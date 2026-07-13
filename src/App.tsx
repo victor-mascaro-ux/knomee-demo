@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
@@ -30,6 +37,7 @@ import {
   WarnIcon,
   CheckIcon,
   CloseIcon,
+  LockIcon,
 } from './components/icons'
 
 type Screen = 'prospects' | 'clients' | 'reporting'
@@ -41,8 +49,12 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
   return (
     <span className="name-line">
-      <span className="name-text">{name}</span>
-      <ChevronRight />
+      <span className="name-text">
+        {name}
+        <span className="name-chevron" aria-hidden>
+          ›
+        </span>
+      </span>
       {isNew && <span className="new-tag">new</span>}
     </span>
   )
@@ -699,13 +711,130 @@ function ClientsScreen({ clients }: { clients: Client[] }) {
   )
 }
 
-function ReportingScreen() {
+/* ── Empty dashboard states ─────────────────────────────────────────────
+   Same chrome as the populated screens (locked metric/insight bars, toolbar,
+   table header) with a centered illustration + CTA. Rendered for Reporting
+   always, and for Prospects/Clients when the internal "empty" mode is on. */
+
+type EmptyVariant = 'prospects' | 'clients' | 'reporting'
+
+interface EmptyConfig {
+  title: string
+  caption: string
+  cta?: string
+  ctaClass?: string
+  subtitle: string
+  columns: string[]
+}
+
+const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
+  prospects: {
+    title: 'My Prospects',
+    caption: 'Your Prospect Dashboard is empty.',
+    cta: 'Test Prospect Experience',
+    ctaClass: 'empty-cta-prospect',
+    subtitle:
+      'Experience the prospect journey to preview conversation starters and strategic conversion insights generated for you.',
+    columns: ['Name', 'KQ Score', 'Intent', 'Clarity', 'Receptivity', 'Sign Up', 'Top Action'],
+  },
+  clients: {
+    title: 'My Clients',
+    caption: 'Your Client Dashboard is empty.',
+    cta: 'Test Client Experience',
+    ctaClass: 'empty-cta-client',
+    subtitle: 'Start inviting clients by clicking the button above.',
+    columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
+  },
+  reporting: {
+    title: 'Reporting',
+    caption: 'Your Reporting Dashboard is empty.',
+    subtitle: 'Reports appear here once you have active prospects and clients.',
+    columns: [],
+  },
+}
+
+function LockedBar({ icon, title }: { icon: ReactNode; title: string }) {
+  return (
+    <div className="locked-bar">
+      <div className="card-title">
+        {icon}
+        <span>{title}</span>
+      </div>
+      <span className="locked-icon">
+        <LockIcon />
+      </span>
+    </div>
+  )
+}
+
+function EmptyIllustration({ variant }: { variant: EmptyVariant }) {
+  return (
+    <div className={`empty-illus illus-${variant}`} aria-hidden>
+      <span className="illus-disc" />
+      <span className="illus-chip chip-1">🧩</span>
+      <span className="illus-chip chip-2">🏔️</span>
+      <span className="illus-chip chip-3">☀️</span>
+      <span className="illus-chip chip-4">🔎</span>
+      <i className="illus-dot d1" />
+      <i className="illus-dot d2" />
+      <i className="illus-dot d3" />
+      <i className="illus-dot d4" />
+      <i className="illus-dot d5" />
+    </div>
+  )
+}
+
+function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => void }) {
+  const cfg = emptyConfigs[variant]
   return (
     <>
-      <h1 className="page-title">Reporting</h1>
-      <div className="reporting-placeholder">
-        <ChartIcon />
-        <p>Reporting dashboards are coming soon.</p>
+      <h1 className="page-title">{cfg.title}</h1>
+
+      <LockedBar icon={<ChartIcon />} title="Top Line Metrics" />
+      <LockedBar icon={<BoltIcon />} title="Actionable Insights" />
+
+      <div className="toolbar">
+        <div className="search-box is-disabled">
+          <SearchIcon />
+          <input type="text" placeholder="Search name" disabled />
+        </div>
+        <div className="toolbar-actions">
+          <button className="btn btn-outline" type="button" disabled>
+            <DownloadIcon /> Download
+          </button>
+          <button className="btn btn-primary" type="button">
+            <PlusIcon /> Invite
+          </button>
+        </div>
+      </div>
+
+      {cfg.columns.length > 0 && (
+        <div className="table-wrap empty-table">
+          <table className="prospects-table">
+            <thead>
+              <tr>
+                <th className="col-check">
+                  <input type="checkbox" disabled />
+                </th>
+                {cfg.columns.map((c) => (
+                  <th key={c}>{c}</th>
+                ))}
+                <th className="col-dots" />
+              </tr>
+            </thead>
+          </table>
+        </div>
+      )}
+
+      <div className="empty-state">
+        <p className="empty-caption">{cfg.caption}</p>
+        <EmptyIllustration variant={variant} />
+        {cfg.cta && (
+          <button className={`empty-cta ${cfg.ctaClass ?? ''}`} type="button" onClick={onCta}>
+            {cfg.cta}
+          </button>
+        )}
+        <p className="empty-subtitle">{cfg.subtitle}</p>
       </div>
     </>
   )
@@ -746,77 +875,89 @@ function ConvertModal({
 }
 
 // Confetti burst on conversion — ported from the original converting flow.
-function Confetti({ fireKey }: { fireKey: number }) {
-  const ref = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    if (fireKey === 0) return
-    const canvas = ref.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const W = (canvas.width = window.innerWidth)
-    const H = (canvas.height = window.innerHeight)
-    canvas.style.display = 'block'
-
-    const COLORS = ['#a855f7', '#7c3aed', '#b98ddc', '#086375', '#c0ffe7', '#240446', '#d4b3eb', '#6ba1ac', '#e879f9', '#67e8f9']
-    const SHAPES = ['rect', 'circle', 'ribbon']
-    const pieces = Array.from({ length: 180 }, () => ({
-      x: Math.random() * W,
-      y: -20 - Math.random() * 160,
-      w: 6 + Math.random() * 10,
-      h: 4 + Math.random() * 6,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
-      rot: Math.random() * Math.PI * 2,
-      dRot: (Math.random() - 0.5) * 0.14,
-      vx: (Math.random() - 0.5) * 3,
-      vy: 2.5 + Math.random() * 3.5,
-      sway: (Math.random() - 0.5) * 0.06,
-      alpha: 1,
-    }))
-
-    const END = Date.now() + 2000
-    let fading = false
-    let raf = 0
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H)
-      if (Date.now() >= END && !fading) fading = true
-      if (fading) pieces.forEach((p) => (p.alpha -= 0.025))
-      pieces.forEach((p) => {
-        if (p.alpha <= 0) return
-        ctx.save()
-        ctx.globalAlpha = Math.max(0, p.alpha)
-        ctx.translate(p.x + p.w / 2, p.y + p.h / 2)
-        ctx.rotate(p.rot)
-        ctx.fillStyle = p.color
-        if (p.shape === 'circle') {
-          ctx.beginPath()
-          ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2)
-          ctx.fill()
-        } else if (p.shape === 'ribbon') {
-          ctx.fillRect(-p.w * 0.4, -p.h / 2, p.w * 0.8, p.h)
-        } else {
-          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
-        }
-        ctx.restore()
-        p.x += p.vx
-        p.y += p.vy
-        p.vx += p.sway
-        p.rot += p.dRot
-        p.vy += 0.06
-      })
-      if (pieces.some((p) => p.alpha > 0)) {
-        raf = requestAnimationFrame(draw)
-      } else {
-        canvas.style.display = 'none'
-      }
-    }
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
-  }, [fireKey])
-
-  return <canvas ref={ref} className="confetti-canvas" aria-hidden />
+// Exposes an imperative fire() so it starts the instant Convert is clicked
+// (no waiting on the Clients screen to re-render). Pieces spawn across the
+// visible band so they're on screen immediately instead of falling in.
+export interface ConfettiHandle {
+  fire: () => void
 }
+
+const Confetti = forwardRef<ConfettiHandle>(function Confetti(_props, ref) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef(0)
+
+  useImperativeHandle(ref, () => ({
+    fire() {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      cancelAnimationFrame(rafRef.current)
+      const W = (canvas.width = window.innerWidth)
+      const H = (canvas.height = window.innerHeight)
+      const band = Math.min(H, 900) // keep the burst inside the viewport
+      canvas.style.display = 'block'
+
+      const COLORS = ['#a855f7', '#7c3aed', '#b98ddc', '#086375', '#c0ffe7', '#240446', '#d4b3eb', '#6ba1ac', '#e879f9', '#67e8f9']
+      const SHAPES = ['rect', 'circle', 'ribbon']
+      const pieces = Array.from({ length: 200 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * band - 60, // spread across the visible band, on screen now
+        w: 6 + Math.random() * 10,
+        h: 4 + Math.random() * 6,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+        rot: Math.random() * Math.PI * 2,
+        dRot: (Math.random() - 0.5) * 0.14,
+        vx: (Math.random() - 0.5) * 3,
+        vy: 2 + Math.random() * 3.5,
+        sway: (Math.random() - 0.5) * 0.06,
+        alpha: 1,
+      }))
+
+      const END = Date.now() + 2000
+      let fading = false
+      const draw = () => {
+        ctx.clearRect(0, 0, W, H)
+        if (Date.now() >= END && !fading) fading = true
+        if (fading) pieces.forEach((p) => (p.alpha -= 0.025))
+        pieces.forEach((p) => {
+          if (p.alpha <= 0) return
+          ctx.save()
+          ctx.globalAlpha = Math.max(0, p.alpha)
+          ctx.translate(p.x + p.w / 2, p.y + p.h / 2)
+          ctx.rotate(p.rot)
+          ctx.fillStyle = p.color
+          if (p.shape === 'circle') {
+            ctx.beginPath()
+            ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2)
+            ctx.fill()
+          } else if (p.shape === 'ribbon') {
+            ctx.fillRect(-p.w * 0.4, -p.h / 2, p.w * 0.8, p.h)
+          } else {
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+          }
+          ctx.restore()
+          p.x += p.vx
+          p.y += p.vy
+          p.vx += p.sway
+          p.rot += p.dRot
+          p.vy += 0.06
+        })
+        if (pieces.some((p) => p.alpha > 0)) {
+          rafRef.current = requestAnimationFrame(draw)
+        } else {
+          canvas.style.display = 'none'
+        }
+      }
+      rafRef.current = requestAnimationFrame(draw)
+    },
+  }))
+
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), [])
+
+  return <canvas ref={canvasRef} className="confetti-canvas" aria-hidden />
+})
 
 function Toast({ show, message }: { show: boolean; message: string }) {
   return (
@@ -840,7 +981,21 @@ export default function App() {
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
   const [toast, setToast] = useState(false)
-  const [confettiKey, setConfettiKey] = useState(0)
+  const confettiRef = useRef<ConfettiHandle>(null)
+  // Internal-only: show the empty dashboards. Off by default so the prototype
+  // reads as the populated demo; toggled from the top-right menu.
+  const [emptyMode, setEmptyMode] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener('click', onDoc)
+    return () => document.removeEventListener('click', onDoc)
+  }, [menuOpen])
 
   // Expose the current screen to the commenting overlay so comment pins are
   // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
@@ -864,9 +1019,9 @@ export default function App() {
     if (!already) {
       setConverted((prev) => [convertedClient(convertTarget.name, convertTarget.email), ...prev])
     }
+    confettiRef.current?.fire() // fire immediately, before the heavy screen switch
     setConvertTarget(null)
     setScreen('clients')
-    setConfettiKey((k) => k + 1)
     setToast(true)
     window.setTimeout(() => setToast(false), 3200)
   }
@@ -881,9 +1036,39 @@ export default function App() {
             <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
             <span className="brand-sub">ADVISOR</span>
           </div>
-          <button className="menu-btn" type="button" aria-label="Open menu">
-            <BurgerMenu />
-          </button>
+          <div className="menu-wrap" ref={menuRef}>
+            <button
+              className="menu-btn"
+              type="button"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuOpen((v) => !v)
+              }}
+            >
+              <BurgerMenu />
+            </button>
+            {menuOpen && (
+              <div className="menu-pop">
+                <div className="menu-pop-title">Demo controls</div>
+                <label className="menu-toggle">
+                  <span>Empty dashboards</span>
+                  <span className={`switch ${emptyMode ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={emptyMode}
+                      onChange={(e) => setEmptyMode(e.target.checked)}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
+                <div className="menu-hint">
+                  Press <b>F2</b> to leave comments
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -901,9 +1086,19 @@ export default function App() {
           ))}
         </nav>
 
-        {screen === 'prospects' && <ProspectsScreen onConvert={setConvertTarget} />}
-        {screen === 'clients' && <ClientsScreen clients={clients} />}
-        {screen === 'reporting' && <ReportingScreen />}
+        {screen === 'prospects' &&
+          (emptyMode ? (
+            <EmptyScreen variant="prospects" onCta={() => setEmptyMode(false)} />
+          ) : (
+            <ProspectsScreen onConvert={setConvertTarget} />
+          ))}
+        {screen === 'clients' &&
+          (emptyMode ? (
+            <EmptyScreen variant="clients" onCta={() => setEmptyMode(false)} />
+          ) : (
+            <ClientsScreen clients={clients} />
+          ))}
+        {screen === 'reporting' && <EmptyScreen variant="reporting" />}
       </main>
 
       {convertTarget && (
@@ -914,7 +1109,7 @@ export default function App() {
         />
       )}
       <Toast show={toast} message="Converted to Client" />
-      <Confetti fireKey={confettiKey} />
+      <Confetti ref={confettiRef} />
     </div>
   )
 }

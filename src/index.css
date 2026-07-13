@@ -655,16 +655,22 @@ input[type='checkbox'] {
 .name-line {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-size: 14.5px;
   font-weight: 600;
   color: var(--plum);
   line-height: 1;
 }
-.name-line svg {
+/* Name + chevron are one inline run so the "›" sits on the text baseline and
+   stays aligned with the name in every table (Prospects and Clients). */
+.name-text {
+  line-height: 1;
+}
+.name-chevron {
+  margin-left: 5px;
+  font-size: 1.1em;
+  font-weight: 600;
   color: var(--plum);
-  flex: none;
-  display: block;
 }
 .name-line .new-tag {
   align-self: center;
@@ -1023,16 +1029,255 @@ input[type='checkbox'] {
   }
 }
 
-.reporting-placeholder {
-  border: 1px dashed var(--stone);
+/* ---------- Empty dashboard states ---------- */
+.locked-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: #fafafa;
+  border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 64px 24px;
+  margin-bottom: 16px;
+}
+.locked-bar .card-title {
+  color: var(--grey-text);
+}
+.locked-bar .card-title svg path,
+.locked-bar .card-title svg rect {
+  opacity: 0.7;
+}
+.locked-icon {
+  color: var(--ash);
+  display: inline-flex;
+}
+
+.search-box.is-disabled {
+  background: #fafafa;
+}
+.search-box.is-disabled input {
+  cursor: not-allowed;
+}
+.btn-outline:disabled {
+  color: var(--ash);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+.btn-outline:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.empty-table {
+  border-bottom: none;
+}
+.empty-table .prospects-table thead th {
+  background: #f4f4f6;
+  color: #333;
+}
+.empty-table .prospects-table thead th:first-child {
+  border-top-left-radius: 14px;
+}
+.empty-table .prospects-table thead th:last-child {
+  border-top-right-radius: 14px;
+}
+
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  color: var(--grey-text);
   text-align: center;
+  padding: 40px 20px 64px;
+  gap: 22px;
+}
+.empty-caption {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--grey-text);
+}
+.empty-cta {
+  border: none;
+  border-radius: 999px;
+  padding: 15px 32px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.18s ease, background 0.2s ease;
+}
+.empty-cta:hover {
+  transform: translateY(-1px);
+}
+.empty-cta-prospect {
+  background: var(--plum);
+}
+.empty-cta-prospect:hover {
+  background: #34105e;
+  box-shadow: 0 8px 20px rgba(36, 4, 70, 0.28);
+}
+.empty-cta-client {
+  background: var(--ocean);
+}
+.empty-cta-client:hover {
+  background: #0a7386;
+  box-shadow: 0 8px 20px rgba(8, 99, 117, 0.3);
+}
+.empty-subtitle {
+  margin: 0;
+  max-width: 640px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--plum);
+}
+.illus-reporting ~ .empty-cta {
+  display: none;
+}
+
+/* Illustration: a soft brand disc with floating icon chips + confetti dots */
+.empty-illus {
+  position: relative;
+  width: 200px;
+  height: 150px;
+}
+.illus-disc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+}
+.illus-prospects .illus-disc {
+  background: #ecd9fb;
+}
+.illus-clients .illus-disc {
+  background: #cdece2;
+}
+.illus-reporting .illus-disc {
+  background: #e7e4f2;
+}
+.illus-chip {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(16, 24, 40, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.chip-1 {
+  left: 30px;
+  top: 18px;
+}
+.chip-2 {
+  right: 34px;
+  top: 6px;
+}
+.chip-3 {
+  right: 30px;
+  bottom: 14px;
+}
+.chip-4 {
+  left: 40px;
+  bottom: 8px;
+}
+.illus-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.illus-dot.d1 { left: 12px; top: 44px; background: var(--purple-bolt); transform: rotate(20deg); }
+.illus-dot.d2 { right: 8px; top: 40px; background: var(--ocean); border-radius: 50%; }
+.illus-dot.d3 { left: 84px; top: 0; background: #f59e0b; }
+.illus-dot.d4 { right: 20px; bottom: 40px; background: var(--lilac); border-radius: 50%; }
+.illus-dot.d5 { left: 22px; bottom: 30px; background: #e879f9; transform: rotate(-15deg); }
+
+/* ---------- Internal demo menu (burger) ---------- */
+.menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.menu-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 120;
+  width: 232px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.18);
+  padding: 12px;
+  color: #1a1a1a;
+}
+.menu-pop-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 10px;
+}
+.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--stone);
+  flex: none;
+  transition: background 0.18s ease;
+}
+.switch.on {
+  background: var(--plum);
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s ease;
+}
+.switch.on .switch-knob {
+  transform: translateX(18px);
+}
+.menu-hint {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--grey-text);
+}
+.menu-hint b {
+  color: var(--plum);
 }
 
 /* Client tier-distribution colors (purple family) */
