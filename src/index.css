@@ -11,6 +11,10 @@
   --line: #e8e8e8;
   --bg: #ffffff;
   --page-bg: #ffffff;
+  /* Single source of truth for page inset — the top bar and the content share
+     it so the logo, tabs and title always line up, and the top padding tracks
+     the side padding so horizontal and vertical spacing stay even. */
+  --page-pad: 40px;
 }
 
 * {
@@ -51,7 +55,7 @@ body {
   max-width: 1520px;
   height: 100%;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 var(--page-pad);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,7 +101,8 @@ body {
 .content {
   max-width: 1520px;
   margin: 0 auto;
-  padding: 24px 40px 80px;
+  /* top inset equals the side inset (even), roomier bottom for scroll space */
+  padding: var(--page-pad) var(--page-pad) 56px;
 }
 
 /* ---------- Tabs ---------- */
@@ -1216,6 +1221,9 @@ input[type='checkbox'] {
 }
 
 /* ---------- Convert modal ---------- */
+/* Modal — matches the "Add Family Member" pattern exactly:
+   neutral dark + frosted-blur backdrop, 9px radius, flush 60px purple header,
+   pill buttons (purple-outline Cancel + solid-purple primary). */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1223,7 +1231,9 @@ input[type='checkbox'] {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(20, 10, 40, 0.45);
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   padding: 20px;
   animation: fadeIn 0.15s ease-out;
 }
@@ -1236,17 +1246,17 @@ input[type='checkbox'] {
   }
 }
 .modal {
-  width: 100%;
-  max-width: 440px;
+  width: 500px;
+  max-width: 100%;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 9px;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
-  animation: modalPop 0.18s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: modalPop 0.15s ease-out;
 }
 @keyframes modalPop {
   from {
-    transform: translateY(8px) scale(0.98);
+    transform: scale(0.96);
     opacity: 0;
   }
   to {
@@ -1256,24 +1266,28 @@ input[type='checkbox'] {
 }
 .modal-header {
   background: var(--plum);
-  padding: 18px 22px;
+  height: 60px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .modal-title {
   color: #fff;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
 }
 .modal-close {
+  width: 32px;
+  height: 32px;
   background: none;
   border: none;
   color: #fff;
   cursor: pointer;
-  opacity: 0.85;
+  opacity: 0.9;
   display: inline-flex;
-  padding: 4px;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
 }
 .modal-close:hover {
@@ -1281,27 +1295,26 @@ input[type='checkbox'] {
   background: rgba(255, 255, 255, 0.14);
 }
 .modal-body {
-  padding: 24px 22px;
+  padding: 24px;
   color: #1a1a1a;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .modal-footer {
   display: flex;
   justify-content: center;
-  gap: 14px;
-  padding: 4px 22px 24px;
+  gap: 12px;
+  padding: 4px 24px 24px;
 }
-/* Project modal button pattern (matches the "Add Family Member" dialog):
-   pill-shaped, purple-outline Cancel + solid-purple primary. */
 .modal .btn {
   border-radius: 999px;
-  padding: 11px 28px;
+  padding: 12px 26px;
+  font-size: 16px;
   font-weight: 600;
 }
 .modal .btn-outline {
   background: #fff;
-  border: 1.5px solid var(--plum);
+  border: 2px solid var(--plum);
   color: var(--plum);
 }
 .modal .btn-outline:hover {
@@ -1311,7 +1324,7 @@ input[type='checkbox'] {
 }
 .modal .btn-primary {
   background: var(--plum);
-  border: 1.5px solid var(--plum);
+  border: 2px solid var(--plum);
   color: #fff;
 }
 .modal .btn-primary:hover {
@@ -1356,14 +1369,22 @@ input[type='checkbox'] {
   flex: none;
 }
 
+/* ---------- Confetti ---------- */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 500;
+  display: none;
+}
+
 /* ---------- Responsive — mirrors the converting flow ----------
    Tables never scroll horizontally; instead columns are dropped
    progressively at each breakpoint, so the tier subheaders always fit. */
 
 @media (max-width: 1200px) {
-  .content {
-    padding-left: 24px;
-    padding-right: 24px;
+  :root {
+    --page-pad: 24px;
   }
 }
 
@@ -1412,9 +1433,6 @@ input[type='checkbox'] {
 
 /* Phone: stack the toolbar (converting flow behavior) */
 @media (max-width: 640px) {
-  .topbar {
-    padding: 0 16px;
-  }
   .brand-logo {
     height: 18px;
   }
@@ -1422,8 +1440,7 @@ input[type='checkbox'] {
     font-size: 11px;
   }
   .content {
-    padding-top: 16px;
-    padding-bottom: 48px;
+    padding-bottom: 40px;
   }
   .tabs {
     gap: 4px;
@@ -1486,9 +1503,8 @@ input[type='checkbox'] {
 
 /* Prospects — also hide Top Action; Clients — also hide Sentiment */
 @media (max-width: 700px) {
-  .content {
-    padding-left: 16px;
-    padding-right: 16px;
+  :root {
+    --page-pad: 16px;
   }
   .prospects-table:not(.clients-table) thead th:nth-child(8),
   .prospects-table:not(.clients-table) tbody td:nth-child(8) {

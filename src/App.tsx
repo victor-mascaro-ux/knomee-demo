@@ -745,6 +745,79 @@ function ConvertModal({
   )
 }
 
+// Confetti burst on conversion — ported from the original converting flow.
+function Confetti({ fireKey }: { fireKey: number }) {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    if (fireKey === 0) return
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const W = (canvas.width = window.innerWidth)
+    const H = (canvas.height = window.innerHeight)
+    canvas.style.display = 'block'
+
+    const COLORS = ['#a855f7', '#7c3aed', '#b98ddc', '#086375', '#c0ffe7', '#240446', '#d4b3eb', '#6ba1ac', '#e879f9', '#67e8f9']
+    const SHAPES = ['rect', 'circle', 'ribbon']
+    const pieces = Array.from({ length: 180 }, () => ({
+      x: Math.random() * W,
+      y: -20 - Math.random() * 160,
+      w: 6 + Math.random() * 10,
+      h: 4 + Math.random() * 6,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+      rot: Math.random() * Math.PI * 2,
+      dRot: (Math.random() - 0.5) * 0.14,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 2.5 + Math.random() * 3.5,
+      sway: (Math.random() - 0.5) * 0.06,
+      alpha: 1,
+    }))
+
+    const END = Date.now() + 2000
+    let fading = false
+    let raf = 0
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H)
+      if (Date.now() >= END && !fading) fading = true
+      if (fading) pieces.forEach((p) => (p.alpha -= 0.025))
+      pieces.forEach((p) => {
+        if (p.alpha <= 0) return
+        ctx.save()
+        ctx.globalAlpha = Math.max(0, p.alpha)
+        ctx.translate(p.x + p.w / 2, p.y + p.h / 2)
+        ctx.rotate(p.rot)
+        ctx.fillStyle = p.color
+        if (p.shape === 'circle') {
+          ctx.beginPath()
+          ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2)
+          ctx.fill()
+        } else if (p.shape === 'ribbon') {
+          ctx.fillRect(-p.w * 0.4, -p.h / 2, p.w * 0.8, p.h)
+        } else {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+        }
+        ctx.restore()
+        p.x += p.vx
+        p.y += p.vy
+        p.vx += p.sway
+        p.rot += p.dRot
+        p.vy += 0.06
+      })
+      if (pieces.some((p) => p.alpha > 0)) {
+        raf = requestAnimationFrame(draw)
+      } else {
+        canvas.style.display = 'none'
+      }
+    }
+    raf = requestAnimationFrame(draw)
+    return () => cancelAnimationFrame(raf)
+  }, [fireKey])
+
+  return <canvas ref={ref} className="confetti-canvas" aria-hidden />
+}
+
 function Toast({ show, message }: { show: boolean; message: string }) {
   return (
     <div className={`app-toast ${show ? 'show' : ''}`} role="status" aria-live="polite">
@@ -767,6 +840,7 @@ export default function App() {
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
   const [toast, setToast] = useState(false)
+  const [confettiKey, setConfettiKey] = useState(0)
 
   // Expose the current screen to the commenting overlay so comment pins are
   // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
@@ -792,6 +866,7 @@ export default function App() {
     }
     setConvertTarget(null)
     setScreen('clients')
+    setConfettiKey((k) => k + 1)
     setToast(true)
     window.setTimeout(() => setToast(false), 3200)
   }
@@ -839,6 +914,7 @@ export default function App() {
         />
       )}
       <Toast show={toast} message="Converted to Client" />
+      <Confetti fireKey={confettiKey} />
     </div>
   )
 }
