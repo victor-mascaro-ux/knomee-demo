@@ -36,6 +36,18 @@ type Screen = 'prospects' | 'clients' | 'reporting'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
+// Shared name + chevron (+ optional "new" tag) so the Prospects and Clients
+// tables render the label identically and the arrow stays aligned with the name.
+function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
+  return (
+    <span className="name-line">
+      <span className="name-text">{name}</span>
+      <ChevronRight />
+      {isNew && <span className="new-tag">new</span>}
+    </span>
+  )
+}
+
 function CollapsibleCard({
   icon,
   title,
@@ -202,9 +214,7 @@ function ProspectRow({ p, onConvert }: { p: Prospect; onConvert: (p: Prospect) =
         <div className="name-cell">
           <Avatar p={p} />
           <div className="name-block">
-            <span className="name-line">
-              {p.name} <ChevronRight />
-            </span>
+            <NameLink name={p.name} />
             <span className="email-line">{p.email}</span>
           </div>
         </div>
@@ -413,10 +423,7 @@ function ClientRow({ c }: { c: Client }) {
         <div className="name-cell">
           <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
           <div className="name-block">
-            <span className="name-line">
-              {c.name} <ChevronRight />
-              {c.isNew && <span className="new-tag">new</span>}
-            </span>
+            <NameLink name={c.name} isNew={c.isNew} />
             <span className="email-line">{c.email}</span>
           </div>
         </div>
