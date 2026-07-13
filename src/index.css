@@ -43,8 +43,18 @@ body {
   background: var(--plum);
   display: flex;
   align-items: center;
+}
+/* Inner wrapper shares the content's max-width + horizontal padding so the
+   logo lines up exactly with the page title and the first tab below it. */
+.topbar-inner {
+  width: 100%;
+  max-width: 1520px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 26px;
 }
 
 .brand {
@@ -93,7 +103,7 @@ body {
 /* ---------- Tabs ---------- */
 .tabs {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 8px;
 }
@@ -104,9 +114,13 @@ body {
   font-family: inherit;
   font-size: 16px;
   color: var(--grey-text);
-  padding: 12px 24px 16px;
+  padding: 12px 20px 16px;
   cursor: pointer;
   position: relative;
+}
+/* First tab's label lines up with the page title and the logo above. */
+.tab:first-child {
+  padding-left: 0;
 }
 
 .tab-active {
@@ -621,8 +635,9 @@ input[type='checkbox'] {
   justify-content: center;
   background: var(--pearl);
   color: var(--grey-text);
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
+  line-height: 1;
 }
 
 .name-block {
@@ -639,9 +654,15 @@ input[type='checkbox'] {
   font-size: 14.5px;
   font-weight: 600;
   color: var(--plum);
+  line-height: 1;
 }
 .name-line svg {
   color: var(--plum);
+  flex: none;
+  display: block;
+}
+.name-line .new-tag {
+  align-self: center;
 }
 
 .email-line {
@@ -1009,6 +1030,151 @@ input[type='checkbox'] {
   text-align: center;
 }
 
+/* Client tier-distribution colors (purple family) */
+.seg-c1 {
+  background: #5b21b6;
+  border-radius: 6px 0 0 6px;
+}
+.seg-c2 {
+  background: #8b5cf6;
+}
+.seg-c3 {
+  background: var(--steel);
+  border-radius: 0 6px 6px 0;
+}
+.dot-c1 {
+  background: #5b21b6;
+}
+.dot-c2 {
+  background: #8b5cf6;
+}
+.dot-c3 {
+  background: var(--steel);
+}
+.sw-c1 {
+  background: #5b21b6;
+}
+.sw-c2 {
+  background: #8b5cf6;
+}
+.sw-c3 {
+  background: var(--steel);
+}
+
+/* Charts row (confidence pie + active-this-week line) */
+.chart-row {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) 1.4fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.chart-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.chart-figure {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.confidence {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 6px 0;
+}
+.pie {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  flex: none;
+}
+.pie-legend {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+}
+.pie-emoji {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.pie-pct {
+  font-variant-numeric: tabular-nums;
+}
+
+.active-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Client actionable insights (warning cards) */
+.client-insights-body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 22px;
+}
+.client-insight {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.client-insight-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff6e6;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f4e6c8;
+}
+.ci-warn {
+  display: inline-flex;
+}
+.ci-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+}
+.client-insight-head svg {
+  color: var(--ash);
+}
+.client-insight-body {
+  padding: 12px 14px;
+}
+.client-insight-body p {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  color: var(--grey-text);
+  line-height: 1.5;
+}
+.client-insight-body p:last-child {
+  margin-bottom: 0;
+}
+
 /* ---------- Row action menu ---------- */
 .row-menu {
   position: relative;
@@ -1122,12 +1288,35 @@ input[type='checkbox'] {
 }
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 0 22px 22px;
+  justify-content: center;
+  gap: 14px;
+  padding: 4px 22px 24px;
 }
+/* Project modal button pattern (matches the "Add Family Member" dialog):
+   pill-shaped, purple-outline Cancel + solid-purple primary. */
 .modal .btn {
-  padding: 10px 20px;
+  border-radius: 999px;
+  padding: 11px 28px;
+  font-weight: 600;
+}
+.modal .btn-outline {
+  background: #fff;
+  border: 1.5px solid var(--plum);
+  color: var(--plum);
+}
+.modal .btn-outline:hover {
+  border-color: #a56ccc;
+  color: #a56ccc;
+  box-shadow: none;
+}
+.modal .btn-primary {
+  background: var(--plum);
+  border: 1.5px solid var(--plum);
+  color: #fff;
+}
+.modal .btn-primary:hover {
+  background: #a56ccc;
+  border-color: #a56ccc;
 }
 
 /* ---------- Toast ---------- */

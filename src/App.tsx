@@ -5,7 +5,14 @@ import {
   baseClients,
   clientTierGroups,
   convertedClient,
+  AVG_KR_SCORE,
+  confidenceScore,
+  confidenceSegments,
+  activeSeries,
+  activeThisWeek,
+  clientInsights,
   type Client,
+  type ClientTier,
 } from './data/clients'
 import {
   ChartIcon,
@@ -221,7 +228,15 @@ function ProspectRow({ p, onConvert }: { p: Prospect; onConvert: (p: Prospect) =
       </td>
       <td className="col-action">{p.topAction}</td>
       <td className="col-bolt">
-        <button className={`bolt-btn ${incomplete ? 'bolt-disabled' : ''}`} type="button">
+        <button
+          className={`bolt-btn ${incomplete ? 'bolt-disabled' : ''}`}
+          type="button"
+          title={incomplete ? undefined : 'Convert to client'}
+          aria-label={incomplete ? undefined : 'Convert to client'}
+          onClick={() => {
+            if (!incomplete) onConvert(p)
+          }}
+        >
           <LightningIcon color={incomplete ? '#c9c9c9' : '#ffffff'} />
         </button>
       </td>
@@ -448,10 +463,190 @@ function ClientRow({ c }: { c: Client }) {
   )
 }
 
+function ConfidencePie() {
+  const stops: string[] = []
+  let acc = 0
+  for (const s of confidenceSegments) {
+    stops.push(`${s.color} ${acc}% ${acc + s.pct}%`)
+    acc += s.pct
+  }
+  return (
+    <div className="confidence">
+      <div className="pie" style={{ background: `conic-gradient(${stops.join(', ')})` }} />
+      <ul className="pie-legend">
+        {confidenceSegments.map((s) => (
+          <li key={s.label}>
+            <span className="pie-emoji" style={{ background: s.color }}>{s.emoji}</span>
+            <span className="pie-pct">{s.pct}%</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function ActiveChart() {
+  const w = 560
+  const h = 190
+  const padL = 34
+  const padR = 12
+  const padT = 12
+  const padB = 26
+  const max = 100
+  const n = activeSeries.length
+  const x = (i: number) => padL + (i * (w - padL - padR)) / (n - 1)
+  const y = (v: number) => padT + (1 - v / max) * (h - padT - padB)
+  const pts = activeSeries.map((d, i) => `${x(i)},${y(d.value)}`).join(' ')
+  const gridVals = [20, 40, 60, 80, 100]
+  return (
+    <svg className="active-chart" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Clients active this week">
+      {gridVals.map((g) => (
+        <g key={g}>
+          <line x1={padL} y1={y(g)} x2={w - padR} y2={y(g)} stroke="#eee" strokeWidth="1" />
+          <text x={padL - 8} y={y(g) + 3} textAnchor="end" fontSize="9" fill="#afafaf">{g}%</text>
+        </g>
+      ))}
+      <polyline points={pts} fill="none" stroke="#9b51e0" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {activeSeries.map((d, i) => (
+        <circle key={i} cx={x(i)} cy={y(d.value)} r="3" fill="#9b51e0" />
+      ))}
+      {activeSeries.map((d, i) => (
+        <text key={`l${i}`} x={x(i)} y={h - 8} textAnchor="middle" fontSize="8.5" fill="#afafaf">{d.week}</text>
+      ))}
+    </svg>
+  )
+}
+
+function ClientsMetrics({ clients }: { clients: Client[] }) {
+  const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
+  const engaged = count('engaged')
+  const attention = count('attention')
+  const reconnect = count('reconnect')
+  const incomplete = count('incomplete')
+  const total = clients.length
+  const scored = engaged + attention + reconnect
+  const pct = (n: number) => (scored ? Math.round((n / scored) * 100) : 0)
+
+  return (
+    <CollapsibleCard
+      className="metrics-card"
+      icon={<ChartIcon />}
+      title="Top Line Metrics"
+      bodyClassName="metrics-body"
+    >
+      <div className="metric-tiles">
+        <div className="metric-tile">
+          <span className="metric-label">TOTAL CLIENTS</span>
+          <span className="metric-value">{total}</span>
+        </div>
+        <div className="metric-tile">
+          <span className="metric-label">AVG KR SCORE</span>
+          <span className="metric-value">{AVG_KR_SCORE}</span>
+        </div>
+        <div className="metric-tile distribution">
+          <span className="metric-label">TIER DISTRIBUTION</span>
+          <div className="dist-bar">
+            <span className="seg seg-c1" style={{ flex: engaged || 0.001 }}>{engaged}</span>
+            <span className="seg seg-c2" style={{ flex: attention || 0.001 }}>{attention}</span>
+            <span className="seg seg-c3" style={{ flex: reconnect || 0.001 }}>{reconnect}</span>
+          </div>
+          <div className="dist-legend">
+            <span><i className="dot dot-c1" />Tier 1 ({pct(engaged)}%)</span>
+            <span><i className="dot dot-c2" />Tier 2 ({pct(attention)}%)</span>
+            <span><i className="dot dot-c3" />Tier 3 ({pct(reconnect)}%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="tier-cards">
+        <div className="tier-card">
+          <div className="tier-card-head">
+            <span className="tier-swatch sw-c1" />
+            <span className="tier-card-title">TIER 1 - ENGAGED</span>
+            <span className="tier-info"><InfoIcon /></span>
+            <span className="tier-range">70-100<br />KR</span>
+          </div>
+          <div className="tier-card-value"><strong>{engaged}</strong> {pct(engaged)}%</div>
+        </div>
+        <div className="tier-card">
+          <div className="tier-card-head">
+            <span className="tier-swatch sw-c2" />
+            <span className="tier-card-title">TIER 2 - ATTENTION</span>
+            <span className="tier-info"><InfoIcon /></span>
+            <span className="tier-range">40-69<br />KR</span>
+          </div>
+          <div className="tier-card-value"><strong>{attention}</strong> {pct(attention)}%</div>
+        </div>
+        <div className="tier-card">
+          <div className="tier-card-head">
+            <span className="tier-swatch sw-c3" />
+            <span className="tier-card-title">TIER 3 - RECONNECT</span>
+            <span className="tier-info"><InfoIcon /></span>
+            <span className="tier-range">0-39<br />KR</span>
+          </div>
+          <div className="tier-card-value"><strong>{reconnect}</strong> {pct(reconnect)}%</div>
+        </div>
+        <div className="tier-card">
+          <div className="tier-card-head">
+            <span className="tier-swatch sw-x" />
+            <span className="tier-card-title">INCOMPLETE PROFILES</span>
+          </div>
+          <div className="tier-card-value"><strong>{incomplete}</strong></div>
+        </div>
+      </div>
+
+      <div className="chart-row">
+        <div className="chart-card">
+          <div className="chart-head">
+            <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+            <span className="chart-figure">{confidenceScore}</span>
+          </div>
+          <ConfidencePie />
+        </div>
+        <div className="chart-card">
+          <div className="chart-head">
+            <span className="metric-label">CLIENTS ACTIVE THIS WEEK</span>
+            <span className="chart-figure">{activeThisWeek}%</span>
+          </div>
+          <ActiveChart />
+        </div>
+      </div>
+    </CollapsibleCard>
+  )
+}
+
+function ClientInsights() {
+  return (
+    <CollapsibleCard
+      className="insights-card"
+      icon={<BoltIcon />}
+      title="Actionable Insights"
+      bodyClassName="client-insights-body"
+    >
+      {clientInsights.map((ins) => (
+        <div className="client-insight" key={ins.name}>
+          <div className="client-insight-head">
+            <span className="ci-warn"><WarnIcon /></span>
+            <span className="ci-name">{ins.name}</span>
+            <ChevronRight />
+          </div>
+          <div className="client-insight-body">
+            {ins.lines.map((l) => (
+              <p key={l}>{l}</p>
+            ))}
+          </div>
+        </div>
+      ))}
+    </CollapsibleCard>
+  )
+}
+
 function ClientsScreen({ clients }: { clients: Client[] }) {
   return (
     <>
       <h1 className="page-title">My Clients</h1>
+      <ClientsMetrics clients={clients} />
+      <ClientInsights />
       <Toolbar />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
@@ -599,13 +794,15 @@ export default function App() {
   return (
     <div className="page">
       <header className="topbar">
-        <div className="brand">
-          <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-          <span className="brand-sub">ADVISOR</span>
+        <div className="topbar-inner">
+          <div className="brand">
+            <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+            <span className="brand-sub">ADVISOR</span>
+          </div>
+          <button className="menu-btn" type="button" aria-label="Open menu">
+            <BurgerMenu />
+          </button>
         </div>
-        <button className="menu-btn" type="button" aria-label="Open menu">
-          <BurgerMenu />
-        </button>
       </header>
 
       <main className="content">

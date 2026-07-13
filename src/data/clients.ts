@@ -23,8 +23,46 @@ export interface ClientTierGroup {
 export const clientTierGroups: ClientTierGroup[] = [
   { id: 'engaged', title: 'TIER 1 – ENGAGED', range: '70–100 KR' },
   { id: 'attention', title: 'TIER 2 – ATTENTION', range: '40–69 KR' },
-  { id: 'reconnect', title: 'TIER 3 – RECONNECT', range: '0–39 KQ' },
+  // Client relationship scores use "KR" everywhere — the tier-3 label read
+  // "KQ" in the source, which was inconsistent with the other tiers.
+  { id: 'reconnect', title: 'TIER 3 – RECONNECT', range: '0–39 KR' },
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
+]
+
+// Headline metric shown in the Clients "Top Line Metrics" card.
+export const AVG_KR_SCORE = 65.6
+
+// Overall client confidence breakdown (sums to 100).
+export const confidenceScore = 33
+export const confidenceSegments = [
+  { label: 'Frustrated', emoji: '😠', color: '#ef4444', pct: 7 },
+  { label: 'Concerned', emoji: '🙁', color: '#f59e0b', pct: 21 },
+  { label: 'Neutral', emoji: '😐', color: '#eab308', pct: 18 },
+  { label: 'Positive', emoji: '🙂', color: '#a3e635', pct: 26 },
+  { label: 'Delighted', emoji: '😄', color: '#84cc16', pct: 28 },
+]
+
+// "Clients active this week" trend (percent of clients active per week).
+export const activeThisWeek = 72
+export const activeSeries = [
+  { week: '04/14 – 04/20', value: 42 },
+  { week: '04/21 – 04/27', value: 46 },
+  { week: '04/28 – 05/04', value: 68 },
+  { week: '05/05 – 05/11', value: 40 },
+  { week: '05/12 – 05/18', value: 78 },
+  { week: '05/19 – 05/25', value: 72 },
+]
+
+export interface ClientInsight {
+  name: string
+  lines: string[]
+}
+
+// Fixed the "Sophie Tran" reference — the only Sophie in the book is Sophie Dean.
+export const clientInsights: ClientInsight[] = [
+  { name: 'Emily Watson', lines: ['No login in 22 days.', '1/4 goals completed.'] },
+  { name: 'Miles Dean', lines: ['Dropped engagement score (-20).', '0 adventures done.'] },
+  { name: 'Sophie Dean', lines: ['High activity, low advisor reliance (10%).'] },
 ]
 
 // Base book of business (before any prospect is converted this session).
@@ -106,7 +144,7 @@ export const baseClients: Client[] = [
     email: 'emma.rossi@beaconplan.co',
     sentiment: null,
     status: 'pending',
-    secondaryStatus: 'Incomplete',
+    secondaryStatus: 'incomplete',
     lastSignIn: '06/05/2025',
     lastLabel: 'Last invited:',
     tier: 'incomplete',
