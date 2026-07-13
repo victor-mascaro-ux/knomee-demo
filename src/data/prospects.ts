@@ -79,7 +79,7 @@ export const prospects: Prospect[] = [
     tier: 'tier2',
   },
   {
-    name: 'Soiphie Dean',
+    name: 'Sophie Dean',
     email: 'sophie.dean@email.com',
     kq: 62,
     intent: 60,

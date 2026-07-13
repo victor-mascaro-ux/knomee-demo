@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
@@ -14,24 +14,59 @@ import {
   DotsIcon,
   InfoIcon,
   CaretDown,
+  BurgerMenu,
 } from './components/icons'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
-function TopLineMetrics() {
+function CollapsibleCard({
+  icon,
+  title,
+  bodyClassName,
+  className,
+  children,
+}: {
+  icon: ReactNode
+  title: string
+  bodyClassName: string
+  className?: string
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(true)
   return (
-    <section className="card metrics-card">
+    <section className={`card ${className ?? ''}`}>
       <header className="card-head">
         <div className="card-title">
-          <ChartIcon />
-          <span>Top Line Metrics</span>
+          {icon}
+          <span>{title}</span>
         </div>
-        <button className="show-toggle" type="button">
-          SHOW LESS <ChevronUp />
+        <button
+          className={`show-toggle ${open ? '' : 'collapsed'}`}
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+        >
+          {open ? 'SHOW LESS' : 'SHOW MORE'} <ChevronUp />
         </button>
       </header>
 
-      <div className="metrics-body">
+      <div className={`collapse ${open ? 'open' : ''}`}>
+        <div className="collapse-inner">
+          <div className={bodyClassName}>{children}</div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TopLineMetrics() {
+  return (
+    <CollapsibleCard
+      className="metrics-card"
+      icon={<ChartIcon />}
+      title="Top Line Metrics"
+      bodyClassName="metrics-body"
+    >
         <div className="metric-tiles">
           <div className="metric-tile">
             <span className="metric-label">TOTAL PROSPECTS</span>
@@ -39,7 +74,7 @@ function TopLineMetrics() {
           </div>
           <div className="metric-tile">
             <span className="metric-label">AVG KQ SCORE</span>
-            <span className="metric-value">56.8</span>
+            <span className="metric-value">55.9</span>
           </div>
 
           <div className="metric-tile distribution">
@@ -93,8 +128,7 @@ function TopLineMetrics() {
             <div className="tier-card-value"><strong>1</strong></div>
           </div>
         </div>
-      </div>
-    </section>
+    </CollapsibleCard>
   )
 }
 
@@ -102,33 +136,26 @@ function ActionableInsights() {
   const col1 = insights.slice(0, 4)
   const col2 = insights.slice(4, 8)
   return (
-    <section className="card insights-card">
-      <header className="card-head">
-        <div className="card-title">
-          <BoltIcon />
-          <span>Actionable Insights</span>
-        </div>
-        <button className="show-toggle" type="button">
-          SHOW LESS <ChevronUp />
-        </button>
-      </header>
-
-      <div className="insights-body">
-        {[col1, col2].map((col, i) => (
-          <div className="insights-col" key={i}>
-            {col.map((ins) => (
-              <div className="insight" key={ins.n}>
-                <div className="insight-num">{ins.n}</div>
-                <div className="insight-text">
-                  <div className="insight-title">{ins.title}</div>
-                  <p className="insight-body">{ins.body}</p>
-                </div>
+    <CollapsibleCard
+      className="insights-card"
+      icon={<BoltIcon />}
+      title="Actionable Insights"
+      bodyClassName="insights-body"
+    >
+      {[col1, col2].map((col, i) => (
+        <div className="insights-col" key={i}>
+          {col.map((ins) => (
+            <div className="insight" key={ins.n}>
+              <div className="insight-num">{ins.n}</div>
+              <div className="insight-text">
+                <div className="insight-title">{ins.title}</div>
+                <p className="insight-body">{ins.body}</p>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
+            </div>
+          ))}
+        </div>
+      ))}
+    </CollapsibleCard>
   )
 }
 
@@ -245,23 +272,6 @@ function ProspectsTable() {
   )
 }
 
-function AccountAvatar() {
-  const [failed, setFailed] = useState(false)
-  return (
-    <div className="topbar-avatar">
-      {failed ? (
-        <span className="topbar-avatar-fallback">A</span>
-      ) : (
-        <img
-          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&crop=faces"
-          alt="Account"
-          onError={() => setFailed(true)}
-        />
-      )}
-    </div>
-  )
-}
-
 export default function App() {
   return (
     <div className="page">
@@ -271,7 +281,9 @@ export default function App() {
           <span className="brand-name">knomee</span>
           <span className="brand-sub">ADVISOR</span>
         </div>
-        <AccountAvatar />
+        <button className="menu-btn" type="button" aria-label="Open menu">
+          <BurgerMenu />
+        </button>
       </header>
 
       <main className="content">

@@ -103,6 +103,19 @@ export function InfoIcon() {
   )
 }
 
+export function BurgerMenu() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden>
+      <path
+        d="M4 7.5h18M4 13h18M4 18.5h18"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function CaretDown() {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>

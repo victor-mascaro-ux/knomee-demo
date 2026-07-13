@@ -68,23 +68,19 @@ body {
   margin-left: 2px;
 }
 
-.topbar-avatar img,
-.topbar-avatar-fallback {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+.menu-btn {
+  background: none;
+  border: none;
+  padding: 6px;
   display: inline-flex;
-}
-
-.topbar-avatar-fallback {
   align-items: center;
   justify-content: center;
-  background: #4a2a6b;
+  cursor: pointer;
+  border-radius: 8px;
   color: #fff;
-  font-size: 15px;
-  font-weight: 600;
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* ---------- Content shell ---------- */
@@ -704,4 +700,341 @@ input[type='checkbox'] {
 .row-incomplete .col-num,
 .row-incomplete .col-kq {
   color: var(--ash);
+}
+
+/* ---------- Collapse mechanics (SHOW LESS / SHOW MORE) ---------- */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.collapse.open {
+  grid-template-rows: 1fr;
+}
+.collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.show-toggle svg {
+  transition: transform 0.3s ease;
+}
+.show-toggle.collapsed svg {
+  transform: rotate(180deg);
+}
+.show-toggle:hover {
+  color: #333;
+}
+
+/* ---------- Entrance animations ---------- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drawBar {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.page-title {
+  animation: fadeUp 0.5s ease both;
+}
+.metrics-card {
+  animation: fadeUp 0.5s ease 0.06s both;
+}
+.insights-card {
+  animation: fadeUp 0.5s ease 0.12s both;
+}
+.toolbar {
+  animation: fadeUp 0.5s ease 0.18s both;
+}
+.table-wrap {
+  animation: fadeUp 0.5s ease 0.24s both;
+}
+.dist-bar {
+  animation: drawBar 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+}
+
+/* ---------- Microinteractions: hover / focus / press ---------- */
+.tab {
+  transition: color 0.2s ease;
+}
+.tab:not(.tab-active):hover {
+  color: #333;
+}
+.tab-active::after {
+  transition: background 0.2s ease;
+}
+
+.btn {
+  transition: transform 0.15s ease, box-shadow 0.18s ease, background 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn-primary:hover {
+  background: #34105e;
+  box-shadow: 0 6px 16px rgba(36, 4, 70, 0.28);
+}
+.btn-outline:hover {
+  border-color: var(--grey-text);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.metric-tile,
+.tier-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.metric-tile:hover,
+.tier-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--stone);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+}
+
+.search-box {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.search-box:focus-within {
+  border-color: var(--plum);
+  box-shadow: 0 0 0 3px rgba(36, 4, 70, 0.12);
+}
+
+.prospects-table tbody tr:not(.group-header) {
+  transition: background 0.16s ease;
+}
+.prospects-table tbody tr:not(.group-header):hover {
+  background: #faf7fd;
+}
+
+.name-line svg {
+  transition: transform 0.2s ease;
+}
+.prospects-table tbody tr:hover .name-line svg {
+  transform: translateX(3px);
+}
+
+.score-badge {
+  transition: transform 0.16s ease;
+}
+.prospects-table tbody tr:hover .score-badge:not(.empty) {
+  transform: scale(1.06);
+}
+
+.bolt-btn {
+  transition: transform 0.15s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+.bolt-btn:not(.bolt-disabled):hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(155, 81, 224, 0.4);
+}
+.bolt-btn:not(.bolt-disabled):active {
+  transform: scale(0.93);
+}
+
+.dots-btn {
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.dots-btn:hover {
+  color: #555;
+  background: #f0eef4;
+}
+
+.insight {
+  border-radius: 8px;
+  transition: background 0.16s ease;
+}
+.insight:hover {
+  background: #fafafa;
+}
+
+.menu-btn svg path {
+  transition: opacity 0.2s ease;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .collapse {
+    transition: none;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+/* Tablet / small laptop */
+@media (max-width: 1024px) {
+  .content {
+    padding: 20px 24px 60px;
+  }
+  .metric-tiles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .metric-tile.distribution {
+    grid-column: 1 / -1;
+  }
+  .tier-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  .insights-body {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  /* keep the full data table usable via horizontal scroll */
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .prospects-table {
+    min-width: 900px;
+  }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 16px;
+  }
+  .brand-name {
+    font-size: 18px;
+  }
+  .brand-sub {
+    font-size: 11px;
+  }
+  .content {
+    padding: 16px 14px 48px;
+  }
+  .tabs {
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 16px 14px;
+    white-space: nowrap;
+  }
+  .page-title {
+    font-size: 28px;
+    margin: 20px 0 18px;
+  }
+  .card-head {
+    padding: 14px 16px;
+  }
+  .card-title {
+    font-size: 16px;
+  }
+  .metrics-body,
+  .insights-body {
+    padding: 16px;
+  }
+  .metric-value {
+    font-size: 38px;
+  }
+  .tier-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tier-card {
+    padding: 12px 12px;
+  }
+  .tier-card-title {
+    white-space: normal;
+    font-size: 10px;
+    line-height: 1.25;
+  }
+  .tier-info {
+    display: none;
+  }
+  .tier-range {
+    font-size: 9px;
+  }
+  .dist-legend {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* toolbar: full-width search + Invite, Download hidden (matches mobile design) */
+  .toolbar {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .search-box {
+    width: auto;
+    flex: 1;
+    padding: 11px 14px;
+  }
+  .btn-outline {
+    display: none;
+  }
+  .btn {
+    padding: 11px 16px;
+    white-space: nowrap;
+  }
+
+  /* condensed table: Name · KQ · Top Action (matches mobile design) */
+  .table-wrap {
+    overflow-x: visible;
+  }
+  .prospects-table {
+    min-width: 0;
+    font-size: 13px;
+  }
+  .prospects-table .col-num,
+  .prospects-table .col-signup,
+  .prospects-table .col-bolt {
+    display: none;
+  }
+  .prospects-table thead th,
+  .prospects-table tbody td {
+    padding: 12px 8px;
+  }
+  .col-check {
+    display: none;
+  }
+  .col-name {
+    width: auto;
+  }
+  .col-action {
+    min-width: 0;
+    line-height: 1.35;
+  }
+  .avatar,
+  .avatar-initial {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+  .name-line {
+    font-size: 13.5px;
+  }
+  .email-line {
+    display: none;
+  }
+  .score-badge {
+    width: 44px;
+    height: 34px;
+    font-size: 15px;
+  }
+  .group-header-inner {
+    padding: 8px 12px;
+    font-size: 11.5px;
+  }
 }
