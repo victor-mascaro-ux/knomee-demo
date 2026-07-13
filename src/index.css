@@ -528,10 +528,24 @@ body {
   color: #444;
   white-space: nowrap;
 }
+/* Top Action / Household take the remaining space and wrap rather than
+   forcing the table wider than its container (which clipped the tier
+   subheaders). Matches the converting flow, where the table always fits and
+   columns are dropped progressively at each breakpoint. */
 .col-action {
-  min-width: 260px;
   color: #444;
   line-height: 1.45;
+}
+.col-household,
+.col-sentiment,
+.col-status {
+  color: #444;
+  white-space: nowrap;
+}
+.col-signin {
+  width: 110px;
+  color: #444;
+  white-space: nowrap;
 }
 .col-bolt {
   width: 60px;
@@ -881,13 +895,291 @@ input[type='checkbox'] {
   }
 }
 
-/* ---------- Responsive ---------- */
+/* ---------- Clients screen ---------- */
+.brand-logo {
+  height: 22px;
+  width: auto;
+  display: block;
+}
 
-/* Tablet / small laptop */
-@media (max-width: 1024px) {
-  .content {
-    padding: 20px 24px 60px;
+.client-group-engaged .group-header-inner {
+  background: #5b21b6;
+  color: #fff;
+}
+.client-group-attention .group-header-inner {
+  background: #8b5cf6;
+  color: #fff;
+}
+.client-group-reconnect .group-header-inner {
+  background: var(--ocean);
+  color: #fff;
+}
+.client-group-incomplete .group-header-inner {
+  background: var(--pearl);
+  color: var(--grey-text);
+}
+
+.sentiment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sdot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--purple-bolt);
+}
+.sdot.empty {
+  background: var(--pearl);
+  border: 1.5px solid var(--stone);
+}
+.sentiment-warn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--stone);
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+}
+.status-badge.status-pending {
+  border-color: #f59e0b;
+  color: #b45309;
+  font-weight: 600;
+}
+.status-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.household-link {
+  color: var(--plum);
+  text-decoration: underline;
+  font-size: 13px;
+}
+.dash {
+  color: var(--ash);
+}
+
+.new-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: #affc41;
+  color: #000;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  margin-left: 6px;
+}
+
+.client-new {
+  animation: newRow 1.6s ease;
+}
+@keyframes newRow {
+  0% {
+    background: #d7f7a8;
   }
+  100% {
+    background: transparent;
+  }
+}
+
+.reporting-placeholder {
+  border: 1px dashed var(--stone);
+  border-radius: 14px;
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--grey-text);
+  text-align: center;
+}
+
+/* ---------- Row action menu ---------- */
+.row-menu {
+  position: relative;
+  display: inline-flex;
+}
+.row-menu-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.14);
+  padding: 6px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+}
+.row-menu-item {
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: #333;
+  padding: 9px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.row-menu-item:hover:not(:disabled) {
+  background: #f5f2fa;
+  color: var(--plum);
+}
+.row-menu-item:disabled {
+  color: var(--ash);
+  cursor: default;
+}
+
+/* ---------- Convert modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 10, 40, 0.45);
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.modal {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  animation: modalPop 0.18s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+}
+@keyframes modalPop {
+  from {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.modal-header {
+  background: var(--plum);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.85;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 8px;
+}
+.modal-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.14);
+}
+.modal-body {
+  padding: 24px 22px;
+  color: #1a1a1a;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 22px 22px;
+}
+.modal .btn {
+  padding: 10px 20px;
+}
+
+/* ---------- Toast ---------- */
+.app-toast {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 250;
+  background: #1c1c1e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 15px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  transform: translateY(calc(100% + 48px));
+  opacity: 0;
+  transition: transform 0.38s cubic-bezier(0.22, 0.81, 0.28, 1.05), opacity 0.3s ease;
+  pointer-events: none;
+}
+.app-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.app-toast-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #84cc16;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+/* ---------- Responsive — mirrors the converting flow ----------
+   Tables never scroll horizontally; instead columns are dropped
+   progressively at each breakpoint, so the tier subheaders always fit. */
+
+@media (max-width: 1200px) {
+  .content {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Tablet: reflow cards + drop the least-critical columns */
+@media (max-width: 1024px) {
   .metric-tiles {
     grid-template-columns: 1fr 1fr;
   }
@@ -901,28 +1193,48 @@ input[type='checkbox'] {
     grid-template-columns: 1fr;
     gap: 0;
   }
-  /* keep the full data table usable via horizontal scroll */
-  .table-wrap {
-    overflow-x: auto;
+
+  /* Prospects — hide Intent, Clarity, Receptivity, Sign Up */
+  .prospects-table:not(.clients-table) thead th:nth-child(4),
+  .prospects-table:not(.clients-table) tbody td:nth-child(4),
+  .prospects-table:not(.clients-table) thead th:nth-child(5),
+  .prospects-table:not(.clients-table) tbody td:nth-child(5),
+  .prospects-table:not(.clients-table) thead th:nth-child(6),
+  .prospects-table:not(.clients-table) tbody td:nth-child(6),
+  .prospects-table:not(.clients-table) thead th:nth-child(7),
+  .prospects-table:not(.clients-table) tbody td:nth-child(7) {
+    display: none;
   }
-  .prospects-table {
-    min-width: 900px;
+
+  /* Clients — hide Last Sign In */
+  .clients-table thead th:nth-child(6),
+  .clients-table tbody td:nth-child(6) {
+    display: none;
   }
 }
 
-/* Phone */
+/* Clients — also hide Status */
+@media (max-width: 900px) {
+  .clients-table thead th:nth-child(5),
+  .clients-table tbody td:nth-child(5) {
+    display: none;
+  }
+}
+
+/* Phone: stack the toolbar (converting flow behavior) */
 @media (max-width: 640px) {
   .topbar {
     padding: 0 16px;
   }
-  .brand-name {
-    font-size: 18px;
+  .brand-logo {
+    height: 18px;
   }
   .brand-sub {
     font-size: 11px;
   }
   .content {
-    padding: 16px 14px 48px;
+    padding-top: 16px;
+    padding-bottom: 48px;
   }
   .tabs {
     gap: 4px;
@@ -949,11 +1261,8 @@ input[type='checkbox'] {
   .metric-value {
     font-size: 38px;
   }
-  .tier-cards {
-    grid-template-columns: 1fr 1fr;
-  }
   .tier-card {
-    padding: 12px 12px;
+    padding: 12px;
   }
   .tier-card-title {
     white-space: normal;
@@ -971,70 +1280,51 @@ input[type='checkbox'] {
     flex-wrap: wrap;
   }
 
-  /* toolbar: full-width search + Invite, Download hidden (matches mobile design) */
   .toolbar {
-    flex-wrap: nowrap;
-    gap: 10px;
+    flex-wrap: wrap;
   }
   .search-box {
-    width: auto;
+    width: 100%;
+  }
+  .toolbar-actions {
+    width: 100%;
+  }
+  .toolbar-actions .btn {
     flex: 1;
-    padding: 11px 14px;
+    justify-content: center;
   }
-  .btn-outline {
-    display: none;
-  }
-  .btn {
-    padding: 11px 16px;
-    white-space: nowrap;
-  }
+}
 
-  /* condensed table: Name · KQ · Top Action (matches mobile design) */
-  .table-wrap {
-    overflow-x: visible;
+/* Prospects — also hide Top Action; Clients — also hide Sentiment */
+@media (max-width: 700px) {
+  .content {
+    padding-left: 16px;
+    padding-right: 16px;
   }
-  .prospects-table {
-    min-width: 0;
-    font-size: 13px;
-  }
-  .prospects-table .col-num,
-  .prospects-table .col-signup,
-  .prospects-table .col-bolt {
+  .prospects-table:not(.clients-table) thead th:nth-child(8),
+  .prospects-table:not(.clients-table) tbody td:nth-child(8) {
     display: none;
   }
-  .prospects-table thead th,
-  .prospects-table tbody td {
-    padding: 12px 8px;
-  }
-  .col-check {
+  .clients-table thead th:nth-child(4),
+  .clients-table tbody td:nth-child(4) {
     display: none;
   }
-  .col-name {
-    width: auto;
-  }
-  .col-action {
-    min-width: 0;
-    line-height: 1.35;
-  }
-  .avatar,
-  .avatar-initial {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
-  }
-  .name-line {
-    font-size: 13.5px;
-  }
-  .email-line {
+}
+
+/* Smallest: just Name + row actions */
+@media (max-width: 480px) {
+  .prospects-table:not(.clients-table) thead th:nth-child(1),
+  .prospects-table:not(.clients-table) tbody tr:not(.group-header) td:nth-child(1),
+  .prospects-table:not(.clients-table) thead th:nth-child(3),
+  .prospects-table:not(.clients-table) tbody td:nth-child(3),
+  .prospects-table:not(.clients-table) thead th:nth-child(9),
+  .prospects-table:not(.clients-table) tbody td:nth-child(9) {
     display: none;
   }
-  .score-badge {
-    width: 44px;
-    height: 34px;
-    font-size: 15px;
-  }
-  .group-header-inner {
-    padding: 8px 12px;
-    font-size: 11.5px;
+  .clients-table thead th:nth-child(1),
+  .clients-table tbody tr:not(.group-header) td:nth-child(1),
+  .clients-table thead th:nth-child(3),
+  .clients-table tbody td:nth-child(3) {
+    display: none;
   }
 }

@@ -1,8 +1,13 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
-  KnomeeMark,
+  baseClients,
+  clientTierGroups,
+  convertedClient,
+  type Client,
+} from './data/clients'
+import {
   ChartIcon,
   BoltIcon,
   ChevronUp,
@@ -15,7 +20,12 @@ import {
   InfoIcon,
   CaretDown,
   BurgerMenu,
+  WarnIcon,
+  CheckIcon,
+  CloseIcon,
 } from './components/icons'
+
+type Screen = 'prospects' | 'clients' | 'reporting'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -174,7 +184,7 @@ function Avatar({ p }: { p: Prospect }) {
   return <span className="avatar avatar-initial">{initial(p.name)}</span>
 }
 
-function ProspectRow({ p }: { p: Prospect }) {
+function ProspectRow({ p, onConvert }: { p: Prospect; onConvert: (p: Prospect) => void }) {
   const incomplete = p.tier === 'incomplete'
   return (
     <tr className={incomplete ? 'row-incomplete' : undefined}>
@@ -216,15 +226,72 @@ function ProspectRow({ p }: { p: Prospect }) {
         </button>
       </td>
       <td className="col-dots">
-        <button className="dots-btn" type="button">
-          <DotsIcon />
-        </button>
+        <RowMenu
+          items={
+            incomplete
+              ? [{ label: 'View profile', disabled: true }]
+              : [{ label: 'Convert to client', onClick: () => onConvert(p) }, { label: 'View profile', disabled: true }]
+          }
+        />
       </td>
     </tr>
   )
 }
 
-function ProspectsTable() {
+interface MenuItem {
+  label: string
+  onClick?: () => void
+  disabled?: boolean
+}
+
+function RowMenu({ items }: { items: MenuItem[] }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('click', onDoc)
+    return () => document.removeEventListener('click', onDoc)
+  }, [open])
+  return (
+    <div className="row-menu" ref={ref}>
+      <button
+        className="dots-btn"
+        type="button"
+        aria-label="Row actions"
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((v) => !v)
+        }}
+      >
+        <DotsIcon />
+      </button>
+      {open && (
+        <div className="row-menu-pop">
+          {items.map((it) => (
+            <button
+              key={it.label}
+              type="button"
+              className="row-menu-item"
+              disabled={it.disabled}
+              onClick={(e) => {
+                e.stopPropagation()
+                setOpen(false)
+                it.onClick?.()
+              }}
+            >
+              {it.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProspectsTable({ onConvert }: { onConvert: (p: Prospect) => void }) {
   return (
     <div className="table-wrap">
       <table className="prospects-table">
@@ -261,7 +328,7 @@ function ProspectsTable() {
                   </td>
                 </tr>
                 {rows.map((p) => (
-                  <ProspectRow p={p} key={p.name} />
+                  <ProspectRow p={p} key={p.name} onConvert={onConvert} />
                 ))}
               </>
             )
@@ -272,13 +339,268 @@ function ProspectsTable() {
   )
 }
 
+function Toolbar() {
+  return (
+    <div className="toolbar">
+      <div className="search-box">
+        <SearchIcon />
+        <input type="text" placeholder="Search name" />
+      </div>
+      <div className="toolbar-actions">
+        <button className="btn btn-outline" type="button">
+          <DownloadIcon /> Download
+        </button>
+        <button className="btn btn-primary" type="button">
+          <PlusIcon /> Invite
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ProspectsScreen({ onConvert }: { onConvert: (p: Prospect) => void }) {
+  return (
+    <>
+      <h1 className="page-title">My Prospects</h1>
+      <TopLineMetrics />
+      <ActionableInsights />
+      <Toolbar />
+      <ProspectsTable onConvert={onConvert} />
+    </>
+  )
+}
+
+/* ── Clients screen (the converted book of business) ── */
+
+function SentimentDots({ value, warn }: { value: number | null; warn?: boolean }) {
+  if (value === null) return <span className="dash">–</span>
+  return (
+    <div className="sentiment">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span key={i} className={`sdot ${i < value ? '' : 'empty'}`} />
+      ))}
+      {warn && (
+        <span className="sentiment-warn">
+          <WarnIcon />
+        </span>
+      )}
+    </div>
+  )
+}
+
+function ClientRow({ c }: { c: Client }) {
+  return (
+    <tr className={c.isNew ? 'client-new' : undefined}>
+      <td className="col-check">
+        <input type="checkbox" />
+      </td>
+      <td className="col-name">
+        <div className="name-cell">
+          <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+          <div className="name-block">
+            <span className="name-line">
+              {c.name} <ChevronRight />
+              {c.isNew && <span className="new-tag">new</span>}
+            </span>
+            <span className="email-line">{c.email}</span>
+          </div>
+        </div>
+      </td>
+      <td className="col-household">
+        {c.household ? (
+          <a href="#" className="household-link" onClick={(e) => e.preventDefault()}>
+            {c.household}
+          </a>
+        ) : (
+          <span className="dash">—</span>
+        )}
+      </td>
+      <td className="col-sentiment">
+        <SentimentDots value={c.sentiment} warn={c.warn} />
+      </td>
+      <td className="col-status">
+        {c.secondaryStatus ? (
+          <div className="status-stack">
+            <span className="status-badge status-pending">{c.status}</span>
+            <span className="status-badge">{c.secondaryStatus}</span>
+          </div>
+        ) : (
+          <span className={`status-badge ${c.status === 'pending' ? 'status-pending' : ''}`}>
+            {c.status}
+          </span>
+        )}
+      </td>
+      <td className="col-signin">
+        {c.lastLabel ? (
+          <span className="signup-invited">
+            {c.lastLabel}
+            <br />
+            {c.lastSignIn}
+          </span>
+        ) : (
+          c.lastSignIn
+        )}
+      </td>
+      <td className="col-dots">
+        <RowMenu items={[{ label: 'View profile', disabled: true }]} />
+      </td>
+    </tr>
+  )
+}
+
+function ClientsScreen({ clients }: { clients: Client[] }) {
+  return (
+    <>
+      <h1 className="page-title">My Clients</h1>
+      <Toolbar />
+      <div className="table-wrap">
+        <table className="prospects-table clients-table">
+          <thead>
+            <tr>
+              <th className="col-check">
+                <input type="checkbox" />
+              </th>
+              <th className="col-name">Name</th>
+              <th className="col-household">Household</th>
+              <th className="col-sentiment">Sentiment</th>
+              <th className="col-status">
+                <span className="th-sort">Status <CaretDown /></span>
+              </th>
+              <th className="col-signin">Last Sign In</th>
+              <th className="col-dots" />
+            </tr>
+          </thead>
+          <tbody>
+            {clientTierGroups.map((group) => {
+              const rows = clients.filter((c) => c.tier === group.id)
+              if (rows.length === 0) return null
+              return (
+                <>
+                  <tr className={`group-header client-group-${group.id}`} key={`ch-${group.id}`}>
+                    <td colSpan={7}>
+                      <div className="group-header-inner">
+                        <span>{group.title}</span>
+                        {group.range && <span className="group-range">{group.range}</span>}
+                      </div>
+                    </td>
+                  </tr>
+                  {rows.map((c) => (
+                    <ClientRow c={c} key={c.name} />
+                  ))}
+                </>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+function ReportingScreen() {
+  return (
+    <>
+      <h1 className="page-title">Reporting</h1>
+      <div className="reporting-placeholder">
+        <ChartIcon />
+        <p>Reporting dashboards are coming soon.</p>
+      </div>
+    </>
+  )
+}
+
+function ConvertModal({
+  prospect,
+  onCancel,
+  onConfirm,
+}: {
+  prospect: Prospect
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div className="modal-backdrop" onClick={onCancel} role="dialog" aria-modal="true">
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Convert to Client</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onCancel}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body">
+          <b>{prospect.name}</b> will be sent to your <b>Clients</b> Dashboard.
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-outline" type="button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" type="button" onClick={onConfirm}>
+            Convert
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Toast({ show, message }: { show: boolean; message: string }) {
+  return (
+    <div className={`app-toast ${show ? 'show' : ''}`} role="status" aria-live="polite">
+      <span className="app-toast-check">
+        <CheckIcon />
+      </span>
+      {message}
+    </div>
+  )
+}
+
+const tabs: { id: Screen; label: string }[] = [
+  { id: 'prospects', label: 'Prospects' },
+  { id: 'clients', label: 'Clients' },
+  { id: 'reporting', label: 'Reporting' },
+]
+
 export default function App() {
+  const [screen, setScreen] = useState<Screen>('prospects')
+  const [converted, setConverted] = useState<Client[]>([])
+  const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
+  const [toast, setToast] = useState(false)
+
+  // Expose the current screen to the commenting overlay so comment pins are
+  // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
+  useEffect(() => {
+    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = screen
+  }, [screen])
+
+  // Esc closes the convert modal.
+  useEffect(() => {
+    if (!convertTarget) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setConvertTarget(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [convertTarget])
+
+  const confirmConvert = () => {
+    if (!convertTarget) return
+    const already = converted.some((c) => c.email === convertTarget.email)
+    if (!already) {
+      setConverted((prev) => [convertedClient(convertTarget.name, convertTarget.email), ...prev])
+    }
+    setConvertTarget(null)
+    setScreen('clients')
+    setToast(true)
+    window.setTimeout(() => setToast(false), 3200)
+  }
+
+  const clients = [...converted, ...baseClients]
+
   return (
     <div className="page">
       <header className="topbar">
         <div className="brand">
-          <KnomeeMark />
-          <span className="brand-name">knomee</span>
+          <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
           <span className="brand-sub">ADVISOR</span>
         </div>
         <button className="menu-btn" type="button" aria-label="Open menu">
@@ -288,33 +610,31 @@ export default function App() {
 
       <main className="content">
         <nav className="tabs">
-          <button className="tab tab-active" type="button">Prospects</button>
-          <button className="tab" type="button">Clients</button>
-          <button className="tab" type="button">Reporting</button>
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              className={`tab ${screen === t.id ? 'tab-active' : ''}`}
+              type="button"
+              onClick={() => setScreen(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
         </nav>
 
-        <h1 className="page-title">My Prospects</h1>
-
-        <TopLineMetrics />
-        <ActionableInsights />
-
-        <div className="toolbar">
-          <div className="search-box">
-            <SearchIcon />
-            <input type="text" placeholder="Search name" />
-          </div>
-          <div className="toolbar-actions">
-            <button className="btn btn-outline" type="button">
-              <DownloadIcon /> Download
-            </button>
-            <button className="btn btn-primary" type="button">
-              <PlusIcon /> Invite
-            </button>
-          </div>
-        </div>
-
-        <ProspectsTable />
+        {screen === 'prospects' && <ProspectsScreen onConvert={setConvertTarget} />}
+        {screen === 'clients' && <ClientsScreen clients={clients} />}
+        {screen === 'reporting' && <ReportingScreen />}
       </main>
+
+      {convertTarget && (
+        <ConvertModal
+          prospect={convertTarget}
+          onCancel={() => setConvertTarget(null)}
+          onConfirm={confirmConvert}
+        />
+      )}
+      <Toast show={toast} message="Converted to Client" />
     </div>
   )
 }
