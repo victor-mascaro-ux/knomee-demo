@@ -8,6 +8,12 @@ import {
 } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
+import { funnelStages, utmBreakdowns, utmKeys, type FunnelStage } from './data/analytics'
+import {
+  CLIENT_ANNUAL_RATE,
+  PROSPECT_ONE_TIME_RATE,
+  currency,
+} from './data/billing'
 import {
   baseClients,
   clientTierGroups,
@@ -40,7 +46,7 @@ import {
   LockIcon,
 } from './components/icons'
 
-type Screen = 'prospects' | 'clients' | 'reporting'
+type Screen = 'prospects' | 'clients' | 'analytics'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -398,7 +404,7 @@ function Toolbar() {
 function ProspectsScreen({ onConvert }: { onConvert: (p: Prospect) => void }) {
   return (
     <>
-      <h1 className="page-title">My Prospects</h1>
+      <h1 className="page-title">My Dashboard</h1>
       <TopLineMetrics />
       <ActionableInsights />
       <Toolbar />
@@ -711,12 +717,127 @@ function ClientsScreen({ clients }: { clients: Client[] }) {
   )
 }
 
+/* ── Analytics screen (funnel + UTMs) ── */
+
+function Funnel() {
+  const [hover, setHover] = useState<FunnelStage | null>(null)
+  const top = funnelStages[0].count
+  return (
+    <div className="funnel">
+      <div className="funnel-bar">
+        {funnelStages.map((s) => (
+          <div
+            key={s.label}
+            className="funnel-seg"
+            style={{ flex: s.count, background: s.color }}
+            onMouseEnter={() => setHover(s)}
+            onMouseLeave={() => setHover((h) => (h === s ? null : h))}
+          >
+            <span className="funnel-count">{s.count}</span>
+            {hover === s && (
+              <div className="funnel-tip">
+                <div className="funnel-tip-title">{s.label}</div>
+                <div className="funnel-tip-stat">
+                  {s.count} · {Math.round((s.count / top) * 100)}% of invited
+                </div>
+                <div className="funnel-tip-desc">{s.desc}</div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="funnel-legend">
+        {funnelStages.map((s) => (
+          <span key={s.label}>
+            <i className="dot" style={{ background: s.color }} />
+            {s.label} ({s.count})
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function UtmBreakdownCard({
+  label,
+  values,
+}: {
+  label: string
+  values: { value: string; count: number }[]
+}) {
+  const total = values.reduce((a, v) => a + v.count, 0)
+  return (
+    <div className="utm-card">
+      <div className="utm-card-title">{label}</div>
+      <ul className="utm-list">
+        {values.map((v) => (
+          <li key={v.value}>
+            <span className="utm-value">{v.value}</span>
+            <span className="utm-track">
+              <span className="utm-fill" style={{ width: `${(v.count / total) * 100}%` }} />
+            </span>
+            <span className="utm-count">{v.count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function AnalyticsScreen() {
+  return (
+    <>
+      <h1 className="page-title">Analytics</h1>
+
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <ChartIcon />
+            <span>Conversion Funnel</span>
+          </div>
+          <span className="analytics-sub">Invited → Converted</span>
+        </header>
+        <div className="analytics-body">
+          <Funnel />
+        </div>
+      </section>
+
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <BoltIcon />
+            <span>Marketing (UTM) Attribution</span>
+          </div>
+          <span className="analytics-sub">How prospects arrived</span>
+        </header>
+        <div className="analytics-body">
+          <div className="utm-grid">
+            {utmBreakdowns.map((b) => (
+              <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
+            ))}
+          </div>
+          <div className="utm-keys">
+            <div className="utm-keys-title">Tracked UTM keys</div>
+            <div className="utm-keys-list">
+              {utmKeys.map((k) => (
+                <span className="utm-chip" key={k.key} title={k.label}>
+                  {k.key}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
 /* ── Empty dashboard states ─────────────────────────────────────────────
    Same chrome as the populated screens (locked metric/insight bars, toolbar,
    table header) with a centered illustration + CTA. Rendered for Reporting
    always, and for Prospects/Clients when the internal "empty" mode is on. */
 
-type EmptyVariant = 'prospects' | 'clients' | 'reporting'
+type EmptyVariant = 'prospects' | 'clients' | 'analytics'
 
 interface EmptyConfig {
   title: string
@@ -729,7 +850,7 @@ interface EmptyConfig {
 
 const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
   prospects: {
-    title: 'My Prospects',
+    title: 'My Dashboard',
     caption: 'Your Prospect Dashboard is empty.',
     cta: 'Test Prospect Experience',
     ctaClass: 'empty-cta-prospect',
@@ -745,10 +866,10 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     subtitle: 'Start inviting clients by clicking the button above.',
     columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
   },
-  reporting: {
-    title: 'Reporting',
-    caption: 'Your Reporting Dashboard is empty.',
-    subtitle: 'Reports appear here once you have active prospects and clients.',
+  analytics: {
+    title: 'Analytics',
+    caption: 'Your Analytics Dashboard is empty.',
+    subtitle: 'Funnel and marketing analytics appear here once you have active prospects.',
     columns: [],
   },
 }
@@ -970,10 +1091,325 @@ function Toast({ show, message }: { show: boolean; message: string }) {
   )
 }
 
+/* ── Account settings (Profile · Security · Billing · Marketing) ── */
+
+type SettingsSection = 'profile' | 'security' | 'billing' | 'marketing'
+
+function downloadInvoice(opts: {
+  name: string
+  email: string
+  amount: number
+  cadence: string
+  invoice: string
+}) {
+  const lines = [
+    'KNOMEE ADVISOR — INVOICE',
+    '========================',
+    `Invoice:   ${opts.invoice}`,
+    `Date:      ${new Date().toLocaleDateString('en-US')}`,
+    '',
+    `Billed to: Knomee Advisor`,
+    `For:       ${opts.name} (${opts.email})`,
+    `Type:      Prospect activation (${opts.cadence})`,
+    '',
+    `Amount:    ${currency(opts.amount)}`,
+    '',
+    'Prospects are billed once at 4× the standard rate. When a prospect',
+    'becomes a client they are billed the standard rate annually thereafter.',
+  ].join('\n')
+  const blob = new Blob([lines], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${opts.invoice}.txt`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+function BillingPanel() {
+  const prospectLines = prospects
+    .filter((p) => p.tier !== 'incomplete')
+    .map((p, i) => ({
+      name: p.name,
+      email: p.email,
+      amount: PROSPECT_ONE_TIME_RATE,
+      cadence: 'one-time',
+      invoice: `INV-P${String(1001 + i)}`,
+    }))
+  const clientLines = baseClients
+    .filter((c) => c.tier !== 'incomplete')
+    .map((c, i) => ({
+      name: c.name,
+      email: c.email,
+      amount: CLIENT_ANNUAL_RATE,
+      cadence: 'annual',
+      invoice: `INV-C${String(2001 + i)}`,
+    }))
+  const prospectsTotal = prospectLines.reduce((a, l) => a + l.amount, 0)
+  const clientsTotal = clientLines.reduce((a, l) => a + l.amount, 0)
+  const total = prospectsTotal + clientsTotal
+
+  return (
+    <div className="settings-content">
+      <h2 className="settings-h2">Billing</h2>
+
+      <div className="bill-summary">
+        <div className="bill-owe">
+          <span className="settings-label">Total due this cycle</span>
+          <span className="bill-owe-value">{currency(total)}</span>
+        </div>
+        <div className="bill-split">
+          <div>
+            <span className="settings-label">Prospects · one-time</span>
+            <strong>{currency(prospectsTotal)}</strong>
+            <span className="bill-note">{prospectLines.length} × {currency(PROSPECT_ONE_TIME_RATE)}</span>
+          </div>
+          <div>
+            <span className="settings-label">Clients · annual</span>
+            <strong>{currency(clientsTotal)}</strong>
+            <span className="bill-note">{clientLines.length} × {currency(CLIENT_ANNUAL_RATE)}/yr</span>
+          </div>
+        </div>
+      </div>
+
+      <p className="bill-explain">
+        Prospects are charged <b>once</b> at {currency(PROSPECT_ONE_TIME_RATE)} (4× the standard
+        rate). When a prospect converts to a client they're billed the standard{' '}
+        {currency(CLIENT_ANNUAL_RATE)} <b>annually</b> from the following year.
+      </p>
+
+      <div className="bill-table-wrap">
+        <table className="bill-table">
+          <thead>
+            <tr>
+              <th>Person</th>
+              <th>Billing</th>
+              <th>Amount</th>
+              <th>Invoice</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bill-group">
+              <td colSpan={4}>Prospects — charged once</td>
+            </tr>
+            {prospectLines.map((l) => (
+              <tr key={l.invoice}>
+                <td>
+                  <div className="bill-person">
+                    <span className="avatar avatar-initial">{l.name.charAt(0)}</span>
+                    <div>
+                      <div className="bill-name">{l.name}</div>
+                      <div className="bill-email">{l.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span className="bill-badge one-time">one-time · 4×</span></td>
+                <td className="bill-amount">{currency(l.amount)}</td>
+                <td>
+                  <button className="bill-invoice" type="button" onClick={() => downloadInvoice(l)}>
+                    <DownloadIcon /> Invoice
+                  </button>
+                </td>
+              </tr>
+            ))}
+            <tr className="bill-group">
+              <td colSpan={4}>Clients — charged annually</td>
+            </tr>
+            {clientLines.map((l) => (
+              <tr key={l.invoice}>
+                <td>
+                  <div className="bill-person">
+                    <span className="avatar avatar-initial">{l.name.charAt(0)}</span>
+                    <div>
+                      <div className="bill-name">{l.name}</div>
+                      <div className="bill-email">{l.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span className="bill-badge annual">annual · standard</span></td>
+                <td className="bill-amount">{currency(l.amount)}</td>
+                <td>
+                  <button className="bill-invoice" type="button" onClick={() => downloadInvoice(l)}>
+                    <DownloadIcon /> Invoice
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function MarketingPanel() {
+  const [checked, setChecked] = useState<Record<string, boolean>>(
+    Object.fromEntries(utmKeys.map((k, i) => [k.key, i < 6])),
+  )
+  const [custom, setCustom] = useState<{ key: string; label: string }[]>([])
+  const [newKey, setNewKey] = useState('')
+  const [newDesc, setNewDesc] = useState('')
+  const all = [...utmKeys, ...custom]
+  const toggle = (key: string) => setChecked((c) => ({ ...c, [key]: !c[key] }))
+  const addCustom = () => {
+    const key = newKey.trim()
+    if (!key) return
+    setCustom((c) => [...c, { key, label: newDesc.trim() || 'Custom key' }])
+    setChecked((c) => ({ ...c, [key]: true }))
+    setNewKey('')
+    setNewDesc('')
+  }
+
+  return (
+    <div className="settings-content">
+      <h2 className="settings-h2">Marketing</h2>
+      <div className="mkt-sub">Allowed Prospect UTM Keys</div>
+
+      <div className="mkt-grid">
+        {all.map((k) => (
+          <label className="mkt-item" key={k.key}>
+            <input type="checkbox" checked={!!checked[k.key]} onChange={() => toggle(k.key)} />
+            <span>
+              <span className="mkt-label">{k.label}</span>
+              <span className="mkt-key">{k.key}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+
+      <div className="mkt-add">
+        <div className="mkt-add-fields">
+          <input
+            type="text"
+            placeholder="custom_key"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Brief description (3–5 words)"
+            value={newDesc}
+            onChange={(e) => setNewDesc(e.target.value)}
+          />
+        </div>
+        <button className="mkt-add-btn" type="button" onClick={addCustom}>
+          Add
+        </button>
+      </div>
+
+      <div className="mkt-footer">
+        <button className="btn btn-primary" type="button">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ProfilePanel() {
+  return (
+    <div className="settings-content">
+      <h2 className="settings-h2">Profile details</h2>
+      <div className="settings-row">
+        <span className="settings-label">Profile</span>
+        <div className="settings-value profile-value">
+          <span className="avatar avatar-initial profile-avatar">A</span>
+          <span>Alex Advisor</span>
+        </div>
+        <button className="settings-link" type="button">Update profile</button>
+      </div>
+      <div className="settings-row">
+        <span className="settings-label">Email addresses</span>
+        <div className="settings-value">
+          <div className="settings-email">
+            alex@beaconplan.co <span className="settings-pill">Primary</span>
+          </div>
+          <button className="settings-link" type="button">+ Add email address</button>
+        </div>
+      </div>
+      <div className="settings-row">
+        <span className="settings-label">Connected accounts</span>
+        <button className="settings-link" type="button">+ Connect account</button>
+      </div>
+    </div>
+  )
+}
+
+function SecurityPanel() {
+  return (
+    <div className="settings-content">
+      <h2 className="settings-h2">Security</h2>
+      <div className="settings-row">
+        <span className="settings-label">Password</span>
+        <span className="settings-value">••••••••••</span>
+        <button className="settings-link" type="button">Update password</button>
+      </div>
+      <div className="settings-row">
+        <span className="settings-label">Active devices</span>
+        <div className="settings-value">
+          <div className="settings-device">
+            <b>Chrome</b> · macOS <span className="settings-pill">This device</span>
+          </div>
+          <div className="settings-device-meta">San Francisco, US · Today at 3:40 PM</div>
+        </div>
+      </div>
+      <div className="settings-row">
+        <span className="settings-label">Delete account</span>
+        <button className="settings-link danger" type="button">Delete account</button>
+      </div>
+    </div>
+  )
+}
+
+function SettingsScreen({ onClose }: { onClose: () => void }) {
+  const [section, setSection] = useState<SettingsSection>('billing')
+  const nav: { id: SettingsSection; label: string }[] = [
+    { id: 'profile', label: 'Profile' },
+    { id: 'security', label: 'Security' },
+    { id: 'billing', label: 'Billing' },
+    { id: 'marketing', label: 'Marketing' },
+  ]
+  return (
+    <main className="content settings-screen">
+      <button className="settings-back" type="button" onClick={onClose}>
+        ‹ Back to dashboard
+      </button>
+      <div className="settings-grid">
+        <aside className="settings-side">
+          <div className="settings-side-head">
+            <h1>Account</h1>
+            <p>Manage your account info.</p>
+          </div>
+          <nav className="settings-nav">
+            {nav.map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                className={`settings-nav-item ${section === n.id ? 'active' : ''}`}
+                onClick={() => setSection(n.id)}
+              >
+                {n.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+        <section className="settings-main">
+          {section === 'profile' && <ProfilePanel />}
+          {section === 'security' && <SecurityPanel />}
+          {section === 'billing' && <BillingPanel />}
+          {section === 'marketing' && <MarketingPanel />}
+        </section>
+      </div>
+    </main>
+  )
+}
+
 const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
-  { id: 'reporting', label: 'Reporting' },
+  { id: 'analytics', label: 'Analytics' },
 ]
 
 export default function App() {
@@ -986,6 +1422,7 @@ export default function App() {
   // reads as the populated demo; toggled from the top-right menu.
   const [emptyMode, setEmptyMode] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -1051,6 +1488,24 @@ export default function App() {
             </button>
             {menuOpen && (
               <div className="menu-pop">
+                <div className="menu-account">
+                  <span className="menu-avatar">A</span>
+                  <span className="menu-name">Alex Advisor</span>
+                </div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setSettingsOpen(true)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Account Settings
+                </button>
+                <button className="menu-item" type="button">
+                  Sign Out
+                </button>
+                <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
                 <label className="menu-toggle">
                   <span>Empty dashboards</span>
@@ -1072,6 +1527,9 @@ export default function App() {
         </div>
       </header>
 
+      {settingsOpen ? (
+        <SettingsScreen onClose={() => setSettingsOpen(false)} />
+      ) : (
       <main className="content">
         <nav className="tabs">
           {tabs.map((t) => (
@@ -1098,8 +1556,10 @@ export default function App() {
           ) : (
             <ClientsScreen clients={clients} />
           ))}
-        {screen === 'reporting' && <EmptyScreen variant="reporting" />}
+        {screen === 'analytics' &&
+          (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
       </main>
+      )}
 
       {convertTarget && (
         <ConvertModal
