@@ -1950,7 +1950,7 @@ input[type='checkbox'] {
 }
 .ob-seg.gate {
   background: repeating-linear-gradient(135deg, #3a1e5e, #3a1e5e 6px, #501f7d 6px, #501f7d 12px);
-  color: #ffce4d;
+  color: #affc41;
   box-shadow: inset 3px 0 0 #ff9525, inset -3px 0 0 #ff9525;
 }
 .ob-tip {

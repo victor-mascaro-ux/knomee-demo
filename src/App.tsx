@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
-import { funnelStages, utmBreakdowns, utmKeys, type FunnelStage } from './data/analytics'
+import { utmBreakdowns, utmKeys } from './data/analytics'
 import {
   engagement,
   outcomes,
@@ -54,7 +54,7 @@ import {
   LockIcon,
 } from './components/icons'
 
-type Screen = 'prospects' | 'clients' | 'performance' | 'analytics'
+type Screen = 'prospects' | 'clients' | 'performance'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -725,46 +725,7 @@ function ClientsScreen({ clients }: { clients: Client[] }) {
   )
 }
 
-/* ── Analytics screen (funnel + UTMs) ── */
-
-function Funnel() {
-  const [hover, setHover] = useState<FunnelStage | null>(null)
-  const top = funnelStages[0].count
-  return (
-    <div className="funnel">
-      <div className="funnel-bar">
-        {funnelStages.map((s) => (
-          <div
-            key={s.label}
-            className="funnel-seg"
-            style={{ flex: s.count, background: s.color }}
-            onMouseEnter={() => setHover(s)}
-            onMouseLeave={() => setHover((h) => (h === s ? null : h))}
-          >
-            <span className="funnel-count">{s.count}</span>
-            {hover === s && (
-              <div className="funnel-tip">
-                <div className="funnel-tip-title">{s.label}</div>
-                <div className="funnel-tip-stat">
-                  {s.count} · {Math.round((s.count / top) * 100)}% of invited
-                </div>
-                <div className="funnel-tip-desc">{s.desc}</div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="funnel-legend">
-        {funnelStages.map((s) => (
-          <span key={s.label}>
-            <i className="dot" style={{ background: s.color }} />
-            {s.label} ({s.count})
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
+/* ── UTM attribution card (used on the Performance page) ── */
 
 function UtmBreakdownCard({
   label,
@@ -789,54 +750,6 @@ function UtmBreakdownCard({
         ))}
       </ul>
     </div>
-  )
-}
-
-function AnalyticsScreen() {
-  return (
-    <>
-      <h1 className="page-title">Analytics</h1>
-
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <ChartIcon />
-            <span>Conversion Funnel</span>
-          </div>
-          <span className="analytics-sub">Invited → Converted</span>
-        </header>
-        <div className="analytics-body">
-          <Funnel />
-        </div>
-      </section>
-
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <BoltIcon />
-            <span>Marketing (UTM) Attribution</span>
-          </div>
-          <span className="analytics-sub">How prospects arrived</span>
-        </header>
-        <div className="analytics-body">
-          <div className="utm-grid">
-            {utmBreakdowns.map((b) => (
-              <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
-            ))}
-          </div>
-          <div className="utm-keys">
-            <div className="utm-keys-title">Tracked UTM keys</div>
-            <div className="utm-keys-list">
-              {utmKeys.map((k) => (
-                <span className="utm-chip" key={k.key} title={k.label}>
-                  {k.key}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
   )
 }
 
@@ -1031,6 +944,31 @@ function PerformanceScreen() {
         </div>
         <OnboardingFunnel />
       </section>
+
+      <section className="card perf-card">
+        <div className="perf-sec">
+          <span className="perf-glyph">
+            <BoltIcon />
+          </span>
+          <b>Marketing (UTM) Attribution</b>
+          <span className="perf-note">how prospects arrived</span>
+        </div>
+        <div className="utm-grid">
+          {utmBreakdowns.map((b) => (
+            <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
+          ))}
+        </div>
+        <div className="utm-keys">
+          <div className="utm-keys-title">Tracked UTM keys</div>
+          <div className="utm-keys-list">
+            {utmKeys.map((k) => (
+              <span className="utm-chip" key={k.key} title={k.label}>
+                {k.key}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   )
 }
@@ -1040,7 +978,7 @@ function PerformanceScreen() {
    table header) with a centered illustration + CTA. Rendered for Reporting
    always, and for Prospects/Clients when the internal "empty" mode is on. */
 
-type EmptyVariant = 'prospects' | 'clients' | 'performance' | 'analytics'
+type EmptyVariant = 'prospects' | 'clients' | 'performance'
 
 interface EmptyConfig {
   title: string
@@ -1073,12 +1011,6 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     title: 'Performance',
     caption: 'Your Performance Dashboard is empty.',
     subtitle: 'Engagement, onboarding funnel and per-tier performance appear here once prospects start onboarding.',
-    columns: [],
-  },
-  analytics: {
-    title: 'Analytics',
-    caption: 'Your Analytics Dashboard is empty.',
-    subtitle: 'Funnel and marketing analytics appear here once you have active prospects.',
     columns: [],
   },
 }
@@ -1619,7 +1551,6 @@ const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
   { id: 'performance', label: 'Performance' },
-  { id: 'analytics', label: 'Analytics' },
 ]
 
 export default function App() {
@@ -1768,8 +1699,6 @@ export default function App() {
           ))}
         {screen === 'performance' &&
           (emptyMode ? <EmptyScreen variant="performance" /> : <PerformanceScreen />)}
-        {screen === 'analytics' &&
-          (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
       </main>
       )}
 
