@@ -403,7 +403,8 @@ body {
 
 .insight {
   display: flex;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 14px;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -413,7 +414,7 @@ body {
 
 .insight-num {
   width: 30px;
-  align-self: stretch;
+  height: 30px;
   background: var(--ocean);
   color: #fff;
   font-size: 15px;
@@ -421,7 +422,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 8px;
   flex: none;
 }
 
