@@ -2015,22 +2015,19 @@ input[type='checkbox'] {
 .fm-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 10px 26px;
   margin-bottom: 20px;
 }
+/* Plain checkboxes — no pill/background, only the check + text color change. */
 .fm-chip {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 14px 8px 10px;
-  border-radius: 999px;
-  border: 1px solid #d8d2e2;
-  background: #fff;
   color: #9c95ac;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 .fm-chip input {
   position: absolute;
@@ -2046,14 +2043,13 @@ input[type='checkbox'] {
   align-items: center;
   justify-content: center;
   flex: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .fm-chip .fm-check svg {
   opacity: 0;
 }
 .fm-chip.on {
-  background: #240446;
-  border-color: #240446;
-  color: #fff;
+  color: #240446;
 }
 .fm-chip.on .fm-check {
   background: #3dbdaa;
@@ -2067,10 +2063,7 @@ input[type='checkbox'] {
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #06403a;
-  background: #c0ffe7;
-  padding: 3px 7px;
-  border-radius: 999px;
+  color: #0e9b87;
 }
 
 .fm-rows {
