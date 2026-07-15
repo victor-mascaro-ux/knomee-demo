@@ -103,6 +103,42 @@ export function InfoIcon() {
   )
 }
 
+export function TargetIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="8" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="8" cy="8" r="1.1" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function TierBarsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <rect x="1.5" y="2" width="13" height="3.2" rx="1.4" fill="#086375" />
+      <rect x="1.5" y="6.4" width="10" height="3.2" rx="1.4" fill="#5B97A1" />
+      <rect x="1.5" y="10.8" width="6" height="3.2" rx="1.4" fill="#B18FD4" />
+    </svg>
+  )
+}
+
+export function FunnelIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M1.5 2.5h13l-4.7 5.6V14l-3.6-1.8V8.1L1.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function MegaphoneIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M2 6.5v3l2 .5v2.5l2 .3V10l7 2.5v-9L6 6H4a2 2 0 0 0-2 .5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function LockIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>

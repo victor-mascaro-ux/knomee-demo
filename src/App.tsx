@@ -52,6 +52,10 @@ import {
   CheckIcon,
   CloseIcon,
   LockIcon,
+  TargetIcon,
+  TierBarsIcon,
+  FunnelIcon,
+  MegaphoneIcon,
 } from './components/icons'
 
 type Screen = 'prospects' | 'clients' | 'performance'
@@ -777,8 +781,12 @@ function TierSector() {
     <>
       <div className="sector-bar">
         {byTier.map((t) => (
-          <span key={t.tier} className="sector-seg" style={{ flex: t.pct, background: t.color }}>
-            {t.pct > 6 && <span className="sector-lbl">{t.count}</span>}
+          <span
+            key={t.tier}
+            className={`sector-seg ${t.pct < 6 ? 'sector-seg-narrow' : ''}`}
+            style={{ flex: t.pct, background: t.color }}
+          >
+            <span className="sector-lbl">{t.count}</span>
           </span>
         ))}
       </div>
@@ -786,7 +794,7 @@ function TierSector() {
         {byTier.map((t) => (
           <span key={t.tier}>
             <i className="swatch" style={{ background: t.color }} />
-            {t.name} {Math.round(t.pct)}%
+            {t.name} · {t.count} · {Math.round(t.pct)}%
           </span>
         ))}
       </div>
@@ -794,34 +802,30 @@ function TierSector() {
   )
 }
 
-function OnboardingFunnel() {
-  const [config, setConfig] = useState<FunnelConfig>({ welcome: true, gate: 'late' })
+const FUNNEL_CONFIGS: {
+  key: string
+  name: string
+  cfg: FunnelConfig
+  recommended?: boolean
+}[] = [
+  { key: 'won-late', name: 'Welcome on · Gate late', cfg: { welcome: true, gate: 'late' }, recommended: true },
+  { key: 'won-early', name: 'Welcome on · Gate early', cfg: { welcome: true, gate: 'early' } },
+  { key: 'woff-late', name: 'Welcome off · Gate late', cfg: { welcome: false, gate: 'late' } },
+  { key: 'woff-early', name: 'Welcome off · Gate early', cfg: { welcome: false, gate: 'early' } },
+]
+
+function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig; recommended?: boolean }) {
   const [hover, setHover] = useState<FunnelSeg | null>(null)
-  const { segments, complete } = buildFunnel(config)
-  const recommended = config.welcome && config.gate === 'late'
+  const { segments, complete } = buildFunnel(cfg)
   return (
-    <div className="funnel-wrap">
-      <div className="funnel-config">
-        <div className="fconfig-group">
-          <span className="fconfig-label">Welcome</span>
-          <div className="seg-toggle">
-            <button className={config.welcome ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, welcome: true }))} type="button">On</button>
-            <button className={!config.welcome ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, welcome: false }))} type="button">Off</button>
-          </div>
-        </div>
-        <div className="fconfig-group">
-          <span className="fconfig-label">Sign-up gate</span>
-          <div className="seg-toggle">
-            <button className={config.gate === 'early' ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, gate: 'early' }))} type="button">Early</button>
-            <button className={config.gate === 'late' ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, gate: 'late' }))} type="button">Late</button>
-          </div>
-        </div>
+    <div className="fm-row">
+      <div className="fm-row-head">
+        <span className="fm-row-name">{name}</span>
         {recommended && <span className="fconfig-pill">Recommended</span>}
-        <span className="funnel-complete">
-          100 started · <b>{complete}% reach Financial ID</b>
+        <span className="fm-row-complete">
+          <b>{complete}%</b> complete
         </span>
       </div>
-
       <div className="ob-bar">
         {segments.map((s, i) => (
           <div
@@ -852,10 +856,70 @@ function OnboardingFunnel() {
   )
 }
 
+function OnboardingFunnel() {
+  const [active, setActive] = useState<Set<string>>(new Set(['won-late']))
+  const toggle = (key: string) =>
+    setActive((s) => {
+      const n = new Set(s)
+      if (n.has(key)) n.delete(key)
+      else n.add(key)
+      return n
+    })
+  return (
+    <div className="funnel-matrix">
+      <div className="fm-intro">
+        100 started · toggle any configuration to add its drop-off bar and compare.
+      </div>
+      <div className="fm-chips">
+        {FUNNEL_CONFIGS.map((c) => (
+          <label key={c.key} className={`fm-chip ${active.has(c.key) ? 'on' : ''}`}>
+            <input
+              type="checkbox"
+              checked={active.has(c.key)}
+              onChange={() => toggle(c.key)}
+            />
+            <span className="fm-check">
+              <CheckIcon />
+            </span>
+            {c.name}
+            {c.recommended && <span className="fm-rec">Recommended</span>}
+          </label>
+        ))}
+      </div>
+      <div className="fm-rows">
+        {FUNNEL_CONFIGS.filter((c) => active.has(c.key)).map((c) => (
+          <FunnelRow key={c.key} name={c.name} cfg={c.cfg} recommended={c.recommended} />
+        ))}
+        {active.size === 0 && (
+          <div className="fm-empty">Select a configuration above to see its drop-off.</div>
+        )}
+      </div>
+      <div className="fm-legend">
+        <span>
+          <i className="swatch" style={{ background: '#8a52bf' }} />
+          Adventure drop-off
+        </span>
+        <span>
+          <i className="swatch fm-hatch" />
+          Sign-up gate
+        </span>
+        <span>
+          <i className="swatch" style={{ background: '#d8c5ec' }} />
+          Welcome
+        </span>
+        <span>
+          <i className="swatch" style={{ background: '#3dbdaa' }} />
+          Completed
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function PerformanceScreen() {
   return (
     <>
-      <h1 className="page-title">Performance</h1>
+      <h1 className="page-title">Analytics</h1>
 
       <section className="card perf-card">
         <div className="perf-sec">
@@ -878,7 +942,7 @@ function PerformanceScreen() {
       <section className="card perf-card">
         <div className="perf-sec">
           <span className="perf-glyph">
-            <BoltIcon />
+            <TargetIcon />
           </span>
           <b>Prospect Outcomes</b>
         </div>
@@ -906,7 +970,7 @@ function PerformanceScreen() {
       <section className="card perf-card">
         <div className="perf-sec">
           <span className="perf-glyph">
-            <ChartIcon />
+            <TierBarsIcon />
           </span>
           <b>By Tier</b>
         </div>
@@ -937,7 +1001,7 @@ function PerformanceScreen() {
       <section className="card perf-card">
         <div className="perf-sec">
           <span className="perf-glyph">
-            <ChartIcon />
+            <FunnelIcon />
           </span>
           <b>Onboarding Funnel</b>
           <span className="perf-note">how far prospects get before they drop off</span>
@@ -948,7 +1012,7 @@ function PerformanceScreen() {
       <section className="card perf-card">
         <div className="perf-sec">
           <span className="perf-glyph">
-            <BoltIcon />
+            <MegaphoneIcon />
           </span>
           <b>Marketing (UTM) Attribution</b>
           <span className="perf-note">how prospects arrived</span>
@@ -1008,9 +1072,9 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
   },
   performance: {
-    title: 'Performance',
-    caption: 'Your Performance Dashboard is empty.',
-    subtitle: 'Engagement, onboarding funnel and per-tier performance appear here once prospects start onboarding.',
+    title: 'Analytics',
+    caption: 'Your Analytics Dashboard is empty.',
+    subtitle: 'Engagement, onboarding funnel and per-tier analytics appear here once prospects start onboarding.',
     columns: [],
   },
 }
@@ -1550,7 +1614,7 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
 const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
-  { id: 'performance', label: 'Performance' },
+  { id: 'performance', label: 'Analytics' },
 ]
 
 export default function App() {
