@@ -1626,25 +1626,15 @@ input[type='checkbox'] {
 /* ---------- Performance ---------- */
 .perf-card {
   overflow: visible;
-  padding: 18px 20px 20px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
-.perf-sec {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 16px;
+.perf-card .card-head {
+  border-radius: 14px 14px 0 0;
 }
-.perf-sec b {
-  font-size: 16px;
-  font-weight: 800;
-  color: #240446;
+.perf-body {
+  padding: 22px;
 }
-.perf-glyph {
-  display: inline-flex;
-}
-.perf-note,
-.perf-sec > span:not(.perf-glyph) {
+.perf-note {
   font-size: 12px;
   font-weight: 600;
   color: #8e88a0;
@@ -2060,10 +2050,14 @@ input[type='checkbox'] {
 }
 .fm-rec {
   font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: #0e9b87;
+  color: #3a9a8b;
+  background: rgba(61, 189, 170, 0.12);
+  border-radius: 999px;
+  padding: 2px 7px;
+  line-height: 1;
 }
 
 .fm-rows {

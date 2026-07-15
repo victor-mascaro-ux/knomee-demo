@@ -868,7 +868,7 @@ function OnboardingFunnel() {
   return (
     <div className="funnel-matrix">
       <div className="fm-intro">
-        100 started · toggle any configuration to add its drop-off bar and compare.
+        Toggle any configuration to add its drop-off bar and compare.
       </div>
       <div className="fm-chips">
         {FUNNEL_CONFIGS.map((c) => (
@@ -922,12 +922,13 @@ function PerformanceScreen() {
       <h1 className="page-title">Analytics</h1>
 
       <section className="card perf-card">
-        <div className="perf-sec">
-          <span className="perf-glyph">
+        <header className="card-head">
+          <div className="card-title">
             <ChartIcon />
-          </span>
-          <b>Engagement</b>
-        </div>
+            <span>Engagement</span>
+          </div>
+        </header>
+        <div className="perf-body">
         <div className="perf-metrics">
           {engagement.map((m) => (
             <div className="perf-metric" key={m.label}>
@@ -937,15 +938,17 @@ function PerformanceScreen() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       <section className="card perf-card">
-        <div className="perf-sec">
-          <span className="perf-glyph">
+        <header className="card-head">
+          <div className="card-title">
             <TargetIcon />
-          </span>
-          <b>Prospect Outcomes</b>
-        </div>
+            <span>Prospect Outcomes</span>
+          </div>
+        </header>
+        <div className="perf-body">
         <div className="perf-outcomes">
           <div className="outcome-card">
             <div className="perf-lbl">Converted · Prospect → Client</div>
@@ -965,15 +968,17 @@ function PerformanceScreen() {
             <KQGauge value={outcomes.avgKQ} />
           </div>
         </div>
+        </div>
       </section>
 
       <section className="card perf-card">
-        <div className="perf-sec">
-          <span className="perf-glyph">
+        <header className="card-head">
+          <div className="card-title">
             <TierBarsIcon />
-          </span>
-          <b>By Tier</b>
-        </div>
+            <span>By Tier</span>
+          </div>
+        </header>
+        <div className="perf-body">
         <TierSector />
         <div className="perf-tier-table">
           <div className="ptt-head">
@@ -996,27 +1001,31 @@ function PerformanceScreen() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       <section className="card perf-card">
-        <div className="perf-sec">
-          <span className="perf-glyph">
+        <header className="card-head">
+          <div className="card-title">
             <FunnelIcon />
-          </span>
-          <b>Onboarding Funnel</b>
+            <span>Onboarding Funnel</span>
+          </div>
           <span className="perf-note">how far prospects get before they drop off</span>
-        </div>
+        </header>
+        <div className="perf-body">
         <OnboardingFunnel />
+        </div>
       </section>
 
       <section className="card perf-card">
-        <div className="perf-sec">
-          <span className="perf-glyph">
+        <header className="card-head">
+          <div className="card-title">
             <MegaphoneIcon />
-          </span>
-          <b>Marketing (UTM) Attribution</b>
+            <span>Marketing (UTM) Attribution</span>
+          </div>
           <span className="perf-note">how prospects arrived</span>
-        </div>
+        </header>
+        <div className="perf-body">
         <div className="utm-grid">
           {utmBreakdowns.map((b) => (
             <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
@@ -1031,6 +1040,7 @@ function PerformanceScreen() {
               </span>
             ))}
           </div>
+        </div>
         </div>
       </section>
     </>
