@@ -10,6 +10,14 @@ import { prospects, tierGroups, type Prospect, type Tier } from './data/prospect
 import { insights } from './data/insights'
 import { funnelStages, utmBreakdowns, utmKeys, type FunnelStage } from './data/analytics'
 import {
+  engagement,
+  outcomes,
+  byTier,
+  buildFunnel,
+  type FunnelConfig,
+  type FunnelSeg,
+} from './data/performance'
+import {
   CLIENT_ANNUAL_RATE,
   PROSPECT_ONE_TIME_RATE,
   currency,
@@ -46,7 +54,7 @@ import {
   LockIcon,
 } from './components/icons'
 
-type Screen = 'prospects' | 'clients' | 'analytics'
+type Screen = 'prospects' | 'clients' | 'performance' | 'analytics'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -832,12 +840,207 @@ function AnalyticsScreen() {
   )
 }
 
+/* ── Performance screen (engagement · outcomes · by tier · onboarding funnel) ── */
+
+function KQGauge({ value }: { value: number }) {
+  return (
+    <div className="kq-gauge">
+      <div className="kq-track">
+        <span className="kq-dot" style={{ left: `${value}%` }} />
+      </div>
+      <div className="kq-axis">
+        <span>0</span>
+        <span>Nurture</span>
+        <span>Considering</span>
+        <span>Ready</span>
+        <span>100</span>
+      </div>
+    </div>
+  )
+}
+
+function TierSector() {
+  return (
+    <>
+      <div className="sector-bar">
+        {byTier.map((t) => (
+          <span key={t.tier} className="sector-seg" style={{ flex: t.pct, background: t.color }}>
+            {t.pct > 6 && <span className="sector-lbl">{t.count}</span>}
+          </span>
+        ))}
+      </div>
+      <div className="sector-legend">
+        {byTier.map((t) => (
+          <span key={t.tier}>
+            <i className="swatch" style={{ background: t.color }} />
+            {t.name} {Math.round(t.pct)}%
+          </span>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function OnboardingFunnel() {
+  const [config, setConfig] = useState<FunnelConfig>({ welcome: true, gate: 'late' })
+  const [hover, setHover] = useState<FunnelSeg | null>(null)
+  const { segments, complete } = buildFunnel(config)
+  const recommended = config.welcome && config.gate === 'late'
+  return (
+    <div className="funnel-wrap">
+      <div className="funnel-config">
+        <div className="fconfig-group">
+          <span className="fconfig-label">Welcome</span>
+          <div className="seg-toggle">
+            <button className={config.welcome ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, welcome: true }))} type="button">On</button>
+            <button className={!config.welcome ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, welcome: false }))} type="button">Off</button>
+          </div>
+        </div>
+        <div className="fconfig-group">
+          <span className="fconfig-label">Sign-up gate</span>
+          <div className="seg-toggle">
+            <button className={config.gate === 'early' ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, gate: 'early' }))} type="button">Early</button>
+            <button className={config.gate === 'late' ? 'on' : ''} onClick={() => setConfig((c) => ({ ...c, gate: 'late' }))} type="button">Late</button>
+          </div>
+        </div>
+        {recommended && <span className="fconfig-pill">Recommended</span>}
+        <span className="funnel-complete">
+          100 started · <b>{complete}% reach Financial ID</b>
+        </span>
+      </div>
+
+      <div className="ob-bar">
+        {segments.map((s, i) => (
+          <div
+            key={`${s.stage}-${i}`}
+            className={`ob-seg ${s.gate ? 'gate' : ''} ${s.completed ? 'done' : ''}`}
+            style={{ flex: s.pct, background: s.gate ? undefined : s.color, color: s.ink }}
+            onMouseEnter={() => setHover(s)}
+            onMouseLeave={() => setHover((h) => (h === s ? null : h))}
+          >
+            {s.pct >= 5 && <span className="ob-pct">{s.pct}%</span>}
+            {hover === s && (
+              <div className="ob-tip">
+                <b>{s.count}</b>{' '}
+                {s.completed ? 'completed' : s.gate ? 'dropped at sign-up' : 'dropped'}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="ob-labels">
+        {segments.map((s, i) => (
+          <span key={`${s.stage}-l-${i}`} style={{ flex: s.pct }}>
+            {s.stage}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PerformanceScreen() {
+  return (
+    <>
+      <h1 className="page-title">Performance</h1>
+
+      <section className="card perf-card">
+        <div className="perf-sec">
+          <span className="perf-glyph">
+            <ChartIcon />
+          </span>
+          <b>Engagement</b>
+        </div>
+        <div className="perf-metrics">
+          {engagement.map((m) => (
+            <div className="perf-metric" key={m.label}>
+              <div className="perf-lbl">{m.label}</div>
+              <div className="perf-num">{m.value}</div>
+              <div className={`perf-sub ${m.tone}`}>{m.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card perf-card">
+        <div className="perf-sec">
+          <span className="perf-glyph">
+            <BoltIcon />
+          </span>
+          <b>Prospect Outcomes</b>
+        </div>
+        <div className="perf-outcomes">
+          <div className="outcome-card">
+            <div className="perf-lbl">Converted · Prospect → Client</div>
+            <div className="outcome-top">
+              <span className="outcome-num">{outcomes.converted}</span>
+              <span className="outcome-rate">{outcomes.rate}% rate</span>
+            </div>
+            <div className="outcome-sub">of {outcomes.scored} scored prospects this year</div>
+            <div className="outcome-track">
+              <span className="outcome-fill" style={{ width: `${outcomes.rate}%` }} />
+            </div>
+            <div className="outcome-target">target {outcomes.target}%</div>
+          </div>
+          <div className="outcome-card">
+            <div className="perf-lbl">Average KQ Score</div>
+            <div className="outcome-num">{outcomes.avgKQ}</div>
+            <KQGauge value={outcomes.avgKQ} />
+          </div>
+        </div>
+      </section>
+
+      <section className="card perf-card">
+        <div className="perf-sec">
+          <span className="perf-glyph">
+            <ChartIcon />
+          </span>
+          <b>By Tier</b>
+        </div>
+        <TierSector />
+        <div className="perf-tier-table">
+          <div className="ptt-head">
+            <span className="ptt-tier">Tier</span>
+            <span>Prospects</span>
+            <span>Avg KQ</span>
+            <span>Conversion</span>
+            <span>KQ Range</span>
+          </div>
+          {byTier.map((t) => (
+            <div className="ptt-row" key={t.tier}>
+              <span className="ptt-tier">
+                <i className="swatch" style={{ background: t.color }} />
+                {t.tier} · {t.name}
+              </span>
+              <span>{t.count}</span>
+              <span>{t.avgKQ}</span>
+              <span className={t.convGood ? 'conv-good' : 'conv-muted'}>{t.conv}</span>
+              <span>{t.range}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card perf-card">
+        <div className="perf-sec">
+          <span className="perf-glyph">
+            <ChartIcon />
+          </span>
+          <b>Onboarding Funnel</b>
+          <span className="perf-note">how far prospects get before they drop off</span>
+        </div>
+        <OnboardingFunnel />
+      </section>
+    </>
+  )
+}
+
 /* ── Empty dashboard states ─────────────────────────────────────────────
    Same chrome as the populated screens (locked metric/insight bars, toolbar,
    table header) with a centered illustration + CTA. Rendered for Reporting
    always, and for Prospects/Clients when the internal "empty" mode is on. */
 
-type EmptyVariant = 'prospects' | 'clients' | 'analytics'
+type EmptyVariant = 'prospects' | 'clients' | 'performance' | 'analytics'
 
 interface EmptyConfig {
   title: string
@@ -865,6 +1068,12 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     ctaClass: 'empty-cta-client',
     subtitle: 'Start inviting clients by clicking the button above.',
     columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
+  },
+  performance: {
+    title: 'Performance',
+    caption: 'Your Performance Dashboard is empty.',
+    subtitle: 'Engagement, onboarding funnel and per-tier performance appear here once prospects start onboarding.',
+    columns: [],
   },
   analytics: {
     title: 'Analytics',
@@ -1409,6 +1618,7 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
 const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
+  { id: 'performance', label: 'Performance' },
   { id: 'analytics', label: 'Analytics' },
 ]
 
@@ -1556,6 +1766,8 @@ export default function App() {
           ) : (
             <ClientsScreen clients={clients} />
           ))}
+        {screen === 'performance' &&
+          (emptyMode ? <EmptyScreen variant="performance" /> : <PerformanceScreen />)}
         {screen === 'analytics' &&
           (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
       </main>
