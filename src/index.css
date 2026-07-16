@@ -170,7 +170,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 22px;
+  padding: 8px 22px;
   background: #fafafa;
   border-bottom: 1px solid var(--line);
 }
@@ -2438,6 +2438,16 @@ input[type='checkbox'] {
 .billing-content {
   max-width: 900px;
 }
+.billing-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.billing-head .settings-h2 {
+  margin-bottom: 0;
+}
 .bill-split-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2456,9 +2466,7 @@ input[type='checkbox'] {
 }
 .bill-year.est {
   background: #f3f1f7;
-  border: 1px dashed #dad5e6;
-  opacity: 0.82;
-  filter: saturate(0.7);
+  border: 1px dashed #cbc3dc;
 }
 
 /* Plan hero (gradient plum) */
@@ -2469,7 +2477,7 @@ input[type='checkbox'] {
   color: #fff;
 }
 .plan-hero.est {
-  background: linear-gradient(105deg, #4a3a63, #5a4a72);
+  background: linear-gradient(105deg, #3f3057, #4c3d66);
 }
 .plan-hero-top {
   display: flex;
@@ -2510,8 +2518,8 @@ input[type='checkbox'] {
   color: #7fe8d6;
 }
 .plan-pill.estimate {
-  background: rgba(14, 140, 107, 0.16);
-  color: #0e8c6b;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 .plan-hero-bottom {
   display: flex;
@@ -2579,19 +2587,19 @@ input[type='checkbox'] {
 }
 .usage-col {
   flex: 1;
+  padding: 0 14px;
+  min-width: 0;
 }
-.usage-col.wide {
-  flex: 1.15;
-  padding-left: 16px;
+.usage-col:first-child {
+  padding-left: 0;
 }
-.usage-col.due {
-  padding-left: 16px;
+.usage-col:last-child {
+  padding-right: 0;
   text-align: right;
 }
 .usage-div {
   width: 1px;
   background: #eceaf2;
-  margin: 0 2px;
   flex: none;
 }
 .usage-lbl {
@@ -2601,27 +2609,26 @@ input[type='checkbox'] {
   text-transform: uppercase;
   color: #a69fb5;
 }
-.usage-figure {
-  margin-top: 5px;
-}
-.usage-figure b {
+/* Number and unit stack on their own lines so all three columns align. */
+.usage-num {
+  margin-top: 7px;
   font-size: 22px;
   font-weight: 900;
   color: #201a2e;
+  line-height: 1.1;
+  white-space: nowrap;
 }
-.usage-figure b.sm {
-  font-size: 15px;
-  font-weight: 800;
+.usage-num.sm {
+  font-size: 16px;
 }
-.usage-figure span {
+.usage-num.due {
+  font-size: 20px;
+}
+.usage-unit {
+  margin-top: 3px;
   font-size: 12px;
   font-weight: 700;
   color: var(--grey-text);
-}
-.usage-due {
-  margin-top: 4px;
-  font-size: 19px;
-  font-weight: 900;
 }
 
 /* Billing history */
@@ -2640,18 +2647,6 @@ input[type='checkbox'] {
   font-size: 14px;
   font-weight: 800;
   color: var(--plum);
-}
-.bill-download-all {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  color: #7639a1;
-  cursor: pointer;
-}
-.bill-download-all:hover {
-  text-decoration: underline;
 }
 .bill-hrow {
   display: flex;
@@ -2917,7 +2912,7 @@ input[type='checkbox'] {
     margin: 20px 0 18px;
   }
   .card-head {
-    padding: 14px 16px;
+    padding: 7px 16px;
   }
   .card-title {
     font-size: 16px;

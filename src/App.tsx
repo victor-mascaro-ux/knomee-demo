@@ -1344,21 +1344,19 @@ function UsageCard({
       <div className="usage-cols">
         <div className="usage-col">
           <div className="usage-lbl">Total</div>
-          <div className="usage-figure">
-            <b>{totalNum}</b> <span>{totalUnit}</span>
-          </div>
+          <div className="usage-num">{totalNum}</div>
+          <div className="usage-unit">{totalUnit}</div>
         </div>
         <span className="usage-div" />
-        <div className="usage-col wide">
+        <div className="usage-col">
           <div className="usage-lbl">Charged</div>
-          <div className="usage-figure">
-            <b className="sm">{rate}</b> <span>{rateUnit}</span>
-          </div>
+          <div className="usage-num sm">{rate}</div>
+          <div className="usage-unit">{rateUnit}</div>
         </div>
         <span className="usage-div" />
-        <div className="usage-col due">
+        <div className="usage-col">
           <div className="usage-lbl">Due</div>
-          <div className="usage-due" style={{ color: dueColor }}>
+          <div className="usage-num due" style={{ color: dueColor }}>
             {due}
           </div>
         </div>
@@ -1386,7 +1384,12 @@ function BillingPanel() {
 
   return (
     <div className="settings-content billing-content">
-      <h2 className="settings-h2">My Plan &amp; Billing</h2>
+      <div className="billing-head">
+        <h2 className="settings-h2">My Plan &amp; Billing</h2>
+        <button className="btn btn-outline" type="button">
+          <DownloadIcon /> Download
+        </button>
+      </div>
 
       <div className="bill-split-grid">
         {/* Current year */}
@@ -1485,9 +1488,6 @@ function BillingPanel() {
       <div className="bill-history">
         <div className="bill-history-head">
           <span>Billing history</span>
-          <button type="button" className="bill-download-all">
-            Download all →
-          </button>
         </div>
         <div className="bill-hrow bill-hhead">
           <span className="bh-date">Date</span>
