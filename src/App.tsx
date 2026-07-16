@@ -867,9 +867,6 @@ function OnboardingFunnel() {
     })
   return (
     <div className="funnel-matrix">
-      <div className="fm-intro">
-        Toggle any configuration to add its drop-off bar and compare.
-      </div>
       <div className="fm-chips">
         {FUNNEL_CONFIGS.map((c) => (
           <label key={c.key} className={`fm-chip ${active.has(c.key) ? 'on' : ''}`}>

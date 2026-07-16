@@ -2010,12 +2010,6 @@ input[type='checkbox'] {
 }
 
 /* Onboarding funnel — config matrix (checkbox chips add comparison bars) */
-.fm-intro {
-  font-size: 13px;
-  font-weight: 600;
-  color: #8e88a0;
-  margin-bottom: 14px;
-}
 .fm-chips {
   display: flex;
   flex-wrap: wrap;
