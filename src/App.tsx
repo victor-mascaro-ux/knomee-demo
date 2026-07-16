@@ -941,6 +941,46 @@ function PerformanceScreen() {
       <section className="card perf-card">
         <header className="card-head">
           <div className="card-title">
+            <FunnelIcon />
+            <span>Onboarding Funnel</span>
+          </div>
+          <span className="perf-note">how far prospects get before they drop off</span>
+        </header>
+        <div className="perf-body">
+        <OnboardingFunnel />
+        </div>
+      </section>
+
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <MegaphoneIcon />
+            <span>Marketing (UTM) Attribution</span>
+          </div>
+          <span className="perf-note">how prospects arrived</span>
+        </header>
+        <div className="perf-body">
+        <div className="utm-grid">
+          {utmBreakdowns.map((b) => (
+            <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
+          ))}
+        </div>
+        <div className="utm-keys">
+          <div className="utm-keys-title">Tracked UTM keys</div>
+          <div className="utm-keys-list">
+            {utmKeys.map((k) => (
+              <span className="utm-chip" key={k.key} title={k.label}>
+                {k.key}
+              </span>
+            ))}
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
             <TargetIcon />
             <span>Prospect Outcomes</span>
           </div>
@@ -997,46 +1037,6 @@ function PerformanceScreen() {
               <span>{t.range}</span>
             </div>
           ))}
-        </div>
-        </div>
-      </section>
-
-      <section className="card perf-card">
-        <header className="card-head">
-          <div className="card-title">
-            <FunnelIcon />
-            <span>Onboarding Funnel</span>
-          </div>
-          <span className="perf-note">how far prospects get before they drop off</span>
-        </header>
-        <div className="perf-body">
-        <OnboardingFunnel />
-        </div>
-      </section>
-
-      <section className="card perf-card">
-        <header className="card-head">
-          <div className="card-title">
-            <MegaphoneIcon />
-            <span>Marketing (UTM) Attribution</span>
-          </div>
-          <span className="perf-note">how prospects arrived</span>
-        </header>
-        <div className="perf-body">
-        <div className="utm-grid">
-          {utmBreakdowns.map((b) => (
-            <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
-          ))}
-        </div>
-        <div className="utm-keys">
-          <div className="utm-keys-title">Tracked UTM keys</div>
-          <div className="utm-keys-list">
-            {utmKeys.map((k) => (
-              <span className="utm-chip" key={k.key} title={k.label}>
-                {k.key}
-              </span>
-            ))}
-          </div>
         </div>
         </div>
       </section>
