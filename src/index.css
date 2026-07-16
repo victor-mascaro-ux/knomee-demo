@@ -2609,20 +2609,15 @@ input[type='checkbox'] {
   text-transform: uppercase;
   color: #a69fb5;
 }
-/* Number and unit stack on their own lines so all three columns align. */
+/* Number and unit stack on their own lines so all three columns align.
+   All three figures share one font size. */
 .usage-num {
   margin-top: 7px;
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 900;
   color: #201a2e;
   line-height: 1.1;
   white-space: nowrap;
-}
-.usage-num.sm {
-  font-size: 16px;
-}
-.usage-num.due {
-  font-size: 20px;
 }
 .usage-unit {
   margin-top: 3px;
@@ -2955,6 +2950,46 @@ input[type='checkbox'] {
   .toolbar-actions .btn {
     flex: 1;
     justify-content: center;
+  }
+
+  /* Settings: near full-bleed. Back link, Account title, and cards all
+     share one small inset so their left edges line up with the chevron. */
+  .settings-screen {
+    padding-top: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .settings-back {
+    padding: 0 0 6px;
+  }
+  .settings-grid {
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+    gap: 0;
+  }
+  .settings-side {
+    padding: 8px 0 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+  }
+  .settings-side-head h1 {
+    font-size: 20px;
+  }
+  .settings-side-head p {
+    margin-bottom: 12px;
+  }
+  .settings-main {
+    padding: 14px 0;
+  }
+  .settings-content,
+  .billing-content {
+    max-width: none;
+  }
+  /* Grey year wrapper stretches the full content width — no white gutter. */
+  .bill-year {
+    padding: 10px;
   }
 }
 
