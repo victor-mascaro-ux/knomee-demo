@@ -130,11 +130,11 @@ function TopLineMetrics() {
       bodyClassName="metrics-body"
     >
         <div className="metric-tiles">
-          <div className="metric-tile">
+          <div className="metric-tile tt" data-tip="Prospects in your book">
             <span className="metric-label">TOTAL PROSPECTS</span>
             <span className="metric-value">12</span>
           </div>
-          <div className="metric-tile">
+          <div className="metric-tile tt" data-tip="Average KQ across all prospects">
             <span className="metric-label">AVG KQ SCORE</span>
             <span className="metric-value">55.9</span>
           </div>
@@ -142,9 +142,9 @@ function TopLineMetrics() {
           <div className="metric-tile distribution">
             <span className="metric-label">TIER DISTRIBUTION</span>
             <div className="dist-bar">
-              <span className="seg seg-1">3</span>
-              <span className="seg seg-2">5</span>
-              <span className="seg seg-3">3</span>
+              <span className="seg seg-1 tt" data-tip="Tier 1 · 3 · 25%">3</span>
+              <span className="seg seg-2 tt" data-tip="Tier 2 · 5 · 42%">5</span>
+              <span className="seg seg-3 tt" data-tip="Tier 3 · 3 · 25%">3</span>
             </div>
             <div className="dist-legend">
               <span><i className="dot dot-1" />Tier 1 (25%)</span>
@@ -160,7 +160,7 @@ function TopLineMetrics() {
               <span className="tier-swatch sw-1" />
               <span className="tier-card-title">TIER 1 - READY NOW</span>
               <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">70-100<br />KQ</span>
+              <span className="tier-range">70-100 KQ</span>
             </div>
             <div className="tier-card-value"><strong>3</strong> 25%</div>
           </div>
@@ -169,7 +169,7 @@ function TopLineMetrics() {
               <span className="tier-swatch sw-2" />
               <span className="tier-card-title">TIER 2 - CONSIDERING</span>
               <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">40-69<br />KQ</span>
+              <span className="tier-range">40-69 KQ</span>
             </div>
             <div className="tier-card-value"><strong>5</strong> 42%</div>
           </div>
@@ -178,7 +178,7 @@ function TopLineMetrics() {
               <span className="tier-swatch sw-3" />
               <span className="tier-card-title">TIER 3 - NURTURE</span>
               <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">0-39<br />KQ</span>
+              <span className="tier-range">0-39 KQ</span>
             </div>
             <div className="tier-card-value"><strong>3</strong> 25%</div>
           </div>
@@ -604,7 +604,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
             <span className="tier-swatch sw-c1" />
             <span className="tier-card-title">TIER 1 - ENGAGED</span>
             <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">70-100<br />KR</span>
+            <span className="tier-range">70-100 KR</span>
           </div>
           <div className="tier-card-value"><strong>{engaged}</strong> {pct(engaged)}%</div>
         </div>
@@ -613,7 +613,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
             <span className="tier-swatch sw-c2" />
             <span className="tier-card-title">TIER 2 - ATTENTION</span>
             <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">40-69<br />KR</span>
+            <span className="tier-range">40-69 KR</span>
           </div>
           <div className="tier-card-value"><strong>{attention}</strong> {pct(attention)}%</div>
         </div>
@@ -622,7 +622,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
             <span className="tier-swatch sw-c3" />
             <span className="tier-card-title">TIER 3 - RECONNECT</span>
             <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">0-39<br />KR</span>
+            <span className="tier-range">0-39 KR</span>
           </div>
           <div className="tier-card-value"><strong>{reconnect}</strong> {pct(reconnect)}%</div>
         </div>

@@ -170,7 +170,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 22px;
+  padding: 16px;
   background: #fafafa;
   border-bottom: 1px solid var(--line);
 }
@@ -213,7 +213,7 @@ body {
 
 /* ---------- Top line metrics ---------- */
 .metrics-body {
-  padding: 22px;
+  padding: 22px 16px;
 }
 
 .metric-tiles {
@@ -254,7 +254,6 @@ body {
   display: flex;
   height: 34px;
   border-radius: 7px;
-  overflow: hidden;
   gap: 2px;
 }
 
@@ -373,6 +372,7 @@ body {
   color: var(--grey-text);
   text-align: right;
   line-height: 1.15;
+  white-space: nowrap;
 }
 
 .tier-card-value {
@@ -392,7 +392,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 26px 44px;
-  padding: 22px;
+  padding: 22px 16px;
 }
 
 .insights-col {
@@ -406,10 +406,6 @@ body {
   align-items: flex-start;
   gap: 14px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-}
-.insights-col .insight:last-child {
-  border-bottom: none;
 }
 
 .insight-num {
@@ -824,8 +820,10 @@ input[type='checkbox'] {
 .table-wrap {
   animation: fadeUp 0.5s ease 0.24s both;
 }
+/* `backwards` (not `both`) so the reveal clip-path isn't retained after the
+   animation — a lingering clip-path would crop the segment hover tooltips. */
 .dist-bar {
-  animation: drawBar 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+  animation: drawBar 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s backwards;
 }
 
 /* ---------- Microinteractions: hover / focus / press ---------- */
@@ -869,6 +867,52 @@ input[type='checkbox'] {
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
 }
 
+/* Lightweight hover tooltip. Rendered below the host so it isn't clipped by
+   the card's collapse overflow. */
+.tt {
+  position: relative;
+}
+.tt::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  background: #240446;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 6px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  z-index: 60;
+  box-shadow: 0 8px 20px rgba(36, 4, 70, 0.28);
+}
+.tt::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: #240446;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease;
+  z-index: 60;
+}
+.tt:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.tt:hover::before {
+  opacity: 1;
+}
+
 .search-box {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -881,7 +925,7 @@ input[type='checkbox'] {
   transition: background 0.16s ease;
 }
 .prospects-table tbody tr:not(.group-header):hover {
-  background: #faf7fd;
+  background: #f8fafa;
 }
 
 .name-line svg {
@@ -1399,7 +1443,7 @@ input[type='checkbox'] {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  padding: 22px;
+  padding: 22px 16px;
 }
 .client-insight {
   border: 1px solid var(--line);
@@ -1646,7 +1690,7 @@ input[type='checkbox'] {
   border-radius: 14px 14px 0 0;
 }
 .perf-body {
-  padding: 22px;
+  padding: 22px 16px;
 }
 .perf-note {
   font-size: 12px;
@@ -2905,9 +2949,6 @@ input[type='checkbox'] {
   .page-title {
     font-size: 28px;
     margin: 20px 0 18px;
-  }
-  .card-head {
-    padding: 7px 16px;
   }
   .card-title {
     font-size: 16px;
