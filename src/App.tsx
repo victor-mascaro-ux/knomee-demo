@@ -130,13 +130,17 @@ function TopLineMetrics() {
       bodyClassName="metrics-body"
     >
         <div className="metric-tiles">
-          <div className="metric-tile tt" data-tip="Prospects in your book">
-            <span className="metric-label">TOTAL PROSPECTS</span>
-            <span className="metric-value">12</span>
+          <div className="metric-tile">
+            <div className="metric-inner tt" data-tip="Prospects in your book">
+              <span className="metric-label">TOTAL PROSPECTS</span>
+              <span className="metric-value">12</span>
+            </div>
           </div>
-          <div className="metric-tile tt" data-tip="Average KQ across all prospects">
-            <span className="metric-label">AVG KQ SCORE</span>
-            <span className="metric-value">55.9</span>
+          <div className="metric-tile">
+            <div className="metric-inner tt" data-tip="Average KQ across all prospects">
+              <span className="metric-label">AVG KQ SCORE</span>
+              <span className="metric-value">55.9</span>
+            </div>
           </div>
 
           <div className="metric-tile distribution">
