@@ -19,8 +19,11 @@ import {
 } from './data/performance'
 import {
   CLIENT_ANNUAL_RATE,
-  PROSPECT_ONE_TIME_RATE,
+  CONVERSION_RATE,
   currency,
+  billingBook,
+  billingHistory,
+  billingLifetime,
 } from './data/billing'
 import {
   baseClients,
@@ -1307,150 +1310,215 @@ function Toast({ show, message }: { show: boolean; message: string }) {
 
 type SettingsSection = 'profile' | 'security' | 'billing' | 'marketing'
 
-function downloadInvoice(opts: {
-  name: string
-  email: string
-  amount: number
-  cadence: string
-  invoice: string
+function UsageCard({
+  accent,
+  wash,
+  icon,
+  title,
+  totalNum,
+  totalUnit,
+  rate,
+  rateUnit,
+  due,
+  dueColor,
+}: {
+  accent: string
+  wash: string
+  icon: ReactNode
+  title: string
+  totalNum: string
+  totalUnit: string
+  rate: string
+  rateUnit: string
+  due: string
+  dueColor: string
 }) {
-  const lines = [
-    'KNOMEE ADVISOR — INVOICE',
-    '========================',
-    `Invoice:   ${opts.invoice}`,
-    `Date:      ${new Date().toLocaleDateString('en-US')}`,
-    '',
-    `Billed to: Knomee Advisor`,
-    `For:       ${opts.name} (${opts.email})`,
-    `Type:      Prospect activation (${opts.cadence})`,
-    '',
-    `Amount:    ${currency(opts.amount)}`,
-    '',
-    'Prospects are billed once at 4× the standard rate. When a prospect',
-    'becomes a client they are billed the standard rate annually thereafter.',
-  ].join('\n')
-  const blob = new Blob([lines], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${opts.invoice}.txt`
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-}
-
-function BillingPanel() {
-  const prospectLines = prospects
-    .filter((p) => p.tier !== 'incomplete')
-    .map((p, i) => ({
-      name: p.name,
-      email: p.email,
-      amount: PROSPECT_ONE_TIME_RATE,
-      cadence: 'one-time',
-      invoice: `INV-P${String(1001 + i)}`,
-    }))
-  const clientLines = baseClients
-    .filter((c) => c.tier !== 'incomplete')
-    .map((c, i) => ({
-      name: c.name,
-      email: c.email,
-      amount: CLIENT_ANNUAL_RATE,
-      cadence: 'annual',
-      invoice: `INV-C${String(2001 + i)}`,
-    }))
-  const prospectsTotal = prospectLines.reduce((a, l) => a + l.amount, 0)
-  const clientsTotal = clientLines.reduce((a, l) => a + l.amount, 0)
-  const total = prospectsTotal + clientsTotal
-
   return (
-    <div className="settings-content">
-      <h2 className="settings-h2">Billing</h2>
-
-      <div className="bill-summary">
-        <div className="bill-owe">
-          <span className="settings-label">Total due this cycle</span>
-          <span className="bill-owe-value">{currency(total)}</span>
-        </div>
-        <div className="bill-split">
-          <div>
-            <span className="settings-label">Prospects · one-time</span>
-            <strong>{currency(prospectsTotal)}</strong>
-            <span className="bill-note">{prospectLines.length} × {currency(PROSPECT_ONE_TIME_RATE)}</span>
+    <div className="usage-card" style={{ borderTopColor: accent }}>
+      <div className="usage-head">
+        <span className="usage-ico" style={{ background: wash }}>
+          {icon}
+        </span>
+        <span className="usage-title">{title}</span>
+      </div>
+      <div className="usage-cols">
+        <div className="usage-col">
+          <div className="usage-lbl">Total</div>
+          <div className="usage-figure">
+            <b>{totalNum}</b> <span>{totalUnit}</span>
           </div>
-          <div>
-            <span className="settings-label">Clients · annual</span>
-            <strong>{currency(clientsTotal)}</strong>
-            <span className="bill-note">{clientLines.length} × {currency(CLIENT_ANNUAL_RATE)}/yr</span>
+        </div>
+        <span className="usage-div" />
+        <div className="usage-col wide">
+          <div className="usage-lbl">Charged</div>
+          <div className="usage-figure">
+            <b className="sm">{rate}</b> <span>{rateUnit}</span>
+          </div>
+        </div>
+        <span className="usage-div" />
+        <div className="usage-col due">
+          <div className="usage-lbl">Due</div>
+          <div className="usage-due" style={{ color: dueColor }}>
+            {due}
           </div>
         </div>
       </div>
+    </div>
+  )
+}
 
-      <p className="bill-explain">
-        Prospects are charged <b>once</b> at {currency(PROSPECT_ONE_TIME_RATE)} (4× the standard
-        rate). When a prospect converts to a client they're billed the standard{' '}
-        {currency(CLIENT_ANNUAL_RATE)} <b>annually</b> from the following year.
-      </p>
+function ClientsGlyph({ color }: { color: string }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+    </svg>
+  )
+}
 
-      <div className="bill-table-wrap">
-        <table className="bill-table">
-          <thead>
-            <tr>
-              <th>Person</th>
-              <th>Billing</th>
-              <th>Amount</th>
-              <th>Invoice</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bill-group">
-              <td colSpan={4}>Prospects — charged once</td>
-            </tr>
-            {prospectLines.map((l) => (
-              <tr key={l.invoice}>
-                <td>
-                  <div className="bill-person">
-                    <span className="avatar avatar-initial">{l.name.charAt(0)}</span>
-                    <div>
-                      <div className="bill-name">{l.name}</div>
-                      <div className="bill-email">{l.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span className="bill-badge one-time">one-time · 4×</span></td>
-                <td className="bill-amount">{currency(l.amount)}</td>
-                <td>
-                  <button className="bill-invoice" type="button" onClick={() => downloadInvoice(l)}>
-                    <DownloadIcon /> Invoice
-                  </button>
-                </td>
-              </tr>
-            ))}
-            <tr className="bill-group">
-              <td colSpan={4}>Clients — charged annually</td>
-            </tr>
-            {clientLines.map((l) => (
-              <tr key={l.invoice}>
-                <td>
-                  <div className="bill-person">
-                    <span className="avatar avatar-initial">{l.name.charAt(0)}</span>
-                    <div>
-                      <div className="bill-name">{l.name}</div>
-                      <div className="bill-email">{l.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span className="bill-badge annual">annual · standard</span></td>
-                <td className="bill-amount">{currency(l.amount)}</td>
-                <td>
-                  <button className="bill-invoice" type="button" onClick={() => downloadInvoice(l)}>
-                    <DownloadIcon /> Invoice
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+function BillingPanel() {
+  const { activeClients, conversionsThisYear, paymentMethod, nextInvoice, estClientsNextYear, estRenews } =
+    billingBook
+  const clientsDue = activeClients * CLIENT_ANNUAL_RATE
+  const conversionsDue = conversionsThisYear * CONVERSION_RATE
+  const yearTotal = clientsDue + conversionsDue
+  const estTotal = estClientsNextYear * CLIENT_ANNUAL_RATE
+
+  return (
+    <div className="settings-content billing-content">
+      <h2 className="settings-h2">My Plan &amp; Billing</h2>
+
+      <div className="bill-split-grid">
+        {/* Current year */}
+        <div className="bill-year">
+          <div className="plan-hero">
+            <div className="plan-hero-top">
+              <div>
+                <div className="plan-hero-eyebrow">This year · 2026</div>
+                <div className="plan-hero-sub">Current plan &amp; pricing</div>
+              </div>
+              <span className="plan-pill grow">Pay as you grow</span>
+            </div>
+            <div className="plan-hero-bottom">
+              <div>
+                <div className="plan-hero-lbl">Total due this year</div>
+                <div className="plan-hero-amt">{currency(yearTotal)}</div>
+              </div>
+              <div className="plan-hero-meta">
+                {paymentMethod}
+                <br />
+                next invoice {nextInvoice}
+              </div>
+            </div>
+          </div>
+
+          <UsageCard
+            accent="#3dbdaa"
+            wash="#E4F6F1"
+            icon={<ClientsGlyph color="#0E8C6B" />}
+            title="Clients"
+            totalNum={String(activeClients)}
+            totalUnit="active clients"
+            rate={currency(CLIENT_ANNUAL_RATE)}
+            rateUnit="/ year each"
+            due={currency(clientsDue)}
+            dueColor="#3dbdaa"
+          />
+
+          <UsageCard
+            accent="#a855f7"
+            wash="#F3E8FD"
+            icon={
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="#a855f7" aria-hidden>
+                <path d="M13 2 4 14h6l-1 8 9-12h-6z" />
+              </svg>
+            }
+            title="Prospects converted"
+            totalNum={String(conversionsThisYear)}
+            totalUnit="this year"
+            rate={currency(CONVERSION_RATE)}
+            rateUnit="one-time each"
+            due={currency(conversionsDue)}
+            dueColor="#a855f7"
+          />
+        </div>
+
+        {/* Estimated next year */}
+        <div className="bill-year est">
+          <div className="plan-hero est">
+            <div className="plan-hero-top">
+              <div>
+                <div className="plan-hero-eyebrow">Estimated · 2027</div>
+                <div className="plan-hero-sub">Projected plan &amp; pricing</div>
+              </div>
+              <span className="plan-pill estimate">Estimate</span>
+            </div>
+            <div className="plan-hero-bottom">
+              <div>
+                <div className="plan-hero-lbl">Est. total next year</div>
+                <div className="plan-hero-amt">{currency(estTotal)}</div>
+              </div>
+              <div className="plan-hero-meta">
+                Same pricing
+                <br />
+                renews {estRenews}
+              </div>
+            </div>
+          </div>
+
+          <UsageCard
+            accent="#7bb8ae"
+            wash="#EAF3F0"
+            icon={<ClientsGlyph color="#5a8f81" />}
+            title="Clients"
+            totalNum={String(estClientsNextYear)}
+            totalUnit="clients in 2027"
+            rate={currency(CLIENT_ANNUAL_RATE)}
+            rateUnit="/ year each"
+            due={currency(estTotal)}
+            dueColor="#7bb8ae"
+          />
+        </div>
+      </div>
+
+      {/* Billing history */}
+      <div className="bill-history">
+        <div className="bill-history-head">
+          <span>Billing history</span>
+          <button type="button" className="bill-download-all">
+            Download all →
+          </button>
+        </div>
+        <div className="bill-hrow bill-hhead">
+          <span className="bh-date">Date</span>
+          <span className="bh-item">Item</span>
+          <span className="bh-num">Qty</span>
+          <span className="bh-num">Rate</span>
+          <span className="bh-num">Amount</span>
+          <span className="bh-num">Status</span>
+        </div>
+        {billingHistory.map((r) => (
+          <div className="bill-hrow" key={r.date + r.item}>
+            <span className="bh-date">{r.date}</span>
+            <span className="bh-item">{r.item}</span>
+            <span className="bh-num">{r.qty}</span>
+            <span className="bh-num">${r.rate}</span>
+            <span className="bh-num">{currency(r.amount).replace('.00', '')}</span>
+            <span className={`bh-num bh-status ${r.status}`}>{r.status}</span>
+          </div>
+        ))}
+        <div className="bill-hrow bill-hfoot">
+          <span className="bh-date">Lifetime</span>
+          <span className="bh-item">
+            {billingLifetime.clients} clients · {billingLifetime.conversions} conversions
+          </span>
+          <span className="bh-num" />
+          <span className="bh-num" />
+          <span className="bh-num bh-total">
+            {currency(billingLifetime.total).replace('.00', '')}
+          </span>
+          <span className="bh-num" />
+        </div>
       </div>
     </div>
   )
