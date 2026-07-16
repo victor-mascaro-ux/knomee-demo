@@ -140,54 +140,29 @@ function TopLineMetrics() {
           </div>
 
           <div className="metric-tile distribution">
-            <span className="metric-label">TIER DISTRIBUTION</span>
+            <div className="dist-head">
+              <span className="metric-label">TIER DISTRIBUTION</span>
+              <span className="dist-note">1 incomplete profile not shown</span>
+            </div>
             <div className="dist-bar">
               <span className="seg seg-1 tt" data-tip="Tier 1 · 3 · 25%">3</span>
               <span className="seg seg-2 tt" data-tip="Tier 2 · 5 · 42%">5</span>
               <span className="seg seg-3 tt" data-tip="Tier 3 · 3 · 25%">3</span>
             </div>
             <div className="dist-legend">
-              <span><i className="dot dot-1" />Tier 1 (25%)</span>
-              <span><i className="dot dot-2" />Tier 2 (42%)</span>
-              <span><i className="dot dot-3" />Tier 3 (25%)</span>
+              <div className="dist-leg">
+                <span className="dist-leg-name"><i className="dot dot-1" />Tier 1 · Ready Now</span>
+                <span className="dist-leg-range">70–100 KQ</span>
+              </div>
+              <div className="dist-leg">
+                <span className="dist-leg-name"><i className="dot dot-2" />Tier 2 · Considering</span>
+                <span className="dist-leg-range">40–69 KQ</span>
+              </div>
+              <div className="dist-leg">
+                <span className="dist-leg-name"><i className="dot dot-3" />Tier 3 · Nurture</span>
+                <span className="dist-leg-range">0–39 KQ</span>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div className="tier-cards">
-          <div className="tier-card">
-            <div className="tier-card-head">
-              <span className="tier-swatch sw-1" />
-              <span className="tier-card-title">TIER 1 - READY NOW</span>
-              <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">70-100 KQ</span>
-            </div>
-            <div className="tier-card-value"><strong>3</strong> 25%</div>
-          </div>
-          <div className="tier-card">
-            <div className="tier-card-head">
-              <span className="tier-swatch sw-2" />
-              <span className="tier-card-title">TIER 2 - CONSIDERING</span>
-              <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">40-69 KQ</span>
-            </div>
-            <div className="tier-card-value"><strong>5</strong> 42%</div>
-          </div>
-          <div className="tier-card">
-            <div className="tier-card-head">
-              <span className="tier-swatch sw-3" />
-              <span className="tier-card-title">TIER 3 - NURTURE</span>
-              <span className="tier-info"><InfoIcon /></span>
-              <span className="tier-range">0-39 KQ</span>
-            </div>
-            <div className="tier-card-value"><strong>3</strong> 25%</div>
-          </div>
-          <div className="tier-card">
-            <div className="tier-card-head">
-              <span className="tier-swatch sw-x" />
-              <span className="tier-card-title">INCOMPLETE PROFILES</span>
-            </div>
-            <div className="tier-card-value"><strong>1</strong></div>
           </div>
         </div>
     </CollapsibleCard>

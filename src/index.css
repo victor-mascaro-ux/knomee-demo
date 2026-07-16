@@ -220,7 +220,6 @@ body {
   display: grid;
   grid-template-columns: 200px 200px 1fr;
   gap: 16px;
-  margin-bottom: 18px;
 }
 
 .metric-tile {
@@ -281,17 +280,40 @@ body {
   border-radius: 0 6px 6px 0;
 }
 
+.dist-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dist-note {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a69fb5;
+}
 .dist-legend {
   display: flex;
-  gap: 26px;
-  font-size: 11px;
-  color: var(--grey-text);
+  flex-wrap: wrap;
+  gap: 10px 40px;
 }
-
-.dist-legend span {
+.dist-leg {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dist-leg-name {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #201a2e;
+}
+.dist-leg-range {
+  padding-left: 17px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--grey-text);
 }
 
 .dot {
@@ -398,14 +420,17 @@ body {
 .insights-col {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
+/* Spacing lives in the insight's own padding (not margins/gaps) so the hover
+   highlight fills the whole block. The negative horizontal margin lets that
+   padding extend outward while keeping the content in its original position. */
 .insight {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 12px 0;
+  padding: 12px;
+  margin: 0 -12px;
 }
 
 .insight-num {
