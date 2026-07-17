@@ -2178,29 +2178,69 @@ input[type='checkbox'] {
 }
 
 /* Onboarding funnel — config matrix (checkbox chips add comparison bars) */
-.fm-chips {
+/* Two-column layout: control grid (left) + sector-bar output (right).
+   Legend spans the full width below; stacks to one column on mobile. */
+.funnel-matrix {
+  display: grid;
+  grid-template-columns: minmax(210px, 270px) 1fr;
+  gap: 30px;
+  align-items: start;
+}
+.fm-output {
+  min-width: 0;
+}
+
+/* Control grid — Welcome on/off (rows) × Gate late/early (columns). */
+.fm-grid {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+.fm-grid-col {
+  align-self: end;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #8e88a0;
+  padding-bottom: 4px;
+}
+.fm-grid-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px 26px;
-  margin-bottom: 20px;
-}
-/* Plain checkboxes — no pill/background, only the check + text color change. */
-.fm-chip {
-  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  color: #9c95ac;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s ease;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #240446;
+  padding-right: 8px;
 }
-.fm-chip input {
+.fm-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 58px;
+  padding: 10px 6px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.fm-cell:hover {
+  border-color: #cfc7dc;
+}
+.fm-cell.on {
+  border-color: #3dbdaa;
+  background: rgba(61, 189, 170, 0.07);
+}
+.fm-cell input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
-.fm-chip .fm-check {
+.fm-check {
   width: 18px;
   height: 18px;
   border-radius: 5px;
@@ -2211,29 +2251,27 @@ input[type='checkbox'] {
   flex: none;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
-.fm-chip .fm-check svg {
+.fm-check svg {
   opacity: 0;
 }
-.fm-chip.on {
-  color: #240446;
-}
-.fm-chip.on .fm-check {
+.fm-cell.on .fm-check {
   background: #3dbdaa;
   border-color: #3dbdaa;
 }
-.fm-chip.on .fm-check svg {
+.fm-cell.on .fm-check svg {
   opacity: 1;
 }
 .fm-rec {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   color: #3a9a8b;
   background: rgba(61, 189, 170, 0.12);
   border-radius: 999px;
-  padding: 2px 7px;
+  padding: 2px 6px;
   line-height: 1;
+  text-align: center;
 }
 
 .fm-rows {
@@ -2272,6 +2310,7 @@ input[type='checkbox'] {
 }
 
 .fm-legend {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -2281,6 +2320,17 @@ input[type='checkbox'] {
   font-size: 11px;
   font-weight: 700;
   color: #8e88a0;
+}
+
+/* Stack the control grid over the sector bar on narrow viewports. */
+@media (max-width: 860px) {
+  .funnel-matrix {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .fm-grid {
+    max-width: 380px;
+  }
 }
 .fm-legend span {
   display: inline-flex;

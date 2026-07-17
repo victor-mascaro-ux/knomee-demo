@@ -1025,6 +1025,8 @@ function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig
   )
 }
 
+const CFG_BY_KEY = Object.fromEntries(FUNNEL_CONFIGS.map((c) => [c.key, c]))
+
 function OnboardingFunnel() {
   const [active, setActive] = useState<Set<string>>(new Set(['won-late']))
   const toggle = (key: string) =>
@@ -1034,31 +1036,41 @@ function OnboardingFunnel() {
       else n.add(key)
       return n
     })
+  const cell = (key: string) => {
+    const c = CFG_BY_KEY[key]
+    return (
+      <label className={`fm-cell ${active.has(key) ? 'on' : ''}`} aria-label={c.name}>
+        <input type="checkbox" checked={active.has(key)} onChange={() => toggle(key)} />
+        <span className="fm-check">
+          <CheckIcon />
+        </span>
+        {c.recommended && <span className="fm-rec">Recommended</span>}
+      </label>
+    )
+  }
   return (
     <div className="funnel-matrix">
-      <div className="fm-chips">
-        {FUNNEL_CONFIGS.map((c) => (
-          <label key={c.key} className={`fm-chip ${active.has(c.key) ? 'on' : ''}`}>
-            <input
-              type="checkbox"
-              checked={active.has(c.key)}
-              onChange={() => toggle(c.key)}
-            />
-            <span className="fm-check">
-              <CheckIcon />
-            </span>
-            {c.name}
-            {c.recommended && <span className="fm-rec">Recommended</span>}
-          </label>
-        ))}
+      {/* Welcome on/off (rows) × Gate late/early (columns) */}
+      <div className="fm-grid">
+        <span className="fm-grid-corner" aria-hidden="true" />
+        <span className="fm-grid-col">Gate late</span>
+        <span className="fm-grid-col">Gate early</span>
+        <span className="fm-grid-row">Welcome on</span>
+        {cell('won-late')}
+        {cell('won-early')}
+        <span className="fm-grid-row">Welcome off</span>
+        {cell('woff-late')}
+        {cell('woff-early')}
       </div>
-      <div className="fm-rows">
-        {FUNNEL_CONFIGS.filter((c) => active.has(c.key)).map((c) => (
-          <FunnelRow key={c.key} name={c.name} cfg={c.cfg} recommended={c.recommended} />
-        ))}
-        {active.size === 0 && (
-          <div className="fm-empty">Select a configuration above to see its drop-off.</div>
-        )}
+      <div className="fm-output">
+        <div className="fm-rows">
+          {FUNNEL_CONFIGS.filter((c) => active.has(c.key)).map((c) => (
+            <FunnelRow key={c.key} name={c.name} cfg={c.cfg} recommended={c.recommended} />
+          ))}
+          {active.size === 0 && (
+            <div className="fm-empty">Select a configuration to see its drop-off.</div>
+          )}
+        </div>
       </div>
       <div className="fm-legend">
         <span>
