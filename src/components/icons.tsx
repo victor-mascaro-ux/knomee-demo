@@ -11,23 +11,23 @@ export function KnomeeMark({ size = 26 }: { size?: number }) {
   )
 }
 
-export function ChartIcon() {
+export function ChartIcon({ color = '#086375' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <path d="M2 15.5h14" stroke="#086375" strokeWidth="1.6" strokeLinecap="round" />
-      <rect x="3" y="9" width="2.6" height="5" rx="0.6" fill="#086375" />
-      <rect x="7.7" y="5.5" width="2.6" height="8.5" rx="0.6" fill="#086375" />
-      <rect x="12.4" y="2.5" width="2.6" height="11.5" rx="0.6" fill="#086375" />
+      <path d="M2 15.5h14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <rect x="3" y="9" width="2.6" height="5" rx="0.6" fill={color} />
+      <rect x="7.7" y="5.5" width="2.6" height="8.5" rx="0.6" fill={color} />
+      <rect x="12.4" y="2.5" width="2.6" height="11.5" rx="0.6" fill={color} />
     </svg>
   )
 }
 
-export function BoltIcon() {
+export function BoltIcon({ color = '#086375' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
       <path
         d="M9.8 1.5 3.5 10h4.2l-1.5 6.5L14 7.5H9.3l0.5-6z"
-        fill="#086375"
+        fill={color}
       />
     </svg>
   )

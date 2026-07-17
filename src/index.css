@@ -458,7 +458,8 @@ body {
 .insight-num {
   width: 30px;
   height: 30px;
-  background: var(--ocean);
+  /* Prospects theme — tier-2 plum. */
+  background: #7639a1;
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -1319,8 +1320,8 @@ input[type='checkbox'] {
 .illus-clients .illus-disc {
   background: #cdece2;
 }
-.illus-analytics .illus-disc {
-  background: #e7e4f2;
+.illus-performance .illus-disc {
+  background: #a4e2ff;
 }
 .illus-chip {
   position: absolute;
