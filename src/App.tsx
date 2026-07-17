@@ -266,7 +266,7 @@ function ProspectRow({
       <td className="col-action">{p.topAction}</td>
       <td className="col-bolt">
         <button
-          className={`bolt-btn ${incomplete ? 'bolt-disabled' : ''}`}
+          className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${p.tier}`}`}
           type="button"
           title={incomplete ? undefined : 'Convert to client'}
           aria-label={incomplete ? undefined : 'Convert to client'}
@@ -274,7 +274,10 @@ function ProspectRow({
             if (!incomplete) onConvert(p)
           }}
         >
-          <LightningIcon color={incomplete ? '#c9c9c9' : '#ffffff'} />
+          {/* Tier 2 is a light plum, so the bolt uses dark ink to stay legible. */}
+          <LightningIcon
+            color={incomplete ? '#c9c9c9' : p.tier === 'tier2' ? '#240446' : '#ffffff'}
+          />
         </button>
       </td>
       <td className="col-dots">
@@ -481,10 +484,18 @@ function ProspectsScreen({
 
 /* ── Clients screen (the converted book of business) ── */
 
-function SentimentDots({ value, warn }: { value: number | null; warn?: boolean }) {
+function SentimentDots({
+  value,
+  warn,
+  tier,
+}: {
+  value: number | null
+  warn?: boolean
+  tier?: ClientTier
+}) {
   if (value === null) return <span className="dash">–</span>
   return (
-    <div className="sentiment">
+    <div className={`sentiment${tier ? ` sentiment-${tier}` : ''}`}>
       {Array.from({ length: 5 }).map((_, i) => (
         <span key={i} className={`sdot ${i < value ? '' : 'empty'}`} />
       ))}
@@ -535,7 +546,7 @@ function ClientRow({
         )}
       </td>
       <td className="col-sentiment">
-        <SentimentDots value={c.sentiment} warn={c.warn} />
+        <SentimentDots value={c.sentiment} warn={c.warn} tier={c.tier} />
       </td>
       <td className="col-status">
         {c.secondaryStatus ? (
