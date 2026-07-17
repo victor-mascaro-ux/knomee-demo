@@ -569,14 +569,8 @@ body {
 .prospects-table tbody td {
   padding: 14px 12px;
   border-bottom: 1px solid var(--line);
-  vertical-align: middle;
-  color: #333;
-}
-
-/* Name/checkbox/email top-aligned; the score + metric columns stay centered. */
-.prospects-table tbody td.col-check,
-.prospects-table tbody td.col-name {
   vertical-align: top;
+  color: #333;
 }
 
 .prospects-table tbody tr:last-child td {
