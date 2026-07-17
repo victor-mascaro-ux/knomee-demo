@@ -570,6 +570,7 @@ body {
   padding: 14px 12px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
+  line-height: 1.45;
   color: #333;
 }
 
