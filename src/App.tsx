@@ -125,7 +125,7 @@ function TopLineMetrics() {
   return (
     <CollapsibleCard
       className="metrics-card"
-      icon={<ChartIcon />}
+      icon={<ChartIcon color="#7639a1" />}
       title="Top Line Metrics"
       bodyClassName="metrics-body"
     >
@@ -179,7 +179,7 @@ function ActionableInsights() {
   return (
     <CollapsibleCard
       className="insights-card"
-      icon={<BoltIcon />}
+      icon={<BoltIcon color="#7639a1" />}
       title="Actionable Insights"
       bodyClassName="insights-body"
     >
@@ -651,7 +651,7 @@ function ActiveChart() {
           <text x={padL - 8} y={y(g) + 3} textAnchor="end" fontSize="9" fill="#afafaf">{g}%</text>
         </g>
       ))}
-      <polyline points={pts} fill="none" stroke="#9b51e0" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline points={pts} fill="none" stroke="#086375" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {activeSeries.map((d, i) => (
         <circle
           key={i}
@@ -659,7 +659,7 @@ function ActiveChart() {
           cx={x(i)}
           cy={y(d.value)}
           r={hover === i ? 5 : 3}
-          fill="#9b51e0"
+          fill="#086375"
         />
       ))}
       {activeSeries.map((d, i) => (
@@ -1097,7 +1097,7 @@ function OnboardingFunnel() {
 function PerformanceScreen() {
   return (
     <>
-      <h1 className="page-title">Analytics</h1>
+      <h1 className="page-title">Performance</h1>
 
       <section className="card perf-card">
         <header className="card-head">
@@ -1260,8 +1260,8 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
   },
   performance: {
-    title: 'Analytics',
-    caption: 'Your Analytics Dashboard is empty.',
+    title: 'Performance',
+    caption: 'Your Performance Dashboard is empty.',
     subtitle: 'Engagement, onboarding funnel and per-tier analytics appear here once prospects start onboarding.',
     columns: [],
   },
@@ -1304,23 +1304,28 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
     <>
       <h1 className="page-title">{cfg.title}</h1>
 
-      <LockedBar icon={<ChartIcon />} title="Top Line Metrics" />
-      <LockedBar icon={<BoltIcon />} title="Actionable Insights" />
+      {/* Performance has no metrics/insights bars, search, or buttons. */}
+      {variant !== 'performance' && (
+        <>
+          <LockedBar icon={<ChartIcon />} title="Top Line Metrics" />
+          <LockedBar icon={<BoltIcon />} title="Actionable Insights" />
 
-      <div className="toolbar">
-        <div className="search-box is-disabled">
-          <SearchIcon />
-          <input type="text" placeholder="Search name" disabled />
-        </div>
-        <div className="toolbar-actions">
-          <button className="btn btn-outline" type="button" disabled>
-            <DownloadIcon /> Download
-          </button>
-          <button className="btn btn-primary" type="button">
-            <PlusIcon /> Invite
-          </button>
-        </div>
-      </div>
+          <div className="toolbar">
+            <div className="search-box is-disabled">
+              <SearchIcon />
+              <input type="text" placeholder="Search name" disabled />
+            </div>
+            <div className="toolbar-actions">
+              <button className="btn btn-outline" type="button" disabled>
+                <DownloadIcon /> Download
+              </button>
+              <button className="btn btn-primary" type="button">
+                <PlusIcon /> Invite
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {cfg.columns.length > 0 && (
         <div className="table-wrap empty-table">
@@ -1905,7 +1910,7 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
 const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
-  { id: 'performance', label: 'Analytics' },
+  { id: 'performance', label: 'Performance' },
 ]
 
 export default function App() {
