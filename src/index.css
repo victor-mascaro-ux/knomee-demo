@@ -535,6 +535,27 @@ body {
   color: #fff;
 }
 
+/* Download: gray (text + icon + stroke) until at least one row is selected,
+   then plum. Icon inherits currentColor. */
+.btn-download {
+  background: #fff;
+  border-color: var(--stone);
+  color: var(--stone);
+  cursor: default;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.btn-download.active {
+  border-color: var(--plum);
+  color: var(--plum);
+  cursor: pointer;
+}
+.btn-download.active:hover {
+  background: #f7f2fc;
+}
+.btn-download:not(.active):hover {
+  transform: none;
+}
+
 /* ---------- Prospects table ---------- */
 .table-wrap {
   border: 1px solid var(--line);

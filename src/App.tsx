@@ -215,12 +215,27 @@ function Avatar({ p }: { p: Prospect }) {
   return <span className="avatar avatar-initial">{initial(p.name)}</span>
 }
 
-function ProspectRow({ p, onConvert }: { p: Prospect; onConvert: (p: Prospect) => void }) {
+function ProspectRow({
+  p,
+  onConvert,
+  checked,
+  onToggle,
+}: {
+  p: Prospect
+  onConvert: (p: Prospect) => void
+  checked: boolean
+  onToggle: () => void
+}) {
   const incomplete = p.tier === 'incomplete'
   return (
     <tr className={incomplete ? 'row-incomplete' : undefined}>
       <td className="col-check">
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          aria-label={`Select ${p.name}`}
+        />
       </td>
       <td className="col-name">
         <div className="name-cell">
@@ -328,14 +343,31 @@ function RowMenu({ items }: { items: MenuItem[] }) {
   )
 }
 
-function ProspectsTable({ onConvert }: { onConvert: (p: Prospect) => void }) {
+function ProspectsTable({
+  onConvert,
+  selected,
+  onToggle,
+  allChecked,
+  onToggleAll,
+}: {
+  onConvert: (p: Prospect) => void
+  selected: Set<string>
+  onToggle: (name: string) => void
+  allChecked: boolean
+  onToggleAll: () => void
+}) {
   return (
     <div className="table-wrap">
       <table className="prospects-table">
         <thead>
           <tr>
             <th className="col-check">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={allChecked}
+                onChange={onToggleAll}
+                aria-label="Select all prospects"
+              />
             </th>
             <th className="col-name">Name</th>
             <th className="col-kq">
@@ -365,7 +397,13 @@ function ProspectsTable({ onConvert }: { onConvert: (p: Prospect) => void }) {
                   </td>
                 </tr>
                 {rows.map((p) => (
-                  <ProspectRow p={p} key={p.name} onConvert={onConvert} />
+                  <ProspectRow
+                    p={p}
+                    key={p.name}
+                    onConvert={onConvert}
+                    checked={selected.has(p.name)}
+                    onToggle={() => onToggle(p.name)}
+                  />
                 ))}
               </>
             )
@@ -376,7 +414,13 @@ function ProspectsTable({ onConvert }: { onConvert: (p: Prospect) => void }) {
   )
 }
 
-function Toolbar() {
+function Toolbar({
+  downloadActive,
+  onDownload,
+}: {
+  downloadActive: boolean
+  onDownload: () => void
+}) {
   return (
     <div className="toolbar">
       <div className="search-box">
@@ -384,7 +428,12 @@ function Toolbar() {
         <input type="text" placeholder="Search name" />
       </div>
       <div className="toolbar-actions">
-        <button className="btn btn-outline" type="button">
+        <button
+          className={`btn btn-download ${downloadActive ? 'active' : ''}`}
+          type="button"
+          aria-disabled={!downloadActive}
+          onClick={() => downloadActive && onDownload()}
+        >
           <DownloadIcon /> Download
         </button>
         <button className="btn btn-primary" type="button">
@@ -395,14 +444,37 @@ function Toolbar() {
   )
 }
 
-function ProspectsScreen({ onConvert }: { onConvert: (p: Prospect) => void }) {
+function ProspectsScreen({
+  onConvert,
+  onDownload,
+}: {
+  onConvert: (p: Prospect) => void
+  onDownload: () => void
+}) {
+  const allNames = prospects.map((p) => p.name)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const toggle = (name: string) =>
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(name)) n.delete(name)
+      else n.add(name)
+      return n
+    })
+  const allChecked = selected.size === allNames.length && allNames.length > 0
+  const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
   return (
     <>
       <h1 className="page-title">My Dashboard</h1>
       <TopLineMetrics />
       <ActionableInsights />
-      <Toolbar />
-      <ProspectsTable onConvert={onConvert} />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
+      <ProspectsTable
+        onConvert={onConvert}
+        selected={selected}
+        onToggle={toggle}
+        allChecked={allChecked}
+        onToggleAll={toggleAll}
+      />
     </>
   )
 }
@@ -425,11 +497,24 @@ function SentimentDots({ value, warn }: { value: number | null; warn?: boolean }
   )
 }
 
-function ClientRow({ c }: { c: Client }) {
+function ClientRow({
+  c,
+  checked,
+  onToggle,
+}: {
+  c: Client
+  checked: boolean
+  onToggle: () => void
+}) {
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
       <td className="col-check">
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          aria-label={`Select ${c.name}`}
+        />
       </td>
       <td className="col-name">
         <div className="name-cell">
@@ -660,19 +745,35 @@ function ClientInsights() {
   )
 }
 
-function ClientsScreen({ clients }: { clients: Client[] }) {
+function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload: () => void }) {
+  const allNames = clients.map((c) => c.name)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const toggle = (name: string) =>
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(name)) n.delete(name)
+      else n.add(name)
+      return n
+    })
+  const allChecked = selected.size === allNames.length && allNames.length > 0
+  const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
   return (
     <>
       <h1 className="page-title">My Clients</h1>
       <ClientsMetrics clients={clients} />
       <ClientInsights />
-      <Toolbar />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
           <thead>
             <tr>
               <th className="col-check">
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  onChange={toggleAll}
+                  aria-label="Select all clients"
+                />
               </th>
               <th className="col-name">Name</th>
               <th className="col-household">Household</th>
@@ -699,7 +800,12 @@ function ClientsScreen({ clients }: { clients: Client[] }) {
                     </td>
                   </tr>
                   {rows.map((c) => (
-                    <ClientRow c={c} key={c.name} />
+                    <ClientRow
+                      c={c}
+                      key={c.name}
+                      checked={selected.has(c.name)}
+                      onToggle={() => toggle(c.name)}
+                    />
                   ))}
                 </>
               )
@@ -1675,7 +1781,11 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('prospects')
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
-  const [toast, setToast] = useState(false)
+  const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
+  const showToast = (msg: string) => {
+    setToast({ show: true, msg })
+    window.setTimeout(() => setToast((t) => ({ ...t, show: false })), 3200)
+  }
   const confettiRef = useRef<ConfettiHandle>(null)
   // Internal-only: show the empty dashboards. Off by default so the prototype
   // reads as the populated demo; toggled from the top-right menu.
@@ -1718,8 +1828,7 @@ export default function App() {
     confettiRef.current?.fire() // fire immediately, before the heavy screen switch
     setConvertTarget(null)
     setScreen('clients')
-    setToast(true)
-    window.setTimeout(() => setToast(false), 3200)
+    showToast('Converted to Client')
   }
 
   const clients = [...converted, ...baseClients]
@@ -1807,13 +1916,16 @@ export default function App() {
           (emptyMode ? (
             <EmptyScreen variant="prospects" onCta={() => setEmptyMode(false)} />
           ) : (
-            <ProspectsScreen onConvert={setConvertTarget} />
+            <ProspectsScreen
+              onConvert={setConvertTarget}
+              onDownload={() => showToast('CSV downloaded')}
+            />
           ))}
         {screen === 'clients' &&
           (emptyMode ? (
             <EmptyScreen variant="clients" onCta={() => setEmptyMode(false)} />
           ) : (
-            <ClientsScreen clients={clients} />
+            <ClientsScreen clients={clients} onDownload={() => showToast('CSV downloaded')} />
           ))}
         {screen === 'performance' &&
           (emptyMode ? <EmptyScreen variant="performance" /> : <PerformanceScreen />)}
@@ -1827,7 +1939,7 @@ export default function App() {
           onConfirm={confirmConvert}
         />
       )}
-      <Toast show={toast} message="Converted to Client" />
+      <Toast show={toast.show} message={toast.msg} />
       <Confetti ref={confettiRef} />
     </div>
   )
