@@ -12,7 +12,7 @@ export const engagement: EngagementMetric[] = [
   { label: 'Prospects Invited', value: 64, sub: '100% of outreach', tone: 'grey' },
   { label: 'Signed Up', value: 40, sub: '63% of invited', tone: 'green' },
   { label: 'Profile Complete', value: 33, sub: '52% of invited', tone: 'green' },
-  { label: 'Finished Onboarding', value: 27, sub: '42% of invited', tone: 'green' },
+  { label: 'Meetings Booked', value: 27, sub: '42% of invited', tone: 'green' },
 ]
 
 export const outcomes = {

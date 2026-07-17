@@ -16,7 +16,6 @@ import {
   byTier,
   buildFunnel,
   type FunnelConfig,
-  type FunnelSeg,
 } from './data/performance'
 import {
   CLIENT_ANNUAL_RATE,
@@ -81,15 +80,26 @@ function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
   )
 }
 
+// Standard card help affordance: a "?" glyph that reveals its hint on hover.
+function HelpTip({ text }: { text: string }) {
+  return (
+    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+      ?
+    </span>
+  )
+}
+
 function CollapsibleCard({
   icon,
   title,
+  hint,
   bodyClassName,
   className,
   children,
 }: {
   icon: ReactNode
   title: string
+  hint?: string
   bodyClassName: string
   className?: string
   children: ReactNode
@@ -101,6 +111,7 @@ function CollapsibleCard({
         <div className="card-title">
           {icon}
           <span>{title}</span>
+          {hint && <HelpTip text={hint} />}
         </div>
         <button
           className={`show-toggle ${open ? '' : 'collapsed'}`}
@@ -127,6 +138,7 @@ function TopLineMetrics() {
       className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
       title="Top Line Metrics"
+      hint="Headline counts for your prospect book — totals, average KQ score, and the tier split."
       bodyClassName="metrics-body"
     >
         <div className="metric-tiles">
@@ -181,6 +193,7 @@ function ActionableInsights() {
       className="insights-card"
       icon={<BoltIcon color="#7639a1" />}
       title="Actionable Insights"
+      hint="Auto-generated takeaways ranked by opportunity, so you know who to prioritise."
       bodyClassName="insights-body"
     >
       {[col1, col2].map((col, i) => (
@@ -714,6 +727,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
       className="metrics-card"
       icon={<ChartIcon />}
       title="Top Line Metrics"
+      hint="Headline counts for your client book — totals, average KR score, and the tier split."
       bodyClassName="metrics-body"
     >
       <div className="metric-tiles">
@@ -783,14 +797,20 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
       <div className="chart-row">
         <div className="chart-card">
           <div className="chart-head">
-            <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+            <span className="chart-head-l">
+              <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+              <HelpTip text="Blended sentiment across your clients, from frustrated to delighted." />
+            </span>
             <span className="chart-figure">{confidenceScore}</span>
           </div>
           <ConfidencePie />
         </div>
         <div className="chart-card">
           <div className="chart-head">
-            <span className="metric-label">CLIENTS ACTIVE THIS WEEK</span>
+            <span className="chart-head-l">
+              <span className="metric-label">CLIENTS ACTIVE THIS WEEK</span>
+              <HelpTip text="Share of clients who logged in each week over the last stretch." />
+            </span>
             <span className="chart-figure">{activeThisWeek}%</span>
           </div>
           <ActiveChart />
@@ -806,6 +826,7 @@ function ClientInsights() {
       className="insights-card"
       icon={<BoltIcon />}
       title="Actionable Insights"
+      hint="Clients that need attention, flagged by recent engagement and sentiment signals."
       bodyClassName="client-insights-body"
     >
       {clientInsights.map((ins) => (
@@ -984,7 +1005,9 @@ const FUNNEL_CONFIGS: {
 ]
 
 function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig; recommended?: boolean }) {
-  const [hover, setHover] = useState<FunnelSeg | null>(null)
+  // Track hover by index: buildFunnel rebuilds segment objects each render, so
+  // object identity would never match after a state update.
+  const [hover, setHover] = useState<number | null>(null)
   const { segments, complete } = buildFunnel(cfg)
   return (
     <div className="fm-row">
@@ -1001,14 +1024,18 @@ function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig
             key={`${s.stage}-${i}`}
             className={`ob-seg ${s.gate ? 'gate' : ''} ${s.completed ? 'done' : ''}`}
             style={{ flex: s.pct, background: s.gate ? undefined : s.color, color: s.ink }}
-            onMouseEnter={() => setHover(s)}
-            onMouseLeave={() => setHover((h) => (h === s ? null : h))}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
           >
             {s.pct >= 5 && <span className="ob-pct">{s.pct}%</span>}
-            {hover === s && (
+            {hover === i && (
               <div className="ob-tip">
-                <b>{s.count}</b>{' '}
-                {s.completed ? 'completed' : s.gate ? 'dropped at sign-up' : 'dropped'}
+                <b>{s.count}</b> {s.count === 1 ? 'person' : 'people'}{' '}
+                {s.completed
+                  ? 'completed onboarding'
+                  : s.gate
+                    ? 'dropped at the sign-up gate'
+                    : 'dropped off here'}
               </div>
             )}
           </div>
@@ -1104,6 +1131,7 @@ function PerformanceScreen() {
           <div className="card-title">
             <ChartIcon />
             <span>Engagement</span>
+            <HelpTip text="Where prospects are in the onboarding journey, from first invite through to a booked meeting." />
           </div>
         </header>
         <div className="perf-body">
@@ -1124,8 +1152,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <FunnelIcon />
             <span>Onboarding Funnel</span>
+            <HelpTip text="how far prospects get before they drop off" />
           </div>
-          <span className="perf-note">how far prospects get before they drop off</span>
         </header>
         <div className="perf-body">
         <OnboardingFunnel />
@@ -1137,8 +1165,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <MegaphoneIcon />
             <span>Marketing (UTM) Attribution</span>
+            <HelpTip text="how prospects arrived" />
           </div>
-          <span className="perf-note">how prospects arrived</span>
         </header>
         <div className="perf-body">
         <div className="utm-grid">
@@ -1164,6 +1192,7 @@ function PerformanceScreen() {
           <div className="card-title">
             <TargetIcon />
             <span>Prospect Outcomes</span>
+            <HelpTip text="Conversion rate and average KQ across the prospects you scored this year." />
           </div>
         </header>
         <div className="perf-body">
@@ -1194,6 +1223,7 @@ function PerformanceScreen() {
           <div className="card-title">
             <TierBarsIcon />
             <span>By Tier</span>
+            <HelpTip text="How prospects spread across readiness tiers, with conversion and KQ for each." />
           </div>
         </header>
         <div className="perf-body">
