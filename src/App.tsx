@@ -274,9 +274,9 @@ function ProspectRow({
             if (!incomplete) onConvert(p)
           }}
         >
-          {/* Tier 2 is a light plum, so the bolt uses dark ink to stay legible. */}
+          {/* Tier 3 is a light plum, so the bolt uses dark ink to stay legible. */}
           <LightningIcon
-            color={incomplete ? '#c9c9c9' : p.tier === 'tier2' ? '#240446' : '#ffffff'}
+            color={incomplete ? '#c9c9c9' : p.tier === 'tier3' ? '#240446' : '#ffffff'}
           />
         </button>
       </td>
