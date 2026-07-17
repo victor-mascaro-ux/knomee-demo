@@ -604,6 +604,11 @@ body {
   width: 44px;
   padding-left: 20px !important;
 }
+/* Center the checkbox on the profile avatar (top-aligned cell → push down). */
+.prospects-table tbody td.col-check input {
+  display: block;
+  margin-top: 12px;
+}
 .col-name {
   width: 250px;
 }
@@ -613,6 +618,12 @@ body {
 .col-num {
   width: 80px;
   color: #444;
+  text-align: center;
+}
+/* Center the number horizontally and give it a line box the same height as the
+   KQ score badge (40px) so, top-aligned, its midline matches the badge number. */
+.prospects-table tbody td.col-num {
+  line-height: 40px;
 }
 .col-signup {
   width: 100px;
