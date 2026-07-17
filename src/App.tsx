@@ -49,7 +49,6 @@ import {
   PlusIcon,
   LightningIcon,
   DotsIcon,
-  InfoIcon,
   CaretDown,
   BurgerMenu,
   WarnIcon,
@@ -642,61 +641,64 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
       <div className="metric-tiles">
         <div className="metric-tile">
           <span className="metric-label">TOTAL CLIENTS</span>
-          <span className="metric-value">{total}</span>
+          <div className="metric-num">
+            <span className="metric-value tt" data-tip="Clients in your book">{total}</span>
+          </div>
         </div>
         <div className="metric-tile">
           <span className="metric-label">AVG KR SCORE</span>
-          <span className="metric-value">{AVG_KR_SCORE}</span>
+          <div className="metric-num">
+            <span className="metric-value tt" data-tip="Average KR across all clients">
+              {AVG_KR_SCORE}
+            </span>
+          </div>
         </div>
         <div className="metric-tile distribution">
-          <span className="metric-label">TIER DISTRIBUTION</span>
+          <div className="dist-head">
+            <span className="metric-label">TIER DISTRIBUTION</span>
+            {incomplete > 0 && (
+              <span className="dist-note">
+                {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown
+              </span>
+            )}
+          </div>
           <div className="dist-bar">
-            <span className="seg seg-c1" style={{ flex: engaged || 0.001 }}>{engaged}</span>
-            <span className="seg seg-c2" style={{ flex: attention || 0.001 }}>{attention}</span>
-            <span className="seg seg-c3" style={{ flex: reconnect || 0.001 }}>{reconnect}</span>
+            <span
+              className="seg seg-c1 tt"
+              style={{ flex: engaged || 0.001 }}
+              data-tip={`Tier 1 · ${engaged} · ${pct(engaged)}%`}
+            >
+              {engaged}
+            </span>
+            <span
+              className="seg seg-c2 tt"
+              style={{ flex: attention || 0.001 }}
+              data-tip={`Tier 2 · ${attention} · ${pct(attention)}%`}
+            >
+              {attention}
+            </span>
+            <span
+              className="seg seg-c3 tt"
+              style={{ flex: reconnect || 0.001 }}
+              data-tip={`Tier 3 · ${reconnect} · ${pct(reconnect)}%`}
+            >
+              {reconnect}
+            </span>
           </div>
           <div className="dist-legend">
-            <span><i className="dot dot-c1" />Tier 1 ({pct(engaged)}%)</span>
-            <span><i className="dot dot-c2" />Tier 2 ({pct(attention)}%)</span>
-            <span><i className="dot dot-c3" />Tier 3 ({pct(reconnect)}%)</span>
+            <div className="dist-leg">
+              <span className="dist-leg-name"><i className="dot dot-c1" />Tier 1 · Engaged</span>
+              <span className="dist-leg-range">70–100 KR</span>
+            </div>
+            <div className="dist-leg">
+              <span className="dist-leg-name"><i className="dot dot-c2" />Tier 2 · Attention</span>
+              <span className="dist-leg-range">40–69 KR</span>
+            </div>
+            <div className="dist-leg">
+              <span className="dist-leg-name"><i className="dot dot-c3" />Tier 3 · Reconnect</span>
+              <span className="dist-leg-range">0–39 KR</span>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="tier-cards">
-        <div className="tier-card">
-          <div className="tier-card-head">
-            <span className="tier-swatch sw-c1" />
-            <span className="tier-card-title">TIER 1 - ENGAGED</span>
-            <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">70-100 KR</span>
-          </div>
-          <div className="tier-card-value"><strong>{engaged}</strong> {pct(engaged)}%</div>
-        </div>
-        <div className="tier-card">
-          <div className="tier-card-head">
-            <span className="tier-swatch sw-c2" />
-            <span className="tier-card-title">TIER 2 - ATTENTION</span>
-            <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">40-69 KR</span>
-          </div>
-          <div className="tier-card-value"><strong>{attention}</strong> {pct(attention)}%</div>
-        </div>
-        <div className="tier-card">
-          <div className="tier-card-head">
-            <span className="tier-swatch sw-c3" />
-            <span className="tier-card-title">TIER 3 - RECONNECT</span>
-            <span className="tier-info"><InfoIcon /></span>
-            <span className="tier-range">0-39 KR</span>
-          </div>
-          <div className="tier-card-value"><strong>{reconnect}</strong> {pct(reconnect)}%</div>
-        </div>
-        <div className="tier-card">
-          <div className="tier-card-head">
-            <span className="tier-swatch sw-x" />
-            <span className="tier-card-title">INCOMPLETE PROFILES</span>
-          </div>
-          <div className="tier-card-value"><strong>{incomplete}</strong></div>
         </div>
       </div>
 
