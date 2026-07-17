@@ -911,6 +911,23 @@ input[type='checkbox'] {
 .table-wrap {
   animation: fadeUp 0.5s ease 0.24s both;
 }
+/* Performance cards fade in with a light stagger, matching the
+   Prospects/Clients entrance feel. */
+.perf-card {
+  animation: fadeUp 0.5s ease both;
+}
+.perf-card:nth-of-type(2) {
+  animation-delay: 0.06s;
+}
+.perf-card:nth-of-type(3) {
+  animation-delay: 0.12s;
+}
+.perf-card:nth-of-type(4) {
+  animation-delay: 0.18s;
+}
+.perf-card:nth-of-type(5) {
+  animation-delay: 0.24s;
+}
 /* `backwards` (not `both`) so the reveal clip-path isn't retained after the
    animation — a lingering clip-path would crop the segment hover tooltips. */
 .dist-bar {
@@ -948,11 +965,17 @@ input[type='checkbox'] {
 }
 
 .metric-tile,
-.tier-card {
+.tier-card,
+.perf-metric,
+.outcome-card,
+.chart-card {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 .metric-tile:hover,
-.tier-card:hover {
+.tier-card:hover,
+.perf-metric:hover,
+.outcome-card:hover,
+.chart-card:hover {
   transform: translateY(-2px);
   border-color: var(--stone);
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
@@ -1002,6 +1025,46 @@ input[type='checkbox'] {
 }
 .tt:hover::before {
   opacity: 1;
+}
+
+/* Standard card help glyph — a "?" that reveals its hint on hover/focus. */
+.help-tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1.4px solid var(--stone);
+  color: var(--grey-text);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+  flex: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.help-tip:hover,
+.help-tip:focus-visible {
+  color: #fff;
+  background: var(--plum);
+  border-color: var(--plum);
+  outline: none;
+}
+/* Help hints can be full sentences — let them wrap instead of forcing a
+   viewport-wide single line like the compact number tooltips. */
+.help-tip.tt::after {
+  white-space: normal;
+  width: max-content;
+  max-width: 220px;
+  text-align: center;
+}
+
+.chart-head-l {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
 }
 
 .search-box {
