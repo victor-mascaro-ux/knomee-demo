@@ -568,19 +568,48 @@ function ClientRow({
 }
 
 function ConfidencePie() {
-  const stops: string[] = []
+  const [hover, setHover] = useState<number | null>(null)
+  const cx = 50
+  const cy = 50
+  const r = 46
   let acc = 0
-  for (const s of confidenceSegments) {
-    stops.push(`${s.color} ${acc}% ${acc + s.pct}%`)
+  const slices = confidenceSegments.map((s) => {
+    const start = (acc / 100) * 2 * Math.PI - Math.PI / 2
     acc += s.pct
-  }
+    const end = (acc / 100) * 2 * Math.PI - Math.PI / 2
+    const large = s.pct > 50 ? 1 : 0
+    const x1 = cx + r * Math.cos(start)
+    const y1 = cy + r * Math.sin(start)
+    const x2 = cx + r * Math.cos(end)
+    const y2 = cy + r * Math.sin(end)
+    return `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`
+  })
   return (
     <div className="confidence">
-      <div className="pie" style={{ background: `conic-gradient(${stops.join(', ')})` }} />
+      <svg className="pie" viewBox="0 0 100 100" role="img" aria-label="Client confidence breakdown">
+        {slices.map((d, i) => (
+          <path
+            key={confidenceSegments[i].label}
+            d={d}
+            fill={confidenceSegments[i].color}
+            className={`pie-slice ${hover === i ? 'on' : ''} ${
+              hover !== null && hover !== i ? 'dim' : ''
+            }`}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+          />
+        ))}
+      </svg>
       <ul className="pie-legend">
-        {confidenceSegments.map((s) => (
-          <li key={s.label}>
-            <span className="pie-emoji" style={{ background: s.color }}>{s.emoji}</span>
+        {confidenceSegments.map((s, i) => (
+          <li
+            key={s.label}
+            className={hover === i ? 'on' : ''}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+          >
+            <span className="pie-swatch" style={{ background: s.color }} />
+            <span className="pie-label">{s.label}</span>
             <span className="pie-pct">{s.pct}%</span>
           </li>
         ))}
@@ -590,6 +619,7 @@ function ConfidencePie() {
 }
 
 function ActiveChart() {
+  const [hover, setHover] = useState<number | null>(null)
   const w = 560
   const h = 190
   const padL = 34
@@ -612,11 +642,48 @@ function ActiveChart() {
       ))}
       <polyline points={pts} fill="none" stroke="#9b51e0" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {activeSeries.map((d, i) => (
-        <circle key={i} cx={x(i)} cy={y(d.value)} r="3" fill="#9b51e0" />
+        <circle
+          key={i}
+          className="active-dot"
+          cx={x(i)}
+          cy={y(d.value)}
+          r={hover === i ? 5 : 3}
+          fill="#9b51e0"
+        />
       ))}
       {activeSeries.map((d, i) => (
         <text key={`l${i}`} x={x(i)} y={h - 8} textAnchor="middle" fontSize="8.5" fill="#afafaf">{d.week}</text>
       ))}
+      {/* generous transparent hit targets */}
+      {activeSeries.map((d, i) => (
+        <circle
+          key={`hit${i}`}
+          cx={x(i)}
+          cy={y(d.value)}
+          r="16"
+          fill="transparent"
+          style={{ cursor: 'pointer' }}
+          onMouseEnter={() => setHover(i)}
+          onMouseLeave={() => setHover((cur) => (cur === i ? null : cur))}
+        />
+      ))}
+      {hover !== null &&
+        (() => {
+          const d = activeSeries[hover]
+          const tw = 44
+          const th = 21
+          const cxp = x(hover)
+          const tx = Math.max(padL, Math.min(cxp - tw / 2, w - padR - tw))
+          const ty = y(d.value) - th - 9
+          return (
+            <g pointerEvents="none">
+              <rect x={tx} y={ty} width={tw} height={th} rx="6" fill="#240446" />
+              <text x={tx + tw / 2} y={ty + th / 2 + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">
+                {d.value}%
+              </text>
+            </g>
+          )
+        })()}
     </svg>
   )
 }

@@ -35,11 +35,11 @@ export const AVG_KR_SCORE = 65.6
 // Overall client confidence breakdown (sums to 100).
 export const confidenceScore = 33
 export const confidenceSegments = [
-  { label: 'Frustrated', emoji: '😠', color: '#ef4444', pct: 7 },
-  { label: 'Concerned', emoji: '🙁', color: '#f59e0b', pct: 21 },
-  { label: 'Neutral', emoji: '😐', color: '#eab308', pct: 18 },
-  { label: 'Positive', emoji: '🙂', color: '#a3e635', pct: 26 },
-  { label: 'Delighted', emoji: '😄', color: '#84cc16', pct: 28 },
+  { label: 'Frustrated', color: '#ef4444', pct: 7 },
+  { label: 'Concerned', color: '#f59e0b', pct: 21 },
+  { label: 'Neutral', color: '#eab308', pct: 18 },
+  { label: 'Positive', color: '#a3e635', pct: 26 },
+  { label: 'Delighted', color: '#84cc16', pct: 28 },
 ]
 
 // "Clients active this week" trend (percent of clients active per week).

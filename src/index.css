@@ -1472,14 +1472,24 @@ input[type='checkbox'] {
 .pie {
   width: 128px;
   height: 128px;
-  border-radius: 50%;
   flex: none;
+}
+.pie-slice {
+  cursor: pointer;
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+.pie-slice.on {
+  filter: brightness(1.09);
+}
+.pie-slice.dim {
+  opacity: 0.4;
 }
 .pie-legend {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 150px;
 }
 .pie-legend li {
   display: flex;
@@ -1488,24 +1498,34 @@ input[type='checkbox'] {
   font-size: 13px;
   color: #444;
   font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
 }
-.pie-emoji {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+.pie-legend li.on {
+  color: #111;
+  font-weight: 700;
+}
+.pie-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+.pie-label {
+  flex: 1;
 }
 .pie-pct {
   font-variant-numeric: tabular-nums;
+  color: var(--grey-text);
 }
 
 .active-chart {
   width: 100%;
   height: auto;
   display: block;
+}
+.active-dot {
+  transition: r 0.12s ease;
 }
 
 /* Client actionable insights (warning cards) */
