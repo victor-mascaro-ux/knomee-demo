@@ -1696,9 +1696,9 @@ input[type='checkbox'] {
 
 /* ---------- Toast ---------- */
 .app-toast {
-  position: fixed;
+  position: absolute;
   right: 32px;
-  bottom: 32px;
+  top: 0;
   z-index: 250;
   background: #1c1c1e;
   color: #fff;
