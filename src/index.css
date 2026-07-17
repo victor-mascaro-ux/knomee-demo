@@ -2193,7 +2193,9 @@ input[type='checkbox'] {
 /* Control grid — Welcome on/off (rows) × Gate late/early (columns). */
 .fm-grid {
   display: grid;
-  grid-template-columns: auto 1fr 1fr;
+  /* minmax(0, 1fr) so the two cell columns stay equal width even when a
+     cell's content (e.g. the RECOMMENDED pill) is wider. */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
   align-items: stretch;
 }
