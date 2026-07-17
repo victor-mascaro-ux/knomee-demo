@@ -5,11 +5,11 @@
   --lilac: #b98ddc;
   /* Tier ramps — Prospects (plum) and Clients (teal), tiers 1 → 3 */
   --prospect-1: #240446;
-  --prospect-2: #7639a1;
-  --prospect-3: #c9a8dd;
+  --prospect-2: #c9a8dd;
+  --prospect-3: #7639a1;
   --client-1: #0f4a3a;
-  --client-2: #3dbdaa;
-  --client-3: #c0ffe7;
+  --client-2: #086375;
+  --client-3: #3dbdaa;
   --purple-bolt: #9b51e0;
   --grey-text: #757575;
   --ash: #afafaf;
@@ -816,6 +816,16 @@ input[type='checkbox'] {
   justify-content: center;
   cursor: pointer;
 }
+/* Convert button carries the prospect's tier color (plum ramp). */
+.bolt-tier1 {
+  background: var(--prospect-1);
+}
+.bolt-tier2 {
+  background: var(--prospect-2);
+}
+.bolt-tier3 {
+  background: var(--prospect-3);
+}
 .bolt-disabled {
   background: var(--pearl);
   cursor: default;
@@ -1081,9 +1091,8 @@ input[type='checkbox'] {
   color: #fff;
 }
 .client-group-reconnect .group-header-inner {
-  /* Tier 3 is a light mint — use dark ink so the label stays legible. */
   background: var(--client-3);
-  color: var(--client-1);
+  color: #fff;
 }
 .client-group-incomplete .group-header-inner {
   background: var(--pearl);
@@ -1104,6 +1113,20 @@ input[type='checkbox'] {
 .sdot.empty {
   background: var(--pearl);
   border: 1.5px solid var(--stone);
+}
+/* Filled sentiment dots carry the client's tier color (teal ramp). */
+.sentiment-engaged .sdot:not(.empty) {
+  background: var(--client-1);
+}
+.sentiment-attention .sdot:not(.empty) {
+  background: var(--client-2);
+}
+.sentiment-reconnect .sdot:not(.empty) {
+  background: var(--client-3);
+}
+/* Incomplete profiles have no tier — keep their dots neutral. */
+.sentiment-incomplete .sdot:not(.empty) {
+  background: var(--grey-text);
 }
 .sentiment-warn {
   display: inline-flex;
@@ -1425,9 +1448,7 @@ input[type='checkbox'] {
   background: var(--client-2);
 }
 .seg-c3 {
-  /* Tier 3 is a light mint — dark ink keeps the count readable. */
   background: var(--client-3);
-  color: var(--client-1);
   border-radius: 0 6px 6px 0;
 }
 .dot-c1 {

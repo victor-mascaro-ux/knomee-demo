@@ -37,8 +37,8 @@ export interface TierPerf {
 
 export const byTier: TierPerf[] = [
   { tier: 'Tier 1', name: 'Ready Now', count: 19, pct: 47.5, avgKQ: 81, conv: '42%', convGood: true, range: '70–100', color: '#240446' },
-  { tier: 'Tier 2', name: 'Considering', count: 20, pct: 50, avgKQ: 55, conv: '15%', convGood: true, range: '40–69', color: '#7639a1' },
-  { tier: 'Tier 3', name: 'Nurture', count: 1, pct: 2.5, avgKQ: 31, conv: '0%', convGood: false, range: '0–39', color: '#c9a8dd' },
+  { tier: 'Tier 2', name: 'Considering', count: 20, pct: 50, avgKQ: 55, conv: '15%', convGood: true, range: '40–69', color: '#c9a8dd' },
+  { tier: 'Tier 3', name: 'Nurture', count: 1, pct: 2.5, avgKQ: 31, conv: '0%', convGood: false, range: '0–39', color: '#7639a1' },
 ]
 
 // ── Onboarding funnel (single proportional drop-off sector bar) ──
