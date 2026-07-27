@@ -42,6 +42,7 @@ import {
   ChartIcon,
   BoltIcon,
   ChevronUp,
+  ChevronDown,
   ChevronRight,
   SearchIcon,
   DownloadIcon,
@@ -276,7 +277,9 @@ function ProspectRow({
           p.signUp
         )}
       </td>
-      <td className="col-action">{p.topAction}</td>
+      <td className="col-action">
+        <TopActionCell text={p.topAction} />
+      </td>
       <td className="col-bolt">
         <button
           className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${p.tier}`}`}
@@ -303,6 +306,49 @@ function ProspectRow({
         />
       </td>
     </tr>
+  )
+}
+
+// Top Action copy is variable-length. Clamp it to 3 lines with an ellipsis;
+// when the text is longer than that, reveal a chevron to expand the cell (and
+// its row) to the full text, and collapse it again.
+function TopActionCell({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false)
+  const [overflowing, setOverflowing] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () => {
+      // Overflow is only meaningful while clamped, so skip when expanded and
+      // keep the last known value.
+      if (expanded) return
+      setOverflowing(el.scrollHeight - el.clientHeight > 1)
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [text, expanded])
+
+  return (
+    <div className="top-action">
+      <div ref={ref} className={`top-action-text${expanded ? ' expanded' : ''}`}>
+        {text}
+      </div>
+      {overflowing && (
+        <button
+          type="button"
+          className="top-action-toggle"
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Collapse' : 'Expand'}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? <ChevronUp /> : <ChevronDown />}
+        </button>
+      )}
+    </div>
   )
 }
 

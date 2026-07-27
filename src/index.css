@@ -649,6 +649,44 @@ body {
   color: #444;
   line-height: 1.45;
 }
+.top-action {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+/* Clamp the copy to 3 lines with an ellipsis; the .expanded modifier releases
+   the clamp so the full text (and its row) grows to fit. */
+.top-action-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+.top-action-text.expanded {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+.top-action-toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b6b6b;
+  cursor: pointer;
+}
+.top-action-toggle:hover {
+  background: rgba(36, 4, 70, 0.06);
+  color: var(--plum);
+}
 .col-household,
 .col-sentiment,
 .col-status {
