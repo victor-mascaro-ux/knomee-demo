@@ -9,13 +9,27 @@ import {
 } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
-import { utmBreakdowns, utmKeys } from './data/analytics'
+import { utmKeys } from './data/analytics'
 import {
   engagement,
   outcomes,
   byTier,
   buildFunnel,
-  type FunnelConfig,
+  MIN_SAMPLE,
+  impactStats,
+  niches,
+  nicheBenchmark,
+  dropReadings,
+  bySource,
+  byNiche,
+  attribution,
+  marketingEffectiveness,
+  experiments,
+  currentConfigSince,
+  talkTo,
+  verbatims,
+  type Segment,
+  type Experiment,
 } from './data/performance'
 import {
   CLIENT_ANNUAL_RATE,
@@ -965,27 +979,37 @@ function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload:
   )
 }
 
-/* ── UTM attribution card (used on the Performance page) ── */
+/* ── UTM attribution card — ranked by clients produced, not clicks ── */
 
-function UtmBreakdownCard({
+function AttributionCard({
   label,
-  values,
+  rows,
 }: {
   label: string
-  values: { value: string; count: number }[]
+  rows: { value: string; scored: number; clients: number }[]
 }) {
-  const total = values.reduce((a, v) => a + v.count, 0)
+  const ranked = [...rows].sort((a, b) => b.clients - a.clients)
+  const max = Math.max(...ranked.map((r) => r.clients), 1)
   return (
     <div className="utm-card">
       <div className="utm-card-title">{label}</div>
+      <div className="attr-head">
+        <span>Source</span>
+        <span>Clients</span>
+        <span>Conv.</span>
+      </div>
       <ul className="utm-list">
-        {values.map((v) => (
-          <li key={v.value}>
-            <span className="utm-value">{v.value}</span>
+        {ranked.map((r) => (
+          <li key={r.value}>
+            <span className="utm-value">{r.value}</span>
             <span className="utm-track">
-              <span className="utm-fill" style={{ width: `${(v.count / total) * 100}%` }} />
+              <span className="utm-fill" style={{ width: `${(r.clients / max) * 100}%` }} />
             </span>
-            <span className="utm-count">{v.count}</span>
+            <span className="utm-count">{r.clients}</span>
+            <span className="attr-conv">
+              {Math.round((r.clients / r.scored) * 100)}%
+              <i className="attr-n">n={r.scored}</i>
+            </span>
           </li>
         ))}
       </ul>
@@ -1038,19 +1062,7 @@ function TierSector() {
   )
 }
 
-const FUNNEL_CONFIGS: {
-  key: string
-  name: string
-  cfg: FunnelConfig
-  recommended?: boolean
-}[] = [
-  { key: 'won-late', name: 'Welcome on · Gate late', cfg: { welcome: true, gate: 'late' }, recommended: true },
-  { key: 'won-early', name: 'Welcome on · Gate early', cfg: { welcome: true, gate: 'early' } },
-  { key: 'woff-late', name: 'Welcome off · Gate late', cfg: { welcome: false, gate: 'late' } },
-  { key: 'woff-early', name: 'Welcome off · Gate early', cfg: { welcome: false, gate: 'early' } },
-]
-
-function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig; recommended?: boolean }) {
+function FunnelRow({ name, cfg, recommended }: { name: string; cfg: Experiment['cfg']; recommended?: boolean }) {
   // Track hover by index: buildFunnel rebuilds segment objects each render, so
   // object identity would never match after a state update.
   const [hover, setHover] = useState<number | null>(null)
@@ -1098,206 +1110,505 @@ function FunnelRow({ name, cfg, recommended }: { name: string; cfg: FunnelConfig
   )
 }
 
-const CFG_BY_KEY = Object.fromEntries(FUNNEL_CONFIGS.map((c) => [c.key, c]))
+const FUNNEL_LEGEND = (
+  <div className="fm-legend">
+    <span>
+      <i className="swatch" style={{ background: '#8a52bf' }} />
+      Adventure drop-off
+    </span>
+    <span>
+      <i className="swatch fm-hatch" />
+      Sign-up gate
+    </span>
+    <span>
+      <i className="swatch" style={{ background: '#d8c5ec' }} />
+      Welcome
+    </span>
+    <span>
+      <i className="swatch" style={{ background: '#3dbdaa' }} />
+      Completed
+    </span>
+  </div>
+)
 
-function OnboardingFunnel() {
-  const [active, setActive] = useState<Set<string>>(new Set(['won-late']))
-  const toggle = (key: string) =>
-    setActive((s) => {
-      const n = new Set(s)
-      if (n.has(key)) n.delete(key)
-      else n.add(key)
-      return n
-    })
-  const cell = (key: string) => {
-    const c = CFG_BY_KEY[key]
-    return (
-      <label className={`fm-cell ${active.has(key) ? 'on' : ''}`} aria-label={c.name}>
-        <input type="checkbox" checked={active.has(key)} onChange={() => toggle(key)} />
-        <span className="fm-check">
-          <CheckIcon />
-        </span>
-        {c.recommended && <span className="fm-rec">Recommended</span>}
-      </label>
-    )
-  }
+/* ── 4a. Segmented drop-off ──
+   The aggregate bar hides both a high-volume/low-completion channel and a
+   low-volume/high-completion one. Splitting by source or niche is what makes
+   them distinguishable, so the split is a first-class control, not a detail. */
+
+type FunnelSplit = 'all' | 'source' | 'niche'
+
+const SPLITS: { key: FunnelSplit; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'source', label: 'By utm_source' },
+  { key: 'niche', label: 'By niche' },
+]
+
+function SegmentBar({ s, max }: { s: Segment; max: number }) {
+  const completion = Math.round((s.completed / s.invited) * 100)
+  const conv = Math.round((s.clients / s.scored) * 100)
   return (
-    <div className="funnel-matrix">
-      {/* Welcome on/off (rows) × Gate late/early (columns) */}
-      <div className="fm-grid">
-        <span className="fm-grid-corner" aria-hidden="true" />
-        <span className="fm-grid-col">Gate late</span>
-        <span className="fm-grid-col">Gate early</span>
-        <span className="fm-grid-row">Welcome on</span>
-        {cell('won-late')}
-        {cell('won-early')}
-        <span className="fm-grid-row">Welcome off</span>
-        {cell('woff-late')}
-        {cell('woff-early')}
+    <div className="seg-row">
+      <span className="seg-row-name">{s.name}</span>
+      {/* Bar length encodes volume, fill encodes completion — so a wide-but-pale
+          row reads as high volume/low completion at a glance. */}
+      <span className="seg-row-track" style={{ width: `${(s.invited / max) * 100}%` }}>
+        <span className="seg-row-fill" style={{ width: `${completion}%` }}>
+          <b>{completion}%</b>
+        </span>
+      </span>
+      <span className="seg-row-meta">
+        <b>{s.completed}</b>/{s.invited} completed · <b>{s.clients}</b> clients ·{' '}
+        <span className="seg-row-conv">{conv}% conv</span> <i className="attr-n">n={s.scored}</i>
+      </span>
+    </div>
+  )
+}
+
+function SegmentedFunnel() {
+  const [split, setSplit] = useState<FunnelSplit>('all')
+  const segments = split === 'source' ? bySource : split === 'niche' ? byNiche : []
+  const max = Math.max(...segments.map((s) => s.invited), 1)
+  return (
+    <div className="funnel-seg-block">
+      <div className="seg-controls">
+        <span className="seg-controls-lbl">Split by</span>
+        {SPLITS.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            className={`seg-chip ${split === s.key ? 'on' : ''}`}
+            aria-pressed={split === s.key}
+            onClick={() => setSplit(s.key)}
+          >
+            {s.label}
+          </button>
+        ))}
       </div>
-      <div className="fm-output">
-        <div className="fm-rows">
-          {FUNNEL_CONFIGS.filter((c) => active.has(c.key)).map((c) => (
-            <FunnelRow key={c.key} name={c.name} cfg={c.cfg} recommended={c.recommended} />
-          ))}
-          {active.size === 0 && (
-            <div className="fm-empty">Select a configuration to see its drop-off.</div>
+
+      {split === 'all' ? (
+        <>
+          <FunnelRow name="All prospects · current configuration" cfg={{ welcome: true, gate: 'late' }} />
+          {FUNNEL_LEGEND}
+          <p className="seg-warn">
+            This aggregate view averages every channel together — it cannot tell a high-volume,
+            low-completion channel from a low-volume, high-completion one. Split by source to see them.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="seg-rows">
+            {segments.map((s) => (
+              <SegmentBar key={s.name} s={s} max={max} />
+            ))}
+          </div>
+          {split === 'niche' && (
+            <p className="seg-warn">Niches overlap — a prospect can match more than one, so these do not sum to 64.</p>
           )}
-        </div>
-      </div>
-      <div className="fm-legend">
-        <span>
-          <i className="swatch" style={{ background: '#8a52bf' }} />
-          Adventure drop-off
-        </span>
-        <span>
-          <i className="swatch fm-hatch" />
-          Sign-up gate
-        </span>
-        <span>
-          <i className="swatch" style={{ background: '#d8c5ec' }} />
-          Welcome
-        </span>
-        <span>
-          <i className="swatch" style={{ background: '#3dbdaa' }} />
-          Completed
-        </span>
+        </>
+      )}
+
+      <div className="drop-readings">
+        {dropReadings.map((d) => (
+          <div className="drop-reading" key={d.where}>
+            <span className="drop-where">{d.where}</span>
+            <ChevronRight />
+            <span className="drop-what">{d.reading}</span>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
+/* ── 5. Onboarding experiments — configuration as a tested hypothesis ── */
+
+function ExperimentTable() {
+  const [open, setOpen] = useState<string | null>('won-late')
+  return (
+    <div className="exp-block">
+      <div className="exp-table">
+        <div className="exp-head">
+          <span>Configuration</span>
+          <span>Sign-ups</span>
+          <span>Completion</span>
+          <span>Conversion</span>
+          <span />
+        </div>
+        {experiments.map((e) => {
+          const { complete } = buildFunnel(e.cfg)
+          const thin = e.signUps < MIN_SAMPLE
+          const conv = Math.round((e.clients / e.signUps) * 100)
+          const isOpen = open === e.key
+          return (
+            <div className="exp-row-wrap" key={e.key}>
+              <button
+                type="button"
+                className={`exp-row ${isOpen ? 'open' : ''} ${thin ? 'thin' : ''}`}
+                aria-expanded={isOpen}
+                onClick={() => setOpen(isOpen ? null : e.key)}
+              >
+                <span className="exp-name">
+                  {e.name}
+                  {e.recommended && <span className="fconfig-pill">Recommended</span>}
+                </span>
+                <span>{e.signUps}</span>
+                {thin ? (
+                  <span className="exp-thin" >not enough data</span>
+                ) : (
+                  <span>{complete}%</span>
+                )}
+                {thin ? (
+                  <span className="exp-thin">not enough data</span>
+                ) : (
+                  <span className="conv-good">
+                    {conv}% <i className="attr-n">n={e.signUps}</i>
+                  </span>
+                )}
+                <span className="exp-caret">{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
+              </button>
+              {isOpen && (
+                <div className="exp-detail">
+                  <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
+                  {FUNNEL_LEGEND}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <p className="exp-note">
+        Current configuration <b>Welcome on · Gate late</b> switched on <b>{currentConfigSince}</b> — read
+        the period deltas above against that date. Welcome off · Gate late shows higher completion (38%)
+        but on 7 sign-ups, and it produced fewer clients; the recommendation follows conversion, not completion.
+      </p>
+    </div>
+  )
+}
+
+/* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
+
+function NicheRow({ n, maxShare }: { n: (typeof niches)[number]; maxShare: number }) {
+  const thin = n.count < MIN_SAMPLE
+  const up = n.delta > 0
+  return (
+    <div className="niche-row">
+      <span className="niche-name">
+        {n.name}
+        {n.share > nicheBenchmark && <i className="niche-flag tt" data-tip={`Above the ${nicheBenchmark}% concentration benchmark`}>▲</i>}
+      </span>
+      <span className="niche-bars">
+        <span className="niche-bar-line">
+          <i className="niche-bar-lbl">Share</i>
+          <span className="niche-track">
+            <span className="niche-fill share" style={{ width: `${(n.share / maxShare) * 100}%` }} />
+          </span>
+          <b className="niche-val">{n.share}%</b>
+          <i className="attr-n">n={n.count}</i>
+        </span>
+        <span className="niche-bar-line">
+          <i className="niche-bar-lbl">Converts</i>
+          <span className="niche-track">
+            <span className="niche-fill conv" style={{ width: `${n.conv}%` }} />
+          </span>
+          <b className="niche-val">{n.conv}%</b>
+          {thin ? (
+            <i className="exp-thin">n={n.count} · too small</i>
+          ) : (
+            <i className={`niche-delta ${up ? 'up' : 'down'}`}>
+              {up ? '▲' : '▼'} {Math.abs(n.delta)} pts vs last quarter
+            </i>
+          )}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 function PerformanceScreen() {
+  const maxShare = Math.max(...niches.map((n) => n.share))
+  const overCount = niches.filter((n) => n.share > nicheBenchmark).length
   return (
     <>
       <h1 className="page-title">Performance</h1>
 
-      <section className="card perf-card">
-        <header className="card-head">
-          <div className="card-title">
-            <ChartIcon />
-            <span>Engagement</span>
-            <HelpTip text="Where prospects are in the onboarding journey, from first invite through to a booked meeting." />
-          </div>
-        </header>
-        <div className="perf-body">
-        <div className="perf-metrics">
-          {engagement.map((m) => (
-            <div className="perf-metric" key={m.label}>
-              <div className="perf-lbl">{m.label}</div>
-              <div className="perf-num">{m.value}</div>
-              <div className={`perf-sub ${m.tone}`}>{m.sub}</div>
-            </div>
-          ))}
-        </div>
-        </div>
-      </section>
-
-      <section className="card perf-card">
-        <header className="card-head">
-          <div className="card-title">
-            <FunnelIcon />
-            <span>Onboarding Funnel</span>
-            <HelpTip text="how far prospects get before they drop off" />
-          </div>
-        </header>
-        <div className="perf-body">
-        <OnboardingFunnel />
-        </div>
-      </section>
-
-      <section className="card perf-card">
-        <header className="card-head">
-          <div className="card-title">
-            <MegaphoneIcon />
-            <span>Marketing (UTM) Attribution</span>
-            <HelpTip text="how prospects arrived" />
-          </div>
-        </header>
-        <div className="perf-body">
-        <div className="utm-grid">
-          {utmBreakdowns.map((b) => (
-            <UtmBreakdownCard key={b.key} label={b.label} values={b.values} />
-          ))}
-        </div>
-        <div className="utm-keys">
-          <div className="utm-keys-title">Tracked UTM keys</div>
-          <div className="utm-keys-list">
-            {utmKeys.map((k) => (
-              <span className="utm-chip" key={k.key} title={k.label}>
-                {k.key}
-              </span>
-            ))}
-          </div>
-        </div>
-        </div>
-      </section>
-
+      {/* 1 ── Impact header */}
       <section className="card perf-card">
         <header className="card-head">
           <div className="card-title">
             <TargetIcon />
-            <span>Prospect Outcomes</span>
-            <HelpTip text="Conversion rate and average KQ across the prospects you scored this year." />
+            <span>Your Practice, With Knomee</span>
+            <HelpTip text="The three numbers that say whether Knomee is producing clients, each shown against a target, a prior period, or a benchmark." />
           </div>
         </header>
         <div className="perf-body">
-        <div className="perf-outcomes">
-          <div className="outcome-card">
-            <div className="perf-lbl">Converted · Prospect → Client</div>
-            <div className="outcome-top">
-              <span className="outcome-num">{outcomes.converted}</span>
-              <span className="outcome-rate">{outcomes.rate}% rate</span>
-            </div>
-            <div className="outcome-sub">of {outcomes.scored} scored prospects this year</div>
-            <div className="outcome-track">
-              <span className="outcome-fill" style={{ width: `${outcomes.rate}%` }} />
-            </div>
-            <div className="outcome-target">target {outcomes.target}%</div>
+          <div className="impact-grid">
+            {impactStats.map((s) => (
+              <div className="impact-card" key={s.label}>
+                <div className="perf-lbl">{s.label}</div>
+                <div className="impact-num">{s.value}</div>
+                <div className="impact-compare">{s.compare}</div>
+                <div className={`impact-detail ${s.good ? 'good' : ''}`}>{s.detail}</div>
+              </div>
+            ))}
           </div>
-          <div className="outcome-card">
-            <div className="perf-lbl">Average KQ Score</div>
-            <div className="outcome-num">{outcomes.avgKQ}</div>
-            <KQGauge value={outcomes.avgKQ} />
-          </div>
-        </div>
         </div>
       </section>
 
+      {/* 2 ── Hero: niche × conversion */}
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <ChartIcon />
+            <span>Who Your Prospects Are — And Which Convert</span>
+            <HelpTip text="Every niche shows both its share of your prospects and the rate at which those prospects become clients. The gap between the two bars is the finding." />
+          </div>
+        </header>
+        <div className="perf-body">
+          <div className="niche-list">
+            {niches.map((n) => (
+              <NicheRow key={n.name} n={n} maxShare={maxShare} />
+            ))}
+          </div>
+
+          <div className="niche-callout">
+            <WarnIcon />
+            <div>
+              <b>Special needs planning is 22% of your prospects but converts at 11%</b> — volume without
+              close rate. It is your third-largest niche and your weakest closer among readable samples.
+              <br />
+              <b>HNW estate complexity is the mirror image:</b> only 16% of prospects, converting at 50%
+              (3 of 6). The smallest meaningful niche produces a quarter of your clients.
+            </div>
+          </div>
+
+          <div className="niche-foot">
+            <span>
+              <b>{overCount} of {niches.length}</b> niches sit above the {nicheBenchmark}% concentration
+              benchmark — your book is more concentrated than a diversified practice.
+            </span>
+            <span className="perf-note">
+              Niches overlap: a prospect can match more than one, so shares sum past 100% and per-niche
+              clients sum past 12.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 3 ── Does the score work? */}
       <section className="card perf-card">
         <header className="card-head">
           <div className="card-title">
             <TierBarsIcon />
-            <span>By Tier</span>
-            <HelpTip text="How prospects spread across readiness tiers, with conversion and KQ for each." />
+            <span>Does the Score Work?</span>
+            <HelpTip text="Whether a higher KQ score actually predicts a client, measured on your own conversions rather than a projected model." />
           </div>
         </header>
         <div className="perf-body">
-        <TierSector />
-        <div className="perf-tier-table">
-          <div className="ptt-head">
-            <span className="ptt-tier">Tier</span>
-            <span>Prospects</span>
-            <span>Avg KQ</span>
-            <span>Conversion</span>
-            <span>KQ Range</span>
+          {/* Distribution first (how the book splits), then conversion per tier
+              (whether the split predicts anything). */}
+          <TierSector />
+          <div className="tier-hero">
+            {byTier.map((t) => {
+              const conv = parseInt(t.conv, 10)
+              const thin = t.count < MIN_SAMPLE
+              return (
+                <div className={`tier-hero-row ${thin ? 'thin' : ''}`} key={t.tier}>
+                  <span className="thr-name">
+                    <i className="swatch" style={{ background: t.color }} />
+                    {t.tier} · {t.name}
+                  </span>
+                  <span className="thr-track">
+                    <span className="thr-fill" style={{ width: `${conv}%`, background: t.color }} />
+                    <b className="thr-conv">{t.conv}</b>
+                  </span>
+                  <span className="thr-meta">
+                    <b>n={t.count}</b> · avg KQ {t.avgKQ} · KQ {t.range}
+                  </span>
+                  {thin && <span className="thr-warn">sample too small to read</span>}
+                </div>
+              )
+            })}
           </div>
-          {byTier.map((t) => (
-            <div className="ptt-row" key={t.tier}>
-              <span className="ptt-tier">
-                <i className="swatch" style={{ background: t.color }} />
-                {t.tier} · {t.name}
-              </span>
-              <span>{t.count}</span>
-              <span>{t.avgKQ}</span>
-              <span className={t.convGood ? 'conv-good' : 'conv-muted'}>{t.conv}</span>
-              <span>{t.range}</span>
-            </div>
-          ))}
-        </div>
+
+          <p className="tier-reading">
+            Prospects scored <b>Ready Now</b> convert <b>2.8×</b> more often than <b>Considering</b>.
+            Based on your own converted clients — not a projected model.
+          </p>
+          <p className="perf-note">
+            Tier 3 shows 0% on a single prospect. That is not a finding — one prospect cannot establish a
+            rate, and the row is greyed for that reason.
+          </p>
+
+          <div className="tier-gauge-block">
+            <div className="perf-lbl">Average KQ Score · all {outcomes.scored} scored</div>
+            <div className="outcome-num">{outcomes.avgKQ}</div>
+            <KQGauge value={outcomes.avgKQ} />
+          </div>
         </div>
       </section>
+
+      {/* 4 ── Marketing reach */}
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <FunnelIcon />
+            <span>Is Your Marketing Reaching the Right People?</span>
+            <HelpTip text="Where prospects drop out of onboarding, split by the channel or niche they came from, and which sources actually produce clients." />
+          </div>
+        </header>
+        <div className="perf-body">
+          <div className="perf-sub-head">Drop-off, segmented</div>
+          <SegmentedFunnel />
+
+          <div className="perf-sub-head">Attribution — ranked by clients produced</div>
+          <div className="utm-grid">
+            {attribution.map((g) => (
+              <AttributionCard key={g.key} label={g.label} rows={g.rows} />
+            ))}
+          </div>
+
+          <div className="perf-sub-head">Marketing effectiveness</div>
+          <ul className="mkt-eff">
+            {marketingEffectiveness.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* 5 ── Experiments */}
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <CheckIcon />
+            <span>Onboarding Experiments</span>
+            <HelpTip text="Each onboarding configuration with the outcome it actually produced, so the recommended setting is a result rather than a default." />
+          </div>
+        </header>
+        <div className="perf-body">
+          <ExperimentTable />
+        </div>
+      </section>
+
+      {/* 6 ── Who to talk to */}
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <BoltIcon />
+            <span>Who to Talk to This Week</span>
+            <HelpTip text="The six highest-intent prospects, each with the reasoning behind the score in the prospect's own words." />
+          </div>
+        </header>
+        <div className="perf-body">
+          <div className="talk-list">
+            {talkTo.map((t) => (
+              <div className="talk-card" key={t.name}>
+                <div className="talk-head">
+                  <span className="talk-name">{t.name}</span>
+                  <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
+                  <span className="talk-kq">KQ {t.kq}</span>
+                  <span className="talk-niche">{t.niche}</span>
+                </div>
+                <div className="talk-chips">
+                  {t.said.map((s, i) => (
+                    <span className="talk-chip-wrap" key={s}>
+                      <span className="talk-chip">{s}</span>
+                      {i < t.said.length - 1 && <ChevronRight />}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="perf-note">
+            Every score shows its reasoning. Each chip is something the prospect stated — never a tracked
+            behaviour.
+          </p>
+        </div>
+      </section>
+
+      {/* 7 ── Verbatims */}
+      <section className="card perf-card">
+        <header className="card-head">
+          <div className="card-title">
+            <MegaphoneIcon />
+            <span>What Your Prospects Are Actually Saying</span>
+            <HelpTip text="Recurring questions in the prospect's own words, tagged by niche and counted." />
+          </div>
+        </header>
+        <div className="perf-body">
+          <div className="verbatim-grid">
+            {verbatims.map((v) => (
+              <blockquote className="verbatim" key={v.quote}>
+                <p>“{v.quote}”</p>
+                <footer>
+                  <span className="verbatim-niche">{v.niche}</span>
+                  <span className="verbatim-count">{v.count} prospects</span>
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+          <div className="verbatim-uses">
+            <div className="vu">
+              <b>Opening a first conversation</b>
+              <span>Lead with the question they already asked — no discovery warm-up needed.</span>
+            </div>
+            <div className="vu">
+              <b>Ad &amp; content copy</b>
+              <span>Run these as headlines verbatim; they are the prospect's phrasing, not yours.</span>
+            </div>
+          </div>
+          <p className="perf-note">Everything here is something your prospect told you directly.</p>
+        </div>
+      </section>
+
+      {/* 8 ── Funnel health, collapsed */}
+      <FunnelHealth />
     </>
+  )
+}
+
+/* ── 8. Aggregate funnel health — retained as a diagnostic, closed by default.
+   The segmented view in section 4 carries the decision value, so this stays
+   out of the way until someone goes looking for it. */
+
+function FunnelHealth() {
+  const [open, setOpen] = useState(false)
+  return (
+    <section className="card perf-card">
+      <button
+        type="button"
+        className="card-head fh-head"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="card-title">
+          <ChartIcon />
+          <span>Knomee Funnel Health</span>
+        </div>
+        <span className="fh-toggle">
+          {open ? 'Hide' : 'Show'} {open ? <ChevronUp /> : <ChevronDown />}
+        </span>
+      </button>
+      {open && (
+        <div className="perf-body">
+          <div className="perf-metrics">
+            {engagement.map((m) => (
+              <div className="perf-metric" key={m.label}>
+                <div className="perf-lbl">{m.label}</div>
+                <div className="perf-num">{m.value}</div>
+                <div className={`perf-sub ${m.tone}`}>{m.sub}</div>
+              </div>
+            ))}
+          </div>
+          <p className="perf-note">
+            Aggregate diagnostic only. These totals cannot separate a targeting problem from a follow-up
+            problem — use the segmented drop-off above for that.
+          </p>
+        </div>
+      )}
+    </section>
   )
 }
 

@@ -2559,12 +2559,45 @@ input[type='checkbox'] {
   flex-direction: column;
   gap: 10px;
 }
+/* 4 columns: value · bar · client count · conversion (with its sample size). */
 .utm-list li {
   display: grid;
-  grid-template-columns: 92px 1fr 20px;
+  grid-template-columns: 84px 1fr 18px 62px;
   align-items: center;
   gap: 8px;
   font-size: 12.5px;
+}
+.attr-head {
+  display: grid;
+  grid-template-columns: 84px 1fr 18px 62px;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #a9a3b8;
+  margin-bottom: 8px;
+}
+.attr-head span:nth-child(2) {
+  text-align: right;
+  grid-column: 2 / 4;
+}
+.attr-head span:last-child {
+  text-align: right;
+}
+.attr-conv {
+  text-align: right;
+  font-weight: 700;
+  color: #086375;
+  font-variant-numeric: tabular-nums;
+}
+/* Sample size rides along with every rate, small and muted. */
+.attr-n {
+  display: block;
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #a9a3b8;
 }
 .utm-value {
   color: #333;
@@ -2590,29 +2623,683 @@ input[type='checkbox'] {
   color: var(--grey-text);
   font-variant-numeric: tabular-nums;
 }
-.utm-keys {
+/* ---------- Performance: restructured sections ---------- */
+
+/* Sub-heading inside a card, for sections that carry more than one block. */
+.perf-sub-head {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #8e88a0;
+  margin: 26px 0 12px;
+}
+.perf-sub-head:first-child {
+  margin-top: 0;
+}
+
+/* 1 ── Impact header */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.impact-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.impact-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--stone);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+}
+.impact-num {
+  font-size: 37px;
+  font-weight: 800;
+  color: #201a2e;
+  line-height: 1;
+  margin: 10px 0 10px;
+}
+.impact-compare {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #3a3350;
+  line-height: 1.45;
+}
+.impact-detail {
+  font-size: 11.5px;
+  color: #8e88a0;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.impact-detail.good {
+  color: #0e8c6b;
+}
+
+/* 2 ── Niche cross-tab */
+.niche-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.niche-row {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.niche-row:last-child {
+  border-bottom: none;
+}
+.niche-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #201a2e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.niche-flag {
+  font-size: 9px;
+  color: var(--purple-bolt);
+  cursor: help;
+}
+.niche-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.niche-bar-line {
+  display: grid;
+  grid-template-columns: 62px 1fr 42px 150px;
+  align-items: center;
+  gap: 10px;
+}
+.niche-bar-lbl {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #a9a3b8;
+}
+.niche-track {
+  height: 9px;
+  background: var(--pearl);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.niche-fill {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+}
+/* Share reads as neutral volume; conversion reads as the outcome colour, so
+   the two bars are never confused for the same measure. */
+.niche-fill.share {
+  background: #b98ddc;
+}
+.niche-fill.conv {
+  background: #086375;
+}
+.niche-val {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #201a2e;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.niche-delta {
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.niche-delta.up {
+  color: #0e8c6b;
+}
+.niche-delta.down {
+  color: #b4324b;
+}
+
+.niche-callout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid #e6d9f2;
+  border-left: 3px solid var(--purple-bolt);
+  border-radius: 10px;
+  background: #faf7fd;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #3a3350;
+}
+.niche-callout svg {
+  flex: none;
+  margin-top: 2px;
+}
+.niche-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: #3a3350;
+}
+
+/* 3 ── Does the score work? */
+.tier-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.tier-hero-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 240px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+/* A rate built on too few prospects is dimmed so it cannot be mistaken for
+   a result. */
+.tier-hero-row.thin {
+  opacity: 0.55;
+  background: #fbfbfc;
+}
+.thr-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #201a2e;
+}
+.thr-track {
+  position: relative;
+  height: 24px;
+  background: var(--pearl);
+  border-radius: 7px;
+}
+.thr-fill {
+  display: block;
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.3s ease;
+}
+.thr-conv {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.thr-meta {
+  font-size: 11.5px;
+  color: #8e88a0;
+  font-weight: 600;
+}
+.thr-warn {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b4324b;
+}
+.tier-reading {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #201a2e;
+}
+.tier-gauge-block {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+/* 4a ── Segmented drop-off */
+.seg-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.seg-controls-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #a9a3b8;
+  margin-right: 2px;
+}
+.seg-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.seg-chip:hover {
+  border-color: var(--stone);
+}
+.seg-chip.on {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: #fff;
+}
+.seg-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.seg-row {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  row-gap: 4px;
+}
+.seg-row-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #201a2e;
+}
+/* Track width encodes volume, fill encodes completion — so high-volume /
+   low-completion and low-volume / high-completion look different. */
+.seg-row-track {
+  height: 22px;
+  background: var(--pearl);
+  border-radius: 7px;
+  overflow: hidden;
+  min-width: 60px;
+}
+.seg-row-fill {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  background: #6d38a0;
+  border-radius: 7px;
+  padding-left: 8px;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+.seg-row-meta {
+  grid-column: 2;
+  font-size: 11.5px;
+  color: #8e88a0;
+  font-weight: 600;
+}
+.seg-row-meta .attr-n {
+  display: inline;
+  margin-left: 4px;
+}
+.seg-row-conv {
+  color: #086375;
+  font-weight: 800;
+}
+.seg-warn {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #8e88a0;
+}
+.drop-readings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
 }
-.utm-keys-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--grey-text);
-  margin-bottom: 10px;
+.drop-reading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fafafa;
+  border: 1px solid var(--line);
 }
-.utm-keys-list {
+.drop-reading svg {
+  flex: none;
+  color: var(--ash);
+}
+.drop-where {
+  color: #8e88a0;
+  font-weight: 600;
+}
+.drop-what {
+  color: var(--plum);
+  font-weight: 700;
+}
+
+/* 4c ── Marketing effectiveness */
+.mkt-eff {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.mkt-eff li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #3a3350;
+}
+.mkt-eff li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple-bolt);
+}
+
+/* 5 ── Experiments */
+.exp-table {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.exp-head,
+.exp-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 110px 120px 34px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  text-align: left;
+}
+.exp-head {
+  background: #fafafa;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #a9a3b8;
+}
+.exp-row {
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-family: inherit;
+  color: #201a2e;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.exp-row:hover {
+  background: #fbfafd;
+}
+.exp-row.open {
+  background: #faf7fd;
+}
+.exp-row.thin {
+  color: #a9a3b8;
+}
+.exp-row-wrap:last-child .exp-row {
+  border-bottom: none;
+}
+.exp-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+}
+.exp-thin {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a9a3b8;
+}
+.exp-caret {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--grey-text);
+}
+.exp-detail {
+  padding: 16px;
+  background: #fdfcfe;
+  border-bottom: 1px solid var(--line);
+}
+.exp-note {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8e88a0;
+}
+
+/* 6 ── Who to talk to */
+.talk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.talk-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.talk-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--stone);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+}
+.talk-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 11px;
+}
+.talk-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--plum);
+}
+.talk-tier {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #fff;
+}
+.talk-tier.t1 {
+  background: var(--prospect-1);
+}
+.talk-tier.t2 {
+  background: var(--prospect-2);
+}
+.talk-kq {
+  font-size: 12px;
+  font-weight: 800;
+  color: #201a2e;
+  font-variant-numeric: tabular-nums;
+}
+.talk-niche {
+  font-size: 11.5px;
+  color: #8e88a0;
+  font-weight: 600;
+  margin-left: auto;
+}
+/* Arrow-separated reasoning strip; wraps rather than scrolling so nothing is
+   hidden on a narrow window. */
+.talk-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 4px;
 }
-.utm-chip {
-  font-size: 12px;
+.talk-chip-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.talk-chip-wrap svg {
+  color: var(--stone);
+  flex: none;
+}
+.talk-chip {
+  font-size: 11.5px;
+  font-weight: 600;
   padding: 5px 10px;
   border-radius: 8px;
   background: #f3f0f9;
-  color: var(--plum);
+  color: #3a2456;
+}
+
+/* 7 ── Verbatims */
+/* Wide enough that the niche chip and its count sit on one line without
+   colliding — five quotes land as 3 + 2 rather than a ragged 4 + 1. */
+.verbatim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 12px;
+}
+.verbatim {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--lilac);
+  border-radius: 10px;
+  padding: 15px 16px;
+  background: #fdfcfe;
+}
+.verbatim p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #201a2e;
   font-weight: 500;
+}
+.verbatim footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+.verbatim-niche {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--plum);
+  background: #f3f0f9;
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+.verbatim-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8e88a0;
+}
+.verbatim-uses {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.vu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+}
+.vu b {
+  color: var(--plum);
+}
+.vu span {
+  color: #8e88a0;
+  line-height: 1.5;
+}
+
+/* 8 ── Funnel health accordion */
+.fh-head {
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.18s ease;
+}
+.fh-head:hover {
+  background: #f4f4f6;
+}
+.fh-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--grey-text);
+}
+
+/* Performance stagger runs to 8 sections now. */
+.perf-card:nth-of-type(6) {
+  animation-delay: 0.3s;
+}
+.perf-card:nth-of-type(7) {
+  animation-delay: 0.36s;
+}
+.perf-card:nth-of-type(8) {
+  animation-delay: 0.42s;
+}
+
+@media (max-width: 1180px) {
+  .impact-grid,
+  .utm-grid {
+    grid-template-columns: 1fr;
+  }
+  .niche-row,
+  .tier-hero-row,
+  .seg-row {
+    grid-template-columns: 1fr;
+  }
+  .tier-hero-row {
+    gap: 8px;
+  }
+  .seg-row-meta {
+    grid-column: 1;
+  }
+  .niche-bar-line {
+    grid-template-columns: 58px 1fr 40px;
+  }
+  .niche-bar-line .niche-delta,
+  .niche-bar-line .attr-n {
+    grid-column: 2 / -1;
+  }
+  .drop-readings,
+  .verbatim-uses {
+    grid-template-columns: 1fr;
+  }
+  .exp-head,
+  .exp-row {
+    grid-template-columns: minmax(0, 1fr) 70px 84px 92px 28px;
+    gap: 8px;
+    font-size: 12px;
+  }
 }
 
 /* ---------- Account settings ---------- */
