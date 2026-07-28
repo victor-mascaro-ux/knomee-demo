@@ -75,7 +75,7 @@ import {
   MegaphoneIcon,
 } from './components/icons'
 
-type Screen = 'prospects' | 'clients' | 'performance'
+type Screen = 'prospects' | 'clients' | 'analytics'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
@@ -1023,7 +1023,7 @@ function AttributionCard({
   )
 }
 
-/* ── Performance screen (engagement · outcomes · by tier · onboarding funnel) ── */
+/* ── Analytics screen (engagement · outcomes · by tier · onboarding funnel) ── */
 
 function KQGauge({ value }: { value: number }) {
   return (
@@ -1230,9 +1230,35 @@ function SegmentedFunnel() {
 /* ── 5. Onboarding experiments — configuration as a tested hypothesis ── */
 
 function ExperimentTable() {
-  const [open, setOpen] = useState<string | null>('won-late')
+  // A Set rather than a single key: configurations are meant to be read against
+  // each other, so any number of drop-off bars can be open at once.
+  const [open, setOpen] = useState<Set<string>>(new Set(['won-late']))
+  const toggle = (key: string) =>
+    setOpen((s) => {
+      const n = new Set(s)
+      if (n.has(key)) n.delete(key)
+      else n.add(key)
+      return n
+    })
+  const allOpen = open.size === experiments.length
   return (
     <div className="exp-block">
+      <div className="exp-toolbar">
+        <span className="exp-count">
+          {open.size === 0
+            ? 'Open a configuration to see its drop-off'
+            : `${open.size} of ${experiments.length} open${open.size > 1 ? ' — bars share one scale, so segments compare directly' : ''}`}
+        </span>
+        <button
+          type="button"
+          className="exp-all"
+          onClick={() =>
+            setOpen(allOpen ? new Set() : new Set(experiments.map((e) => e.key)))
+          }
+        >
+          {allOpen ? 'Collapse all' : 'Compare all'}
+        </button>
+      </div>
       <div className="exp-table">
         <div className="exp-head">
           <span>Configuration</span>
@@ -1245,14 +1271,14 @@ function ExperimentTable() {
           const { complete } = buildFunnel(e.cfg)
           const thin = e.signUps < MIN_SAMPLE
           const conv = Math.round((e.clients / e.signUps) * 100)
-          const isOpen = open === e.key
+          const isOpen = open.has(e.key)
           return (
             <div className="exp-row-wrap" key={e.key}>
               <button
                 type="button"
                 className={`exp-row ${isOpen ? 'open' : ''} ${thin ? 'thin' : ''}`}
                 aria-expanded={isOpen}
-                onClick={() => setOpen(isOpen ? null : e.key)}
+                onClick={() => toggle(e.key)}
               >
                 <span className="exp-name">
                   {e.name}
@@ -1276,13 +1302,15 @@ function ExperimentTable() {
               {isOpen && (
                 <div className="exp-detail">
                   <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
-                  {FUNNEL_LEGEND}
                 </div>
               )}
             </div>
           )
         })}
       </div>
+      {/* One legend for the whole table — repeating it under every open row
+          crowded out the bars it was meant to explain. */}
+      {open.size > 0 && FUNNEL_LEGEND}
       <p className="exp-note">
         Current configuration <b>Welcome on · Gate late</b> switched on <b>{currentConfigSince}</b> — read
         the period deltas above against that date. Welcome off · Gate late shows higher completion (38%)
@@ -1331,12 +1359,12 @@ function NicheRow({ n, maxShare }: { n: (typeof niches)[number]; maxShare: numbe
   )
 }
 
-function PerformanceScreen() {
+function AnalyticsScreen() {
   const maxShare = Math.max(...niches.map((n) => n.share))
   const overCount = niches.filter((n) => n.share > nicheBenchmark).length
   return (
     <>
-      <h1 className="page-title">Performance</h1>
+      <h1 className="page-title">Analytics</h1>
 
       {/* 1 ── Impact header */}
       <section className="card perf-card">
@@ -1623,7 +1651,7 @@ function FunnelHealth() {
    table header) with a centered illustration + CTA. Rendered for Reporting
    always, and for Prospects/Clients when the internal "empty" mode is on. */
 
-type EmptyVariant = 'prospects' | 'clients' | 'performance'
+type EmptyVariant = 'prospects' | 'clients' | 'analytics'
 
 interface EmptyConfig {
   title: string
@@ -1652,9 +1680,9 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     subtitle: 'Start inviting clients by clicking the button above.',
     columns: ['Name', 'Household', 'Sentiment', 'Status', 'Last Sign In'],
   },
-  performance: {
-    title: 'Performance',
-    caption: 'Your Performance Dashboard is empty.',
+  analytics: {
+    title: 'Analytics',
+    caption: 'Your Analytics Dashboard is empty.',
     subtitle: 'Engagement, onboarding funnel and per-tier analytics appear here once prospects start onboarding.',
     columns: [],
   },
@@ -1697,8 +1725,8 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
     <>
       <h1 className="page-title">{cfg.title}</h1>
 
-      {/* Performance has no metrics/insights bars, search, or buttons. */}
-      {variant !== 'performance' && (
+      {/* Analytics has no metrics/insights bars, search, or buttons. */}
+      {variant !== 'analytics' && (
         <>
           <LockedBar icon={<ChartIcon />} title="Top Line Metrics" />
           <LockedBar icon={<BoltIcon />} title="Actionable Insights" />
@@ -2303,7 +2331,7 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
 const tabs: { id: Screen; label: string }[] = [
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
-  { id: 'performance', label: 'Performance' },
+  { id: 'analytics', label: 'Analytics' },
 ]
 
 export default function App() {
@@ -2456,8 +2484,8 @@ export default function App() {
           ) : (
             <ClientsScreen clients={clients} onDownload={() => showToast('CSV downloaded')} />
           ))}
-        {screen === 'performance' &&
-          (emptyMode ? <EmptyScreen variant="performance" /> : <PerformanceScreen />)}
+        {screen === 'analytics' &&
+          (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
       </main>
       )}
 

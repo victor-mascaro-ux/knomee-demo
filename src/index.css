@@ -957,7 +957,7 @@ input[type='checkbox'] {
 .table-wrap {
   animation: fadeUp 0.5s ease 0.24s both;
 }
-/* Performance cards fade in with a light stagger, matching the
+/* Analytics cards fade in with a light stagger, matching the
    Prospects/Clients entrance feel. */
 .perf-card {
   animation: fadeUp 0.5s ease both;
@@ -1474,7 +1474,7 @@ input[type='checkbox'] {
 .illus-clients .illus-disc {
   background: #cdece2;
 }
-.illus-performance .illus-disc {
+.illus-analytics .illus-disc {
   background: #a4e2ff;
 }
 .illus-chip {
@@ -1960,7 +1960,7 @@ input[type='checkbox'] {
   display: none;
 }
 
-/* ---------- Performance ---------- */
+/* ---------- Analytics ---------- */
 .perf-card {
   overflow: visible;
   margin-bottom: 22px;
@@ -2676,7 +2676,7 @@ input[type='checkbox'] {
   color: var(--grey-text);
   font-variant-numeric: tabular-nums;
 }
-/* ---------- Performance: restructured sections ---------- */
+/* ---------- Analytics: restructured sections ---------- */
 
 /* Sub-heading inside a card, for sections that carry more than one block. */
 .perf-sub-head {
@@ -3132,9 +3132,46 @@ input[type='checkbox'] {
   color: var(--grey-text);
 }
 .exp-detail {
-  padding: 16px;
+  padding: 14px 16px 16px;
   background: #fdfcfe;
   border-bottom: 1px solid var(--line);
+}
+/* The table row immediately above already carries the name, the recommended
+   pill and the completion figure, so the bar's own header is pure repetition
+   here — and with several open at once it separates the bars being compared. */
+.exp-detail .fm-row-head {
+  display: none;
+}
+.exp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.exp-count {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #8e88a0;
+}
+.exp-all {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--plum);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.exp-all:hover {
+  border-color: var(--stone);
+  background: #faf7fd;
+}
+.exp-block > .fm-legend {
+  margin-top: 12px;
 }
 .exp-note {
   margin-top: 14px;
@@ -3309,7 +3346,7 @@ input[type='checkbox'] {
   color: var(--grey-text);
 }
 
-/* Performance stagger runs to 8 sections now. */
+/* Analytics stagger runs to 8 sections now. */
 .perf-card:nth-of-type(6) {
   animation-delay: 0.3s;
 }

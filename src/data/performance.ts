@@ -1,4 +1,4 @@
-// Advisor Performance page — engagement, outcomes, per-tier, onboarding funnel.
+// Advisor Analytics page — engagement, outcomes, per-tier, onboarding funnel.
 // All figures are placeholder sample data from the design handoff.
 
 export interface EngagementMetric {
