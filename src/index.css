@@ -2174,6 +2174,26 @@ input[type='checkbox'] {
   border: 5px solid transparent;
   border-top-color: #240446;
 }
+/* The end segments are narrow, so a tooltip centred on them hangs past the
+   bar and is cut off by the card/table clip. Anchor those to the bar edge and
+   move the arrow in to stay over the segment. */
+.ob-seg:first-child .ob-tip {
+  left: 0;
+  transform: none;
+}
+.ob-seg:first-child .ob-tip::after {
+  left: 18px;
+}
+.ob-seg:last-child .ob-tip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.ob-seg:last-child .ob-tip::after {
+  left: auto;
+  right: 18px;
+  transform: translateX(50%);
+}
 .ob-labels {
   display: flex;
   gap: 2px;
@@ -3057,6 +3077,16 @@ input[type='checkbox'] {
 .exp-collapse.open .exp-collapse-inner {
   visibility: visible;
   transition-delay: 0s;
+  /* The clip is only needed while the row is growing. Once open, release it on
+     a delay so segment tooltips — which sit above the bar, outside this box —
+     are not sliced off. Discrete property, so it flips via a filled animation
+     rather than a transition. */
+  animation: unclip 0.01s linear 0.34s forwards;
+}
+@keyframes unclip {
+  to {
+    overflow: visible;
+  }
 }
 .exp-caret {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.18s ease;
