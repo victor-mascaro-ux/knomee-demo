@@ -126,16 +126,18 @@ function CollapsibleCard({
         <div className="card-title">
           {icon}
           <span>{title}</span>
-          {hint && <HelpTip text={hint} />}
         </div>
-        <button
-          className={`show-toggle ${open ? '' : 'collapsed'}`}
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-        >
-          {open ? 'SHOW LESS' : 'SHOW MORE'} <ChevronUp />
-        </button>
+        <div className="card-head-right">
+          {hint && <HelpTip text={hint} />}
+          <button
+            className={`show-toggle ${open ? '' : 'collapsed'}`}
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+          >
+            {open ? 'SHOW LESS' : 'SHOW MORE'} <ChevronUp />
+          </button>
+        </div>
       </header>
 
       <div className={`collapse ${open ? 'open' : ''}`}>
@@ -153,7 +155,7 @@ function TopLineMetrics() {
       className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
       title="Top Line Metrics"
-      hint="Headline counts for your prospect book — totals, average KQ score, and the tier split."
+      hint="Totals, average KQ score, and the tier split."
       bodyClassName="metrics-body"
     >
         <div className="metric-tiles">
@@ -208,7 +210,7 @@ function ActionableInsights() {
       className="insights-card"
       icon={<BoltIcon color="#7639a1" />}
       title="Actionable Insights"
-      hint="Auto-generated takeaways ranked by opportunity, so you know who to prioritise."
+      hint="Auto-generated takeaways, ranked by opportunity."
       bodyClassName="insights-body"
     >
       {[col1, col2].map((col, i) => (
@@ -787,7 +789,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
       className="metrics-card"
       icon={<ChartIcon />}
       title="Top Line Metrics"
-      hint="Headline counts for your client book — totals, average KR score, and the tier split."
+      hint="Totals, average KR score, and the tier split."
       bodyClassName="metrics-body"
     >
       <div className="metric-tiles">
@@ -859,9 +861,11 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
-              <HelpTip text="Blended sentiment across your clients, from frustrated to delighted." />
             </span>
-            <span className="chart-figure">{confidenceScore}</span>
+            <span className="chart-head-r">
+              <span className="chart-figure">{confidenceScore}</span>
+              <HelpTip text="Blended client sentiment, from frustrated to delighted." />
+            </span>
           </div>
           <ConfidencePie />
         </div>
@@ -869,9 +873,11 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">CLIENTS ACTIVE THIS WEEK</span>
-              <HelpTip text="Share of clients who logged in each week over the last stretch." />
             </span>
-            <span className="chart-figure">{activeThisWeek}%</span>
+            <span className="chart-head-r">
+              <span className="chart-figure">{activeThisWeek}%</span>
+              <HelpTip text="Share of clients logging in each week." />
+            </span>
           </div>
           <ActiveChart />
         </div>
@@ -886,7 +892,7 @@ function ClientInsights() {
       className="insights-card"
       icon={<BoltIcon />}
       title="Actionable Insights"
-      hint="Clients that need attention, flagged by recent engagement and sentiment signals."
+      hint="Clients flagged by engagement and sentiment."
       bodyClassName="client-insights-body"
     >
       {clientInsights.map((ins) => (
@@ -1338,8 +1344,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <TargetIcon />
             <span>Your Practice, With Knomee</span>
-            <HelpTip text="The three numbers that say whether Knomee is producing clients, each shown against a target, a prior period, or a benchmark." />
           </div>
+          <HelpTip text="Each number against its target or benchmark." />
         </header>
         <div className="perf-body">
           <div className="impact-grid">
@@ -1361,8 +1367,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <ChartIcon />
             <span>Who Your Prospects Are — And Which Convert</span>
-            <HelpTip text="Every niche shows both its share of your prospects and the rate at which those prospects become clients. The gap between the two bars is the finding." />
           </div>
+          <HelpTip text="Share of your prospects against how many convert." />
         </header>
         <div className="perf-body">
           <div className="niche-list">
@@ -1401,8 +1407,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <TierBarsIcon />
             <span>Does the Score Work?</span>
-            <HelpTip text="Whether a higher KQ score actually predicts a client, measured on your own conversions rather than a projected model." />
           </div>
+          <HelpTip text="Whether a higher KQ score predicts a client." />
         </header>
         <div className="perf-body">
           {/* Distribution first (how the book splits), then conversion per tier
@@ -1454,8 +1460,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <FunnelIcon />
             <span>Is Your Marketing Reaching the Right People?</span>
-            <HelpTip text="Where prospects drop out of onboarding, split by the channel or niche they came from, and which sources actually produce clients." />
           </div>
+          <HelpTip text="Where prospects drop out, and which sources convert." />
         </header>
         <div className="perf-body">
           <div className="perf-sub-head">Drop-off, segmented</div>
@@ -1483,8 +1489,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <CheckIcon />
             <span>Onboarding Experiments</span>
-            <HelpTip text="Each onboarding configuration with the outcome it actually produced, so the recommended setting is a result rather than a default." />
           </div>
+          <HelpTip text="Each configuration with the outcome it produced." />
         </header>
         <div className="perf-body">
           <ExperimentTable />
@@ -1497,8 +1503,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <BoltIcon />
             <span>Who to Talk to This Week</span>
-            <HelpTip text="The six highest-intent prospects, each with the reasoning behind the score in the prospect's own words." />
           </div>
+          <HelpTip text="Highest-intent prospects, with their stated reasoning." />
         </header>
         <div className="perf-body">
           <div className="talk-list">
@@ -1534,8 +1540,8 @@ function PerformanceScreen() {
           <div className="card-title">
             <MegaphoneIcon />
             <span>What Your Prospects Are Actually Saying</span>
-            <HelpTip text="Recurring questions in the prospect's own words, tagged by niche and counted." />
           </div>
+          <HelpTip text="Recurring questions in the prospect's own words." />
         </header>
         <div className="perf-body">
           <div className="verbatim-grid">

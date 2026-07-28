@@ -182,6 +182,14 @@ body {
   border-bottom: 1px solid var(--line);
 }
 
+/* Right-hand cluster of a card header: the help "?" and any collapse toggle,
+   pinned to the card's right edge by the header's space-between. */
+.card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .card-title {
   display: flex;
   align-items: center;
@@ -1065,6 +1073,40 @@ input[type='checkbox'] {
   opacity: 1;
 }
 
+/* Card help tips open to the LEFT of the "?" and are vertically centred on it,
+   with the arrow on the tooltip's right edge pointing back at the glyph. The
+   "?" sits at the card's right edge, so opening downward or rightward would
+   push the bubble off the card. Overrides the generic .tt placement above —
+   these rules must stay after it. */
+/* Placement only — wrapping and text alignment live on .help-tip.tt::after
+   below, which outranks this rule on specificity. */
+.help-tip::after {
+  top: 50%;
+  left: auto;
+  right: calc(100% + 9px);
+  transform: translateY(-50%) translateX(3px);
+}
+.help-tip:hover::after,
+.help-tip:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+/* Right-pointing wedge sitting in the 5px gap between the bubble's right edge
+   and the glyph. The right border must be 0: with the generic .tt's 5px on all
+   sides the box is 10px wide and the wedge lands under the bubble instead of
+   beside it. */
+.help-tip::before {
+  top: 50%;
+  left: auto;
+  right: calc(100% + 4px);
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent #240446;
+}
+.help-tip:focus-visible::before {
+  opacity: 1;
+}
+
 /* Standard card help glyph — a "?" that reveals its hint on hover/focus. */
 .help-tip {
   display: inline-flex;
@@ -1090,12 +1132,23 @@ input[type='checkbox'] {
   outline: none;
 }
 /* Help hints can be full sentences — let them wrap instead of forcing a
-   viewport-wide single line like the compact number tooltips. */
+   viewport-wide single line like the compact number tooltips, and set ragged-
+   right so a two-line caption reads as prose. */
 .help-tip.tt::after {
   white-space: normal;
   width: max-content;
-  max-width: 220px;
-  text-align: center;
+  max-width: 230px;
+  text-align: left;
+}
+
+/* Figure plus help "?" at the card's right edge, matching the card-head
+   standard — a "?" beside the left-hand label would open its bubble off the
+   card. */
+.chart-head-r {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
 }
 
 .chart-head-l {
