@@ -34,6 +34,14 @@ body {
   padding: 0;
 }
 
+/* Reserve the scrollbar gutter permanently. Without it, anything that changes
+   page height — switching to Analytics, opening an accordion, expanding an
+   experiment — can cross the threshold where a classic scrollbar appears, and
+   the ~15px width change reflows the whole page sideways as a visible shake. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #1a1a1a;
@@ -959,19 +967,19 @@ input[type='checkbox'] {
 }
 /* Analytics cards fade in with a light stagger, matching the
    Prospects/Clients entrance feel. */
-.perf-card {
+.analytics-card {
   animation: fadeUp 0.5s ease both;
 }
-.perf-card:nth-of-type(2) {
+.analytics-card:nth-of-type(2) {
   animation-delay: 0.06s;
 }
-.perf-card:nth-of-type(3) {
+.analytics-card:nth-of-type(3) {
   animation-delay: 0.12s;
 }
-.perf-card:nth-of-type(4) {
+.analytics-card:nth-of-type(4) {
   animation-delay: 0.18s;
 }
-.perf-card:nth-of-type(5) {
+.analytics-card:nth-of-type(5) {
   animation-delay: 0.24s;
 }
 /* `backwards` (not `both`) so the reveal clip-path isn't retained after the
@@ -1009,18 +1017,15 @@ input[type='checkbox'] {
   transform: translateY(0);
   box-shadow: none;
 }
-
 .metric-tile,
 .tier-card,
-.perf-metric,
-.outcome-card,
+.analytics-metric,
 .chart-card {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 .metric-tile:hover,
 .tier-card:hover,
-.perf-metric:hover,
-.outcome-card:hover,
+.analytics-metric:hover,
 .chart-card:hover {
   transform: translateY(-2px);
   border-color: var(--stone);
@@ -1961,74 +1966,56 @@ input[type='checkbox'] {
 }
 
 /* ---------- Analytics ---------- */
-.perf-card {
+.analytics-card {
   overflow: visible;
   margin-bottom: 22px;
 }
-.perf-card .card-head {
+.analytics-card .card-head {
   border-radius: 14px 14px 0 0;
 }
-.perf-body {
+.analytics-body {
   padding: 22px 16px;
 }
-.perf-note {
+.analytics-note {
   font-size: 12px;
   font-weight: 600;
   color: #8e88a0;
 }
 
-.perf-metrics {
+.analytics-metrics {
   display: flex;
   gap: 14px;
 }
-.perf-metric {
+.analytics-metric {
   flex: 1;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 15px 17px;
 }
-.perf-lbl {
+.analytics-lbl {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.7px;
   text-transform: uppercase;
   color: #8e88a0;
 }
-.perf-num {
+.analytics-num {
   font-size: 33px;
   font-weight: 800;
   color: #201a2e;
   margin-top: 9px;
   line-height: 1;
 }
-.perf-sub {
+.analytics-sub {
   font-size: 12px;
   font-weight: 700;
   margin-top: 8px;
 }
-.perf-sub.grey {
+.analytics-sub.grey {
   color: #8e88a0;
 }
-.perf-sub.green {
+.analytics-sub.green {
   color: #0e8c6b;
-}
-
-/* outcomes */
-.perf-outcomes {
-  display: flex;
-  gap: 14px;
-}
-.outcome-card {
-  flex: 1;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px 18px;
-}
-.outcome-top {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 8px;
 }
 .outcome-num {
   font-size: 37px;
@@ -2036,34 +2023,6 @@ input[type='checkbox'] {
   color: #201a2e;
   line-height: 1;
   margin-top: 8px;
-}
-.outcome-rate {
-  font-size: 14px;
-  font-weight: 800;
-  color: #086375;
-}
-.outcome-sub {
-  font-size: 12px;
-  color: #8e88a0;
-  margin: 8px 0 14px;
-}
-.outcome-track {
-  height: 9px;
-  background: #eef0f3;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.outcome-fill {
-  display: block;
-  height: 100%;
-  background: #086375;
-  border-radius: 6px;
-}
-.outcome-target {
-  font-size: 11px;
-  font-weight: 700;
-  color: #8e88a0;
-  margin-top: 6px;
 }
 
 /* KQ gauge */
@@ -2134,8 +2093,7 @@ input[type='checkbox'] {
   font-weight: 700;
   color: #8e88a0;
 }
-.sector-legend span,
-.fconfig-group {
+.sector-legend span {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -2146,100 +2104,8 @@ input[type='checkbox'] {
   border-radius: 3px;
   display: inline-block;
 }
-
-/* per-tier table */
-.perf-tier-table {
-  margin-top: 18px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.ptt-head,
-.ptt-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-  align-items: center;
-}
-.ptt-head {
-  background: #f7f6fa;
-  padding: 11px 18px;
-}
-.ptt-head span {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #8e88a0;
-  text-align: right;
-}
-.ptt-head .ptt-tier,
-.ptt-row .ptt-tier {
-  text-align: left;
-}
-.ptt-row {
-  padding: 13px 18px;
-  border-top: 1px solid #efeef4;
-  font-size: 14px;
-  font-weight: 700;
-  color: #241c33;
-}
-.ptt-row span {
-  text-align: right;
-}
-.ptt-tier {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-}
-.ptt-tier .swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
 .conv-good {
   color: #0e8c6b;
-}
-.conv-muted {
-  color: #8e88a0;
-}
-
-/* onboarding funnel */
-.funnel-wrap {
-  margin-top: 4px;
-}
-.funnel-config {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-.fconfig-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #8e88a0;
-}
-.seg-toggle {
-  display: inline-flex;
-  border: 1px solid var(--stone);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.seg-toggle button {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #8e88a0;
-  padding: 6px 14px;
-  cursor: pointer;
-}
-.seg-toggle button.on {
-  background: #240446;
-  color: #fff;
 }
 .fconfig-pill {
   font-size: 10px;
@@ -2250,15 +2116,6 @@ input[type='checkbox'] {
   background: #c0ffe7;
   padding: 4px 10px;
   border-radius: 999px;
-}
-.funnel-complete {
-  margin-left: auto;
-  font-size: 12px;
-  font-weight: 700;
-  color: #8e88a0;
-}
-.funnel-complete b {
-  color: #0e9b87;
 }
 
 .ob-bar {
@@ -2331,111 +2188,6 @@ input[type='checkbox'] {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* Onboarding funnel — config matrix (checkbox chips add comparison bars) */
-/* Two-column layout: control grid (left) + sector-bar output (right).
-   Legend spans the full width below; stacks to one column on mobile. */
-.funnel-matrix {
-  display: grid;
-  grid-template-columns: minmax(210px, 270px) 1fr;
-  gap: 30px;
-  align-items: start;
-}
-.fm-output {
-  min-width: 0;
-}
-
-/* Control grid — Welcome on/off (rows) × Gate late/early (columns). */
-.fm-grid {
-  display: grid;
-  /* minmax(0, 1fr) so the two cell columns stay equal width even when a
-     cell's content (e.g. the RECOMMENDED pill) is wider. */
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px;
-  align-items: stretch;
-}
-.fm-grid-col {
-  align-self: end;
-  text-align: center;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #8e88a0;
-  padding-bottom: 4px;
-}
-.fm-grid-row {
-  display: flex;
-  align-items: center;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #240446;
-  padding-right: 8px;
-}
-.fm-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 58px;
-  padding: 10px 6px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.fm-cell:hover {
-  border-color: #cfc7dc;
-}
-.fm-cell.on {
-  border-color: #3dbdaa;
-  background: rgba(61, 189, 170, 0.07);
-}
-.fm-cell input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.fm-check {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  border: 1.5px solid #cfc7dc;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.fm-check svg {
-  opacity: 0;
-}
-.fm-cell.on .fm-check {
-  background: #3dbdaa;
-  border-color: #3dbdaa;
-}
-.fm-cell.on .fm-check svg {
-  opacity: 1;
-}
-.fm-rec {
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  color: #3a9a8b;
-  background: rgba(61, 189, 170, 0.12);
-  border-radius: 999px;
-  padding: 2px 6px;
-  line-height: 1;
-  text-align: center;
-}
-
-.fm-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
 .fm-row-head {
   display: flex;
   align-items: center;
@@ -2457,14 +2209,6 @@ input[type='checkbox'] {
   color: #0e9b87;
   font-size: 15px;
 }
-.fm-empty {
-  padding: 28px;
-  text-align: center;
-  font-size: 13px;
-  color: #9c95ac;
-  border: 1px dashed var(--stone);
-  border-radius: 12px;
-}
 
 .fm-legend {
   grid-column: 1 / -1;
@@ -2480,15 +2224,7 @@ input[type='checkbox'] {
 }
 
 /* Stack the control grid over the sector bar on narrow viewports. */
-@media (max-width: 860px) {
-  .funnel-matrix {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-  .fm-grid {
-    max-width: 380px;
-  }
-}
+@media (max-width: 860px) {}
 .fm-legend span {
   display: inline-flex;
   align-items: center;
@@ -2496,26 +2232,6 @@ input[type='checkbox'] {
 }
 .fm-hatch {
   background: repeating-linear-gradient(135deg, #3a1e5e, #3a1e5e 3px, #501f7d 3px, #501f7d 6px);
-}
-
-/* ---------- Analytics ---------- */
-.analytics-card {
-  margin-bottom: 22px;
-}
-.analytics-sub {
-  font-size: 12px;
-  color: var(--grey-text);
-}
-.analytics-body {
-  padding: 24px 22px;
-}
-
-.funnel-bar {
-  display: flex;
-  height: 46px;
-  border-radius: 9px;
-  overflow: visible;
-  gap: 3px;
 }
 .funnel-seg {
   position: relative;
@@ -2537,57 +2253,6 @@ input[type='checkbox'] {
 .funnel-seg:hover {
   filter: brightness(1.08);
   transform: translateY(-2px);
-}
-.funnel-tip {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 210px;
-  background: #1c1c1e;
-  color: #fff;
-  border-radius: 10px;
-  padding: 10px 12px;
-  z-index: 30;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-}
-.funnel-tip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: #1c1c1e;
-}
-.funnel-tip-title {
-  font-size: 13px;
-  font-weight: 700;
-}
-.funnel-tip-stat {
-  font-size: 12px;
-  color: #c0ffe7;
-  margin: 2px 0 5px;
-  font-variant-numeric: tabular-nums;
-}
-.funnel-tip-desc {
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.85);
-}
-.funnel-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin-top: 16px;
-  font-size: 12px;
-  color: var(--grey-text);
-}
-.funnel-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .utm-grid {
@@ -2679,7 +2344,7 @@ input[type='checkbox'] {
 /* ---------- Analytics: restructured sections ---------- */
 
 /* Sub-heading inside a card, for sections that carry more than one block. */
-.perf-sub-head {
+.analytics-sub-head {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.7px;
@@ -2687,7 +2352,7 @@ input[type='checkbox'] {
   color: #8e88a0;
   margin: 26px 0 12px;
 }
-.perf-sub-head:first-child {
+.analytics-sub-head:first-child {
   margin-top: 0;
 }
 
@@ -3346,14 +3011,184 @@ input[type='checkbox'] {
   color: var(--grey-text);
 }
 
+/* ---------- Analytics: motion ----------
+   Two rules throughout: bars grow from their own origin so length reads as the
+   quantity being drawn, and anything that changes height animates via the
+   0fr→1fr grid trick rather than snapping. All of it is disabled wholesale
+   under prefers-reduced-motion at the end of this block. */
+
+@keyframes growX {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes growW {
+  from {
+    width: 0;
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Experiment rows: collapse without unmounting so both directions animate. */
+.exp-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.exp-collapse.open {
+  grid-template-rows: 1fr;
+}
+/* Clipped to zero height when closed, and hidden from assistive tech too —
+   the delay keeps it visible for the length of the collapse animation. */
+.exp-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  transition: visibility 0s linear 0.34s;
+}
+.exp-collapse.open .exp-collapse-inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+.exp-caret {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.18s ease;
+}
+.exp-caret.up {
+  transform: rotate(180deg);
+}
+.exp-row:hover .exp-caret {
+  color: var(--plum);
+}
+
+/* Bars draw left-to-right. Fills carrying their own label animate width so the
+   text is not squashed; the rest use scaleX, which is cheaper. */
+.niche-fill,
+.thr-fill,
+.utm-fill {
+  transform-origin: left center;
+  animation: growX 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.seg-row-fill {
+  animation: growW 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+/* Cascade down each list so the eye follows the comparison being built. */
+.niche-row:nth-child(1) .niche-fill { animation-delay: 0.05s; }
+.niche-row:nth-child(2) .niche-fill { animation-delay: 0.11s; }
+.niche-row:nth-child(3) .niche-fill { animation-delay: 0.17s; }
+.niche-row:nth-child(4) .niche-fill { animation-delay: 0.23s; }
+.niche-row:nth-child(5) .niche-fill { animation-delay: 0.29s; }
+.niche-row:nth-child(6) .niche-fill { animation-delay: 0.35s; }
+.niche-fill.conv { animation-duration: 0.8s; }
+
+.tier-hero-row:nth-child(1) .thr-fill { animation-delay: 0.08s; }
+.tier-hero-row:nth-child(2) .thr-fill { animation-delay: 0.18s; }
+.tier-hero-row:nth-child(3) .thr-fill { animation-delay: 0.28s; }
+
+.seg-row:nth-child(1) .seg-row-fill { animation-delay: 0.04s; }
+.seg-row:nth-child(2) .seg-row-fill { animation-delay: 0.1s; }
+.seg-row:nth-child(3) .seg-row-fill { animation-delay: 0.16s; }
+.seg-row:nth-child(4) .seg-row-fill { animation-delay: 0.22s; }
+.seg-row:nth-child(5) .seg-row-fill { animation-delay: 0.28s; }
+.seg-row:nth-child(6) .seg-row-fill { animation-delay: 0.34s; }
+
+/* Swapping the split replaces the rows, so they re-enter rather than pop. */
+.seg-row,
+.drop-reading,
+.talk-card,
+.verbatim {
+  animation: riseIn 0.4s ease backwards;
+}
+.drop-reading:nth-child(2), .talk-card:nth-child(2), .verbatim:nth-child(2) { animation-delay: 0.05s; }
+.drop-reading:nth-child(3), .talk-card:nth-child(3), .verbatim:nth-child(3) { animation-delay: 0.1s; }
+.drop-reading:nth-child(4), .talk-card:nth-child(4), .verbatim:nth-child(4) { animation-delay: 0.15s; }
+.talk-card:nth-child(5), .verbatim:nth-child(5) { animation-delay: 0.2s; }
+.talk-card:nth-child(6) { animation-delay: 0.25s; }
+
+/* Funnel segments sweep in behind a clip, matching the tier distribution bar. */
+.ob-bar {
+  animation: drawBar 0.7s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* Hover affordances on the rows that carry a reading. */
+.niche-row,
+.tier-hero-row,
+.drop-reading,
+.verbatim,
+.utm-list li,
+.talk-chip {
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.niche-row:hover,
+.utm-list li:hover {
+  background: #fbfafd;
+}
+.tier-hero-row:not(.thin):hover {
+  border-color: var(--stone);
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.07);
+}
+.drop-reading:hover,
+.verbatim:hover {
+  transform: translateY(-2px);
+  border-color: var(--stone);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+}
+.verbatim:hover {
+  border-left-color: var(--purple-bolt);
+}
+.talk-chip:hover {
+  background: #e9e2f5;
+}
+.impact-card,
+.talk-card {
+  will-change: transform;
+}
+
+/* Honour the OS setting: no entrance animation, no bar draw, no hover lift. */
+@media (prefers-reduced-motion: reduce) {
+  .analytics-card,
+  .niche-fill,
+  .thr-fill,
+  .utm-fill,
+  .seg-row-fill,
+  .seg-row,
+  .drop-reading,
+  .talk-card,
+  .verbatim,
+  .ob-bar,
+  .dist-bar {
+    animation: none !important;
+  }
+  .exp-collapse,
+  .collapse,
+  .exp-caret {
+    transition: none !important;
+  }
+  .drop-reading:hover,
+  .verbatim:hover,
+  .impact-card:hover,
+  .talk-card:hover,
+  .analytics-metric:hover {
+    transform: none;
+  }
+}
+
 /* Analytics stagger runs to 8 sections now. */
-.perf-card:nth-of-type(6) {
+.analytics-card:nth-of-type(6) {
   animation-delay: 0.3s;
 }
-.perf-card:nth-of-type(7) {
+.analytics-card:nth-of-type(7) {
   animation-delay: 0.36s;
 }
-.perf-card:nth-of-type(8) {
+.analytics-card:nth-of-type(8) {
   animation-delay: 0.42s;
 }
 

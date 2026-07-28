@@ -9,7 +9,6 @@ import {
 } from 'react'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
-import { utmKeys } from './data/analytics'
 import {
   engagement,
   outcomes,
@@ -28,9 +27,10 @@ import {
   currentConfigSince,
   talkTo,
   verbatims,
+  utmKeys,
   type Segment,
   type Experiment,
-} from './data/performance'
+} from './data/analytics'
 import {
   CLIENT_ANNUAL_RATE,
   CONVERSION_RATE,
@@ -1297,13 +1297,20 @@ function ExperimentTable() {
                     {conv}% <i className="attr-n">n={e.signUps}</i>
                   </span>
                 )}
-                <span className="exp-caret">{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
+                <span className={`exp-caret ${isOpen ? 'up' : ''}`}>
+                  <ChevronDown />
+                </span>
               </button>
-              {isOpen && (
-                <div className="exp-detail">
-                  <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
+              {/* Kept mounted and collapsed with the 0fr→1fr grid trick used by
+                  .collapse, so opening and closing both animate — unmounting on
+                  close would snap shut. */}
+              <div className={`exp-collapse ${isOpen ? 'open' : ''}`}>
+                <div className="exp-collapse-inner">
+                  <div className="exp-detail">
+                    <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           )
         })}
@@ -1367,7 +1374,7 @@ function AnalyticsScreen() {
       <h1 className="page-title">Analytics</h1>
 
       {/* 1 ── Impact header */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <TargetIcon />
@@ -1375,11 +1382,11 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Each number against its target or benchmark." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           <div className="impact-grid">
             {impactStats.map((s) => (
               <div className="impact-card" key={s.label}>
-                <div className="perf-lbl">{s.label}</div>
+                <div className="analytics-lbl">{s.label}</div>
                 <div className="impact-num">{s.value}</div>
                 <div className="impact-compare">{s.compare}</div>
                 <div className={`impact-detail ${s.good ? 'good' : ''}`}>{s.detail}</div>
@@ -1390,7 +1397,7 @@ function AnalyticsScreen() {
       </section>
 
       {/* 2 ── Hero: niche × conversion */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <ChartIcon />
@@ -1398,7 +1405,7 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Share of your prospects against how many convert." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           <div className="niche-list">
             {niches.map((n) => (
               <NicheRow key={n.name} n={n} maxShare={maxShare} />
@@ -1421,7 +1428,7 @@ function AnalyticsScreen() {
               <b>{overCount} of {niches.length}</b> niches sit above the {nicheBenchmark}% concentration
               benchmark — your book is more concentrated than a diversified practice.
             </span>
-            <span className="perf-note">
+            <span className="analytics-note">
               Niches overlap: a prospect can match more than one, so shares sum past 100% and per-niche
               clients sum past 12.
             </span>
@@ -1430,7 +1437,7 @@ function AnalyticsScreen() {
       </section>
 
       {/* 3 ── Does the score work? */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <TierBarsIcon />
@@ -1438,7 +1445,7 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Whether a higher KQ score predicts a client." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           {/* Distribution first (how the book splits), then conversion per tier
               (whether the split predicts anything). */}
           <TierSector />
@@ -1469,13 +1476,13 @@ function AnalyticsScreen() {
             Prospects scored <b>Ready Now</b> convert <b>2.8×</b> more often than <b>Considering</b>.
             Based on your own converted clients — not a projected model.
           </p>
-          <p className="perf-note">
+          <p className="analytics-note">
             Tier 3 shows 0% on a single prospect. That is not a finding — one prospect cannot establish a
             rate, and the row is greyed for that reason.
           </p>
 
           <div className="tier-gauge-block">
-            <div className="perf-lbl">Average KQ Score · all {outcomes.scored} scored</div>
+            <div className="analytics-lbl">Average KQ Score · all {outcomes.scored} scored</div>
             <div className="outcome-num">{outcomes.avgKQ}</div>
             <KQGauge value={outcomes.avgKQ} />
           </div>
@@ -1483,7 +1490,7 @@ function AnalyticsScreen() {
       </section>
 
       {/* 4 ── Marketing reach */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <FunnelIcon />
@@ -1491,18 +1498,18 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Where prospects drop out, and which sources convert." />
         </header>
-        <div className="perf-body">
-          <div className="perf-sub-head">Drop-off, segmented</div>
+        <div className="analytics-body">
+          <div className="analytics-sub-head">Drop-off, segmented</div>
           <SegmentedFunnel />
 
-          <div className="perf-sub-head">Attribution — ranked by clients produced</div>
+          <div className="analytics-sub-head">Attribution — ranked by clients produced</div>
           <div className="utm-grid">
             {attribution.map((g) => (
               <AttributionCard key={g.key} label={g.label} rows={g.rows} />
             ))}
           </div>
 
-          <div className="perf-sub-head">Marketing effectiveness</div>
+          <div className="analytics-sub-head">Marketing effectiveness</div>
           <ul className="mkt-eff">
             {marketingEffectiveness.map((m) => (
               <li key={m}>{m}</li>
@@ -1512,7 +1519,7 @@ function AnalyticsScreen() {
       </section>
 
       {/* 5 ── Experiments */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <CheckIcon />
@@ -1520,13 +1527,13 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Each configuration with the outcome it produced." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           <ExperimentTable />
         </div>
       </section>
 
       {/* 6 ── Who to talk to */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <BoltIcon />
@@ -1534,7 +1541,7 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Highest-intent prospects, with their stated reasoning." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           <div className="talk-list">
             {talkTo.map((t) => (
               <div className="talk-card" key={t.name}>
@@ -1555,7 +1562,7 @@ function AnalyticsScreen() {
               </div>
             ))}
           </div>
-          <p className="perf-note">
+          <p className="analytics-note">
             Every score shows its reasoning. Each chip is something the prospect stated — never a tracked
             behaviour.
           </p>
@@ -1563,7 +1570,7 @@ function AnalyticsScreen() {
       </section>
 
       {/* 7 ── Verbatims */}
-      <section className="card perf-card">
+      <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <MegaphoneIcon />
@@ -1571,7 +1578,7 @@ function AnalyticsScreen() {
           </div>
           <HelpTip text="Recurring questions in the prospect's own words." />
         </header>
-        <div className="perf-body">
+        <div className="analytics-body">
           <div className="verbatim-grid">
             {verbatims.map((v) => (
               <blockquote className="verbatim" key={v.quote}>
@@ -1593,7 +1600,7 @@ function AnalyticsScreen() {
               <span>Run these as headlines verbatim; they are the prospect's phrasing, not yours.</span>
             </div>
           </div>
-          <p className="perf-note">Everything here is something your prospect told you directly.</p>
+          <p className="analytics-note">Everything here is something your prospect told you directly.</p>
         </div>
       </section>
 
@@ -1610,7 +1617,7 @@ function AnalyticsScreen() {
 function FunnelHealth() {
   const [open, setOpen] = useState(false)
   return (
-    <section className="card perf-card">
+    <section className="card analytics-card">
       <button
         type="button"
         className="card-head fh-head"
@@ -1626,17 +1633,17 @@ function FunnelHealth() {
         </span>
       </button>
       {open && (
-        <div className="perf-body">
-          <div className="perf-metrics">
+        <div className="analytics-body">
+          <div className="analytics-metrics">
             {engagement.map((m) => (
-              <div className="perf-metric" key={m.label}>
-                <div className="perf-lbl">{m.label}</div>
-                <div className="perf-num">{m.value}</div>
-                <div className={`perf-sub ${m.tone}`}>{m.sub}</div>
+              <div className="analytics-metric" key={m.label}>
+                <div className="analytics-lbl">{m.label}</div>
+                <div className="analytics-num">{m.value}</div>
+                <div className={`analytics-sub ${m.tone}`}>{m.sub}</div>
               </div>
             ))}
           </div>
-          <p className="perf-note">
+          <p className="analytics-note">
             Aggregate diagnostic only. These totals cannot separate a targeting problem from a follow-up
             problem — use the segmented drop-off above for that.
           </p>
