@@ -1,0 +1,930 @@
+{
+ "nicolehunter": {
+  "key": "nicolehunter",
+  "attention": {
+   "Health & Wellness": 1,
+   "Family & Relationships": 1,
+   "Home Life": 1
+  },
+  "concerns": [
+   "kids financial  support"
+  ],
+  "hopes": [],
+  "money_purpose": [
+   "Supporting my family",
+   "Security",
+   "Choice/Freedom"
+  ],
+  "fy_where": [
+   "At the beach",
+   "In the mountains"
+  ],
+  "fy_doing": [
+   "Creative pursuits",
+   "Socializing",
+   "Helping others",
+   "Traveling"
+  ],
+  "fy_with": [
+   "Friends",
+   "Romantic partner",
+   "Family"
+  ],
+  "fy_ideal": [
+   "Creative pursuits",
+   "Concerts",
+   "Music",
+   "Art",
+   "Going out",
+   "Cooking",
+   "Outdoors"
+  ],
+  "sentiment": 4,
+  "sentiment_label": "Mostly Good",
+  "joy_experience": "relaxing",
+  "joy_why": "people",
+  "conf": {
+   "condition": 3,
+   "resilience": 3,
+   "goal_belief": 1,
+   "joy_spend": 2,
+   "regret_never": 5,
+   "advisor_value": 3
+  },
+  "fy_horizon": "10-15 years",
+  "fy_vivid": 1,
+  "goal_text": "give back to places and things I like the most",
+  "goal_when": "1-5 years from now",
+  "goal_why": "greatful",
+  "goal_advisor_pref": "I want to do it on my own.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "I know what to do and I've started making changes",
+  "goal_action": "Not yet.",
+  "goal_worth": "personal satisfaction",
+  "goal_challenge": "IDK",
+  "goal_stage_check": 2,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "A relaxed | experience-rich life \u2014 her most recent joy was simply relaxing | and her future includes music | art | cooking | and the outdoors",
+    "Surrounded by people she loves \u2014 friends | a romantic partner | and family are central to her future vision",
+    "Living near nature \u2014 the beach and mountains feature prominently in how she sees her ideal future",
+    "Health | home life | and relationships are all areas where she wants money to make a meaningful difference"
+   ],
+   "Value": [
+    "Family comes first \u2014 April's top concern is her kids' financial support | showing deep commitment to those she loves",
+    "Security and freedom matter deeply \u2014 she wants money to provide stability and choice | not just comfort",
+    "Gratitude drives her giving \u2014 her goal to give back stems from a place of genuine appreciation | not obligation"
+   ],
+   "Motivation": [
+    "April wants to support her family and ensure her kids are financially okay",
+    "She's working toward a future filled with creativity | connection | and experiences \u2014 concerts | art | travel | and the outdoors",
+    "Giving back to causes and places she loves within the next 1\u20135 years brings her personal satisfaction",
+    "Her 10\u201315 year vision includes a rich | full life near the beach or mountains | surrounded by friends | a partner | and family"
+   ],
+   "Confidence and Concern": [
+    "April frequently second-guesses her financial decisions (scored 5/5 on regret) | which may be creating emotional friction",
+    "She rates her confidence in achieving financial goals at just 1/5 \u2014 a significant signal that she may feel stuck or uncertain about the path forward",
+    "She has moderate confidence in her current financial condition and ability to handle surprises (3/5)",
+    "She doesn't spend freely on joy \u2014 scoring low on spending for experiences \u2014 suggesting she may be holding back even when she doesn't need to",
+    "Her biggest concern is her kids' financial support; she reports no other hopes or concerns | which may reflect emotional fatigue or guardedness"
+   ],
+   "Discussion Topic": [
+    "April | you mentioned that your biggest concern right now is your kids' financial support \u2014 that kind of love and responsibility says a lot about who you are. I'd love to explore what 'support' looks like to you. Is it about helping them now | setting something up for their future | or both? Getting clear on that could help us build a plan that gives you real peace of mind.",
+    "You scored yourself a 1 out of 5 on believing you can achieve your financial goals \u2014 and I don't want to gloss over that. That kind of doubt can feel heavy | especially when you care so much about the people around you. Can you tell me more about what's making it hard to feel confident right now? Understanding that is where we start.",
+    "You shared that giving back is a goal you've thought about but haven't started yet \u2014 and that it comes from a place of gratitude. That's a beautiful motivator. What does giving back look like in your mind \u2014 is it donating to causes | supporting your community | or something more personal? Let's talk about how we can make that real within your timeline."
+   ]
+  }
+ },
+ "jeffreyhunter": {
+  "key": "jeffreyhunter",
+  "attention": {
+   "Work & Career": 0,
+   "Financial Planning & Management": -1,
+   "Health & Wellness": 1,
+   "Family & Relationships": 0,
+   "Hobbies & Interests": 1,
+   "Travel & Adventure": 1,
+   "Home Life": 0
+  },
+  "concerns": [
+   "success at work",
+   "will our kids be ok longterm"
+  ],
+  "hopes": [
+   "I hope to be able to not worry about money for retirement to provide freedom and choice",
+   "we'll be able to see the world"
+  ],
+  "money_purpose": [
+   "Choice/Freedom",
+   "Enjoying the moment",
+   "Comfort"
+  ],
+  "fy_where": [
+   "In the mountains"
+  ],
+  "fy_doing": [
+   "Traveling",
+   "Socializing"
+  ],
+  "fy_with": [
+   "Family",
+   "Friends",
+   "Romantic partner"
+  ],
+  "fy_ideal": [
+   "International Travel",
+   "Domestic travel",
+   "Going out",
+   "Cooking",
+   "Entertaining",
+   "Fitness",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Mountain",
+   "Snowbird",
+   "Gig work",
+   "Grandchildren"
+  ],
+  "sentiment": 4,
+  "sentiment_label": "Mostly Good",
+  "joy_experience": "friends weekend",
+  "joy_why": "reliving the old days",
+  "conf": {
+   "condition": 5,
+   "resilience": 5,
+   "goal_belief": 5,
+   "joy_spend": 5,
+   "regret_never": 2,
+   "advisor_value": 5
+  },
+  "fy_horizon": "5-10 years",
+  "fy_postcard": "Start thinking about what you want to do after work",
+  "fy_vivid": 3,
+  "goal_text": "Fund kids education",
+  "goal_when": "1-5 years from now",
+  "goal_why": "Financial independence",
+  "goal_advisor_pref": "I want help from a wealth manager.",
+  "goal_thought": "I have made changes and am staying on track",
+  "goal_steps": "I know what to do and I've started making changes",
+  "goal_action": "Yes, I've taken steps.",
+  "goal_worth": "Provides a foundation for their long term independence and success",
+  "goal_challenge": "May delay retirement",
+  "goal_stage_check": 4,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "Jeffrey's Future You is vivid: living in the mountains | traveling internationally and domestically | entertaining friends | staying active outdoors | and enjoying grandchildren.",
+    "He wants more travel | more hobbies | and more wellness \u2014 and his postcard to himself is a gentle nudge: start thinking about what life looks like after work.",
+    "Joy for Jeffrey looks like a friends' weekend and reliving the good old days \u2014 connection | laughter | and presence."
+   ],
+   "Value": [
+    "Family first \u2014 Jeffrey sees funding his kids' education as building a foundation for their long-term independence | not just a financial transaction.",
+    "Freedom over accumulation \u2014 money is a means to choice | comfort | and enjoying the moment | not an end in itself.",
+    "Intentional living \u2014 he spends on experiences that bring joy and rarely second-guesses those decisions."
+   ],
+   "Motivation": [
+    "Financial independence is the north star \u2014 Jeffrey wants to reach a place where retirement doesn't feel like a worry | but a choice.",
+    "He's driven by a desire to see the world | stay connected with family and friends | and eventually enjoy a mountain lifestyle with grandchildren nearby.",
+    "He's already taking action \u2014 he knows the steps | has started making changes | and is staying on track."
+   ],
+   "Confidence and Concern": [
+    "Jeffrey is highly confident across the board \u2014 scoring 5/5 on his ability to achieve goals | weather challenges | and live the life he wants. Working with an advisor clearly amplifies that confidence.",
+    "He rarely regrets financial decisions | which speaks to a grounded | values-aligned approach to money.",
+    "His biggest concerns are professional \u2014 success at work weighs on him \u2014 and parental \u2014 he genuinely wonders if his kids will be okay long-term.",
+    "He'd like to spend less mental energy on financial planning and management | suggesting he values simplicity and delegation."
+   ],
+   "Discussion Topic": [
+    "Jeffrey | you mentioned that funding your kids' education might delay retirement \u2014 but you also said it's worth it because it gives them a foundation for long-term independence. That trade-off says a lot about who you are. Let's make sure we're structuring this in a way that honors both goals | so you're not choosing one over the other.",
+    "You scored yourself a 5 on financial confidence across the board | which is fantastic \u2014 and you also said you'd love to spend less time on financial planning and management. That's exactly where we can add the most value. What would it feel like to hand that mental load off and just focus on living the life you're building?",
+    "Your Future You is in the mountains \u2014 traveling | entertaining | staying active | surrounded by family and friends. That picture is closer than you think. What's one thing that | if we got it right in the next 12 months | would make that vision feel truly within reach?"
+   ]
+  }
+ },
+ "ashleysmith": {
+  "key": "ashleysmith",
+  "attention": {
+   "Work & Career": 0,
+   "Financial Planning & Management": 0,
+   "Health & Wellness": 0,
+   "Family & Relationships": 1,
+   "Hobbies & Interests": 0,
+   "Travel & Adventure": 1,
+   "Home Life": 1
+  },
+  "concerns": [
+   "How we can continue to balance spending and saving in a way that allows us to meet our goals and indulge in some wishes along the way"
+  ],
+  "hopes": [
+   "That we have the team at Archer to help guide us and that we will be able to achieve all the goals we have set with some guidance and direction"
+  ],
+  "money_purpose": [
+   "Choice/Freedom",
+   "Security",
+   "Supporting my family"
+  ],
+  "fy_where": [
+   "In a big city",
+   "At the beach",
+   "In the country",
+   "In the mountains"
+  ],
+  "fy_doing": [
+   "Helping others",
+   "Socializing",
+   "Relaxing",
+   "Traveling"
+  ],
+  "fy_with": [
+   "Family",
+   "Friends",
+   "Romantic partner"
+  ],
+  "fy_ideal": [
+   "Domestic travel",
+   "International Travel",
+   "Going out",
+   "Staying home",
+   "Cooking",
+   "Entertaining",
+   "Sports",
+   "Family",
+   "Friends",
+   "Health",
+   "Volunteering",
+   "Philanthropic giving",
+   "House",
+   "Outdoors",
+   "Beach",
+   "Mountain",
+   "Ocean",
+   "Lake",
+   "Pets"
+  ],
+  "sentiment": 4,
+  "sentiment_label": "Mostly Good",
+  "joy_experience": "seeing the kids spend a Saturday afternoon doing things they love and feeling content",
+  "joy_why": "That everyone was content, happy and fulfilled",
+  "conf": {
+   "condition": 5,
+   "resilience": 5,
+   "goal_belief": 5,
+   "joy_spend": 4,
+   "regret_never": 5,
+   "advisor_value": 5
+  },
+  "fy_horizon": "5-10 years",
+  "fy_postcard": "Content - patience and a systematic approach now allows for contentment and peace in the future",
+  "fy_vivid": 4,
+  "goal_text": "House renovations",
+  "goal_when": "1-5 years from now",
+  "goal_why": "So that we can maximize the enjoyment we get from our home now instead of looking back and realizing we should have done it earlier or we wasted time not doing it.",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "Some ideas, but unsure",
+  "goal_action": "Yes, I've taken steps.",
+  "goal_worth": "Allows us to enjoy our home, Allows us to use our home in ways that we want (entertaining, playing, relaxing, etc.), Help us get more organized with the space we have, Helps with resale value if we get to a point of wanting to move or sell",
+  "goal_challenge": "Cash flow and budgeting (deciding on how we will pay for it), Understanding the scope of the project (do we want to be more conservative with renovations or more extensive while we are at it), Possible impacts of school needs down the road",
+  "goal_stage_check": 5,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "Ashley envisions a future filled with travel | entertaining | outdoor adventures | and time with family and friends across cities | beaches | mountains | and lakes.",
+    "She wants more from her home life and travel \u2014 both are areas where she's actively looking to invest more.",
+    "Volunteering and philanthropic giving also feature in her future vision | pointing to a desire to contribute beyond her immediate family."
+   ],
+   "Value": [
+    "Family and home are at the heart of Ashley's financial decisions \u2014 she wants money to provide choice | security | and the ability to support the people she loves.",
+    "She values intentionality: her postcard to herself speaks to patience and a systematic approach as the path to future peace and contentment.",
+    "Experiences over things \u2014 joy comes from watching her kids thrive on a Saturday afternoon | not from material accumulation."
+   ],
+   "Motivation": [
+    "Ashley is motivated by not wanting to look back with regret \u2014 she wants to maximize enjoyment of her home and life now | while she's in it.",
+    "Her future vision is rich and full: travel (domestic and international) | entertaining | family | friends | volunteering | and giving back.",
+    "She's driven by a desire for balance \u2014 spending and saving in a way that lets her meet goals while still indulging in life's meaningful moments."
+   ],
+   "Confidence and Concern": [
+    "Ashley scores a confident 5/5 across nearly all financial confidence measures \u2014 she believes in her ability to achieve goals and weather challenges.",
+    "She acknowledges she sometimes second-guesses financial decisions | which suggests she values reassurance and a clear plan.",
+    "Her primary concern is cash flow and budgeting \u2014 specifically how to fund renovations while keeping future needs (like school costs) in view."
+   ],
+   "Discussion Topic": [
+    "You mentioned not wanting to look back and feel like you wasted time not enjoying your home \u2014 that really stood out. As we think about the renovation timeline | what would it mean for your family to have that space ready and working for you in the next year or two? Let's make sure we're building a plan that gets you there without sacrificing what else matters.",
+    "You scored yourself a 5 on financial confidence | which is wonderful \u2014 but you also noted you sometimes second-guess decisions. That's actually really common when the stakes feel personal. How can we structure our conversations so you feel more settled after each decision | especially as renovation costs and school planning start to overlap?",
+    "Your postcard to Future You talked about patience and a systematic approach leading to peace. I love that framing. When you picture that contented future \u2014 traveling | entertaining | giving back \u2014 what's the one thing you'd want to make sure we never compromise on to get there?"
+   ]
+  }
+ },
+ "davidsmith": {
+  "key": "davidsmith",
+  "attention": {
+   "Work & Career": 0,
+   "Financial Planning & Management": 0,
+   "Health & Wellness": 0,
+   "Family & Relationships": 0,
+   "Hobbies & Interests": 1,
+   "Travel & Adventure": 1,
+   "Home Life": 0
+  },
+  "concerns": [
+   "Nothing keeps me up at night, but I am still working to calibrate our monthly cash flow with Claire being retired and my income moving to quarterly true up.",
+   "Balancing between saving for long term and spending to enhance our life."
+  ],
+  "hopes": [
+   "A second house and more travel"
+  ],
+  "money_purpose": [
+   "Philanthropy and giving",
+   "Choice/Freedom",
+   "Supporting my family"
+  ],
+  "fy_where": [
+   "In the country",
+   "At the beach",
+   "In the mountains"
+  ],
+  "fy_doing": [
+   "Relaxing",
+   "Creative pursuits",
+   "Traveling",
+   "Helping others",
+   "Socializing"
+  ],
+  "fy_with": [
+   "Family",
+   "Friends",
+   "Romantic partner",
+   "A large group"
+  ],
+  "fy_ideal": [
+   "Creative pursuits",
+   "Domestic travel",
+   "International Travel",
+   "Theater",
+   "Concerts",
+   "Music",
+   "Art",
+   "Going out",
+   "Museums",
+   "Staying home",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Health",
+   "Philanthropic giving",
+   "Grandchildren",
+   "House",
+   "Live near family",
+   "Country",
+   "Mountain",
+   "Ocean",
+   "Lake",
+   "Pets"
+  ],
+  "sentiment": 3,
+  "sentiment_label": "Neutral",
+  "joy_experience": "Going on a greenway bike ride with the kids that they both loved (they are very hard to please) and the 1996 Ford Explorer I got in December",
+  "joy_why": "Spending time with the kids doing something they enjoyed and reminiscing about how much fun I had in the Explorer the first time I had one like it.  Claire was there to experience both.",
+  "conf": {
+   "condition": 5,
+   "resilience": 5,
+   "goal_belief": 5,
+   "joy_spend": 3,
+   "regret_never": 4,
+   "advisor_value": 5
+  },
+  "fy_horizon": "10-15 years",
+  "fy_postcard": "Enjoy it more along the way",
+  "fy_vivid": 5,
+  "goal_text": "A lake house",
+  "goal_when": "1-5 years from now",
+  "goal_why": "I love the lake, and would want to share it with the kids before they graduate",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "Some ideas, but unsure",
+  "goal_action": "Not yet.",
+  "goal_worth": "Relaxation and fun with our family and friends",
+  "goal_challenge": "Private school, business uncertainty, down payment",
+  "goal_stage_check": 4,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "John envisions a future in nature \u2014 at the lake | in the mountains | by the beach \u2014 surrounded by family | friends | and a romantic partner.",
+    "He wants a life rich with culture: travel | theater | concerts | museums | and the outdoors | alongside philanthropic giving and time with grandchildren.",
+    "His joy comes from simple | real moments \u2014 a bike ride the kids actually loved | a nostalgic Ford Explorer | Ashley by his side."
+   ],
+   "Value": [
+    "Family is at the center of John's financial life \u2014 from the lake house dream to bike rides with the kids | his decisions are rooted in creating meaningful experiences with the people he loves.",
+    "Philanthropy | freedom | and supporting his family are the lenses through which he views money \u2014 not accumulation | but impact and choice.",
+    "He values presence and enjoyment | as his postcard to himself reminds us: 'Enjoy it more along the way.'"
+   ],
+   "Motivation": [
+    "John is motivated by creating shared memories with his kids before they grow up \u2014 the lake house isn't just a property | it's a backdrop for family life.",
+    "He's working toward a future filled with travel | creativity | culture | and connection \u2014 a rich | full life with Ashley | family | and friends.",
+    "He wants more \u2014 more travel | more hobbies \u2014 and is beginning to give himself permission to spend on joy | not just save for later."
+   ],
+   "Confidence and Concern": [
+    "John scores a confident 5 across the board on financial confidence \u2014 he believes in his plan | his resilience | and the value of working with an advisor.",
+    "He occasionally second-guesses financial decisions (4/5) | which suggests a thoughtful | reflective nature rather than anxiety.",
+    "His real tension is practical: calibrating monthly cash flow now that Ashley is retired and his income has shifted to quarterly true-ups. He's also navigating the balance between long-term saving and spending to enhance life today \u2014 a meaningful and common crossroads."
+   ],
+   "Discussion Topic": [
+    "You mentioned wanting to share the lake with your kids before they graduate \u2014 that window feels real and close. Let's map out what it would actually take to make that happen in the next few years | and make sure private school costs and the business income shift don't get in the way of it.",
+    "You scored yourself a 3 on spending money on things that bring you joy \u2014 but your joy story was a bike ride and a '96 Explorer that clearly meant the world to you. I'd love to explore what it would look like to be a little more intentional about building those moments in | without guilt.",
+    "You said your biggest concern is balancing long-term saving with spending to enhance life today. That's exactly the right question to be asking. Let's look at your cash flow together and see if we can create a framework that lets you do both \u2014 so the lake house doesn't feel like a tradeoff | but a natural next step."
+   ]
+  }
+ },
+ "kiralopez": {
+  "key": "kiralopez",
+  "attention": {
+   "Work & Career": 1,
+   "Financial Planning & Management": 0,
+   "Health & Wellness": 1,
+   "Family & Relationships": 1,
+   "Hobbies & Interests": 1,
+   "Travel & Adventure": 1,
+   "Home Life": 0
+  },
+  "concerns": [
+   "- cash flow in the short term"
+  ],
+  "hopes": [
+   "feeling more comfortable in our cash flow so that we can prioritize things like date nights, travel (with or without the girls), our individual wellness",
+   "if money weren't a factor, I would spend time getting our home/ kids/ things organized, streamlined, and supported (for example, someone else to do the grocery shopping or meal prep) so those things weren't such a burden or time suck."
+  ],
+  "money_purpose": [
+   "Supporting my family",
+   "Choice/Freedom",
+   "Simplicity"
+  ],
+  "fy_where": [
+   "Abroad",
+   "In a big city",
+   "In the mountains",
+   "At the beach"
+  ],
+  "fy_doing": [
+   "Relaxing",
+   "Running a business",
+   "Traveling",
+   "Helping others"
+  ],
+  "fy_with": [
+   "Family",
+   "Friends",
+   "Romantic partner"
+  ],
+  "fy_ideal": [
+   "International Travel",
+   "Domestic travel",
+   "Concerts",
+   "Music",
+   "Theater",
+   "Museums",
+   "Going out",
+   "Cooking",
+   "Entertaining",
+   "Fitness",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Health",
+   "Camping",
+   "Philanthropic giving",
+   "House",
+   "City",
+   "Mountain",
+   "Living abroad",
+   "Snowbird",
+   "Volunteering",
+   "Ocean",
+   "Pets"
+  ],
+  "joy_experience": "Travel with Luke; time to relax & restore",
+  "joy_why": "confidence that the girls were cared for. we could embrace the moment (stress reduction)",
+  "conf": {
+   "condition": 2,
+   "resilience": 2,
+   "goal_belief": 5,
+   "joy_spend": 3,
+   "regret_never": 4,
+   "advisor_value": 5
+  },
+  "fy_horizon": "5-10 years",
+  "fy_postcard": "try to make these things a reality today\u2014don't wait until the situation is perfect",
+  "fy_vivid": 4,
+  "goal_text": "establish an annual summer sabbatical of one month plus",
+  "goal_when": "1-5 years from now",
+  "goal_why": "We love to travel, and while work is deeply fulfilling, it is not (and we don't want it to be) the ultimate focus of our lives. I want to be able to step away from work for an extended period to adventure with our family all over the world.",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "Not thinking/worried about it",
+  "goal_steps": "No idea",
+  "goal_action": "Not yet.",
+  "goal_worth": "individually and collectively restorative for Luke, me, the family; exposes the girls to new experiences; returns us to one of the things we really love",
+  "goal_challenge": "we have a number of more pressing and immediate demands on our financial resources (cash flow, Luke's mom, etc)",
+  "goal_stage_check": 4,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "International travel as a core family experience",
+    "Balanced lifestyle that includes cultural activities (concerts | museums | theater)",
+    "Multiple living environments (city | mountains | beach | possibly abroad)",
+    "Time for fitness | outdoors | and entertaining friends",
+    "Running a business while maintaining flexibility for travel",
+    "Philanthropic engagement and helping others",
+    "Simplified home life with less administrative burden"
+   ],
+   "Value": [
+    "Family-centered - prioritizes experiences with spouse Luke and their daughters",
+    "Balance-oriented - seeks harmony between work fulfillment and personal life",
+    "Experience-driven - values travel and cultural enrichment over material possessions",
+    "Wellness-focused - recognizes the importance of restoration and self-care"
+   ],
+   "Motivation": [
+    "Creating meaningful family experiences through travel and adventure",
+    "Finding freedom and flexibility in work-life integration",
+    "Ensuring long-term security for her children",
+    "Building a life that allows for personal restoration and growth",
+    "Supporting family obligations (including care for Luke's mom)"
+   ],
+   "Confidence and Concern": [
+    "Confident about long-term financial prospects (rated 5/5 on achieving financial goals)",
+    "Values advisor partnership (rated 5/5 on advisor improving confidence)",
+    "Concerned about immediate cash flow constraints",
+    "Worried about balancing family care obligations with personal needs",
+    "Anxious about home sale prospects",
+    "Struggles with confidence in weathering unexpected financial challenges (rated 2/5)",
+    "Often second-guesses financial decisions (rated 4/5)",
+    "Feels current financial condition limits desired lifestyle (rated 2/5)"
+   ],
+   "Discussion Topic": [
+    "I noticed that travel with Luke brought you recent joy | and your vision includes establishing a month-long summer sabbatical. How might we begin creating smaller versions of this experience now | even as we work toward the larger goal?",
+    "You mentioned feeling caught between 'must-have' expenses and the things that bring you joy. Let's explore how we might reframe some of your current spending to better align with your values around family experiences and personal restoration.",
+    "Your confidence in long-term financial goals is strong | but I sense some tension around short-term cash flow and caring for Luke's mom. Could we talk about creating a more structured approach to these immediate concerns that might help reduce the mental burden?"
+   ]
+  }
+ },
+ "lukelopez": {
+  "key": "lukelopez",
+  "attention": {
+   "Work & Career": 1,
+   "Financial Planning & Management": 1,
+   "Health & Wellness": 1,
+   "Family & Relationships": 1,
+   "Hobbies & Interests": 1,
+   "Travel & Adventure": 1,
+   "Home Life": 0
+  },
+  "concerns": [
+   "Month-to-month cash flow is negative",
+   "Financially taking care of my mother years earlier than expected"
+  ],
+  "hopes": [
+   "Getting back to a positive monthly cash flow that allows us to get back on track",
+   "Getting work/my company back on track in 1h 2026"
+  ],
+  "money_purpose": [
+   "Choice/Freedom",
+   "Independence",
+   "Supporting my family"
+  ],
+  "fy_where": [
+   "In the mountains",
+   "At the beach",
+   "Abroad"
+  ],
+  "fy_doing": [
+   "Traveling",
+   "Creative pursuits",
+   "Socializing",
+   "Relaxing",
+   "Running a business"
+  ],
+  "fy_with": [
+   "Family",
+   "Friends",
+   "Romantic partner"
+  ],
+  "fy_ideal": [
+   "International Travel",
+   "Domestic travel",
+   "Sports",
+   "Fitness",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Health",
+   "Camping",
+   "Board room",
+   "Creative pursuits",
+   "Concerts",
+   "Museums",
+   "Going out",
+   "Cooking",
+   "Entertaining",
+   "Living abroad",
+   "Ocean",
+   "Pets",
+   "Mountain",
+   "Beach",
+   "City",
+   "Philanthropic giving",
+   "House",
+   "Theater",
+   "Music",
+   "Art",
+   "Desert",
+   "Lake"
+  ],
+  "joy_experience": "Spending the holidays with my daughters and wife",
+  "joy_why": "Getting time to be in the moment watching my girls grow",
+  "conf": {
+   "condition": 4,
+   "resilience": 4,
+   "goal_belief": 4,
+   "joy_spend": 4,
+   "regret_never": 4,
+   "advisor_value": 5
+  },
+  "fy_horizon": "5-10 years",
+  "fy_postcard": "Be patient and play the long game.",
+  "fy_vivid": 5,
+  "goal_text": "Get cash flow back positive and feeling confident that we're on the right track financiallyy",
+  "goal_when": "< 12 months from now",
+  "goal_why": "It's unsettling to have to pull from savings to maintain cash flow, even if we have a long runway.",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "Some ideas, but unsure",
+  "goal_action": "Not yet.",
+  "goal_worth": "peace of mind, maintaining a path to early financial freedom",
+  "goal_challenge": "We can't sell our old home in this market and thus can't pay down the mortgage on our current house. Plus, childcare for both kids is very expensive.",
+  "goal_stage_check": 4,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "A balanced life that includes travel (both domestic and international)",
+    "Possibly living abroad in a mountain or beach setting within 5-10 years",
+    "Maintaining close connections with family | romantic partner | and friends",
+    "Pursuing creative interests and running a business",
+    "Engaging in outdoor activities | fitness | and sports",
+    "Contributing through philanthropic giving"
+   ],
+   "Value": [
+    "Financial security and stability are core principles | as shown by concern about negative cash flow",
+    "Family-centered | with deep value placed on time with wife and daughters",
+    "Independence and freedom are important | with money viewed as a means to these ends",
+    "Long-term thinking | as evidenced by the 'play the long game' mindset",
+    "Balance between financial responsibility and enjoying meaningful experiences"
+   ],
+   "Motivation": [
+    "Achieving early financial freedom",
+    "Supporting family | including unexpectedly caring for mother",
+    "Creating stability that allows presence with children as they grow",
+    "Building a life that includes travel | creative pursuits | and social connections",
+    "Running a business successfully | with hopes for improvement in 2026"
+   ],
+   "Confidence and Concern": [
+    "Generally confident about achieving financial goals (4/5) and weathering challenges",
+    "Strong belief in the value of working with a financial advisor (5/5)",
+    "Concerned about negative monthly cash flow requiring use of savings",
+    "Worried about real estate challenges - unable to sell previous home in current market",
+    "Anxious about high childcare costs for multiple children",
+    "Concerned about supporting mother earlier than anticipated"
+   ],
+   "Discussion Topic": [
+    "You mentioned feeling unsettled about pulling from savings for cash flow | even with a long runway. Let's explore some immediate strategies that might help restore positive cash flow while keeping your early financial freedom goals intact. What expenses feel most flexible to you right now?",
+    "I noticed you're balancing several significant financial pressures - childcare costs | holding two properties in a challenging market | and supporting your mother earlier than expected. How are you prioritizing these competing needs | and where would you most value strategic guidance?",
+    "Your vision for the future includes a rich mix of family time | travel | creative pursuits | and potentially running a business. As we work to address your current cash flow concerns | I'd love to understand which of these future aspirations feels most important to protect and nurture now."
+   ]
+  }
+ },
+ "mattbravos": {
+  "key": "mattbravos",
+  "attention": {
+   "Work & Career": -1,
+   "Financial Planning & Management": 0,
+   "Health & Wellness": 1,
+   "Family & Relationships": 1,
+   "Hobbies & Interests": 1,
+   "Travel & Adventure": 1,
+   "Home Life": 0
+  },
+  "concerns": [
+   "Making sure that my family will have resources to handle a major setback or medical emergency"
+  ],
+  "hopes": [
+   "I would stop working at my current career.",
+   "Id like to develop a piece of land that we currently own. Id like to take our kids on some adventures and trips."
+  ],
+  "money_purpose": [
+   "Supporting my family",
+   "Choice/Freedom",
+   "Independence"
+  ],
+  "fy_where": [
+   "In the desert",
+   "In the mountains"
+  ],
+  "fy_doing": [
+   "Traveling",
+   "Helping others",
+   "Socializing",
+   "Relaxing"
+  ],
+  "fy_with": [
+   "Romantic partner",
+   "Friends",
+   "Family"
+  ],
+  "fy_ideal": [
+   "Domestic travel",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Health",
+   "Mountain",
+   "Desert",
+   "Fitness",
+   "Sports",
+   "Camping"
+  ],
+  "joy_experience": "Road tripping with my family to visit my mom and exploring around Arizona",
+  "joy_why": "Connecting and sharing an experience",
+  "conf": {
+   "condition": 4,
+   "resilience": 4,
+   "goal_belief": 5,
+   "joy_spend": 4,
+   "regret_never": 5,
+   "advisor_value": 5
+  },
+  "fy_horizon": "5-10 years",
+  "fy_postcard": "Take time to make choices, but trust your gut. You have to decide what is best for you and your family despite what others may think.",
+  "fy_vivid": 2,
+  "goal_text": "Find a way to make work optional and be able to travel while the kids are still at home.",
+  "goal_when": "1-5 years from now",
+  "goal_why": "I want to make the most of this short window. I'd rather spend the time now with them than conserve money.",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "Some ideas, but unsure",
+  "goal_action": "Yes, I've taken steps.",
+  "goal_worth": "This would give our family a chance to do things on our timeline and create lasting memories",
+  "goal_challenge": "Limited cash flow, could delay other priorities",
+  "goal_stage_check": 5,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "Work-optional lifestyle within 1-5 years",
+    "More travel and adventure | especially in mountain and desert settings",
+    "More time for family | friends | health | and outdoor activities",
+    "Less focus on career | more on hobbies and interests",
+    "Developing owned land",
+    "Balance of relaxation | socializing | and helping others"
+   ],
+   "Value": [
+    "Family-centered - prioritizes creating memories with family over conserving money",
+    "Freedom and independence - desires choice in how to spend time and resources",
+    "Authenticity - believes in trusting gut feelings and making choices true to self",
+    "Connection - finds joy in shared experiences with loved ones"
+   ],
+   "Motivation": [
+    "Creating meaningful family experiences while children are still at home",
+    "Achieving work-optional status to have more control over time",
+    "Developing owned land as a potential project or investment",
+    "Supporting family's wellbeing and security",
+    "Traveling and exploring nature with loved ones"
+   ],
+   "Confidence and Concern": [
+    "High confidence in ability to achieve financial goals (5/5)",
+    "Strong belief that working with a financial advisor improves confidence (5/5)",
+    "Good confidence in weathering unexpected financial challenges (4/5)",
+    "Frequently second-guesses financial decisions (5/5)",
+    "Concerned about having resources for major setbacks or medical emergencies",
+    "Somewhat unclear vision of future self (2/5 clarity)"
+   ],
+   "Discussion Topic": [
+    "That road trip to Arizona with your family sounds like it really embodied what Markers to you. I'd love to hear more about those experiences and how we might create a plan that allows for more of those meaningful adventures while your kids are still at home.",
+    "You mentioned wanting to develop a piece of land you currently own. I'm curious how you envision this fitting into your work-optional goal - could this be an income source | a family retreat | or perhaps both?",
+    "I notice you have strong confidence in achieving your financial goals | but also tend to second-guess your decisions. Let's talk about how we might build a plan that not only addresses your concern about having resources for emergencies | but also gives you more peace of mind about your day-to-day financial choices."
+   ]
+  }
+ },
+ "kristenbravos": {
+  "key": "kristenbravos",
+  "attention": {
+   "Work & Career": 0,
+   "Financial Planning & Management": 1,
+   "Health & Wellness": 1,
+   "Family & Relationships": 0,
+   "Hobbies & Interests": 0,
+   "Travel & Adventure": 1,
+   "Home Life": 1
+  },
+  "concerns": [
+   "That I didn't responsibly handle the money we currently have.",
+   "That I may not use the money we have grown to it's full potential."
+  ],
+  "hopes": [
+   "The potential to grow our money to a level that our children will have a set future. That we can enjoy the benefits together.",
+   "I would like to help my mom with some expenses."
+  ],
+  "money_purpose": [
+   "Supporting my family",
+   "Choice/Freedom",
+   "Security"
+  ],
+  "fy_where": [
+   "At the beach",
+   "Abroad",
+   "In the mountains",
+   "In the desert"
+  ],
+  "fy_doing": [
+   "Traveling",
+   "Relaxing",
+   "Creative pursuits"
+  ],
+  "fy_with": [
+   "Family"
+  ],
+  "fy_ideal": [
+   "International Travel",
+   "Domestic travel",
+   "Concerts",
+   "Art",
+   "Museums",
+   "Music",
+   "Cooking",
+   "Staying home",
+   "Fitness",
+   "Sports",
+   "Outdoors",
+   "Family",
+   "Friends",
+   "Health",
+   "Camping",
+   "Volunteering",
+   "House",
+   "City",
+   "Country",
+   "Beach",
+   "Mountain",
+   "Ocean",
+   "Lake",
+   "Desert",
+   "Pets"
+  ],
+  "joy_experience": "Helping my mom with bills",
+  "joy_why": "Taking away some stress and worry from her",
+  "conf": {
+   "condition": 4,
+   "resilience": 4,
+   "goal_belief": 5,
+   "joy_spend": 4,
+   "regret_never": 4,
+   "advisor_value": 5
+  },
+  "fy_horizon": "a few years",
+  "fy_postcard": "Visiting Europe has been great. Thanks for getting the tickets!",
+  "fy_vivid": 3,
+  "goal_text": "Own a home in Lake Tahoe, Montana, or Utah. Travel to Europe with my family within 2 years.",
+  "goal_when": "1-5 years from now",
+  "goal_why": "Living near outdoor activities and great weather.",
+  "goal_advisor_pref": "I want help from my advisor.",
+  "goal_thought": "I've thought about it, but no plans yet",
+  "goal_steps": "Some ideas, but unsure",
+  "goal_action": "Not yet.",
+  "goal_worth": "outdoor time with my family, easy of travel to other states",
+  "goal_challenge": "leaving family, friends, routine",
+  "goal_stage_check": 4,
+  "advisor_narrative": {
+   "Lifestyle Aspiration": [
+    "Relocating to a nature-centric location (Lake Tahoe | Montana | or Utah)",
+    "Traveling internationally | especially to Europe with family",
+    "Balancing active outdoor pursuits with relaxation and creative activities",
+    "Creating a life rich in experiences - concerts | art | museums | cooking",
+    "Maintaining strong family connections while exploring new environments"
+   ],
+   "Value": [
+    "Family-centered - prioritizes supporting family members | especially her mother",
+    "Outdoor lifestyle - drawn to nature and locations that facilitate outdoor activities",
+    "Balance - seeks a life that combines adventure | relaxation | and creative pursuits",
+    "Generosity - finds joy in being able to help others financially"
+   ],
+   "Motivation": [
+    "Creating financial security for her children's future",
+    "Gaining freedom and choices through financial stability",
+    "Alleviating financial stress for loved ones | particularly her mother",
+    "Building a lifestyle centered around outdoor activities and travel"
+   ],
+   "Confidence and Concern": [
+    "Strong belief in ability to achieve financial goals (5/5 confidence)",
+    "Confident about weathering financial challenges (4/5)",
+    "Worries about not handling current money responsibly",
+    "Concerned about maximizing the potential of accumulated wealth",
+    "Tends to second-guess financial decisions despite overall confidence",
+    "Values professional financial guidance to boost confidence"
+   ],
+   "Discussion Topic": [
+    "I noticed you mentioned finding joy in helping your mom with bills. Could you share more about what supporting family members means to you | and how we might incorporate that value into your long-term financial plan?",
+    "You've expressed interest in owning a home in Lake Tahoe | Montana | or Utah within the next few years. What specific qualities about these locations appeal to you | and how do you envision this move enhancing your family's lifestyle?",
+    "I see you're concerned about maximizing the potential of your money while ensuring your children have a secure future. Let's explore what financial security means to you and how we can build a strategy that balances growth with your desire for family experiences like your planned European trip."
+   ]
+  }
+ }
+}

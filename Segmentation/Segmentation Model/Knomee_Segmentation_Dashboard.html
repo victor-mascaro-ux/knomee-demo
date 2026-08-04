@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knomee — Audience Intelligence (Model Prototype)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#1A1050;--purple:#6B3FA0;--lilac:#F2EFF7;--line:#E4E0EC;--ink:#2A2440;--mute:#7A7391;--amber:#B8860B;--amberbg:#FFF6E0}
+body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF9FC;color:var(--ink);font-size:14px;line-height:1.5}
+header{background:var(--navy);color:#fff;padding:22px 32px}
+header h1{font-size:19px;font-weight:600;letter-spacing:-.2px}
+header p{font-size:12.5px;opacity:.72;margin-top:3px}
+.banner{background:var(--amberbg);border-bottom:1px solid #EFD9A0;color:#6B5200;padding:9px 32px;font-size:12px}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 32px 64px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+.tab{padding:9px 15px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font:inherit;font-size:13px;color:var(--mute);transition:.12s}
+.tab:hover{border-color:var(--purple);color:var(--purple)}
+.tab.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:500}
+.tab .k{font-weight:700;margin-right:6px;opacity:.6}
+.tab.on .k{opacity:.85}
+.spine{background:#fff;border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:8px;padding:13px 17px;margin-bottom:22px;font-size:13px}
+.spine b{color:var(--navy)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:19px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--mute);font-weight:600;margin-bottom:15px}
+.seg{margin-bottom:13px}
+.seg-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:5px}
+.seg-name{font-weight:600;font-size:13.5px;color:var(--navy);cursor:pointer}
+.seg-name:hover{color:var(--purple)}
+.seg-n{font-size:12px;color:var(--mute);white-space:nowrap}
+.bar{height:9px;background:var(--lilac);border-radius:5px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--purple);border-radius:5px;transition:width .3s}
+.bar.zero>i{background:var(--line)}
+.blurb{font-size:12px;color:var(--mute);margin-top:5px;line-height:1.45}
+.hook{font-size:12px;color:var(--purple);font-style:italic;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-weight:600;color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px 9px;border-bottom:2px solid var(--line)}
+td{padding:9px;border-bottom:1px solid #F0EEF5;vertical-align:top}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--lilac)}
+.pill{display:inline-block;padding:2px 8px;border-radius:11px;background:var(--lilac);color:var(--navy);font-size:11px;margin:1px 2px 1px 0;white-space:nowrap}
+.pill.warn{background:var(--amberbg);color:var(--amber)}
+.pill.hot{background:#E6F4EA;color:#1E6B3A}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border-radius:10px;overflow:hidden}
+.q{background:#fff;padding:16px;min-height:150px}
+.q h3{font-size:13px;color:var(--navy);margin-bottom:3px}
+.q .qn{font-size:26px;font-weight:600;color:var(--purple);line-height:1}
+.q .qb{font-size:11.5px;color:var(--mute);margin:6px 0 8px}
+.scatter{position:relative;height:330px;border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);margin:12px 0 4px 42px}
+.dot{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--purple);transform:translate(-50%,50%);cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px var(--purple)}
+.dot:hover{background:var(--navy);z-index:5}
+.dot span{position:absolute;left:15px;top:-6px;font-size:11px;white-space:nowrap;color:var(--ink)}
+.cut{position:absolute;background:#D9D3E6}
+.axl{font-size:10.5px;color:var(--mute)}
+details{margin-top:8px}
+summary{cursor:pointer;font-size:12px;color:var(--purple);outline:none}
+.trace{font-size:11.5px;color:var(--mute);margin-top:7px;padding-left:12px;border-left:2px solid var(--lilac)}
+.trace li{margin-bottom:3px;list-style:none}
+.cmp td:first-child{font-weight:600;color:var(--navy)}
+.note{font-size:11.5px;color:var(--mute);margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.full{grid-column:1/-1}
+.step{display:flex;gap:14px;margin-bottom:16px}
+.step .num{flex:0 0 26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.step h4{font-size:13.5px;color:var(--navy);margin-bottom:3px}
+.step p{font-size:12.5px;color:var(--mute);line-height:1.5}
+.fx{display:inline-block;margin-top:7px;background:var(--lilac);border:1px solid var(--line);border-radius:6px;padding:7px 11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--navy)}
+.io{display:grid;grid-template-columns:1.4fr 1.6fr .7fr;gap:1px;background:var(--line);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.io>div{background:#fff;padding:9px 12px;font-size:12.5px}
+.io>div.h{background:var(--lilac);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mute);font-weight:600}
+.wk{background:var(--lilac);border-radius:9px;padding:15px;margin-top:6px}
+.wk h4{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);margin-bottom:9px}
+.wk table{background:#fff;border-radius:6px;overflow:hidden}
+.wk td,.wk th{padding:6px 9px;font-size:12px}
+.wk tr.win td{background:#EDE6F7;font-weight:600}
+.q2{font-size:14px;color:var(--navy);font-weight:600;margin-bottom:14px;padding-left:11px;border-left:3px solid var(--purple)}
+.ct{display:flex;gap:12px;margin-bottom:11px;align-items:flex-start}
+.ct b{flex:0 0 250px;font-size:12.5px;color:var(--navy)}
+.ct span{font-size:12.5px;color:var(--mute);line-height:1.5}
+@media(max-width:760px){.io{grid-template-columns:1fr}.ct{flex-direction:column;gap:2px}.ct b{flex:none}}
+.kpi{display:flex;gap:26px;flex-wrap:wrap}
+.kpi div b{display:block;font-size:25px;color:var(--purple);font-weight:600;line-height:1.1}
+.kpi div span{font-size:11.5px;color:var(--mute)}
+.modal{position:fixed;inset:0;background:rgba(26,16,80,.42);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+.modal.on{display:flex}
+.sheet{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:86vh;overflow:auto;padding:26px}
+.sheet h2{font-size:18px;color:var(--navy);margin-bottom:2px}
+.sheet .x{float:right;cursor:pointer;color:var(--mute);font-size:22px;line-height:1}
+.sheet section{margin-top:17px}
+.sheet section h4{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mute);margin-bottom:6px}
+.q1{font-size:12.5px;color:var(--ink);background:var(--lilac);padding:9px 11px;border-radius:7px;margin-bottom:5px}
+</style></head><body>
+<header>
+  <h1>Audience Intelligence — Segmentation Model Prototype</h1>
+  <p>Four competing models scored against the same 8 Adventure profiles. Switch models to see how the same people regroup.</p>
+</header>
+<div class="banner"><b>v2 — schema-driven.</b> Every label is an exhaustive partition of the Adventure's closed option space; free text never assigns a label. Verified against 30,011 synthetic respondents: 0 crashes, 0 unlabeled, every label reachable. <b>Caveat:</b> n=8 real profiles, no conversion outcomes — nothing here is validated against conversion.</div>
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <div class="spine" id="spine"></div>
+  <div class="grid" id="view"></div>
+</div>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<script>
+const D = {"meta": {"c_cuts": {"vision": 82.1, "readiness": 35.7}, "c_basis": "cohort median", "purpose_idf": {"Supporting my family": 0.182, "Security": 0.944, "Choice/Freedom": 0.057, "Enjoying the moment": 1.792, "Comfort": 1.792, "Philanthropy and giving": 1.792, "Simplicity": 1.792, "Independence": 1.281}}, "proof": {"n": 30011, "crashes": 0, "unlabeled": 0, "insufficient": 3230, "A": {"Contribution": 1388, "Home & Table": 2298, "Culture & Creativity": 5048, "People & Generations": 4506, "Work & Enterprise": 4651, "Insufficient Signal": 3230, "Travel & Exploration": 5303, "Place & Setting": 823, "Health & Activity": 2764}, "B": {"Working on it Liberator": 2172, "Uneasy Protector": 3698, "Working on it Contributor": 679, "Working on it Experiencer": 1259, "Working on it Protector": 2229, "Uneasy Unstated": 4000, "Unrated Unstated": 2484, "Uneasy Liberator": 3427, "Uneasy Achiever": 1110, "Assured Unstated": 906, "Uneasy Experiencer": 2249, "Uneasy Contributor": 1130, "Working on it Unstated": 1854, "Assured Liberator": 425, "Unrated Protector": 294, "Unrated Liberator": 181, "Assured Protector": 446, "Assured Experiencer": 286, "Assured Achiever": 142, "Working on it Achiever": 671, "Unrated Achiever": 65, "Assured Contributor": 117, "Unrated Experiencer": 133, "Unrated Contributor": 54}, "C": {"Ready to Build": 6162, "Moving Without a Map": 5368, "Not Yet Looking": 13875, "Vivid but Stuck": 4606}, "D": {"Confidence Gap": 5508, "Vision-Action Gap": 1756, "Decision Fatigue": 8507, "Self-Directed": 10621, "Deferred Joy": 7923, "Planning Aversion": 2352, "Vision Fog": 3276, "Solo Future": 7882, "Advisor-Receptive": 3611, "Permission Gap": 1606, "Horizon Mismatch": 833}, "missing": [], "writeins_resolved": {"Security": 324, "Helping others": 382, "Running a business": 382, "Creative pursuits": 551, "Solo": 408, "Romantic partner": 350, "Friends": 350, "Supporting my family": 670, "In the country": 312, "Abroad": 312, "Going out": 175, "Domestic travel": 176, "RVing": 176, "In the mountains": 288, "House": 128, "Mountain": 128, "Sports": 149, "Grandchildren": 142, "Pets": 142, "Outdoors": 1}, "writeins_dropped": {"studying philosophy": 388, "church": 152, "my dog": 332, "quantum basket weaving": 153, "on a boat": 275, "crypto moonshot": 290, "beekeeping": 139}}, "method": {"A": {"title": "Model A \u2014 Life Domain", "question": "Which life domain does this person's future vision point at?", "inputs": [["Ideal life includes", "40 options, partitioned into 8 domains", "60% of the score"], ["Attention shifts", "7 areas, + More / = Same / \u2212 Less", "25% of the score"], ["Future You is doing", "6 options mapped to domains", "15% of the score"]], "steps": [["1 \u00b7 Count the hits per domain", "Each of the 40 ideal-life options belongs to exactly one domain. Count how many the person selected in each.", null], ["2 \u00b7 Work out what chance would predict", "A domain with 14 options will collect more picks than one with 2, purely on size. So compute how many hits you'd expect if their picks were spread at random.", "expected = (their total picks) \u00d7 (options in domain) \u00f7 40"], ["3 \u00b7 Score the over-representation, not the raw count", "Lift asks whether the domain is over-represented among THIS person's picks. The +1 on both sides shrinks small domains toward 1.0, so a single lucky pick in a 2-option domain can't dominate.", "lift = (hits + 1) \u00f7 (expected + 1)"], ["4 \u00b7 Add the reinforcing signals", "Attention shifts marked '+ More' and Future You 'doing' selections both map to domains and add their weighted share.", "score = 0.60 \u00d7 (lift \u00f7 3) + 0.25 \u00d7 attention share + 0.15 \u00d7 doing share"], ["5 \u00b7 Highest score wins; near-ties report both", "If the runner-up is within 0.08, both domains are reported. Two domains can genuinely be co-live. If none of the three inputs was answered, the result is 'Insufficient Signal' \u2014 never a silent default.", null]], "example": {"who": "davidsmith", "picks": 23, "total": 40, "rows": [{"domain": "Culture & Creativity", "size": 7, "hits": 7, "expected": 4.03, "lift": 1.59, "contrib": 0.318, "picked": "Creative pursuits, Theater, Concerts, Music, Art, Museums, Going out"}, {"domain": "People & Generations", "size": 3, "hits": 3, "expected": 1.73, "lift": 1.47, "contrib": 0.294, "picked": "Family, Friends, Grandchildren"}, {"domain": "Travel & Exploration", "size": 3, "hits": 2, "expected": 1.73, "lift": 1.1, "contrib": 0.22, "picked": "International travel, Domestic travel"}, {"domain": "Home & Table", "size": 4, "hits": 2, "expected": 2.3, "lift": 0.91, "contrib": 0.182, "picked": "Staying home, Pets"}, {"domain": "Health & Activity", "size": 4, "hits": 2, "expected": 2.3, "lift": 0.91, "contrib": 0.182, "picked": "Outdoors, Health"}, {"domain": "Place & Setting", "size": 14, "hits": 6, "expected": 8.05, "lift": 0.77, "contrib": 0.155, "picked": "House, Country, Mountain, Ocean, Lake, Live near family"}, {"domain": "Contribution", "size": 3, "hits": 1, "expected": 1.73, "lift": 0.73, "contrib": 0.147, "picked": "Philanthropic giving"}, {"domain": "Work & Enterprise", "size": 2, "hits": 0, "expected": 1.15, "lift": 0.47, "contrib": 0.093, "picked": ""}], "attention_more": ["Hobbies & Interests", "Travel & Adventure"], "doing": ["Relaxing", "Creative pursuits", "Traveling", "Helping others", "Socializing"], "final": {"Culture & Creativity": 0.628, "Travel & Exploration": 0.53, "People & Generations": 0.354, "Home & Table": 0.242, "Contribution": 0.207, "Health & Activity": 0.182, "Place & Setting": 0.155, "Work & Enterprise": 0.093}, "segment": "Culture & Creativity"}}, "B": {"title": "Model B \u2014 Purpose \u00d7 Posture", "question": "Why does money matter to them, and how do they feel about it?", "inputs": [["I want money to help me with", "10 options + Other, ranked 1\u20133", "Family axis"], ["Confidence items", "condition, resilience, goal belief, freedom from regret", "Posture axis"]], "steps": [["1 \u00b7 Map each pick to a family", "All 10 options partition into 5 families. 'Other' or no answer resolves to 'Unstated'.", null], ["2 \u00b7 Weight by position, then by distinctiveness", "First pick scores 3, second 2, third 1. Then multiply by an inverse-frequency weight: an option almost everyone picks tells you little about who this person is.", "weight = ln((n + 1) \u00f7 (times picked + 0.5))"], ["3 \u00b7 Highest family wins", "Margins under 2 points are flagged rather than hidden.", null], ["4 \u00b7 Posture from the confidence block", "Mean of four items, banded. No confidence answers at all resolves to 'Unrated'.", "Assured \u2265 4.2 \u00b7 Working on it \u2265 3.2 \u00b7 Uneasy < 3.2"]], "example": {"who": "davidsmith", "rows": [{"opt": "Philanthropy and giving", "pos": 1, "rank": 3, "family": "Contributor", "weight": 1.79, "points": 5.38}, {"opt": "Choice/Freedom", "pos": 2, "rank": 2, "family": "Liberator", "weight": 0.15, "points": 0.3}, {"opt": "Supporting my family", "pos": 3, "rank": 1, "family": "Protector", "weight": 0.18, "points": 0.18}], "all": {"Contributor": 5.38, "Liberator": 0.3, "Protector": 0.18, "Experiencer": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "posture": "Assured", "mean": 4.75, "segment": "Assured Contributor"}}, "C": {"title": "Model C \u2014 Vision \u00d7 Readiness", "question": "How clearly can they see the destination, and how close are they to acting?", "inputs": [["Vision clarity 1\u20135, ideal-life count, where/doing/who counts, horizon set, postcard completed", "all closed", "Vision axis, 0\u2013100"], ["Readiness: thought / steps / action, goal timeframe, advisor preference", "all closed enums", "Readiness axis, 0\u2013100"]], "steps": [["1 \u00b7 Build the Vision score", "Clarity rating contributes up to 40, breadth of ideal-life selections up to 22, the where/what/who answers up to 23, horizon 8, postcard completion 7. The postcard's CONTENT is never read \u2014 only whether it was filled in.", null], ["2 \u00b7 Build the Readiness score", "The three transtheoretical questions are ordered 4-point scales; position on each maps linearly. Thought 26, steps 26, action 30, timeframe up to 12, advisor preference 6.", "points = (position on the scale \u00f7 3) \u00d7 weight"], ["3 \u00b7 Split at the cohort median, not a fixed number", "The Adventure is designed to elicit a vivid vision, so absolute vision scores skew high \u2014 the median here is 82.1. A fixed threshold would file almost everyone under 'vivid' and the axis would carry no information. Books under 6 profiles fall back to absolute cuts.", "current cuts \u2014 vision 82.1 \u00b7 readiness 35.7 (cohort median)"], ["4 \u00b7 Quadrant by construction", "Above both cuts \u2192 Ready to Build. Vision only \u2192 Vivid but Stuck. Readiness only \u2192 Moving Without a Map. Neither \u2192 Not Yet Looking. Exhaustive by definition, so nobody is ever unlabeled.", null]], "example": {"who": "kiralopez", "vision": 90.0, "readiness": 16.0, "vision_reasons": ["Vision clarity 4/5 (+30)", "24 of 40 ideal-life options selected (+22)", "Future You 'where': 4 selected (+8)", "Future You 'what': 4 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'Not thinking/worried about it' = level 0/3 (+0)", "goal_steps: 'No idea' = level 0/3 (+0)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "basis": "cohort median", "segment": "Vivid but Stuck"}}, "D": {"title": "Model D \u2014 Tension Tags", "question": "Where does what they want contradict what they believe or do?", "inputs": [["Confidence items, vision clarity, readiness enums, attention shifts, advisor preference, Future You 'who'", "all closed", "Multi-label"]], "steps": [["1 \u00b7 Each tag is a single explicit rule over closed answers", "No scoring, no thresholds to tune, no free text. A tag either fires or it doesn't, and the rule that fired is shown.", null], ["2 \u00b7 Tags are not exclusive", "A prospect carries as many as apply \u2014 in this sample, between 1 and 5.", null], ["3 \u00b7 A rule never fires on missing data", "Every rule checks that the items it reads were actually answered. An unanswered confidence item is never read as a low one.", null]], "rules": [["Deferred Joy", "Wants MORE on travel / hobbies / health AND spending-for-joy \u2264 3"], ["Confidence Gap", "Goal belief \u2265 4 AND min(condition, resilience) \u2264 3"], ["Vision-Action Gap", "Vision clarity \u2265 4 AND action = 'Not yet'"], ["Permission Gap", "min(condition, resilience) \u2265 4 AND spending-for-joy \u2264 3"], ["Decision Fatigue", "Freedom-from-regret \u2264 2"], ["Horizon Mismatch", "Goal within 5 years AND steps \u2264 'some ideas' AND no action taken"], ["Planning Aversion", "Financial-planning attention = \u2212 Less AND advisor value \u2265 4"], ["Vision Fog", "Vision clarity \u2264 2 AND fewer than 8 ideal-life options chosen"], ["Solo Future", "Future You 'who' includes Solo"], ["Advisor-Receptive", "Advisor value \u2265 4 AND asked for help with the goal"], ["Self-Directed", "Chose to pursue the goal without advisor support"]], "example": null}}, "contract": [["Every label is an exhaustive, disjoint partition", "The 40 ideal-life options and the 10 money-purpose options each belong to exactly one group. A validator proves this on every run, and an assertion fails the build if the label set drifts from the partition."], ["Any answer set resolves to a label", "Verified against 30,008 synthetic respondents drawn from the full option space \u2014 including all-'Other', all-floor, all-ceiling, single-tag and 15%-completion cases. Zero crashes, zero unlabeled, every label reachable."], ["Narrative free text never assigns a label", "Goals, concerns, hopes and the postcard are read by advisors, not by the models. Scrambling every one of those fields on the 8 real profiles leaves all labels identical. The one exception is deliberate: text typed into an 'Other' box, which may only resolve to an option that already exists."], ["Missing data is never evidence", "Rules keyed on a low score check the item was answered first. Profiles under 55% field coverage are classified but flagged unreliable."], ["Answers are canonicalised before matching", "The export writes 'International Travel'; the schema declares 'International travel'. Exact matching silently dropped it. All answers now match case-insensitively against a synonym table, and an alarm reports anything matching no declared option."]], "other": {"title": "How 'Other' write-ins are handled", "policy": [["Approximated toward a declared option", "When a client picks 'Other' and types something, a field-scoped lexicon places it onto an option that already exists. 'golf and sailing' becomes Sports + Outdoors. 'second home in the mountains' becomes House + Mountain."], ["Never creates a new category", "A write-in can only ever resolve to something already in the option space. It cannot invent a label, widen a partition, or alter a domain."], ["If it cannot be placed, it does not count", "No match, or 'Other' left blank, and the answer is dropped entirely - in every model, for every use case. It does not inflate any count, any denominator, or any score. The bare token 'Other' never counts anywhere."], ["Every placement is logged", "What the client wrote, which term matched, and which option it resolved to - all visible in the per-prospect trace, so a wrong approximation is findable rather than silent."], ["Multiple concepts in one write-in all resolve", "'a small town overseas' carries a setting and a location; both are recorded. Overlapping matches collapse so 'ski' and 'skiing' cannot double-count the same span."]], "lexicon_sizes": [["fy_ideal", 198, 40, 40], ["fy_where", 23, 7, 7], ["fy_doing", 26, 6, 6], ["fy_with", 31, 6, 6], ["money_purpose", 42, 10, 10]], "examples": [["fy_ideal", "golf and sailing", "Sports, Outdoors"], ["fy_ideal", "second home in the mountains", "House, Mountain"], ["fy_ideal", "RV trips to national parks", "Domestic travel, RVing"], ["fy_ideal", "church", "\u2014 dropped, no declared option matches"], ["fy_ideal", "Other (blank)", "\u2014 dropped, does not count"], ["money_purpose", "peace of mind", "Security"], ["money_purpose", "legacy for my kids", "Supporting my family"], ["money_purpose", "crypto moonshot", "\u2014 dropped"], ["fy_where", "a small town overseas", "In the country, Abroad"], ["fy_with", "my wife and buddies", "Romantic partner, Friends"], ["fy_horizon", "about 8 years", "5-10 years"]], "backlog_note": "Dropped write-ins are logged and counted. Ranked by frequency they are a backlog of options the Adventure is missing - the highest-value output of this mechanism, not a failure of it."}, "backlog": [["studying philosophy", 388], ["my dog", 332], ["crypto moonshot", 290], ["on a boat", 275], ["quantum basket weaving", 153], ["church", 152], ["beekeeping", 139]], "wi_resolved": 5546, "wi_dropped": 1729, "old": {"nicolehunter": "Giving It Forward", "jeffreyhunter": "Setting Up the Next Generation", "ashleysmith": "Rooting a Place", "davidsmith": "Rooting a Place", "kiralopez": "Widening the World", "lukelopez": "Caught in the Middle", "mattbravos": "Widening the World", "kristenbravos": "Rooting a Place"}, "prospects": [{"key": "nicolehunter", "name": "Nicole Hunter", "coverage": 100, "goal": "give back to places and things I like the most", "goal_when": "1-5 years from now", "purpose": ["Supporting my family", "Security", "Choice/Freedom"], "conf": {"condition": 3, "resilience": 3, "goal_belief": 1, "joy_spend": 2, "regret_never": 5, "advisor_value": 3}, "concerns": ["kids financial  support"], "hopes": [], "horizon": "10-15 years", "vivid": 1, "ideal": ["Creative pursuits", "Concerts", "Music", "Art", "Going out", "Cooking", "Outdoors"], "attention": {"Health & Wellness": 1, "Family & Relationships": 1, "Home Life": 1}, "A": {"segment": "Culture & Creativity", "secondary": null, "score": 0.614, "margin": 0.129, "reasons": ["Ideal life: 5 of 7 'Culture & Creativity' options (Creative pursuits, Concerts, Music, Art...); expected 1.2 by chance -> lift 2.70", "Future You is 'Creative pursuits' (+0.07)"], "all": {"Culture & Creativity": 0.614, "Health & Activity": 0.485, "People & Generations": 0.456, "Home & Table": 0.36, "Travel & Exploration": 0.206, "Contribution": 0.206, "Place & Setting": 0.183, "Work & Enterprise": 0.148}, "confident": true}, "B": {"family": "Protector", "posture": "Uneasy", "posture_mean": 3.0, "segment": "Uneasy Protector", "score": 2.43, "runner_up": "Liberator", "margin": 2.28, "reasons": ["'Supporting my family' at rank 1, distinctiveness 0.18 (+0.55)", "'Security' at rank 2, distinctiveness 0.94 (+1.89)"], "all": {"Protector": 2.43, "Liberator": 0.15, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": true}, "C": {"segment": "Moving Without a Map", "vision": 36.0, "readiness": 36.0, "vision_reasons": ["Vision clarity 1/5 (+0)", "7 of 40 ideal-life options selected (+8)", "Future You 'where': 2 selected (+5)", "Future You 'what': 4 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '10-15 years' (+8)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'I know what to do and I've started making changes' = level 2/3 (+17)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '1-5 years from now' (+10)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Deferred Joy", "why": "Wants MORE attention on Health & Wellness but scores 2/5 on spending for joy"}, {"tag": "Vision Fog", "why": "Vision clarity 1/5 with only 7 ideal-life elements chosen"}, {"tag": "Self-Directed", "why": "Chose to pursue this goal without advisor support"}]}, "oldA": "Giving It Forward"}, {"key": "jeffreyhunter", "name": "Jeffrey Hunter", "coverage": 100, "goal": "Fund kids education", "goal_when": "1-5 years from now", "purpose": ["Choice/Freedom", "Enjoying the moment", "Comfort"], "conf": {"condition": 5, "resilience": 5, "goal_belief": 5, "joy_spend": 5, "regret_never": 2, "advisor_value": 5}, "concerns": ["success at work", "will our kids be ok longterm"], "hopes": ["I hope to be able to not worry about money for retirement to provide freedom and choice", "we'll be able to see the world"], "horizon": "5-10 years", "vivid": 3, "ideal": ["International Travel", "Domestic travel", "Going out", "Cooking", "Entertaining", "Fitness", "Outdoors", "Family", "Friends", "Mountain", "Snowbird", "Gig work", "Grandchildren"], "attention": {"Work & Career": 0, "Financial Planning & Management": -1, "Health & Wellness": 1, "Family & Relationships": 0, "Hobbies & Interests": 1, "Travel & Adventure": 1, "Home Life": 0}, "A": {"segment": "Travel & Exploration", "secondary": null, "score": 0.704, "margin": 0.149, "reasons": ["Ideal life: 2 of 3 'Travel & Exploration' options (International travel, Domestic travel); expected 1.0 by chance -> lift 1.52", "Wants MORE attention on 'Travel & Adventure' (+0.25)", "Future You is 'Traveling' (+0.15)"], "all": {"Travel & Exploration": 0.704, "People & Generations": 0.555, "Health & Activity": 0.511, "Culture & Creativity": 0.372, "Home & Table": 0.261, "Work & Enterprise": 0.242, "Place & Setting": 0.108, "Contribution": 0.101}, "confident": true}, "B": {"family": "Experiencer", "posture": "Assured", "posture_mean": 4.25, "segment": "Assured Experiencer", "score": 5.38, "runner_up": "Liberator", "margin": 4.93, "reasons": ["'Enjoying the moment' at rank 2, distinctiveness 1.79 (+3.58)", "'Comfort' at rank 3, distinctiveness 1.79 (+1.79)"], "all": {"Experiencer": 5.38, "Liberator": 0.45, "Protector": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": true}, "C": {"segment": "Moving Without a Map", "vision": 64.3, "readiness": 69.3, "vision_reasons": ["Vision clarity 3/5 (+20)", "13 of 40 ideal-life options selected (+14)", "Future You 'where': 1 selected (+3)", "Future You 'what': 2 selected (+5)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I have made changes and am staying on track' = level 3/3 (+26)", "goal_steps: 'I know what to do and I've started making changes' = level 2/3 (+17)", "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": true}, "D": {"tags": [{"tag": "Decision Fatigue", "why": "Freedom-from-regret 2/5"}, {"tag": "Planning Aversion", "why": "Wants LESS attention on financial planning while rating advisor value 5/5"}, {"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Setting Up the Next Generation"}, {"key": "ashleysmith", "name": "Ashley Smith", "coverage": 100, "goal": "House renovations", "goal_when": "1-5 years from now", "purpose": ["Choice/Freedom", "Security", "Supporting my family"], "conf": {"condition": 5, "resilience": 5, "goal_belief": 5, "joy_spend": 4, "regret_never": 5, "advisor_value": 5}, "concerns": ["How we can continue to balance spending and saving in a way that allows us to meet our goals and indulge in some wishes along the way"], "hopes": ["That we have the team at Archer to help guide us and that we will be able to achieve all the goals we have set with some guidance and direction"], "horizon": "5-10 years", "vivid": 4, "ideal": ["Domestic travel", "International Travel", "Going out", "Staying home", "Cooking", "Entertaining", "Sports", "Family", "Friends", "Health", "Volunteering", "Philanthropic giving", "House", "Outdoors", "Beach", "Mountain", "Ocean", "Lake", "Pets"], "attention": {"Work & Career": 0, "Financial Planning & Management": 0, "Health & Wellness": 0, "Family & Relationships": 1, "Hobbies & Interests": 0, "Travel & Adventure": 1, "Home Life": 1}, "A": {"segment": "Travel & Exploration", "secondary": "People & Generations", "score": 0.572, "margin": 0.0, "reasons": ["Ideal life: 2 of 3 'Travel & Exploration' options (International travel, Domestic travel); expected 1.4 by chance -> lift 1.24", "Wants MORE attention on 'Travel & Adventure' (+0.25)", "Future You is 'Traveling' (+0.07)"], "all": {"Travel & Exploration": 0.572, "People & Generations": 0.572, "Home & Table": 0.545, "Contribution": 0.322, "Place & Setting": 0.282, "Health & Activity": 0.276, "Work & Enterprise": 0.103, "Culture & Creativity": 0.092}, "confident": false}, "B": {"family": "Protector", "posture": "Assured", "posture_mean": 5.0, "segment": "Assured Protector", "score": 2.07, "runner_up": "Liberator", "margin": 1.62, "reasons": ["'Security' at rank 2, distinctiveness 0.94 (+1.89)", "'Supporting my family' at rank 3, distinctiveness 0.18 (+0.18)"], "all": {"Protector": 2.07, "Liberator": 0.45, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": false}, "C": {"segment": "Ready to Build", "vision": 88.9, "readiness": 43.3, "vision_reasons": ["Vision clarity 4/5 (+30)", "19 of 40 ideal-life options selected (+21)", "Future You 'where': 4 selected (+8)", "Future You 'what': 4 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)", "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Rooting a Place"}, {"key": "davidsmith", "name": "David Smith", "coverage": 100, "goal": "A lake house", "goal_when": "1-5 years from now", "purpose": ["Philanthropy and giving", "Choice/Freedom", "Supporting my family"], "conf": {"condition": 5, "resilience": 5, "goal_belief": 5, "joy_spend": 3, "regret_never": 4, "advisor_value": 5}, "concerns": ["Nothing keeps me up at night, but I am still working to calibrate our monthly cash flow with Claire being retired and my income moving to quarterly true up.", "Balancing between saving for long term and spending to enhance our life."], "hopes": ["A second house and more travel"], "horizon": "10-15 years", "vivid": 5, "ideal": ["Creative pursuits", "Domestic travel", "International Travel", "Theater", "Concerts", "Music", "Art", "Going out", "Museums", "Staying home", "Outdoors", "Family", "Friends", "Health", "Philanthropic giving", "Grandchildren", "House", "Live near family", "Country", "Mountain", "Ocean", "Lake", "Pets"], "attention": {"Work & Career": 0, "Financial Planning & Management": 0, "Health & Wellness": 0, "Family & Relationships": 0, "Hobbies & Interests": 1, "Travel & Adventure": 1, "Home Life": 0}, "A": {"segment": "Culture & Creativity", "secondary": null, "score": 0.628, "margin": 0.098, "reasons": ["Ideal life: 7 of 7 'Culture & Creativity' options (Creative pursuits, Theater, Concerts, Music...); expected 4.0 by chance -> lift 1.59", "Wants MORE attention on 'Hobbies & Interests' (+0.25)", "Future You is 'Creative pursuits' (+0.06)"], "all": {"Culture & Creativity": 0.628, "Travel & Exploration": 0.53, "People & Generations": 0.354, "Home & Table": 0.242, "Contribution": 0.207, "Health & Activity": 0.182, "Place & Setting": 0.155, "Work & Enterprise": 0.093}, "confident": true}, "B": {"family": "Contributor", "posture": "Assured", "posture_mean": 4.75, "segment": "Assured Contributor", "score": 5.38, "runner_up": "Liberator", "margin": 5.08, "reasons": ["'Philanthropy and giving' at rank 1, distinctiveness 1.79 (+5.38)"], "all": {"Contributor": 5.38, "Liberator": 0.3, "Protector": 0.18, "Experiencer": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": true}, "C": {"segment": "Vivid but Stuck", "vision": 100.0, "readiness": 33.3, "vision_reasons": ["Vision clarity 5/5 (+40)", "23 of 40 ideal-life options selected (+22)", "Future You 'where': 3 selected (+8)", "Future You 'what': 5 selected (+8)", "Future You 'who': 4 selected (+7)", "Horizon set to '10-15 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Deferred Joy", "why": "Wants MORE attention on Travel & Adventure, Hobbies & Interests but scores 3/5 on spending for joy"}, {"tag": "Vision-Action Gap", "why": "Vision clarity 5/5 but action = 'Not yet.'"}, {"tag": "Permission Gap", "why": "Condition 5/5 and resilience 5/5 but joy-spending 3/5"}, {"tag": "Horizon Mismatch", "why": "Goal set '1-5 years from now' but steps = 'Some ideas, but unsure' and no action taken"}, {"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Rooting a Place"}, {"key": "kiralopez", "name": "Kira Lopez", "coverage": 100, "goal": "establish an annual summer sabbatical of one month plus", "goal_when": "1-5 years from now", "purpose": ["Supporting my family", "Choice/Freedom", "Simplicity"], "conf": {"condition": 2, "resilience": 2, "goal_belief": 5, "joy_spend": 3, "regret_never": 4, "advisor_value": 5}, "concerns": ["- cash flow in the short term"], "hopes": ["feeling more comfortable in our cash flow so that we can prioritize things like date nights, travel (with or without the girls), our individual wellness", "if money weren't a factor, I would spend time getting our home/ kids/ things organized, streamlined, and supported (for example, someone else to do the grocery shopping or meal prep) so those things weren't such a burden or time suck."], "horizon": "5-10 years", "vivid": 4, "ideal": ["International Travel", "Domestic travel", "Concerts", "Music", "Theater", "Museums", "Going out", "Cooking", "Entertaining", "Fitness", "Outdoors", "Family", "Friends", "Health", "Camping", "Philanthropic giving", "House", "City", "Mountain", "Living abroad", "Snowbird", "Volunteering", "Ocean", "Pets"], "attention": {"Work & Career": 1, "Financial Planning & Management": 0, "Health & Wellness": 1, "Family & Relationships": 1, "Hobbies & Interests": 1, "Travel & Adventure": 1, "Home Life": 0}, "A": {"segment": "Travel & Exploration", "secondary": null, "score": 0.611, "margin": 0.125, "reasons": ["Ideal life: 3 of 3 'Travel & Exploration' options (International travel, Domestic travel, Camping); expected 1.8 by chance -> lift 1.43", "Wants MORE attention on 'Travel & Adventure' (+0.25)", "Future You is 'Traveling' (+0.07)"], "all": {"Travel & Exploration": 0.611, "Health & Activity": 0.485, "Culture & Creativity": 0.481, "People & Generations": 0.464, "Work & Enterprise": 0.416, "Home & Table": 0.31, "Contribution": 0.289, "Place & Setting": 0.149}, "confident": true}, "B": {"family": "Liberator", "posture": "Working on it", "posture_mean": 3.25, "segment": "Working on it Liberator", "score": 2.09, "runner_up": "Protector", "margin": 1.55, "reasons": ["'Choice/Freedom' at rank 2, distinctiveness 0.15 (+0.30)", "'Simplicity' at rank 3, distinctiveness 1.79 (+1.79)"], "all": {"Liberator": 2.09, "Protector": 0.55, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": false}, "C": {"segment": "Vivid but Stuck", "vision": 90.0, "readiness": 16.0, "vision_reasons": ["Vision clarity 4/5 (+30)", "24 of 40 ideal-life options selected (+22)", "Future You 'where': 4 selected (+8)", "Future You 'what': 4 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'Not thinking/worried about it' = level 0/3 (+0)", "goal_steps: 'No idea' = level 0/3 (+0)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Deferred Joy", "why": "Wants MORE attention on Travel & Adventure, Hobbies & Interests, Health & Wellness but scores 3/5 on spending for joy"}, {"tag": "Confidence Gap", "why": "Goal belief 5/5 but condition 2/5, resilience 2/5"}, {"tag": "Vision-Action Gap", "why": "Vision clarity 4/5 but action = 'Not yet.'"}, {"tag": "Horizon Mismatch", "why": "Goal set '1-5 years from now' but steps = 'No idea' and no action taken"}, {"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Widening the World"}, {"key": "lukelopez", "name": "Luke Lopez", "coverage": 100, "goal": "Get cash flow back positive and feeling confident that we're on the right track financiallyy", "goal_when": "< 12 months from now", "purpose": ["Choice/Freedom", "Independence", "Supporting my family"], "conf": {"condition": 4, "resilience": 4, "goal_belief": 4, "joy_spend": 4, "regret_never": 4, "advisor_value": 5}, "concerns": ["Month-to-month cash flow is negative", "Financially taking care of my mother years earlier than expected"], "hopes": ["Getting back to a positive monthly cash flow that allows us to get back on track", "Getting work/my company back on track in 1h 2026"], "horizon": "5-10 years", "vivid": 5, "ideal": ["International Travel", "Domestic travel", "Sports", "Fitness", "Outdoors", "Family", "Friends", "Health", "Camping", "Board room", "Creative pursuits", "Concerts", "Museums", "Going out", "Cooking", "Entertaining", "Living abroad", "Ocean", "Pets", "Mountain", "Beach", "City", "Philanthropic giving", "House", "Theater", "Music", "Art", "Desert", "Lake"], "attention": {"Work & Career": 1, "Financial Planning & Management": 1, "Health & Wellness": 1, "Family & Relationships": 1, "Hobbies & Interests": 1, "Travel & Adventure": 1, "Home Life": 0}, "A": {"segment": "Culture & Creativity", "secondary": "Travel & Exploration", "score": 0.573, "margin": 0.011, "reasons": ["Ideal life: 7 of 7 'Culture & Creativity' options (Creative pursuits, Theater, Concerts, Music...); expected 5.1 by chance -> lift 1.32", "Wants MORE attention on 'Hobbies & Interests' (+0.25)", "Future You is 'Creative pursuits' (+0.06)"], "all": {"Culture & Creativity": 0.573, "Travel & Exploration": 0.562, "Health & Activity": 0.506, "People & Generations": 0.499, "Work & Enterprise": 0.473, "Home & Table": 0.265, "Place & Setting": 0.161, "Contribution": 0.126}, "confident": false}, "B": {"family": "Liberator", "posture": "Working on it", "posture_mean": 4.0, "segment": "Working on it Liberator", "score": 3.01, "runner_up": "Protector", "margin": 2.83, "reasons": ["'Choice/Freedom' at rank 1, distinctiveness 0.15 (+0.45)", "'Independence' at rank 2, distinctiveness 1.28 (+2.56)"], "all": {"Liberator": 3.01, "Protector": 0.18, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": true}, "C": {"segment": "Vivid but Stuck", "vision": 100.0, "readiness": 35.3, "vision_reasons": ["Vision clarity 5/5 (+40)", "29 of 40 ideal-life options selected (+22)", "Future You 'where': 3 selected (+8)", "Future You 'what': 5 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '< 12 months from now' (+12)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Vision-Action Gap", "why": "Vision clarity 5/5 but action = 'Not yet.'"}, {"tag": "Horizon Mismatch", "why": "Goal set '< 12 months from now' but steps = 'Some ideas, but unsure' and no action taken"}, {"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Caught in the Middle"}, {"key": "mattbravos", "name": "Matt Bravos", "coverage": 100, "goal": "Find a way to make work optional and be able to travel while the kids are still at home.", "goal_when": "1-5 years from now", "purpose": ["Supporting my family", "Choice/Freedom", "Independence"], "conf": {"condition": 4, "resilience": 4, "goal_belief": 5, "joy_spend": 4, "regret_never": 5, "advisor_value": 5}, "concerns": ["Making sure that my family will have resources to handle a major setback or medical emergency"], "hopes": ["I would stop working at my current career.", "Id like to develop a piece of land that we currently own. Id like to take our kids on some adventures and trips."], "horizon": "5-10 years", "vivid": 2, "ideal": ["Domestic travel", "Outdoors", "Family", "Friends", "Health", "Mountain", "Desert", "Fitness", "Sports", "Camping"], "attention": {"Work & Career": -1, "Financial Planning & Management": 0, "Health & Wellness": 1, "Family & Relationships": 1, "Hobbies & Interests": 1, "Travel & Adventure": 1, "Home Life": 0}, "A": {"segment": "Health & Activity", "secondary": null, "score": 0.75, "margin": 0.082, "reasons": ["Ideal life: 4 of 4 'Health & Activity' options (Fitness, Sports, Outdoors, Health); expected 1.0 by chance -> lift 2.50", "Wants MORE attention on 'Health & Wellness' (+0.25)"], "all": {"Health & Activity": 0.75, "Travel & Exploration": 0.668, "People & Generations": 0.668, "Culture & Creativity": 0.323, "Contribution": 0.189, "Home & Table": 0.175, "Place & Setting": 0.133, "Work & Enterprise": 0.133}, "confident": true}, "B": {"family": "Liberator", "posture": "Assured", "posture_mean": 4.5, "segment": "Assured Liberator", "score": 1.58, "runner_up": "Protector", "margin": 1.03, "reasons": ["'Choice/Freedom' at rank 2, distinctiveness 0.15 (+0.30)", "'Independence' at rank 3, distinctiveness 1.28 (+1.28)"], "all": {"Liberator": 1.58, "Protector": 0.55, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": false}, "C": {"segment": "Moving Without a Map", "vision": 56.3, "readiness": 43.3, "vision_reasons": ["Vision clarity 2/5 (+10)", "10 of 40 ideal-life options selected (+11)", "Future You 'where': 2 selected (+5)", "Future You 'what': 4 selected (+8)", "Future You 'who': 3 selected (+7)", "Horizon set to '5-10 years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)", "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Widening the World"}, {"key": "kristenbravos", "name": "Kristen Bravos", "coverage": 100, "goal": "Own a home in Lake Tahoe, Montana, or Utah. Travel to Europe with my family within 2 years.", "goal_when": "1-5 years from now", "purpose": ["Supporting my family", "Choice/Freedom", "Security"], "conf": {"condition": 4, "resilience": 4, "goal_belief": 5, "joy_spend": 4, "regret_never": 4, "advisor_value": 5}, "concerns": ["That I didn't responsibly handle the money we currently have.", "That I may not use the money we have grown to it's full potential."], "hopes": ["The potential to grow our money to a level that our children will have a set future. That we can enjoy the benefits together.", "I would like to help my mom with some expenses."], "horizon": "a few years", "vivid": 3, "ideal": ["International Travel", "Domestic travel", "Concerts", "Art", "Museums", "Music", "Cooking", "Staying home", "Fitness", "Sports", "Outdoors", "Family", "Friends", "Health", "Camping", "Volunteering", "House", "City", "Country", "Beach", "Mountain", "Ocean", "Lake", "Desert", "Pets"], "attention": {"Work & Career": 0, "Financial Planning & Management": 1, "Health & Wellness": 1, "Family & Relationships": 0, "Hobbies & Interests": 0, "Travel & Adventure": 1, "Home Life": 1}, "A": {"segment": "Travel & Exploration", "secondary": null, "score": 0.628, "margin": 0.093, "reasons": ["Ideal life: 3 of 3 'Travel & Exploration' options (International travel, Domestic travel, Camping); expected 1.9 by chance -> lift 1.39", "Wants MORE attention on 'Travel & Adventure' (+0.25)", "Future You is 'Traveling' (+0.10)"], "all": {"Travel & Exploration": 0.628, "Health & Activity": 0.536, "Home & Table": 0.454, "Place & Setting": 0.31, "Culture & Creativity": 0.286, "People & Generations": 0.209, "Contribution": 0.139, "Work & Enterprise": 0.089}, "confident": true}, "B": {"family": "Protector", "posture": "Assured", "posture_mean": 4.25, "segment": "Assured Protector", "score": 1.49, "runner_up": "Liberator", "margin": 1.19, "reasons": ["'Supporting my family' at rank 1, distinctiveness 0.18 (+0.55)", "'Security' at rank 3, distinctiveness 0.94 (+0.94)"], "all": {"Protector": 1.49, "Liberator": 0.3, "Experiencer": 0.0, "Contributor": 0.0, "Achiever": 0.0, "Unstated": 0.0}, "confident": false}, "C": {"segment": "Not Yet Looking", "vision": 75.3, "readiness": 33.3, "vision_reasons": ["Vision clarity 3/5 (+20)", "25 of 40 ideal-life options selected (+22)", "Future You 'where': 4 selected (+8)", "Future You 'what': 3 selected (+8)", "Future You 'who': 1 selected (+2)", "Horizon set to 'a few years' (+8)", "Postcard completed (+7)"], "readiness_reasons": ["goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)", "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)", "goal_action: 'Not yet.' = level 0/3 (+0)", "Timeframe '1-5 years from now' (+10)", "Wants advisor help with this goal (+6)"], "cuts": {"vision": 82.1, "readiness": 35.7}, "confident": false}, "D": {"tags": [{"tag": "Horizon Mismatch", "why": "Goal set '1-5 years from now' but steps = 'Some ideas, but unsure' and no action taken"}, {"tag": "Advisor-Receptive", "why": "Advisor value 5/5 and asked for help"}]}, "oldA": "Rooting a Place"}], "models": {"A": {"name": "Life Domain", "spine": "Dominant life domain \u2014 the 8-domain partition of the 40 ideal-life options; the label is the domain", "kind": "exclusive", "segments": {"Place & Setting": {"blurb": "The future vision is anchored to a place - a home, a region, a setting.", "hook": "The address is the goal. Let's make the numbers meet it.", "opts": ["House", "Apartment", "City", "Country", "Suburb", "Beach", "Mountain", "Ocean", "Lake", "Desert", "Living abroad", "Snowbird", "RVing", "Live near family"]}, "Travel & Exploration": {"blurb": "The vision is about going further - travel, exploration, new ground.", "hook": "The window for this is open now. Let's use it.", "opts": ["International travel", "Domestic travel", "Camping"]}, "Culture & Creativity": {"blurb": "Culture, creativity and expression carry the vision - art, music, making things.", "hook": "Fund the part of life that isn't on the balance sheet.", "opts": ["Creative pursuits", "Theater", "Concerts", "Music", "Art", "Museums", "Going out"]}, "Home & Table": {"blurb": "Home as the centre of gravity - cooking, hosting, being in it rather than away from it.", "hook": "Make home the best place you spend money.", "opts": ["Staying home", "Cooking", "Entertaining", "Pets"]}, "Health & Activity": {"blurb": "Health, fitness and being physically able to enjoy what comes next.", "hook": "The plan only works if you're well enough to live it.", "opts": ["Fitness", "Sports", "Outdoors", "Health"]}, "People & Generations": {"blurb": "Relationships are the vision - family, friends, generations.", "hook": "Plan around the people, not the portfolio.", "opts": ["Family", "Friends", "Grandchildren"]}, "Contribution": {"blurb": "Contribution beyond the household - volunteering, philanthropy, board work.", "hook": "Turn generosity into a plan with real impact.", "opts": ["Volunteering", "Philanthropic giving", "Non-profit board work"]}, "Work & Enterprise": {"blurb": "Work and enterprise remain central to the future, not something to escape.", "hook": "You're not winding down. Let's plan for what you're still building.", "opts": ["Gig work", "Board room"]}, "Insufficient Signal": {"blurb": "Too few closed answers to place a chapter. Not a segment - a data gap.", "hook": "(no campaign - route back to complete the Adventure)", "opts": []}}}, "B": {"name": "Purpose \u00d7 Posture", "spine": "All 10 money-purpose options partitioned into 5 families, crossed with 4 posture bands", "kind": "exclusive", "segments": {"Protector": {"blurb": "Money is a shield for the people they love.", "hook": "Protect what you've built - and who's counting on it.", "opts": ["Security", "Control", "Supporting my family"]}, "Liberator": {"blurb": "Money is optionality - a wider range of choices.", "hook": "More options. Fewer obligations.", "opts": ["Choice/Freedom", "Independence", "Simplicity"]}, "Experiencer": {"blurb": "Money is fuel for living now.", "hook": "Don't save the good life for later.", "opts": ["Enjoying the moment", "Comfort"]}, "Contributor": {"blurb": "Money is leverage for impact beyond the household.", "hook": "Make your generosity go further.", "opts": ["Philanthropy and giving"]}, "Achiever": {"blurb": "Money marks and validates progress.", "hook": "You've earned the position. Let's make it durable.", "opts": ["Status"]}, "Unstated": {"blurb": "Chose 'Other' or skipped. Purpose not captured by the option set.", "hook": "(no campaign - candidate for an added option)", "opts": ["(Other / no answer)"]}}, "postures": {"Assured": "Feels in control. Sells on ambition, not reassurance.", "Working on it": "Broadly capable with live doubts. Sells on partnership and clarity.", "Uneasy": "Confidence is the bottleneck, not the balance sheet. Sells on relief.", "Unrated": "Confidence block not completed. Posture unknown."}}, "C": {"name": "Vision \u00d7 Readiness", "spine": "Two continuous scores over closed scales only", "kind": "grid", "segments": {"Ready to Build": {"blurb": "Clear picture, already moving. Shortest path to a signed client.", "hook": "You know where you're going. Let's build the plan that gets you there.", "action": "Highest-priority outreach. Lead with capability and speed."}, "Vivid but Stuck": {"blurb": "Detailed future, no first step taken. Blocked by how, not whether.", "hook": "You can already see it. Here's the first move.", "action": "Best nurture audience. Lead with a concrete first step."}, "Moving Without a Map": {"blurb": "Acting, but the destination is fuzzy. Risk of optimising toward the wrong thing.", "hook": "You're doing the work. Let's point it at the right life.", "action": "Strong advisor fit. Lead with direction-setting."}, "Not Yet Looking": {"blurb": "Neither vision nor plan formed. Genuine top-of-funnel.", "hook": "Start with what you actually want.", "action": "Long nurture. Lead with the Adventure itself."}}}, "D": {"name": "Tension Tags", "spine": "Contradictions between closed answers \u2014 no free text", "kind": "multi", "segments": {"Deferred Joy": {"blurb": "Wants more of what brings joy but won't spend on it.", "hook": "The things you love shouldn't be the first thing cut."}, "Confidence Gap": {"blurb": "Believes in the goal but doubts the current footing.", "hook": "You believe you'll get there. Let's make today's numbers agree."}, "Vision-Action Gap": {"blurb": "Vivid future, no first step taken. Largest conversion opportunity.", "hook": "You've done the hard part - imagining it. Here's step one."}, "Permission Gap": {"blurb": "Secure but still won't spend on joy. Needs permission, not capacity.", "hook": "You can afford this. Here's the proof."}, "Decision Fatigue": {"blurb": "Second-guesses decisions regardless of outcome.", "hook": "Stop re-litigating every decision."}, "Horizon Mismatch": {"blurb": "Near-term goal date with no plan behind it.", "hook": "Your timeline is closer than your plan."}, "Planning Aversion": {"blurb": "Wants less time on financial admin but rates advisors highly. Delegation-ready.", "hook": "Hand it over. That's what we're for."}, "Vision Fog": {"blurb": "Cannot picture the future yet - low clarity and few elements chosen.", "hook": "Before the plan, the picture."}, "Solo Future": {"blurb": "Future You is alone. Different planning needs from a household plan.", "hook": "A plan built around you, not a household."}, "Advisor-Receptive": {"blurb": "Rates advisors highly and asked for help.", "hook": "Ready for a partner."}, "Self-Directed": {"blurb": "Prefers to go it alone. Advisory framing will meet resistance.", "hook": "Lead with tools and insight, not a service pitch."}}}}};
+let cur = 'A';
+const el = (h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+const esc = s => String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+function segCounts(m){
+  const c = {};
+  Object.keys(D.models[m].segments).forEach(s=>c[s]=[]);
+  D.prospects.forEach(p=>{
+    if(m==='D'){ p.D.tags.forEach(t=>{ if(c[t.tag]) c[t.tag].push(p) }) }
+    else if(m==='B'){ c[p.B.family].push(p) }
+    else if(m==='C'){ c[p.C.segment].push(p) }
+    else { c[p.A.segment].push(p); }
+  });
+  return c;
+}
+
+function renderTabs(){
+  const t=document.getElementById('tabs'); t.innerHTML='';
+  ['A','B','C','D'].forEach(m=>{
+    const b=el(`<button class="tab ${m===cur?'on':''}"><span class="k">${m}</span>${D.models[m].name}</button>`);
+    b.onclick=()=>{cur=m;render()}; t.appendChild(b);
+  });
+  const b=el(`<button class="tab ${cur==='X'?'on':''}"><span class="k">↔</span>Compare all four</button>`);
+  b.onclick=()=>{cur='X';render()}; t.appendChild(b);
+  const b3=el(`<button class="tab ${cur==='M'?'on':''}"><span class="k">⚙</span>How it's calculated</button>`);
+  b3.onclick=()=>{cur='M';render()}; t.appendChild(b3);
+  const b2=el(`<button class="tab ${cur==='P'?'on':''}"><span class="k">✓</span>Coverage proof</button>`);
+  b2.onclick=()=>{cur='P';render()}; t.appendChild(b2);
+}
+
+function distCard(m){
+  const c=segCounts(m), n=D.prospects.length;
+  const max=Math.max(1,...Object.values(c).map(a=>a.length));
+  let h=`<div class="card"><h2>Segment mix — who is actually coming through</h2>`;
+  Object.entries(c).sort((a,b)=>b[1].length-a[1].length).forEach(([s,arr])=>{
+    const meta=D.models[m].segments[s];
+    h+=`<div class="seg">
+      <div class="seg-top"><span class="seg-name" data-seg="${esc(s)}">${esc(s)}</span>
+      <span class="seg-n">${arr.length} of ${n} · ${Math.round(arr.length/n*100)}%</span></div>
+      <div class="bar ${arr.length?'':'zero'}"><i style="width:${arr.length/max*100}%"></i></div>
+      <div class="blurb">${esc(meta.blurb)}</div>
+      <div class="hook">“${esc(meta.hook)}”</div></div>`;
+  });
+  const empty=Object.entries(c).filter(([,a])=>!a.length).map(([s])=>s);
+  h+=`<div class="note">${empty.length? '<b>Zero-count segments:</b> '+esc(empty.join(', '))+'. On a real book these are the audiences your marketing is <i>not</i> reaching — the whole point of the view.' : 'Every segment is represented in this sample.'}</div></div>`;
+  return h;
+}
+
+function listCard(m){
+  let h=`<div class="card"><h2>Prospects — click a row for the full trace</h2><table><thead><tr>
+    <th>Prospect</th><th>${esc(D.models[m].name)}</th><th>Signal</th></tr></thead><tbody>`;
+  D.prospects.forEach(p=>{
+    let seg='', sig='';
+    if(m==='A'){ seg=esc(p.A.segment)+(p.A.secondary?` <span class="pill">+ ${esc(p.A.secondary)}</span>`:'');
+      sig=p.A.margin<1.5?`<span class="pill warn">thin margin ${p.A.margin}</span>`:`<span class="pill hot">clear ${p.A.margin}</span>`; }
+    if(m==='B'){ seg=esc(p.B.segment); sig=`<span class="pill ${p.B.confident?'hot':'warn'}">margin ${p.B.margin}</span>`; }
+    if(m==='C'){ seg=esc(p.C.segment); sig=`<span class="pill">vision ${p.C.vision}</span><span class="pill">ready ${p.C.readiness}</span>`; }
+    if(m==='D'){ seg=p.D.tags.map(t=>`<span class="pill">${esc(t.tag)}</span>`).join(' ')||'—'; sig=`<span class="pill">${p.D.tags.length} tag(s)</span>`; }
+    h+=`<tr class="row" data-p="${p.key}"><td><b>${esc(p.name)}</b><div class="blurb">${esc((p.goal||'').slice(0,72))}</div></td><td>${seg}</td><td>${sig}</td></tr>`;
+  });
+  return h+`</tbody></table></div>`;
+}
+
+function quadCard(){
+  const c=segCounts('C'), cuts=D.meta.c_cuts;
+  const order=['Ready to Build','Vivid but Stuck','Moving Without a Map','Not Yet Looking'];
+  let h=`<div class="card full"><h2>Vision × Readiness grid</h2><div class="quad">`;
+  order.forEach(s=>{
+    const m=D.models.C.segments[s], arr=c[s];
+    h+=`<div class="q"><div class="qn">${arr.length}</div><h3>${esc(s)}</h3>
+      <div class="qb">${esc(m.blurb)}</div>
+      <div>${arr.map(p=>`<span class="pill" data-p="${p.key}" style="cursor:pointer">${esc(p.name)}</span>`).join('')||'<span class="blurb">—</span>'}</div>
+      <div class="hook" style="margin-top:8px">${esc(m.action)}</div></div>`;
+  });
+  h+=`</div><div class="scatter" id="sc"></div>
+    <div class="axl" style="margin-left:42px">Readiness to act →</div>
+    <div class="note">Cut points are the <b>${esc(D.meta.c_basis)}</b> of this book — vision ${cuts.vision}, readiness ${cuts.readiness} — not fixed absolutes. The Adventure is designed to elicit a vivid vision, so absolute vision scores skew high; only position <i>relative to your own book</i> is meaningful.</div></div>`;
+  return h;
+}
+
+function drawScatter(){
+  const sc=document.getElementById('sc'); if(!sc) return;
+  const cuts=D.meta.c_cuts;
+  sc.appendChild(el(`<div class="cut" style="left:${cuts.readiness}%;top:0;bottom:0;width:1px"></div>`));
+  sc.appendChild(el(`<div class="cut" style="bottom:${cuts.vision}%;left:0;right:0;height:1px"></div>`));
+  sc.appendChild(el(`<div class="axl" style="position:absolute;left:-40px;top:0">vision 100</div>`));
+  sc.appendChild(el(`<div class="axl" style="position:absolute;left:-40px;bottom:-4px">vision 0</div>`));
+  D.prospects.forEach(p=>{
+    const d=el(`<div class="dot" style="left:${p.C.readiness}%;bottom:${p.C.vision}%" title="${esc(p.name)}"><span>${esc(p.name.split(' ')[0])}</span></div>`);
+    d.onclick=()=>openP(p.key); sc.appendChild(d);
+  });
+}
+
+function compareCard(){
+  let h=`<div class="card full"><h2>Same eight people, four models</h2>
+   <div class="kpi" style="margin-bottom:18px">
+    <div><b>7</b><span>Life Chapters</span></div>
+    <div><b>5×3</b><span>Purpose × Posture</span></div>
+    <div><b>4</b><span>Vision × Readiness quadrants</span></div>
+    <div><b>9</b><span>Tension tags (multi-label)</span></div>
+   </div>
+   <table class="cmp"><thead><tr><th>Prospect</th><th>A · Life Domain</th><th>B · Purpose × Posture</th><th>C · Vision × Readiness</th><th>D · Tensions</th></tr></thead><tbody>`;
+  D.prospects.forEach(p=>{
+    h+=`<tr class="row" data-p="${p.key}"><td>${esc(p.name)}</td>
+      <td>${esc(p.A.segment)}${p.A.secondary?`<br><span class="blurb">+ ${esc(p.A.secondary)}</span>`:''}</td>
+      <td>${esc(p.B.segment)}</td>
+      <td>${esc(p.C.segment)}<br><span class="blurb">V ${p.C.vision} · R ${p.C.readiness}</span></td>
+      <td>${p.D.tags.map(t=>`<span class="pill">${esc(t.tag)}</span>`).join('')||'—'}</td></tr>`;
+  });
+  h+=`</tbody></table>
+  <div class="note"><b>What the comparison shows on this sample.</b>
+  Model A separates people cleanly but 4 of 8 carry a genuine second chapter — situations overlap, so it should stay multi-label rather than forcing one winner.
+  Model B nearly collapses: 6 of 8 pick “Supporting my family” and 7 of 8 pick “Choice/Freedom”, so the raw answer carries little information. Inverse-frequency weighting rescues it, but it is doing the work that the taxonomy should be doing.
+  Model C is the only one that maps to a marketing <i>action</i> rather than a marketing <i>theme</i>, and the only one whose axes are continuous — so it degrades gracefully instead of mislabelling.
+  Model D produces the insight none of the others can: the gap between what someone wants and what they believe or do.</div></div>`;
+  return h;
+}
+
+function openP(key){
+  const p=D.prospects.find(x=>x.key===key);
+  const tr=(a)=>`<ul class="trace">${a.map(x=>`<li>· ${esc(x)}</li>`).join('')}</ul>`;
+  document.getElementById('sheet').innerHTML=`
+   <span class="x" onclick="document.getElementById('modal').classList.remove('on')">×</span>
+   <h2>${esc(p.name)}</h2>
+   <div class="blurb">Data coverage ${p.coverage}% · vision clarity ${p.vivid??'—'}/5 · horizon ${esc(p.horizon)}</div>
+   <section><h4>In their own words</h4>
+     <div class="q1"><b>Goal:</b> ${esc(p.goal)} <i>(${esc(p.goal_when)})</i></div>
+     ${p.concerns.map(c=>`<div class="q1"><b>Concern:</b> ${esc(c)}</div>`).join('')}
+     ${p.hopes.map(c=>`<div class="q1"><b>Hope:</b> ${esc(c)}</div>`).join('')}
+     <div class="q1"><b>Money is for:</b> ${p.purpose.map(x=>esc(x)).join(' → ')}</div></section>
+   <section><h4>A · Life Chapter → ${esc(p.A.segment)}${p.A.secondary?` (+ ${esc(p.A.secondary)})`:''}</h4>
+     ${tr(p.A.reasons)}${p.A.secondary?`<div class="blurb" style="margin-top:6px">Secondary chapter:</div>${tr(p.A.secondary_reasons)}`:''}</section>
+   <section><h4>B · Purpose × Posture → ${esc(p.B.segment)}</h4>${tr(p.B.reasons)}</section>
+   <section><h4>C · Vision ${p.C.vision} × Readiness ${p.C.readiness} → ${esc(p.C.segment)}</h4>
+     ${tr(p.C.vision_reasons)}${tr(p.C.readiness_reasons)}</section>
+   <section><h4>D · Tensions</h4>
+     ${p.D.tags.length?p.D.tags.map(t=>`<div class="q1"><b>${esc(t.tag)}</b> — ${esc(t.why)}</div>`).join(''):'<div class="blurb">None detected.</div>'}</section>`;
+  document.getElementById('modal').classList.add('on');
+}
+
+function openSeg(m,s){
+  const meta=D.models[m].segments[s], arr=segCounts(m)[s];
+  document.getElementById('sheet').innerHTML=`
+   <span class="x" onclick="document.getElementById('modal').classList.remove('on')">×</span>
+   <h2>${esc(s)}</h2><div class="blurb">${esc(D.models[m].name)}</div>
+   <section><h4>What it means</h4><div>${esc(meta.blurb)}</div></section>
+   <section><h4>Marketing hook</h4><div class="hook">“${esc(meta.hook)}”</div></section>
+   ${meta.action?`<section><h4>Marketing action</h4><div>${esc(meta.action)}</div></section>`:''}
+   ${(meta.opts&&meta.opts.length)?`<section><h4>Built from these closed options</h4><div>${meta.opts.map(o=>`<span class="pill">${esc(o)}</span>`).join('')}</div></section>`:''}
+   <section><h4>In this sample (${arr.length})</h4>
+     ${arr.length?arr.map(p=>`<div class="q1"><b>${esc(p.name)}</b> — ${esc(p.goal)}</div>`).join(''):'<div class="blurb">No prospect in this sample. On a real book, an empty segment is a targeting gap.</div>'}</section>`;
+  document.getElementById('modal').classList.add('on');
+}
+
+function proofCard(){
+  const P=D.proof, n=P.n;
+  let h=`<div class="card full"><h2>Coverage proof — does every possible answer set get a label?</h2>
+   <div class="kpi" style="margin-bottom:16px">
+     <div><b>${n.toLocaleString()}</b><span>synthetic respondents</span></div>
+     <div><b>${P.crashes}</b><span>crashes</span></div>
+     <div><b>${P.unlabeled}</b><span>unlabeled</span></div>
+     <div><b>${P.missing.length}</b><span>unreachable labels</span></div>
+   </div>
+   <div class="blurb" style="margin-bottom:14px">Respondents drawn at random from the declared option space at completion rates from 15% to 100%, plus adversarial cases: empty, all-&ldquo;Other&rdquo;, all-floor, all-ceiling, single-tag, and attention-only.</div>`;
+  ['A','B','C','D'].forEach(m=>{
+    const bag=P[m], mx=Math.max(...Object.values(bag));
+    h+=`<h2 style="margin-top:18px">Model ${m} — ${esc(D.models[m].name)}</h2>`;
+    Object.entries(bag).sort((a,b)=>b[1]-a[1]).forEach(([lab,c])=>{
+      h+=`<div class="seg"><div class="seg-top"><span class="seg-name">${esc(lab)}</span>
+        <span class="seg-n">${c.toLocaleString()} · ${(c/n*100).toFixed(1)}%</span></div>
+        <div class="bar"><i style="width:${c/mx*100}%"></i></div></div>`;
+    });
+  });
+  h+=`<div class="note"><b>Reading this.</b> Percentages are the share of <i>random</i> respondents landing in each label — not a market forecast. They show the taxonomy has no dead labels and no single label swallowing the space. Model A's &ldquo;Insufficient Signal&rdquo; at ${(P.insufficient/n*100).toFixed(1)}% is respondents who answered none of its three inputs; it is reported explicitly rather than defaulted.</div></div>`;
+  return h;
+}
+
+function divergeCard(){
+  let h=`<div class="card full"><h2>v1 vs v2 — what changed when free text was removed</h2>
+   <div class="blurb" style="margin-bottom:14px">v1 read Model A's segments off free-text keywords found in these eight profiles. v2 reads them off closed options. <b>They agree on 1 of 8.</b></div>
+   <table><thead><tr><th>Prospect</th><th>v1 chapter (free-text)</th><th>v2 life domain (closed-only)</th><th>Stated goal</th></tr></thead><tbody>`;
+  D.prospects.forEach(p=>{
+    const same=p.oldA===p.A.segment;
+    h+=`<tr class="row" data-p="${p.key}"><td><b>${esc(p.name)}</b></td>
+      <td>${esc(p.oldA)}</td><td>${esc(p.A.segment)}</td>
+      <td class="${same?'':'x'}" ${same?'':'style="background:#FFF6E0"'}>${esc((p.goal||'').slice(0,80))}</td></tr>`;
+  });
+  h+=`</tbody></table><div class="note"><b>Why they diverge.</b> The written goal names the <i>instrument</i> — &ldquo;a lake house&rdquo;. The closed ideal-life tags describe the <i>life</i> — Theater, Concerts, Music, Art, Museums. Both are true. v1 segmented on the instrument, which only works when the prospect writes something your keyword list anticipated. v2 segments on the life, which works for every respondent. Model C, built on closed scales in both versions, agreed 6 of 8.</div></div>`;
+  return h;
+}
+
+function methodCard(m){
+  const M=D.method[m]; if(!M) return '';
+  let h=`<div class="card full"><h2>${esc(M.title)} — how it's calculated</h2>
+    <div class="q2">${esc(M.question)}</div>
+    <div class="io"><div class="h">Input</div><div class="h">Option space</div><div class="h">Role</div>`;
+  M.inputs.forEach(r=>{h+=`<div>${esc(r[0])}</div><div>${esc(r[1])}</div><div>${esc(r[2])}</div>`});
+  h+=`</div>`;
+  M.steps.forEach((st,i)=>{
+    h+=`<div class="step"><div class="num">${i+1}</div><div><h4>${esc(st[0].replace(/^\d+ · /,''))}</h4>
+      <p>${esc(st[1])}</p>${st[2]?`<div class="fx">${esc(st[2])}</div>`:''}</div></div>`;
+  });
+  if(M.rules){
+    h+=`<h2 style="margin-top:6px">The rules in full</h2><table><thead><tr><th>Tag</th><th>Fires when</th></tr></thead><tbody>`;
+    M.rules.forEach(r=>{h+=`<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`});
+    h+=`</tbody></table>`;
+  }
+  const E=M.example;
+  if(E && m==='A'){
+    h+=`<div class="wk"><h4>Worked example — ${esc(E.who)}, who selected ${E.picks} of ${E.total} ideal-life options</h4>
+      <table><thead><tr><th>Domain</th><th>Options</th><th>Picked</th><th>Expected by chance</th><th>Lift</th></tr></thead><tbody>`;
+    E.rows.forEach((r,i)=>{h+=`<tr class="${i===0?'win':''}"><td>${esc(r.domain)}</td><td>${r.size}</td>
+      <td>${r.hits}${r.picked?` <span class="blurb" style="display:inline">${esc(r.picked.slice(0,64))}</span>`:''}</td>
+      <td>${r.expected}</td><td><b>${r.lift}</b></td></tr>`});
+    h+=`</tbody></table>
+      <p class="blurb" style="margin-top:9px">Culture &amp; Creativity wins not because it has the most picks in absolute terms, but because ${E.rows[0].hits} hits against ${E.rows[0].expected} expected is the biggest over-representation. Wants MORE attention on: ${esc(E.attention_more.join(', ')||'none')}. Future You is: ${esc(E.doing.join(', ')||'—')}.</p>
+      <p class="blurb"><b>Result → ${esc(E.segment)}</b></p></div>`;
+  }
+  if(E && m==='B'){
+    h+=`<div class="wk"><h4>Worked example — ${esc(E.who)}</h4>
+      <table><thead><tr><th>Their pick</th><th>Position</th><th>Family</th><th>Rank pts</th><th>Distinctiveness</th><th>Total</th></tr></thead><tbody>`;
+    E.rows.forEach(r=>{h+=`<tr><td>${esc(r.opt)}</td><td>${r.pos}</td><td>${esc(r.family)}</td>
+      <td>${r.rank}</td><td>×${r.weight}</td><td><b>${r.points}</b></td></tr>`});
+    h+=`</tbody></table><p class="blurb" style="margin-top:9px">Confidence mean ${E.mean} → posture <b>${esc(E.posture)}</b>.</p>
+      <p class="blurb"><b>Result → ${esc(E.segment)}</b></p></div>`;
+  }
+  if(E && m==='C'){
+    h+=`<div class="wk"><h4>Worked example — ${esc(E.who)}</h4>
+      <div class="grid" style="gap:12px"><div><b style="font-size:12.5px">Vision = ${E.vision}</b>
+        <ul class="trace">${E.vision_reasons.map(x=>`<li>· ${esc(x)}</li>`).join('')}</ul></div>
+        <div><b style="font-size:12.5px">Readiness = ${E.readiness}</b>
+        <ul class="trace">${E.readiness_reasons.map(x=>`<li>· ${esc(x)}</li>`).join('')}</ul></div></div>
+      <p class="blurb" style="margin-top:9px">Cuts: vision ${E.cuts.vision}, readiness ${E.cuts.readiness} (${esc(E.basis)}). Vision ${E.vision} ≥ ${E.cuts.vision}? ${E.vision>=E.cuts.vision?'yes':'no'}. Readiness ${E.readiness} ≥ ${E.cuts.readiness}? ${E.readiness>=E.cuts.readiness?'yes':'no'}.</p>
+      <p class="blurb"><b>Result → ${esc(E.segment)}</b></p></div>`;
+  }
+  return h+`</div>`;
+}
+
+function contractCard(){
+  let h=`<div class="card full"><h2>The rules every model obeys</h2>`;
+  D.contract.forEach(c=>{h+=`<div class="ct"><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`});
+  return h+`<div class="note">Full engine: <b>schema.py</b> declares the option space and both partitions · <b>models2.py</b> scores · <b>prove.py</b> runs the coverage proof · <b>verify2.py</b> runs the mutation, unseen-option and determinism tests.</div></div>`;
+}
+
+function otherCard(){
+  const O=D.other;
+  let h=`<div class="card full"><h2>${esc(O.title)}</h2>`;
+  O.policy.forEach(p=>{h+=`<div class="ct"><b>${esc(p[0])}</b><span>${esc(p[1])}</span></div>`});
+  h+=`<h2 style="margin-top:20px">What resolves, and what doesn't</h2>
+    <table><thead><tr><th>Field</th><th>Client typed</th><th>Counts as</th></tr></thead><tbody>`;
+  O.examples.forEach(e=>{
+    const dead=e[2].startsWith('—');
+    h+=`<tr><td><span class="blurb">${esc(e[0])}</span></td><td>${esc(e[1])}</td>
+      <td style="${dead?'color:var(--mute)':''}">${dead?esc(e[2]):`<span class="pill">${e[2].split(', ').map(esc).join('</span> <span class="pill">')}</span>`}</td></tr>`;
+  });
+  h+=`</tbody></table>
+   <h2 style="margin-top:20px">Lexicon coverage</h2>
+   <table><thead><tr><th>Field</th><th>Terms</th><th>Options reachable</th></tr></thead><tbody>`;
+  O.lexicon_sizes.forEach(r=>{h+=`<tr><td>${esc(r[0])}</td><td>${r[1]}</td><td>${r[2]} of ${r[3]}</td></tr>`});
+  h+=`</tbody></table>`;
+  if(D.backlog && D.backlog.length){
+    h+=`<h2 style="margin-top:20px">Unresolved write-ins — the missing-option backlog</h2>
+      <div class="blurb" style="margin-bottom:10px">${esc(O.backlog_note)}</div>
+      <div class="kpi" style="margin-bottom:14px">
+        <div><b>${D.wi_resolved.toLocaleString()}</b><span>placed onto an option</span></div>
+        <div><b>${D.wi_dropped.toLocaleString()}</b><span>dropped, counted nowhere</span></div></div>
+      <table><thead><tr><th>Fragment</th><th>Times seen</th></tr></thead><tbody>`;
+    D.backlog.forEach(b=>{h+=`<tr><td>${esc(b[0]||'(blank)')}</td><td>${b[1].toLocaleString()}</td></tr>`});
+    h+=`</tbody></table><div class="note">From the synthetic proof run, not from real clients — the 8 sample profiles contain no write-ins. On live data this table is the ranked list of options worth adding to the Adventure.</div>`;
+  }
+  return h+`</div>`;
+}
+
+function methodView(){
+  return contractCard()+otherCard()+['A','B','C','D'].map(m=>methodCard(m)).join('');
+}
+
+function render(){
+  renderTabs();
+  const sp=document.getElementById('spine'), v=document.getElementById('view');
+  if(cur==='M'){ sp.innerHTML=`<b>Method.</b> Every label is computed from closed answers only — no free text, no judgement calls.`; v.innerHTML=methodView(); }
+  else if(cur==='P'){ sp.innerHTML=`<b>Proof.</b> Every label must be reachable, and every possible answer set must resolve to one.`; v.innerHTML=proofCard(); }
+  else if(cur==='X'){ sp.innerHTML=`<b>Comparison.</b> The same eight prospects under all four taxonomies.`; v.innerHTML=compareCard()+divergeCard(); }
+  else{
+    const m=D.models[cur];
+    sp.innerHTML=`<b>Organising spine —</b> ${esc(m.spine)}. <span class="blurb" style="display:inline">${m.kind==='multi'?'Multi-label: a prospect can carry several tags.':'Exclusive: each prospect lands in one segment.'}</span>`;
+    const how=`<div class="card full" style="padding:0"><details style="margin:0"><summary style="padding:15px 19px">How ${esc(m.name)} is calculated ▾</summary><div style="padding:0 19px 4px">${methodCard(cur).replace('<div class="card full">','<div>')}</div></details></div>`;
+    v.innerHTML = (cur==='C' ? quadCard()+distCard('C')+listCard('C') : distCard(cur)+listCard(cur)) + how;
+    if(cur==='C') drawScatter();
+  }
+  v.querySelectorAll('[data-p]').forEach(e=>e.onclick=(ev)=>{ev.stopPropagation();openP(e.dataset.p)});
+  v.querySelectorAll('[data-seg]').forEach(e=>e.onclick=()=>openSeg(cur,e.dataset.seg));
+}
+document.getElementById('modal').onclick=(e)=>{if(e.target.id==='modal')e.currentTarget.classList.remove('on')};
+render();
+</script></body></html>

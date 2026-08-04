@@ -1,0 +1,738 @@
+{
+ "_meta": {
+  "c_cuts": {
+   "vision": 82.1,
+   "readiness": 35.7
+  },
+  "c_basis": "cohort median",
+  "purpose_idf": {
+   "Supporting my family": 0.182,
+   "Security": 0.944,
+   "Choice/Freedom": 0.057,
+   "Enjoying the moment": 1.792,
+   "Comfort": 1.792,
+   "Philanthropy and giving": 1.792,
+   "Simplicity": 1.792,
+   "Independence": 1.281
+  }
+ },
+ "nicolehunter": {
+  "A": {
+   "segment": "Culture & Creativity",
+   "secondary": null,
+   "score": 0.614,
+   "margin": 0.129,
+   "reasons": [
+    "Ideal life: 5 of 7 'Culture & Creativity' options (Creative pursuits, Concerts, Music, Art...); expected 1.2 by chance -> lift 2.70",
+    "Future You is 'Creative pursuits' (+0.07)"
+   ],
+   "all": {
+    "Culture & Creativity": 0.614,
+    "Health & Activity": 0.485,
+    "People & Generations": 0.456,
+    "Home & Table": 0.36,
+    "Travel & Exploration": 0.206,
+    "Contribution": 0.206,
+    "Place & Setting": 0.183,
+    "Work & Enterprise": 0.148
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Protector",
+   "posture": "Uneasy",
+   "posture_mean": 3.0,
+   "segment": "Uneasy Protector",
+   "score": 2.43,
+   "runner_up": "Liberator",
+   "margin": 2.28,
+   "reasons": [
+    "'Supporting my family' at rank 1, distinctiveness 0.18 (+0.55)",
+    "'Security' at rank 2, distinctiveness 0.94 (+1.89)"
+   ],
+   "all": {
+    "Protector": 2.43,
+    "Liberator": 0.15,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": true
+  },
+  "C": {
+   "segment": "Moving Without a Map",
+   "vision": 36.0,
+   "readiness": 36.0,
+   "vision_reasons": [
+    "Vision clarity 1/5 (+0)",
+    "7 of 40 ideal-life options selected (+8)",
+    "Future You 'where': 2 selected (+5)",
+    "Future You 'what': 4 selected (+8)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '10-15 years' (+8)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'I know what to do and I've started making changes' = level 2/3 (+17)",
+    "goal_action: 'Not yet.' = level 0/3 (+0)",
+    "Timeframe '1-5 years from now' (+10)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Deferred Joy",
+     "why": "Wants MORE attention on Health & Wellness but scores 2/5 on spending for joy"
+    },
+    {
+     "tag": "Vision Fog",
+     "why": "Vision clarity 1/5 with only 7 ideal-life elements chosen"
+    },
+    {
+     "tag": "Self-Directed",
+     "why": "Chose to pursue this goal without advisor support"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "jeffreyhunter": {
+  "A": {
+   "segment": "Travel & Exploration",
+   "secondary": null,
+   "score": 0.704,
+   "margin": 0.149,
+   "reasons": [
+    "Ideal life: 2 of 3 'Travel & Exploration' options (International travel, Domestic travel); expected 1.0 by chance -> lift 1.52",
+    "Wants MORE attention on 'Travel & Adventure' (+0.25)",
+    "Future You is 'Traveling' (+0.15)"
+   ],
+   "all": {
+    "Travel & Exploration": 0.704,
+    "People & Generations": 0.555,
+    "Health & Activity": 0.511,
+    "Culture & Creativity": 0.372,
+    "Home & Table": 0.261,
+    "Work & Enterprise": 0.242,
+    "Place & Setting": 0.108,
+    "Contribution": 0.101
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Experiencer",
+   "posture": "Assured",
+   "posture_mean": 4.25,
+   "segment": "Assured Experiencer",
+   "score": 5.38,
+   "runner_up": "Liberator",
+   "margin": 4.93,
+   "reasons": [
+    "'Enjoying the moment' at rank 2, distinctiveness 1.79 (+3.58)",
+    "'Comfort' at rank 3, distinctiveness 1.79 (+1.79)"
+   ],
+   "all": {
+    "Experiencer": 5.38,
+    "Liberator": 0.45,
+    "Protector": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": true
+  },
+  "C": {
+   "segment": "Moving Without a Map",
+   "vision": 64.3,
+   "readiness": 69.3,
+   "vision_reasons": [
+    "Vision clarity 3/5 (+20)",
+    "13 of 40 ideal-life options selected (+14)",
+    "Future You 'where': 1 selected (+3)",
+    "Future You 'what': 2 selected (+5)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '5-10 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I have made changes and am staying on track' = level 3/3 (+26)",
+    "goal_steps: 'I know what to do and I've started making changes' = level 2/3 (+17)",
+    "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": true
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Decision Fatigue",
+     "why": "Freedom-from-regret 2/5"
+    },
+    {
+     "tag": "Planning Aversion",
+     "why": "Wants LESS attention on financial planning while rating advisor value 5/5"
+    },
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "ashleysmith": {
+  "A": {
+   "segment": "Travel & Exploration",
+   "secondary": "People & Generations",
+   "score": 0.572,
+   "margin": 0.0,
+   "reasons": [
+    "Ideal life: 2 of 3 'Travel & Exploration' options (International travel, Domestic travel); expected 1.4 by chance -> lift 1.24",
+    "Wants MORE attention on 'Travel & Adventure' (+0.25)",
+    "Future You is 'Traveling' (+0.07)"
+   ],
+   "all": {
+    "Travel & Exploration": 0.572,
+    "People & Generations": 0.572,
+    "Home & Table": 0.545,
+    "Contribution": 0.322,
+    "Place & Setting": 0.282,
+    "Health & Activity": 0.276,
+    "Work & Enterprise": 0.103,
+    "Culture & Creativity": 0.092
+   },
+   "confident": false
+  },
+  "B": {
+   "family": "Protector",
+   "posture": "Assured",
+   "posture_mean": 5.0,
+   "segment": "Assured Protector",
+   "score": 2.07,
+   "runner_up": "Liberator",
+   "margin": 1.62,
+   "reasons": [
+    "'Security' at rank 2, distinctiveness 0.94 (+1.89)",
+    "'Supporting my family' at rank 3, distinctiveness 0.18 (+0.18)"
+   ],
+   "all": {
+    "Protector": 2.07,
+    "Liberator": 0.45,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": false
+  },
+  "C": {
+   "segment": "Ready to Build",
+   "vision": 88.9,
+   "readiness": 43.3,
+   "vision_reasons": [
+    "Vision clarity 4/5 (+30)",
+    "19 of 40 ideal-life options selected (+21)",
+    "Future You 'where': 4 selected (+8)",
+    "Future You 'what': 4 selected (+8)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '5-10 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)",
+    "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "davidsmith": {
+  "A": {
+   "segment": "Culture & Creativity",
+   "secondary": null,
+   "score": 0.628,
+   "margin": 0.098,
+   "reasons": [
+    "Ideal life: 7 of 7 'Culture & Creativity' options (Creative pursuits, Theater, Concerts, Music...); expected 4.0 by chance -> lift 1.59",
+    "Wants MORE attention on 'Hobbies & Interests' (+0.25)",
+    "Future You is 'Creative pursuits' (+0.06)"
+   ],
+   "all": {
+    "Culture & Creativity": 0.628,
+    "Travel & Exploration": 0.53,
+    "People & Generations": 0.354,
+    "Home & Table": 0.242,
+    "Contribution": 0.207,
+    "Health & Activity": 0.182,
+    "Place & Setting": 0.155,
+    "Work & Enterprise": 0.093
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Contributor",
+   "posture": "Assured",
+   "posture_mean": 4.75,
+   "segment": "Assured Contributor",
+   "score": 5.38,
+   "runner_up": "Liberator",
+   "margin": 5.08,
+   "reasons": [
+    "'Philanthropy and giving' at rank 1, distinctiveness 1.79 (+5.38)"
+   ],
+   "all": {
+    "Contributor": 5.38,
+    "Liberator": 0.3,
+    "Protector": 0.18,
+    "Experiencer": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": true
+  },
+  "C": {
+   "segment": "Vivid but Stuck",
+   "vision": 100.0,
+   "readiness": 33.3,
+   "vision_reasons": [
+    "Vision clarity 5/5 (+40)",
+    "23 of 40 ideal-life options selected (+22)",
+    "Future You 'where': 3 selected (+8)",
+    "Future You 'what': 5 selected (+8)",
+    "Future You 'who': 4 selected (+7)",
+    "Horizon set to '10-15 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)",
+    "goal_action: 'Not yet.' = level 0/3 (+0)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Deferred Joy",
+     "why": "Wants MORE attention on Travel & Adventure, Hobbies & Interests but scores 3/5 on spending for joy"
+    },
+    {
+     "tag": "Vision-Action Gap",
+     "why": "Vision clarity 5/5 but action = 'Not yet.'"
+    },
+    {
+     "tag": "Permission Gap",
+     "why": "Condition 5/5 and resilience 5/5 but joy-spending 3/5"
+    },
+    {
+     "tag": "Horizon Mismatch",
+     "why": "Goal set '1-5 years from now' but steps = 'Some ideas, but unsure' and no action taken"
+    },
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "kiralopez": {
+  "A": {
+   "segment": "Travel & Exploration",
+   "secondary": null,
+   "score": 0.611,
+   "margin": 0.125,
+   "reasons": [
+    "Ideal life: 3 of 3 'Travel & Exploration' options (International travel, Domestic travel, Camping); expected 1.8 by chance -> lift 1.43",
+    "Wants MORE attention on 'Travel & Adventure' (+0.25)",
+    "Future You is 'Traveling' (+0.07)"
+   ],
+   "all": {
+    "Travel & Exploration": 0.611,
+    "Health & Activity": 0.485,
+    "Culture & Creativity": 0.481,
+    "People & Generations": 0.464,
+    "Work & Enterprise": 0.416,
+    "Home & Table": 0.31,
+    "Contribution": 0.289,
+    "Place & Setting": 0.149
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Liberator",
+   "posture": "Working on it",
+   "posture_mean": 3.25,
+   "segment": "Working on it Liberator",
+   "score": 2.09,
+   "runner_up": "Protector",
+   "margin": 1.55,
+   "reasons": [
+    "'Choice/Freedom' at rank 2, distinctiveness 0.15 (+0.30)",
+    "'Simplicity' at rank 3, distinctiveness 1.79 (+1.79)"
+   ],
+   "all": {
+    "Liberator": 2.09,
+    "Protector": 0.55,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": false
+  },
+  "C": {
+   "segment": "Vivid but Stuck",
+   "vision": 90.0,
+   "readiness": 16.0,
+   "vision_reasons": [
+    "Vision clarity 4/5 (+30)",
+    "24 of 40 ideal-life options selected (+22)",
+    "Future You 'where': 4 selected (+8)",
+    "Future You 'what': 4 selected (+8)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '5-10 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'Not thinking/worried about it' = level 0/3 (+0)",
+    "goal_steps: 'No idea' = level 0/3 (+0)",
+    "goal_action: 'Not yet.' = level 0/3 (+0)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Deferred Joy",
+     "why": "Wants MORE attention on Travel & Adventure, Hobbies & Interests, Health & Wellness but scores 3/5 on spending for joy"
+    },
+    {
+     "tag": "Confidence Gap",
+     "why": "Goal belief 5/5 but condition 2/5, resilience 2/5"
+    },
+    {
+     "tag": "Vision-Action Gap",
+     "why": "Vision clarity 4/5 but action = 'Not yet.'"
+    },
+    {
+     "tag": "Horizon Mismatch",
+     "why": "Goal set '1-5 years from now' but steps = 'No idea' and no action taken"
+    },
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "lukelopez": {
+  "A": {
+   "segment": "Culture & Creativity",
+   "secondary": "Travel & Exploration",
+   "score": 0.573,
+   "margin": 0.011,
+   "reasons": [
+    "Ideal life: 7 of 7 'Culture & Creativity' options (Creative pursuits, Theater, Concerts, Music...); expected 5.1 by chance -> lift 1.32",
+    "Wants MORE attention on 'Hobbies & Interests' (+0.25)",
+    "Future You is 'Creative pursuits' (+0.06)"
+   ],
+   "all": {
+    "Culture & Creativity": 0.573,
+    "Travel & Exploration": 0.562,
+    "Health & Activity": 0.506,
+    "People & Generations": 0.499,
+    "Work & Enterprise": 0.473,
+    "Home & Table": 0.265,
+    "Place & Setting": 0.161,
+    "Contribution": 0.126
+   },
+   "confident": false
+  },
+  "B": {
+   "family": "Liberator",
+   "posture": "Working on it",
+   "posture_mean": 4.0,
+   "segment": "Working on it Liberator",
+   "score": 3.01,
+   "runner_up": "Protector",
+   "margin": 2.83,
+   "reasons": [
+    "'Choice/Freedom' at rank 1, distinctiveness 0.15 (+0.45)",
+    "'Independence' at rank 2, distinctiveness 1.28 (+2.56)"
+   ],
+   "all": {
+    "Liberator": 3.01,
+    "Protector": 0.18,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": true
+  },
+  "C": {
+   "segment": "Vivid but Stuck",
+   "vision": 100.0,
+   "readiness": 35.3,
+   "vision_reasons": [
+    "Vision clarity 5/5 (+40)",
+    "29 of 40 ideal-life options selected (+22)",
+    "Future You 'where': 3 selected (+8)",
+    "Future You 'what': 5 selected (+8)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '5-10 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)",
+    "goal_action: 'Not yet.' = level 0/3 (+0)",
+    "Timeframe '< 12 months from now' (+12)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Vision-Action Gap",
+     "why": "Vision clarity 5/5 but action = 'Not yet.'"
+    },
+    {
+     "tag": "Horizon Mismatch",
+     "why": "Goal set '< 12 months from now' but steps = 'Some ideas, but unsure' and no action taken"
+    },
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "mattbravos": {
+  "A": {
+   "segment": "Health & Activity",
+   "secondary": null,
+   "score": 0.75,
+   "margin": 0.082,
+   "reasons": [
+    "Ideal life: 4 of 4 'Health & Activity' options (Fitness, Sports, Outdoors, Health); expected 1.0 by chance -> lift 2.50",
+    "Wants MORE attention on 'Health & Wellness' (+0.25)"
+   ],
+   "all": {
+    "Health & Activity": 0.75,
+    "Travel & Exploration": 0.668,
+    "People & Generations": 0.668,
+    "Culture & Creativity": 0.323,
+    "Contribution": 0.189,
+    "Home & Table": 0.175,
+    "Place & Setting": 0.133,
+    "Work & Enterprise": 0.133
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Liberator",
+   "posture": "Assured",
+   "posture_mean": 4.5,
+   "segment": "Assured Liberator",
+   "score": 1.58,
+   "runner_up": "Protector",
+   "margin": 1.03,
+   "reasons": [
+    "'Choice/Freedom' at rank 2, distinctiveness 0.15 (+0.30)",
+    "'Independence' at rank 3, distinctiveness 1.28 (+1.28)"
+   ],
+   "all": {
+    "Liberator": 1.58,
+    "Protector": 0.55,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": false
+  },
+  "C": {
+   "segment": "Moving Without a Map",
+   "vision": 56.3,
+   "readiness": 43.3,
+   "vision_reasons": [
+    "Vision clarity 2/5 (+10)",
+    "10 of 40 ideal-life options selected (+11)",
+    "Future You 'where': 2 selected (+5)",
+    "Future You 'what': 4 selected (+8)",
+    "Future You 'who': 3 selected (+7)",
+    "Horizon set to '5-10 years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)",
+    "goal_action: 'Yes, I've taken steps.' = level 1/3 (+10)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ },
+ "kristenbravos": {
+  "A": {
+   "segment": "Travel & Exploration",
+   "secondary": null,
+   "score": 0.628,
+   "margin": 0.093,
+   "reasons": [
+    "Ideal life: 3 of 3 'Travel & Exploration' options (International travel, Domestic travel, Camping); expected 1.9 by chance -> lift 1.39",
+    "Wants MORE attention on 'Travel & Adventure' (+0.25)",
+    "Future You is 'Traveling' (+0.10)"
+   ],
+   "all": {
+    "Travel & Exploration": 0.628,
+    "Health & Activity": 0.536,
+    "Home & Table": 0.454,
+    "Place & Setting": 0.31,
+    "Culture & Creativity": 0.286,
+    "People & Generations": 0.209,
+    "Contribution": 0.139,
+    "Work & Enterprise": 0.089
+   },
+   "confident": true
+  },
+  "B": {
+   "family": "Protector",
+   "posture": "Assured",
+   "posture_mean": 4.25,
+   "segment": "Assured Protector",
+   "score": 1.49,
+   "runner_up": "Liberator",
+   "margin": 1.19,
+   "reasons": [
+    "'Supporting my family' at rank 1, distinctiveness 0.18 (+0.55)",
+    "'Security' at rank 3, distinctiveness 0.94 (+0.94)"
+   ],
+   "all": {
+    "Protector": 1.49,
+    "Liberator": 0.3,
+    "Experiencer": 0.0,
+    "Contributor": 0.0,
+    "Achiever": 0.0,
+    "Unstated": 0.0
+   },
+   "confident": false
+  },
+  "C": {
+   "segment": "Not Yet Looking",
+   "vision": 75.3,
+   "readiness": 33.3,
+   "vision_reasons": [
+    "Vision clarity 3/5 (+20)",
+    "25 of 40 ideal-life options selected (+22)",
+    "Future You 'where': 4 selected (+8)",
+    "Future You 'what': 3 selected (+8)",
+    "Future You 'who': 1 selected (+2)",
+    "Horizon set to 'a few years' (+8)",
+    "Postcard completed (+7)"
+   ],
+   "readiness_reasons": [
+    "goal_thought: 'I've thought about it, but no plans yet' = level 1/3 (+9)",
+    "goal_steps: 'Some ideas, but unsure' = level 1/3 (+9)",
+    "goal_action: 'Not yet.' = level 0/3 (+0)",
+    "Timeframe '1-5 years from now' (+10)",
+    "Wants advisor help with this goal (+6)"
+   ],
+   "cuts": {
+    "vision": 82.1,
+    "readiness": 35.7
+   },
+   "confident": false
+  },
+  "D": {
+   "tags": [
+    {
+     "tag": "Horizon Mismatch",
+     "why": "Goal set '1-5 years from now' but steps = 'Some ideas, but unsure' and no action taken"
+    },
+    {
+     "tag": "Advisor-Receptive",
+     "why": "Advisor value 5/5 and asked for help"
+    }
+   ]
+  },
+  "coverage": 100,
+  "missing": [],
+  "reliable": true
+ }
+}
