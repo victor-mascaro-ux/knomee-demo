@@ -74,6 +74,7 @@ import {
   FunnelIcon,
   MegaphoneIcon,
 } from './components/icons'
+import SegmentationScreen from './screens/SegmentationScreen'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
 
@@ -2356,6 +2357,9 @@ export default function App() {
   const [emptyMode, setEmptyMode] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  // Reached from the burger menu rather than the tab bar: it describes how the
+  // segments are derived, which is a level below the day-to-day dashboards.
+  const [segmentationOpen, setSegmentationOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -2370,8 +2374,10 @@ export default function App() {
   // Expose the current screen to the commenting overlay so comment pins are
   // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
   useEffect(() => {
-    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = screen
-  }, [screen])
+    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = segmentationOpen
+      ? 'segmentation'
+      : screen
+  }, [screen, segmentationOpen])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -2429,6 +2435,7 @@ export default function App() {
                   type="button"
                   onClick={() => {
                     setSettingsOpen(true)
+                    setSegmentationOpen(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -2436,6 +2443,19 @@ export default function App() {
                 </button>
                 <button className="menu-item" type="button">
                   Sign Out
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Analysis</div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setSegmentationOpen(true)
+                    setSettingsOpen(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Segmentation
                 </button>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
@@ -2461,6 +2481,17 @@ export default function App() {
 
       {settingsOpen ? (
         <SettingsScreen onClose={() => setSettingsOpen(false)} />
+      ) : segmentationOpen ? (
+        <main className="content">
+          <button
+            className="settings-back"
+            type="button"
+            onClick={() => setSegmentationOpen(false)}
+          >
+            ‹ Back to dashboard
+          </button>
+          <SegmentationScreen />
+        </main>
       ) : (
       <main className="content">
         <nav className="tabs">
