@@ -1,0 +1,399 @@
+/* Segmentation screen.
+   Scoped to .seg-* so nothing here can leak into the existing screens.
+   Reuses the app's card / card-head / analytics-body / prospects-table shells,
+   and inherits the design tokens already declared in index.css. */
+
+.seg-banner {
+  background: #fff8e6;
+  border: 1px solid #f0dfae;
+  color: #6b5200;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* model switcher */
+.seg-switch {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.seg-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid var(--line, #e4e0ec);
+  background: #fff;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted, #7a7391);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+.seg-switch-btn:hover {
+  border-color: var(--purple, #6b3fa0);
+  color: var(--purple, #6b3fa0);
+}
+.seg-switch-btn.is-on {
+  background: var(--navy, #1a1050);
+  border-color: var(--navy, #1a1050);
+  color: #fff;
+  font-weight: 500;
+}
+.seg-switch-k {
+  font-weight: 700;
+  opacity: 0.55;
+}
+.seg-switch-btn.is-on .seg-switch-k {
+  opacity: 0.85;
+}
+
+.seg-spine {
+  background: #fff;
+  border: 1px solid var(--line, #e4e0ec);
+  border-left: 3px solid var(--purple, #6b3fa0);
+  border-radius: 8px;
+  padding: 11px 15px;
+  font-size: 12.5px;
+  margin-bottom: 18px;
+}
+
+/* segment mix */
+.seg-list {
+  display: grid;
+  gap: 14px;
+}
+.seg-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.seg-name {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--navy, #1a1050);
+  cursor: pointer;
+  text-align: left;
+}
+.seg-name:hover {
+  color: var(--purple, #6b3fa0);
+}
+.seg-name.is-static {
+  cursor: default;
+  font-weight: 500;
+}
+.seg-bar {
+  height: 9px;
+  background: var(--lilac, #f2eff7);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.seg-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--purple, #6b3fa0);
+  border-radius: 5px;
+  transition: width 0.3s;
+}
+.seg-bar.is-empty > i {
+  background: var(--line, #e4e0ec);
+}
+.seg-blurb {
+  font-size: 12px;
+  color: var(--muted, #7a7391);
+  line-height: 1.45;
+  margin-top: 5px;
+}
+.seg-hook {
+  font-size: 12px;
+  color: var(--purple, #6b3fa0);
+  font-style: italic;
+  margin-top: 4px;
+}
+.seg-note {
+  font-size: 11.5px;
+  color: var(--muted, #7a7391);
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--line, #e4e0ec);
+  line-height: 1.55;
+}
+
+/* quadrants */
+.seg-quad {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--line, #e4e0ec);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.seg-quad-cell {
+  background: #fff;
+  padding: 16px;
+  min-height: 150px;
+}
+.seg-quad-cell h4 {
+  font-size: 13px;
+  color: var(--navy, #1a1050);
+  margin: 2px 0 0;
+}
+.seg-quad-n {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--purple, #6b3fa0);
+  line-height: 1;
+}
+.seg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+.seg-chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 11px;
+  background: var(--lilac, #f2eff7);
+  color: var(--navy, #1a1050);
+  font-size: 11px;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  margin: 1px 2px 1px 0;
+  white-space: nowrap;
+}
+.seg-chip.is-static {
+  cursor: default;
+}
+.seg-chip.is-warn {
+  background: #fff6e0;
+  color: #b8860b;
+}
+.seg-chip.is-ok {
+  background: #e6f4ea;
+  color: #1e6b3a;
+}
+
+/* table */
+.seg-table td {
+  vertical-align: top;
+}
+.seg-clickable {
+  cursor: pointer;
+}
+.seg-clickable:hover td {
+  background: var(--lilac, #f2eff7);
+}
+
+/* disclosures */
+.seg-disclosure {
+  border-top: 1px solid var(--line, #e4e0ec);
+  padding: 4px 0;
+}
+.seg-disclosure:first-child {
+  border-top: 0;
+}
+.seg-disclosure > summary {
+  cursor: pointer;
+  padding: 11px 2px;
+  font-size: 13px;
+  color: var(--purple, #6b3fa0);
+  font-weight: 500;
+  list-style: none;
+}
+.seg-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.seg-disclosure > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 15px;
+  transition: transform 0.15s;
+}
+.seg-disclosure[open] > summary::before {
+  transform: rotate(90deg);
+}
+.seg-disclosure-body {
+  padding: 4px 0 16px 15px;
+}
+
+/* method */
+.seg-question {
+  font-size: 14px;
+  color: var(--navy, #1a1050);
+  font-weight: 600;
+  margin-bottom: 14px;
+  padding-left: 11px;
+  border-left: 3px solid var(--purple, #6b3fa0);
+}
+.seg-io-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.seg-io-row > b {
+  flex: 0 0 230px;
+  color: var(--navy, #1a1050);
+}
+.seg-io-row > span {
+  flex: 1;
+  color: var(--muted, #7a7391);
+}
+.seg-io-row > em {
+  flex: 0 0 130px;
+  color: var(--purple, #6b3fa0);
+  font-style: normal;
+  font-size: 12px;
+}
+.seg-step {
+  display: flex;
+  gap: 14px;
+  margin: 16px 0;
+}
+.seg-step-n {
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--navy, #1a1050);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.seg-step h4 {
+  font-size: 13.5px;
+  color: var(--navy, #1a1050);
+  margin: 0 0 3px;
+}
+.seg-step p {
+  font-size: 12.5px;
+  color: var(--muted, #7a7391);
+  line-height: 1.5;
+  margin: 0;
+}
+.seg-fx {
+  display: inline-block;
+  margin-top: 7px;
+  background: var(--lilac, #f2eff7);
+  border: 1px solid var(--line, #e4e0ec);
+  border-radius: 6px;
+  padding: 7px 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--navy, #1a1050);
+}
+.seg-sub {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted, #7a7391);
+  margin: 16px 0 8px;
+}
+
+/* modal */
+.seg-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 16, 80, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+.seg-sheet {
+  position: relative;
+  background: #fff;
+  border-radius: 12px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 86vh;
+  overflow: auto;
+  padding: 26px;
+}
+.seg-sheet h3 {
+  font-size: 18px;
+  color: var(--navy, #1a1050);
+  margin: 0 0 2px;
+}
+.seg-sheet h5 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted, #7a7391);
+  margin: 18px 0 7px;
+}
+.seg-sheet p {
+  font-size: 13px;
+  margin: 0;
+}
+.seg-x {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--muted, #7a7391);
+  cursor: pointer;
+}
+.seg-quote {
+  font-size: 12.5px;
+  background: var(--lilac, #f2eff7);
+  padding: 9px 11px;
+  border-radius: 7px;
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+.seg-trace {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--lilac, #f2eff7);
+  list-style: none;
+}
+.seg-trace li {
+  font-size: 11.5px;
+  color: var(--muted, #7a7391);
+  margin-bottom: 3px;
+  line-height: 1.5;
+}
+.seg-trace li::before {
+  content: '· ';
+}
+
+@media (max-width: 900px) {
+  .seg-quad {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .seg-io-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .seg-io-row > b,
+  .seg-io-row > em {
+    flex: none;
+  }
+  .seg-hide-sm {
+    display: none;
+  }
+}
