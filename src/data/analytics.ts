@@ -434,4 +434,4 @@ export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
   },
 }
 
-export const CLUSTER_KEYS = ['C', 'B', 'A', 'D'] as const
+export const CLUSTER_KEYS = ['A', 'B', 'C', 'D'] as const

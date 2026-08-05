@@ -406,7 +406,9 @@ function Method({ model }: { model: ModelKey }) {
 
 /* ── screen ── */
 export default function SegmentationScreen() {
-  const [model, setModel] = useState<ModelKey>('C')
+  // 'overview' is the cover: what the page is and what each model means. The
+  // four model keys are the detail views the cover leads into.
+  const [model, setModel] = useState<ModelKey | 'overview'>('overview')
   const [openProspect, setOpenProspect] = useState<ScoredProspect | null>(null)
   const [openSegment, setOpenSegment] = useState<string | null>(null)
 
@@ -436,6 +438,14 @@ export default function SegmentationScreen() {
       </div>
 
       <nav className="seg-switch">
+        <button
+          type="button"
+          className={`seg-switch-btn ${model === 'overview' ? 'is-on' : ''}`}
+          onClick={() => setModel('overview')}
+        >
+          <span className="seg-switch-k">◎</span>
+          Overview
+        </button>
         {MODEL_KEYS.map((k) => (
           <button
             key={k}
@@ -449,6 +459,10 @@ export default function SegmentationScreen() {
         ))}
       </nav>
 
+      {model === 'overview' ? (
+        <Overview onPick={setModel} />
+      ) : (
+        <>
       <div className="seg-spine">
         <b>Organising spine —</b> {segModels[model].spine}.{' '}
         {segModels[model].kind === 'multi'
@@ -611,11 +625,57 @@ export default function SegmentationScreen() {
           </div>
         </Disclosure>
       </Card>
+        </>
+      )}
 
       {openProspect && <ProspectSheet p={openProspect} onClose={() => setOpenProspect(null)} />}
-      {openSegment && (
+      {openSegment && model !== 'overview' && (
         <SegmentSheet model={model} name={openSegment} onClose={() => setOpenSegment(null)} />
       )}
+    </>
+  )
+}
+
+/* ── Overview / cover: what the page is, and what each model means. Each card
+   leads into a model's detail view. This is the default landing state. ── */
+function Overview({ onPick }: { onPick: (k: ModelKey) => void }) {
+  return (
+    <>
+      <div className="seg-overview-intro">
+        <p>
+          <b>Audience Segmentation groups your prospects by what they told the Adventure</b> — their
+          goals, their language, how ready they are — rather than by demographics. Four independent
+          models each cut the same book a different way; pick the lens that fits the decision you are
+          making. Every label is an exhaustive partition of the Adventure&rsquo;s closed option
+          space, so no prospect is ever left unclassified.
+        </p>
+      </div>
+
+      <div className="seg-overview-grid">
+        {MODEL_KEYS.map((k) => {
+          const m = segModels[k]
+          return (
+            <button key={k} type="button" className="seg-overview-card" onClick={() => onPick(k)}>
+              <div className="seg-overview-top">
+                <span className="seg-overview-k">{k}</span>
+                <span className="seg-overview-name">{m.name}</span>
+              </div>
+              <p className="seg-overview-spine">{m.spine}.</p>
+              <div className="seg-overview-foot">
+                <span className="seg-overview-meta">
+                  {m.segments.length} segments · {m.kind === 'multi' ? 'overlapping' : 'exclusive'}
+                </span>
+                <span className="seg-overview-go">Explore →</span>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      <p className="seg-note seg-overview-hint">
+        Pick a model above, or a card, to see its quadrants, segment mix, the full prospect list and
+        how each label is calculated.
+      </p>
     </>
   )
 }

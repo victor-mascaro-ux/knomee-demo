@@ -1112,6 +1112,24 @@ input[type='checkbox'] {
   opacity: 1;
 }
 
+/* Right-opening variant: glyph sits at the LEFT of a row (e.g. a category
+   label), so the bubble opens rightward to avoid clipping off the left edge. */
+.help-tip-right::after {
+  left: calc(100% + 9px);
+  right: auto;
+  transform: translateY(-50%) translateX(-3px);
+}
+.help-tip-right:hover::after,
+.help-tip-right:focus-visible::after {
+  transform: translateY(-50%) translateX(0);
+}
+.help-tip-right::before {
+  left: calc(100% + 4px);
+  right: auto;
+  border-width: 5px 5px 5px 0;
+  border-color: transparent #240446 transparent transparent;
+}
+
 /* Standard card help glyph — a "?" that reveals its hint on hover/focus. */
 .help-tip {
   display: inline-flex;

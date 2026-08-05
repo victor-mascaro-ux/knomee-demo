@@ -83,6 +83,7 @@ import {
   MegaphoneIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
+import { segModels } from './data/segmentation'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
 
@@ -105,9 +106,18 @@ function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
 }
 
 // Standard card help affordance: a "?" glyph that reveals its hint on hover.
-function HelpTip({ text }: { text: string }) {
+// The bubble opens to the LEFT by default (the "?" usually sits at a card's
+// right edge); pass side="right" where the glyph sits at the left instead, so
+// the bubble doesn't overflow off-screen.
+function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
-    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+    <span
+      className={`help-tip tt${side === 'right' ? ' help-tip-right' : ''}`}
+      data-tip={text}
+      tabIndex={0}
+      role="img"
+      aria-label={text}
+    >
       ?
     </span>
   )
@@ -1384,7 +1394,7 @@ function ExperimentTable() {
 
 // One clustered row: share of the book (scored / 40) crossed with the segment's
 // own conversion. Same bar grammar as before, now driven by the chosen model.
-function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
+function ClusterRow({ s, maxShare, tip }: { s: ClusterSeg; maxShare: number; tip?: string }) {
   const share = Math.round((s.scored / 40) * 100)
   const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
   const thin = s.scored < MIN_SAMPLE
@@ -1392,7 +1402,10 @@ function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
   const flat = s.delta === 0
   return (
     <div className="niche-row">
-      <span className="niche-name">{s.name}</span>
+      <span className="niche-name">
+        {s.name}
+        {tip && <HelpTip text={tip} side="right" />}
+      </span>
       <span className="niche-bars">
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Share</i>
@@ -1428,10 +1441,13 @@ function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
 // "who your prospects are = what your prospects want" view — the labels come
 // straight from the Segmentation page, scored here by conversion.
 function ProspectClusters() {
-  const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('C')
+  const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('A')
   const model = modelClusters[key]
   const segs = [...model.segs].sort((a, b) => b.scored - a.scored)
   const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / 40) * 100)))
+  // Each segment's plain-language definition, pulled from the Segmentation page
+  // so the two screens never disagree on what a label means.
+  const defs = new Map(segModels[key].segments.map((sg) => [sg.name, sg.blurb]))
   return (
     <>
       <nav className="cluster-switch" role="tablist" aria-label="Clustering model">
@@ -1454,7 +1470,7 @@ function ProspectClusters() {
 
       <div className="niche-list">
         {segs.map((s) => (
-          <ClusterRow key={s.name} s={s} maxShare={maxShare} />
+          <ClusterRow key={s.name} s={s} maxShare={maxShare} tip={defs.get(s.name)} />
         ))}
       </div>
 
