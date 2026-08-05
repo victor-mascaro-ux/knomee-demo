@@ -342,3 +342,96 @@ export const utmKeys: UtmKey[] = [
   { key: 'first_touch_at', label: 'First visit timestamp' },
   { key: 'last_touch_at', label: 'Latest visit timestamp' },
 ]
+
+// ── Prospect book clustered by each segmentation model ──
+// The same 40 scored prospects / 12 clients, re-partitioned by whichever lens
+// the advisor picks. Segment names match the Segmentation page (segModels), so
+// the two screens tell one story: Segmentation defines the labels, Analytics
+// scores them by conversion. Exclusive models (A/B/C) sum to 40 scored / 12
+// clients; the Tension-Tag model (D) overlaps, so its counts sum past both.
+export interface ClusterSeg {
+  name: string
+  scored: number // prospects landing in this segment
+  clients: number // of those, how many converted
+  delta: number // percentage points of share vs last quarter
+}
+
+export interface ModelCluster {
+  key: 'A' | 'B' | 'C' | 'D'
+  name: string
+  spine: string
+  exclusive: boolean // false = segments overlap, shares sum past 100%
+  lead: string // the one sentence an advisor should act on
+  segs: ClusterSeg[]
+}
+
+export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
+  C: {
+    key: 'C',
+    name: 'Vision × Readiness',
+    spine: 'How clearly they see the destination, crossed with how close they are to acting.',
+    exclusive: true,
+    lead: 'Readiness sorts your book cleanly: Ready to Build converts at 63%, Not Yet Looking at 17%. Spend the week on the first row.',
+    segs: [
+      { name: 'Ready to Build', scored: 8, clients: 5, delta: 4 },
+      { name: 'Vivid but Stuck', scored: 14, clients: 4, delta: 2 },
+      { name: 'Moving Without a Map', scored: 12, clients: 2, delta: -3 },
+      { name: 'Not Yet Looking', scored: 6, clients: 1, delta: -3 },
+    ],
+  },
+  B: {
+    key: 'B',
+    name: 'Purpose × Posture',
+    spine: 'Why money matters to them, crossed with how they feel about it.',
+    exclusive: true,
+    lead: 'Liberators and Contributors convert best (43% / 40%) despite being your smallest families — the message that lands is autonomy, not accumulation.',
+    segs: [
+      { name: 'Protector', scored: 11, clients: 4, delta: 1 },
+      { name: 'Achiever', scored: 8, clients: 2, delta: -2 },
+      { name: 'Liberator', scored: 7, clients: 3, delta: 5 },
+      { name: 'Experiencer', scored: 6, clients: 1, delta: 0 },
+      { name: 'Contributor', scored: 5, clients: 2, delta: 2 },
+      { name: 'Unstated', scored: 3, clients: 0, delta: -1 },
+    ],
+  },
+  A: {
+    key: 'A',
+    name: 'Life Domain',
+    spine: 'Which of the eight life domains the future vision points at.',
+    exclusive: true,
+    lead: 'People & Generations and Travel & Exploration close above 40%; Culture & Creativity is a quarter of interest but a fifth of that close rate.',
+    segs: [
+      { name: 'Health & Activity', scored: 8, clients: 2, delta: 2 },
+      { name: 'People & Generations', scored: 7, clients: 3, delta: 3 },
+      { name: 'Culture & Creativity', scored: 6, clients: 1, delta: -1 },
+      { name: 'Work & Enterprise', scored: 5, clients: 2, delta: 1 },
+      { name: 'Home & Table', scored: 4, clients: 1, delta: 0 },
+      { name: 'Travel & Exploration', scored: 4, clients: 2, delta: 4 },
+      { name: 'Contribution', scored: 3, clients: 1, delta: 1 },
+      { name: 'Place & Setting', scored: 2, clients: 0, delta: -2 },
+      { name: 'Insufficient Signal', scored: 1, clients: 0, delta: 0 },
+    ],
+  },
+  D: {
+    key: 'D',
+    name: 'Tension Tags',
+    spine: 'Where what a prospect wants contradicts what they believe or do. Tags overlap — one prospect can carry several.',
+    exclusive: false,
+    lead: 'Advisor-Receptive is the money tag: 12 prospects carry it and it converts at 50%. Deferred Joy is the largest but converts at 21% — volume that needs reframing, not closing.',
+    segs: [
+      { name: 'Advisor-Receptive', scored: 12, clients: 6, delta: 3 },
+      { name: 'Deferred Joy', scored: 14, clients: 3, delta: 2 },
+      { name: 'Vision-Action Gap', scored: 13, clients: 4, delta: -1 },
+      { name: 'Confidence Gap', scored: 11, clients: 2, delta: 1 },
+      { name: 'Vision Fog', scored: 10, clients: 2, delta: -2 },
+      { name: 'Decision Fatigue', scored: 9, clients: 1, delta: 0 },
+      { name: 'Self-Directed', scored: 9, clients: 1, delta: -1 },
+      { name: 'Horizon Mismatch', scored: 8, clients: 3, delta: 2 },
+      { name: 'Planning Aversion', scored: 7, clients: 1, delta: -1 },
+      { name: 'Permission Gap', scored: 6, clients: 2, delta: 1 },
+      { name: 'Solo Future', scored: 5, clients: 2, delta: 0 },
+    ],
+  },
+}
+
+export const CLUSTER_KEYS = ['A', 'B', 'C', 'D'] as const

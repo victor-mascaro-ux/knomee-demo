@@ -1112,6 +1112,24 @@ input[type='checkbox'] {
   opacity: 1;
 }
 
+/* Right-opening variant: glyph sits at the LEFT of a row (e.g. a category
+   label), so the bubble opens rightward to avoid clipping off the left edge. */
+.help-tip-right::after {
+  left: calc(100% + 9px);
+  right: auto;
+  transform: translateY(-50%) translateX(-3px);
+}
+.help-tip-right:hover::after,
+.help-tip-right:focus-visible::after {
+  transform: translateY(-50%) translateX(0);
+}
+.help-tip-right::before {
+  left: calc(100% + 4px);
+  right: auto;
+  border-width: 5px 5px 5px 0;
+  border-color: transparent #240446 transparent transparent;
+}
+
 /* Standard card help glyph — a "?" that reveals its hint on hover/focus. */
 .help-tip {
   display: inline-flex;
@@ -3989,4 +4007,196 @@ input[type='checkbox'] {
   .clients-table tbody td:nth-child(3) {
     display: none;
   }
+}
+
+/* ---------- Analytics: clustering-model switcher (section 2) ---------- */
+.cluster-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.cluster-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-text);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px 7px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.cluster-switch-btn:hover {
+  border-color: var(--lilac);
+  color: var(--plum);
+}
+.cluster-switch-btn.is-on {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: #fff;
+}
+.cluster-switch-k {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--pearl);
+  color: var(--plum);
+}
+.cluster-switch-btn.is-on .cluster-switch-k {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+.cluster-spine {
+  font-size: 13px;
+  color: var(--grey-text);
+  margin: 0 0 16px;
+  max-width: 70ch;
+}
+
+/* ---------- Admin view ---------- */
+.adopt-list {
+  display: flex;
+  flex-direction: column;
+}
+.adopt-row {
+  display: grid;
+  grid-template-columns: 230px 1fr 48px 44px;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.adopt-row:last-child {
+  border-bottom: none;
+}
+.adopt-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #201a2e;
+}
+.adopt-note {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--grey-text);
+}
+.adopt-track {
+  height: 10px;
+  background: var(--pearl);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.adopt-fill {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7639a1, var(--plum));
+}
+.adopt-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #201a2e;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.adopt-pct {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-text);
+  text-align: right;
+}
+/* Conversion-spread histogram */
+.conv-dist {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 180px;
+  padding: 8px 4px 0;
+}
+.conv-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.conv-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--plum);
+}
+.conv-bar-wrap {
+  width: 100%;
+  max-width: 56px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+.conv-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #7639a1, var(--plum));
+  border-radius: 6px 6px 0 0;
+  min-height: 3px;
+  transition: height 0.25s ease;
+}
+.conv-lbl {
+  font-size: 12px;
+  color: var(--grey-text);
+  text-align: center;
+}
+/* Leaderboard table */
+.admin-table-wrap {
+  max-height: 520px;
+  overflow-y: auto;
+}
+.admin-table th.num,
+.admin-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.admin-table td {
+  white-space: nowrap;
+}
+.admin-rank {
+  display: inline-block;
+  min-width: 22px;
+  margin-right: 8px;
+  color: var(--ash);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+.admin-muted {
+  color: var(--grey-text);
+}
+.admin-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.admin-badge.on {
+  background: #e3f6f0;
+  color: #0f4a3a;
+}
+.admin-badge.off {
+  background: var(--pearl);
+  color: var(--grey-text);
 }
