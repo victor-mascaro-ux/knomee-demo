@@ -1857,11 +1857,11 @@ input[type='checkbox'] {
   border-radius: 9px;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  animation: modalPop 0.15s ease-out;
+  animation: modalPop 0.24s cubic-bezier(0.22, 0.81, 0.28, 1.05);
 }
 @keyframes modalPop {
   from {
-    transform: scale(0.96);
+    transform: scale(0.955) translateY(10px);
     opacity: 0;
   }
   to {
@@ -4459,5 +4459,121 @@ input[type='checkbox'] {
   }
   .invite-qr-box {
     align-self: flex-start;
+  }
+}
+
+/* ---------- Micro-interactions & animation polish ---------- */
+/* Buttons: press feedback + primary hover lift */
+.btn-primary:hover {
+  box-shadow: 0 6px 18px rgba(36, 4, 70, 0.28);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+.btn-download.active:hover {
+  transform: translateY(-1px);
+}
+
+/* Invite send plane nudges toward "send" on hover */
+.invite-send svg {
+  transition: transform 0.16s ease;
+}
+.invite-send:hover svg {
+  transform: translate(2px, -2px);
+}
+/* Copy buttons press in */
+.invite-copy {
+  transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+}
+.invite-copy:active {
+  transform: scale(0.86);
+}
+
+/* Pills & switches: press feedback (hover/colour already handled above) */
+.invite-tab,
+.cluster-switch-btn,
+.seg-switch-btn,
+.tab {
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease, transform 0.12s ease;
+}
+.invite-tab:active,
+.cluster-switch-btn:active,
+.seg-switch-btn:active {
+  transform: scale(0.96);
+}
+
+/* Accept button in the invite preview */
+.invite-accept {
+  transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+.invite-accept:hover {
+  box-shadow: 0 6px 16px rgba(91, 83, 217, 0.4);
+  transform: translateY(-1px);
+}
+.invite-accept:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Email preview slides in when revealed */
+.invite-preview {
+  animation: previewIn 0.28s cubic-bezier(0.22, 0.81, 0.28, 1.05);
+  transform-origin: top center;
+}
+@keyframes previewIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Interactive list cards get a gentle hover lift */
+.talk-card {
+  transition: transform 0.16s ease, box-shadow 0.18s ease, border-color 0.16s ease;
+}
+.talk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.09);
+}
+.client-insight,
+.insight {
+  transition: transform 0.16s ease;
+}
+.client-insight:hover,
+.insight:hover {
+  transform: translateX(2px);
+}
+/* Segmentation overview cards already lift; add press feedback */
+.seg-overview-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Impact / KPI tiles ease on hover where they already scale */
+.impact-card {
+  transition: transform 0.16s ease, box-shadow 0.18s ease, border-color 0.16s ease;
+}
+
+/* Honour reduced-motion for the entrance animations added here */
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .invite-preview {
+    animation: none;
+  }
+  .btn-primary:hover,
+  .btn:active,
+  .talk-card:hover,
+  .insight:hover,
+  .client-insight:hover,
+  .invite-accept:hover,
+  .invite-send:hover svg,
+  .invite-tab:active,
+  .cluster-switch-btn:active,
+  .seg-switch-btn:active,
+  .invite-copy:active {
+    transform: none;
   }
 }

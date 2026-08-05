@@ -130,6 +130,7 @@ function CollapsibleCard({
   hint,
   bodyClassName,
   className,
+  defaultOpen = true,
   children,
 }: {
   icon: ReactNode
@@ -137,9 +138,10 @@ function CollapsibleCard({
   hint?: string
   bodyClassName: string
   className?: string
+  defaultOpen?: boolean
   children: ReactNode
 }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(defaultOpen)
   return (
     <section className={`card ${className ?? ''}`}>
       <header className="card-head">
@@ -232,6 +234,7 @@ function ActionableInsights() {
       title="Actionable Insights"
       hint="Auto-generated takeaways, ranked by opportunity."
       bodyClassName="insights-body"
+      defaultOpen={false}
     >
       {[col1, col2].map((col, i) => (
         <div className="insights-col" key={i}>
@@ -549,41 +552,39 @@ function Toolbar({
 // chip is something the prospect stated, never a tracked behaviour.
 function WhoToTalkTo() {
   return (
-    <section className="card analytics-card who-to-talk">
-      <header className="card-head">
-        <div className="card-title">
-          <BoltIcon />
-          <span>Who to Talk to This Week</span>
-        </div>
-        <HelpTip text="Highest-intent prospects, with their stated reasoning." />
-      </header>
-      <div className="analytics-body">
-        <div className="talk-list">
-          {talkTo.map((t) => (
-            <div className="talk-card" key={t.name}>
-              <div className="talk-head">
-                <span className="talk-name">{t.name}</span>
-                <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
-                <span className="talk-kq">KQ {t.kq}</span>
-                <span className="talk-niche">{t.niche}</span>
-              </div>
-              <div className="talk-chips">
-                {t.said.map((s, i) => (
-                  <span className="talk-chip-wrap" key={s}>
-                    <span className="talk-chip">{s}</span>
-                    {i < t.said.length - 1 && <ChevronRight />}
-                  </span>
-                ))}
-              </div>
+    <CollapsibleCard
+      className="analytics-card who-to-talk"
+      icon={<BoltIcon />}
+      title="Who to Talk to This Week"
+      hint="Highest-intent prospects, with their stated reasoning."
+      bodyClassName="analytics-body"
+      defaultOpen={false}
+    >
+      <div className="talk-list">
+        {talkTo.map((t) => (
+          <div className="talk-card" key={t.name}>
+            <div className="talk-head">
+              <span className="talk-name">{t.name}</span>
+              <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
+              <span className="talk-kq">KQ {t.kq}</span>
+              <span className="talk-niche">{t.niche}</span>
             </div>
-          ))}
-        </div>
-        <p className="analytics-note">
-          Every score shows its reasoning. Each chip is something the prospect stated — never a
-          tracked behaviour.
-        </p>
+            <div className="talk-chips">
+              {t.said.map((s, i) => (
+                <span className="talk-chip-wrap" key={s}>
+                  <span className="talk-chip">{s}</span>
+                  {i < t.said.length - 1 && <ChevronRight />}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+      <p className="analytics-note">
+        Every score shows its reasoning. Each chip is something the prospect stated — never a
+        tracked behaviour.
+      </p>
+    </CollapsibleCard>
   )
 }
 
@@ -962,6 +963,7 @@ function ClientInsights() {
       title="Actionable Insights"
       hint="Clients flagged by engagement and sentiment."
       bodyClassName="client-insights-body"
+      defaultOpen={false}
     >
       {clientInsights.map((ins) => (
         <div className="client-insight" key={ins.name}>
@@ -2041,6 +2043,43 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
    copying the link, or copying the QR each fires the matching toast. All data
    is demo-fake: the link is a placeholder and the QR is decorative. */
 
+// The prototype runs in a full-height iframe whose PARENT window scrolls, so a
+// `position: fixed` backdrop centres on the tall iframe rather than the user's
+// window. Mirror the Toast fix: report whichever window actually scrolls so an
+// absolutely-positioned backdrop can be pinned to the visible viewport.
+function useViewportBand(active: boolean) {
+  const [band, setBand] = useState<{ top: number; height: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!active) return
+    let parentWin: Window | null = null
+    try {
+      if (window.parent !== window && typeof window.parent.scrollY === 'number') parentWin = window.parent
+    } catch {
+      parentWin = null
+    }
+    const place = () => {
+      const selfScrolls = document.documentElement.scrollHeight > window.innerHeight + 2
+      const w = selfScrolls || !parentWin ? window : parentWin
+      setBand({ top: w.scrollY, height: w.innerHeight })
+    }
+    place()
+    const targets = new Set<Window>([window])
+    if (parentWin) targets.add(parentWin)
+    targets.forEach((t) => {
+      t.addEventListener('scroll', place, { passive: true })
+      t.addEventListener('resize', place)
+    })
+    return () =>
+      targets.forEach((t) => {
+        t.removeEventListener('scroll', place)
+        t.removeEventListener('resize', place)
+      })
+  }, [active])
+  // When embedded, pin an absolute backdrop to the visible band; otherwise let
+  // the stylesheet's `position: fixed; inset: 0` handle it.
+  return band ? ({ position: 'absolute', top: band.top, height: band.height } as const) : undefined
+}
+
 type InviteKind = 'prospect' | 'client'
 
 // Paper-plane send glyph, matching the mockup's input affordance.
@@ -2182,8 +2221,10 @@ function InviteModal({
     setEmail('')
   }
 
+  const bandStyle = useViewportBand(true)
+
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Invite {label}</h2>
@@ -2285,8 +2326,9 @@ function ConvertModal({
   onCancel: () => void
   onConfirm: () => void
 }) {
+  const bandStyle = useViewportBand(true)
   return (
-    <div className="modal-backdrop" onClick={onCancel} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" style={bandStyle} onClick={onCancel} role="dialog" aria-modal="true">
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Convert to Client</h2>
