@@ -4320,6 +4320,10 @@ input[type='checkbox'] {
 .invite-preview-toggle svg {
   width: 14px;
   height: 14px;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.invite-preview-toggle.is-open svg {
+  transform: rotate(180deg);
 }
 /* Email preview */
 .invite-preview {
@@ -4515,20 +4519,35 @@ input[type='checkbox'] {
   transform: translateY(0) scale(0.98);
 }
 
-/* Email preview slides in when revealed */
-.invite-preview {
-  animation: previewIn 0.28s cubic-bezier(0.22, 0.81, 0.28, 1.05);
-  transform-origin: top center;
+/* Tab-switch: the panel below the pills cross-fades on each `key` change. */
+.invite-panel {
+  animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
 }
-@keyframes previewIn {
+@keyframes invitePanelIn {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: none;
   }
+}
+/* The title's changing word cross-fades in step with the tab switch. */
+.invite-title-word {
+  display: inline-block;
+  animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
+}
+/* Email preview: height reveal (via .collapse) plus a fade on its contents. */
+.invite-preview-collapse .collapse-inner {
+  opacity: 0;
+  transition: opacity 0.3s ease 0.04s;
+}
+.invite-preview-collapse.open .collapse-inner {
+  opacity: 1;
+}
+.invite-preview {
+  transform-origin: top center;
 }
 
 /* Interactive list cards get a gentle hover lift */
@@ -4560,8 +4579,13 @@ input[type='checkbox'] {
 /* Honour reduced-motion for the entrance animations added here */
 @media (prefers-reduced-motion: reduce) {
   .modal,
-  .invite-preview {
+  .invite-panel,
+  .invite-title-word {
     animation: none;
+  }
+  .invite-preview-toggle svg,
+  .invite-preview-collapse .collapse-inner {
+    transition: none;
   }
   .btn-primary:hover,
   .btn:active,

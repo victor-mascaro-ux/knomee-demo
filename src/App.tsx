@@ -2227,7 +2227,12 @@ function InviteModal({
     <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Invite {label}</h2>
+          <h2 className="modal-title">
+            Invite{' '}
+            <span className="invite-title-word" key={kind}>
+              {label}
+            </span>
+          </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
@@ -2248,66 +2253,75 @@ function InviteModal({
             ))}
           </div>
 
-          <h3 className="invite-section">Send Invite Email</h3>
-          <label className="invite-field-label" htmlFor="invite-email">
-            Email
-          </label>
-          <div className="invite-email-row">
-            <input
-              id="invite-email"
-              type="email"
-              placeholder={`Add ${kind} email`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && send()}
-            />
+          {/* Keyed on `kind` so the panel re-runs its enter animation on each
+              tab switch — the content cross-fades instead of snapping. */}
+          <div className="invite-panel" key={kind}>
+            <h3 className="invite-section">Send Invite Email</h3>
+            <label className="invite-field-label" htmlFor="invite-email">
+              Email
+            </label>
+            <div className="invite-email-row">
+              <input
+                id="invite-email"
+                type="email"
+                placeholder={`Add ${kind} email`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && send()}
+              />
+              <button
+                className="invite-send"
+                type="button"
+                aria-label={`Send ${kind} invite`}
+                onClick={send}
+              >
+                <SendGlyph />
+              </button>
+            </div>
             <button
-              className="invite-send"
+              className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
               type="button"
-              aria-label={`Send ${kind} invite`}
-              onClick={send}
+              aria-expanded={previewOpen}
+              onClick={() => setPreviewOpen((v) => !v)}
             >
-              <SendGlyph />
+              Preview <ChevronDown />
             </button>
-          </div>
-          <button
-            className="invite-preview-toggle"
-            type="button"
-            aria-expanded={previewOpen}
-            onClick={() => setPreviewOpen((v) => !v)}
-          >
-            Preview {previewOpen ? <ChevronUp /> : <ChevronDown />}
-          </button>
-          {previewOpen && <InvitePreview kind={kind} />}
-
-          <h3 className="invite-section">Share {label} Link</h3>
-          <div className="invite-share">
-            <div className="invite-share-col invite-share-link">
-              <label className="invite-field-label">Link</label>
-              <div className="invite-link-box">
-                <span className="invite-link-text">{link}</span>
-                <button
-                  className="invite-copy"
-                  type="button"
-                  aria-label={`Copy ${kind} link`}
-                  onClick={() => copy(link, `${label} link copied`)}
-                >
-                  <CopyGlyph />
-                </button>
+            {/* Height-animated reveal so the preview expands rather than pops. */}
+            <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`}>
+              <div className="collapse-inner">
+                <InvitePreview kind={kind} />
               </div>
             </div>
-            <div className="invite-share-col">
-              <label className="invite-field-label">QR Code</label>
-              <div className="invite-qr-box">
-                <QrCode seed={kind === 'prospect' ? 7 : 23} />
-                <button
-                  className="invite-copy invite-qr-copy"
-                  type="button"
-                  aria-label={`Copy ${kind} QR code`}
-                  onClick={() => copy(link, `${label} QR code copied`)}
-                >
-                  <CopyGlyph />
-                </button>
+
+            <h3 className="invite-section">Share {label} Link</h3>
+            <div className="invite-share">
+              <div className="invite-share-col invite-share-link">
+                <label className="invite-field-label">Link</label>
+                <div className="invite-link-box">
+                  <span className="invite-link-text">{link}</span>
+                  <button
+                    className="invite-copy"
+                    type="button"
+                    aria-label={`Copy ${kind} link`}
+                    onClick={() => copy(link, `${label} link copied`)}
+                  >
+                    <CopyGlyph />
+                  </button>
+                </div>
+              </div>
+              <div className="invite-share-col">
+                <label className="invite-field-label">QR Code</label>
+                <div className="invite-qr-box">
+                  <QrCode seed={kind === 'prospect' ? 7 : 23} />
+                  <button
+                    className="invite-copy invite-qr-copy"
+                    type="button"
+                    aria-label={`Copy ${kind} QR code`}
+                    onClick={() => copy(link, `${label} QR code copied`)}
+                  >
+                    <CopyGlyph />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
