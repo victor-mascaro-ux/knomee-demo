@@ -61,6 +61,7 @@ import {
   type ClientTier,
 } from './data/clients'
 import {
+  KnomeeMark,
   ChartIcon,
   BoltIcon,
   ChevronUp,
@@ -514,9 +515,11 @@ function ProspectsTable({
 function Toolbar({
   downloadActive,
   onDownload,
+  onInvite,
 }: {
   downloadActive: boolean
   onDownload: () => void
+  onInvite: () => void
 }) {
   return (
     <div className="toolbar">
@@ -533,7 +536,7 @@ function Toolbar({
         >
           <DownloadIcon /> Download
         </button>
-        <button className="btn btn-primary" type="button">
+        <button className="btn btn-primary" type="button" onClick={onInvite}>
           <PlusIcon /> Invite
         </button>
       </div>
@@ -587,9 +590,11 @@ function WhoToTalkTo() {
 function ProspectsScreen({
   onConvert,
   onDownload,
+  onInvite,
 }: {
   onConvert: (p: Prospect) => void
   onDownload: () => void
+  onInvite: () => void
 }) {
   const allNames = prospects.map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -608,7 +613,7 @@ function ProspectsScreen({
       <TopLineMetrics />
       <ActionableInsights />
       <WhoToTalkTo />
-      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
         selected={selected}
@@ -976,7 +981,15 @@ function ClientInsights() {
   )
 }
 
-function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload: () => void }) {
+function ClientsScreen({
+  clients,
+  onDownload,
+  onInvite,
+}: {
+  clients: Client[]
+  onDownload: () => void
+  onInvite: () => void
+}) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const toggle = (name: string) =>
@@ -993,7 +1006,7 @@ function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload:
       <h1 className="page-title">My Clients</h1>
       <ClientsMetrics clients={clients} />
       <ClientInsights />
-      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
           <thead>
@@ -2022,6 +2035,247 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
   )
 }
 
+/* ── Invite flow ─────────────────────────────────────────────────────────
+   One modal, two tabs (prospect / client). Opened from the Invite button on
+   either dashboard, defaulting to that dashboard's kind. Sending an email,
+   copying the link, or copying the QR each fires the matching toast. All data
+   is demo-fake: the link is a placeholder and the QR is decorative. */
+
+type InviteKind = 'prospect' | 'client'
+
+// Paper-plane send glyph, matching the mockup's input affordance.
+function SendGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.5 2.5 9 11" />
+      <path d="M17.5 2.5 12 17.5 9 11 2.5 8 17.5 2.5Z" />
+    </svg>
+  )
+}
+
+// Two-sheet copy glyph.
+function CopyGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="7" y="7" width="10" height="10" rx="2" />
+      <path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+    </svg>
+  )
+}
+
+// Decorative QR: three finder patterns + a seeded field of modules. It encodes
+// nothing — the link beside it is the real (placeholder) share target.
+function QrCode({ seed }: { seed: number }) {
+  const N = 21
+  let s = seed || 1
+  const rand = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff
+    return s / 0x7fffffff
+  }
+  const finders: [number, number][] = [
+    [0, 0],
+    [0, N - 7],
+    [N - 7, 0],
+  ]
+  const rects: { x: number; y: number }[] = []
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      // Separator ring around each finder stays white.
+      const nearFinder = finders.some(([fr, fc]) => r >= fr - 1 && r <= fr + 7 && c >= fc - 1 && c <= fc + 7)
+      const inFinder = finders.some(([fr, fc]) => r >= fr && r <= fr + 6 && c >= fc && c <= fc + 6)
+      let on: boolean
+      if (inFinder) {
+        const fr = r < 7 ? 0 : N - 7
+        const fc = c < 7 ? 0 : N - 7
+        const rr = r - fr
+        const cc = c - fc
+        on = rr === 0 || rr === 6 || cc === 0 || cc === 6 || (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4)
+      } else if (nearFinder) {
+        on = false
+      } else {
+        on = rand() > 0.5
+      }
+      if (on) rects.push({ x: c, y: r })
+    }
+  }
+  return (
+    <svg className="invite-qr-svg" viewBox={`-1 -1 ${N + 2} ${N + 2}`} role="img" aria-label="QR code">
+      <rect x={-1} y={-1} width={N + 2} height={N + 2} fill="#fff" />
+      {rects.map((m) => (
+        <rect key={`${m.x}-${m.y}`} x={m.x} y={m.y} width={1} height={1} fill="#111" />
+      ))}
+    </svg>
+  )
+}
+
+function InvitePreview({ kind }: { kind: InviteKind }) {
+  return (
+    <div className="invite-preview">
+      <div className="invite-preview-meta">
+        <div>
+          From: <b>info@knomee.com</b>
+        </div>
+        <div>
+          Subject: <b>Invitation to Join Beacon Planning</b>
+        </div>
+      </div>
+      <div className="invite-preview-card">
+        <div className="invite-preview-brand">
+          <KnomeeMark size={20} /> knomee
+        </div>
+        <h4>Your Invitation</h4>
+        <p>
+          Alex Advisor has invited you to join Beacon Planning on Knomee
+          {kind === 'client' ? ' as a client' : ''}.
+        </p>
+        <button className="invite-accept" type="button">
+          Accept Invitation
+        </button>
+        <p className="invite-preview-foot">
+          If you&rsquo;re having trouble with the above please email us at:{' '}
+          <a href="mailto:info@knomee.com" onClick={(e) => e.preventDefault()}>
+            info@knomee.com
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function InviteModal({
+  initialKind,
+  onClose,
+  showToast,
+}: {
+  initialKind: InviteKind
+  onClose: () => void
+  showToast: (msg: string) => void
+}) {
+  const [kind, setKind] = useState<InviteKind>(initialKind)
+  const [email, setEmail] = useState('')
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const label = kind === 'prospect' ? 'Prospect' : 'Client'
+  const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // Clipboard may be blocked inside the embedding iframe; the toast is the
+  // demo's real feedback, so never let a copy failure swallow it.
+  const copy = (text: string, msg: string) => {
+    try {
+      navigator.clipboard?.writeText(text)
+    } catch {
+      /* ignore — demo still confirms via toast */
+    }
+    showToast(msg)
+  }
+
+  const send = () => {
+    if (!email.trim()) return
+    showToast(`${label} email sent`)
+    setEmail('')
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Invite {label}</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body invite-body">
+          <div className="invite-tabs" role="tablist">
+            {(['prospect', 'client'] as InviteKind[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                aria-selected={kind === k}
+                className={`invite-tab ${kind === k ? 'is-on' : ''}`}
+                onClick={() => setKind(k)}
+              >
+                Invite {k === 'prospect' ? 'Prospect' : 'Client'}
+              </button>
+            ))}
+          </div>
+
+          <h3 className="invite-section">Send Invite Email</h3>
+          <label className="invite-field-label" htmlFor="invite-email">
+            Email
+          </label>
+          <div className="invite-email-row">
+            <input
+              id="invite-email"
+              type="email"
+              placeholder={`Add ${kind} email`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && send()}
+            />
+            <button
+              className="invite-send"
+              type="button"
+              aria-label={`Send ${kind} invite`}
+              onClick={send}
+            >
+              <SendGlyph />
+            </button>
+          </div>
+          <button
+            className="invite-preview-toggle"
+            type="button"
+            aria-expanded={previewOpen}
+            onClick={() => setPreviewOpen((v) => !v)}
+          >
+            Preview {previewOpen ? <ChevronUp /> : <ChevronDown />}
+          </button>
+          {previewOpen && <InvitePreview kind={kind} />}
+
+          <h3 className="invite-section">Share {label} Link</h3>
+          <div className="invite-share">
+            <div className="invite-share-col invite-share-link">
+              <label className="invite-field-label">Link</label>
+              <div className="invite-link-box">
+                <span className="invite-link-text">{link}</span>
+                <button
+                  className="invite-copy"
+                  type="button"
+                  aria-label={`Copy ${kind} link`}
+                  onClick={() => copy(link, `${label} link copied`)}
+                >
+                  <CopyGlyph />
+                </button>
+              </div>
+            </div>
+            <div className="invite-share-col">
+              <label className="invite-field-label">QR Code</label>
+              <div className="invite-qr-box">
+                <QrCode seed={kind === 'prospect' ? 7 : 23} />
+                <button
+                  className="invite-copy invite-qr-copy"
+                  type="button"
+                  aria-label={`Copy ${kind} QR code`}
+                  onClick={() => copy(link, `${label} QR code copied`)}
+                >
+                  <CopyGlyph />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ConvertModal({
   prospect,
   onCancel,
@@ -2591,6 +2845,8 @@ export default function App() {
   const [emptyMode, setEmptyMode] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  // Invite modal: null when closed, otherwise the tab it opens on.
+  const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(false)
@@ -2774,13 +3030,18 @@ export default function App() {
             <ProspectsScreen
               onConvert={setConvertTarget}
               onDownload={() => showToast('CSV downloaded')}
+              onInvite={() => setInviteKind('prospect')}
             />
           ))}
         {screen === 'clients' &&
           (emptyMode ? (
             <EmptyScreen variant="clients" onCta={() => setEmptyMode(false)} />
           ) : (
-            <ClientsScreen clients={clients} onDownload={() => showToast('CSV downloaded')} />
+            <ClientsScreen
+              clients={clients}
+              onDownload={() => showToast('CSV downloaded')}
+              onInvite={() => setInviteKind('client')}
+            />
           ))}
         {screen === 'analytics' &&
           (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
@@ -2792,6 +3053,13 @@ export default function App() {
           prospect={convertTarget}
           onCancel={() => setConvertTarget(null)}
           onConfirm={confirmConvert}
+        />
+      )}
+      {inviteKind && (
+        <InviteModal
+          initialKind={inviteKind}
+          onClose={() => setInviteKind(null)}
+          showToast={showToast}
         />
       )}
       <Toast show={toast.show} message={toast.msg} />
