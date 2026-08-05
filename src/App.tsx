@@ -16,8 +16,8 @@ import {
   buildFunnel,
   MIN_SAMPLE,
   impactStats,
-  niches,
-  nicheBenchmark,
+  modelClusters,
+  CLUSTER_KEYS,
   dropReadings,
   bySource,
   byNiche,
@@ -30,7 +30,15 @@ import {
   utmKeys,
   type Segment,
   type Experiment,
+  type ClusterSeg,
 } from './data/analytics'
+import {
+  advisors,
+  adminSummary,
+  adoptionStages,
+  convDistribution,
+  unactivated,
+} from './data/admin'
 import {
   CLIENT_ANNUAL_RATE,
   CONVERSION_RATE,
@@ -523,6 +531,49 @@ function Toolbar({
   )
 }
 
+// The prioritised call-list. Lives on the Prospects dashboard — that is where
+// the advisor decides who to act on — rather than buried in Analytics. Each
+// chip is something the prospect stated, never a tracked behaviour.
+function WhoToTalkTo() {
+  return (
+    <section className="card analytics-card who-to-talk">
+      <header className="card-head">
+        <div className="card-title">
+          <BoltIcon />
+          <span>Who to Talk to This Week</span>
+        </div>
+        <HelpTip text="Highest-intent prospects, with their stated reasoning." />
+      </header>
+      <div className="analytics-body">
+        <div className="talk-list">
+          {talkTo.map((t) => (
+            <div className="talk-card" key={t.name}>
+              <div className="talk-head">
+                <span className="talk-name">{t.name}</span>
+                <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
+                <span className="talk-kq">KQ {t.kq}</span>
+                <span className="talk-niche">{t.niche}</span>
+              </div>
+              <div className="talk-chips">
+                {t.said.map((s, i) => (
+                  <span className="talk-chip-wrap" key={s}>
+                    <span className="talk-chip">{s}</span>
+                    {i < t.said.length - 1 && <ChevronRight />}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="analytics-note">
+          Every score shows its reasoning. Each chip is something the prospect stated — never a
+          tracked behaviour.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 function ProspectsScreen({
   onConvert,
   onDownload,
@@ -546,6 +597,7 @@ function ProspectsScreen({
       <h1 className="page-title">My Dashboard</h1>
       <TopLineMetrics />
       <ActionableInsights />
+      <WhoToTalkTo />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
       <ProspectsTable
         onConvert={onConvert}
@@ -1330,35 +1382,39 @@ function ExperimentTable() {
 
 /* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
 
-function NicheRow({ n, maxShare }: { n: (typeof niches)[number]; maxShare: number }) {
-  const thin = n.count < MIN_SAMPLE
-  const up = n.delta > 0
+// One clustered row: share of the book (scored / 40) crossed with the segment's
+// own conversion. Same bar grammar as before, now driven by the chosen model.
+function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
+  const share = Math.round((s.scored / 40) * 100)
+  const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
+  const thin = s.scored < MIN_SAMPLE
+  const up = s.delta > 0
+  const flat = s.delta === 0
   return (
     <div className="niche-row">
-      <span className="niche-name">
-        {n.name}
-        {n.share > nicheBenchmark && <i className="niche-flag tt" data-tip={`Above the ${nicheBenchmark}% concentration benchmark`}>▲</i>}
-      </span>
+      <span className="niche-name">{s.name}</span>
       <span className="niche-bars">
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Share</i>
           <span className="niche-track">
-            <span className="niche-fill share" style={{ width: `${(n.share / maxShare) * 100}%` }} />
+            <span className="niche-fill share" style={{ width: `${(share / maxShare) * 100}%` }} />
           </span>
-          <b className="niche-val">{n.share}%</b>
-          <i className="attr-n">n={n.count}</i>
+          <b className="niche-val">{share}%</b>
+          <i className="attr-n">n={s.scored}</i>
         </span>
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Converts</i>
           <span className="niche-track">
-            <span className="niche-fill conv" style={{ width: `${n.conv}%` }} />
+            <span className="niche-fill conv" style={{ width: `${conv}%` }} />
           </span>
-          <b className="niche-val">{n.conv}%</b>
+          <b className="niche-val">{conv}%</b>
           {thin ? (
-            <i className="exp-thin">n={n.count} · too small</i>
+            <i className="exp-thin">n={s.scored} · too small</i>
+          ) : flat ? (
+            <i className="niche-delta">— flat vs last quarter</i>
           ) : (
             <i className={`niche-delta ${up ? 'up' : 'down'}`}>
-              {up ? '▲' : '▼'} {Math.abs(n.delta)} pts vs last quarter
+              {up ? '▲' : '▼'} {Math.abs(s.delta)} pts vs last quarter
             </i>
           )}
         </span>
@@ -1367,9 +1423,234 @@ function NicheRow({ n, maxShare }: { n: (typeof niches)[number]; maxShare: numbe
   )
 }
 
+// The clustering lens for section 2: one switcher over the four Segmentation
+// models, re-partitioning the same 40 scored prospects each time. This is the
+// "who your prospects are = what your prospects want" view — the labels come
+// straight from the Segmentation page, scored here by conversion.
+function ProspectClusters() {
+  const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('C')
+  const model = modelClusters[key]
+  const segs = [...model.segs].sort((a, b) => b.scored - a.scored)
+  const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / 40) * 100)))
+  return (
+    <>
+      <nav className="cluster-switch" role="tablist" aria-label="Clustering model">
+        {CLUSTER_KEYS.map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={k === key}
+            className={`cluster-switch-btn ${k === key ? 'is-on' : ''}`}
+            onClick={() => setKey(k)}
+          >
+            <span className="cluster-switch-k">{k}</span>
+            {modelClusters[k].name}
+          </button>
+        ))}
+      </nav>
+
+      <p className="cluster-spine">{model.spine}</p>
+
+      <div className="niche-list">
+        {segs.map((s) => (
+          <ClusterRow key={s.name} s={s} maxShare={maxShare} />
+        ))}
+      </div>
+
+      <div className="niche-callout">
+        <BoltIcon />
+        <div>{model.lead}</div>
+      </div>
+
+      <p className="analytics-note">
+        {model.exclusive
+          ? 'Every scored prospect lands in exactly one segment — shares sum to 100% and clients to 12.'
+          : 'Tags overlap: a prospect can carry several, so shares sum past 100% and per-tag clients past 12.'}{' '}
+        Labels are the exhaustive partition defined on the Segmentation page.
+      </p>
+    </>
+  )
+}
+
+/* ── Admin (manager) view ───────────────────────────────────────────────
+   The advisor screens answer "which of my prospects should I call?". This one
+   answers a manager's question over 100 advisors: who is actually using
+   Knomee, and who is turning it into clients. Same fabricated-sample spirit as
+   the rest of the demo; every number rolls up from src/data/admin.ts. */
+
+function AdminScreen() {
+  const s = adminSummary
+  const maxAdopt = adoptionStages[0].count
+  const maxBucket = Math.max(...convDistribution.map((b) => b.count))
+  const leaders = advisors // already sorted by clients desc in the data
+  const rate = (c: number, comp: number) => (comp ? Math.round((c / comp) * 100) : 0)
+  return (
+    <>
+      <h1 className="page-title">Practice Group — Admin</h1>
+
+      {/* Adoption + production at a glance */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <TargetIcon />
+            <span>Are Your Advisors Using Knomee?</span>
+          </div>
+          <HelpTip text="Adoption first (are they using it), then production (is it working)." />
+        </header>
+        <div className="analytics-body">
+          <div className="impact-grid">
+            <div className="impact-card">
+              <div className="analytics-lbl">Active This Month</div>
+              <div className="impact-num">{s.active30}</div>
+              <div className="impact-compare">of {s.seats} seats · {Math.round((s.active30 / s.seats) * 100)}%</div>
+              <div className="impact-detail">Opened Knomee in the last 30 days</div>
+            </div>
+            <div className="impact-card">
+              <div className="analytics-lbl">Producing Clients</div>
+              <div className="impact-num">{s.producing}</div>
+              <div className="impact-compare">of {s.activated} activated · {Math.round((s.producing / s.activated) * 100)}%</div>
+              <div className="impact-detail good">Converted at least one client</div>
+            </div>
+            <div className="impact-card">
+              <div className="analytics-lbl">Clients Converted</div>
+              <div className="impact-num">{s.clients}</div>
+              <div className="impact-compare">from {s.completed.toLocaleString()} completed Adventures</div>
+              <div className="impact-detail good">{s.convRate}% group conversion rate</div>
+            </div>
+            <div className="impact-card">
+              <div className="analytics-lbl">Prospects Invited</div>
+              <div className="impact-num">{s.invited.toLocaleString()}</div>
+              <div className="impact-compare">across {s.activated} activated advisors</div>
+              <div className="impact-detail">{Math.round(s.invited / s.activated)} avg per active advisor</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Adoption funnel — where advisors, not prospects, fall out */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <FunnelIcon />
+            <span>Advisor Adoption Funnel</span>
+          </div>
+          <HelpTip text="Where advisors drop out of using the product at all." />
+        </header>
+        <div className="analytics-body">
+          <div className="adopt-list">
+            {adoptionStages.map((st) => (
+              <div className="adopt-row" key={st.stage}>
+                <span className="adopt-stage">
+                  {st.stage}
+                  <i className="adopt-note">{st.note}</i>
+                </span>
+                <span className="adopt-track">
+                  <span
+                    className="adopt-fill"
+                    style={{ width: `${(st.count / maxAdopt) * 100}%` }}
+                  />
+                </span>
+                <b className="adopt-val">{st.count}</b>
+                <i className="adopt-pct">{Math.round((st.count / maxAdopt) * 100)}%</i>
+              </div>
+            ))}
+          </div>
+          {unactivated.length > 0 && (
+            <div className="niche-callout">
+              <WarnIcon />
+              <div>
+                <b>{unactivated.length} advisors have never invited a prospect.</b> They hold seats but
+                have not activated — the fastest adoption win in the group.
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Conversion spread across advisors */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <TierBarsIcon />
+            <span>How Conversion Is Spread</span>
+          </div>
+          <HelpTip text="The spread across advisors is the story, not the average." />
+        </header>
+        <div className="analytics-body">
+          <div className="conv-dist">
+            {convDistribution.map((b) => (
+              <div className="conv-col" key={b.label}>
+                <span className="conv-count">{b.count}</span>
+                <span className="conv-bar-wrap">
+                  <span
+                    className="conv-bar"
+                    style={{ height: `${maxBucket ? (b.count / maxBucket) * 100 : 0}%` }}
+                  />
+                </span>
+                <span className="conv-lbl">{b.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="analytics-note">
+            Each bar is a count of advisors, bucketed by their own conversion rate (clients ÷ completed
+            Adventures). Advisors with no completed Adventures yet are not placed.
+          </p>
+        </div>
+      </section>
+
+      {/* Leaderboard */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <ChartIcon />
+            <span>Advisor Leaderboard</span>
+          </div>
+          <HelpTip text="All 100 advisors, ranked by clients converted." />
+        </header>
+        <div className="analytics-body">
+          <div className="table-wrap admin-table-wrap">
+            <table className="prospects-table admin-table">
+              <thead>
+                <tr>
+                  <th>Advisor</th>
+                  <th>Region</th>
+                  <th className="num">Invited</th>
+                  <th className="num">Completed</th>
+                  <th className="num">Clients</th>
+                  <th className="num">Conv.</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaders.map((a, i) => (
+                  <tr key={a.name}>
+                    <td>
+                      <span className="admin-rank">{i + 1}</span>
+                      {a.name}
+                    </td>
+                    <td className="admin-muted">{a.region}</td>
+                    <td className="num">{a.invited}</td>
+                    <td className="num">{a.completed}</td>
+                    <td className="num"><b>{a.clients}</b></td>
+                    <td className="num">{rate(a.clients, a.completed)}%</td>
+                    <td>
+                      <span className={`admin-badge ${a.active ? 'on' : 'off'}`}>
+                        {a.active ? 'Active' : `Idle ${a.daysSinceActive}d`}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
 function AnalyticsScreen() {
-  const maxShare = Math.max(...niches.map((n) => n.share))
-  const overCount = niches.filter((n) => n.share > nicheBenchmark).length
   return (
     <>
       <h1 className="page-title">Analytics</h1>
@@ -1404,36 +1685,10 @@ function AnalyticsScreen() {
             <ChartIcon />
             <span>Who Your Prospects Are — And Which Convert</span>
           </div>
-          <HelpTip text="Share of your prospects against how many convert." />
+          <HelpTip text="Cluster the book by any of the four models; each row is a segment's share against how many of it convert." />
         </header>
         <div className="analytics-body">
-          <div className="niche-list">
-            {niches.map((n) => (
-              <NicheRow key={n.name} n={n} maxShare={maxShare} />
-            ))}
-          </div>
-
-          <div className="niche-callout">
-            <WarnIcon />
-            <div>
-              <b>Special needs planning is 22% of your prospects but converts at 11%</b> — volume without
-              close rate. It is your third-largest niche and your weakest closer among readable samples.
-              <br />
-              <b>HNW estate complexity is the mirror image:</b> only 16% of prospects, converting at 50%
-              (3 of 6). The smallest meaningful niche produces a quarter of your clients.
-            </div>
-          </div>
-
-          <div className="niche-foot">
-            <span>
-              <b>{overCount} of {niches.length}</b> niches sit above the {nicheBenchmark}% concentration
-              benchmark — your book is more concentrated than a diversified practice.
-            </span>
-            <span className="analytics-note">
-              Niches overlap: a prospect can match more than one, so shares sum past 100% and per-niche
-              clients sum past 12.
-            </span>
-          </div>
+          <ProspectClusters />
         </div>
       </section>
 
@@ -1533,44 +1788,7 @@ function AnalyticsScreen() {
         </div>
       </section>
 
-      {/* 6 ── Who to talk to */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <BoltIcon />
-            <span>Who to Talk to This Week</span>
-          </div>
-          <HelpTip text="Highest-intent prospects, with their stated reasoning." />
-        </header>
-        <div className="analytics-body">
-          <div className="talk-list">
-            {talkTo.map((t) => (
-              <div className="talk-card" key={t.name}>
-                <div className="talk-head">
-                  <span className="talk-name">{t.name}</span>
-                  <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
-                  <span className="talk-kq">KQ {t.kq}</span>
-                  <span className="talk-niche">{t.niche}</span>
-                </div>
-                <div className="talk-chips">
-                  {t.said.map((s, i) => (
-                    <span className="talk-chip-wrap" key={s}>
-                      <span className="talk-chip">{s}</span>
-                      {i < t.said.length - 1 && <ChevronRight />}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="analytics-note">
-            Every score shows its reasoning. Each chip is something the prospect stated — never a tracked
-            behaviour.
-          </p>
-        </div>
-      </section>
-
-      {/* 7 ── Verbatims */}
+      {/* 6 ── Verbatims */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
@@ -2360,6 +2578,9 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(false)
+  // Dev toggle between the advisor persona (the default demo) and the manager /
+  // admin persona who oversees 100 advisors. Off = advisor.
+  const [adminView, setAdminView] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -2374,10 +2595,12 @@ export default function App() {
   // Expose the current screen to the commenting overlay so comment pins are
   // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
   useEffect(() => {
-    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = segmentationOpen
-      ? 'segmentation'
-      : screen
-  }, [screen, segmentationOpen])
+    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = adminView
+      ? 'admin'
+      : segmentationOpen
+        ? 'segmentation'
+        : screen
+  }, [screen, segmentationOpen, adminView])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -2409,7 +2632,7 @@ export default function App() {
         <div className="topbar-inner">
           <div className="brand">
             <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-            <span className="brand-sub">ADVISOR</span>
+            <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
           </div>
           <div className="menu-wrap" ref={menuRef}>
             <button
@@ -2436,6 +2659,7 @@ export default function App() {
                   onClick={() => {
                     setSettingsOpen(true)
                     setSegmentationOpen(false)
+                    setAdminView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -2452,6 +2676,7 @@ export default function App() {
                   onClick={() => {
                     setSegmentationOpen(true)
                     setSettingsOpen(false)
+                    setAdminView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -2459,6 +2684,21 @@ export default function App() {
                 </button>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
+                <label className="menu-toggle">
+                  <span>Admin view (100 advisors)</span>
+                  <span className={`switch ${adminView ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={adminView}
+                      onChange={(e) => {
+                        setAdminView(e.target.checked)
+                        setSettingsOpen(false)
+                        setSegmentationOpen(false)
+                      }}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
                 <label className="menu-toggle">
                   <span>Empty dashboards</span>
                   <span className={`switch ${emptyMode ? 'on' : ''}`}>
@@ -2479,7 +2719,11 @@ export default function App() {
         </div>
       </header>
 
-      {settingsOpen ? (
+      {adminView ? (
+        <main className="content">
+          <AdminScreen />
+        </main>
+      ) : settingsOpen ? (
         <SettingsScreen onClose={() => setSettingsOpen(false)} />
       ) : segmentationOpen ? (
         <main className="content">
