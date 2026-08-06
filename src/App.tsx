@@ -216,7 +216,7 @@ function CommandCenter() {
       <header className="card-head">
         <div className="card-title">
           <ChartIcon color="#7639a1" />
-          <span>My Book</span>
+          <span>Actionable Metrics</span>
         </div>
         <HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />
       </header>
@@ -689,7 +689,7 @@ function ProspectsScreen({
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
   return (
     <>
-      <h1 className="page-title">My Dashboard</h1>
+      <h1 className="page-title">My Prospects</h1>
       <CommandCenter />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
