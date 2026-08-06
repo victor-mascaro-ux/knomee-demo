@@ -4601,3 +4601,61 @@ input[type='checkbox'] {
     transform: none;
   }
 }
+
+/* ---------- Sliding active indicator for segmented toggles ---------- */
+/* A single highlight element slides/resizes to the active item (measured by
+   useSlideIndicator) instead of each item snapping its own background on. */
+.slide-nav {
+  position: relative;
+}
+.slide-nav > button {
+  position: relative;
+  z-index: 1;
+}
+.slide-ind {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  background: var(--plum);
+  pointer-events: none;
+  transition: transform 0.32s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.32s cubic-bezier(0.22, 0.81, 0.28, 1.02), height 0.28s ease;
+  will-change: transform, width;
+}
+.slide-ind-round {
+  border-radius: 999px;
+}
+.slide-ind-pill {
+  border-radius: 8px;
+  background: #1a1050;
+}
+.slide-ind-underline {
+  top: auto;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px;
+  transition: transform 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02);
+}
+/* Active items let the sliding highlight show through rather than painting
+   their own fill (the highlight is what moves). */
+.invite-tabs.slide-nav .invite-tab.is-on {
+  background: transparent;
+}
+.cluster-switch.slide-nav .cluster-switch-btn.is-on {
+  background: transparent;
+  border-color: transparent;
+}
+.seg-switch.slide-nav .seg-switch-btn.is-on {
+  background: transparent;
+  border-color: transparent;
+}
+.tabs.slide-nav .tab-active::after {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-ind {
+    transition: none;
+  }
+}

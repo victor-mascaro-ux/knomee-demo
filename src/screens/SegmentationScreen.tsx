@@ -16,6 +16,7 @@ import {
   type ModelKey,
   type ScoredProspect,
 } from '../data/segmentation'
+import { useSlideIndicator } from '../useSlideIndicator'
 import './segmentation.css'
 
 /* ── local icons, so this screen has no dependency on App.tsx internals ── */
@@ -409,6 +410,7 @@ export default function SegmentationScreen() {
   // 'overview' is the cover: what the page is and what each model means. The
   // four model keys are the detail views the cover leads into.
   const [model, setModel] = useState<ModelKey | 'overview'>('overview')
+  const segInd = useSlideIndicator(model)
   const [openProspect, setOpenProspect] = useState<ScoredProspect | null>(null)
   const [openSegment, setOpenSegment] = useState<string | null>(null)
 
@@ -437,9 +439,20 @@ export default function SegmentationScreen() {
         households, and no conversion outcomes — nothing here is validated against conversion.
       </div>
 
-      <nav className="seg-switch">
+      <nav className="seg-switch slide-nav" ref={segInd.ref}>
+        {segInd.box && (
+          <span
+            className="slide-ind slide-ind-pill"
+            style={{
+              transform: `translate(${segInd.box.left}px, ${segInd.box.top}px)`,
+              width: segInd.box.width,
+              height: segInd.box.height,
+            }}
+          />
+        )}
         <button
           type="button"
+          data-active={model === 'overview'}
           className={`seg-switch-btn ${model === 'overview' ? 'is-on' : ''}`}
           onClick={() => setModel('overview')}
         >
@@ -450,6 +463,7 @@ export default function SegmentationScreen() {
           <button
             key={k}
             type="button"
+            data-active={model === k}
             className={`seg-switch-btn ${model === k ? 'is-on' : ''}`}
             onClick={() => setModel(k)}
           >
