@@ -85,6 +85,7 @@ import {
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import { segModels } from './data/segmentation'
+import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
 
@@ -1463,15 +1464,27 @@ function ProspectClusters() {
   // Each segment's plain-language definition, pulled from the Segmentation page
   // so the two screens never disagree on what a label means.
   const defs = new Map(segModels[key].segments.map((sg) => [sg.name, sg.blurb]))
+  const ind = useSlideIndicator(key)
   return (
     <>
-      <nav className="cluster-switch" role="tablist" aria-label="Clustering model">
+      <nav className="cluster-switch slide-nav" role="tablist" aria-label="Clustering model" ref={ind.ref}>
+        {ind.box && (
+          <span
+            className="slide-ind slide-ind-round"
+            style={{
+              transform: `translate(${ind.box.left}px, ${ind.box.top}px)`,
+              width: ind.box.width,
+              height: ind.box.height,
+            }}
+          />
+        )}
         {CLUSTER_KEYS.map((k) => (
           <button
             key={k}
             type="button"
             role="tab"
             aria-selected={k === key}
+            data-active={k === key}
             className={`cluster-switch-btn ${k === key ? 'is-on' : ''}`}
             onClick={() => setKey(k)}
           >
@@ -2193,6 +2206,7 @@ function InviteModal({
   const [kind, setKind] = useState<InviteKind>(initialKind)
   const [email, setEmail] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
+  const tabInd = useSlideIndicator(kind)
   const label = kind === 'prospect' ? 'Prospect' : 'Client'
   const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
 
@@ -2238,13 +2252,24 @@ function InviteModal({
           </button>
         </div>
         <div className="modal-body invite-body">
-          <div className="invite-tabs" role="tablist">
+          <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
+            {tabInd.box && (
+              <span
+                className="slide-ind slide-ind-round"
+                style={{
+                  transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
+                  width: tabInd.box.width,
+                  height: tabInd.box.height,
+                }}
+              />
+            )}
             {(['prospect', 'client'] as InviteKind[]).map((k) => (
               <button
                 key={k}
                 type="button"
                 role="tab"
                 aria-selected={kind === k}
+                data-active={kind === k}
                 className={`invite-tab ${kind === k ? 'is-on' : ''}`}
                 onClick={() => setKind(k)}
               >
@@ -2888,6 +2913,7 @@ const tabs: { id: Screen; label: string }[] = [
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('prospects')
+  const tabsInd = useSlideIndicator<HTMLElement>(screen)
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
@@ -3066,12 +3092,22 @@ export default function App() {
         </main>
       ) : (
       <main className="content">
-        <nav className="tabs">
+        <nav className="tabs slide-nav" ref={tabsInd.ref}>
+          {tabsInd.box && (
+            <span
+              className="slide-ind slide-ind-underline"
+              style={{
+                transform: `translateX(${tabsInd.box.left}px)`,
+                width: tabsInd.box.width,
+              }}
+            />
+          )}
           {tabs.map((t) => (
             <button
               key={t.id}
               className={`tab ${screen === t.id ? 'tab-active' : ''}`}
               type="button"
+              data-active={screen === t.id}
               onClick={() => setScreen(t.id)}
             >
               {t.label}
