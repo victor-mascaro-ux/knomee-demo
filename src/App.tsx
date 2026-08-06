@@ -172,85 +172,204 @@ function CollapsibleCard({
   )
 }
 
-function TopLineMetrics() {
+// Tier metadata shared by the pulse bar and the drill-in filter. `book` is the
+// full-book count shown on the bar; the linked insight surfaces as the "why"
+// when a tier is focused.
+const TIER_META = [
+  { key: 'Tier 1' as const, name: 'Ready Now', range: '70–100 KQ', book: 3, seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, name: 'Considering', range: '40–69 KQ', book: 5, seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, name: 'Nurture', range: '0–39 KQ', book: 3, seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+]
+type TierKey = (typeof TIER_META)[number]['key']
+
+// The single layered dashboard: pulse (state) + the one next action always
+// visible; the full call-list and the evidence are discoverable layers. The
+// tier bar is the drill-in spine — focusing a tier filters the call-list and
+// surfaces that tier's insight.
+function CommandCenter() {
+  const [tier, setTier] = useState<TierKey | null>(null)
+  const [listOpen, setListOpen] = useState(false)
+  const [whyOpen, setWhyOpen] = useState(false)
+
+  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
+  const lead = flagged[0]
+  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
+  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
+  const orderedInsights = tierInsight
+    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
+    : insights
+
+  // Focusing a tier reveals its people; clicking it again clears the filter.
+  const pickTier = (k: TierKey) =>
+    setTier((prev) => {
+      const next = prev === k ? null : k
+      setListOpen(next !== null)
+      return next
+    })
+  const clear = () => {
+    setTier(null)
+    setListOpen(false)
+  }
+
   return (
-    <CollapsibleCard
-      className="metrics-card"
-      icon={<ChartIcon color="#7639a1" />}
-      title="Top Line Metrics"
-      hint="Totals, average KQ score, and the tier split."
-      bodyClassName="metrics-body"
-    >
-        <div className="metric-tiles">
+    <section className="card cmd-card">
+      <header className="card-head">
+        <div className="card-title">
+          <ChartIcon color="#7639a1" />
+          <span>My Book</span>
+        </div>
+        <HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />
+      </header>
+
+      <div className="cmd-body">
+        {/* Layer 0 — the pulse */}
+        <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
             <span className="metric-label">TOTAL PROSPECTS</span>
-            <div className="metric-num">
-              <span className="metric-value tt" data-tip="Prospects in your book">12</span>
-            </div>
+            <div className="metric-num"><span className="metric-value">12</span></div>
           </div>
           <div className="metric-tile">
             <span className="metric-label">AVG KQ SCORE</span>
-            <div className="metric-num">
-              <span className="metric-value tt" data-tip="Average KQ across all prospects">55.9</span>
-            </div>
+            <div className="metric-num"><span className="metric-value">55.9</span></div>
           </div>
-
           <div className="metric-tile distribution">
             <div className="dist-head">
               <span className="metric-label">TIER DISTRIBUTION</span>
-              <span className="dist-note">1 incomplete profile not shown</span>
+              {tier ? (
+                <button className="cmd-clear" type="button" onClick={clear}>
+                  Clear filter ✕
+                </button>
+              ) : (
+                <span className="dist-note">1 incomplete profile not shown · tap a tier to focus</span>
+              )}
             </div>
-            <div className="dist-bar">
-              <span className="seg seg-1 tt" data-tip="Tier 1 · 3 · 25%">3</span>
-              <span className="seg seg-2 tt" data-tip="Tier 2 · 5 · 42%">5</span>
-              <span className="seg seg-3 tt" data-tip="Tier 3 · 3 · 25%">3</span>
+            <div className="dist-bar cmd-dist-bar">
+              {TIER_META.map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  className={`seg ${m.seg} ${tier === m.key ? 'is-sel' : ''} ${
+                    tier && tier !== m.key ? 'is-dim' : ''
+                  }`}
+                  onClick={() => pickTier(m.key)}
+                  aria-pressed={tier === m.key}
+                  data-tip={`${m.key} · ${m.name} — tap to focus`}
+                >
+                  {m.book}
+                </button>
+              ))}
             </div>
             <div className="dist-legend">
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-1" />Tier 1 · Ready Now</span>
-                <span className="dist-leg-range">70–100 KQ</span>
-              </div>
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-2" />Tier 2 · Considering</span>
-                <span className="dist-leg-range">40–69 KQ</span>
-              </div>
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-3" />Tier 3 · Nurture</span>
-                <span className="dist-leg-range">0–39 KQ</span>
+              {TIER_META.map((m) => (
+                <div className="dist-leg" key={m.key}>
+                  <span className="dist-leg-name">
+                    <i className={`dot ${m.dot}`} />
+                    {m.key} · {m.name}
+                  </span>
+                  <span className="dist-leg-range">{m.range}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Layer 0 — the one next action */}
+        <div className="cmd-focus">
+          <p className="cmd-focus-line">
+            {meta ? (
+              <>
+                <b>{meta.key} · {meta.name}</b> — {flagged.length} flagged to talk to this week.
+              </>
+            ) : (
+              <>
+                <b>{flagged.length} prospects</b> flagged to talk to this week.
+              </>
+            )}
+          </p>
+          {lead ? (
+            <button
+              className="cmd-lead"
+              type="button"
+              onClick={() => setListOpen((o) => !o)}
+              aria-expanded={listOpen}
+            >
+              <span className="cmd-lead-tag">Start with</span>
+              <span className="cmd-lead-name">{lead.name}</span>
+              <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>{lead.tier}</span>
+              <span className="cmd-lead-kq">KQ {lead.kq}</span>
+              <span className="cmd-lead-niche">{lead.niche}</span>
+              <span className="cmd-lead-more">
+                {listOpen ? 'Hide' : `See all ${flagged.length}`}
+                <ChevronDown />
+              </span>
+            </button>
+          ) : (
+            <p className="cmd-empty">
+              None flagged in this tier this week — keep them on a light-touch nurture track.
+            </p>
+          )}
+        </div>
+
+        {/* Layer 1 — the full call-list */}
+        <div className={`collapse ${listOpen && flagged.length ? 'open' : ''}`}>
+          <div className="collapse-inner">
+            <div className="talk-list cmd-talk-list">
+              {flagged.map((t) => (
+                <div className="talk-card" key={t.name}>
+                  <div className="talk-head">
+                    <span className="talk-name">{t.name}</span>
+                    <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
+                    <span className="talk-kq">KQ {t.kq}</span>
+                    <span className="talk-niche">{t.niche}</span>
+                  </div>
+                  <div className="talk-chips">
+                    {t.said.map((s, i) => (
+                      <span className="talk-chip-wrap" key={s}>
+                        <span className="talk-chip">{s}</span>
+                        {i < t.said.length - 1 && <ChevronRight />}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Layer 1 — the evidence */}
+        <div className="cmd-why">
+          <button
+            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
+            type="button"
+            aria-expanded={whyOpen}
+            onClick={() => setWhyOpen((o) => !o)}
+          >
+            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
+          </button>
+          {meta && tierInsight && !whyOpen && (
+            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
+              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
+              <span className="cmd-why-peek-more">Read more →</span>
+            </button>
+          )}
+          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
+            <div className="collapse-inner">
+              <div className="cmd-insights">
+                {orderedInsights.map((ins) => (
+                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
+                    <div className="insight-num">{ins.n}</div>
+                    <div className="insight-text">
+                      <div className="insight-title">{ins.title}</div>
+                      <p className="insight-body">{ins.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
-    </CollapsibleCard>
-  )
-}
-
-function ActionableInsights() {
-  const col1 = insights.slice(0, 4)
-  const col2 = insights.slice(4, 8)
-  return (
-    <CollapsibleCard
-      className="insights-card"
-      icon={<BoltIcon color="#7639a1" />}
-      title="Actionable Insights"
-      hint="Auto-generated takeaways, ranked by opportunity."
-      bodyClassName="insights-body"
-      defaultOpen={false}
-    >
-      {[col1, col2].map((col, i) => (
-        <div className="insights-col" key={i}>
-          {col.map((ins) => (
-            <div className="insight" key={ins.n}>
-              <div className="insight-num">{ins.n}</div>
-              <div className="insight-text">
-                <div className="insight-title">{ins.title}</div>
-                <p className="insight-body">{ins.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ))}
-    </CollapsibleCard>
+      </div>
+    </section>
   )
 }
 
@@ -548,47 +667,6 @@ function Toolbar({
   )
 }
 
-// The prioritised call-list. Lives on the Prospects dashboard — that is where
-// the advisor decides who to act on — rather than buried in Analytics. Each
-// chip is something the prospect stated, never a tracked behaviour.
-function WhoToTalkTo() {
-  return (
-    <CollapsibleCard
-      className="analytics-card who-to-talk"
-      icon={<BoltIcon />}
-      title="Who to Talk to This Week"
-      hint="Highest-intent prospects, with their stated reasoning."
-      bodyClassName="analytics-body"
-      defaultOpen={false}
-    >
-      <div className="talk-list">
-        {talkTo.map((t) => (
-          <div className="talk-card" key={t.name}>
-            <div className="talk-head">
-              <span className="talk-name">{t.name}</span>
-              <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
-              <span className="talk-kq">KQ {t.kq}</span>
-              <span className="talk-niche">{t.niche}</span>
-            </div>
-            <div className="talk-chips">
-              {t.said.map((s, i) => (
-                <span className="talk-chip-wrap" key={s}>
-                  <span className="talk-chip">{s}</span>
-                  {i < t.said.length - 1 && <ChevronRight />}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="analytics-note">
-        Every score shows its reasoning. Each chip is something the prospect stated — never a
-        tracked behaviour.
-      </p>
-    </CollapsibleCard>
-  )
-}
-
 function ProspectsScreen({
   onConvert,
   onDownload,
@@ -612,9 +690,7 @@ function ProspectsScreen({
   return (
     <>
       <h1 className="page-title">My Dashboard</h1>
-      <TopLineMetrics />
-      <ActionableInsights />
-      <WhoToTalkTo />
+      <CommandCenter />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
