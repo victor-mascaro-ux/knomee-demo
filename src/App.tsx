@@ -68,7 +68,7 @@ import {
   FunnelIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
-import { segModels } from './data/segmentation'
+import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
@@ -1177,23 +1177,20 @@ type ClusterKey = (typeof CLUSTER_KEYS)[number]
 
 // Plain-language "how a prospect lands here" per model, kept deliberately
 // jargon-free. A/B classify from concrete answer options; C/D from scores/flags.
-const CLASSIFY_COPY: Record<ClusterKey, { lead: string; showOptions: boolean; note?: string }> = {
+const CLASSIFY_COPY: Record<ClusterKey, { lead: string; optionsLabel?: string }> = {
   A: {
-    lead: 'Based on the life they pictured. A prospect lands here when their “ideal life” choices cluster in this domain:',
-    showOptions: true,
+    lead: 'Every classification is read from the prospect’s Adventure answers — nothing is typed in by hand. For this domain, it starts from the “ideal life” choices that map here:',
+    optionsLabel: 'Ideal-life options that map to this domain',
   },
   B: {
-    lead: 'Based on why money matters to them. A prospect lands here when their top reasons for wanting money are:',
-    showOptions: true,
+    lead: 'Every classification is read from the prospect’s Adventure answers. This family is built from why they said money matters:',
+    optionsLabel: '“I want money to help me with…” answers in this family',
   },
   C: {
-    lead: 'Based on two things read from their answers — how clearly they can picture their future (vision), and how close they are to acting (readiness) — each compared with everyone else in your book.',
-    showOptions: false,
-    note: 'Cut at the middle of your book (vision ≈ 82, readiness ≈ 36). This label is exactly that mix of high or low vision and readiness.',
+    lead: 'Read entirely from closed Adventure answers — two scores, then a split against the rest of your book.',
   },
   D: {
-    lead: 'A tension tag — a flag raised when what someone wants pulls against what they do or believe. It’s a signal, not a bucket, so one prospect can carry several at once.',
-    showOptions: false,
+    lead: 'A tension tag is a single yes/no rule over the prospect’s closed Adventure answers — it’s a signal, not a bucket, so one prospect can carry several.',
   },
 }
 
@@ -1210,6 +1207,9 @@ function SegmentExplainer({
 }) {
   const def = segModels[modelKey].segments.find((d) => d.name === seg.name)
   const how = CLASSIFY_COPY[modelKey]
+  const method = segMethod[modelKey]
+  // Model D classifies by explicit per-tag rules; find the one for this tag.
+  const rule = method.rules?.find((r) => r[0] === seg.name)
   const share = Math.round((seg.scored / 40) * 100)
   const conv = seg.scored ? Math.round((seg.clients / seg.scored) * 100) : 0
   const bandStyle = useViewportBand(true)
@@ -1240,16 +1240,54 @@ function SegmentExplainer({
           <div className="explain-block">
             <h3 className="explain-h">How a prospect lands here</h3>
             <p>{how.lead}</p>
-            {how.showOptions && def && def.options.length > 0 && (
-              <div className="explain-chips">
-                {def.options.map((o) => (
-                  <span className="explain-chip" key={o}>
-                    {o}
-                  </span>
-                ))}
-              </div>
+
+            {how.optionsLabel && def && def.options.length > 0 && (
+              <>
+                <div className="explain-sub-h">{how.optionsLabel}</div>
+                <div className="explain-chips">
+                  {def.options.map((o) => (
+                    <span className="explain-chip" key={o}>
+                      {o}
+                    </span>
+                  ))}
+                </div>
+              </>
             )}
-            {how.note && <p className="explain-note">{how.note}</p>}
+
+            <div className="explain-sub-h">The Adventure questions it reads</div>
+            <ul className="explain-inputs">
+              {method.inputs.map((inp) => (
+                <li key={inp[0]}>
+                  <b>{inp[0]}</b>
+                  {inp[1] ? <span className="explain-input-desc"> — {inp[1]}</span> : null}
+                  {inp[2] ? <span className="explain-input-role">{inp[2]}</span> : null}
+                </li>
+              ))}
+            </ul>
+
+            {rule ? (
+              <>
+                <div className="explain-sub-h">The exact rule for this flag</div>
+                <p className="explain-rule">{rule[1]}</p>
+                <p className="explain-note">
+                  Yes/no over closed answers — no scoring or thresholds to tune, and a rule never
+                  fires on a question the prospect left blank.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="explain-sub-h">How it’s scored</div>
+                <ol className="explain-steps">
+                  {method.steps.map((st) => (
+                    <li key={st[0]}>
+                      <b className="explain-step-label">{st[0]}</b>
+                      <span className="explain-step-detail">{st[1]}</span>
+                      {st[2] ? <code className="explain-step-formula">{st[2]}</code> : null}
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
           </div>
 
           {def?.hook && (
