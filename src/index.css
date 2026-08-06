@@ -4949,3 +4949,87 @@ input[type='checkbox'] {
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+
+/* Explainer: Adventure inputs + scoring detail */
+.explain-sub-h {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--grey-text);
+  margin: 16px 0 8px;
+}
+.explain-inputs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.explain-inputs li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a3247;
+  border-left: 2px solid var(--lilac);
+  padding-left: 11px;
+}
+.explain-inputs b {
+  color: #201a2e;
+}
+.explain-input-desc {
+  color: var(--grey-text);
+}
+.explain-input-role {
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--plum);
+  background: #f0e9f8;
+  border-radius: 999px;
+  padding: 1px 8px;
+  vertical-align: 1px;
+}
+.explain-rule {
+  font-size: 14px !important;
+  color: #201a2e !important;
+  background: #f3ecfb;
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-weight: 500;
+}
+.explain-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.explain-steps li {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.explain-step-label {
+  display: block;
+  color: var(--plum);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.explain-step-detail {
+  color: #3a3247;
+}
+.explain-step-formula {
+  display: block;
+  margin-top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  background: #f6f4fa;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
+  color: #4a3f5e;
+  white-space: pre-wrap;
+}
