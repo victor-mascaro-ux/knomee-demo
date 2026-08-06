@@ -1177,20 +1177,36 @@ type ClusterKey = (typeof CLUSTER_KEYS)[number]
 
 // Plain-language "how a prospect lands here" per model, kept deliberately
 // jargon-free. A/B classify from concrete answer options; C/D from scores/flags.
-const CLASSIFY_COPY: Record<ClusterKey, { lead: string; optionsLabel?: string }> = {
+// Short, glanceable explainer content per model: the questions it reads (with
+// the Adventure each belongs to) and a one-line "how it's scored". Model D's
+// scored line is filled per-tag from the rule.
+type ExplainQ = { q: string; adv: string }
+const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
   A: {
-    lead: 'Every classification is read from the prospect’s Adventure answers — nothing is typed in by hand. For this domain, it starts from the “ideal life” choices that map here:',
-    optionsLabel: 'Ideal-life options that map to this domain',
+    questions: [
+      { q: 'Ideal life', adv: 'Ideal Life' },
+      { q: 'Attention shifts', adv: 'Life Balance' },
+      { q: 'Future You', adv: 'Future You' },
+    ],
+    scored: 'We see which life area the answers point to most. The strongest one wins.',
   },
   B: {
-    lead: 'Every classification is read from the prospect’s Adventure answers. This family is built from why they said money matters:',
-    optionsLabel: '“I want money to help me with…” answers in this family',
+    questions: [
+      { q: 'Why money matters (top 3)', adv: 'Money & Meaning' },
+      { q: 'Confidence check', adv: 'Confidence' },
+    ],
+    scored: 'We rank the top reasons money matters. The most telling one names the family.',
   },
   C: {
-    lead: 'Read entirely from closed Adventure answers — two scores, then a split against the rest of your book.',
+    questions: [
+      { q: 'Vision clarity & Future You', adv: 'Vision' },
+      { q: 'Readiness & timeframe', adv: 'Readiness' },
+    ],
+    scored: 'Two scores — how clear the vision is, how ready they are — split at the middle of your book.',
   },
   D: {
-    lead: 'A tension tag is a single yes/no rule over the prospect’s closed Adventure answers — it’s a signal, not a bucket, so one prospect can carry several.',
+    questions: [{ q: 'Confidence, vision & readiness answers', adv: 'Across the Adventure' }],
+    scored: '', // filled from the per-tag rule below
   },
 }
 
@@ -1206,10 +1222,11 @@ function SegmentExplainer({
   onClose: () => void
 }) {
   const def = segModels[modelKey].segments.find((d) => d.name === seg.name)
-  const how = CLASSIFY_COPY[modelKey]
-  const method = segMethod[modelKey]
-  // Model D classifies by explicit per-tag rules; find the one for this tag.
-  const rule = method.rules?.find((r) => r[0] === seg.name)
+  const ex = EXPLAIN[modelKey]
+  // Model D classifies by explicit per-tag rules; use the one for this tag as
+  // the plain "how it's scored" line.
+  const rule = segMethod[modelKey].rules?.find((r) => r[0] === seg.name)
+  const scored = rule ? `Flagged when: ${rule[1]}` : ex.scored
   const share = Math.round((seg.scored / 40) * 100)
   const conv = seg.scored ? Math.round((seg.clients / seg.scored) * 100) : 0
   const bandStyle = useViewportBand(true)
@@ -1230,73 +1247,29 @@ function SegmentExplainer({
           </button>
         </div>
         <div className="modal-body explain-body">
-          <div className="explain-sub">{modelClusters[modelKey].name} · how this label works</div>
+          <div className="explain-sub">{modelClusters[modelKey].name}</div>
 
-          <div className="explain-block">
-            <h3 className="explain-h">What it means</h3>
-            <p>{def?.blurb ?? seg.name}</p>
-          </div>
+          <section className="ex-sec">
+            <h3 className="ex-h">What it means</h3>
+            <p className="ex-text">{def?.blurb ?? seg.name}</p>
+          </section>
 
-          <div className="explain-block">
-            <h3 className="explain-h">How a prospect lands here</h3>
-            <p>{how.lead}</p>
-
-            {how.optionsLabel && def && def.options.length > 0 && (
-              <>
-                <div className="explain-sub-h">{how.optionsLabel}</div>
-                <div className="explain-chips">
-                  {def.options.map((o) => (
-                    <span className="explain-chip" key={o}>
-                      {o}
-                    </span>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div className="explain-sub-h">The Adventure questions it reads</div>
-            <ul className="explain-inputs">
-              {method.inputs.map((inp) => (
-                <li key={inp[0]}>
-                  <b>{inp[0]}</b>
-                  {inp[1] ? <span className="explain-input-desc"> — {inp[1]}</span> : null}
-                  {inp[2] ? <span className="explain-input-role">{inp[2]}</span> : null}
+          <section className="ex-sec">
+            <h3 className="ex-h">What it looks at</h3>
+            <ul className="ex-q">
+              {ex.questions.map((qq) => (
+                <li key={qq.q}>
+                  <span className="ex-q-name">{qq.q}</span>
+                  <span className="ex-q-adv">{qq.adv}</span>
                 </li>
               ))}
             </ul>
+          </section>
 
-            {rule ? (
-              <>
-                <div className="explain-sub-h">The exact rule for this flag</div>
-                <p className="explain-rule">{rule[1]}</p>
-                <p className="explain-note">
-                  Yes/no over closed answers — no scoring or thresholds to tune, and a rule never
-                  fires on a question the prospect left blank.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="explain-sub-h">How it’s scored</div>
-                <ol className="explain-steps">
-                  {method.steps.map((st) => (
-                    <li key={st[0]}>
-                      <b className="explain-step-label">{st[0]}</b>
-                      <span className="explain-step-detail">{st[1]}</span>
-                      {st[2] ? <code className="explain-step-formula">{st[2]}</code> : null}
-                    </li>
-                  ))}
-                </ol>
-              </>
-            )}
-          </div>
-
-          {def?.hook && (
-            <div className="explain-block">
-              <h3 className="explain-h">How to talk to them</h3>
-              <p className="explain-hook">“{def.hook}”</p>
-              {def.action && <p className="explain-action">{def.action}</p>}
-            </div>
-          )}
+          <section className="ex-sec">
+            <h3 className="ex-h">How it’s scored</h3>
+            <p className="ex-text">{scored}</p>
+          </section>
 
           <div className="explain-stats">
             <div className="explain-stat">
