@@ -10,26 +10,11 @@ import {
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
-  engagement,
-  outcomes,
-  byTier,
-  buildFunnel,
   MIN_SAMPLE,
-  impactStats,
   modelClusters,
   CLUSTER_KEYS,
-  dropReadings,
-  bySource,
-  byNiche,
-  attribution,
-  marketingEffectiveness,
-  experiments,
-  currentConfigSince,
   talkTo,
-  verbatims,
   utmKeys,
-  type Segment,
-  type Experiment,
   type ClusterSeg,
 } from './data/analytics'
 import {
@@ -81,7 +66,6 @@ import {
   TargetIcon,
   TierBarsIcon,
   FunnelIcon,
-  MegaphoneIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import { segModels } from './data/segmentation'
@@ -1140,363 +1124,24 @@ function ClientsScreen({
   )
 }
 
-/* ── UTM attribution card — ranked by clients produced, not clicks ── */
-
-function AttributionCard({
-  label,
-  rows,
-}: {
-  label: string
-  rows: { value: string; scored: number; clients: number }[]
-}) {
-  const ranked = [...rows].sort((a, b) => b.clients - a.clients)
-  const max = Math.max(...ranked.map((r) => r.clients), 1)
-  return (
-    <div className="utm-card">
-      <div className="utm-card-title">{label}</div>
-      <div className="attr-head">
-        <span>Source</span>
-        <span>Clients</span>
-        <span>Conv.</span>
-      </div>
-      <ul className="utm-list">
-        {ranked.map((r) => (
-          <li key={r.value}>
-            <span className="utm-value">{r.value}</span>
-            <span className="utm-track">
-              <span className="utm-fill" style={{ width: `${(r.clients / max) * 100}%` }} />
-            </span>
-            <span className="utm-count">{r.clients}</span>
-            <span className="attr-conv">
-              {Math.round((r.clients / r.scored) * 100)}%
-              <i className="attr-n">n={r.scored}</i>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-/* ── Analytics screen (engagement · outcomes · by tier · onboarding funnel) ── */
-
-function KQGauge({ value }: { value: number }) {
-  return (
-    <div className="kq-gauge">
-      <div className="kq-track">
-        <span className="kq-dot" style={{ left: `${value}%` }} />
-      </div>
-      <div className="kq-axis">
-        <span>0</span>
-        <span>Nurture</span>
-        <span>Considering</span>
-        <span>Ready</span>
-        <span>100</span>
-      </div>
-    </div>
-  )
-}
-
-function TierSector() {
-  return (
-    <>
-      <div className="sector-bar">
-        {byTier.map((t) => (
-          <span
-            key={t.tier}
-            className={`sector-seg ${t.pct < 6 ? 'sector-seg-narrow' : ''}`}
-            style={{ flex: t.pct, background: t.color }}
-          >
-            <span className="sector-lbl">{t.count}</span>
-          </span>
-        ))}
-      </div>
-      <div className="sector-legend">
-        {byTier.map((t) => (
-          <span key={t.tier}>
-            <i className="swatch" style={{ background: t.color }} />
-            {t.name} · {t.count} · {Math.round(t.pct)}%
-          </span>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function FunnelRow({ name, cfg, recommended }: { name: string; cfg: Experiment['cfg']; recommended?: boolean }) {
-  // Track hover by index: buildFunnel rebuilds segment objects each render, so
-  // object identity would never match after a state update.
-  const [hover, setHover] = useState<number | null>(null)
-  const { segments, complete } = buildFunnel(cfg)
-  return (
-    <div className="fm-row">
-      <div className="fm-row-head">
-        <span className="fm-row-name">{name}</span>
-        {recommended && <span className="fconfig-pill">Recommended</span>}
-        <span className="fm-row-complete">
-          <b>{complete}%</b> complete
-        </span>
-      </div>
-      <div className="ob-bar">
-        {segments.map((s, i) => (
-          <div
-            key={`${s.stage}-${i}`}
-            className={`ob-seg ${s.gate ? 'gate' : ''} ${s.completed ? 'done' : ''}`}
-            style={{ flex: s.pct, background: s.gate ? undefined : s.color, color: s.ink }}
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-          >
-            {s.pct >= 5 && <span className="ob-pct">{s.pct}%</span>}
-            {hover === i && (
-              <div className="ob-tip">
-                <b>{s.count}</b> {s.count === 1 ? 'person' : 'people'}{' '}
-                {s.completed
-                  ? 'completed onboarding'
-                  : s.gate
-                    ? 'dropped at the sign-up gate'
-                    : 'dropped off here'}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="ob-labels">
-        {segments.map((s, i) => (
-          <span key={`${s.stage}-l-${i}`} style={{ flex: s.pct }}>
-            {s.stage}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const FUNNEL_LEGEND = (
-  <div className="fm-legend">
-    <span>
-      <i className="swatch" style={{ background: '#8a52bf' }} />
-      Adventure drop-off
-    </span>
-    <span>
-      <i className="swatch fm-hatch" />
-      Sign-up gate
-    </span>
-    <span>
-      <i className="swatch" style={{ background: '#d8c5ec' }} />
-      Welcome
-    </span>
-    <span>
-      <i className="swatch" style={{ background: '#3dbdaa' }} />
-      Completed
-    </span>
-  </div>
-)
-
-/* ── 4a. Segmented drop-off ──
-   The aggregate bar hides both a high-volume/low-completion channel and a
-   low-volume/high-completion one. Splitting by source or niche is what makes
-   them distinguishable, so the split is a first-class control, not a detail. */
-
-type FunnelSplit = 'all' | 'source' | 'niche'
-
-const SPLITS: { key: FunnelSplit; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'source', label: 'By utm_source' },
-  { key: 'niche', label: 'By niche' },
-]
-
-function SegmentBar({ s, max }: { s: Segment; max: number }) {
-  const completion = Math.round((s.completed / s.invited) * 100)
-  const conv = Math.round((s.clients / s.scored) * 100)
-  return (
-    <div className="seg-row">
-      <span className="seg-row-name">{s.name}</span>
-      {/* Bar length encodes volume, fill encodes completion — so a wide-but-pale
-          row reads as high volume/low completion at a glance. */}
-      <span className="seg-row-track" style={{ width: `${(s.invited / max) * 100}%` }}>
-        <span className="seg-row-fill" style={{ width: `${completion}%` }}>
-          <b>{completion}%</b>
-        </span>
-      </span>
-      <span className="seg-row-meta">
-        <b>{s.completed}</b>/{s.invited} completed · <b>{s.clients}</b> clients ·{' '}
-        <span className="seg-row-conv">{conv}% conv</span> <i className="attr-n">n={s.scored}</i>
-      </span>
-    </div>
-  )
-}
-
-function SegmentedFunnel() {
-  const [split, setSplit] = useState<FunnelSplit>('all')
-  const segments = split === 'source' ? bySource : split === 'niche' ? byNiche : []
-  const max = Math.max(...segments.map((s) => s.invited), 1)
-  return (
-    <div className="funnel-seg-block">
-      <div className="seg-controls">
-        <span className="seg-controls-lbl">Split by</span>
-        {SPLITS.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            className={`seg-chip ${split === s.key ? 'on' : ''}`}
-            aria-pressed={split === s.key}
-            onClick={() => setSplit(s.key)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {split === 'all' ? (
-        <>
-          <FunnelRow name="All prospects · current configuration" cfg={{ welcome: true, gate: 'late' }} />
-          {FUNNEL_LEGEND}
-          <p className="seg-warn">
-            This aggregate view averages every channel together — it cannot tell a high-volume,
-            low-completion channel from a low-volume, high-completion one. Split by source to see them.
-          </p>
-        </>
-      ) : (
-        <>
-          <div className="seg-rows">
-            {segments.map((s) => (
-              <SegmentBar key={s.name} s={s} max={max} />
-            ))}
-          </div>
-          {split === 'niche' && (
-            <p className="seg-warn">Niches overlap — a prospect can match more than one, so these do not sum to 64.</p>
-          )}
-        </>
-      )}
-
-      <div className="drop-readings">
-        {dropReadings.map((d) => (
-          <div className="drop-reading" key={d.where}>
-            <span className="drop-where">{d.where}</span>
-            <ChevronRight />
-            <span className="drop-what">{d.reading}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ── 5. Onboarding experiments — configuration as a tested hypothesis ── */
-
-function ExperimentTable() {
-  // A Set rather than a single key: configurations are meant to be read against
-  // each other, so any number of drop-off bars can be open at once.
-  const [open, setOpen] = useState<Set<string>>(new Set(['won-late']))
-  const toggle = (key: string) =>
-    setOpen((s) => {
-      const n = new Set(s)
-      if (n.has(key)) n.delete(key)
-      else n.add(key)
-      return n
-    })
-  const allOpen = open.size === experiments.length
-  return (
-    <div className="exp-block">
-      <div className="exp-toolbar">
-        <span className="exp-count">
-          {open.size === 0
-            ? 'Open a configuration to see its drop-off'
-            : `${open.size} of ${experiments.length} open${open.size > 1 ? ' — bars share one scale, so segments compare directly' : ''}`}
-        </span>
-        <button
-          type="button"
-          className="exp-all"
-          onClick={() =>
-            setOpen(allOpen ? new Set() : new Set(experiments.map((e) => e.key)))
-          }
-        >
-          {allOpen ? 'Collapse all' : 'Compare all'}
-        </button>
-      </div>
-      <div className="exp-table">
-        <div className="exp-head">
-          <span>Configuration</span>
-          <span>Sign-ups</span>
-          <span>Completion</span>
-          <span>Conversion</span>
-          <span />
-        </div>
-        {experiments.map((e) => {
-          const { complete } = buildFunnel(e.cfg)
-          const thin = e.signUps < MIN_SAMPLE
-          const conv = Math.round((e.clients / e.signUps) * 100)
-          const isOpen = open.has(e.key)
-          return (
-            <div className="exp-row-wrap" key={e.key}>
-              <button
-                type="button"
-                className={`exp-row ${isOpen ? 'open' : ''} ${thin ? 'thin' : ''}`}
-                aria-expanded={isOpen}
-                onClick={() => toggle(e.key)}
-              >
-                <span className="exp-name">
-                  {e.name}
-                  {e.recommended && <span className="fconfig-pill">Recommended</span>}
-                </span>
-                <span>{e.signUps}</span>
-                {thin ? (
-                  <span className="exp-thin" >not enough data</span>
-                ) : (
-                  <span>{complete}%</span>
-                )}
-                {thin ? (
-                  <span className="exp-thin">not enough data</span>
-                ) : (
-                  <span className="conv-good">
-                    {conv}% <i className="attr-n">n={e.signUps}</i>
-                  </span>
-                )}
-                <span className={`exp-caret ${isOpen ? 'up' : ''}`}>
-                  <ChevronDown />
-                </span>
-              </button>
-              {/* Kept mounted and collapsed with the 0fr→1fr grid trick used by
-                  .collapse, so opening and closing both animate — unmounting on
-                  close would snap shut. */}
-              <div className={`exp-collapse ${isOpen ? 'open' : ''}`}>
-                <div className="exp-collapse-inner">
-                  <div className="exp-detail">
-                    <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      {/* One legend for the whole table — repeating it under every open row
-          crowded out the bars it was meant to explain. */}
-      {open.size > 0 && FUNNEL_LEGEND}
-      <p className="exp-note">
-        Current configuration <b>Welcome on · Gate late</b> switched on <b>{currentConfigSince}</b> — read
-        the period deltas above against that date. Welcome off · Gate late shows higher completion (38%)
-        but on 7 sign-ups, and it produced fewer clients; the recommendation follows conversion, not completion.
-      </p>
-    </div>
-  )
-}
 
 /* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
 
 // One clustered row: share of the book (scored / 40) crossed with the segment's
 // own conversion. Same bar grammar as before, now driven by the chosen model.
-function ClusterRow({ s, maxShare, tip }: { s: ClusterSeg; maxShare: number; tip?: string }) {
+function ClusterRow({ s, maxShare, onOpen }: { s: ClusterSeg; maxShare: number; onOpen: () => void }) {
   const share = Math.round((s.scored / 40) * 100)
   const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
   const thin = s.scored < MIN_SAMPLE
   const up = s.delta > 0
   const flat = s.delta === 0
   return (
-    <div className="niche-row">
+    <button className="niche-row niche-row-btn" type="button" onClick={onOpen}>
       <span className="niche-name">
         {s.name}
-        {tip && <HelpTip text={tip} side="right" />}
+        <span className="niche-open" aria-hidden>
+          ⓘ
+        </span>
       </span>
       <span className="niche-bars">
         <span className="niche-bar-line">
@@ -1524,6 +1169,113 @@ function ClusterRow({ s, maxShare, tip }: { s: ClusterSeg; maxShare: number; tip
           )}
         </span>
       </span>
+    </button>
+  )
+}
+
+type ClusterKey = (typeof CLUSTER_KEYS)[number]
+
+// Plain-language "how a prospect lands here" per model, kept deliberately
+// jargon-free. A/B classify from concrete answer options; C/D from scores/flags.
+const CLASSIFY_COPY: Record<ClusterKey, { lead: string; showOptions: boolean; note?: string }> = {
+  A: {
+    lead: 'Based on the life they pictured. A prospect lands here when their “ideal life” choices cluster in this domain:',
+    showOptions: true,
+  },
+  B: {
+    lead: 'Based on why money matters to them. A prospect lands here when their top reasons for wanting money are:',
+    showOptions: true,
+  },
+  C: {
+    lead: 'Based on two things read from their answers — how clearly they can picture their future (vision), and how close they are to acting (readiness) — each compared with everyone else in your book.',
+    showOptions: false,
+    note: 'Cut at the middle of your book (vision ≈ 82, readiness ≈ 36). This label is exactly that mix of high or low vision and readiness.',
+  },
+  D: {
+    lead: 'A tension tag — a flag raised when what someone wants pulls against what they do or believe. It’s a signal, not a bucket, so one prospect can carry several at once.',
+    showOptions: false,
+  },
+}
+
+// The intuitive explainer that opens when a category row is clicked: what the
+// label means, how a prospect ends up in it, and how to talk to them.
+function SegmentExplainer({
+  modelKey,
+  seg,
+  onClose,
+}: {
+  modelKey: ClusterKey
+  seg: ClusterSeg
+  onClose: () => void
+}) {
+  const def = segModels[modelKey].segments.find((d) => d.name === seg.name)
+  const how = CLASSIFY_COPY[modelKey]
+  const share = Math.round((seg.scored / 40) * 100)
+  const conv = seg.scored ? Math.round((seg.clients / seg.scored) * 100) : 0
+  const bandStyle = useViewportBand(true)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal explain-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">{seg.name}</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body explain-body">
+          <div className="explain-sub">{modelClusters[modelKey].name} · how this label works</div>
+
+          <div className="explain-block">
+            <h3 className="explain-h">What it means</h3>
+            <p>{def?.blurb ?? seg.name}</p>
+          </div>
+
+          <div className="explain-block">
+            <h3 className="explain-h">How a prospect lands here</h3>
+            <p>{how.lead}</p>
+            {how.showOptions && def && def.options.length > 0 && (
+              <div className="explain-chips">
+                {def.options.map((o) => (
+                  <span className="explain-chip" key={o}>
+                    {o}
+                  </span>
+                ))}
+              </div>
+            )}
+            {how.note && <p className="explain-note">{how.note}</p>}
+          </div>
+
+          {def?.hook && (
+            <div className="explain-block">
+              <h3 className="explain-h">How to talk to them</h3>
+              <p className="explain-hook">“{def.hook}”</p>
+              {def.action && <p className="explain-action">{def.action}</p>}
+            </div>
+          )}
+
+          <div className="explain-stats">
+            <div className="explain-stat">
+              <b>{seg.scored}</b>
+              <span>prospects</span>
+            </div>
+            <div className="explain-stat">
+              <b>{share}%</b>
+              <span>of your book</span>
+            </div>
+            <div className="explain-stat">
+              <b>{conv}%</b>
+              <span>convert</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1537,9 +1289,7 @@ function ProspectClusters() {
   const model = modelClusters[key]
   const segs = [...model.segs].sort((a, b) => b.scored - a.scored)
   const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / 40) * 100)))
-  // Each segment's plain-language definition, pulled from the Segmentation page
-  // so the two screens never disagree on what a label means.
-  const defs = new Map(segModels[key].segments.map((sg) => [sg.name, sg.blurb]))
+  const [openSeg, setOpenSeg] = useState<ClusterSeg | null>(null)
   const ind = useSlideIndicator(key)
   return (
     <>
@@ -1574,7 +1324,7 @@ function ProspectClusters() {
 
       <div className="niche-list">
         {segs.map((s) => (
-          <ClusterRow key={s.name} s={s} maxShare={maxShare} tip={defs.get(s.name)} />
+          <ClusterRow key={s.name} s={s} maxShare={maxShare} onOpen={() => setOpenSeg(s)} />
         ))}
       </div>
 
@@ -1589,6 +1339,10 @@ function ProspectClusters() {
           : 'Tags overlap: a prospect can carry several, so shares sum past 100% and per-tag clients past 12.'}{' '}
         Labels are the exhaustive partition defined on the Segmentation page.
       </p>
+
+      {openSeg && (
+        <SegmentExplainer modelKey={key} seg={openSeg} onClose={() => setOpenSeg(null)} />
+      )}
     </>
   )
 }
@@ -1775,220 +1529,19 @@ function AnalyticsScreen() {
     <>
       <h1 className="page-title">Analytics</h1>
 
-      {/* 1 ── Impact header */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <TargetIcon />
-            <span>Your Practice, With Knomee</span>
-          </div>
-          <HelpTip text="Each number against its target or benchmark." />
-        </header>
-        <div className="analytics-body">
-          <div className="impact-grid">
-            {impactStats.map((s) => (
-              <div className="impact-card" key={s.label}>
-                <div className="analytics-lbl">{s.label}</div>
-                <div className="impact-num">{s.value}</div>
-                <div className="impact-compare">{s.compare}</div>
-                <div className={`impact-detail ${s.good ? 'good' : ''}`}>{s.detail}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 2 ── Hero: niche × conversion */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <ChartIcon />
             <span>Who Your Prospects Are — And Which Convert</span>
           </div>
-          <HelpTip text="Cluster the book by any of the four models; each row is a segment's share against how many of it convert." />
+          <HelpTip text="Cluster the book by any of the four models. Each row is a segment — click it to see what the label means and how prospects land in it." />
         </header>
         <div className="analytics-body">
           <ProspectClusters />
         </div>
       </section>
-
-      {/* 3 ── Does the score work? */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <TierBarsIcon />
-            <span>Does the Score Work?</span>
-          </div>
-          <HelpTip text="Whether a higher KQ score predicts a client." />
-        </header>
-        <div className="analytics-body">
-          {/* Distribution first (how the book splits), then conversion per tier
-              (whether the split predicts anything). */}
-          <TierSector />
-          <div className="tier-hero">
-            {byTier.map((t) => {
-              const conv = parseInt(t.conv, 10)
-              const thin = t.count < MIN_SAMPLE
-              return (
-                <div className={`tier-hero-row ${thin ? 'thin' : ''}`} key={t.tier}>
-                  <span className="thr-name">
-                    <i className="swatch" style={{ background: t.color }} />
-                    {t.tier} · {t.name}
-                  </span>
-                  <span className="thr-track">
-                    <span className="thr-fill" style={{ width: `${conv}%`, background: t.color }} />
-                    <b className="thr-conv">{t.conv}</b>
-                  </span>
-                  <span className="thr-meta">
-                    <b>n={t.count}</b> · avg KQ {t.avgKQ} · KQ {t.range}
-                  </span>
-                  {thin && <span className="thr-warn">sample too small to read</span>}
-                </div>
-              )
-            })}
-          </div>
-
-          <p className="tier-reading">
-            Prospects scored <b>Ready Now</b> convert <b>2.8×</b> more often than <b>Considering</b>.
-            Based on your own converted clients — not a projected model.
-          </p>
-          <p className="analytics-note">
-            Tier 3 shows 0% on a single prospect. That is not a finding — one prospect cannot establish a
-            rate, and the row is greyed for that reason.
-          </p>
-
-          <div className="tier-gauge-block">
-            <div className="analytics-lbl">Average KQ Score · all {outcomes.scored} scored</div>
-            <div className="outcome-num">{outcomes.avgKQ}</div>
-            <KQGauge value={outcomes.avgKQ} />
-          </div>
-        </div>
-      </section>
-
-      {/* 4 ── Marketing reach */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <FunnelIcon />
-            <span>Is Your Marketing Reaching the Right People?</span>
-          </div>
-          <HelpTip text="Where prospects drop out, and which sources convert." />
-        </header>
-        <div className="analytics-body">
-          <div className="analytics-sub-head">Drop-off, segmented</div>
-          <SegmentedFunnel />
-
-          <div className="analytics-sub-head">Attribution — ranked by clients produced</div>
-          <div className="utm-grid">
-            {attribution.map((g) => (
-              <AttributionCard key={g.key} label={g.label} rows={g.rows} />
-            ))}
-          </div>
-
-          <div className="analytics-sub-head">Marketing effectiveness</div>
-          <ul className="mkt-eff">
-            {marketingEffectiveness.map((m) => (
-              <li key={m}>{m}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* 5 ── Experiments */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <CheckIcon />
-            <span>Onboarding Experiments</span>
-          </div>
-          <HelpTip text="Each configuration with the outcome it produced." />
-        </header>
-        <div className="analytics-body">
-          <ExperimentTable />
-        </div>
-      </section>
-
-      {/* 6 ── Verbatims */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <MegaphoneIcon />
-            <span>What Your Prospects Are Actually Saying</span>
-          </div>
-          <HelpTip text="Recurring questions in the prospect's own words." />
-        </header>
-        <div className="analytics-body">
-          <div className="verbatim-grid">
-            {verbatims.map((v) => (
-              <blockquote className="verbatim" key={v.quote}>
-                <p>“{v.quote}”</p>
-                <footer>
-                  <span className="verbatim-niche">{v.niche}</span>
-                  <span className="verbatim-count">{v.count} prospects</span>
-                </footer>
-              </blockquote>
-            ))}
-          </div>
-          <div className="verbatim-uses">
-            <div className="vu">
-              <b>Opening a first conversation</b>
-              <span>Lead with the question they already asked — no discovery warm-up needed.</span>
-            </div>
-            <div className="vu">
-              <b>Ad &amp; content copy</b>
-              <span>Run these as headlines verbatim; they are the prospect's phrasing, not yours.</span>
-            </div>
-          </div>
-          <p className="analytics-note">Everything here is something your prospect told you directly.</p>
-        </div>
-      </section>
-
-      {/* 8 ── Funnel health, collapsed */}
-      <FunnelHealth />
     </>
-  )
-}
-
-/* ── 8. Aggregate funnel health — retained as a diagnostic, closed by default.
-   The segmented view in section 4 carries the decision value, so this stays
-   out of the way until someone goes looking for it. */
-
-function FunnelHealth() {
-  const [open, setOpen] = useState(false)
-  return (
-    <section className="card analytics-card">
-      <button
-        type="button"
-        className="card-head fh-head"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <div className="card-title">
-          <ChartIcon />
-          <span>Knomee Funnel Health</span>
-        </div>
-        <span className="fh-toggle">
-          {open ? 'Hide' : 'Show'} {open ? <ChevronUp /> : <ChevronDown />}
-        </span>
-      </button>
-      {open && (
-        <div className="analytics-body">
-          <div className="analytics-metrics">
-            {engagement.map((m) => (
-              <div className="analytics-metric" key={m.label}>
-                <div className="analytics-lbl">{m.label}</div>
-                <div className="analytics-num">{m.value}</div>
-                <div className={`analytics-sub ${m.tone}`}>{m.sub}</div>
-              </div>
-            ))}
-          </div>
-          <p className="analytics-note">
-            Aggregate diagnostic only. These totals cannot separate a targeting problem from a follow-up
-            problem — use the segmented drop-off above for that.
-          </p>
-        </div>
-      )}
-    </section>
   )
 }
 
