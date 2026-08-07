@@ -17,6 +17,7 @@ import {
   type ScoredProspect,
 } from '../data/segmentation'
 import { useSlideIndicator } from '../useSlideIndicator'
+import { evidence, evidenceMeta, type DistRow } from '../data/evidence'
 import './segmentation.css'
 
 /* ── local icons, so this screen has no dependency on App.tsx internals ── */
@@ -690,6 +691,66 @@ function Overview({ onPick }: { onPick: (k: ModelKey) => void }) {
         Pick a model above, or a card, to see its quadrants, segment mix, the full prospect list and
         how each label is calculated.
       </p>
+
+      <EvidenceSection />
     </>
+  )
+}
+
+// Real respondent evidence from the five Adventures — the aggregate findings
+// that inform (or don't) how prospects are categorised.
+function EvidenceRows({ rows }: { rows: DistRow[] }) {
+  const max = Math.max(...rows.map((r) => r.pct), 1)
+  return (
+    <div className="ev-rows">
+      {rows.map((r) => (
+        <div className="ev-row" key={r.label}>
+          <span className="ev-row-label">{r.label}</span>
+          <span className="ev-row-track">
+            <i className="ev-row-fill" style={{ width: `${(r.pct / max) * 100}%` }} />
+          </span>
+          <b className="ev-row-val">{r.display}</b>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function EvidenceSection() {
+  return (
+    <div className="ev-section">
+      <div className="ev-head">
+        <h4 className="ev-title">What real respondents said</h4>
+        <span className="ev-meta">
+          {evidenceMeta.source} · {evidenceMeta.period}
+        </span>
+      </div>
+      <div className="ev-grid">
+        {evidence.map((e) => (
+          <section className="ev-card" key={e.key}>
+            <header className="ev-card-head">
+              <div>
+                <div className="ev-card-title">{e.title}</div>
+                <div className="ev-card-sub">
+                  {e.adventure} · n={e.n}
+                </div>
+              </div>
+              <span className="ev-informs" title="Which model this Adventure feeds">
+                {e.informs}
+              </span>
+            </header>
+            <div className="ev-block-h">{e.primary.heading}</div>
+            <EvidenceRows rows={e.primary.rows} />
+            {e.secondary && (
+              <>
+                <div className="ev-block-h">{e.secondary.heading}</div>
+                <EvidenceRows rows={e.secondary.rows} />
+              </>
+            )}
+            {e.note && <p className="ev-note">{e.note}</p>}
+          </section>
+        ))}
+      </div>
+    </div>
   )
 }
