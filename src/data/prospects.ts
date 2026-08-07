@@ -294,17 +294,29 @@ function randomDate(rand: () => number): string {
 export const prospects: Prospect[] = [...featuredProspects, ...randomProspects(30, 0x5eed)]
 
 // Pulse metrics for the dashboard, derived from the book so they can never
-// drift from the table below them.
-const scoredKQ = prospects.filter((p) => p.kq !== null).map((p) => p.kq as number)
+// drift from the table below them. Every tab that talks about the standing
+// prospect book reads these, so the numbers agree everywhere.
+const scored = prospects.filter((p) => p.kq !== null)
+const round1 = (n: number) => Math.round(n * 10) / 10
+const mean = (xs: number[]) => (xs.length ? round1(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
+const tierKQ = (t: Tier) => mean(prospects.filter((p) => p.tier === t && p.kq !== null).map((p) => p.kq as number))
+
 export const prospectStats = {
   total: prospects.length,
-  avgKQ: scoredKQ.length
-    ? Math.round((scoredKQ.reduce((a, b) => a + b, 0) / scoredKQ.length) * 10) / 10
-    : 0,
+  scored: scored.length,
+  avgKQ: mean(scored.map((p) => p.kq as number)),
+  avgIntent: mean(scored.map((p) => p.intent as number)),
+  avgClarity: mean(scored.map((p) => p.clarity as number)),
+  avgReceptivity: mean(scored.map((p) => p.receptivity as number)),
   byTier: {
     tier1: prospects.filter((p) => p.tier === 'tier1').length,
     tier2: prospects.filter((p) => p.tier === 'tier2').length,
     tier3: prospects.filter((p) => p.tier === 'tier3').length,
     incomplete: prospects.filter((p) => p.tier === 'incomplete').length,
+  },
+  avgKQByTier: {
+    tier1: tierKQ('tier1'),
+    tier2: tierKQ('tier2'),
+    tier3: tierKQ('tier3'),
   },
 }
