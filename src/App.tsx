@@ -11,7 +11,6 @@ import { createPortal } from 'react-dom'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
-  MIN_SAMPLE,
   modelClusters,
   CLUSTER_KEYS,
   talkTo,
@@ -1128,14 +1127,21 @@ function ClientsScreen({
 
 /* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
 
-// One clustered row: share of the book (scored / 40) crossed with the segment's
-// own conversion. Same bar grammar as before, now driven by the chosen model.
-function ClusterRow({ s, maxShare, onOpen }: { s: ClusterSeg; maxShare: number; onOpen: () => void }) {
-  const share = Math.round((s.scored / 40) * 100)
+// One clustered row: share of the real respondent population (scored / model
+// total) crossed with the segment's illustrative conversion.
+function ClusterRow({
+  s,
+  maxShare,
+  total,
+  onOpen,
+}: {
+  s: ClusterSeg
+  maxShare: number
+  total: number
+  onOpen: () => void
+}) {
+  const share = total ? Math.round((s.scored / total) * 100) : 0
   const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
-  const thin = s.scored < MIN_SAMPLE
-  const up = s.delta > 0
-  const flat = s.delta === 0
   return (
     <button className="niche-row niche-row-btn" type="button" onClick={onOpen}>
       <span className="niche-name">
@@ -1159,15 +1165,7 @@ function ClusterRow({ s, maxShare, onOpen }: { s: ClusterSeg; maxShare: number; 
             <span className="niche-fill conv" style={{ width: `${conv}%` }} />
           </span>
           <b className="niche-val">{conv}%</b>
-          {thin ? (
-            <i className="exp-thin">n={s.scored} · too small</i>
-          ) : flat ? (
-            <i className="niche-delta">— flat vs last quarter</i>
-          ) : (
-            <i className={`niche-delta ${up ? 'up' : 'down'}`}>
-              {up ? '▲' : '▼'} {Math.abs(s.delta)} pts vs last quarter
-            </i>
-          )}
+          <i className="niche-delta">illustrative</i>
         </span>
       </span>
     </button>
@@ -1228,7 +1226,7 @@ function SegmentExplainer({
   // the plain "how it's scored" line.
   const rule = segMethod[modelKey].rules?.find((r) => r[0] === seg.name)
   const scored = rule ? `Flagged when: ${rule[1]}` : ex.scored
-  const share = Math.round((seg.scored / 40) * 100)
+  const share = Math.round((seg.scored / modelClusters[modelKey].n) * 100)
   const conv = seg.scored ? Math.round((seg.clients / seg.scored) * 100) : 0
   const bandStyle = useViewportBand(true)
   useEffect(() => {
@@ -1291,15 +1289,15 @@ function SegmentExplainer({
           <div className="explain-stats">
             <div className="explain-stat">
               <b>{seg.scored}</b>
-              <span>prospects</span>
+              <span>respondents</span>
             </div>
             <div className="explain-stat">
               <b>{share}%</b>
-              <span>of your book</span>
+              <span>of group</span>
             </div>
             <div className="explain-stat">
               <b>{conv}%</b>
-              <span>convert</span>
+              <span>convert (illus.)</span>
             </div>
           </div>
         </div>
@@ -1317,7 +1315,7 @@ function ProspectClusters() {
   const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('A')
   const model = modelClusters[key]
   const segs = [...model.segs].sort((a, b) => b.scored - a.scored)
-  const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / 40) * 100)))
+  const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / model.n) * 100)))
   const [openSeg, setOpenSeg] = useState<ClusterSeg | null>(null)
   const ind = useSlideIndicator(key)
   return (
@@ -1349,11 +1347,19 @@ function ProspectClusters() {
         ))}
       </nav>
 
-      <p className="cluster-spine">{model.spine}</p>
+      <p className="cluster-spine">
+        {model.spine} <b className="cluster-n">n = {model.n.toLocaleString()} respondents</b>
+      </p>
 
       <div className="niche-list">
         {segs.map((s) => (
-          <ClusterRow key={s.name} s={s} maxShare={maxShare} onOpen={() => setOpenSeg(s)} />
+          <ClusterRow
+            key={s.name}
+            s={s}
+            maxShare={maxShare}
+            total={model.n}
+            onOpen={() => setOpenSeg(s)}
+          />
         ))}
       </div>
 
@@ -1363,10 +1369,14 @@ function ProspectClusters() {
       </div>
 
       <p className="analytics-note">
+        {model.basis}
+      </p>
+      <p className="analytics-note">
+        Recomputed by running the model over real anonymized respondent data.{' '}
         {model.exclusive
-          ? 'Every scored prospect lands in exactly one segment — shares sum to 100% and clients to 12.'
-          : 'Tags overlap: a prospect can carry several, so shares sum past 100% and per-tag clients past 12.'}{' '}
-        Labels are the exhaustive partition defined on the Segmentation page.
+          ? 'Each respondent lands in exactly one segment — shares sum to 100%.'
+          : 'Tags overlap — a respondent can carry several, so shares sum past 100%.'}{' '}
+        Conversion is illustrative: this dataset has no outcomes.
       </p>
 
       {openSeg && (
