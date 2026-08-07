@@ -1220,6 +1220,48 @@ const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
   },
 }
 
+// A worked example per category: for each question the model reads, what a
+// respondent in this segment actually picked. The picks are drawn from the real
+// Adventure option vocabulary and align index-for-index with EXPLAIN[key].questions.
+const SEGMENT_PICKS: Record<ClusterKey, Record<string, string[]>> = {
+  A: {
+    'People & Generations': ['Family, Friends, Grandchildren', 'More focus on Family & relationships', 'Spending time with loved ones'],
+    'Home & Table': ['Staying home, Cooking, Pets, Garden', 'More focus on Home & comfort', 'Relaxing at home'],
+    'Health & Activity': ['Outdoors, Health, Sports, Fitness', 'More focus on Health & wellness', 'Staying active'],
+    'Culture & Creativity': ['Creative pursuits, Music, Art, Theater', 'More focus on Hobbies & interests', 'On a creative pursuit'],
+    'Work & Enterprise': ['Building a business, Meaningful work', 'More focus on Work & career', 'Working on something that matters'],
+    'Contribution': ['Philanthropic giving, Volunteering', 'More focus on Community & giving', 'Helping others'],
+    'Travel & Exploration': ['International travel, Domestic travel', 'More focus on Travel & adventure', 'Traveling'],
+    'Place & Setting': ['House, Country, Mountain, Ocean, Lake', 'Same focus across areas', 'Settled in the right place'],
+  },
+  B: {
+    Liberator: ['Choice / Freedom at rank 1', 'Confident — “I can achieve my goals” (4–5/5)'],
+    Experiencer: ['Enjoying the moment, Comfort', 'Assured — comfortable spending on what brings joy'],
+    Protector: ['Security, Supporting my family', 'Uneasy — some regret / second-guessing money moves'],
+    Contributor: ['Supporting my family, Giving back', 'Steady — values an advisor’s guidance'],
+    Achiever: ['Status', 'Driven — confident but competitive about progress'],
+  },
+  C: {
+    'Vivid but Stuck': ['Vision clarity 4–5/5, broad ideal-life picks', '“Thought about it, but no plans yet”'],
+    'Ready to Build': ['Vision clarity 4–5/5, clear horizon', '“I know what to do and I’ve started”'],
+    'Not Yet Looking': ['Vision clarity 1–2/5, few ideal-life picks', '“Not something I’m thinking about”'],
+    'Moving Without a Map': ['Vision clarity 1–2/5', '“I’ve already made changes” — acting without a clear vision'],
+  },
+  D: {
+    'Advisor-Receptive': ['Says an advisor improves their confidence (4–5/5) and wants guidance'],
+    'Deferred Joy': ['Wants MORE attention on wellbeing but scores low on spending for joy'],
+    'Vision-Action Gap': ['Vivid future vision (4–5/5) but readiness still at “thinking about it”'],
+    'Confidence Gap': ['Clear goals but a low overall confidence band (<14/25)'],
+    'Vision Fog': ['Vision clarity 1/5 with very few ideal-life elements chosen'],
+    'Decision Fatigue': ['Second-guesses money moves; many concerns, few next steps'],
+    'Self-Directed': ['Chose to pursue the goal without advisor support'],
+    'Horizon Mismatch': ['Goal timeframe far shorter than their stated planning horizon'],
+    'Planning Aversion': ['High concern about running out of money, no plan started'],
+    'Permission Gap': ['Wants to enjoy money but feels they “shouldn’t” spend it'],
+    'Solo Future': ['Pictures the future alone despite a family-oriented goal'],
+  },
+}
+
 // The intuitive explainer that opens when a category row is clicked: what the
 // label means, how a prospect ends up in it, and how to talk to them.
 function SegmentExplainer({
@@ -1281,14 +1323,25 @@ function SegmentExplainer({
           </section>
 
           <section className="ex-sec">
-            <h3 className="ex-h">What it looks at</h3>
+            <h3 className="ex-h">Questions used</h3>
             <ul className="ex-q">
-              {ex.questions.map((qq) => (
-                <li key={qq.q}>
-                  <span className="ex-q-name">{qq.q}</span>
-                  <span className="ex-q-adv">{qq.adv}</span>
-                </li>
-              ))}
+              {ex.questions.map((qq, i) => {
+                const picked = SEGMENT_PICKS[modelKey]?.[seg.name]?.[i]
+                return (
+                  <li key={qq.q}>
+                    <div className="ex-q-top">
+                      <span className="ex-q-name">{qq.q}</span>
+                      <span className="ex-q-adv">{qq.adv}</span>
+                    </div>
+                    {picked && (
+                      <div className="ex-q-pick">
+                        <span className="ex-q-pick-lbl">Picked</span>
+                        {picked}
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </section>
 
