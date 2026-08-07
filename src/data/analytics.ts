@@ -343,17 +343,19 @@ export const utmKeys: UtmKey[] = [
   { key: 'last_touch_at', label: 'Latest visit timestamp' },
 ]
 
-// ── Prospect book clustered by each segmentation model ──
-// The same 40 scored prospects / 12 clients, re-partitioned by whichever lens
-// the advisor picks. Segment names match the Segmentation page (segModels), so
-// the two screens tell one story: Segmentation defines the labels, Analytics
-// scores them by conversion. Exclusive models (A/B/C) sum to 40 scored / 12
-// clients; the Tension-Tag model (D) overlaps, so its counts sum past both.
+// ── Prospect population clustered by each segmentation model ──
+// Recomputed by running the existing models over the real (anonymized)
+// TypeForm respondent data (Sep 2025 – Apr 2026). Each model runs on the
+// Adventure that feeds it, and those Adventures are SEPARATE respondent
+// populations, so `n` differs per model. `basis` states the provenance and any
+// caveat. Conversion is illustrative only — this dataset has no outcomes, so
+// the per-segment rates are carried over from the earlier sample to keep the
+// "which convert" bar meaningful; treat the SHARE as the real signal.
 export interface ClusterSeg {
   name: string
-  scored: number // prospects landing in this segment
-  clients: number // of those, how many converted
-  delta: number // percentage points of share vs last quarter
+  scored: number // respondents landing in this segment (real)
+  clients: number // illustrative only — no outcomes in this dataset
+  delta: number // pp vs last quarter — 0: no time series in this dataset
 }
 
 export interface ModelCluster {
@@ -361,7 +363,9 @@ export interface ModelCluster {
   name: string
   spine: string
   exclusive: boolean // false = segments overlap, shares sum past 100%
-  lead: string // the one sentence an advisor should act on
+  n: number // real respondent base this model was computed over
+  basis: string // provenance + caveat, shown under the card
+  lead: string // the one sentence to read off the distribution
   segs: ClusterSeg[]
 }
 
@@ -371,12 +375,14 @@ export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
     name: 'Vision × Readiness',
     spine: 'How clearly they see the destination, crossed with how close they are to acting.',
     exclusive: true,
-    lead: 'Readiness sorts your book cleanly: Ready to Build converts at 63%, Not Yet Looking at 17%. Spend the week on the first row.',
+    n: 400,
+    basis: 'Estimated — vision (Future You, n=487) and readiness (TTM, n=434) are measured on different respondents, so the quadrants combine the two rates.',
+    lead: 'Most can picture a future but few are acting — ~40% land in Vivid but Stuck, and only ~24% are Ready to Build.',
     segs: [
-      { name: 'Ready to Build', scored: 8, clients: 5, delta: 4 },
-      { name: 'Vivid but Stuck', scored: 14, clients: 4, delta: 2 },
-      { name: 'Moving Without a Map', scored: 12, clients: 2, delta: -3 },
-      { name: 'Not Yet Looking', scored: 6, clients: 1, delta: -3 },
+      { name: 'Vivid but Stuck', scored: 159, clients: 45, delta: 0 },
+      { name: 'Ready to Build', scored: 97, clients: 61, delta: 0 },
+      { name: 'Not Yet Looking', scored: 89, clients: 15, delta: 0 },
+      { name: 'Moving Without a Map', scored: 55, clients: 9, delta: 0 },
     ],
   },
   B: {
@@ -384,14 +390,15 @@ export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
     name: 'Purpose × Posture',
     spine: 'Why money matters to them, crossed with how they feel about it.',
     exclusive: true,
-    lead: 'Liberators and Contributors convert best (43% / 40%) despite being your smallest families — the message that lands is autonomy, not accumulation.',
+    n: 404,
+    basis: 'From 404 Financial Joy respondents’ money-value picks. Values are multi-select without a stored rank, so the family is assigned by distinctiveness rather than pick order.',
+    lead: 'Liberators lead (34%) — money means choice and freedom more than protection. Status is almost no one (<1%).',
     segs: [
-      { name: 'Protector', scored: 11, clients: 4, delta: 1 },
-      { name: 'Achiever', scored: 8, clients: 2, delta: -2 },
-      { name: 'Liberator', scored: 7, clients: 3, delta: 5 },
-      { name: 'Experiencer', scored: 6, clients: 1, delta: 0 },
-      { name: 'Contributor', scored: 5, clients: 2, delta: 2 },
-      { name: 'Unstated', scored: 3, clients: 0, delta: -1 },
+      { name: 'Liberator', scored: 139, clients: 60, delta: 0 },
+      { name: 'Experiencer', scored: 109, clients: 18, delta: 0 },
+      { name: 'Protector', scored: 106, clients: 39, delta: 0 },
+      { name: 'Contributor', scored: 48, clients: 19, delta: 0 },
+      { name: 'Achiever', scored: 2, clients: 1, delta: 0 },
     ],
   },
   A: {
@@ -399,17 +406,18 @@ export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
     name: 'Life Domain',
     spine: 'Which of the eight life domains the future vision points at.',
     exclusive: true,
-    lead: 'People & Generations and Travel & Exploration close above 40%; Culture & Creativity is a quarter of interest but a fifth of that close rate.',
+    n: 818,
+    basis: 'From 818 Future You respondents’ ideal-life picks + Future You “doing”. The attention-shift reinforcement (25% of the engine score) lives in a different Adventure and is omitted.',
+    lead: 'People & Generations is the biggest domain (25%) — family and legacy dominate what prospects picture, with home, health and creativity close behind.',
     segs: [
-      { name: 'Health & Activity', scored: 8, clients: 2, delta: 2 },
-      { name: 'People & Generations', scored: 7, clients: 3, delta: 3 },
-      { name: 'Culture & Creativity', scored: 6, clients: 1, delta: -1 },
-      { name: 'Work & Enterprise', scored: 5, clients: 2, delta: 1 },
-      { name: 'Home & Table', scored: 4, clients: 1, delta: 0 },
-      { name: 'Travel & Exploration', scored: 4, clients: 2, delta: 4 },
-      { name: 'Contribution', scored: 3, clients: 1, delta: 1 },
-      { name: 'Place & Setting', scored: 2, clients: 0, delta: -2 },
-      { name: 'Insufficient Signal', scored: 1, clients: 0, delta: 0 },
+      { name: 'People & Generations', scored: 208, clients: 89, delta: 0 },
+      { name: 'Home & Table', scored: 138, clients: 35, delta: 0 },
+      { name: 'Health & Activity', scored: 121, clients: 30, delta: 0 },
+      { name: 'Culture & Creativity', scored: 116, clients: 19, delta: 0 },
+      { name: 'Work & Enterprise', scored: 81, clients: 32, delta: 0 },
+      { name: 'Contribution', scored: 71, clients: 24, delta: 0 },
+      { name: 'Travel & Exploration', scored: 50, clients: 25, delta: 0 },
+      { name: 'Place & Setting', scored: 33, clients: 0, delta: 0 },
     ],
   },
   D: {
@@ -417,18 +425,20 @@ export const modelClusters: Record<'A' | 'B' | 'C' | 'D', ModelCluster> = {
     name: 'Tension Tags',
     spine: 'Where what a prospect wants contradicts what they believe or do. Tags overlap — one prospect can carry several.',
     exclusive: false,
-    lead: 'Advisor-Receptive is the money tag: 12 prospects carry it and it converts at 50%. Deferred Joy is the largest but converts at 21% — volume that needs reframing, not closing.',
+    n: 40,
+    basis: 'Illustrative sample — tension-tag rules read several Adventures at once (confidence + vision + readiness + attention), which this dataset holds as separate populations, so they can’t be recomputed per person here.',
+    lead: 'Advisor-Receptive is the money tag: it converts best. Deferred Joy is the largest but needs reframing, not closing.',
     segs: [
-      { name: 'Advisor-Receptive', scored: 12, clients: 6, delta: 3 },
-      { name: 'Deferred Joy', scored: 14, clients: 3, delta: 2 },
-      { name: 'Vision-Action Gap', scored: 13, clients: 4, delta: -1 },
-      { name: 'Confidence Gap', scored: 11, clients: 2, delta: 1 },
-      { name: 'Vision Fog', scored: 10, clients: 2, delta: -2 },
+      { name: 'Advisor-Receptive', scored: 12, clients: 6, delta: 0 },
+      { name: 'Deferred Joy', scored: 14, clients: 3, delta: 0 },
+      { name: 'Vision-Action Gap', scored: 13, clients: 4, delta: 0 },
+      { name: 'Confidence Gap', scored: 11, clients: 2, delta: 0 },
+      { name: 'Vision Fog', scored: 10, clients: 2, delta: 0 },
       { name: 'Decision Fatigue', scored: 9, clients: 1, delta: 0 },
-      { name: 'Self-Directed', scored: 9, clients: 1, delta: -1 },
-      { name: 'Horizon Mismatch', scored: 8, clients: 3, delta: 2 },
-      { name: 'Planning Aversion', scored: 7, clients: 1, delta: -1 },
-      { name: 'Permission Gap', scored: 6, clients: 2, delta: 1 },
+      { name: 'Self-Directed', scored: 9, clients: 1, delta: 0 },
+      { name: 'Horizon Mismatch', scored: 8, clients: 3, delta: 0 },
+      { name: 'Planning Aversion', scored: 7, clients: 1, delta: 0 },
+      { name: 'Permission Gap', scored: 6, clients: 2, delta: 0 },
       { name: 'Solo Future', scored: 5, clients: 2, delta: 0 },
     ],
   },
