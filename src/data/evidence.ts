@@ -2,7 +2,7 @@
 // the five Knomee Adventures. Figures are the aggregate findings prepared in
 // the analysis tabs of the source workbook — each Adventure is its own
 // respondent population, so counts differ per card and don't join per-person.
-// Percentages are the analysts' estimates (~) except TTM, which has exact counts.
+// Percentages are the analysts' estimates (~) except Goals, which has exact counts.
 
 export interface DistRow {
   label: string
@@ -37,7 +37,7 @@ export const evidence: EvidenceCard[] = [
   {
     key: 'ttm',
     title: 'Readiness to act',
-    adventure: 'TTM Adventure',
+    adventure: 'Goals',
     n: 434,
     informs: 'Vision × Readiness (C)',
     primary: {
@@ -55,7 +55,7 @@ export const evidence: EvidenceCard[] = [
   {
     key: 'outlook',
     title: 'Concerns & hopes',
-    adventure: 'Outlook Adventure',
+    adventure: 'Outlook',
     n: 382,
     informs: 'Context for every model',
     primary: {
@@ -83,7 +83,7 @@ export const evidence: EvidenceCard[] = [
   {
     key: 'finjoy',
     title: 'What money is for',
-    adventure: 'Financial Joy Adventure',
+    adventure: 'Financial Joy',
     n: 404,
     informs: 'Purpose × Posture (B)',
     primary: {
@@ -111,7 +111,7 @@ export const evidence: EvidenceCard[] = [
   {
     key: 'futureyou',
     title: 'Vision clarity',
-    adventure: 'Future You Adventure',
+    adventure: 'Future You',
     n: 400,
     informs: 'Life Domain (A) · Vision × Readiness (C)',
     primary: {
@@ -138,7 +138,7 @@ export const evidence: EvidenceCard[] = [
   {
     key: 'confidence',
     title: 'Financial confidence',
-    adventure: 'Confidence Adventure',
+    adventure: 'Confidence',
     n: 607,
     informs: 'Purpose × Posture (B) · Tension Tags (D)',
     primary: {

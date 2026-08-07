@@ -22,3 +22,7 @@ dist-ssr
 *.sln
 *.sw?
 tsconfig.tsbuildinfo
+
+# Python bytecode from the segmentation engine
+__pycache__/
+*.pyc
