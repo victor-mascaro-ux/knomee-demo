@@ -432,14 +432,6 @@ export default function SegmentationScreen() {
     <>
       <h1 className="page-title">Audience Segmentation</h1>
 
-      <div className="seg-banner">
-        <b>Prototype.</b> Every label is an exhaustive partition of the Adventure&rsquo;s closed
-        option space — no free text assigns a label. Verified against{' '}
-        {segProof.n.toLocaleString()} synthetic respondents: {segProof.crashes} crashes,{' '}
-        {segProof.unlabeled} unlabeled, every label reachable. <b>Caveat:</b> 8 real profiles from 4
-        households, and no conversion outcomes — nothing here is validated against conversion.
-      </div>
-
       <nav className="seg-switch slide-nav" ref={segInd.ref}>
         {segInd.box && (
           <span
@@ -731,8 +723,8 @@ function EvidenceSection() {
             <header className="ev-card-head">
               <div>
                 <div className="ev-card-title">{e.title}</div>
-                <div className="ev-card-sub">
-                  {e.adventure} · n={e.n}
+                <div className="ev-card-sub" title={`n=${e.n}`}>
+                  {e.adventure}
                 </div>
               </div>
               <span className="ev-informs" title="Which model this Adventure feeds">

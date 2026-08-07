@@ -1128,7 +1128,8 @@ function ClientsScreen({
 /* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
 
 // One clustered row: share of the real respondent population (scored / model
-// total) crossed with the segment's illustrative conversion.
+// total) crossed with the segment's conversion. The respondent count and
+// converted count ride on hover so the bars can run full-width.
 function ClusterRow({
   s,
   maxShare,
@@ -1143,7 +1144,12 @@ function ClusterRow({
   const share = total ? Math.round((s.scored / total) * 100) : 0
   const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
   return (
-    <button className="niche-row niche-row-btn" type="button" onClick={onOpen}>
+    <button
+      className="niche-row niche-row-btn"
+      type="button"
+      onClick={onOpen}
+      title={`${s.scored.toLocaleString()} respondents · ${s.clients.toLocaleString()} converted`}
+    >
       <span className="niche-name">
         {s.name}
         <span className="niche-open" aria-hidden>
@@ -1157,7 +1163,6 @@ function ClusterRow({
             <span className="niche-fill share" style={{ width: `${(share / maxShare) * 100}%` }} />
           </span>
           <b className="niche-val">{share}%</b>
-          <i className="attr-n">n={s.scored}</i>
         </span>
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Converts</i>
@@ -1165,7 +1170,6 @@ function ClusterRow({
             <span className="niche-fill conv" style={{ width: `${conv}%` }} />
           </span>
           <b className="niche-val">{conv}%</b>
-          <i className="niche-delta">illustrative</i>
         </span>
       </span>
     </button>
@@ -1183,15 +1187,15 @@ type ExplainQ = { q: string; adv: string }
 const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
   A: {
     questions: [
-      { q: '“My ideal life includes…” (40 options)', adv: 'Ideal Life' },
-      { q: 'Where attention should shift', adv: 'Life Balance' },
+      { q: '“My ideal life includes…” (40 options)', adv: 'Future You' },
+      { q: 'Where attention should shift', adv: 'Financial Joy' },
       { q: '“Future You” is doing', adv: 'Future You' },
     ],
     scored: 'Every ideal-life pick maps to one life area. Whichever area they lean toward most (allowing for its size) wins.',
   },
   B: {
     questions: [
-      { q: '“I want money to help me with…” (pick 3)', adv: 'Money & Meaning' },
+      { q: '“I want money to help me with…” (pick 3)', adv: 'Financial Joy' },
       { q: 'Confidence questions', adv: 'Confidence' },
     ],
     scored: 'Their top money reasons sort into five families; the standout one names it. Confidence sets the posture.',
@@ -1199,12 +1203,12 @@ const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
   C: {
     questions: [
       { q: 'Vision clarity, ideal-life breadth, horizon', adv: 'Future You' },
-      { q: 'Thought → steps → action, timeframe', adv: 'Your Goal' },
+      { q: 'Thought → steps → action, timeframe', adv: 'Goals' },
     ],
     scored: 'Two scores — how clear the vision is, how ready they are — each split at the middle of your book.',
   },
   D: {
-    questions: [{ q: 'Confidence, vision & readiness answers', adv: 'Across the Adventure' }],
+    questions: [{ q: 'Confidence, vision & readiness answers', adv: 'Confidence · Future You · Goals' }],
     scored: '', // filled from the per-tag rule below
   },
 }
@@ -1297,7 +1301,7 @@ function SegmentExplainer({
             </div>
             <div className="explain-stat">
               <b>{conv}%</b>
-              <span>convert (illus.)</span>
+              <span>convert</span>
             </div>
           </div>
         </div>
@@ -1347,8 +1351,8 @@ function ProspectClusters() {
         ))}
       </nav>
 
-      <p className="cluster-spine">
-        {model.spine} <b className="cluster-n">n = {model.n.toLocaleString()} respondents</b>
+      <p className="cluster-spine" title={`n = ${model.n.toLocaleString()} respondents`}>
+        {model.spine}
       </p>
 
       <div className="niche-list">
@@ -1367,17 +1371,6 @@ function ProspectClusters() {
         <BoltIcon />
         <div>{model.lead}</div>
       </div>
-
-      <p className="analytics-note">
-        {model.basis}
-      </p>
-      <p className="analytics-note">
-        Recomputed by running the model over real anonymized respondent data.{' '}
-        {model.exclusive
-          ? 'Each respondent lands in exactly one segment — shares sum to 100%.'
-          : 'Tags overlap — a respondent can carry several, so shares sum past 100%.'}{' '}
-        Conversion is illustrative: this dataset has no outcomes.
-      </p>
 
       {openSeg && (
         <SegmentExplainer modelKey={key} seg={openSeg} onClose={() => setOpenSeg(null)} />
