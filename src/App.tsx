@@ -1185,25 +1185,25 @@ type ExplainQ = { q: string; adv: string }
 const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
   A: {
     questions: [
-      { q: 'Ideal life', adv: 'Ideal Life' },
-      { q: 'Attention shifts', adv: 'Life Balance' },
-      { q: 'Future You', adv: 'Future You' },
+      { q: '“My ideal life includes…” (40 options)', adv: 'Ideal Life' },
+      { q: 'Where attention should shift', adv: 'Life Balance' },
+      { q: '“Future You” is doing', adv: 'Future You' },
     ],
-    scored: 'We see which life area the answers point to most. The strongest one wins.',
+    scored: 'Every ideal-life pick maps to one life area. Whichever area they lean toward most (allowing for its size) wins.',
   },
   B: {
     questions: [
-      { q: 'Why money matters (top 3)', adv: 'Money & Meaning' },
-      { q: 'Confidence check', adv: 'Confidence' },
+      { q: '“I want money to help me with…” (pick 3)', adv: 'Money & Meaning' },
+      { q: 'Confidence questions', adv: 'Confidence' },
     ],
-    scored: 'We rank the top reasons money matters. The most telling one names the family.',
+    scored: 'Their top money reasons sort into five families; the standout one names it. Confidence sets the posture.',
   },
   C: {
     questions: [
-      { q: 'Vision clarity & Future You', adv: 'Vision' },
-      { q: 'Readiness & timeframe', adv: 'Readiness' },
+      { q: 'Vision clarity, ideal-life breadth, horizon', adv: 'Future You' },
+      { q: 'Thought → steps → action, timeframe', adv: 'Your Goal' },
     ],
-    scored: 'Two scores — how clear the vision is, how ready they are — split at the middle of your book.',
+    scored: 'Two scores — how clear the vision is, how ready they are — each split at the middle of your book.',
   },
   D: {
     questions: [{ q: 'Confidence, vision & readiness answers', adv: 'Across the Adventure' }],
@@ -1238,6 +1238,20 @@ function SegmentExplainer({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+  // Lock the page behind the modal so it can't scroll out from under the fixed
+  // overlay (which showed un-dimmed gaps during momentum scroll).
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prevH = html.style.overflow
+    const prevB = body.style.overflow
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = prevH
+      body.style.overflow = prevB
+    }
+  }, [])
   // Portal to <body> so no transformed ancestor (the analytics card subtree)
   // can trap the fixed-positioned backdrop and let it drift with scroll.
   return createPortal(
