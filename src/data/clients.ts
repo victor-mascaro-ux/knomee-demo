@@ -29,9 +29,6 @@ export const clientTierGroups: ClientTierGroup[] = [
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
 ]
 
-// Headline metric shown in the Clients "Top Line Metrics" card.
-export const AVG_KR_SCORE = 65.6
-
 // Overall client confidence breakdown (sums to 100).
 export const confidenceScore = 33
 export const confidenceSegments = [
@@ -255,6 +252,35 @@ function randomClients(count: number, seed: number): Client[] {
 
 // Base book of business (before any prospect is converted this session).
 export const baseClients: Client[] = [...featuredClients, ...randomClients(22, 0xc11e)]
+
+// Stats derived from the book so every headline agrees with the table.
+const clientCount = (t: ClientTier) => baseClients.filter((c) => c.tier === t).length
+// KR midpoint per tier band (engaged 70–100, attention 40–69, reconnect 0–39).
+const KR_MID: Record<Exclude<ClientTier, 'incomplete'>, number> = {
+  engaged: 85,
+  attention: 55,
+  reconnect: 30,
+}
+const scoredTiers: Exclude<ClientTier, 'incomplete'>[] = ['engaged', 'attention', 'reconnect']
+const scoredClients = scoredTiers.reduce((a, t) => a + clientCount(t), 0)
+
+export const clientStats = {
+  total: baseClients.length,
+  scored: scoredClients,
+  converted: baseClients.filter((c) => c.isNew).length,
+  byTier: {
+    engaged: clientCount('engaged'),
+    attention: clientCount('attention'),
+    reconnect: clientCount('reconnect'),
+    incomplete: clientCount('incomplete'),
+  },
+}
+
+// Headline metric shown in the Clients "Top Line Metrics" card — the KR average
+// implied by the tier mix, so it moves with the book instead of being fixed.
+export const AVG_KR_SCORE = scoredClients
+  ? Math.round((scoredTiers.reduce((a, t) => a + clientCount(t) * KR_MID[t], 0) / scoredClients) * 10) / 10
+  : 0
 
 // A converted prospect becomes a freshly-onboarded ENGAGED client.
 export function convertedClient(name: string, email: string): Client {
