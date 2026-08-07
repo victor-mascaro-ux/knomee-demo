@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
+import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
   modelClusters,
@@ -160,9 +160,9 @@ function CollapsibleCard({
 // full-book count shown on the bar; the linked insight surfaces as the "why"
 // when a tier is focused.
 const TIER_META = [
-  { key: 'Tier 1' as const, name: 'Ready Now', range: '70–100 KQ', book: 3, seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, name: 'Considering', range: '40–69 KQ', book: 5, seg: 'seg-2', dot: 'dot-2', insightN: 7 },
-  { key: 'Tier 3' as const, name: 'Nurture', range: '0–39 KQ', book: 3, seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -210,11 +210,11 @@ function CommandCenter() {
         <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
             <span className="metric-label">TOTAL PROSPECTS</span>
-            <div className="metric-num"><span className="metric-value">12</span></div>
+            <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
           </div>
           <div className="metric-tile">
             <span className="metric-label">AVG KQ SCORE</span>
-            <div className="metric-num"><span className="metric-value">55.9</span></div>
+            <div className="metric-num"><span className="metric-value">{prospectStats.avgKQ.toFixed(1)}</span></div>
           </div>
           <div className="metric-tile distribution">
             <div className="dist-head">
@@ -224,24 +224,31 @@ function CommandCenter() {
                   Clear filter ✕
                 </button>
               ) : (
-                <span className="dist-note">1 incomplete profile not shown · tap a tier to focus</span>
+                <span className="dist-note">
+                  {prospectStats.byTier.incomplete} incomplete profile
+                  {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown · tap a tier to focus
+                </span>
               )}
             </div>
             <div className="dist-bar cmd-dist-bar">
-              {TIER_META.map((m) => (
-                <button
-                  key={m.key}
-                  type="button"
-                  className={`seg ${m.seg} ${tier === m.key ? 'is-sel' : ''} ${
-                    tier && tier !== m.key ? 'is-dim' : ''
-                  }`}
-                  onClick={() => pickTier(m.key)}
-                  aria-pressed={tier === m.key}
-                  data-tip={`${m.key} · ${m.name} — tap to focus`}
-                >
-                  {m.book}
-                </button>
-              ))}
+              {TIER_META.map((m) => {
+                const n = prospectStats.byTier[m.tierId]
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    style={{ flex: n || 0.001 }}
+                    className={`seg ${m.seg} ${tier === m.key ? 'is-sel' : ''} ${
+                      tier && tier !== m.key ? 'is-dim' : ''
+                    }`}
+                    onClick={() => pickTier(m.key)}
+                    aria-pressed={tier === m.key}
+                    data-tip={`${m.key} · ${m.name} · ${n} — tap to focus`}
+                  >
+                    {n}
+                  </button>
+                )
+              })}
             </div>
             <div className="dist-legend">
               {TIER_META.map((m) => (

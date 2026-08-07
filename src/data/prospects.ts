@@ -27,7 +27,9 @@ export const tierGroups: TierGroup[] = [
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
 ]
 
-export const prospects: Prospect[] = [
+// The hand-authored, "featured" prospects that lead each tier. The randomly
+// distributed book below is appended to these.
+const featuredProspects: Prospect[] = [
   {
     name: 'Sarah Mitchell',
     email: 'sara.mitchell@email.com',
@@ -174,3 +176,135 @@ export const prospects: Prospect[] = [
     tier: 'incomplete',
   },
 ]
+
+/* ── Randomly distributed book ──────────────────────────────────────────────
+   The rest of the book is generated from a fixed seed so the "distribution at
+   random" is stable across builds. Each person is assigned a tier at random
+   (weighted like a real funnel), a KQ inside that tier's band, and supporting
+   scores that vary around it. This is what decides who is a prospect in the
+   database — clients and converted prospects live in clients.ts. */
+
+function mulberry32(seed: number): () => number {
+  return () => {
+    seed |= 0
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const FIRST = [
+  'Olivia', 'Liam', 'Ava', 'Noah', 'Isabella', 'Ethan', 'Sofia', 'Lucas', 'Mia', 'Mason',
+  'Charlotte', 'Logan', 'Amelia', 'Elijah', 'Harper', 'James', 'Evelyn', 'Benjamin', 'Abigail',
+  'Henry', 'Grace', 'Alexander', 'Chloe', 'Daniel', 'Zoe', 'Matthew', 'Lily', 'Samuel', 'Nora',
+  'Joseph', 'Hazel', 'Gabriel', 'Aurora', 'Julian', 'Ruby', 'Leo', 'Elena', 'Aaron', 'Clara',
+  'Owen', 'Priya', 'Marcus', 'Naomi', 'Diego', 'Freya', 'Isaac', 'Leah', 'Victor', 'Sienna',
+]
+const LAST = [
+  'Bennett', 'Carter', 'Nguyen', 'Patel', 'Reyes', 'Fischer', 'Okafor', 'Silva', 'Kowalski',
+  'Haddad', 'Romano', 'Bauer', 'Larsen', 'Ivanov', 'Costa', 'Mensah', 'Petrov', 'Cohen', 'Wallace',
+  'Ferreira', 'Novak', 'Sato', 'Blanc', 'Moreau', 'Klein', 'Vega', 'Hansen', 'Dubois', 'Serrano',
+]
+
+const ACTIONS: Record<Tier, string[]> = {
+  tier1: [
+    'Book a meeting this week — strong readiness and a clear Future You vision',
+    'Call now — high intent and receptivity; lead with their stated goal',
+    'Send a personalised plan; they are ready to act on legacy priorities',
+    'Fast-track to a first meeting — vision and readiness both above the book',
+  ],
+  tier2: [
+    'Reframe the goal into a concrete first step; then follow up',
+    'Send value-add content matched to their concern; re-engage in two weeks',
+    'Involve both partners; relationship-based outreach before a meeting',
+    'Confidence is the gap — share a short win before pitching a plan',
+  ],
+  tier3: [
+    'Quarterly light-touch check-in; keep warm with education',
+    'Send the financial education series; minimal urgency today',
+    'Low-touch nurture sequence; revisit after the next Adventure',
+    'Thin Future You — invite to complete another Adventure first',
+  ],
+  incomplete: ['Complete Knomee Prospect flow.'],
+}
+
+const clamp = (n: number) => Math.max(1, Math.min(100, Math.round(n)))
+
+function randomProspects(count: number, seed: number): Prospect[] {
+  const rand = mulberry32(seed)
+  const used = new Set(featuredProspects.map((p) => p.name.toLowerCase()))
+  const out: Prospect[] = []
+  let guard = 0
+  while (out.length < count && guard < count * 20) {
+    guard++
+    const first = FIRST[Math.floor(rand() * FIRST.length)]
+    const last = LAST[Math.floor(rand() * LAST.length)]
+    const name = `${first} ${last}`
+    if (used.has(name.toLowerCase())) continue
+    used.add(name.toLowerCase())
+
+    // Weighted funnel: mostly Considering, a solid Ready Now head, a Nurture
+    // tail, and a few profiles that never finished the Adventure.
+    const roll = rand()
+    const tier: Tier = roll < 0.28 ? 'tier1' : roll < 0.72 ? 'tier2' : roll < 0.9 ? 'tier3' : 'incomplete'
+
+    if (tier === 'incomplete') {
+      out.push({
+        name,
+        email: `${first}.${last}@email.com`.toLowerCase(),
+        kq: null,
+        intent: null,
+        clarity: null,
+        receptivity: null,
+        signUp: randomDate(rand),
+        signUpLabel: 'Last invited:',
+        topAction: ACTIONS.incomplete[0],
+        tier,
+      })
+      continue
+    }
+
+    const band = tier === 'tier1' ? [70, 99] : tier === 'tier2' ? [40, 69] : [5, 39]
+    const kq = Math.round(band[0] + rand() * (band[1] - band[0]))
+    const jitter = () => (rand() - 0.5) * 16
+    out.push({
+      name,
+      email: `${first}.${last}@email.com`.toLowerCase(),
+      kq,
+      intent: clamp(kq + jitter()),
+      clarity: clamp(kq + jitter()),
+      receptivity: clamp(kq + jitter()),
+      signUp: randomDate(rand),
+      topAction: ACTIONS[tier][Math.floor(rand() * ACTIONS[tier].length)],
+      tier,
+    })
+  }
+  return out
+}
+
+function randomDate(rand: () => number): string {
+  // Spread sign-ups across spring 2025.
+  const start = Date.UTC(2025, 2, 1) // 01 Mar 2025
+  const end = Date.UTC(2025, 5, 6) // 06 Jun 2025
+  const d = new Date(start + rand() * (end - start))
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+}
+
+export const prospects: Prospect[] = [...featuredProspects, ...randomProspects(30, 0x5eed)]
+
+// Pulse metrics for the dashboard, derived from the book so they can never
+// drift from the table below them.
+const scoredKQ = prospects.filter((p) => p.kq !== null).map((p) => p.kq as number)
+export const prospectStats = {
+  total: prospects.length,
+  avgKQ: scoredKQ.length
+    ? Math.round((scoredKQ.reduce((a, b) => a + b, 0) / scoredKQ.length) * 10) / 10
+    : 0,
+  byTier: {
+    tier1: prospects.filter((p) => p.tier === 'tier1').length,
+    tier2: prospects.filter((p) => p.tier === 'tier2').length,
+    tier3: prospects.filter((p) => p.tier === 'tier3').length,
+    incomplete: prospects.filter((p) => p.tier === 'incomplete').length,
+  },
+}
