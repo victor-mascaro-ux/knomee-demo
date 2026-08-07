@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
@@ -1237,7 +1238,9 @@ function SegmentExplainer({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
-  return (
+  // Portal to <body> so no transformed ancestor (the analytics card subtree)
+  // can trap the fixed-positioned backdrop and let it drift with scroll.
+  return createPortal(
     <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal explain-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
@@ -1287,7 +1290,8 @@ function SegmentExplainer({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -1696,10 +1700,19 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
    copying the link, or copying the QR each fires the matching toast. All data
    is demo-fake: the link is a placeholder and the QR is decorative. */
 
-// The prototype runs in a full-height iframe whose PARENT window scrolls, so a
-// `position: fixed` backdrop centres on the tall iframe rather than the user's
-// window. Mirror the Toast fix: report whichever window actually scrolls so an
-// absolutely-positioned backdrop can be pinned to the visible viewport.
+// Modal positioning across embeddings.
+//
+// Default: let CSS `position: fixed; inset: 0` centre the modal in the visible
+// window. That is correct for a standalone page, an internally-scrolling
+// iframe, and the artifact preview — `fixed` pins to whatever the viewer sees,
+// so the modal never drifts with scroll.
+//
+// The one exception is the GitHub Pages embed: the app runs in a full-height,
+// same-origin iframe whose PARENT document scrolls. There `fixed` would centre
+// on the tall iframe (off-screen), so we anchor an absolutely-positioned
+// backdrop to the parent's visible band and follow the parent's scroll. We only
+// do this when the parent is reachable (same-origin) AND our own window does
+// not scroll — otherwise `fixed` is already right and we return nothing.
 function useViewportBand(active: boolean) {
   const [band, setBand] = useState<{ top: number; height: number } | null>(null)
   useLayoutEffect(() => {
@@ -1710,26 +1723,21 @@ function useViewportBand(active: boolean) {
     } catch {
       parentWin = null
     }
-    const place = () => {
-      const selfScrolls = document.documentElement.scrollHeight > window.innerHeight + 2
-      const w = selfScrolls || !parentWin ? window : parentWin
-      setBand({ top: w.scrollY, height: w.innerHeight })
+    const selfScrolls = document.documentElement.scrollHeight > window.innerHeight + 2
+    // No reachable scrolling parent, or our own window scrolls → `fixed` is right.
+    if (!parentWin || selfScrolls) {
+      setBand(null)
+      return
     }
+    const place = () => setBand({ top: parentWin!.scrollY, height: parentWin!.innerHeight })
     place()
-    const targets = new Set<Window>([window])
-    if (parentWin) targets.add(parentWin)
-    targets.forEach((t) => {
-      t.addEventListener('scroll', place, { passive: true })
-      t.addEventListener('resize', place)
-    })
-    return () =>
-      targets.forEach((t) => {
-        t.removeEventListener('scroll', place)
-        t.removeEventListener('resize', place)
-      })
+    parentWin.addEventListener('scroll', place, { passive: true })
+    parentWin.addEventListener('resize', place)
+    return () => {
+      parentWin!.removeEventListener('scroll', place)
+      parentWin!.removeEventListener('resize', place)
+    }
   }, [active])
-  // When embedded, pin an absolute backdrop to the visible band; otherwise let
-  // the stylesheet's `position: fixed; inset: 0` handle it.
   return band ? ({ position: 'absolute', top: band.top, height: band.height } as const) : undefined
 }
 
