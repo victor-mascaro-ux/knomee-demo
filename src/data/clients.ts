@@ -55,13 +55,6 @@ export interface ClientInsight {
   lines: string[]
 }
 
-// Fixed the "Sophie Tran" reference — the only Sophie in the book is Sophie Dean.
-export const clientInsights: ClientInsight[] = [
-  { name: 'Emily Watson', lines: ['No login in 22 days.', '1/4 goals completed.'] },
-  { name: 'Miles Dean', lines: ['Dropped engagement score (-20).', '0 adventures done.'] },
-  { name: 'Sophie Dean', lines: ['High activity, low advisor reliance (10%).'] },
-]
-
 // Hand-authored, "featured" clients that lead each tier. The randomly
 // distributed book below is appended to these.
 const featuredClients: Client[] = [
@@ -275,6 +268,38 @@ export const clientStats = {
     incomplete: clientCount('incomplete'),
   },
 }
+
+// Actionable Insights, derived from the book rather than hand-listed: surface
+// the clients most in need of attention and describe each from their own row,
+// so the card always matches the table.
+function insightSeverity(c: Client): number {
+  let s = 0
+  if (c.tier === 'reconnect') s += 4
+  else if (c.tier === 'attention') s += 2
+  if (c.warn) s += 2
+  if (c.sentiment !== null && c.sentiment <= 2) s += 2
+  if (c.status === 'incomplete') s += 1
+  else if (c.status === 'pending') s += 1
+  return s
+}
+
+function insightLines(c: Client): string[] {
+  const lines: string[] = []
+  if (c.tier === 'reconnect') lines.push('In the Reconnect tier — engagement has cooled off.')
+  else if (c.tier === 'attention') lines.push('Sliding toward Reconnect — worth a check-in.')
+  if (c.sentiment !== null && c.sentiment <= 2) lines.push(`Low sentiment (${c.sentiment}/5).`)
+  else if (c.warn) lines.push('Sentiment flagged for a caution.')
+  if (c.status === 'incomplete') lines.push('Profile still incomplete.')
+  else if (c.status === 'pending') lines.push('Invite pending — not onboarded yet.')
+  lines.push(`Last sign-in ${c.lastSignIn}.`)
+  return lines.slice(0, 2)
+}
+
+export const clientInsights: ClientInsight[] = baseClients
+  .filter((c) => insightSeverity(c) > 0)
+  .sort((a, b) => insightSeverity(b) - insightSeverity(a))
+  .slice(0, 3)
+  .map((c) => ({ name: c.name, lines: insightLines(c) }))
 
 // Headline metric shown in the Clients "Top Line Metrics" card — the KR average
 // implied by the tier mix, so it moves with the book instead of being fixed.
