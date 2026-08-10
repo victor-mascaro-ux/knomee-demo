@@ -5121,3 +5121,300 @@ input[type='checkbox'] {
   padding: 2px 9px;
   vertical-align: 1px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Prospect welcome / landing page (previewed from the burger menu)
+   ───────────────────────────────────────────────────────────────────────── */
+.landing {
+  max-width: 1120px;
+  margin: 8px auto 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(26, 12, 48, 0.16);
+  border: 1px solid var(--line);
+}
+.landing-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 26px;
+  background: linear-gradient(90deg, #2a0f4a 0%, #3a1a5e 100%);
+}
+.landing-logo {
+  position: absolute;
+  left: 26px;
+  height: 26px;
+}
+.landing-firm {
+  color: #fff;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  letter-spacing: 4px;
+}
+.landing-body {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+}
+.landing-left {
+  padding: 54px 52px 60px;
+}
+.landing-eyebrow {
+  margin: 0 0 18px;
+  color: #7639a1;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.landing-h1 {
+  margin: 0 0 22px;
+  font-size: 40px;
+  line-height: 1.12;
+  font-weight: 800;
+  color: #26123f;
+  letter-spacing: -0.5px;
+}
+.landing-lead {
+  margin: 0 0 30px;
+  max-width: 34em;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #6d6478;
+}
+.landing-checks {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.landing-checks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #34293f;
+  font-weight: 500;
+}
+.landing-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.landing-cta {
+  border: 0;
+  cursor: pointer;
+  background: #2a0f4a;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 15px 34px;
+  border-radius: 999px;
+  transition: transform 0.12s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.landing-cta:hover {
+  background: #3a1a5e;
+  box-shadow: 0 8px 22px rgba(42, 15, 74, 0.28);
+  transform: translateY(-1px);
+}
+.landing-nodl {
+  color: #9a90a6;
+  font-size: 14px;
+}
+
+/* Right panel */
+.landing-right {
+  position: relative;
+  padding: 40px 40px 46px;
+  background:
+    radial-gradient(120% 70% at 80% -10%, rgba(150, 96, 200, 0.45) 0%, rgba(150, 96, 200, 0) 55%),
+    linear-gradient(180deg, #3a1a5e 0%, #24103f 100%);
+}
+.landing-right-eyebrow {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+.landing-right-foot {
+  margin: 20px 2px 0;
+  color: #c6b4e2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Financial ID card */
+.fid-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15, 6, 32, 0.34);
+}
+.fid-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(90deg, #17a08f 0%, #23bda9 100%);
+}
+.fid-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  flex: none;
+}
+.fid-head-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: #fff;
+}
+.fid-dots {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #bff05a;
+}
+.fid-dots b {
+  color: #fff;
+  margin-left: 4px;
+  letter-spacing: 0;
+  font-size: 12.5px;
+}
+.fid-conf {
+  font-size: 15px;
+  font-weight: 800;
+}
+.fid-body {
+  padding: 18px 18px 20px;
+}
+.fid-title {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #23163a;
+}
+.fid-vals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.fid-val {
+  background: #f7f5fb;
+  border: 1px solid #ece6f5;
+  border-bottom-width: 3px;
+  border-radius: 10px;
+  padding: 12px 12px 11px;
+}
+.fid-val-core {
+  border-bottom-color: #3b6fd4;
+}
+.fid-val-vision {
+  border-bottom-color: #8a52bf;
+}
+.fid-val-h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #23163a;
+  margin-bottom: 6px;
+}
+.fid-val p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #6d6478;
+}
+.fid-label {
+  margin: 0 0 9px;
+  color: #7639a1;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.fid-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.fid-chip {
+  border: 1px solid #e0d6ee;
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3a2b52;
+  background: #fff;
+}
+.fid-questions {
+  background: #f4f2f8;
+  border-radius: 12px;
+  padding: 14px 14px 15px;
+}
+.fid-questions-h {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #3a2b52;
+}
+.fid-q-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  counter-reset: none;
+}
+.fid-q-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #eceaf2;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #2f2545;
+}
+.fid-q-n {
+  flex: none;
+  color: #7639a1;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .landing-body {
+    grid-template-columns: 1fr;
+  }
+  .landing-left {
+    padding: 36px 26px 40px;
+  }
+  .landing-h1 {
+    font-size: 30px;
+  }
+  .landing-right {
+    padding: 30px 24px 34px;
+  }
+  .landing-firm {
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+  .fid-vals {
+    grid-template-columns: 1fr;
+  }
+}
