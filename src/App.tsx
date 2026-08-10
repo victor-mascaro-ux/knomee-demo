@@ -1692,7 +1692,6 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
           </ul>
           <div className="landing-cta-row">
             <button className="landing-cta" type="button">Get Started</button>
-            <span className="landing-nodl">Nothing to download</span>
           </div>
         </div>
 
