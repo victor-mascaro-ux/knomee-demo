@@ -1637,6 +1637,132 @@ function AnalyticsScreen() {
   )
 }
 
+/* ── Prospect welcome / landing page ─────────────────────────────────────
+   The prospect-facing page an advisor's client sees before they start the
+   Knomee questionnaire. Reached from the burger menu as a preview. The right
+   panel shows an example "Financial ID" — what the prospect walks away with. */
+const FID_QUESTIONS = [
+  'Can I afford to help my two kids through college?',
+  'Can I afford this family vacation?',
+  'Should I start a new company?',
+]
+const FID_WANTS = ['Enjoying the moment', 'Choice/Freedom', 'Philanthropy and giving']
+
+function LandingScreen() {
+  const firm = 'Acme Advisors'
+  return (
+    <div className="landing">
+      <header className="landing-top">
+        <img className="landing-logo" src="./knomee-logo-white.svg" alt="knomee" />
+        <span className="landing-firm">{firm.toUpperCase()}</span>
+      </header>
+
+      <div className="landing-body">
+        <div className="landing-left">
+          <p className="landing-eyebrow">Prepared for you by {firm}</p>
+          <h1 className="landing-h1">
+            Great financial advice starts with understanding you.
+          </h1>
+          <p className="landing-lead">
+            Most first meetings focus on numbers. The best ones start with understanding your
+            goals, concerns, priorities, and the questions that matter most to you. Take about 8
+            minutes to complete this questionnaire before meeting with your {firm} advisor. Your
+            responses will help create a more personalized and productive conversation.
+          </p>
+          <ul className="landing-checks">
+            {[
+              'Takes about 8 minutes',
+              'Complimentary',
+              'Your responses are private and only shared with your advisor',
+            ].map((t) => (
+              <li key={t}>
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#1aa179" strokeWidth="2">
+                  <path d="M3 8.4 6.4 12 13 4.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <div className="landing-cta-row">
+            <button className="landing-cta" type="button">Get Started</button>
+            <span className="landing-nodl">Nothing to download</span>
+          </div>
+        </div>
+
+        <div className="landing-right">
+          <p className="landing-right-eyebrow">What you&rsquo;ll get</p>
+          <div className="fid-card">
+            <div className="fid-head">
+              <span className="fid-face" aria-hidden>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2a8f83" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M8.5 14.5c.9 1 2.2 1.6 3.5 1.6s2.6-.6 3.5-1.6" strokeLinecap="round" />
+                  <path d="M9 9.5v.01M15 9.5v.01" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="fid-head-txt">
+                <span className="fid-dots" aria-label="5 out of 5">
+                  {'●●●●●'} <b>5/5</b>
+                </span>
+                <span className="fid-conf">Confidence: Strong</span>
+              </div>
+            </div>
+
+            <div className="fid-body">
+              <h3 className="fid-title">Your Financial ID</h3>
+
+              <div className="fid-vals">
+                <div className="fid-val fid-val-core">
+                  <div className="fid-val-h">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="#3b6fd4">
+                      <path d="M8 1 2.5 3.2v3.4c0 3.3 2.3 6.4 5.5 7.4 3.2-1 5.5-4.1 5.5-7.4V3.2L8 1Z" />
+                    </svg>
+                    Core Values
+                  </div>
+                  <p>Family, freedom, meaningful connection, and a life that feels grounded and joyful.</p>
+                </div>
+                <div className="fid-val fid-val-vision">
+                  <div className="fid-val-h">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="#e07a1f">
+                      <path d="M9 1 3 9h4l-1 6 6-8H8l1-6Z" />
+                    </svg>
+                    Future Vision
+                  </div>
+                  <p>Living by the beach or abroad, possibly running a business, helping others, building a warm home life.</p>
+                </div>
+              </div>
+
+              <p className="fid-label">I want money to help me with</p>
+              <div className="fid-chips">
+                {FID_WANTS.map((w) => (
+                  <span className="fid-chip" key={w}>{w}</span>
+                ))}
+              </div>
+
+              <div className="fid-questions">
+                <p className="fid-questions-h">
+                  <span aria-hidden>💬</span> Your most important questions
+                </p>
+                <ol className="fid-q-list">
+                  {FID_QUESTIONS.map((q, i) => (
+                    <li key={q}>
+                      <span className="fid-q-n">{i + 1}</span>
+                      {q}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <p className="landing-right-foot">
+            Yours to keep, and shared with your advisor before you meet.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Empty dashboard states ─────────────────────────────────────────────
    Same chrome as the populated screens (locked metric/insight bars, toolbar,
    table header) with a centered illustration + CTA. Rendered for Reporting
@@ -2657,6 +2783,8 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(false)
+  // The prospect-facing welcome page, previewed from the burger menu.
+  const [landingOpen, setLandingOpen] = useState(false)
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(false)
@@ -2678,8 +2806,10 @@ export default function App() {
       ? 'admin'
       : segmentationOpen
         ? 'segmentation'
-        : screen
-  }, [screen, segmentationOpen, adminView])
+        : landingOpen
+          ? 'landing'
+          : screen
+  }, [screen, segmentationOpen, landingOpen, adminView])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -2738,6 +2868,7 @@ export default function App() {
                   onClick={() => {
                     setSettingsOpen(true)
                     setSegmentationOpen(false)
+                    setLandingOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
                   }}
@@ -2755,11 +2886,27 @@ export default function App() {
                   onClick={() => {
                     setSegmentationOpen(true)
                     setSettingsOpen(false)
+                    setLandingOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
                   }}
                 >
                   Segmentation
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Prospect view</div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setLandingOpen(true)
+                    setSettingsOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Welcome page
                 </button>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
@@ -2773,6 +2920,7 @@ export default function App() {
                         setAdminView(e.target.checked)
                         setSettingsOpen(false)
                         setSegmentationOpen(false)
+                        setLandingOpen(false)
                       }}
                     />
                     <span className="switch-knob" />
@@ -2814,6 +2962,17 @@ export default function App() {
             ‹ Back to dashboard
           </button>
           <SegmentationScreen />
+        </main>
+      ) : landingOpen ? (
+        <main className="content">
+          <button
+            className="settings-back"
+            type="button"
+            onClick={() => setLandingOpen(false)}
+          >
+            ‹ Back to dashboard
+          </button>
+          <LandingScreen />
         </main>
       ) : (
       <main className="content">
