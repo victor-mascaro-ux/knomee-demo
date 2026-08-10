@@ -2769,8 +2769,33 @@ const tabs: { id: Screen; label: string }[] = [
   { id: 'analytics', label: 'Analytics' },
 ]
 
+// ── Hash routing ──────────────────────────────────────────────────────────
+// Every page owns a hash (#/clients, #/welcome, …) so a single link opens
+// straight to it. Deep links survive reload and work on GitHub Pages with no
+// server config. The app runs inside an iframe on the live site, so the route
+// is also mirrored up to the parent window's address bar (the URL people copy).
+const ROUTE_VIEWS = [
+  'prospects',
+  'clients',
+  'analytics',
+  'segmentation',
+  'welcome',
+  'admin',
+  'settings',
+] as const
+type RouteView = (typeof ROUTE_VIEWS)[number]
+
+function parseHashView(): RouteView | null {
+  if (typeof window === 'undefined') return null
+  const h = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
+  return (ROUTE_VIEWS as readonly string[]).includes(h) ? (h as RouteView) : null
+}
+
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('prospects')
+  const initialView = parseHashView()
+  const [screen, setScreen] = useState<Screen>(
+    initialView === 'clients' || initialView === 'analytics' ? initialView : 'prospects',
+  )
   const tabsInd = useSlideIndicator<HTMLElement>(screen)
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
@@ -2784,17 +2809,17 @@ export default function App() {
   // reads as the populated demo; toggled from the top-right menu.
   const [emptyMode, setEmptyMode] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
   const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
-  const [segmentationOpen, setSegmentationOpen] = useState(false)
+  const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
   // The prospect-facing welcome page, previewed from the burger menu.
-  const [landingOpen, setLandingOpen] = useState(false)
+  const [landingOpen, setLandingOpen] = useState(initialView === 'welcome')
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
-  const [adminView, setAdminView] = useState(false)
+  const [adminView, setAdminView] = useState(initialView === 'admin')
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -2817,6 +2842,62 @@ export default function App() {
           ? 'landing'
           : screen
   }, [screen, segmentationOpen, landingOpen, adminView])
+
+  // The single view the app is showing right now — the source of truth the
+  // URL hash reflects.
+  const currentView: RouteView = adminView
+    ? 'admin'
+    : settingsOpen
+      ? 'settings'
+      : segmentationOpen
+        ? 'segmentation'
+        : landingOpen
+          ? 'welcome'
+          : (screen as RouteView)
+
+  // ── Routing: URL hash ⇄ nav state ──
+  useEffect(() => {
+    const applyView = (v: RouteView) => {
+      setAdminView(v === 'admin')
+      setSettingsOpen(v === 'settings')
+      setSegmentationOpen(v === 'segmentation')
+      setLandingOpen(v === 'welcome')
+      if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
+    }
+    const syncFromHash = () => {
+      const v = parseHashView()
+      if (v) applyView(v)
+    }
+    // The parent (comment-overlay) frame forwards its address-bar hash here.
+    const onMessage = (e: MessageEvent) => {
+      const d = e.data
+      if (d && d.type === 'cc-nav' && typeof d.hash === 'string' && window.location.hash !== d.hash) {
+        window.location.hash = d.hash
+      }
+    }
+    window.addEventListener('hashchange', syncFromHash)
+    window.addEventListener('message', onMessage)
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash)
+      window.removeEventListener('message', onMessage)
+    }
+  }, [])
+
+  // State → hash, and mirror the route up to the parent window's address bar
+  // (the URL people actually copy on the live site).
+  useEffect(() => {
+    const hash = `#/${currentView}`
+    if (window.location.hash !== hash) {
+      window.history.replaceState(null, '', hash)
+    }
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: 'cc-route', hash }, '*')
+      } catch {
+        /* cross-origin parent — ignore */
+      }
+    }
+  }, [currentView])
 
   // Esc closes the convert modal.
   useEffect(() => {
