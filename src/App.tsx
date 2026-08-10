@@ -1648,13 +1648,18 @@ const FID_QUESTIONS = [
 ]
 const FID_WANTS = ['Enjoying the moment', 'Choice/Freedom', 'Philanthropy and giving']
 
-function LandingScreen() {
+function LandingScreen({ onExit }: { onExit?: () => void }) {
   const firm = 'Acme Advisors'
   return (
     <div className="landing">
       <header className="landing-top">
         <img className="landing-logo" src="./knomee-logo-white.svg" alt="knomee" />
         <span className="landing-firm">{firm.toUpperCase()}</span>
+        {onExit && (
+          <button className="landing-exit" type="button" onClick={onExit}>
+            Exit preview ✕
+          </button>
+        )}
       </header>
 
       <div className="landing-body">
@@ -2835,6 +2840,12 @@ export default function App() {
 
   const clients = [...converted, ...baseClients]
 
+  // The prospect welcome page is a standalone full-screen page — it takes over
+  // the whole viewport with its own header, not embedded in the advisor shell.
+  if (landingOpen) {
+    return <LandingScreen onExit={() => setLandingOpen(false)} />
+  }
+
   return (
     <div className="page">
       <header className="topbar">
@@ -2962,17 +2973,6 @@ export default function App() {
             ‹ Back to dashboard
           </button>
           <SegmentationScreen />
-        </main>
-      ) : landingOpen ? (
-        <main className="content">
-          <button
-            className="settings-back"
-            type="button"
-            onClick={() => setLandingOpen(false)}
-          >
-            ‹ Back to dashboard
-          </button>
-          <LandingScreen />
         </main>
       ) : (
       <main className="content">

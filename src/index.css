@@ -5126,21 +5126,41 @@ input[type='checkbox'] {
    Prospect welcome / landing page (previewed from the burger menu)
    ───────────────────────────────────────────────────────────────────────── */
 .landing {
-  max-width: 1120px;
-  margin: 8px auto 0;
-  border-radius: 18px;
-  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
   background: #fff;
-  box-shadow: 0 18px 50px rgba(26, 12, 48, 0.16);
-  border: 1px solid var(--line);
 }
 .landing-top {
   position: relative;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 26px;
+  padding: 22px 28px;
   background: linear-gradient(90deg, #2a0f4a 0%, #3a1a5e 100%);
+}
+.landing-exit {
+  position: absolute;
+  right: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.landing-exit:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 .landing-logo {
   position: absolute;
@@ -5154,6 +5174,7 @@ input[type='checkbox'] {
   letter-spacing: 4px;
 }
 .landing-body {
+  flex: 1;
   display: grid;
   grid-template-columns: 1.12fr 0.88fr;
 }
