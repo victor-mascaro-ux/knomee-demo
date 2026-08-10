@@ -77,7 +77,7 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
 // Shared name + chevron (+ optional "new" tag) so the Prospects and Clients
 // tables render the label identically and the arrow stays aligned with the name.
-function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
+function NameLink({ name }: { name: string }) {
   return (
     <span className="name-line">
       <span className="name-text">
@@ -86,7 +86,6 @@ function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
           ›
         </span>
       </span>
-      {isNew && <span className="new-tag">new</span>}
     </span>
   )
 }
@@ -741,9 +740,12 @@ function ClientRow({
       </td>
       <td className="col-name">
         <div className="name-cell">
-          <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+          <span className="avatar-wrap">
+            <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+            {c.isNew && <span className="new-tag avatar-new">new</span>}
+          </span>
           <div className="name-block">
-            <NameLink name={c.name} isNew={c.isNew} />
+            <NameLink name={c.name} />
             <span className="email-line">{c.email}</span>
           </div>
         </div>

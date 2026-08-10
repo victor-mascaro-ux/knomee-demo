@@ -782,6 +782,23 @@ input[type='checkbox'] {
   flex: none;
 }
 
+/* Avatar with an overlaid status badge (e.g. the "new" pill on a fresh
+   client). The badge sits in front of the circle, centered on its bottom edge. */
+.avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+.new-tag.avatar-new {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 2;
+  box-shadow: 0 0 0 2px #fff;
+}
+
 .avatar-initial {
   display: flex;
   align-items: center;
@@ -813,6 +830,7 @@ input[type='checkbox'] {
    stays aligned with the name in every table (Prospects and Clients). */
 .name-text {
   line-height: 1;
+  white-space: nowrap;
 }
 .name-chevron {
   margin-left: 5px;
