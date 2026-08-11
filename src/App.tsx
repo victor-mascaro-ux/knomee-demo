@@ -1678,10 +1678,10 @@ const LANDING_VERSIONS: Record<'a' | 'b', LandingVersion> = {
   },
   b: {
     label: 'B',
-    firm: 'Robertson Stephens',
-    eyebrow: 'Prepared for you by Robertson Stephens',
+    firm: 'Acme Advisors',
+    eyebrow: 'Prepared for you by Acme Advisors',
     headline: 'Before You Meet With Your Advisor',
-    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, your Robertson Stephens advisor will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
+    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, your advisor at Acme Advisors will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
     checks: [
       'Takes about 8 minutes',
       'Complimentary',
