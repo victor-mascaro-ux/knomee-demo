@@ -271,21 +271,6 @@
   }
   .cc-send:hover { opacity: 0.85; }
 
-  /* ════════ 5. FAB ════════ */
-  .cc-fab {
-    position: absolute; right: 20px; bottom: 20px; width: 52px; height: 52px;
-    border-radius: 50%; z-index: 65; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--cc-ink);
-    box-shadow: 0 12px 30px -8px rgba(20,10,40,0.45);
-    transition: transform 0.15s, background 0.15s, color 0.15s;
-  }
-  .cc-fab:hover { transform: translateY(-2px); }
-  /* Soft shadow on the bubble glyph itself (on top of the button's own
-     shadow) so the yellow reads on a light frosted circle too. */
-  .cc-fab svg { filter: drop-shadow(0 1.5px 1.5px rgba(20,10,40,0.45)); }
-  .cc-stage.cc-mode .cc-fab { background: var(--cc-ink); color: #fff; border-color: transparent; }
-
   /* ════════ 6. Esc pill ════════ */
   .cc-esc {
     position: absolute; left: 16px; bottom: 24px; z-index: 60; display: none;
@@ -334,7 +319,6 @@
   .cc-stage[data-cc-theme="smoke-tray"] .cc-send { background: #fff; color: var(--cc-ink); }
   .cc-stage[data-cc-theme="smoke-tray"] .cc-empty { border-color: rgba(255,255,255,0.22); }
   .cc-stage[data-cc-theme="smoke-tray"] .cc-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-fab:not(.cc-mode *) { color: #fff; }
   .cc-stage[data-cc-theme="smoke-tray"] .cc-clear-btn:hover { color: #fff; }
 
   /* ════════════════════════════════════════════════════════
@@ -352,15 +336,12 @@
     content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
     background: var(--cc-purple); border-radius: 3px;
   }
-  .cc-stage[data-cc-theme="branded-frost"] .cc-fab { color: var(--cc-purple); }
-  .cc-stage[data-cc-theme="branded-frost"].cc-mode .cc-fab { background: var(--cc-purple-deep); color: #fff; }
 
   /* ════════════════════════════════════════════════════════
      knomee-demo integration overrides
      ════════════════════════════════════════════════════════ */
   /* 1) The whole overlay is invisible until the activation key arms it,
         so the prototype looks and behaves completely normally by default. */
-  .cc-stage:not(.cc-armed) .cc-fab,
   .cc-stage:not(.cc-armed) .cc-rail,
   .cc-stage:not(.cc-armed) .cc-esc,
   .cc-stage:not(.cc-armed) .cc-catcher,
@@ -375,7 +356,6 @@
   .cc-frame { position: relative; inset: auto; }
   .cc-frame iframe { height: 100vh; } /* fallback until JS reports content height */
   .cc-rail { position: fixed; }
-  .cc-fab  { position: fixed; }
   .cc-esc  { position: fixed; }
 </style>
 </head>
@@ -424,14 +404,6 @@
     <div class="cc-list" id="ccList"></div>
   </aside>
 
-  <!-- 5. FAB -->
-  <button class="cc-fab cc-frost cc-chrome" id="ccFab" title="Toggle comment mode" aria-label="Toggle comment mode">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z" fill="none" stroke="#1E1A28" stroke-width="3.2" stroke-linejoin="round" stroke-opacity="0.9"/>
-      <path d="M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z" style="fill:var(--cc-pin);stroke:#fff;stroke-width:1.5;stroke-linejoin:round"/>
-    </svg>
-  </button>
-
   <!-- 6. esc pill -->
   <div class="cc-esc cc-chrome">Press <b>Esc</b> to exit comment mode</div>
 
@@ -464,7 +436,6 @@
   const proto    = document.getElementById('ccProto');
   const catcher  = document.getElementById('ccCatcher');
   const pinLayer = document.getElementById('ccPinLayer');
-  const fab      = document.getElementById('ccFab');
   const closeModeBtn = document.getElementById('ccCloseMode');
   const listEl   = document.getElementById('ccList');
   const countEl  = document.getElementById('ccCount');
@@ -915,7 +886,6 @@
     if (!on) closeThread();
   }
 
-  fab.addEventListener('click', (e) => { e.stopPropagation(); setMode(!commentMode); });
   closeModeBtn.addEventListener('click', (e) => { e.stopPropagation(); setMode(false); });
 
   // ── Armed state: the overlay stays hidden until ACTIVATION_KEY ─────────
@@ -987,6 +957,15 @@
     e.stopPropagation();
     setRailCollapsed(!rail.classList.contains('cc-collapsed'));
   });
+
+  // Comment mode must never trap the page scroll: the catcher sits over the
+  // prototype to intercept pin clicks, but wheel / trackpad gestures should
+  // still scroll the long prototype behind it. Forward them to the window.
+  catcher.addEventListener('wheel', (e) => {
+    const factor = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
+    window.scrollBy(e.deltaX * factor, e.deltaY * factor);
+    e.preventDefault();
+  }, { passive: false });
 
   // drop a pin
   catcher.addEventListener('click', (e) => {
