@@ -5161,9 +5161,36 @@ input[type='checkbox'] {
   padding: 22px 28px;
   background: linear-gradient(90deg, #2a0f4a 0%, #3a1a5e 100%);
 }
-.landing-exit {
+.landing-actions {
   position: absolute;
   right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Discreet A/B copy switcher — a small segmented pill in the header. */
+.landing-ver {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.landing-ver-btn {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.landing-ver-btn.is-on {
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a0f4a;
+}
+.landing-exit {
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
