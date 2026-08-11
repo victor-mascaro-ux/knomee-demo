@@ -1650,37 +1650,85 @@ const FID_QUESTIONS = [
 ]
 const FID_WANTS = ['Choice / Freedom', 'Adventure & travel', 'Supporting my family', 'Community involvement']
 
+// Two copy versions of the welcome page, A/B-tested from a discreet switcher in
+// the header. Only the left column + firm name change between them; the right
+// "Financial ID" preview is shared.
+interface LandingVersion {
+  label: string
+  firm: string
+  eyebrow: string
+  headline: string
+  body: string
+  checks: string[]
+  cta: string
+}
+const LANDING_VERSIONS: Record<'a' | 'b', LandingVersion> = {
+  a: {
+    label: 'A',
+    firm: 'Acme Advisors',
+    eyebrow: 'Prepared for you by Acme Advisors',
+    headline: 'Great financial advice starts with understanding you.',
+    body: 'Most first meetings focus on numbers. The best ones start with understanding your goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes to clarify what matters so you can make the most of your meeting with Acme Advisors.',
+    checks: [
+      'Takes about 8 minutes',
+      'Built with cutting-edge behavioral science',
+      'Your responses are private and shared only with Acme Advisors',
+    ],
+    cta: 'Get Started',
+  },
+  b: {
+    label: 'B',
+    firm: 'Robertson Stephens',
+    eyebrow: 'Prepared for you by Robertson Stephens',
+    headline: 'Before You Meet With Your Advisor',
+    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, your Robertson Stephens advisor will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
+    checks: [
+      'Takes about 8 minutes',
+      'Complimentary',
+      'Your responses are private and only shared with your advisor',
+    ],
+    cta: 'Begin Questionnaire',
+  },
+}
+
 function LandingScreen({ onExit }: { onExit?: () => void }) {
-  const firm = 'Acme Advisors'
+  const [ver, setVer] = useState<'a' | 'b'>('a')
+  const v = LANDING_VERSIONS[ver]
+  const firm = v.firm
   return (
     <div className="landing">
       <header className="landing-top">
         <img className="landing-logo" src="./knomee-logo-white.svg" alt="knomee" />
         <span className="landing-firm">{firm.toUpperCase()}</span>
-        {onExit && (
-          <button className="landing-exit" type="button" onClick={onExit}>
-            Exit preview ✕
-          </button>
-        )}
+        <div className="landing-actions">
+          <div className="landing-ver" role="group" aria-label="Copy version">
+            {(['a', 'b'] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                className={`landing-ver-btn ${ver === k ? 'is-on' : ''}`}
+                aria-pressed={ver === k}
+                onClick={() => setVer(k)}
+              >
+                {LANDING_VERSIONS[k].label}
+              </button>
+            ))}
+          </div>
+          {onExit && (
+            <button className="landing-exit" type="button" onClick={onExit}>
+              Exit preview ✕
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="landing-body">
         <div className="landing-left">
-          <p className="landing-eyebrow">Prepared for you by {firm}</p>
-          <h1 className="landing-h1">
-            Great financial advice starts with understanding you.
-          </h1>
-          <p className="landing-lead">
-            Most first meetings focus on numbers. The best ones start with understanding your
-            goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes
-            to clarify what matters so you can make the most of your meeting with {firm}.
-          </p>
+          <p className="landing-eyebrow">{v.eyebrow}</p>
+          <h1 className="landing-h1">{v.headline}</h1>
+          <p className="landing-lead">{v.body}</p>
           <ul className="landing-checks">
-            {[
-              'Takes about 8 minutes',
-              'Built with cutting-edge behavioral science',
-              `Your responses are private and shared only with ${firm}`,
-            ].map((t) => (
+            {v.checks.map((t) => (
               <li key={t}>
                 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#1aa179" strokeWidth="2">
                   <path d="M3 8.4 6.4 12 13 4.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -1690,7 +1738,7 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
             ))}
           </ul>
           <div className="landing-cta-row">
-            <button className="landing-cta" type="button">Get Started</button>
+            <button className="landing-cta" type="button">{v.cta}</button>
           </div>
         </div>
 
