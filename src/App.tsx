@@ -1644,11 +1644,11 @@ function AnalyticsScreen() {
    Knomee questionnaire. Reached from the burger menu as a preview. The right
    panel shows an example "Financial ID" — what the prospect walks away with. */
 const FID_QUESTIONS = [
-  'Can I afford to help my two kids through college?',
-  'Can I afford this family vacation?',
-  'Should I start a new company?',
+  'Should I weigh the tradeoffs between acquiring a company I’m excited about and buying a second home, or are both feasible in the next 5 years?',
+  'Given how important family and adventure travel are to me, should I spend more on vacations or a place on the lake?',
+  'Given that I value education, how should I be thinking about advanced degrees for my children?',
 ]
-const FID_WANTS = ['Enjoying the moment', 'Choice/Freedom', 'Philanthropy and giving']
+const FID_WANTS = ['Choice / Freedom', 'Adventure & travel', 'Supporting my family', 'Community involvement']
 
 function LandingScreen({ onExit }: { onExit?: () => void }) {
   const firm = 'Acme Advisors'
@@ -1672,15 +1672,14 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
           </h1>
           <p className="landing-lead">
             Most first meetings focus on numbers. The best ones start with understanding your
-            goals, concerns, priorities, and the questions that matter most to you. Take about 8
-            minutes to complete this questionnaire before meeting with your {firm} advisor. Your
-            responses will help create a more personalized and productive conversation.
+            goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes
+            to clarify what matters so you can make the most of your meeting with {firm}.
           </p>
           <ul className="landing-checks">
             {[
               'Takes about 8 minutes',
-              'Complimentary',
-              'Your responses are private and only shared with your advisor',
+              'Built with cutting-edge behavioral science',
+              `Your responses are private and shared only with ${firm}`,
             ].map((t) => (
               <li key={t}>
                 <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#1aa179" strokeWidth="2">
@@ -1725,7 +1724,7 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
                     </svg>
                     Core Values
                   </div>
-                  <p>Family, freedom, meaningful connection, and a life that feels grounded and joyful.</p>
+                  <p>Family, adventure travel, freedom, and community involvement.</p>
                 </div>
                 <div className="fid-val fid-val-vision">
                   <div className="fid-val-h">
@@ -1734,7 +1733,7 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
                     </svg>
                     Future Vision
                   </div>
-                  <p>Living by the beach or abroad, possibly running a business, helping others, building a warm home life.</p>
+                  <p>A place on the lake for family summers, room to travel widely, and the freedom to acquire a business I’m genuinely excited about.</p>
                 </div>
               </div>
 
@@ -1761,7 +1760,7 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
             </div>
           </div>
           <p className="landing-right-foot">
-            Yours to keep, and shared with your advisor before you meet.
+            Yours to keep, and shared with {firm} before you meet.
           </p>
         </div>
       </div>
