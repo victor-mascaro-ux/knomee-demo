@@ -960,10 +960,18 @@
 
   // Comment mode must never trap the page scroll: the catcher sits over the
   // prototype to intercept pin clicks, but wheel / trackpad gestures should
-  // still scroll the long prototype behind it. Forward them to the window.
+  // still scroll the prototype behind it. Most pages scroll the parent document
+  // (the iframe is sized to full content); fixed-layout pages (e.g. the welcome
+  // page) scroll INSIDE the frame instead, so hand the delta to the app there
+  // when the parent can't move.
   catcher.addEventListener('wheel', (e) => {
     const factor = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
-    window.scrollBy(e.deltaX * factor, e.deltaY * factor);
+    const dx = e.deltaX * factor, dy = e.deltaY * factor;
+    const y0 = window.scrollY, x0 = window.scrollX;
+    window.scrollBy(dx, dy);
+    if (window.scrollY === y0 && window.scrollX === x0 && proto.contentWindow) {
+      proto.contentWindow.postMessage({ type: 'cc-scroll', dx: dx, dy: dy }, '*');
+    }
     e.preventDefault();
   }, { passive: false });
 
