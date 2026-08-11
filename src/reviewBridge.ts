@@ -6,14 +6,19 @@
 //
 // When the app is opened standalone (window.parent === window) this is a no-op.
 
-const ACTIVATION_KEY = 'F2'
+// The overlay toggles on F2 (fine on Windows/Linux) OR ⌘/Ctrl+Shift+. — the
+// latter is the reliable path on macOS, where the OS eats bare function keys
+// unless Fn is held. `e.code === 'Period'` is layout-independent and unaffected
+// by Shift turning "." into ">".
+const isToggleCombo = (e: KeyboardEvent) =>
+  e.key === 'F2' || ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'Period')
 
 export function initReviewBridge() {
   if (window.parent === window) return
   const parent = window.parent
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === ACTIVATION_KEY) {
+    if (isToggleCombo(e)) {
       e.preventDefault()
       parent.postMessage({ type: 'cc-activate' }, '*')
     }

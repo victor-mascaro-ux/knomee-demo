@@ -3030,7 +3030,7 @@ export default function App() {
                   </span>
                 </label>
                 <div className="menu-hint">
-                  Press <b>F2</b> to leave comments
+                  Press <b>F2</b> — or <b>⌘⇧.</b> on Mac — to leave comments
                 </div>
               </div>
             )}

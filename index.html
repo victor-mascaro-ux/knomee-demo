@@ -931,9 +931,13 @@
   }
   function toggleArmed() { setArmed(!armed); }
 
-  // Key pressed while focus is on the overlay chrome (this document).
+  // Key pressed while focus is on the overlay chrome (this document). F2 works
+  // on Windows/Linux; ⌘/Ctrl+Shift+. is the reliable path on macOS, where the
+  // OS eats bare function keys. e.code stays stable regardless of layout/Shift.
+  const isToggleCombo = (e) =>
+    e.key === ACTIVATION_KEY || ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'Period');
   window.addEventListener('keydown', (e) => {
-    if (e.key === ACTIVATION_KEY) { e.preventDefault(); toggleArmed(); }
+    if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
   });
 
   // Messages from the prototype iframe: the activation key forwarded from
