@@ -35,6 +35,22 @@ export function initReviewBridge() {
     }
   })
 
+  // In comment mode the overlay covers the frame to catch pin clicks; it hands
+  // scroll gestures here when the parent document itself can't scroll (a
+  // fixed-layout page like the welcome page scrolls inside its own panel).
+  window.addEventListener('message', (e) => {
+    const d = e.data as { type?: string; dx?: number; dy?: number } | null
+    if (!d || d.type !== 'cc-scroll') return
+    const dx = d.dx || 0
+    const dy = d.dy || 0
+    // Prefer a full-page inner scroller (e.g. `.landing`); fall back to window.
+    const inner = Array.from(document.querySelectorAll<HTMLElement>('.landing')).find(
+      (el) => el.scrollHeight > el.clientHeight,
+    )
+    if (inner) inner.scrollBy(dx, dy)
+    else window.scrollBy(dx, dy)
+  })
+
   let last = 0
   const reportHeight = () => {
     const h = Math.ceil(document.documentElement.scrollHeight)
