@@ -6,12 +6,23 @@
 //
 // When the app is opened standalone (window.parent === window) this is a no-op.
 
-// The overlay toggles on F2 (fine on Windows/Linux) OR ⌘/Ctrl+Shift+. — the
-// latter is the reliable path on macOS, where the OS eats bare function keys
-// unless Fn is held. `e.code === 'Period'` is layout-independent and unaffected
-// by Shift turning "." into ">".
-const isToggleCombo = (e: KeyboardEvent) =>
-  e.key === 'F2' || ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'Period')
+// The overlay toggles on a single key: "c" for comment (works everywhere,
+// including macOS, unlike bare function keys). F2 stays as an alias. "c" is
+// ignored while typing in a field, and requires no ⌘/Ctrl/Alt so it never
+// hijacks copy (⌘/Ctrl+C).
+const isEditableTarget = (t: EventTarget | null) => {
+  const el = t as HTMLElement | null
+  if (!el) return false
+  const tag = el.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable
+}
+const isToggleCombo = (e: KeyboardEvent) => {
+  if (e.key === 'F2') return true
+  if ((e.key === 'c' || e.key === 'C') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    return !isEditableTarget(e.target)
+  }
+  return false
+}
 
 export function initReviewBridge() {
   if (window.parent === window) return

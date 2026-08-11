@@ -931,11 +931,21 @@
   }
   function toggleArmed() { setArmed(!armed); }
 
-  // Key pressed while focus is on the overlay chrome (this document). F2 works
-  // on Windows/Linux; ⌘/Ctrl+Shift+. is the reliable path on macOS, where the
-  // OS eats bare function keys. e.code stays stable regardless of layout/Shift.
-  const isToggleCombo = (e) =>
-    e.key === ACTIVATION_KEY || ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'Period');
+  // Single-key toggle: "c" for comment (works everywhere, incl. macOS, unlike
+  // bare function keys). F2 stays as an alias. "c" is ignored while typing in a
+  // field and requires no ⌘/Ctrl/Alt, so it never hijacks copy.
+  function isEditableTarget(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  }
+  function isToggleCombo(e) {
+    if (e.key === ACTIVATION_KEY) return true;
+    if ((e.key === 'c' || e.key === 'C') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      return !isEditableTarget(e.target);
+    }
+    return false;
+  }
   window.addEventListener('keydown', (e) => {
     if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
   });
