@@ -5242,6 +5242,13 @@ input[type='checkbox'] {
   color: #26123f;
   letter-spacing: -0.5px;
 }
+.landing-h1 + .landing-subhead {
+  margin: -12px 0 22px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #7639a1;
+  line-height: 1.35;
+}
 .landing-lead {
   margin: 0 0 30px;
   max-width: 34em;

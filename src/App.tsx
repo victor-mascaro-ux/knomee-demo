@@ -1650,50 +1650,59 @@ const FID_QUESTIONS = [
 ]
 const FID_WANTS = ['Choice / Freedom', 'Adventure & travel', 'Supporting my family', 'Community involvement']
 
-// Two copy versions of the welcome page, A/B-tested from a discreet switcher in
-// the header. Only the left column + firm name change between them; the right
-// "Financial ID" preview is shared.
+// Two copy versions of the welcome page. They live on separate routes
+// (#/welcome and #/welcome-b) so their comment pins never overlap; a discreet
+// switcher in the header navigates between the two pages. Only the left column
+// changes between them; the right "Financial ID" preview is shared.
+type LandingKey = 'a' | 'b'
 interface LandingVersion {
   label: string
   firm: string
   eyebrow: string
   headline: string
+  sub?: string
   body: string
   checks: string[]
   cta: string
 }
-const LANDING_VERSIONS: Record<'a' | 'b', LandingVersion> = {
+// Same reassurance bullets across both versions.
+const LANDING_CHECKS = [
+  'Takes about 8 minutes',
+  'Built with cutting-edge behavioral science',
+  'Your responses are private and shared only with Acme Advisors',
+]
+const LANDING_VERSIONS: Record<LandingKey, LandingVersion> = {
   a: {
     label: 'A',
     firm: 'Acme Advisors',
     eyebrow: 'Prepared for you by Acme Advisors',
     headline: 'Great financial advice starts with understanding you.',
+    sub: 'Tailored specifically for your future.',
     body: 'Most first meetings focus on numbers. The best ones start with understanding your goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes to clarify what matters so you can make the most of your meeting with Acme Advisors.',
-    checks: [
-      'Takes about 8 minutes',
-      'Built with cutting-edge behavioral science',
-      'Your responses are private and shared only with Acme Advisors',
-    ],
+    checks: LANDING_CHECKS,
     cta: 'Get Started',
   },
   b: {
     label: 'B',
     firm: 'Acme Advisors',
     eyebrow: 'Prepared for you by Acme Advisors',
-    headline: 'Before You Meet With Your Advisor',
-    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, your advisor at Acme Advisors will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
-    checks: [
-      'Takes about 8 minutes',
-      'Complimentary',
-      'Your responses are private and only shared with your advisor',
-    ],
+    headline: 'Before You Meet With an Advisor',
+    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, an advisor at Acme Advisors will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
+    checks: LANDING_CHECKS,
     cta: 'Begin Questionnaire',
   },
 }
 
-function LandingScreen({ onExit }: { onExit?: () => void }) {
-  const [ver, setVer] = useState<'a' | 'b'>('a')
-  const v = LANDING_VERSIONS[ver]
+function LandingScreen({
+  version,
+  onSwitch,
+  onExit,
+}: {
+  version: LandingKey
+  onSwitch: (v: LandingKey) => void
+  onExit?: () => void
+}) {
+  const v = LANDING_VERSIONS[version]
   const firm = v.firm
   return (
     <div className="landing">
@@ -1706,9 +1715,9 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
               <button
                 key={k}
                 type="button"
-                className={`landing-ver-btn ${ver === k ? 'is-on' : ''}`}
-                aria-pressed={ver === k}
-                onClick={() => setVer(k)}
+                className={`landing-ver-btn ${version === k ? 'is-on' : ''}`}
+                aria-pressed={version === k}
+                onClick={() => onSwitch(k)}
               >
                 {LANDING_VERSIONS[k].label}
               </button>
@@ -1726,6 +1735,7 @@ function LandingScreen({ onExit }: { onExit?: () => void }) {
         <div className="landing-left">
           <p className="landing-eyebrow">{v.eyebrow}</p>
           <h1 className="landing-h1">{v.headline}</h1>
+          {v.sub && <p className="landing-subhead">{v.sub}</p>}
           <p className="landing-lead">{v.body}</p>
           <ul className="landing-checks">
             {v.checks.map((t) => (
@@ -2826,6 +2836,7 @@ const ROUTE_VIEWS = [
   'analytics',
   'segmentation',
   'welcome',
+  'welcome-b',
   'admin',
   'settings',
 ] as const
@@ -2861,8 +2872,15 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
-  // The prospect-facing welcome page, previewed from the burger menu.
-  const [landingOpen, setLandingOpen] = useState(initialView === 'welcome')
+  // The prospect-facing welcome page, previewed from the burger menu. Its two
+  // copy versions are separate routes (#/welcome, #/welcome-b) so their comment
+  // pins never overlap.
+  const [landingOpen, setLandingOpen] = useState(
+    initialView === 'welcome' || initialView === 'welcome-b',
+  )
+  const [landingVersion, setLandingVersion] = useState<'a' | 'b'>(
+    initialView === 'welcome-b' ? 'b' : 'a',
+  )
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
@@ -2885,9 +2903,11 @@ export default function App() {
       : segmentationOpen
         ? 'segmentation'
         : landingOpen
-          ? 'landing'
+          ? landingVersion === 'b'
+            ? 'welcome-b'
+            : 'welcome-a'
           : screen
-  }, [screen, segmentationOpen, landingOpen, adminView])
+  }, [screen, segmentationOpen, landingOpen, landingVersion, adminView])
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
@@ -2898,7 +2918,9 @@ export default function App() {
       : segmentationOpen
         ? 'segmentation'
         : landingOpen
-          ? 'welcome'
+          ? landingVersion === 'b'
+            ? 'welcome-b'
+            : 'welcome'
           : (screen as RouteView)
 
   // ── Routing: URL hash ⇄ nav state ──
@@ -2907,7 +2929,9 @@ export default function App() {
       setAdminView(v === 'admin')
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
-      setLandingOpen(v === 'welcome')
+      setLandingOpen(v === 'welcome' || v === 'welcome-b')
+      if (v === 'welcome') setLandingVersion('a')
+      if (v === 'welcome-b') setLandingVersion('b')
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
     }
     const syncFromHash = () => {
@@ -2972,7 +2996,13 @@ export default function App() {
   // The prospect welcome page is a standalone full-screen page — it takes over
   // the whole viewport with its own header, not embedded in the advisor shell.
   if (landingOpen) {
-    return <LandingScreen onExit={() => setLandingOpen(false)} />
+    return (
+      <LandingScreen
+        version={landingVersion}
+        onSwitch={setLandingVersion}
+        onExit={() => setLandingOpen(false)}
+      />
+    )
   }
 
   return (
@@ -3040,6 +3070,7 @@ export default function App() {
                   type="button"
                   onClick={() => {
                     setLandingOpen(true)
+                    setLandingVersion('a')
                     setSettingsOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
