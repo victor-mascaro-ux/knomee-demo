@@ -1668,7 +1668,7 @@ interface LandingVersion {
 // Same reassurance bullets across both versions.
 const LANDING_CHECKS = [
   'Takes about 8 minutes',
-  'Built with cutting-edge behavioral science',
+  'Tailored specifically for your future.',
   'Your responses are private and shared only with Acme Advisors',
 ]
 const LANDING_VERSIONS: Record<LandingKey, LandingVersion> = {
@@ -1677,7 +1677,6 @@ const LANDING_VERSIONS: Record<LandingKey, LandingVersion> = {
     firm: 'Acme Advisors',
     eyebrow: 'Prepared for you by Acme Advisors',
     headline: 'Great financial advice starts with understanding you.',
-    sub: 'Tailored specifically for your future.',
     body: 'Most first meetings focus on numbers. The best ones start with understanding your goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes to clarify what matters so you can make the most of your meeting with Acme Advisors.',
     checks: LANDING_CHECKS,
     cta: 'Get Started',
