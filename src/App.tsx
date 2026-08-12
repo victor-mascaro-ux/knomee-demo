@@ -1695,11 +1695,9 @@ const LANDING_VERSIONS: Record<LandingKey, LandingVersion> = {
 function LandingScreen({
   version,
   onSwitch,
-  onExit,
 }: {
   version: LandingKey
   onSwitch: (v: LandingKey) => void
-  onExit?: () => void
 }) {
   const v = LANDING_VERSIONS[version]
   const firm = v.firm
@@ -1722,11 +1720,6 @@ function LandingScreen({
               </button>
             ))}
           </div>
-          {onExit && (
-            <button className="landing-exit" type="button" onClick={onExit}>
-              Exit preview ✕
-            </button>
-          )}
         </div>
       </header>
 
@@ -2995,13 +2988,7 @@ export default function App() {
   // The prospect welcome page is a standalone full-screen page — it takes over
   // the whole viewport with its own header, not embedded in the advisor shell.
   if (landingOpen) {
-    return (
-      <LandingScreen
-        version={landingVersion}
-        onSwitch={setLandingVersion}
-        onExit={() => setLandingOpen(false)}
-      />
-    )
+    return <LandingScreen version={landingVersion} onSwitch={setLandingVersion} />
   }
 
   return (
