@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knomee · V2 Daylight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#221833;
+  --ink-2:#3B3350;
+  --mute:#6E6884;
+  --faint:#9B95AC;
+  --paper:#FFFFFF;
+  --paper-2:#F8FAFA;
+  --line:#E7E9EE;
+  --teal:#2DD2B0;
+  --teal-dk:#086375;
+  --teal-lt:#E6FBF6;
+  --plum:#240446;
+  --plum-lt:#F1ECFB;
+  --ease:cubic-bezier(.19,1,.22,1);
+  --rail:268px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper-2);color:var(--ink);
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+  display:flex;
+}
+
+/* ================= RAIL ================= */
+#rail{
+  width:var(--rail);flex:none;height:100vh;background:var(--paper);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  padding:26px 0 18px;position:relative;z-index:20;
+  transition:width .46s var(--ease),padding .46s var(--ease);
+}
+body.collapsed #rail{width:74px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 22px;margin-bottom:26px;white-space:nowrap}
+.brand svg{width:26px;height:26px;flex:none}
+.brand .wm{font-weight:800;font-size:17px;letter-spacing:-.03em;transition:opacity .3s}
+.brand .sub{font-size:8.5px;font-weight:700;letter-spacing:.2em;color:var(--teal-dk);text-transform:uppercase;transition:opacity .3s}
+body.collapsed .brand .wm,body.collapsed .brand .sub{opacity:0}
+
+.rsec{padding:0 18px;margin-bottom:8px}
+.rlbl{font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);padding:0 6px 10px;transition:opacity .3s}
+body.collapsed .rlbl{opacity:0}
+#routepick{
+  width:100%;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--paper-2);
+  cursor:pointer;outline:0;transition:border-color .25s,box-shadow .25s;
+  appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4.5 6 8.5 10 4.5' stroke='%236E6884' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+#routepick:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt)}
+body.collapsed .rsec{opacity:0;pointer-events:none}
+
+#nav{flex:1;overflow-y:auto;padding:14px 12px;position:relative}
+#nav::-webkit-scrollbar{width:5px}#nav::-webkit-scrollbar-thumb{background:#DFE2E8;border-radius:3px}
+.ghead{
+  font-size:9.5px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
+  padding:16px 12px 7px;transition:opacity .3s;
+}
+body.collapsed .ghead{opacity:0;height:14px;padding:6px 0 0}
+.nitem{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;cursor:pointer;
+  transition:background .22s,color .22s;position:relative;white-space:nowrap;
+}
+.nitem:hover{background:var(--paper-2)}
+.nitem .dot{
+  width:24px;height:24px;flex:none;border-radius:7px;display:grid;place-items:center;
+  font-size:9.5px;font-weight:800;color:var(--mute);background:var(--paper-2);
+  border:1px solid var(--line);transition:all .3s var(--ease);
+}
+.nitem .lb{font-size:12.5px;font-weight:600;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;transition:opacity .3s}
+body.collapsed .nitem .lb{opacity:0}
+.nitem.live .dot{background:var(--teal-lt);border-color:rgba(45,210,176,.4);color:var(--teal-dk)}
+.nitem.on{background:var(--plum-lt)}
+.nitem.on .dot{background:var(--plum);border-color:var(--plum);color:#fff;transform:scale(1.06)}
+.nitem.on .lb{color:var(--plum);font-weight:800}
+.nitem.soon{opacity:.5}
+#marker{
+  position:absolute;left:0;width:3px;height:34px;background:var(--plum);border-radius:0 3px 3px 0;
+  transition:transform .44s var(--ease),opacity .3s;opacity:0;top:0;
+}
+#collapse{
+  margin:0 18px;border:1px solid var(--line);background:var(--paper);border-radius:10px;
+  padding:9px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--mute);
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:all .25s;
+}
+#collapse:hover{border-color:var(--teal);color:var(--teal-dk)}
+
+/* ================= STAGE ================= */
+#stage{flex:1;position:relative;height:100vh;overflow:hidden}
+.card{
+  position:absolute;inset:0;padding:clamp(34px,4.4vw,72px) clamp(34px,4.8vw,80px);
+  display:flex;flex-direction:column;background:var(--paper-2);
+  opacity:0;visibility:hidden;transform:translateX(46px);
+  transition:opacity .38s var(--ease),transform .5s var(--ease),visibility 0s .5s;
+}
+.card.active{opacity:1;visibility:visible;transform:none;transition:opacity .38s var(--ease),transform .5s var(--ease),visibility 0s 0s}
+.card.back{transform:translateX(-46px)}
+.st{opacity:0;transform:translateY(20px);transition:opacity .46s var(--ease),transform .56s var(--ease)}
+.card.active .st{opacity:1;transform:none}
+.card.active .st:nth-child(1){transition-delay:.08s}
+.card.active .st:nth-child(2){transition-delay:.15s}
+.card.active .st:nth-child(3){transition-delay:.22s}
+.card.active .st:nth-child(4){transition-delay:.29s}
+
+.eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--teal-dk);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:22px;height:2px;background:var(--teal);border-radius:2px}
+h1.title{font-size:clamp(30px,3.9vw,56px);font-weight:800;letter-spacing:-.035em;line-height:1.04;margin-top:15px}
+h1.title em{font-style:normal;color:var(--plum)}
+.lede{font-size:clamp(14px,1.15vw,18px);font-weight:400;color:var(--mute);line-height:1.62;max-width:58ch;margin-top:16px}
+
+/* ---- HOME ---- */
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:clamp(26px,4vh,52px)}
+.hcard{
+  background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px 22px 24px;
+  cursor:pointer;transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .3s;
+  position:relative;overflow:hidden;
+}
+.hcard::after{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--plum));transform:scaleX(0);transform-origin:left;transition:transform .44s var(--ease)}
+.hcard:hover{transform:translateY(-7px);box-shadow:0 26px 48px -24px rgba(18,10,36,.28);border-color:transparent}
+.hcard:hover::after{transform:scaleX(1)}
+.hcard .k{font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--teal-dk)}
+.hcard .h{font-size:19px;font-weight:800;letter-spacing:-.025em;margin-top:11px}
+.hcard .p{font-size:13px;color:var(--mute);line-height:1.55;margin-top:9px}
+.hcard .go{font-size:12px;font-weight:800;color:var(--plum);margin-top:16px;display:flex;align-items:center;gap:6px}
+.hcard:hover .go span{transform:translateX(4px)}
+.hcard .go span{transition:transform .3s var(--ease);display:inline-block}
+.hcard.apx{border-style:dashed;border-color:rgba(45,210,176,.5)}
+.hcard.apx .k{color:var(--teal-dk)}
+.hcard.apx::after{background:linear-gradient(90deg,var(--teal),var(--teal-dk))}
+.nitem.apx .dot{border-style:dashed;border-color:rgba(45,210,176,.55);color:var(--teal-dk)}
+
+.stats{display:flex;gap:11px;margin-top:26px;flex-wrap:wrap}
+.pill{
+  border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 17px;
+  font-size:12.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:9px;
+}
+.pill b{color:var(--teal-dk);font-weight:800}
+
+/* ---- CARD 1.1 ---- */
+.split{display:grid;grid-template-columns:.85fr 1fr;gap:clamp(28px,4vw,64px);align-items:center;flex:1;margin-top:clamp(16px,2.4vw,36px)}
+.bignum{
+  background:linear-gradient(160deg,var(--teal) 0%,#0F9E8A 55%,#086375 100%);
+  border-radius:26px;padding:clamp(30px,4vw,58px) 26px;text-align:center;color:#04231D;
+  box-shadow:0 30px 60px -30px rgba(8,99,117,.6);
+  position:relative;overflow:hidden;
+}
+.bignum::before{content:'';position:absolute;inset:0;background:radial-gradient(70% 60% at 30% 20%,rgba(255,255,255,.42),transparent 60%)}
+.bignum .n{position:relative;font-size:clamp(56px,7.4vw,112px);font-weight:800;letter-spacing:-.06em;line-height:.92}
+.bignum .l{position:relative;font-size:clamp(15px,1.5vw,22px);font-weight:800;margin-top:6px;letter-spacing:-.02em}
+.bignum .s{position:relative;font-size:11.5px;font-style:italic;opacity:.72;margin-top:8px}
+
+.stack{display:flex;flex-direction:column;gap:11px}
+.stack h2{font-size:clamp(18px,1.9vw,27px);font-weight:800;letter-spacing:-.025em;margin-bottom:6px;color:var(--plum)}
+.row{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:17px 20px;display:flex;align-items:center;gap:14px;
+  transition:transform .34s var(--ease),border-color .3s,box-shadow .34s var(--ease);
+}
+.row:hover{transform:translateX(7px);border-color:var(--teal);box-shadow:0 14px 30px -20px rgba(8,99,117,.5)}
+.row .bul{width:8px;height:8px;border-radius:50%;background:var(--teal);flex:none}
+.row .k{font-size:clamp(14px,1.35vw,20px);font-weight:700;letter-spacing:-.02em}
+.row .s{margin-left:auto;font-size:11px;font-style:italic;color:var(--faint);text-decoration:underline}
+
+/* ---- CARD 2.1 ---- */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.5vw,22px);flex:1;align-content:center;margin-top:clamp(18px,2.6vw,40px)}
+.metric{
+  background:var(--paper);border:1px solid var(--line);border-radius:20px;
+  padding:clamp(22px,2.6vw,38px) 18px;text-align:center;position:relative;overflow:hidden;
+  transition:transform .42s var(--ease),box-shadow .42s var(--ease),border-color .3s;
+}
+.metric::before{content:'';position:absolute;inset:auto 0 0 0;height:4px;background:var(--teal);transform:scaleX(.18);transform-origin:center;transition:transform .5s var(--ease)}
+.metric:hover{transform:translateY(-9px);box-shadow:0 30px 56px -30px rgba(18,10,36,.34);border-color:transparent}
+.metric:hover::before{transform:scaleX(1)}
+.metric .n{font-size:clamp(38px,5vw,78px);font-weight:800;letter-spacing:-.055em;line-height:1;color:var(--plum)}
+.metric .l{font-size:clamp(11.5px,1vw,14.5px);font-weight:600;color:var(--mute);margin-top:13px;line-height:1.42}
+.tag{align-self:center;margin-top:clamp(18px,2.4vw,32px);font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-dk);background:var(--teal-lt);border-radius:999px;padding:9px 22px}
+
+/* ---- footer chrome ---- */
+#foot{
+  position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 clamp(34px,4.8vw,80px);
+  font-size:11px;color:var(--faint);font-weight:600;letter-spacing:.06em;pointer-events:none;
+}
+#foot kbd{font-family:inherit;font-size:10px;border:1px solid var(--line);background:var(--paper);border-radius:5px;padding:2px 6px;color:var(--mute);margin:0 1px}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.13s!important;animation:none!important}.card,.st{transform:none!important}#marker{transition:none!important}}
+@media(max-width:1000px){.split,.metrics,.hgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ================= RAIL ================= -->
+<aside id="rail">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#120A24" stroke-width="2.2" stroke-dasharray="30 8"/><circle cx="16" cy="16" r="8.5" stroke="#2DD2B0" stroke-width="2.2" stroke-dasharray="18 6"/><path d="M16 19.4c-2.6-2-3.9-3.2-3.9-4.7a2.1 2.1 0 0 1 3.9-1.1 2.1 2.1 0 0 1 3.9 1.1c0 1.5-1.3 2.7-3.9 4.7Z" fill="#120A24"/></svg>
+    <div><div class="wm">knomee</div><div class="sub">Advisor</div></div>
+  </div>
+
+  <div class="rsec">
+    <div class="rlbl">Route</div>
+    <select id="routepick">
+      <option>Full Pitch · 20 min</option>
+      <option>The Five · 5 min</option>
+      <option>Growth / CGO · 12 min</option>
+      <option>Platform / CTO · 12 min</option>
+      <option>Advisor · 10 min</option>
+      <option>Succession &amp; M&amp;A · 10 min</option>
+    </select>
+  </div>
+
+  <nav id="nav">
+    <div id="marker"></div>
+    <div class="ghead">Deck</div>
+    <div class="nitem live" data-go="home"><span class="dot">⌂</span><span class="lb">Home</span></div>
+
+    <div class="ghead">Ch 0 · Open</div>
+    <div class="nitem soon"><span class="dot">0.1</span><span class="lb">Some Firms Grow…</span></div>
+
+    <div class="ghead">Ch 1 · Problem</div>
+    <div class="nitem live" data-go="c11"><span class="dot">1.1</span><span class="lb">Growth Problem</span></div>
+    <div class="nitem soon"><span class="dot">1.2</span><span class="lb">What Matters Most</span></div>
+    <div class="nitem soon"><span class="dot">1.3</span><span class="lb">Better Diagnosis</span></div>
+
+    <div class="ghead">Ch 2 · Proof</div>
+    <div class="nitem live" data-go="c21"><span class="dot">2.1</span><span class="lb">Businesses Grow</span></div>
+    <div class="nitem soon"><span class="dot">2.2</span><span class="lb">95% Completion</span></div>
+
+    <div class="ghead">Ch 3 · Solution</div>
+    <div class="nitem soon"><span class="dot">3.1</span><span class="lb">Before Meetings</span></div>
+    <div class="nitem soon"><span class="dot">3.2</span><span class="lb">Trust Builders</span></div>
+    <div class="nitem soon"><span class="dot">3.3</span><span class="lb">Ready To Help</span></div>
+    <div class="nitem soon"><span class="dot">3.4</span><span class="lb">Who To Focus On</span></div>
+
+    <div class="ghead">Ch 4 · Where It Fits</div>
+    <div class="nitem soon"><span class="dot">4.1</span><span class="lb">First Interaction</span></div>
+    <div class="nitem soon"><span class="dot">4.2</span><span class="lb">Advisor Transitions</span></div>
+    <div class="nitem soon"><span class="dot">4.3</span><span class="lb">Firm Intelligence</span></div>
+
+    <div class="ghead">Ch 5 · Platform</div>
+    <div class="nitem soon"><span class="dot">5.1</span><span class="lb">AI &amp; Data</span></div>
+    <div class="nitem soon"><span class="dot">5.2</span><span class="lb">Your Workflow</span></div>
+    <div class="nitem soon"><span class="dot">5.3</span><span class="lb">The Platform</span></div>
+
+    <div class="ghead">Ch 6 · Close</div>
+    <div class="nitem soon"><span class="dot">6.1</span><span class="lb">Pilot &amp; Outcomes</span></div>
+    <div class="nitem soon"><span class="dot">6.2</span><span class="lb">Contact</span></div>
+
+    <div class="ghead">Appendix</div>
+    <div class="nitem soon apx"><span class="dot">A</span><span class="lb">Answer Stack · 8</span></div>
+  </nav>
+
+  <button id="collapse"><span id="cico">‹‹</span> <span id="ctxt">Hide rail</span></button>
+</aside>
+
+<!-- ================= STAGE ================= -->
+<main id="stage">
+
+  <section class="card" id="home">
+    <div class="st" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="eyebrow">Enterprise Sales · Interactive · 2026</div>
+      <h1 class="title">One deck.<br><em>Every room.</em></h1>
+      <p class="lede">17 cards organised into 7 chapters and 6 routes. Choose a route on the left before the call — or click any card at any moment. Nothing is buried, nothing is skipped in front of the prospect.</p>
+      <div class="stats">
+        <span class="pill"><b>17</b> cards</span>
+        <span class="pill"><b>7</b> chapters</span>
+        <span class="pill"><b>6</b> routes</span>
+        <span class="pill"><b>8</b> appendix answers</span>
+      </div>
+    </div>
+
+    <div class="hgrid st">
+      <div class="hcard" data-go="c11">
+        <div class="k">Ch 1 · Problem</div>
+        <div class="h">Why growth stalled</div>
+        <div class="p">The &lt;2% organic growth problem, what clients don't say, and why better diagnosis changes outcomes.</div>
+        <div class="go">Open chapter <span>→</span></div>
+      </div>
+      <div class="hcard" data-go="c21">
+        <div class="k">Ch 2 · Proof</div>
+        <div class="h">What actually happens</div>
+        <div class="p">30% faster conversion, 20% more capacity, 5X referrals, 95% completion. Lead with this.</div>
+        <div class="go">Open chapter <span>→</span></div>
+      </div>
+      <div class="hcard apx" data-go="c21">
+        <div class="k">Appendix</div>
+        <div class="h">The answer stack</div>
+        <div class="p">Security, pricing, timeline, science, integrations, ROI. Never in the flow — always one click away.</div>
+        <div class="go">Open appendix <span>→</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="c11">
+    <div class="st">
+      <div class="eyebrow">Chapter 1 · Problem</div>
+      <h1 class="title">The Industry Has A <em>Growth Problem.</em></h1>
+    </div>
+    <div class="split">
+      <div class="st">
+        <div class="bignum">
+          <div class="n">&lt;2<span style="font-size:.5em">%</span></div>
+          <div class="l">Organic Growth</div>
+          <div class="s">Cerulli</div>
+        </div>
+      </div>
+      <div class="stack st">
+        <h2>Growth is getting harder.</h2>
+        <div class="row"><span class="bul"></span><span class="k">$124T Wealth Transfer</span><span class="s">Cerulli</span></div>
+        <div class="row"><span class="bul"></span><span class="k">Advisor Shortage</span><span class="s">McKinsey</span></div>
+        <div class="row"><span class="bul"></span><span class="k">Rising Client Expectations</span><span class="s">McKinsey</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="c21">
+    <div class="st">
+      <div class="eyebrow">Chapter 2 · Proof</div>
+      <h1 class="title">When Advisors Understand, <em>Businesses Grow.</em></h1>
+    </div>
+    <div class="metrics st">
+      <div class="metric"><div class="n">30%</div><div class="l">Faster<br>Conversion</div></div>
+      <div class="metric"><div class="n">20%</div><div class="l">More Advisor<br>Capacity</div></div>
+      <div class="metric"><div class="n">5X</div><div class="l">More<br>Referrals</div></div>
+      <div class="metric"><div class="n">50%</div><div class="l">More Advice<br>Implemented</div></div>
+    </div>
+    <div class="tag st">Real Knomee Results</div>
+  </section>
+
+  <div id="foot">
+    <span id="pos">Home</span>
+    <span><kbd>←</kbd><kbd>→</kbd> navigate · <kbd>esc</kbd> home · <kbd>\</kbd> hide rail</span>
+  </div>
+</main>
+
+<script>
+const LIVE=['home','c11','c21'];
+const NAMES={home:'Home',c11:'Chapter 1 · Card 1.1',c21:'Chapter 2 · Card 2.1'};
+let idx=0;
+const marker=document.getElementById('marker');
+const pos=document.getElementById('pos');
+
+function show(id){
+  const i=LIVE.indexOf(id); if(i<0) return;
+  const goingBack=i<idx;
+  document.querySelectorAll('.card').forEach(c=>{
+    c.classList.remove('active');
+    c.classList.toggle('back',goingBack?false:LIVE.indexOf(c.id)<i);
+  });
+  const node=document.getElementById(id);
+  node.classList.toggle('back',goingBack);
+  void node.offsetWidth;
+  node.classList.remove('back');
+  node.classList.add('active');
+  idx=i;
+  pos.textContent=NAMES[id];
+  document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('on'));
+  const nav=document.querySelector(`.nitem[data-go="${id}"]`);
+  if(nav){
+    nav.classList.add('on');
+    const nb=nav.getBoundingClientRect(), pb=document.getElementById('nav').getBoundingClientRect();
+    marker.style.opacity=1;
+    marker.style.height=nb.height+'px';
+    marker.style.transform=`translateY(${nb.top-pb.top+document.getElementById('nav').scrollTop}px)`;
+  }
+}
+document.querySelectorAll('.nitem[data-go],[data-go]').forEach(n=>n.addEventListener('click',()=>show(n.dataset.go)));
+show('home');
+
+const body=document.body,cico=document.getElementById('cico'),ctxt=document.getElementById('ctxt');
+function toggleRail(){
+  body.classList.toggle('collapsed');
+  const c=body.classList.contains('collapsed');
+  cico.textContent=c?'››':'‹‹'; ctxt.textContent=c?'':'Hide rail';
+  setTimeout(()=>show(LIVE[idx]),470);
+}
+document.getElementById('collapse').addEventListener('click',toggleRail);
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='SELECT')return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(LIVE[Math.min(idx+1,LIVE.length-1)])}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(LIVE[Math.max(idx-1,0)])}
+  if(e.key==='Escape'){show('home')}
+  if(e.key==='\\'){e.preventDefault();toggleRail()}
+});
+window.addEventListener('resize',()=>show(LIVE[idx]));
+</script>
+</body>
+</html>
