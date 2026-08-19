@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knomee · V3 Aperture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --shell:#240446;
+  --shell-2:#33095F;
+  --canvas:#F8FAFA;
+  --ink:#221833;
+  --ink-2:#4A4160;
+  --mute:#767089;
+  --faint:#A29CB2;
+  --line:#E8EAF0;
+  --violet:#6D28D9;
+  --violet-lt:#A78BFA;
+  --teal:#2DD2B0;
+  --teal-dk:#086375;
+  --teal-lt:#E7FBF6;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(90% 70% at 12% -10%, rgba(109,40,217,.42), transparent 60%),
+    radial-gradient(80% 70% at 100% 110%, rgba(45,210,176,.24), transparent 60%),
+    var(--shell);
+  font-family:'Manrope',system-ui,sans-serif;color:var(--ink);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;
+}
+
+/* ============ CHROME ============ */
+#chrome{
+  height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;font-family:'Poppins',sans-serif;color:#fff;z-index:30;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;letter-spacing:-.02em}
+.brand svg{width:23px;height:23px}
+.brand small{font-size:8.5px;letter-spacing:.2em;font-weight:600;color:var(--teal);text-transform:uppercase}
+#route{
+  display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:500;
+  color:rgba(255,255,255,.72);letter-spacing:.06em;
+}
+#route .chip{
+  border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 13px;
+  background:rgba(255,255,255,.06);font-weight:600;font-size:11px;color:#fff;
+}
+#hubbtn{
+  display:flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.07);color:#fff;border-radius:11px;padding:8px 14px;
+  font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.05em;cursor:pointer;
+  transition:all .3s var(--ease);
+}
+#hubbtn:hover{background:var(--violet);border-color:var(--violet);transform:translateY(-1px)}
+.grid9{display:grid;grid-template-columns:repeat(3,3px);gap:2.5px}
+.grid9 i{width:3px;height:3px;background:currentColor;border-radius:.5px;display:block;transition:opacity .3s}
+#hubbtn:hover .grid9 i:nth-child(2n){opacity:.4}
+
+/* ============ CANVAS ============ */
+#frame{
+  flex:1;margin:0 16px 16px;border-radius:22px;position:relative;overflow:hidden;
+  background:var(--canvas);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.10);
+}
+.card{
+  position:absolute;inset:0;padding:clamp(30px,4vw,64px) clamp(32px,4.4vw,74px) clamp(46px,4vw,64px);
+  display:flex;flex-direction:column;background:var(--canvas);
+  opacity:0;visibility:hidden;transform:scale(.985);
+  transition:opacity .34s var(--ease),transform .44s var(--ease),visibility 0s .44s;
+}
+.card.active{opacity:1;visibility:visible;transform:none;transition:opacity .34s var(--ease),transform .44s var(--ease),visibility 0s 0s}
+.st{opacity:0;transform:translateY(18px);transition:opacity .44s var(--ease),transform .54s var(--ease)}
+.card.active .st{opacity:1;transform:none}
+.card.active .st:nth-child(1){transition-delay:.14s}
+.card.active .st:nth-child(2){transition-delay:.21s}
+.card.active .st:nth-child(3){transition-delay:.28s}
+.card.active .st:nth-child(4){transition-delay:.35s}
+
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--violet);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:20px;height:2px;background:linear-gradient(90deg,var(--violet),var(--teal));border-radius:2px}
+h1.title{font-size:clamp(29px,3.7vw,54px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin-top:14px}
+h1.title em{font-style:normal;background:linear-gradient(96deg,var(--violet) 10%,var(--teal-dk) 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(13.5px,1.1vw,17.5px);color:var(--mute);line-height:1.64;max-width:56ch;margin-top:15px;font-weight:400}
+
+/* ---- HOME ---- */
+.hero-row{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(26px,3.4vw,54px);flex:1;align-items:center;margin-top:clamp(14px,2vw,30px)}
+.mini{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.tile{
+  border-radius:15px;padding:15px 14px 16px;cursor:pointer;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--shell-2),#1A0733);
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease);
+  min-height:96px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.tile::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(109,40,217,.55),rgba(45,210,176,.28));opacity:0;transition:opacity .4s var(--ease)}
+.tile:hover{transform:translateY(-6px) scale(1.015);box-shadow:0 24px 44px -22px rgba(21,6,41,.75)}
+.tile:hover::after{opacity:1}
+.tile .n{position:relative;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--teal)}
+.tile .h{position:relative;font-size:13.5px;font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-top:auto}
+.tile .c{position:relative;font-size:10px;color:rgba(255,255,255,.55);margin-top:5px}
+.tile.apx{background:linear-gradient(160deg,#0B7F80,#086375)}
+.tile.apx .n{color:#8CF0DA}
+
+.kpis{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.kpi{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.kpi b{color:var(--teal-dk)}
+
+/* ---- CARD 1.1 ---- */
+.split{display:grid;grid-template-columns:.8fr 1fr;gap:clamp(26px,3.6vw,60px);align-items:center;flex:1;margin-top:clamp(14px,2vw,32px)}
+.dial{position:relative;width:min(100%,330px);aspect-ratio:1;margin:0 auto;display:grid;place-items:center}
+.dial svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.dial .ring-bg{fill:none;stroke:#EDF0F3;stroke-width:9}
+.dial .ring-fg{fill:none;stroke:url(#g3);stroke-width:9;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:283;transition:stroke-dashoffset 1.4s var(--ease) .35s}
+.card.active .dial .ring-fg{stroke-dashoffset:272}
+.dial .in{text-align:center}
+.dial .n{font-size:clamp(46px,6vw,88px);font-weight:800;letter-spacing:-.06em;line-height:.92;
+  background:linear-gradient(150deg,var(--violet),var(--teal-dk));-webkit-background-clip:text;background-clip:text;color:transparent}
+.dial .l{font-size:clamp(13px,1.25vw,18px);font-weight:800;letter-spacing:-.02em;margin-top:4px}
+.dial .s{font-size:11px;font-style:italic;color:var(--faint);margin-top:5px;text-decoration:underline}
+
+.stack{display:flex;flex-direction:column;gap:10px}
+.stack h2{font-size:clamp(17px,1.8vw,26px);font-weight:800;letter-spacing:-.025em;color:var(--violet);margin-bottom:5px}
+.row{
+  background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 19px;
+  display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;
+  transition:transform .34s var(--ease),box-shadow .34s var(--ease);
+}
+.row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--violet),var(--teal));transform:scaleY(0);transform-origin:top;transition:transform .4s var(--ease)}
+.row:hover{transform:translateX(6px);box-shadow:0 16px 32px -22px rgba(21,6,41,.5)}
+.row:hover::before{transform:scaleY(1)}
+.row .k{font-size:clamp(13.5px,1.3vw,19px);font-weight:700;letter-spacing:-.02em}
+.row .s{margin-left:auto;font-size:10.5px;font-style:italic;color:var(--faint);text-decoration:underline}
+
+/* ---- CARD 2.1 ---- */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(11px,1.4vw,20px);flex:1;align-content:center;margin-top:clamp(16px,2.2vw,36px)}
+.metric{
+  border-radius:19px;padding:clamp(20px,2.4vw,36px) 16px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(165deg,#fff,#F2F6F8);border:1px solid var(--line);
+  transition:transform .42s var(--ease),box-shadow .42s var(--ease);
+}
+.metric::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .42s var(--ease);
+  background:linear-gradient(165deg,rgba(109,40,217,.10),rgba(45,210,176,.14))}
+.metric:hover{transform:translateY(-9px);box-shadow:0 30px 54px -28px rgba(21,6,41,.5)}
+.metric:hover::before{opacity:1}
+.metric .n{position:relative;font-size:clamp(36px,4.8vw,76px);font-weight:800;letter-spacing:-.055em;line-height:1;
+  background:linear-gradient(150deg,var(--violet) 15%,var(--teal-dk) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.metric .l{position:relative;font-size:clamp(11px,.98vw,14px);font-weight:600;color:var(--mute);margin-top:12px;line-height:1.42}
+.tag{align-self:center;margin-top:clamp(16px,2.2vw,30px);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--teal-dk);background:var(--teal-lt);border-radius:999px;padding:9px 22px}
+
+/* ---- canvas footer ---- */
+#cfoot{
+  position:absolute;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(32px,4.4vw,74px);font-size:10.5px;color:var(--faint);font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;pointer-events:none;
+}
+
+/* ============ HUB OVERLAY ============ */
+#hub{
+  position:fixed;inset:0;z-index:60;padding:clamp(30px,4vw,66px);
+  background:rgba(11,3,22,.80);backdrop-filter:blur(22px) saturate(150%);
+  display:flex;flex-direction:column;justify-content:center;gap:clamp(28px,5vh,60px);color:#fff;font-family:'Poppins',sans-serif;
+  opacity:0;visibility:hidden;transition:opacity .34s var(--ease),visibility 0s .34s;
+}
+#hub.open{opacity:1;visibility:visible;transition:opacity .34s var(--ease),visibility 0s 0s}
+#hub h2{font-size:clamp(24px,2.9vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+#hub .sub{font-size:13px;color:rgba(255,255,255,.6);margin-top:10px;font-weight:400;max-width:60ch}
+#hub .rts{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.rt{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);
+  border-radius:999px;padding:8px 16px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .28s var(--ease)}
+.rt:hover{background:var(--violet);border-color:var(--violet);color:#fff;transform:translateY(-2px)}
+.rt.on{background:linear-gradient(100deg,var(--violet),var(--teal-dk));border-color:transparent;color:#fff}
+.hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.htile{
+  border-radius:17px;padding:17px 15px 18px;cursor:pointer;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);background:linear-gradient(165deg,rgba(255,255,255,.09),rgba(255,255,255,.02));
+  min-height:128px;display:flex;flex-direction:column;
+  transition:transform .38s var(--ease),border-color .3s;
+}
+.htile::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .38s var(--ease);
+  background:linear-gradient(165deg,rgba(109,40,217,.6),rgba(45,210,176,.3))}
+.htile:hover{transform:translateY(-8px);border-color:rgba(167,139,250,.6)}
+.htile:hover::after{opacity:1}
+.htile .n{position:relative;font-size:9.5px;font-weight:800;letter-spacing:.18em;color:var(--violet-lt)}
+.htile .h{position:relative;font-size:clamp(12.5px,1.05vw,15.5px);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-top:auto}
+.htile .c{position:relative;font-size:10px;color:rgba(255,255,255,.5);margin-top:6px}
+.htile.apx{border-style:dashed;border-color:rgba(45,210,176,.4)}
+.htile.apx .n{color:var(--teal)}
+#hubclose{
+  position:absolute;top:clamp(26px,3.4vw,54px);right:clamp(30px,4vw,66px);
+  width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.07);color:#fff;font-size:17px;cursor:pointer;line-height:1;
+  transition:all .28s var(--ease);font-family:inherit;
+}
+#hubclose:hover{background:rgba(255,255,255,.16);transform:rotate(90deg)}
+
+/* ============ MORPH GHOST ============ */
+#ghost{
+  position:fixed;z-index:55;border-radius:17px;pointer-events:none;opacity:0;
+  background:linear-gradient(165deg,var(--violet),var(--teal-dk));
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.7);
+}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.13s!important;animation:none!important}.card,.st{transform:none!important}#ghost{display:none!important}.dial .ring-fg{transition:none!important}}
+@media(max-width:1000px){.split,.metrics,.hero-row{grid-template-columns:1fr}.hgrid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- ============ CHROME ============ -->
+<header id="chrome">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#fff" stroke-width="2.2" stroke-dasharray="30 8"/><circle cx="16" cy="16" r="8.5" stroke="#2DD2B0" stroke-width="2.2" stroke-dasharray="18 6"/><path d="M16 19.4c-2.6-2-3.9-3.2-3.9-4.7a2.1 2.1 0 0 1 3.9-1.1 2.1 2.1 0 0 1 3.9 1.1c0 1.5-1.3 2.7-3.9 4.7Z" fill="#fff"/></svg>
+    <span>knomee</span><small>Advisor</small>
+  </div>
+  <div id="route"><span class="chip">Full Pitch</span><span id="rpos">Home</span></div>
+  <button id="hubbtn"><span class="grid9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span> HUB</button>
+</header>
+
+<!-- ============ CANVAS ============ -->
+<main id="frame">
+
+  <section class="card" id="home">
+    <div class="st">
+      <div class="eyebrow">Enterprise Sales · Interactive · 2026</div>
+      <h1 class="title">The deck <em>opens</em><br>where the room is.</h1>
+      <p class="lede">Hit <strong>HUB</strong> to see all 17 cards at once. Tap one and it opens into the canvas — no scrolling past slides that don't apply, no dead air while you find the right screen.</p>
+      <div class="kpis">
+        <span class="kpi"><b>17</b> cards</span><span class="kpi"><b>7</b> chapters</span>
+        <span class="kpi"><b>6</b> routes</span><span class="kpi"><b>8</b> appendix answers</span>
+      </div>
+    </div>
+    <div class="hero-row">
+      <div class="st">
+        <div class="mini">
+          <div class="tile" data-go="c11"><div class="n">CH 1</div><div class="h">Problem</div><div class="c">3 cards</div></div>
+          <div class="tile" data-go="c21"><div class="n">CH 2</div><div class="h">Proof</div><div class="c">2 cards</div></div>
+          <div class="tile" data-go="c21"><div class="n">CH 3</div><div class="h">Solution</div><div class="c">4 cards</div></div>
+          <div class="tile" data-go="c11"><div class="n">CH 4</div><div class="h">Where It Fits</div><div class="c">3 cards</div></div>
+          <div class="tile" data-go="c21"><div class="n">CH 5</div><div class="h">Platform</div><div class="c">3 cards</div></div>
+          <div class="tile apx" data-go="c11"><div class="n">APX</div><div class="h">Answer Stack</div><div class="c">8 on demand</div></div>
+        </div>
+      </div>
+      <div class="st" style="display:flex;flex-direction:column;gap:12px">
+        <div class="row"><span class="k">Open the hub</span><span class="s">H</span></div>
+        <div class="row"><span class="k">Next / previous card</span><span class="s">← →</span></div>
+        <div class="row"><span class="k">Back to home</span><span class="s">esc</span></div>
+        <div class="row"><span class="k">Presenter view</span><span class="s">P</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="c11">
+    <div class="st">
+      <div class="eyebrow">Chapter 1 · Problem</div>
+      <h1 class="title">The Industry Has A <em>Growth Problem.</em></h1>
+    </div>
+    <div class="split">
+      <div class="st">
+        <div class="dial">
+          <svg viewBox="0 0 100 100">
+            <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D28D9"/><stop offset="1" stop-color="#2DD2B0"/></linearGradient></defs>
+            <circle class="ring-bg" cx="50" cy="50" r="45"/>
+            <circle class="ring-fg" cx="50" cy="50" r="45"/>
+          </svg>
+          <div class="in">
+            <div class="n">&lt;2<span style="font-size:.5em">%</span></div>
+            <div class="l">Organic Growth</div>
+            <div class="s">Cerulli</div>
+          </div>
+        </div>
+      </div>
+      <div class="stack st">
+        <h2>Growth is getting harder.</h2>
+        <div class="row"><span class="k">$124T Wealth Transfer</span><span class="s">Cerulli</span></div>
+        <div class="row"><span class="k">Advisor Shortage</span><span class="s">McKinsey</span></div>
+        <div class="row"><span class="k">Rising Client Expectations</span><span class="s">McKinsey</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="c21">
+    <div class="st">
+      <div class="eyebrow">Chapter 2 · Proof</div>
+      <h1 class="title">When Advisors Understand, <em>Businesses Grow.</em></h1>
+    </div>
+    <div class="metrics st">
+      <div class="metric"><div class="n">30%</div><div class="l">Faster<br>Conversion</div></div>
+      <div class="metric"><div class="n">20%</div><div class="l">More Advisor<br>Capacity</div></div>
+      <div class="metric"><div class="n">5X</div><div class="l">More<br>Referrals</div></div>
+      <div class="metric"><div class="n">50%</div><div class="l">More Advice<br>Implemented</div></div>
+    </div>
+    <div class="tag st">Real Knomee Results</div>
+  </section>
+
+  <div id="cfoot"><span id="cpos">Home</span><span>Knomee · Confidential</span></div>
+</main>
+
+<!-- ============ HUB ============ -->
+<div id="hub">
+  <button id="hubclose">×</button>
+  <div>
+    <h2>Where do you want to go?</h2>
+    <p class="sub">Pick a route to set the default order, or open any chapter directly. The appendix never appears in a route — it's there for the questions you get asked.</p>
+    <div class="rts">
+      <button class="rt on">Full Pitch · 20m</button>
+      <button class="rt">The Five · 5m</button>
+      <button class="rt">Growth / CGO · 12m</button>
+      <button class="rt">Platform / CTO · 12m</button>
+      <button class="rt">Advisor · 10m</button>
+      <button class="rt">Succession &amp; M&amp;A · 10m</button>
+    </div>
+  </div>
+  <div class="hgrid">
+    <div class="htile" data-go="home"><div class="n">CH 0</div><div class="h">Open</div><div class="c">1 card</div></div>
+    <div class="htile" data-go="c11"><div class="n">CH 1</div><div class="h">Problem</div><div class="c">3 cards</div></div>
+    <div class="htile" data-go="c21"><div class="n">CH 2</div><div class="h">Proof</div><div class="c">2 cards</div></div>
+    <div class="htile" data-go="c21"><div class="n">CH 3</div><div class="h">Solution</div><div class="c">4 cards</div></div>
+    <div class="htile" data-go="c11"><div class="n">CH 4</div><div class="h">Where It Fits</div><div class="c">3 cards</div></div>
+    <div class="htile" data-go="c21"><div class="n">CH 5</div><div class="h">Platform</div><div class="c">3 cards</div></div>
+    <div class="htile apx" data-go="c11"><div class="n">APX</div><div class="h">Answer Stack</div><div class="c">8 on demand</div></div>
+  </div>
+</div>
+
+<div id="ghost"></div>
+
+<script>
+const LIVE=['home','c11','c21'];
+const NAMES={home:'Home',c11:'Ch 1 · Card 1.1 · Growth Problem',c21:'Ch 2 · Card 2.1 · Businesses Grow'};
+let idx=0;
+const frame=document.getElementById('frame');
+const ghost=document.getElementById('ghost');
+const hub=document.getElementById('hub');
+const rpos=document.getElementById('rpos'), cpos=document.getElementById('cpos');
+
+function show(id){
+  const i=LIVE.indexOf(id); if(i<0) return;
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  const node=document.getElementById(id);
+  void node.offsetWidth;
+  node.classList.add('active');
+  idx=i; rpos.textContent=NAMES[id]; cpos.textContent=NAMES[id];
+}
+show('home');
+
+/* --- morph: tile rect -> canvas rect --- */
+function morphTo(el,id){
+  const a=el.getBoundingClientRect(), b=frame.getBoundingClientRect();
+  ghost.style.transition='none';
+  ghost.style.left=a.left+'px'; ghost.style.top=a.top+'px';
+  ghost.style.width=a.width+'px'; ghost.style.height=a.height+'px';
+  ghost.style.borderRadius='17px'; ghost.style.opacity='1';
+  void ghost.offsetWidth;
+  ghost.style.transition='all .52s cubic-bezier(.16,1,.3,1)';
+  ghost.style.left=b.left+'px'; ghost.style.top=b.top+'px';
+  ghost.style.width=b.width+'px'; ghost.style.height=b.height+'px';
+  ghost.style.borderRadius='22px';
+  closeHub();
+  setTimeout(()=>{ show(id); ghost.style.transition='opacity .3s ease'; ghost.style.opacity='0'; },440);
+}
+
+document.querySelectorAll('[data-go]').forEach(n=>n.addEventListener('click',()=>morphTo(n,n.dataset.go)));
+document.querySelectorAll('.rt').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.rt').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelector('#route .chip').textContent=b.textContent.split('·')[0].trim();
+}));
+
+function openHub(){hub.classList.add('open')}
+function closeHub(){hub.classList.remove('open')}
+document.getElementById('hubbtn').addEventListener('click',openHub);
+document.getElementById('hubclose').addEventListener('click',closeHub);
+hub.addEventListener('click',e=>{if(e.target===hub)closeHub()});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ if(hub.classList.contains('open')){closeHub()} else {show('home')} return }
+  if(e.key.toLowerCase()==='h'){e.preventDefault();hub.classList.contains('open')?closeHub():openHub();return}
+  if(hub.classList.contains('open'))return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(LIVE[Math.min(idx+1,LIVE.length-1)])}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(LIVE[Math.max(idx-1,0)])}
+});
+</script>
+</body>
+</html>
