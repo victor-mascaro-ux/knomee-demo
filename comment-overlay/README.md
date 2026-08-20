@@ -6,8 +6,8 @@ writes threaded comments in a collapsible side rail. Comments persist and are
 scoped per screen. Everything is namespaced under `.cc-` so it never collides
 with the host app.
 
-Extracted from the knomee-demo prototype. No build step, no framework, no
-dependencies (Firebase is optional — see Persistence).
+Extracted from the knomee-demo prototype. No build step, no framework. Comments
+are always stored in Firebase Firestore (shared, real-time) — see Persistence.
 
 ## Files
 
@@ -37,10 +37,16 @@ The overlay is the outer page; the app you're reviewing loads in an iframe.
 1. In the host page `<head>`: `<link rel="stylesheet" href="comment-overlay.css">`
 2. In the host `<body>`: paste `overlay-markup.html` as the first child, and set
    the `#ccProto` iframe `src` to your app's URL.
-3. Before `</body>`: `<script src="comment-overlay.js"></script>`
-4. In the **reviewed app** (the iframe's page): `<script src="review-bridge.js"></script>`
-5. Open `comment-overlay.js` and set `PROJECT_ID` to something unique. Done —
-   comments now persist to the reviewer's `localStorage`.
+3. In the host `<head>`, before `comment-overlay.js`, load the two Firebase
+   compat scripts (required — persistence is always Firestore):
+   ```html
+   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+   ```
+4. Before `</body>`: `<script src="comment-overlay.js"></script>`
+5. In the **reviewed app** (the iframe's page): `<script src="review-bridge.js"></script>`
+6. Do the **Firebase setup** below (create a project, paste config, set rules) and
+   set a unique `PROJECT_ID`. Comments now sync in real time for every reviewer.
 
 ## Inline model (single SPA, no iframe)
 
@@ -60,11 +66,13 @@ If you'd rather overlay the app's own DOM directly:
 
 | Const | Default | Notes |
 |-------|---------|-------|
-| `PROJECT_ID` | `CHANGE-ME-…` | **Must be unique.** Namespaces stored comments. |
+| `PROJECT_ID` | `CHANGE-ME-…` | **Must be unique.** Firestore doc id that namespaces this site's comments. |
 | `THEME` | `neutral-frost` | `neutral-frost` \| `smoke-tray` \| `branded-frost` |
-| `USE_FIRESTORE` | `false` | `false` = localStorage only. `true` = real-time sync. |
-| `SEED_DEMO` | `false` | `true` seeds fake comments, skips persistence (for previews). |
+| `COLLECTION` | `overlay-comments` | Top-level Firestore collection comments live under. |
+| `SEED_DEMO` | `false` | `true` seeds fake comments and skips Firestore (previews only). |
 | `ACTIVATION_KEY` | `F2` | The `c` shortcut is always on in addition to this. |
+
+`firebaseConfig` (just below the consts) must be filled in with your own project.
 
 ## Per-screen hook
 
@@ -78,21 +86,51 @@ window.__ccScreenId = 'clients' // e.g. on route change
 Fallbacks if unset: an element matching `.screen.active` (its `id`), else `'default'`
 (single-screen apps can ignore this entirely).
 
-## Persistence
+## Persistence — always Firestore
 
-- **localStorage (default).** With `USE_FIRESTORE = false`, threads are saved in the
-  reviewer's browser only. Zero config, but not shared between people.
-- **Firestore (shared, real-time).** Set `USE_FIRESTORE = true`, load the two
-  firebase compat scripts in the host page, and fill `firebaseConfig` with **your
-  own** Firebase project (do not reuse someone else's):
+Comments are **always** stored in Firestore (shared across every reviewer, in real
+time). There is no localStorage mode. Threads live at
+`{COLLECTION}/{PROJECT_ID}/threads`.
 
-  ```html
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  ```
+### Firebase setup (required)
 
-  Threads are stored at `video-feedback/{PROJECT_ID}/comments`. Your Firestore
-  security rules must allow read/write to that collection.
+1. Create a Firebase project at <https://console.firebase.google.com> (or reuse one).
+2. In **Build → Firestore Database**, click **Create database** (production mode is
+   fine — you'll set rules in step 5).
+3. In **Project settings → General → Your apps**, add a **Web app** and copy its
+   `firebaseConfig` object.
+4. Paste that object over the placeholder `firebaseConfig` near the top of
+   `comment-overlay.js`, and set `PROJECT_ID` to a unique id for this site.
+5. In **Firestore → Rules**, allow read/write on the comments path. Simplest
+   (open — anyone with the link can comment; fine for internal review demos):
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /overlay-comments/{project}/threads/{thread} {
+         allow read, write: if true;
+       }
+     }
+   }
+   ```
+
+   If you changed `COLLECTION`, change `overlay-comments` here to match. For anything
+   non-public, lock this down (e.g. require Firebase Auth) instead of `if true`.
+
+### Required code changes (checklist)
+
+The overlay ships with placeholders; to go live you must:
+
+- [ ] Load the two `firebase-*-compat.js` scripts in the host page (see Quick start).
+- [ ] Fill in `firebaseConfig` in `comment-overlay.js` with your project's config.
+- [ ] Set a unique `PROJECT_ID` (and `COLLECTION` if you want a custom name).
+- [ ] Publish the Firestore security rules above.
+- [ ] (Multi-screen apps) set `window.__ccScreenId` on route change — see above.
+
+Nothing else in `comment-overlay.js` needs editing for the Firestore-only setup.
+`SEED_DEMO = true` is the only way to run without Firebase, and it's for previewing
+the UI only (no saving).
 
 ## Notes
 
