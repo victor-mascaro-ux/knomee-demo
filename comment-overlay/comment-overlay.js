@@ -4,21 +4,24 @@
   // ────────────────────────────────────────────────────────
   // Config — change these for your project.
   //
-  // PROJECT_ID: unique id for THIS project. If USE_FIRESTORE is on, comments
-  //   are namespaced by it in the shared Firestore project, so two sites left
-  //   on the same id would share one comment thread. MUST be unique.
+  // PROJECT_ID: unique id for THIS project. Comments are namespaced by it as
+  //   the Firestore doc id, so two sites on the same id share one thread.
+  //   MUST be unique.
   // THEME: 'neutral-frost' | 'smoke-tray' | 'branded-frost'
-  // USE_FIRESTORE: false (default) = comments persist to the reviewer's
-  //   localStorage only, zero config. true = real-time sync via Firestore
-  //   (fill in `firebaseConfig` below with YOUR OWN Firebase project).
-  // SEED_DEMO: true = seeds 3 fake comments and skips all persistence — for
+  // COLLECTION: top-level Firestore collection comments live under. Your
+  //   security rules must allow read/write on {COLLECTION}/{PROJECT_ID}/threads.
+  // SEED_DEMO: true = seeds 3 fake comments and skips Firestore — for
   //   previewing the overlay itself. Leave false in real projects.
   // ACTIVATION_KEY / the "c" shortcut: reveals/hides the overlay.
+  //
+  // Persistence is ALWAYS Firestore (shared, real-time) — never localStorage.
+  // You MUST load the two firebase-*-compat.js <script> tags in the host page
+  // and fill in `firebaseConfig` below with YOUR OWN Firebase project.
   // ────────────────────────────────────────────────────────
-  const PROJECT_ID    = 'CHANGE-ME-unique-project-id';
-  const THEME         = 'neutral-frost';
-  const USE_FIRESTORE = false;
-  const SEED_DEMO     = false;
+  const PROJECT_ID = 'CHANGE-ME-unique-project-id';
+  const THEME      = 'neutral-frost';
+  const COLLECTION = 'overlay-comments';
+  const SEED_DEMO  = false;
   const ACTIVATION_KEY = 'F2';
   // ────────────────────────────────────────────────────────
 
@@ -33,11 +36,8 @@
   const clearBtn = document.getElementById('ccClearAll');
   const rail     = document.getElementById('ccRail');
   const collapseBtn = document.getElementById('ccCollapse');
-  const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed';
 
   stage.dataset.ccTheme = THEME;
-
-  const STORE_KEY = 'knomee-prototype-feedback::' + PROJECT_ID;
 
   let store = { threads: [] };
   let draft = null;            // unpersisted thread while composing the first note
@@ -47,16 +47,8 @@
   let currentScreen = 'default';
 
   // ── Shared storage (Firestore) ──────────────────────────
-  // Deliberate deviation from the design spec's localStorage-only
-  // persistence: comments must be shared across reviewers/devices (same
-  // behavior as the knomee-video feedback tool), so Firestore is the
-  // source of truth and localStorage is only a fast-paint seed and
-  // offline fallback. Same Firebase project AND same top-level
-  // collection ("video-feedback") as the video tool — the project's
-  // security rules only allow that one collection name — namespaced
-  // by PROJECT_ID as the doc ID.
-  // Fill in with YOUR OWN Firebase project when USE_FIRESTORE is true. The
-  // two firebase-*-compat.js <script> tags must be loaded in the host page.
+  // Firestore is the single source of truth for comments — shared across every
+  // reviewer, in real time. Fill in with YOUR OWN Firebase project.
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -65,13 +57,10 @@
     messagingSenderId: "YOUR_SENDER_ID",
     appId: "YOUR_APP_ID"
   };
-  let db = null, stateRef = null, threadsRef = null;
-  if (USE_FIRESTORE) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    stateRef = db.collection('video-feedback').doc(PROJECT_ID);
-    threadsRef = stateRef.collection('comments');
-  }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const stateRef = db.collection(COLLECTION).doc(PROJECT_ID);
+  const threadsRef = stateRef.collection('threads');
 
   // Accepts both the current schema and legacy single-text comments
   // (pre-threads) so old data keeps rendering. Legacy comments have no
@@ -89,48 +78,27 @@
     };
   }
 
-  function loadLocalFallback() {
-    if (SEED_DEMO) return;
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const items = Array.isArray(parsed.threads) ? parsed.threads
-          : (Array.isArray(parsed.comments) ? parsed.comments : []);
-        store.threads = items.map(normalize);
-      }
-    } catch (e) { /* keep defaults */ }
-  }
-  function cacheLocally() {
-    if (SEED_DEMO) return;
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ threads: store.threads })); }
-    catch (e) { /* best-effort only */ }
-  }
-
   function initSync() {
-    if (SEED_DEMO || !USE_FIRESTORE) return;
+    if (SEED_DEMO) return;
     threadsRef.orderBy('createdAt').onSnapshot(snap => {
       store.threads = snap.docs.map(d => normalize(d.data()));
-      cacheLocally();
       renderAll();
       refreshOpenThread();
     }, err => {
       console.warn('Firestore sync error', err);
-      showWarning("Can't reach the shared comment server — showing your last saved copy.");
+      showWarning("Can't reach the shared comment server — check your Firebase config and rules.");
     });
   }
 
   function persistThread(t) {
-    cacheLocally();
-    if (SEED_DEMO || !USE_FIRESTORE) return;
+    if (SEED_DEMO) return;
     threadsRef.doc(t.id).set(t).catch(err => {
       console.warn('Could not save comment', err);
       showWarning();
     });
   }
   function persistDelete(id) {
-    cacheLocally();
-    if (SEED_DEMO || !USE_FIRESTORE) return;
+    if (SEED_DEMO) return;
     threadsRef.doc(id).delete().catch(err => {
       console.warn('Could not delete comment', err);
       showWarning();
@@ -163,7 +131,7 @@
   const SITE_ID = location.host + location.pathname.replace(/index\.html$/, '').replace(/\/$/, '');
   const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(location.hostname);
   function checkNamespaceConflict() {
-    if (IS_LOCAL_DEV || SEED_DEMO || !USE_FIRESTORE) return;
+    if (IS_LOCAL_DEV || SEED_DEMO) return;
     stateRef.get().then(snap => {
       const claimedBy = snap.exists ? snap.data().claimedBy : null;
       if (claimedBy && claimedBy !== SITE_ID) {
@@ -547,7 +515,6 @@
     rail.classList.toggle('cc-collapsed', on);
     collapseBtn.title = on ? 'Expand comments' : 'Collapse comments';
     collapseBtn.setAttribute('aria-label', collapseBtn.title);
-    try { localStorage.setItem(RAIL_COLLAPSED_KEY, on ? '1' : '0'); } catch (e) { /* best-effort */ }
   }
   collapseBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -631,7 +598,6 @@
     const ids = store.threads.map(t => t.id);
     store.threads = [];
     closeThread();
-    cacheLocally();
     if (!SEED_DEMO) {
       const batch = db.batch();
       ids.forEach(id => batch.delete(threadsRef.doc(id)));
@@ -662,11 +628,8 @@
 
   // ── Init ─────────────────────────────────────────────────
   // The menu is persistent, so default it to the slim collapsed tab — it
-  // stays reachable at all times without covering the prototype. Only an
-  // explicit '0' (the reviewer expanded it before) keeps it open on load.
-  try { setRailCollapsed(localStorage.getItem(RAIL_COLLAPSED_KEY) !== '0'); }
-  catch (e) { setRailCollapsed(true); }
-  loadLocalFallback();
+  // stays reachable at all times without covering the prototype.
+  setRailCollapsed(true);
   renderAll();
   initSync();
   checkNamespaceConflict();
