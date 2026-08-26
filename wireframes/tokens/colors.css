@@ -1,0 +1,99 @@
+/* ============================================================
+   KNOMEE · COLOR TOKENS
+   Extracted from the Knomee advisor dashboard, consumer
+   onboarding ("Financial Joy") flow, and sign-up page.
+   ============================================================ */
+:root {
+  /* ---- Brand purple (the spine of the brand) ---- */
+  --k-plum:          #240446;  /* primary brand — nav bars, headlines, primary buttons */
+  --k-plum-ink:      #1a0433;  /* darkest text tint of the plum family */
+  --k-grape:         #7639a1;  /* interactive purple — button hover, links */
+  --k-grape-bar:     #7538b2;  /* the 6px accent bar on feature cards */
+  --k-grape-light:   #e9d9f4;  /* light purple surface / soft badge fill */
+  --k-grape-vivid:   #9b19fb;  /* vivid grape accent */
+  --k-plum-050:      rgba(36,4,70,0.05); /* faint plum card tray wash */
+
+  /* ---- Teal / "joy" greens (consumer-facing warmth) ---- */
+  --k-teal:          #3dbdaa;  /* consumer accent — save CTA, question numbers */
+  --k-teal-deep:     #2fa896;  /* teal hover */
+  --k-teal-light:    #e6f7f5;  /* teal wash surface */
+  --k-mint:          #c0ffe7;  /* pale mint highlight */
+  --k-ocean:         #086375;  /* deep teal — advisor Tier 1 banner, bar-chart icon */
+  --k-steel:         #6ba1ac;  /* muted teal — advisor Tier 2 banner */
+  --k-aqua:          #6bd6c4;  /* aqua tint (brand vector family) */
+
+  /* ---- Lilac / violet accents ---- */
+  --k-lilac:         #b98ddc;  /* KQ tier-3 badge */
+  --k-lilac-soft:    #d4b3eb;  /* Tier 3 banner fill */
+  --k-bolt:          #9b51e0;  /* "convert" action / lightning violet (advisor demo) */
+  --k-bolt-deep:     #7c3aed;  /* bolt hover */
+
+  /* Client engagement tiers (purple family, converted book of business) */
+  --k-client-1:      #5b21b6;  /* Tier 1 engaged */
+  --k-client-2:      #8b5cf6;  /* Tier 2 attention */
+  --k-client-3:      var(--k-steel); /* Tier 3 reconnect */
+
+  /* ---- Signal / status ---- */
+  --k-tangerine:     #ff9525;  /* energy accent — lightning icon, timers */
+  --k-lime:          #affc41;  /* "new" tag, sparkle accent */
+  --k-amber:         #f59e0b;  /* warning triangle */
+  --k-amber-ink:     #b45309;  /* warning text */
+  --k-green:         #009966;  /* success / sparkle */
+  --k-green-lime:    #84cc16;  /* toast confirmation dot */
+  --k-green-bright:  #22c55e;  /* inline success check */
+
+  /* ---- Neutrals (warm-cool gray ramp) ---- */
+  --k-ink:           #1a1a1a;  /* primary body text on light */
+  --k-body:          #364153;  /* long-form body copy */
+  --k-muted:         #6a7282;  /* secondary text */
+  --k-slate:         #757575;  /* tertiary text, table headers */
+  --k-ash:           #afafaf;  /* placeholder / disabled */
+  --k-stone:         #cccccc;  /* control borders, unchecked */
+  --k-pearl:         #eeeeee;  /* hairline dividers, disabled fills */
+  --k-border:        #e0e0e0;  /* card border */
+  --k-border-soft:   #e8e8e8;  /* softest hairline */
+  --k-cloud:         #fafafa;  /* zebra / header row wash */
+  --k-app-bg:        #f5f5f7;  /* app canvas behind cards */
+  --k-white:         #ffffff;
+  --k-black:         #000000;
+
+  /* ============================================================
+     SEMANTIC ALIASES — reach for these in product code
+     ============================================================ */
+  --text-strong:     var(--k-plum);      /* headings */
+  --text-body:       var(--k-ink);
+  --text-secondary:  var(--k-slate);
+  --text-muted:      var(--k-muted);
+  --text-inverse:    var(--k-white);
+  --text-link:       var(--k-plum);
+  --text-link-hover: var(--k-grape);
+
+  --surface-page:    var(--k-app-bg);
+  --surface-card:    var(--k-white);
+  --surface-raised:  var(--k-white);
+  --surface-sunken:  var(--k-cloud);
+  --surface-tray:    var(--k-plum-050);   /* faint plum wash behind card groups */
+  --surface-brand:   var(--k-plum);       /* nav bars, brand panels */
+  --surface-accent:  var(--k-teal-light);
+
+  --border-default:  var(--k-border);
+  --border-hairline: var(--k-pearl);
+  --border-strong:   var(--k-plum);
+  --border-control:  var(--k-stone);
+
+  --action-primary:        var(--k-plum);
+  --action-primary-hover:  var(--k-grape);
+  --action-accent:         var(--k-teal);
+  --action-accent-hover:   var(--k-teal-deep);
+  --action-bolt:           var(--k-bolt);
+  --action-bolt-hover:     var(--k-bolt-deep);
+
+  --status-success:  var(--k-green-lime);
+  --status-warning:  var(--k-amber);
+  --status-info:     var(--k-ocean);
+
+  /* KQ score tiers (advisor lead scoring) */
+  --tier-1:          var(--k-ocean);      /* ready now / engaged */
+  --tier-2:          var(--k-steel);      /* considering / attention */
+  --tier-3:          var(--k-lilac);      /* nurture / reconnect */
+}
