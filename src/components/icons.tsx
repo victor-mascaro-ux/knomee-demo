@@ -1,12 +1,12 @@
 // Inline SVG icons used across the Prospects dashboard.
 // Sized via CSS (width/height) and inherit color via `currentColor` unless noted.
 
-export function KnomeeMark({ size = 26 }: { size?: number }) {
+export function KnomeeMark({ size = 26, color = 'currentColor' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 26 26" fill="none" aria-hidden>
-      <circle cx="13" cy="13" r="12" stroke="#ffffff" strokeWidth="1.6" />
-      <circle cx="13" cy="13" r="4.3" fill="#ffffff" />
-      <circle cx="13" cy="13" r="8.1" stroke="#ffffff" strokeWidth="1.4" opacity="0.55" />
+      <circle cx="13" cy="13" r="12" stroke={color} strokeWidth="1.6" />
+      <circle cx="13" cy="13" r="4.3" fill={color} />
+      <circle cx="13" cy="13" r="8.1" stroke={color} strokeWidth="1.4" opacity="0.55" />
     </svg>
   )
 }

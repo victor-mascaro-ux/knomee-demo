@@ -223,9 +223,11 @@ function CommandCenter() {
                   Clear filter ✕
                 </button>
               ) : (
-                <span className="dist-note">
-                  {prospectStats.byTier.incomplete} incomplete profile
-                  {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown · tap a tier to focus
+                <span className="dist-filter-hint">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                    <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
+                  </svg>
+                  Tap a tier to filter
                 </span>
               )}
             </div>
@@ -249,9 +251,9 @@ function CommandCenter() {
                 )
               })}
             </div>
-            <div className="dist-legend">
+            <div className="dist-legend dist-legend-bars">
               {TIER_META.map((m) => (
-                <div className="dist-leg" key={m.key}>
+                <div className="dist-leg" key={m.key} style={{ flex: prospectStats.byTier[m.tierId] || 0.001 }}>
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}
@@ -260,6 +262,12 @@ function CommandCenter() {
                 </div>
               ))}
             </div>
+            {prospectStats.byTier.incomplete > 0 && (
+              <p className="dist-foot">
+                {prospectStats.byTier.incomplete} incomplete profile
+                {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown
+              </p>
+            )}
           </div>
         </div>
 
@@ -567,6 +575,20 @@ function ProspectsTable({
   allChecked: boolean
   onToggleAll: () => void
 }) {
+  // KQ Score sort: null = book order, then asc (low→high) ↔ desc on each click.
+  // Applied within each tier group so the tier bands stay intact.
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+  const sortRows = (rows: Prospect[]) => {
+    if (!sortDir) return rows
+    const scored = rows.filter((p) => p.kq !== null)
+    const unscored = rows.filter((p) => p.kq === null)
+    scored.sort((a, b) =>
+      sortDir === 'asc'
+        ? (a.kq as number) - (b.kq as number)
+        : (b.kq as number) - (a.kq as number),
+    )
+    return [...scored, ...unscored]
+  }
   return (
     <div className="table-wrap">
       <table className="prospects-table">
@@ -582,7 +604,17 @@ function ProspectsTable({
             </th>
             <th className="col-name">Name</th>
             <th className="col-kq">
-              <span className="th-sort">KQ Score <CaretDown /></span>
+              <button
+                type="button"
+                className="th-sort th-sort-btn"
+                onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                aria-label="Sort by KQ score"
+              >
+                KQ Score
+                <span className={`th-caret ${sortDir ? 'is-active' : ''} ${sortDir === 'asc' ? 'is-asc' : ''}`}>
+                  <CaretDown />
+                </span>
+              </button>
             </th>
             <th className="col-num">Intent</th>
             <th className="col-num">Clarity</th>
@@ -607,7 +639,7 @@ function ProspectsTable({
                     </div>
                   </td>
                 </tr>
-                {rows.map((p) => (
+                {sortRows(rows).map((p) => (
                   <ProspectRow
                     p={p}
                     key={p.name}
