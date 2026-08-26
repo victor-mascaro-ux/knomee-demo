@@ -695,27 +695,36 @@ function ProspectsScreen({
 
 /* ── Clients screen (the converted book of business) ── */
 
-function SentimentDots({
-  value,
-  warn,
-  tier,
-}: {
-  value: number | null
-  warn?: boolean
-  tier?: ClientTier
-}) {
+// Sentiment shown as a single colored face on a 1–5 scale (matching the
+// prospect app's "how do you feel about your money" faces): red frown → amber
+// → yellow neutral → lime smile → green grin.
+const SENTIMENT_FACES = [
+  { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
+  { color: '#f59e0b', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
+  { color: '#eab308', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
+  { color: '#a3e635', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#84cc16', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+]
+
+function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
   if (value === null) return <span className="dash">–</span>
+  const f = SENTIMENT_FACES[Math.max(1, Math.min(5, Math.round(value))) - 1]
   return (
-    <div className={`sentiment${tier ? ` sentiment-${tier}` : ''}`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={`sdot ${i < value ? '' : 'empty'}`} />
-      ))}
+    <span className="sentiment">
+      <span className="sentiment-face" title={`${f.label} · ${Math.round(value)}/5`}>
+        <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
+          <circle cx="12" cy="12" r="12" fill={f.color} />
+          <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
+          <circle cx="15" cy="10.4" r="1.5" fill="#2b2140" />
+          <path d={f.mouth} fill="none" stroke="#2b2140" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
       {warn && (
         <span className="sentiment-warn">
           <WarnIcon />
         </span>
       )}
-    </div>
+    </span>
   )
 }
 
@@ -760,7 +769,7 @@ function ClientRow({
         )}
       </td>
       <td className="col-sentiment">
-        <SentimentDots value={c.sentiment} warn={c.warn} tier={c.tier} />
+        <SentimentFace value={c.sentiment} warn={c.warn} />
       </td>
       <td className="col-status">
         {c.secondaryStatus ? (
