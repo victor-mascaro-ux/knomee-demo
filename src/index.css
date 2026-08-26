@@ -1490,6 +1490,13 @@ input[type='checkbox'] {
   color: #b45309;
   font-weight: 600;
 }
+/* Incomplete: a soft warm tint — clearly distinct from "complete" without the
+   loudness of the amber "pending" badge. */
+.status-badge.status-incomplete {
+  border-color: #e6d3a6;
+  background: #fbf6ea;
+  color: #977a3c;
+}
 .status-stack {
   display: flex;
   flex-direction: column;
@@ -1819,6 +1826,8 @@ input[type='checkbox'] {
   margin-top: 16px;
 }
 .chart-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px 18px;
@@ -1836,14 +1845,16 @@ input[type='checkbox'] {
 }
 
 .confidence {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 22px;
+  justify-content: center;
+  gap: 30px;
   padding: 6px 0;
 }
 .pie {
-  width: 128px;
-  height: 128px;
+  width: 168px;
+  height: 168px;
   flex: none;
 }
 .pie-slice {
@@ -1860,14 +1871,14 @@ input[type='checkbox'] {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 150px;
+  gap: 14px;
+  min-width: 168px;
 }
 .pie-legend li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 11px;
+  font-size: 14px;
   color: #444;
   font-weight: 500;
   cursor: pointer;

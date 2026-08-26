@@ -71,7 +71,7 @@ const featuredClients: Client[] = [
     email: 'emily.watson@email.com',
     household: 'Watson Family',
     sentiment: 4,
-    status: 'incomplete',
+    status: 'complete',
     lastSignIn: '05/30/2025',
     tier: 'engaged',
   },
@@ -234,7 +234,8 @@ function randomClients(count: number, seed: number): Client[] {
       household,
       sentiment,
       warn: warn || undefined,
-      status: rand() < 0.15 ? 'incomplete' : 'complete',
+      // A profile in a scored tier is, by definition, complete.
+      status: 'complete',
       lastSignIn: randomClientDate(rand),
       tier,
       isNew: isNew || undefined,

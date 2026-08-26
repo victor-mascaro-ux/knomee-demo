@@ -814,10 +814,18 @@ function ClientRow({
         {c.secondaryStatus ? (
           <div className="status-stack">
             <span className="status-badge status-pending">{c.status}</span>
-            <span className="status-badge">{c.secondaryStatus}</span>
+            <span className="status-badge status-incomplete">{c.secondaryStatus}</span>
           </div>
         ) : (
-          <span className={`status-badge ${c.status === 'pending' ? 'status-pending' : ''}`}>
+          <span
+            className={`status-badge ${
+              c.status === 'pending'
+                ? 'status-pending'
+                : c.status === 'incomplete'
+                  ? 'status-incomplete'
+                  : ''
+            }`}
+          >
             {c.status}
           </span>
         )}
