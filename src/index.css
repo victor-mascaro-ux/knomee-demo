@@ -1303,6 +1303,13 @@ input[type='checkbox'] {
   align-items: center;
   gap: 4px;
 }
+.sentiment-face {
+  display: inline-flex;
+  line-height: 0;
+}
+.sentiment-face svg {
+  display: block;
+}
 .sdot {
   width: 12px;
   height: 12px;
