@@ -66,6 +66,7 @@ import {
   TargetIcon,
   TierBarsIcon,
   FunnelIcon,
+  HouseIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import { segModels, segMethod } from './data/segmentation'
@@ -740,18 +741,19 @@ const SENTIMENT_FACES = [
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
   if (value === null) return <span className="dash">–</span>
-  const f = SENTIMENT_FACES[Math.max(1, Math.min(5, Math.round(value))) - 1]
+  const rounded = Math.max(1, Math.min(5, Math.round(value)))
+  const f = SENTIMENT_FACES[rounded - 1]
+  // Caution triangle only flags the two lowest (unhappy) faces.
+  const showWarn = warn && rounded <= 2
   return (
-    <span className="sentiment">
-      <span className="sentiment-face" title={`${f.label} · ${Math.round(value)}/5`}>
-        <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
-          <circle cx="12" cy="12" r="12" fill={f.color} />
-          <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
-          <circle cx="15" cy="10.4" r="1.5" fill="#2b2140" />
-          <path d={f.mouth} fill="none" stroke="#2b2140" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-      {warn && (
+    <span className="sentiment-face" title={`${f.label} · ${rounded}/5`}>
+      <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
+        <circle cx="12" cy="12" r="12" fill={f.color} />
+        <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
+        <circle cx="15" cy="10.4" r="1.5" fill="#2b2140" />
+        <path d={f.mouth} fill="none" stroke="#2b2140" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {showWarn && (
         <span className="sentiment-warn">
           <WarnIcon />
         </span>
@@ -783,6 +785,11 @@ function ClientRow({
         <div className="name-cell">
           <span className="avatar-wrap">
             <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+            {c.household && (
+              <span className="household-badge" title={c.household} aria-label={c.household}>
+                <HouseIcon />
+              </span>
+            )}
             {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">

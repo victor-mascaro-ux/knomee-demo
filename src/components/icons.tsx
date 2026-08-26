@@ -11,6 +11,15 @@ export function KnomeeMark({ size = 26, color = 'currentColor' }: { size?: numbe
   )
 }
 
+export function HouseIcon({ color = 'currentColor' }: { color?: string }) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M2.6 7.6 8 3.2l5.4 4.4" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 7.1v5.7h8V7.1" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function ChartIcon({ color = '#086375' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>

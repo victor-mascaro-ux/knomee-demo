@@ -900,6 +900,27 @@ input[type='checkbox'] {
   z-index: 2;
   box-shadow: 0 0 0 2px #fff;
 }
+/* Small badge on the avatar's bottom-right marking clients in a household. */
+.household-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--plum);
+  color: #fff;
+  box-shadow: 0 0 0 2px #fff;
+  z-index: 3;
+}
+.household-badge svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
 
 .avatar-initial {
   display: flex;
@@ -1406,6 +1427,7 @@ input[type='checkbox'] {
   gap: 4px;
 }
 .sentiment-face {
+  position: relative;
   display: inline-flex;
   line-height: 0;
 }
@@ -1436,10 +1458,21 @@ input[type='checkbox'] {
 .sentiment-incomplete .sdot:not(.empty) {
   background: var(--grey-text);
 }
+/* Caution triangle sits as a badge on the face's bottom-right corner, so the
+   face itself stays centered in the column whether or not a warning is shown. */
 .sentiment-warn {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
   display: inline-flex;
-  align-items: center;
-  margin-left: 2px;
+  line-height: 0;
+  z-index: 2;
+}
+.sentiment-warn svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff);
 }
 
 .status-badge {
