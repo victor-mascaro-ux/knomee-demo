@@ -755,7 +755,7 @@ function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }
       </svg>
       {showWarn && (
         <span className="sentiment-warn">
-          <WarnIcon />
+          <WarnIcon color="#b91c1c" />
         </span>
       )}
     </span>

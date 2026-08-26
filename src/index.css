@@ -894,7 +894,7 @@ input[type='checkbox'] {
 .new-tag.avatar-new {
   position: absolute;
   left: 50%;
-  bottom: -7px;
+  top: -8px;
   transform: translateX(-50%);
   margin: 0;
   z-index: 2;

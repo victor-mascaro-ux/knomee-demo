@@ -74,6 +74,7 @@ const featuredClients: Client[] = [
     status: 'complete',
     lastSignIn: '05/30/2025',
     tier: 'engaged',
+    isNew: true,
   },
   {
     name: 'Jorday Ray',
