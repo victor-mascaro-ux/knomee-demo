@@ -798,19 +798,19 @@ body {
   width: 55px;
 }
 .clients-table .col-name {
-  width: 330px;
+  width: 370px;
 }
 .clients-table .col-household {
-  width: 190px;
+  width: 240px;
 }
 .clients-table .col-sentiment {
-  width: 130px;
+  width: 175px;
 }
 .clients-table .col-status {
-  width: 150px;
+  width: 200px;
 }
 .clients-table .col-signin {
-  width: 150px;
+  width: 235px;
 }
 .clients-table .col-dots {
   width: auto;
