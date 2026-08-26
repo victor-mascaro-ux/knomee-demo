@@ -353,6 +353,44 @@ body {
   font-weight: 600;
   color: var(--grey-text);
 }
+/* "Tap a tier to filter" hint in the distribution header. */
+.dist-filter-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a69fb5;
+}
+/* Incomplete-profiles footnote, moved below the legend. */
+.dist-foot {
+  margin: 12px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a69fb5;
+}
+/* Bars-aligned legend: each tier label sits under the LEFT edge of its bar
+   segment (same flex + gap as the bar), and the last one right-aligns to the
+   bar's right edge. */
+.dist-legend-bars {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.dist-legend-bars .dist-leg {
+  align-items: flex-start;
+  min-width: 0;
+}
+.dist-legend-bars .dist-leg:last-child {
+  align-items: flex-end;
+  text-align: right;
+}
+.dist-legend-bars .dist-leg-name {
+  white-space: nowrap;
+}
+.dist-legend-bars .dist-leg-range {
+  text-align: inherit;
+}
 
 .dot {
   width: 9px;
@@ -637,15 +675,50 @@ body {
   margin-top: 12px;
 }
 .col-name {
-  width: 250px;
+  width: 330px;
 }
 .col-kq {
   width: 100px;
+  text-align: center;
 }
 .col-num {
   width: 80px;
   color: #444;
   text-align: center;
+}
+/* Center the KQ / Intent / Clarity / Receptivity headers too (the base thead
+   rule left-aligns everything). */
+.prospects-table thead th.col-kq,
+.prospects-table thead th.col-num,
+.clients-table thead th.col-sentiment {
+  text-align: center;
+}
+/* Center the sentiment faces under their centered header. */
+.col-sentiment {
+  text-align: center;
+}
+/* KQ Score sortable header button + direction caret. */
+.th-sort-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.th-caret {
+  display: inline-flex;
+  color: #b7b0c2;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.th-caret.is-active {
+  color: var(--plum);
+}
+.th-caret.is-asc {
+  transform: rotate(180deg);
 }
 /* Center the number horizontally and give it a line box the same height as the
    KQ score badge (40px) so, top-aligned, its midline matches the badge number. */
@@ -713,6 +786,35 @@ body {
   width: 110px;
   color: #444;
   white-space: nowrap;
+}
+/* Clients table: fixed layout so the data columns keep tidy widths and the
+   trailing (dots) column absorbs the slack — Last Sign In then ends well before
+   the KR range in the tier header, separating the two like Top Action does on
+   Prospects. */
+.clients-table {
+  table-layout: fixed;
+}
+.clients-table .col-check {
+  width: 55px;
+}
+.clients-table .col-name {
+  width: 330px;
+}
+.clients-table .col-household {
+  width: 190px;
+}
+.clients-table .col-sentiment {
+  width: 130px;
+}
+.clients-table .col-status {
+  width: 150px;
+}
+.clients-table .col-signin {
+  width: 150px;
+}
+.clients-table .col-dots {
+  width: auto;
+  text-align: right;
 }
 .col-bolt {
   width: 60px;
