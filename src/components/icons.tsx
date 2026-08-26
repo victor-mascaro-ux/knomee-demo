@@ -13,11 +13,20 @@ export function KnomeeMark({ size = 26, color = 'currentColor' }: { size?: numbe
 
 export function HouseIcon({ color = 'currentColor' }: { color?: string }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        d="M8 2.6 2 7.3V13a.6.6 0 0 0 .6.6H6V9.9h4v3.7h3.4a.6.6 0 0 0 .6-.6V7.3L8 2.6z"
-        fill={color}
-      />
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 11 12 4l9 7" />
+      <path d="M5.5 9.2V19h13V9.2" />
+      <path d="M10 19v-3.4a2 2 0 0 1 4 0V19" />
     </svg>
   )
 }

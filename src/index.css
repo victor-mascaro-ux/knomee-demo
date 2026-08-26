@@ -908,18 +908,18 @@ input[type='checkbox'] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--plum);
-  color: #fff;
+  background: #e9d9f7;
+  color: var(--plum);
   box-shadow: 0 0 0 2px #fff;
   z-index: 3;
 }
 .household-badge svg {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 }
 
 .avatar-initial {
