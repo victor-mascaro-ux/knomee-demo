@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
 import type { Prospect } from '../data/prospects'
+import { DownloadIcon } from '../components/icons'
 
 type ProfileTab = 'id' | 'readiness' | 'playbook'
 
@@ -41,6 +42,15 @@ export default function ProspectProfileScreen({
   const [tab, setTab] = useState<ProfileTab>('id')
   const initial = prospect.name.charAt(0).toUpperCase()
   const fi = financialId
+
+  // Open the profile scrolled to the top, regardless of where the prospect's
+  // row sat in the table when it was clicked.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    const el = document.scrollingElement || document.documentElement
+    if (el) el.scrollTop = 0
+    if (document.body) document.body.scrollTop = 0
+  }, [prospect.name])
 
   return (
     <div className="pp">
@@ -91,8 +101,8 @@ export default function ProspectProfileScreen({
 
           <div className="pp-title-row">
             <h1 className="pp-title">{prospect.name}’s Financial ID</h1>
-            <button className="pp-download" type="button">
-              ⬇ Download PDF
+            <button className="btn btn-download active" type="button">
+              <DownloadIcon /> Download PDF
             </button>
           </div>
 
@@ -147,6 +157,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">💠 Financial Joy</span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
                     <div className="pp-chips">
@@ -161,6 +172,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">🧭 Future You</span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     {(
                       [
@@ -185,6 +197,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">🌸 Outlook</span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     <span className="pp-fy-label pp-concern">Concerns</span>
                     {fi.outlook.concerns.map((c) => (

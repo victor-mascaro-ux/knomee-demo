@@ -486,41 +486,13 @@ function ProspectRow({
 // when the text is longer than that, reveal a chevron to expand the cell (and
 // its row) to the full text, and collapse it again.
 function TopActionCell({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false)
-  const [overflowing, setOverflowing] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const measure = () => {
-      // Overflow is only meaningful while clamped, so skip when expanded and
-      // keep the last known value.
-      if (expanded) return
-      setOverflowing(el.scrollHeight - el.clientHeight > 1)
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [text, expanded])
-
+  // Clamp to two lines with an ellipsis; the full text shows in a native
+  // tooltip on hover.
   return (
     <div className="top-action">
-      <div ref={ref} className={`top-action-text${expanded ? ' expanded' : ''}`}>
+      <div className="top-action-text" title={text}>
         {text}
       </div>
-      {overflowing && (
-        <button
-          type="button"
-          className="top-action-toggle"
-          aria-expanded={expanded}
-          aria-label={expanded ? 'Collapse' : 'Expand'}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? <ChevronUp /> : <ChevronDown />}
-        </button>
-      )}
     </div>
   )
 }
@@ -788,7 +760,7 @@ const SENTIMENT_FACES = [
   { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
   { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
   { color: '#6ee787', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#22c55e', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#34e07a', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -3335,7 +3307,7 @@ export default function App() {
       </header>
 
       {profileProspect ? (
-        <main className="content">
+        <main className="content content-profile">
           <ProspectProfileScreen
             prospect={profileProspect}
             onBack={() => setProfileProspect(null)}

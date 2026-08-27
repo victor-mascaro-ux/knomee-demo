@@ -743,19 +743,14 @@ body {
   align-items: flex-start;
   gap: 6px;
 }
-/* Clamp the copy to 3 lines with an ellipsis; the .expanded modifier releases
-   the clamp so the full text (and its row) grows to fit. */
+/* Clamp the copy to 2 lines with an ellipsis; the full text shows in a native
+   tooltip (title) on hover. */
 .top-action-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-}
-.top-action-text.expanded {
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  overflow: visible;
 }
 .top-action-toggle {
   flex: none;
@@ -1007,6 +1002,11 @@ input[type='checkbox'] {
 }
 .name-line .new-tag {
   align-self: center;
+}
+/* Client names match the prospect table's lighter weight. */
+.clients-table .name-line,
+.clients-table .name-text {
+  font-weight: 400;
 }
 /* Clickable name (opens the prospect's profile). */
 button.name-link-btn {
