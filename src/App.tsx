@@ -772,8 +772,8 @@ const SENTIMENT_FACES = [
   { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
   { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
   { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
-  { color: '#22c55e', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#15803d', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#4ade80', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#16a34a', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -835,9 +835,6 @@ function ClientRow({
           </div>
         </div>
       </td>
-      <td className="col-kr">
-        <ClientScoreBadge tier={c.tier} value={c.kr} />
-      </td>
       <td className="col-household">
         {c.household ? (
           <a href="#" className="household-link" onClick={(e) => e.preventDefault()}>
@@ -846,6 +843,9 @@ function ClientRow({
         ) : (
           <span className="dash">—</span>
         )}
+      </td>
+      <td className="col-kr">
+        <ClientScoreBadge tier={c.tier} value={c.kr} />
       </td>
       <td className="col-sentiment">
         <SentimentFace value={c.sentiment} warn={c.warn} />
@@ -1215,8 +1215,8 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-kr">KR Score</th>
               <th className="col-household">Household</th>
+              <th className="col-kr">KR Score</th>
               <th className="col-sentiment">Sentiment</th>
               <th className="col-status">
                 <span className="th-sort">Status <CaretDown /></span>
