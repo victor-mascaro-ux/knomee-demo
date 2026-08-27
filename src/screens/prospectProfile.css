@@ -1,10 +1,10 @@
 /* Prospect "Financial ID" profile page. Namespaced under .pp so it never
    collides with the dashboards. Colors lean on the app tokens in index.css. */
 
-/* Tighter than the dashboards — the profile leads with a small breadcrumb, so
-   it doesn't need the full page inset above and to the sides. */
+/* Align horizontally with the header logo (page-pad), but lead tighter at the
+   top since the profile opens with a small breadcrumb rather than a title. */
 .content-profile {
-  padding: 16px 24px 48px;
+  padding: 12px var(--page-pad) 48px;
 }
 .pp {
   padding: 0 0 40px;
@@ -50,6 +50,10 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  background: #f9fafb;
+  border: 1px solid var(--line, #e7e4ee);
+  border-radius: 14px;
+  padding: 20px 14px 22px;
 }
 .pp-avatar {
   width: 96px;
@@ -186,7 +190,7 @@
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 14px;
   padding: 16px 18px;
-  background: #fff;
+  background: #f9fafb;
   margin-bottom: 16px;
 }
 .pp-card-head {
