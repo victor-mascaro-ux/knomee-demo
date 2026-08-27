@@ -62,6 +62,7 @@ body {
   background: var(--plum);
   display: flex;
   align-items: center;
+  border-bottom: 1px solid var(--line);
 }
 /* Inner wrapper shares the content's max-width + horizontal padding so the
    logo lines up exactly with the page title and the first tab below it. */
