@@ -739,18 +739,41 @@ body {
   line-height: 1.45;
 }
 .top-action {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 6px;
 }
-/* Clamp the copy to 2 lines with an ellipsis; the full text shows in a native
-   tooltip (title) on hover. */
+/* Clamp the copy to 2 lines with an ellipsis. */
 .top-action-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+}
+/* On hover, the full text opens in a card floating over the dashboard. */
+.top-action-pop {
+  position: absolute;
+  top: -10px;
+  left: -12px;
+  right: -12px;
+  padding: 11px 13px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(20, 10, 40, 0.2);
+  color: #444;
+  line-height: 1.45;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 50;
+}
+.top-action:hover .top-action-pop {
+  opacity: 1;
+  visibility: visible;
 }
 .top-action-toggle {
   flex: none;
@@ -1908,6 +1931,26 @@ button.name-link-btn:hover .name-text {
   font-size: 15px;
   font-weight: 700;
   color: #111;
+}
+.chart-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chart-delta.is-up {
+  color: #16a34a;
+}
+.chart-delta.is-down {
+  color: #dc2626;
+}
+.chart-delta-note {
+  margin-left: 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--grey-text);
 }
 
 .confidence {

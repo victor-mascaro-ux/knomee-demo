@@ -486,13 +486,12 @@ function ProspectRow({
 // when the text is longer than that, reveal a chevron to expand the cell (and
 // its row) to the full text, and collapse it again.
 function TopActionCell({ text }: { text: string }) {
-  // Clamp to two lines with an ellipsis; the full text shows in a native
-  // tooltip on hover.
+  // Clamp to two lines; on hover, the full text opens in a card that floats
+  // over the dashboard (no ellipsis).
   return (
     <div className="top-action">
-      <div className="top-action-text" title={text}>
-        {text}
-      </div>
+      <div className="top-action-text">{text}</div>
+      <div className="top-action-pop">{text}</div>
     </div>
   )
 }
@@ -760,7 +759,7 @@ const SENTIMENT_FACES = [
   { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
   { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
   { color: '#6ee787', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#34e07a', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#17c964', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -770,7 +769,7 @@ function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }
   // Caution triangle only flags the two lowest (unhappy) faces.
   const showWarn = warn && rounded <= 2
   return (
-    <span className="sentiment-face" title={`${f.label} · ${rounded}/5`}>
+    <span className="sentiment-face tt" data-tip={`${f.label} · ${rounded}/5`}>
       <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
         <circle cx="12" cy="12" r="12" fill={f.color} />
         <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
@@ -996,6 +995,18 @@ function ActiveChart() {
   )
 }
 
+// Small week-over-week delta: an up/down triangle + magnitude, colored by
+// direction. `note` (e.g. "this week") makes the weekly cadence explicit.
+function Delta({ value, note }: { value: number; note?: string }) {
+  const up = value >= 0
+  return (
+    <span className={`chart-delta ${up ? 'is-up' : 'is-down'}`}>
+      {up ? '▲' : '▼'} {Math.abs(value)}
+      {note ? <span className="chart-delta-note">{note}</span> : null}
+    </span>
+  )
+}
+
 const CLIENT_TIER_META = [
   { tierId: 'engaged' as const, label: 'Tier 1 · Engaged', range: '70–100 KR', seg: 'seg-c1', dot: 'dot-c1' },
   { tierId: 'attention' as const, label: 'Tier 2 · Attention', range: '40–69 KR', seg: 'seg-c2', dot: 'dot-c2' },
@@ -1103,7 +1114,8 @@ function ClientsMetrics({
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{confidenceScore}</span>
-              <HelpTip text="Blended client sentiment, from frustrated to delighted." />
+              <Delta value={2} note="this week" />
+              <HelpTip text="Blended client sentiment, from frustrated to delighted. Measured weekly." />
             </span>
           </div>
           <ConfidencePie />
@@ -1115,6 +1127,7 @@ function ClientsMetrics({
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{activeThisWeek}%</span>
+              <Delta value={activeSeries[activeSeries.length - 1].value - activeSeries[activeSeries.length - 2].value} />
               <HelpTip text="Share of clients logging in each week." />
             </span>
           </div>
