@@ -1001,7 +1001,21 @@ function ActiveChart() {
   )
 }
 
-function ClientsMetrics({ clients }: { clients: Client[] }) {
+const CLIENT_TIER_META = [
+  { tierId: 'engaged' as const, label: 'Tier 1 · Engaged', range: '70–100 KR', seg: 'seg-c1', dot: 'dot-c1' },
+  { tierId: 'attention' as const, label: 'Tier 2 · Attention', range: '40–69 KR', seg: 'seg-c2', dot: 'dot-c2' },
+  { tierId: 'reconnect' as const, label: 'Tier 3 · Reconnect', range: '0–39 KR', seg: 'seg-c3', dot: 'dot-c3' },
+]
+
+function ClientsMetrics({
+  clients,
+  filterTier,
+  onPickTier,
+}: {
+  clients: Client[]
+  filterTier: ClientTier | null
+  onPickTier: (t: ClientTier) => void
+}) {
   const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
   const engaged = count('engaged')
   const attention = count('attention')
@@ -1037,49 +1051,52 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
         <div className="metric-tile distribution">
           <div className="dist-head">
             <span className="metric-label">TIER DISTRIBUTION</span>
-            {incomplete > 0 && (
-              <span className="dist-note">
-                {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown
+            {filterTier ? (
+              <button className="cmd-clear" type="button" onClick={() => onPickTier(filterTier)}>
+                Clear filter ✕
+              </button>
+            ) : (
+              <span className="dist-filter-hint">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                  <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
+                </svg>
+                Tap a tier to filter
               </span>
             )}
           </div>
           <div className="dist-bar">
-            <span
-              className="seg seg-c1 tt"
-              style={{ flex: engaged || 0.001 }}
-              data-tip={`Tier 1 · ${engaged} · ${pct(engaged)}%`}
-            >
-              {engaged}
-            </span>
-            <span
-              className="seg seg-c2 tt"
-              style={{ flex: attention || 0.001 }}
-              data-tip={`Tier 2 · ${attention} · ${pct(attention)}%`}
-            >
-              {attention}
-            </span>
-            <span
-              className="seg seg-c3 tt"
-              style={{ flex: reconnect || 0.001 }}
-              data-tip={`Tier 3 · ${reconnect} · ${pct(reconnect)}%`}
-            >
-              {reconnect}
-            </span>
+            {CLIENT_TIER_META.map((m) => {
+              const n = count(m.tierId)
+              return (
+                <button
+                  key={m.tierId}
+                  type="button"
+                  className={`seg ${m.seg} tt ${filterTier === m.tierId ? 'is-sel' : ''} ${
+                    filterTier && filterTier !== m.tierId ? 'is-dim' : ''
+                  }`}
+                  style={{ flex: n || 0.001 }}
+                  onClick={() => onPickTier(m.tierId)}
+                  aria-pressed={filterTier === m.tierId}
+                  data-tip={`${m.label} · ${n} · ${pct(n)}% — tap to filter`}
+                >
+                  {n}
+                </button>
+              )
+            })}
           </div>
-          <div className="dist-legend">
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c1" />Tier 1 · Engaged</span>
-              <span className="dist-leg-range">70–100 KR</span>
-            </div>
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c2" />Tier 2 · Attention</span>
-              <span className="dist-leg-range">40–69 KR</span>
-            </div>
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c3" />Tier 3 · Reconnect</span>
-              <span className="dist-leg-range">0–39 KR</span>
-            </div>
+          <div className="dist-legend dist-legend-bars">
+            {CLIENT_TIER_META.map((m) => (
+              <div className="dist-leg" key={m.tierId} style={{ flex: count(m.tierId) || 0.001 }}>
+                <span className="dist-leg-name"><i className={`dot ${m.dot}`} />{m.label}</span>
+                <span className="dist-leg-range">{m.range}</span>
+              </div>
+            ))}
           </div>
+          {incomplete > 0 && (
+            <p className="dist-foot">
+              {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown
+            </p>
+          )}
         </div>
       </div>
 
@@ -1169,10 +1186,12 @@ function ClientsScreen({
       else n.add(id)
       return n
     })
+  const [tierFilter, setTierFilter] = useState<ClientTier | null>(null)
+  const pickTier = (t: ClientTier) => setTierFilter((prev) => (prev === t ? null : t))
   return (
     <>
       <h1 className="page-title">My Clients</h1>
-      <ClientsMetrics clients={clients} />
+      <ClientsMetrics clients={clients} filterTier={tierFilter} onPickTier={pickTier} />
       <ClientInsights />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <div className="table-wrap">
@@ -1199,6 +1218,7 @@ function ClientsScreen({
           </thead>
           <tbody>
             {clientTierGroups.map((group) => {
+              if (tierFilter && group.id !== tierFilter) return null
               const rows = clients.filter((c) => c.tier === group.id)
               if (rows.length === 0) return null
               // In the incomplete group, invited (pending) rows sit below the
