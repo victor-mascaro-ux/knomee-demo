@@ -147,7 +147,7 @@ body {
 }
 
 .tab-active {
-  color: #111;
+  color: var(--plum);
   font-weight: 600;
 }
 
@@ -841,7 +841,8 @@ input[type='checkbox'] {
 .group-header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
   padding: 9px 20px;
   font-size: 12.5px;
   font-weight: 600;
@@ -850,9 +851,48 @@ input[type='checkbox'] {
 }
 
 .group-range {
+  margin-left: auto;
   font-weight: 600;
   font-size: 12px;
   opacity: 0.95;
+}
+
+/* Collapsible tier groups */
+.group-header {
+  cursor: pointer;
+}
+.group-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 -2px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.18s ease;
+}
+.group-header.is-collapsed .group-toggle {
+  transform: rotate(-90deg);
+}
+.group-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.group-incomplete .group-count,
+.client-group-incomplete .group-count {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .group-tier1 .group-header-inner {

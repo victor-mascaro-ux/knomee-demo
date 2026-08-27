@@ -1,4 +1,5 @@
 import {
+  Fragment,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -576,20 +577,33 @@ function ProspectsTable({
   allChecked: boolean
   onToggleAll: () => void
 }) {
-  // KQ Score sort: null = book order, then asc (low→high) ↔ desc on each click.
-  // Applied within each tier group so the tier bands stay intact.
+  // KQ Score sort. null = book order. 'desc' (caret down): normal tier order,
+  // strongest prospect first within each tier. 'asc' (caret up): the whole
+  // table flips — tier groups run 3 → 2 → 1 — with each tier still ordered
+  // strongest-first; incomplete profiles stay pinned last either way.
   const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const toggleGroup = (id: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
   const sortRows = (rows: Prospect[]) => {
     if (!sortDir) return rows
-    const scored = rows.filter((p) => p.kq !== null)
+    const scored = rows
+      .filter((p) => p.kq !== null)
+      .sort((a, b) => (b.kq as number) - (a.kq as number))
     const unscored = rows.filter((p) => p.kq === null)
-    scored.sort((a, b) =>
-      sortDir === 'asc'
-        ? (a.kq as number) - (b.kq as number)
-        : (b.kq as number) - (a.kq as number),
-    )
     return [...scored, ...unscored]
   }
+  // Scored tiers reverse when the caret points up; incomplete is always last.
+  const orderedGroups = (() => {
+    const scored = tierGroups.filter((g) => g.id !== 'incomplete')
+    const rest = tierGroups.filter((g) => g.id === 'incomplete')
+    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest]
+  })()
   return (
     <div className="table-wrap">
       <table className="prospects-table">
@@ -608,7 +622,7 @@ function ProspectsTable({
               <button
                 type="button"
                 className="th-sort th-sort-btn"
-                onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
                 aria-label="Sort by KQ score"
               >
                 KQ Score
@@ -627,29 +641,47 @@ function ProspectsTable({
           </tr>
         </thead>
         <tbody>
-          {tierGroups.map((group) => {
+          {orderedGroups.map((group) => {
             const rows = prospects.filter((p) => p.tier === group.id)
             if (rows.length === 0) return null
+            const isCollapsed = collapsed.has(group.id)
             return (
-              <>
-                <tr className={`group-header group-${group.id}`} key={`h-${group.id}`}>
+              <Fragment key={`g-${group.id}`}>
+                <tr
+                  className={`group-header group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
+                  onClick={() => toggleGroup(group.id)}
+                >
                   <td colSpan={10}>
                     <div className="group-header-inner">
+                      <button
+                        type="button"
+                        className="group-toggle"
+                        aria-expanded={!isCollapsed}
+                        aria-label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleGroup(group.id)
+                        }}
+                      >
+                        <ChevronDown />
+                      </button>
                       <span>{group.title}</span>
+                      <span className="group-count">{rows.length}</span>
                       {group.range && <span className="group-range">{group.range}</span>}
                     </div>
                   </td>
                 </tr>
-                {sortRows(rows).map((p) => (
-                  <ProspectRow
-                    p={p}
-                    key={p.name}
-                    onConvert={onConvert}
-                    checked={selected.has(p.name)}
-                    onToggle={() => onToggle(p.name)}
-                  />
-                ))}
-              </>
+                {!isCollapsed &&
+                  sortRows(rows).map((p) => (
+                    <ProspectRow
+                      p={p}
+                      key={p.name}
+                      onConvert={onConvert}
+                      checked={selected.has(p.name)}
+                      onToggle={() => onToggle(p.name)}
+                    />
+                  ))}
+              </Fragment>
             )
           })}
         </tbody>
@@ -733,10 +765,10 @@ function ProspectsScreen({
 // → yellow neutral → lime smile → green grin.
 const SENTIMENT_FACES = [
   { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
-  { color: '#f59e0b', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
-  { color: '#eab308', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
-  { color: '#a3e635', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#84cc16', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
+  { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
+  { color: '#22c55e', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#15803d', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -1129,6 +1161,14 @@ function ClientsScreen({
     })
   const allChecked = selected.size === allNames.length && allNames.length > 0
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const toggleGroup = (id: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
   return (
     <>
       <h1 className="page-title">My Clients</h1>
@@ -1161,25 +1201,52 @@ function ClientsScreen({
             {clientTierGroups.map((group) => {
               const rows = clients.filter((c) => c.tier === group.id)
               if (rows.length === 0) return null
+              // In the incomplete group, invited (pending) rows sit below the
+              // started-but-unfinished (incomplete) rows.
+              const orderedRows =
+                group.id === 'incomplete'
+                  ? [
+                      ...rows.filter((c) => c.status !== 'pending'),
+                      ...rows.filter((c) => c.status === 'pending'),
+                    ]
+                  : rows
+              const isCollapsed = collapsed.has(group.id)
               return (
-                <>
-                  <tr className={`group-header client-group-${group.id}`} key={`ch-${group.id}`}>
+                <Fragment key={`cg-${group.id}`}>
+                  <tr
+                    className={`group-header client-group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
+                    onClick={() => toggleGroup(group.id)}
+                  >
                     <td colSpan={7}>
                       <div className="group-header-inner">
+                        <button
+                          type="button"
+                          className="group-toggle"
+                          aria-expanded={!isCollapsed}
+                          aria-label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleGroup(group.id)
+                          }}
+                        >
+                          <ChevronDown />
+                        </button>
                         <span>{group.title}</span>
+                        <span className="group-count">{rows.length}</span>
                         {group.range && <span className="group-range">{group.range}</span>}
                       </div>
                     </td>
                   </tr>
-                  {rows.map((c) => (
-                    <ClientRow
-                      c={c}
-                      key={c.name}
-                      checked={selected.has(c.name)}
-                      onToggle={() => toggle(c.name)}
-                    />
-                  ))}
-                </>
+                  {!isCollapsed &&
+                    orderedRows.map((c) => (
+                      <ClientRow
+                        c={c}
+                        key={c.name}
+                        checked={selected.has(c.name)}
+                        onToggle={() => toggle(c.name)}
+                      />
+                    ))}
+                </Fragment>
               )
             })}
           </tbody>
