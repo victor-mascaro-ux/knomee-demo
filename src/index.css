@@ -1410,8 +1410,14 @@ button.name-link-btn:hover .name-text {
 .chart-head-l {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 4px 7px;
   min-width: 0;
+}
+/* When a "Clear filter" appears in a chart head, it drops to its own line
+   under the label rather than crowding the figure. */
+.chart-head-l .cmd-clear {
+  flex-basis: 100%;
 }
 
 .search-box {
