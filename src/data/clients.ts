@@ -4,6 +4,7 @@ export interface Client {
   name: string
   email: string
   household?: string
+  kr?: number | null // KR score within the tier band; null for incomplete profiles
   sentiment: number | null // filled dots out of 5; null → not applicable
   warn?: boolean // amber caution marker on the sentiment
   status: 'complete' | 'incomplete' | 'pending'
@@ -245,8 +246,26 @@ function randomClients(count: number, seed: number): Client[] {
   return out
 }
 
+// A stable KR score inside the client's tier band, derived from the name so it
+// never shifts between builds. Incomplete profiles have no score.
+const KR_BAND: Record<Exclude<ClientTier, 'incomplete'>, [number, number]> = {
+  engaged: [70, 99],
+  attention: [40, 69],
+  reconnect: [5, 39],
+}
+function krForClient(c: Client): number | null {
+  if (c.tier === 'incomplete') return null
+  if (c.kr != null) return c.kr
+  const [lo, hi] = KR_BAND[c.tier]
+  let h = 0
+  for (let i = 0; i < c.name.length; i++) h = (h * 31 + c.name.charCodeAt(i)) >>> 0
+  return lo + (h % (hi - lo + 1))
+}
+
 // Base book of business (before any prospect is converted this session).
-export const baseClients: Client[] = [...featuredClients, ...randomClients(22, 0xc11e)]
+export const baseClients: Client[] = [...featuredClients, ...randomClients(22, 0xc11e)].map(
+  (c) => ({ ...c, kr: krForClient(c) }),
+)
 
 // Stats derived from the book so every headline agrees with the table.
 const clientCount = (t: ClientTier) => baseClients.filter((c) => c.tier === t).length
@@ -314,6 +333,7 @@ export function convertedClient(name: string, email: string): Client {
   return {
     name,
     email,
+    kr: 78,
     sentiment: 4,
     status: 'complete',
     lastSignIn: new Date()
