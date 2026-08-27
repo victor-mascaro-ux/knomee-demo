@@ -248,12 +248,12 @@ function CommandCenter() {
                     key={m.key}
                     type="button"
                     style={{ flex: n || 0.001 }}
-                    className={`seg ${m.seg} ${tier === m.key ? 'is-sel' : ''} ${
+                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
                       tier && tier !== m.key ? 'is-dim' : ''
                     }`}
                     onClick={() => pickTier(m.key)}
                     aria-pressed={tier === m.key}
-                    data-tip={`${m.key} · ${m.name} · ${n} — tap to focus`}
+                    data-tip={`${m.key} · ${m.name} · ${n}`}
                   >
                     {n}
                   </button>
@@ -1023,13 +1023,8 @@ function ClientsMetrics({
   onPickTier: (t: ClientTier) => void
 }) {
   const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
-  const engaged = count('engaged')
-  const attention = count('attention')
-  const reconnect = count('reconnect')
   const incomplete = count('incomplete')
   const total = clients.length
-  const scored = engaged + attention + reconnect
-  const pct = (n: number) => (scored ? Math.round((n / scored) * 100) : 0)
 
   return (
     <CollapsibleCard
@@ -1083,7 +1078,7 @@ function ClientsMetrics({
                   style={{ flex: n || 0.001 }}
                   onClick={() => onPickTier(m.tierId)}
                   aria-pressed={filterTier === m.tierId}
-                  data-tip={`${m.label} · ${n} · ${pct(n)}% — tap to filter`}
+                  data-tip={`${m.label} · ${n}`}
                 >
                   {n}
                 </button>
