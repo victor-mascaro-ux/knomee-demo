@@ -70,6 +70,7 @@ import {
   HouseIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
+import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
 
@@ -79,17 +80,23 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
 // Shared name + chevron (+ optional "new" tag) so the Prospects and Clients
 // tables render the label identically and the arrow stays aligned with the name.
-function NameLink({ name }: { name: string }) {
-  return (
-    <span className="name-line">
-      <span className="name-text">
-        {name}
-        <span className="name-chevron" aria-hidden>
-          ›
-        </span>
+function NameLink({ name, onClick }: { name: string; onClick?: () => void }) {
+  const inner = (
+    <span className="name-text">
+      {name}
+      <span className="name-chevron" aria-hidden>
+        ›
       </span>
     </span>
   )
+  if (onClick) {
+    return (
+      <button type="button" className="name-line name-link-btn" onClick={onClick}>
+        {inner}
+      </button>
+    )
+  }
+  return <span className="name-line">{inner}</span>
 }
 
 // Standard card help affordance: a "?" glyph that reveals its hint on hover.
@@ -396,11 +403,13 @@ function Avatar({ p }: { p: Prospect }) {
 function ProspectRow({
   p,
   onConvert,
+  onOpenProfile,
   checked,
   onToggle,
 }: {
   p: Prospect
   onConvert: (p: Prospect) => void
+  onOpenProfile: (p: Prospect) => void
   checked: boolean
   onToggle: () => void
 }) {
@@ -419,7 +428,7 @@ function ProspectRow({
         <div className="name-cell">
           <Avatar p={p} />
           <div className="name-block">
-            <NameLink name={p.name} />
+            <NameLink name={p.name} onClick={() => onOpenProfile(p)} />
             <span className="email-line">{p.email}</span>
           </div>
         </div>
@@ -571,12 +580,14 @@ function RowMenu({ items }: { items: MenuItem[] }) {
 
 function ProspectsTable({
   onConvert,
+  onOpenProfile,
   selected,
   onToggle,
   allChecked,
   onToggleAll,
 }: {
   onConvert: (p: Prospect) => void
+  onOpenProfile: (p: Prospect) => void
   selected: Set<string>
   onToggle: (name: string) => void
   allChecked: boolean
@@ -682,6 +693,7 @@ function ProspectsTable({
                       p={p}
                       key={p.name}
                       onConvert={onConvert}
+                      onOpenProfile={onOpenProfile}
                       checked={selected.has(p.name)}
                       onToggle={() => onToggle(p.name)}
                     />
@@ -731,10 +743,12 @@ function ProspectsScreen({
   onConvert,
   onDownload,
   onInvite,
+  onOpenProfile,
 }: {
   onConvert: (p: Prospect) => void
   onDownload: () => void
   onInvite: () => void
+  onOpenProfile: (p: Prospect) => void
 }) {
   const allNames = prospects.map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -754,6 +768,7 @@ function ProspectsScreen({
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
+        onOpenProfile={onOpenProfile}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}
@@ -772,8 +787,8 @@ const SENTIMENT_FACES = [
   { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
   { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
   { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
-  { color: '#4ade80', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#16a34a', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#6ee787', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#22c55e', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -3061,6 +3076,9 @@ export default function App() {
   const tabsInd = useSlideIndicator<HTMLElement>(screen)
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
+  // When set, a prospect's full "Financial ID" profile page takes over the main
+  // area (reached by clicking a prospect's name in the table).
+  const [profileProspect, setProfileProspect] = useState<Prospect | null>(null)
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
   const showToast = (msg: string) => {
     setToast({ show: true, msg })
@@ -3316,7 +3334,15 @@ export default function App() {
         </div>
       </header>
 
-      {adminView ? (
+      {profileProspect ? (
+        <main className="content">
+          <ProspectProfileScreen
+            prospect={profileProspect}
+            onBack={() => setProfileProspect(null)}
+            onConvert={(p) => setConvertTarget(p)}
+          />
+        </main>
+      ) : adminView ? (
         <main className="content">
           <AdminScreen />
         </main>
@@ -3366,6 +3392,7 @@ export default function App() {
               onConvert={setConvertTarget}
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('prospect')}
+              onOpenProfile={setProfileProspect}
             />
           ))}
         {screen === 'clients' &&

@@ -1008,6 +1008,19 @@ input[type='checkbox'] {
 .name-line .new-tag {
   align-self: center;
 }
+/* Clickable name (opens the prospect's profile). */
+button.name-link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+button.name-link-btn:hover .name-text {
+  text-decoration: underline;
+}
 
 .email-line {
   font-size: 12.5px;
