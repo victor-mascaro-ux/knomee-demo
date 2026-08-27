@@ -33,10 +33,10 @@ export const clientTierGroups: ClientTierGroup[] = [
 export const confidenceScore = 33
 export const confidenceSegments = [
   { label: 'Frustrated', color: '#ef4444', pct: 7 },
-  { label: 'Concerned', color: '#f59e0b', pct: 21 },
-  { label: 'Neutral', color: '#eab308', pct: 18 },
-  { label: 'Positive', color: '#a3e635', pct: 26 },
-  { label: 'Delighted', color: '#84cc16', pct: 28 },
+  { label: 'Concerned', color: '#f97316', pct: 21 },
+  { label: 'Neutral', color: '#facc15', pct: 18 },
+  { label: 'Positive', color: '#22c55e', pct: 26 },
+  { label: 'Delighted', color: '#15803d', pct: 28 },
 ]
 
 // "Clients active this week" trend (percent of clients active per week).
