@@ -772,8 +772,8 @@ const SENTIMENT_FACES = [
   { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
   { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
   { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
-  { color: '#22c55e', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#15803d', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { color: '#4ade80', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#16a34a', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -835,9 +835,6 @@ function ClientRow({
           </div>
         </div>
       </td>
-      <td className="col-kr">
-        <ClientScoreBadge tier={c.tier} value={c.kr} />
-      </td>
       <td className="col-household">
         {c.household ? (
           <a href="#" className="household-link" onClick={(e) => e.preventDefault()}>
@@ -846,6 +843,9 @@ function ClientRow({
         ) : (
           <span className="dash">—</span>
         )}
+      </td>
+      <td className="col-kr">
+        <ClientScoreBadge tier={c.tier} value={c.kr} />
       </td>
       <td className="col-sentiment">
         <SentimentFace value={c.sentiment} warn={c.warn} />
@@ -1196,6 +1196,45 @@ function ClientsScreen({
     })
   const [tierFilter, setTierFilter] = useState<ClientTier | null>(null)
   const pickTier = (t: ClientTier) => setTierFilter((prev) => (prev === t ? null : t))
+  // Column sort: KR (prospect-style — flips the tier order on ascending) or
+  // Household (alphabetical within each tier). Only one is active at a time.
+  const [sort, setSort] = useState<{ col: 'kr' | 'household' | null; dir: 'asc' | 'desc' }>({
+    col: null,
+    dir: 'desc',
+  })
+  const clickSort = (col: 'kr' | 'household') =>
+    setSort((s) =>
+      s.col === col
+        ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' }
+        : { col, dir: col === 'household' ? 'asc' : 'desc' },
+    )
+  // Scored tiers flip when KR is sorted ascending; incomplete stays last.
+  const krFlip = sort.col === 'kr' && sort.dir === 'asc'
+  const orderedGroups = (() => {
+    const scored = clientTierGroups.filter((g) => g.id !== 'incomplete')
+    const rest = clientTierGroups.filter((g) => g.id === 'incomplete')
+    return [...(krFlip ? [...scored].reverse() : scored), ...rest]
+  })()
+  const orderRows = (rows: Client[], groupId: ClientTier): Client[] => {
+    // The incomplete group keeps pending below the started-but-unfinished rows.
+    if (groupId === 'incomplete') {
+      return [...rows.filter((c) => c.status !== 'pending'), ...rows.filter((c) => c.status === 'pending')]
+    }
+    if (sort.col === 'kr') {
+      return [...rows].sort((a, b) => (b.kr ?? 0) - (a.kr ?? 0))
+    }
+    if (sort.col === 'household') {
+      const withH = rows
+        .filter((c) => c.household)
+        .sort((a, b) => {
+          const cmp = (a.household as string).localeCompare(b.household as string)
+          return sort.dir === 'asc' ? cmp : -cmp
+        })
+      const noH = rows.filter((c) => !c.household)
+      return [...withH, ...noH]
+    }
+    return rows
+  }
   return (
     <>
       <h1 className="page-title">My Clients</h1>
@@ -1215,30 +1254,52 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-kr">KR Score</th>
-              <th className="col-household">Household</th>
-              <th className="col-sentiment">Sentiment</th>
-              <th className="col-status">
-                <span className="th-sort">Status <CaretDown /></span>
+              <th className="col-household">
+                <button
+                  type="button"
+                  className="th-sort th-sort-btn"
+                  onClick={() => clickSort('household')}
+                  aria-label="Sort by household"
+                >
+                  Household
+                  <span
+                    className={`th-caret ${sort.col === 'household' ? 'is-active' : ''} ${
+                      sort.col === 'household' && sort.dir === 'asc' ? 'is-asc' : ''
+                    }`}
+                  >
+                    <CaretDown />
+                  </span>
+                </button>
               </th>
+              <th className="col-kr">
+                <button
+                  type="button"
+                  className="th-sort th-sort-btn"
+                  onClick={() => clickSort('kr')}
+                  aria-label="Sort by KR score"
+                >
+                  KR Score
+                  <span
+                    className={`th-caret ${sort.col === 'kr' ? 'is-active' : ''} ${
+                      sort.col === 'kr' && sort.dir === 'asc' ? 'is-asc' : ''
+                    }`}
+                  >
+                    <CaretDown />
+                  </span>
+                </button>
+              </th>
+              <th className="col-sentiment">Sentiment</th>
+              <th className="col-status">Status</th>
               <th className="col-signin">Last Sign In</th>
               <th className="col-dots" />
             </tr>
           </thead>
           <tbody>
-            {clientTierGroups.map((group) => {
+            {orderedGroups.map((group) => {
               if (tierFilter && group.id !== tierFilter) return null
               const rows = clients.filter((c) => c.tier === group.id)
               if (rows.length === 0) return null
-              // In the incomplete group, invited (pending) rows sit below the
-              // started-but-unfinished (incomplete) rows.
-              const orderedRows =
-                group.id === 'incomplete'
-                  ? [
-                      ...rows.filter((c) => c.status !== 'pending'),
-                      ...rows.filter((c) => c.status === 'pending'),
-                    ]
-                  : rows
+              const orderedRows = orderRows(rows, group.id)
               const isCollapsed = collapsed.has(group.id)
               return (
                 <Fragment key={`cg-${group.id}`}>
