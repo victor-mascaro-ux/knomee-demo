@@ -378,6 +378,11 @@ function ScoreBadge({ tier, value }: { tier: Tier; value: number | null }) {
   return <span className={`score-badge score-${tier}`}>{value}</span>
 }
 
+function ClientScoreBadge({ tier, value }: { tier: ClientTier; value: number | null | undefined }) {
+  if (value == null) return <span className="score-badge empty">–</span>
+  return <span className={`score-badge score-${tier}`}>{value}</span>
+}
+
 function Avatar({ p }: { p: Prospect }) {
   const [failed, setFailed] = useState(false)
   if (p.avatar && !failed) {
@@ -830,6 +835,9 @@ function ClientRow({
           </div>
         </div>
       </td>
+      <td className="col-kr">
+        <ClientScoreBadge tier={c.tier} value={c.kr} />
+      </td>
       <td className="col-household">
         {c.household ? (
           <a href="#" className="household-link" onClick={(e) => e.preventDefault()}>
@@ -1064,7 +1072,7 @@ function ClientsMetrics({
               </span>
             )}
           </div>
-          <div className="dist-bar">
+          <div className="dist-bar cmd-dist-bar">
             {CLIENT_TIER_META.map((m) => {
               const n = count(m.tierId)
               return (
@@ -1207,6 +1215,7 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
+              <th className="col-kr">KR Score</th>
               <th className="col-household">Household</th>
               <th className="col-sentiment">Sentiment</th>
               <th className="col-status">
@@ -1237,7 +1246,7 @@ function ClientsScreen({
                     className={`group-header client-group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
                     onClick={() => toggleGroup(group.id)}
                   >
-                    <td colSpan={7}>
+                    <td colSpan={8}>
                       <div className="group-header-inner">
                         <button
                           type="button"
