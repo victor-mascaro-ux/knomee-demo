@@ -381,7 +381,10 @@ body {
   align-items: flex-start;
   min-width: 0;
 }
-.dist-legend-bars .dist-leg:last-child {
+/* Only the Prospects command-center right-aligns the last tier: its tier-3 bar
+   can be very narrow and sit far right, so a left-aligned label would overflow.
+   The Clients distribution is more even, so every tier aligns to its left border. */
+.cmd-card .dist-legend-bars .dist-leg:last-child {
   align-items: flex-end;
   text-align: right;
 }
