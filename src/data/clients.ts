@@ -37,7 +37,7 @@ export const confidenceSegments = [
   { label: 'Concerned', color: '#f97316', pct: 21 },
   { label: 'Neutral', color: '#facc15', pct: 18 },
   { label: 'Positive', color: '#6ee787', pct: 26 },
-  { label: 'Delighted', color: '#34e07a', pct: 28 },
+  { label: 'Delighted', color: '#17c964', pct: 28 },
 ]
 
 // "Clients active this week" trend (percent of clients active per week).

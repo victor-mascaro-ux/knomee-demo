@@ -59,13 +59,7 @@ export const financialId = {
       'My perfect day includes travel, family, and fun – near the water, hopefully involving a boat.',
     ],
   },
-  badges: [
-    { label: 'Financial Joy', icon: '💰', color: '#5ec2b7' },
-    { label: 'Confidence', icon: '☀️', color: '#f5c451' },
-    { label: 'Outlook', icon: '🔭', color: '#e0668a' },
-    { label: 'Future You', icon: '🧭', color: '#8ec06b' },
-    { label: 'Goals', icon: '🎯', color: '#48b0e0' },
-  ],
+  badges: ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals'],
   confidence: 'Strong',
   lifeEvents: [
     { tag: 'Purchase', kind: 'Property purchase', text: 'Bought the beach house in Costa Rica', date: '05/03/2025' },

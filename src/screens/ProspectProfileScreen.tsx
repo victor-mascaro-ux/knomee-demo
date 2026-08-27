@@ -3,6 +3,22 @@ import './prospectProfile.css'
 import { financialId } from '../data/financialId'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
+import addIcon from '../assets/adventures/add.svg'
+import icFinancialJoy from '../assets/adventures/financial-joy.svg'
+import icConfidence from '../assets/adventures/confidence.svg'
+import icOutlook from '../assets/adventures/outlook.svg'
+import icFutureYou from '../assets/adventures/future-you.svg'
+import icGoals from '../assets/adventures/goals.svg'
+import icQuestions from '../assets/adventures/questions.svg'
+import icLifeEvents from '../assets/adventures/life-events.svg'
+
+const ADVENTURE_ICON: Record<string, string> = {
+  'Financial Joy': icFinancialJoy,
+  Confidence: icConfidence,
+  Outlook: icOutlook,
+  'Future You': icFutureYou,
+  Goals: icGoals,
+}
 
 type ProfileTab = 'id' | 'readiness' | 'playbook'
 
@@ -135,8 +151,8 @@ export default function ProspectProfileScreen({
                 <div className="pp-col-main">
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">🎯 Goals</span>
-                      <span className="pp-add">＋</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-goals">
                       {fi.goals.map((g) => (
@@ -156,7 +172,7 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">💠 Financial Joy</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
                       <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
@@ -171,7 +187,7 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">🧭 Future You</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
                       <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     {(
@@ -196,7 +212,7 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">🌸 Outlook</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
                       <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     <span className="pp-fy-label pp-concern">Concerns</span>
@@ -218,12 +234,10 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title">🏅 Badges</span>
                     </div>
                     <div className="pp-badges">
-                      {fi.badges.map((b) => (
-                        <div className="pp-badge" key={b.label}>
-                          <span className="pp-badge-disc" style={{ background: b.color }}>
-                            {b.icon}
-                          </span>
-                          <span className="pp-badge-label">{b.label}</span>
+                      {fi.badges.map((label) => (
+                        <div className="pp-badge" key={label}>
+                          <img className="pp-badge-disc" src={ADVENTURE_ICON[label]} alt="" />
+                          <span className="pp-badge-label">{label}</span>
                           <span className="pp-badge-sub">Adventure Complete</span>
                         </div>
                       ))}
@@ -235,7 +249,7 @@ export default function ProspectProfileScreen({
                 <div className="pp-rail">
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">☀️ Confidence</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
                       <span className="pp-date">05/03/2025 ⌄</span>
                     </div>
                     <div className="pp-confidence">
@@ -249,8 +263,8 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">📅 Life Events</span>
-                      <span className="pp-add">＋</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-events">
                       {fi.lifeEvents.map((e, i) => (
@@ -266,8 +280,8 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">💬 Questions</span>
-                      <span className="pp-add">＋</span>
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-questions">
                       {fi.questions.map((q, i) => (
