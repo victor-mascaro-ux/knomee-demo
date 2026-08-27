@@ -874,8 +874,17 @@ function ClientRow({
   )
 }
 
-function ConfidencePie() {
+function ConfidencePie({
+  activeSentiment,
+  onPick,
+}: {
+  activeSentiment: number | null
+  onPick: (level: number) => void
+}) {
   const [hover, setHover] = useState<number | null>(null)
+  // The picked slice stays highlighted; hover previews another.
+  const sel = activeSentiment != null ? activeSentiment - 1 : null
+  const focus = hover ?? sel
   const cx = 50
   const cy = 50
   const r = 46
@@ -899,11 +908,12 @@ function ConfidencePie() {
             key={confidenceSegments[i].label}
             d={d}
             fill={confidenceSegments[i].color}
-            className={`pie-slice ${hover === i ? 'on' : ''} ${
-              hover !== null && hover !== i ? 'dim' : ''
+            className={`pie-slice ${focus === i ? 'on' : ''} ${
+              focus !== null && focus !== i ? 'dim' : ''
             }`}
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+            onClick={() => onPick(i + 1)}
           />
         ))}
       </svg>
@@ -911,9 +921,10 @@ function ConfidencePie() {
         {confidenceSegments.map((s, i) => (
           <li
             key={s.label}
-            className={hover === i ? 'on' : ''}
+            className={`${focus === i ? 'on' : ''} ${sel === i ? 'is-sel' : ''}`}
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+            onClick={() => onPick(i + 1)}
           >
             <span className="pie-swatch" style={{ background: s.color }} />
             <span className="pie-label">{s.label}</span>
@@ -1017,10 +1028,14 @@ function ClientsMetrics({
   clients,
   filterTier,
   onPickTier,
+  sentimentFilter,
+  onPickSentiment,
 }: {
   clients: Client[]
   filterTier: ClientTier | null
   onPickTier: (t: ClientTier) => void
+  sentimentFilter: number | null
+  onPickSentiment: (level: number) => void
 }) {
   const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
   const incomplete = count('incomplete')
@@ -1106,6 +1121,15 @@ function ClientsMetrics({
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+              {sentimentFilter != null && (
+                <button
+                  className="cmd-clear"
+                  type="button"
+                  onClick={() => onPickSentiment(sentimentFilter)}
+                >
+                  Clear filter ✕
+                </button>
+              )}
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{confidenceScore}</span>
@@ -1113,7 +1137,7 @@ function ClientsMetrics({
               <HelpTip text="Blended client sentiment, from frustrated to delighted. Measured weekly." />
             </span>
           </div>
-          <ConfidencePie />
+          <ConfidencePie activeSentiment={sentimentFilter} onPick={onPickSentiment} />
         </div>
         <div className="chart-card">
           <div className="chart-head">
@@ -1191,6 +1215,10 @@ function ClientsScreen({
     })
   const [tierFilter, setTierFilter] = useState<ClientTier | null>(null)
   const pickTier = (t: ClientTier) => setTierFilter((prev) => (prev === t ? null : t))
+  // Clicking a confidence-pie sector filters the table to that sentiment.
+  const [sentimentFilter, setSentimentFilter] = useState<number | null>(null)
+  const pickSentiment = (level: number) =>
+    setSentimentFilter((prev) => (prev === level ? null : level))
   // Column sort: KR (prospect-style — flips the tier order on ascending) or
   // Household (alphabetical within each tier). Only one is active at a time.
   const [sort, setSort] = useState<{ col: 'kr' | 'household' | null; dir: 'asc' | 'desc' }>({
@@ -1233,7 +1261,13 @@ function ClientsScreen({
   return (
     <>
       <h1 className="page-title">My Clients</h1>
-      <ClientsMetrics clients={clients} filterTier={tierFilter} onPickTier={pickTier} />
+      <ClientsMetrics
+        clients={clients}
+        filterTier={tierFilter}
+        onPickTier={pickTier}
+        sentimentFilter={sentimentFilter}
+        onPickSentiment={pickSentiment}
+      />
       <ClientInsights />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <div className="table-wrap">
@@ -1292,7 +1326,12 @@ function ClientsScreen({
           <tbody>
             {orderedGroups.map((group) => {
               if (tierFilter && group.id !== tierFilter) return null
-              const rows = clients.filter((c) => c.tier === group.id)
+              const rows = clients.filter(
+                (c) =>
+                  c.tier === group.id &&
+                  (sentimentFilter == null ||
+                    (c.sentiment != null && Math.round(c.sentiment) === sentimentFilter)),
+              )
               if (rows.length === 0) return null
               const orderedRows = orderRows(rows, group.id)
               const isCollapsed = collapsed.has(group.id)
