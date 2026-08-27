@@ -60,12 +60,28 @@ export default function ProspectProfileScreen({
   const fi = financialId
 
   // Open the profile scrolled to the top, regardless of where the prospect's
-  // row sat in the table when it was clicked.
+  // row sat in the table when it was clicked. On the live site the app runs in
+  // a full-height iframe and the PARENT page scrolls, so reset that too — and
+  // re-assert after the parent resizes the iframe to the (shorter) profile.
   useEffect(() => {
-    window.scrollTo(0, 0)
-    const el = document.scrollingElement || document.documentElement
-    if (el) el.scrollTop = 0
-    if (document.body) document.body.scrollTop = 0
+    const toTop = () => {
+      window.scrollTo(0, 0)
+      const el = document.scrollingElement || document.documentElement
+      if (el) el.scrollTop = 0
+      if (document.body) document.body.scrollTop = 0
+      try {
+        if (window.parent && window.parent !== window) window.parent.scrollTo(0, 0)
+      } catch {
+        /* cross-origin parent — ignore */
+      }
+    }
+    toTop()
+    const raf = requestAnimationFrame(toTop)
+    const t = window.setTimeout(toTop, 150)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(t)
+    }
   }, [prospect.name])
 
   return (
