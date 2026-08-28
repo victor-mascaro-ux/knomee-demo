@@ -3,12 +3,17 @@
 
 /* Align horizontally with the header logo (page-pad), but lead tighter at the
    top since the profile opens with a small breadcrumb rather than a title. */
-.content-profile {
-  padding: 12px var(--page-pad) 48px;
+.content.content-profile {
+  padding: 0 var(--page-pad) 48px;
 }
 .pp {
   padding: 0 0 40px;
   color: #2a2340;
+}
+/* The main column carries the top inset so the sidebar strip runs flush up to
+   the header bar. */
+.pp-main {
+  padding-top: 14px;
 }
 
 .pp-crumb {
@@ -131,9 +136,7 @@
   color: var(--grey-text, #8b8598);
   padding: 0 20px 16px;
   cursor: pointer;
-}
-.pp-tab:first-child {
-  padding-left: 0;
+  text-align: center;
 }
 .pp-tab.is-active {
   color: var(--plum, #240446);
@@ -232,7 +235,7 @@
   gap: 14px;
 }
 .pp-highlight {
-  background: #eef1f5;
+  background: #e8ebf2;
   border: 1px solid var(--line, #e7e4ee);
   border-bottom: 3px solid var(--purple-bolt, #9b51e0);
   border-radius: 10px;
@@ -272,7 +275,7 @@
   gap: 10px;
 }
 .pp-goal {
-  background: #eef1f5;
+  background: #e8ebf2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -335,7 +338,7 @@
   border-radius: 20px;
   padding: 7px 14px;
   font-size: 12.5px;
-  background: #eef1f5;
+  background: #e8ebf2;
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
 }
 .pp-fy-group {
@@ -361,7 +364,7 @@
   margin-top: 12px;
 }
 .pp-quote {
-  background: #eef1f5;
+  background: #e8ebf2;
   margin: 0 0 8px;
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 10px;
@@ -475,7 +478,7 @@
   gap: 9px;
 }
 .pp-question {
-  background: #eef1f5;
+  background: #e8ebf2;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
