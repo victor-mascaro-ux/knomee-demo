@@ -17,7 +17,7 @@
   gap: 8px;
   font-size: 13px;
   color: var(--grey-text, #8b8598);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .pp-crumb-link {
   border: 0;
@@ -39,20 +39,23 @@
   display: grid;
   grid-template-columns: 210px 1fr;
   gap: 30px;
-  align-items: start;
+  align-items: stretch;
 }
 
-/* ── Left sidebar ── */
+/* ── Left sidebar — a full-height strip; its content stays pinned near the top
+   as the main column scrolls. ── */
 .pp-side {
+  background: #f9fafb;
+  border: 1px solid var(--line, #e7e4ee);
+  border-radius: 14px;
+}
+.pp-side-inner {
   position: sticky;
-  top: 16px;
+  top: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: #f9fafb;
-  border: 1px solid var(--line, #e7e4ee);
-  border-radius: 14px;
   padding: 20px 14px 22px;
 }
 .pp-avatar {
@@ -112,10 +115,10 @@
   transform: translateY(1px);
 }
 
-/* ── Main column ── */
+/* ── Main column — tabs mirror the dashboard tab bar for consistency ── */
 .pp-tabs {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   margin-bottom: 20px;
 }
@@ -124,17 +127,17 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--grey-text, #8b8598);
-  padding: 4px 16px 14px;
+  padding: 0 20px 16px;
   cursor: pointer;
 }
 .pp-tab:first-child {
-  padding-left: 4px;
+  padding-left: 0;
 }
 .pp-tab.is-active {
   color: var(--plum, #240446);
-  font-weight: 700;
+  font-weight: 600;
 }
 .pp-tab.is-active::after {
   content: '';
@@ -229,6 +232,7 @@
   gap: 14px;
 }
 .pp-highlight {
+  background: #eef1f5;
   border: 1px solid var(--line, #e7e4ee);
   border-bottom: 3px solid var(--purple-bolt, #9b51e0);
   border-radius: 10px;
@@ -268,6 +272,7 @@
   gap: 10px;
 }
 .pp-goal {
+  background: #eef1f5;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -330,7 +335,7 @@
   border-radius: 20px;
   padding: 7px 14px;
   font-size: 12.5px;
-  background: #fff;
+  background: #eef1f5;
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
 }
 .pp-fy-group {
@@ -356,6 +361,7 @@
   margin-top: 12px;
 }
 .pp-quote {
+  background: #eef1f5;
   margin: 0 0 8px;
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 10px;
@@ -375,26 +381,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  width: 88px;
+  width: 92px;
   text-align: center;
 }
 .pp-badge-disc {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(20, 10, 40, 0.12);
+  display: inline-flex;
+  line-height: 0;
+  filter: drop-shadow(0 4px 8px rgba(20, 10, 40, 0.12));
 }
-.pp-badge-label {
-  font-size: 11px;
+.pp-badge-disc svg {
+  display: block;
+}
+.pp-badge-arc {
+  font-family: 'Poppins', sans-serif;
+  font-size: 8px;
   font-weight: 700;
-  color: #3a3350;
-}
-.pp-badge-sub {
-  font-size: 9px;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #a49eb4;
+  letter-spacing: 0.3px;
+  fill: #3a3350;
 }
 
 /* Right rail */
@@ -472,6 +475,7 @@
   gap: 9px;
 }
 .pp-question {
+  background: #eef1f5;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;

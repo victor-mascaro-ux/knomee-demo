@@ -33,14 +33,69 @@ function ReadinessBars({ level }: { level: number }) {
 }
 
 function Gauge({ label }: { label: string }) {
-  // A simple 180° gauge with the needle a little past center ("Strong").
+  // A 180° gauge with a light→deep purple sweep and a needle a little past
+  // center ("Strong"), matching the product's confidence dial.
   return (
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
-      <svg viewBox="0 0 100 56" width="86" height="48">
-        <path d="M6 50 A44 44 0 0 1 94 50" fill="none" stroke="#ece7f4" strokeWidth="10" strokeLinecap="round" />
-        <path d="M6 50 A44 44 0 0 1 78 20" fill="none" stroke="#7c4dc4" strokeWidth="10" strokeLinecap="round" />
-        <circle cx="50" cy="50" r="4.5" fill="#3b2d63" />
-        <line x1="50" y1="50" x2="76" y2="26" stroke="#3b2d63" strokeWidth="3" strokeLinecap="round" />
+      <svg viewBox="0 0 120 68" width="108" height="61">
+        <defs>
+          <linearGradient id="pp-gauge-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stopColor="#cbb0f0" />
+            <stop offset="1" stopColor="#6d28c9" />
+          </linearGradient>
+        </defs>
+        <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#ece7f4" strokeWidth="12" strokeLinecap="round" />
+        <path d="M8 60 A52 52 0 0 1 99 24" fill="none" stroke="url(#pp-gauge-grad)" strokeWidth="12" strokeLinecap="round" />
+        <circle cx="60" cy="60" r="6" fill="#2b2140" />
+        <line x1="60" y1="60" x2="96" y2="28" stroke="#2b2140" strokeWidth="4" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+}
+
+const BADGE_TINT: Record<string, string> = {
+  'Financial Joy': '#bfe6dd',
+  Confidence: '#fbe3a6',
+  Outlook: '#f6c6d4',
+  'Future You': '#d2ecbe',
+  Goals: '#c6e2f6',
+}
+
+// A scalloped "seal" medallion: a wavy colored ring with the adventure icon in
+// the middle and the category / "ADVENTURE COMPLETE" curved around it, like the
+// real product's badges.
+function BadgeMedallion({ label, icon }: { label: string; icon: string }) {
+  const tint = BADGE_TINT[label] ?? '#e6e6ee'
+  const slug = label.replace(/\s+/g, '-').toLowerCase()
+  const cx = 60
+  const cy = 60
+  const R = 46
+  const n = 18
+  const bump = 6.5
+  const bumps = Array.from({ length: n }, (_, i) => {
+    const a = (i / n) * 2 * Math.PI
+    return <circle key={i} cx={cx + R * Math.cos(a)} cy={cy + R * Math.sin(a)} r={bump} fill={tint} />
+  })
+  return (
+    <span className="pp-badge-disc">
+      <svg viewBox="0 0 120 120" width="90" height="90">
+        <defs>
+          <path id={`pp-top-${slug}`} d="M 22 60 A 38 38 0 0 1 98 60" fill="none" />
+          <path id={`pp-bot-${slug}`} d="M 24 60 A 36 36 0 0 0 96 60" fill="none" />
+        </defs>
+        {bumps}
+        <circle cx={cx} cy={cy} r={R} fill={tint} />
+        <text className="pp-badge-arc">
+          <textPath href={`#pp-top-${slug}`} startOffset="50%" textAnchor="middle">
+            {label.toUpperCase()}
+          </textPath>
+        </text>
+        <text className="pp-badge-arc">
+          <textPath href={`#pp-bot-${slug}`} startOffset="50%" textAnchor="middle">
+            ADVENTURE COMPLETE
+          </textPath>
+        </text>
+        <image href={icon} x={cx - 27} y={cy - 27} width="54" height="54" />
       </svg>
     </span>
   )
@@ -86,32 +141,33 @@ export default function ProspectProfileScreen({
 
   return (
     <div className="pp">
-      <nav className="pp-crumb">
-        <button type="button" className="pp-crumb-link" onClick={onBack}>
-          My Prospects
-        </button>
-        <span className="pp-crumb-sep">›</span>
-        <span className="pp-crumb-cur">{prospect.name}</span>
-      </nav>
-
       <div className="pp-layout">
-        {/* Left profile sidebar */}
+        {/* Left profile sidebar — a full-height static strip */}
         <aside className="pp-side">
-          <div className="pp-avatar">
-            {prospect.avatar ? <img src={prospect.avatar} alt="" /> : <span>{initial}</span>}
+          <div className="pp-side-inner">
+            <div className="pp-avatar">
+              {prospect.avatar ? <img src={prospect.avatar} alt="" /> : <span>{initial}</span>}
+            </div>
+            <h2 className="pp-name">{prospect.name}</h2>
+            <div className="pp-meta">
+              <span className="pp-meta-row">📅 Joined {fi.joined}</span>
+              <span className="pp-meta-row">✉️ {prospect.email}</span>
+            </div>
+            <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
+              ⚡ Convert to Client
+            </button>
           </div>
-          <h2 className="pp-name">{prospect.name}</h2>
-          <div className="pp-meta">
-            <span className="pp-meta-row">📅 Joined {fi.joined}</span>
-            <span className="pp-meta-row">✉️ {prospect.email}</span>
-          </div>
-          <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
-            ⚡ Convert to Client
-          </button>
         </aside>
 
         {/* Main column */}
         <main className="pp-main">
+          <nav className="pp-crumb">
+            <button type="button" className="pp-crumb-link" onClick={onBack}>
+              My Prospects
+            </button>
+            <span className="pp-crumb-sep">›</span>
+            <span className="pp-crumb-cur">{prospect.name}</span>
+          </nav>
           <div className="pp-tabs">
             {(
               [
@@ -252,9 +308,7 @@ export default function ProspectProfileScreen({
                     <div className="pp-badges">
                       {fi.badges.map((label) => (
                         <div className="pp-badge" key={label}>
-                          <img className="pp-badge-disc" src={ADVENTURE_ICON[label]} alt="" />
-                          <span className="pp-badge-label">{label}</span>
-                          <span className="pp-badge-sub">Adventure Complete</span>
+                          <BadgeMedallion label={label} icon={ADVENTURE_ICON[label]} />
                         </div>
                       ))}
                     </div>
@@ -288,7 +342,7 @@ export default function ProspectProfileScreen({
                           <span className="pp-event-tag">{e.tag}</span>
                           <span className="pp-event-kind">{e.kind}</span>
                           <span className="pp-event-text">{e.text}</span>
-                          <span className="pp-event-date">🕓 {e.date}</span>
+                          <span className="pp-event-date">{e.date}</span>
                         </div>
                       ))}
                     </div>
