@@ -33,21 +33,43 @@ function ReadinessBars({ level }: { level: number }) {
 }
 
 function Gauge({ label }: { label: string }) {
-  // A 180° gauge with a light→deep purple sweep and a needle a little past
-  // center ("Strong"), matching the product's confidence dial.
+  // A segmented 180° dial (light → deep purple bands) with a grey teardrop
+  // needle, matching the product's confidence gauge.
+  const cx = 60
+  const cy = 60
+  const r = 42
+  const colors = ['#e7dcf6', '#d4bdef', '#bd97e6', '#9a5fd6', '#6f2dc4']
+  const pt = (deg: number) => {
+    const a = (deg * Math.PI) / 180
+    return [cx + r * Math.cos(a), cy - r * Math.sin(a)] as const
+  }
+  const segs = colors.map((c, i) => {
+    const start = 180 - i * 36 - 2
+    const end = 180 - (i + 1) * 36 + 2
+    const [x0, y0] = pt(start)
+    const [x1, y1] = pt(end)
+    return (
+      <path
+        key={i}
+        d={`M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`}
+        fill="none"
+        stroke={c}
+        strokeWidth="13"
+        strokeLinecap="round"
+      />
+    )
+  })
   return (
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
-      <svg viewBox="0 0 120 68" width="108" height="61">
-        <defs>
-          <linearGradient id="pp-gauge-grad" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0" stopColor="#cbb0f0" />
-            <stop offset="1" stopColor="#6d28c9" />
-          </linearGradient>
-        </defs>
-        <path d="M8 60 A52 52 0 0 1 112 60" fill="none" stroke="#ece7f4" strokeWidth="12" strokeLinecap="round" />
-        <path d="M8 60 A52 52 0 0 1 99 24" fill="none" stroke="url(#pp-gauge-grad)" strokeWidth="12" strokeLinecap="round" />
-        <circle cx="60" cy="60" r="6" fill="#2b2140" />
-        <line x1="60" y1="60" x2="96" y2="28" stroke="#2b2140" strokeWidth="4" strokeLinecap="round" />
+      <svg viewBox="0 0 120 70" width="112" height="65">
+        {segs}
+        <g transform="rotate(-22 60 60)">
+          <path
+            d="M60 27 C 55 42, 53 51, 53 57 A 7 7 0 1 0 67 57 C 67 51, 65 42, 60 27 Z"
+            fill="#6f6a7c"
+          />
+          <circle cx="60" cy="57" r="2.6" fill="#cfc9d8" />
+        </g>
       </svg>
     </span>
   )
