@@ -235,7 +235,7 @@
   gap: 14px;
 }
 .pp-highlight {
-  background: #e8ebf2;
+  background: #fff;
   border: 1px solid var(--line, #e7e4ee);
   border-bottom: 3px solid var(--purple-bolt, #9b51e0);
   border-radius: 10px;
@@ -275,7 +275,7 @@
   gap: 10px;
 }
 .pp-goal {
-  background: #e8ebf2;
+  background: #fff;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -338,7 +338,7 @@
   border-radius: 20px;
   padding: 7px 14px;
   font-size: 12.5px;
-  background: #e8ebf2;
+  background: #fff;
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
 }
 .pp-fy-group {
@@ -364,7 +364,7 @@
   margin-top: 12px;
 }
 .pp-quote {
-  background: #e8ebf2;
+  background: #fff;
   margin: 0 0 8px;
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 10px;
@@ -449,7 +449,7 @@
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 10px;
   padding: 11px 13px;
-  background: #faf9fc;
+  background: #fff;
 }
 .pp-event-tag {
   font-size: 10px;
@@ -478,7 +478,7 @@
   gap: 9px;
 }
 .pp-question {
-  background: #e8ebf2;
+  background: #fff;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
