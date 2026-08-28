@@ -38,14 +38,16 @@ function Gauge({ label }: { label: string }) {
   const cx = 60
   const cy = 60
   const r = 42
-  const colors = ['#e7dcf6', '#d4bdef', '#bd97e6', '#9a5fd6', '#6f2dc4']
+  // Three confidence levels (Weak → Moderate → Strong), light → deep purple.
+  const colors = ['#dcc8f2', '#a878df', '#6f2dc4']
   const pt = (deg: number) => {
     const a = (deg * Math.PI) / 180
     return [cx + r * Math.cos(a), cy - r * Math.sin(a)] as const
   }
+  const step = 180 / colors.length
   const segs = colors.map((c, i) => {
-    const start = 180 - i * 36 - 2
-    const end = 180 - (i + 1) * 36 + 2
+    const start = 180 - i * step - 3
+    const end = 180 - (i + 1) * step + 3
     const [x0, y0] = pt(start)
     const [x1, y1] = pt(end)
     return (
@@ -54,7 +56,7 @@ function Gauge({ label }: { label: string }) {
         d={`M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`}
         fill="none"
         stroke={c}
-        strokeWidth="13"
+        strokeWidth="14"
         strokeLinecap="round"
       />
     )
@@ -63,7 +65,8 @@ function Gauge({ label }: { label: string }) {
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
       <svg viewBox="0 0 120 70" width="112" height="65">
         {segs}
-        <g transform="rotate(-22 60 60)">
+        {/* Needle points into the "Strong" (rightmost) band. */}
+        <g transform="rotate(48 60 60)">
           <path
             d="M60 27 C 55 42, 53 51, 53 57 A 7 7 0 1 0 67 57 C 67 51, 65 42, 60 27 Z"
             fill="#6f6a7c"
