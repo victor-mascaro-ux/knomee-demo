@@ -3257,17 +3257,11 @@ export default function App() {
     >
       <header className="topbar">
         <div className="topbar-inner">
-          {brand ? (
-            <>
-              <span className="brand-spacer" aria-hidden />
-              <div className="topbar-client">{brand.logo}</div>
-            </>
-          ) : (
-            <div className="brand">
-              <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-              <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
-            </div>
-          )}
+          <div className="brand">
+            <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+            <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
+          </div>
+          {brand && <div className="topbar-client">{brand.logo}</div>}
           <div className="menu-wrap" ref={menuRef}>
             <button
               className="menu-btn"

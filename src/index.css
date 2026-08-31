@@ -86,9 +86,6 @@ body {
 }
 
 /* White-label: the client logo sits centered on the (brand-colored) bar. */
-.brand-spacer {
-  width: 1px;
-}
 .topbar-client {
   position: absolute;
   left: 50%;
