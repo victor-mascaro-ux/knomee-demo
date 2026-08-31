@@ -22,6 +22,11 @@
      it so the logo, tabs and title always line up, and the top padding tracks
      the side padding so horizontal and vertical spacing stay even. */
   --page-pad: 40px;
+  /* Height every header logo renders at — the knomee lockup and any client
+     (white-label) logo share it, so a co-branded bar keeps both marks at the
+     same visual height. Client logos must be supplied trimmed + white for this
+     box height to equal their visual height (see docs/logo-guidelines). */
+  --brand-logo-h: 19.5px;
 }
 
 * {
@@ -87,13 +92,13 @@ body {
   line-height: 0;
 }
 .client-logo {
-  height: 26px;
+  height: var(--brand-logo-h);
   width: auto;
   display: block;
 }
 
 .brand-lockup {
-  height: 19.5px;
+  height: var(--brand-logo-h);
   width: auto;
   display: block;
 }
