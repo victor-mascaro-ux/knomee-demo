@@ -82,19 +82,36 @@ body {
   color: #fff;
 }
 
-/* White-label: the client logo sits centered on the (brand-colored) bar. */
-.topbar-client {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+/* White-label: the client's logo leads, with a small "powered by knomee"
+   line beneath it so knomee reads as the secondary, supporting brand. */
+.brand-cobrand {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   color: #fff;
-  line-height: 0;
 }
 .client-logo {
-  height: var(--brand-logo-h);
+  height: 22px;
   width: auto;
   display: block;
+}
+.powered-by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.powered-by-text {
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+.powered-by img {
+  height: 11px;
+  width: auto;
+  display: block;
+  opacity: 0.9;
 }
 
 .brand-lockup {
