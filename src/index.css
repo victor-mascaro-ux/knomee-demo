@@ -34,14 +34,6 @@ body {
   padding: 0;
 }
 
-/* Reserve the scrollbar gutter permanently. Without it, anything that changes
-   page height — switching to Analytics, opening an accordion, expanding an
-   experiment — can cross the threshold where a classic scrollbar appears, and
-   the ~15px width change reflows the whole page sideways as a visible shake. */
-html {
-  scrollbar-gutter: stable;
-}
-
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #1a1a1a;
@@ -101,7 +93,7 @@ body {
 }
 
 .brand-lockup {
-  height: 26px;
+  height: 19.5px;
   width: auto;
   display: block;
 }
