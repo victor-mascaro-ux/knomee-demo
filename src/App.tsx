@@ -3259,13 +3259,7 @@ export default function App() {
         <div className="topbar-inner">
           <div className="brand">
             {brand ? (
-              <div className="brand-cobrand">
-                {brand.logo}
-                <span className="powered-by">
-                  <span className="powered-by-text">powered by</span>
-                  <img src="./knomee-logo-white.svg" alt="knomee" />
-                </span>
-              </div>
+              brand.logo
             ) : adminView ? (
               <>
                 <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
@@ -3275,6 +3269,12 @@ export default function App() {
               <img className="brand-lockup" src="./knomee-advisor-white.svg" alt="knomee advisor" />
             )}
           </div>
+          {brand && (
+            <div className="cobrand-center">
+              <span className="powered-by-text">powered by</span>
+              <img className="cobrand-knomee" src="./knomee-advisor-white.svg" alt="knomee advisor" />
+            </div>
+          )}
           <div className="menu-wrap" ref={menuRef}>
             <button
               className="menu-btn"
