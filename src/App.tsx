@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -71,6 +72,7 @@ import {
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
+import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
 
@@ -3107,6 +3109,9 @@ export default function App() {
   // Internal-only: show the empty dashboards. Off by default so the prototype
   // reads as the populated demo; toggled from the top-right menu.
   const [emptyMode, setEmptyMode] = useState(false)
+  // White-label demo: null = knomee, otherwise a client brand id.
+  const [brandId, setBrandId] = useState<string | null>(null)
+  const brand = CLIENT_BRANDS.find((b) => b.id === brandId) ?? null
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
@@ -3242,13 +3247,27 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div
+      className={`page ${brand ? 'brand-client' : ''}`}
+      style={
+        brand
+          ? ({ '--plum': brand.primary, '--purple-bolt': brand.accent } as CSSProperties)
+          : undefined
+      }
+    >
       <header className="topbar">
         <div className="topbar-inner">
-          <div className="brand">
-            <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-            <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
-          </div>
+          {brand ? (
+            <>
+              <span className="brand-spacer" aria-hidden />
+              <div className="topbar-client">{brand.logo}</div>
+            </>
+          ) : (
+            <div className="brand">
+              <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+              <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
+            </div>
+          )}
           <div className="menu-wrap" ref={menuRef}>
             <button
               className="menu-btn"
@@ -3344,6 +3363,31 @@ export default function App() {
                     <span className="switch-knob" />
                   </span>
                 </label>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Client brand</div>
+                <button
+                  className={`menu-item ${!brandId ? 'is-on' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setBrandId(null)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Knomee (default)
+                </button>
+                {CLIENT_BRANDS.map((b) => (
+                  <button
+                    key={b.id}
+                    className={`menu-item ${brandId === b.id ? 'is-on' : ''}`}
+                    type="button"
+                    onClick={() => {
+                      setBrandId(b.id)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    {b.name}
+                  </button>
+                ))}
                 <div className="menu-hint">
                   Press <b>C</b> to leave comments
                 </div>
