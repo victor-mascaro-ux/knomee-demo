@@ -15,7 +15,7 @@ export interface ClientBrand {
 // "Confetti Wealth" — scattered squares + wordmark.
 function ConfettiLogo() {
   return (
-    <svg className="client-logo" viewBox="0 0 336 40" fill="currentColor" role="img" aria-label="Confetti Wealth">
+    <svg className="client-logo" viewBox="0 1 336 35.5" fill="currentColor" role="img" aria-label="Confetti Wealth">
       <rect x="15" y="1" width="8" height="8" rx="1.5" />
       <rect x="2" y="12" width="9.5" height="9.5" rx="1.5" />
       <rect x="15.5" y="11.5" width="11.5" height="11.5" rx="1.5" opacity="0.72" />
@@ -31,7 +31,7 @@ function ConfettiLogo() {
 // "Affirm Wealth Advisors" — AWA monogram, divider, stacked name.
 function AffirmLogo() {
   return (
-    <svg className="client-logo" viewBox="0 0 300 40" fill="currentColor" role="img" aria-label="Affirm Wealth Advisors">
+    <svg className="client-logo" viewBox="0 3 300 34" fill="currentColor" role="img" aria-label="Affirm Wealth Advisors">
       <text x="0" y="31" fontFamily="Georgia, 'Times New Roman', serif" fontSize="34" fontWeight="700" letterSpacing="-1.5">
         AWA
       </text>
