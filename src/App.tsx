@@ -3258,8 +3258,14 @@ export default function App() {
       <header className="topbar">
         <div className="topbar-inner">
           <div className="brand">
-            <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-            <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
+            {adminView ? (
+              <>
+                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+                <span className="brand-sub">ADMIN</span>
+              </>
+            ) : (
+              <img className="brand-lockup" src="./knomee-advisor-white.svg" alt="knomee advisor" />
+            )}
           </div>
           {brand && <div className="topbar-client">{brand.logo}</div>}
           <div className="menu-wrap" ref={menuRef}>
