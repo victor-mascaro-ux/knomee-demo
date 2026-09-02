@@ -55,7 +55,7 @@ body {
 
 /* ---------- Top bar ---------- */
 .topbar {
-  height: 60px;
+  height: 64px;
   background: var(--plum);
   display: flex;
   align-items: center;
