@@ -3112,6 +3112,9 @@ export default function App() {
   // White-label demo: null = knomee, otherwise a client brand id.
   const [brandId, setBrandId] = useState<string | null>(null)
   const brand = CLIENT_BRANDS.find((b) => b.id === brandId) ?? null
+  // Co-brand credit placement: 'centered' (client centered) or 'left' (client
+  // leads the left). knomee always renders small + subordinate beneath it.
+  const [cobrandLayout, setCobrandLayout] = useState<'centered' | 'left'>('left')
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
@@ -3259,7 +3262,15 @@ export default function App() {
         <div className="topbar-inner">
           <div className="brand">
             {brand ? (
-              brand.logo
+              cobrandLayout === 'left' ? (
+                <div className="cobrand-stack">
+                  {brand.logo}
+                  <span className="powered-by">
+                    <span className="powered-by-text">powered by</span>
+                    <img className="cobrand-knomee" src="./knomee-logo-white.svg" alt="knomee" />
+                  </span>
+                </div>
+              ) : null
             ) : adminView ? (
               <>
                 <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
@@ -3269,10 +3280,13 @@ export default function App() {
               <img className="brand-lockup" src="./knomee-advisor-white.svg" alt="knomee advisor" />
             )}
           </div>
-          {brand && (
-            <div className="cobrand-center">
-              <span className="powered-by-text">powered by</span>
-              <img className="cobrand-knomee" src="./knomee-advisor-white.svg" alt="knomee advisor" />
+          {brand && cobrandLayout === 'centered' && (
+            <div className="cobrand-stack cobrand-center">
+              {brand.logo}
+              <span className="powered-by">
+                <span className="powered-by-text">powered by</span>
+                <img className="cobrand-knomee" src="./knomee-logo-white.svg" alt="knomee" />
+              </span>
             </div>
           )}
           <div className="menu-wrap" ref={menuRef}>
@@ -3395,6 +3409,25 @@ export default function App() {
                     {b.name}
                   </button>
                 ))}
+                {brand && (
+                  <>
+                    <div className="menu-pop-title">Logo placement</div>
+                    <button
+                      className={`menu-item ${cobrandLayout === 'left' ? 'is-on' : ''}`}
+                      type="button"
+                      onClick={() => setCobrandLayout('left')}
+                    >
+                      Client left
+                    </button>
+                    <button
+                      className={`menu-item ${cobrandLayout === 'centered' ? 'is-on' : ''}`}
+                      type="button"
+                      onClick={() => setCobrandLayout('centered')}
+                    >
+                      Client centered
+                    </button>
+                  </>
+                )}
                 <div className="menu-hint">
                   Press <b>C</b> to leave comments
                 </div>
