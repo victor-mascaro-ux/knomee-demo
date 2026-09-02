@@ -87,7 +87,7 @@ body {
    secondary, supporting brand rather than a second competing logo.
    Two placements: left (client leads the bar) or centered. */
 .client-logo {
-  height: 22px;
+  height: 34px;
   width: auto;
   display: block;
 }
@@ -106,7 +106,7 @@ body {
   align-items: center;
 }
 .cobrand-stack.cobrand-center .client-logo {
-  height: 24px;
+  height: 34px;
 }
 .powered-by {
   display: flex;
