@@ -82,37 +82,49 @@ body {
   color: #fff;
 }
 
-/* White-label: the client's logo leads on the left, while a small, dimmed
-   "powered by knomee advisor" credit sits centered on the bar so knomee
-   reads as the secondary, supporting brand. */
+/* White-label: the client's logo is the dominant brand, with a small, dimmed
+   "powered by knomee" credit tucked beneath it so knomee reads as the
+   secondary, supporting brand rather than a second competing logo.
+   Two placements: left (client leads the bar) or centered. */
 .client-logo {
   height: 22px;
   width: auto;
   display: block;
 }
-.cobrand-center {
+.cobrand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  color: #fff;
+}
+.cobrand-stack.cobrand-center {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  color: #fff;
+}
+.cobrand-stack.cobrand-center .client-logo {
+  height: 24px;
+}
+.powered-by {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.72;
 }
 .powered-by-text {
-  font-size: 8.5px;
+  font-size: 7.5px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  color: #fff;
 }
 .cobrand-knomee {
-  height: 15px;
+  height: 9px;
   width: auto;
   display: block;
-  opacity: 0.8;
 }
 
 .brand-lockup {
