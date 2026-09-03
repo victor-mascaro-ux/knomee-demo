@@ -178,6 +178,30 @@ body {
   margin-bottom: 8px;
 }
 
+/* "powered by knomee" credit, pinned to the right of the tab row (client
+   brand / white-label mode only). Uses knomee's own plum so it reads as a
+   knomee credit even on a client-themed page. */
+.tabs-powered {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tabs-powered-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-text);
+}
+.tabs-powered-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #240446;
+}
+
 .tab {
   background: none;
   border: none;

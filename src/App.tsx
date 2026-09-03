@@ -3799,13 +3799,7 @@ export default function App() {
           <div className="brand">
             {brand ? (
               cobrandLayout === 'left' ? (
-                <div className="cobrand-stack">
-                  {brand.logo}
-                  <span className="powered-by">
-                    <span className="powered-by-text">powered by</span>
-                    <img className="cobrand-knomee" src="./knomee-logo-white.svg" alt="knomee" />
-                  </span>
-                </div>
+                <div className="cobrand-stack">{brand.logo}</div>
               ) : null
             ) : adminView ? (
               <>
@@ -3817,13 +3811,7 @@ export default function App() {
             )}
           </div>
           {brand && cobrandLayout === 'centered' && (
-            <div className="cobrand-stack cobrand-center">
-              {brand.logo}
-              <span className="powered-by">
-                <span className="powered-by-text">powered by</span>
-                <img className="cobrand-knomee" src="./knomee-logo-white.svg" alt="knomee" />
-              </span>
-            </div>
+            <div className="cobrand-stack cobrand-center">{brand.logo}</div>
           )}
           <div className="menu-wrap" ref={menuRef}>
             <button
@@ -4021,6 +4009,13 @@ export default function App() {
               {t.label}
             </button>
           ))}
+          {brand && (
+            <span className="tabs-powered">
+              <span className="tabs-powered-text">powered by</span>
+              <KnomeeMark size={16} color="#240446" />
+              <span className="tabs-powered-name">knomee</span>
+            </span>
+          )}
         </nav>
 
         {screen === 'prospects' &&
