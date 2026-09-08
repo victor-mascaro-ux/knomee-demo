@@ -4,6 +4,7 @@ export interface Client {
   name: string
   email: string
   household?: string
+  kr?: number | null // KR score within the tier band; null for incomplete profiles
   sentiment: number | null // filled dots out of 5; null → not applicable
   warn?: boolean // amber caution marker on the sentiment
   status: 'complete' | 'incomplete' | 'pending'
@@ -29,17 +30,14 @@ export const clientTierGroups: ClientTierGroup[] = [
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
 ]
 
-// Headline metric shown in the Clients "Top Line Metrics" card.
-export const AVG_KR_SCORE = 65.6
-
 // Overall client confidence breakdown (sums to 100).
 export const confidenceScore = 33
 export const confidenceSegments = [
   { label: 'Frustrated', color: '#ef4444', pct: 7 },
-  { label: 'Concerned', color: '#f59e0b', pct: 21 },
-  { label: 'Neutral', color: '#eab308', pct: 18 },
-  { label: 'Positive', color: '#a3e635', pct: 26 },
-  { label: 'Delighted', color: '#84cc16', pct: 28 },
+  { label: 'Concerned', color: '#f97316', pct: 21 },
+  { label: 'Neutral', color: '#facc15', pct: 18 },
+  { label: 'Positive', color: '#6ee787', pct: 26 },
+  { label: 'Delighted', color: '#17c964', pct: 28 },
 ]
 
 // "Clients active this week" trend (percent of clients active per week).
@@ -58,15 +56,9 @@ export interface ClientInsight {
   lines: string[]
 }
 
-// Fixed the "Sophie Tran" reference — the only Sophie in the book is Sophie Dean.
-export const clientInsights: ClientInsight[] = [
-  { name: 'Emily Watson', lines: ['No login in 22 days.', '1/4 goals completed.'] },
-  { name: 'Miles Dean', lines: ['Dropped engagement score (-20).', '0 adventures done.'] },
-  { name: 'Sophie Dean', lines: ['High activity, low advisor reliance (10%).'] },
-]
-
-// Base book of business (before any prospect is converted this session).
-export const baseClients: Client[] = [
+// Hand-authored, "featured" clients that lead each tier. The randomly
+// distributed book below is appended to these.
+const featuredClients: Client[] = [
   {
     name: 'Jennifer Martinez',
     email: 'jennifer.martinez@email.com',
@@ -80,9 +72,10 @@ export const baseClients: Client[] = [
     email: 'emily.watson@email.com',
     household: 'Watson Family',
     sentiment: 4,
-    status: 'incomplete',
+    status: 'complete',
     lastSignIn: '05/30/2025',
     tier: 'engaged',
+    isNew: true,
   },
   {
     name: 'Jorday Ray',
@@ -159,11 +152,188 @@ export const baseClients: Client[] = [
   },
 ]
 
+/* ── Randomly distributed book ──────────────────────────────────────────────
+   The rest of the book is generated from a fixed seed so the distribution is
+   stable across builds. Each client is assigned a tier at random, a sentiment,
+   a status and a last-sign-in date. A slice of the ENGAGED tier is flagged as
+   freshly converted (isNew) — this is what decides who converted from a
+   prospect into a client in the database. */
+
+function mulberry32(seed: number): () => number {
+  return () => {
+    seed |= 0
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const FIRST = [
+  'Olivia', 'Liam', 'Ava', 'Noah', 'Isabella', 'Ethan', 'Sofia', 'Lucas', 'Mia', 'Mason',
+  'Charlotte', 'Logan', 'Amelia', 'Elijah', 'Harper', 'James', 'Evelyn', 'Benjamin', 'Grace',
+  'Alexander', 'Chloe', 'Daniel', 'Zoe', 'Matthew', 'Lily', 'Nora', 'Hazel', 'Aurora', 'Ruby',
+  'Elena', 'Clara', 'Priya', 'Naomi', 'Diego', 'Freya', 'Leah', 'Sienna', 'Marcus', 'Aaron',
+]
+const LAST = [
+  'Bennett', 'Carter', 'Nguyen', 'Patel', 'Reyes', 'Fischer', 'Okafor', 'Silva', 'Romano',
+  'Bauer', 'Larsen', 'Costa', 'Mensah', 'Cohen', 'Wallace', 'Ferreira', 'Novak', 'Sato',
+  'Blanc', 'Moreau', 'Klein', 'Vega', 'Hansen', 'Dubois', 'Serrano', 'Haddad', 'Kowalski',
+]
+
+function randomClientDate(rand: () => number): string {
+  const start = Date.UTC(2025, 3, 20) // 20 Apr 2025
+  const end = Date.UTC(2025, 5, 6) // 06 Jun 2025
+  const d = new Date(start + rand() * (end - start))
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+}
+
+function randomClients(count: number, seed: number): Client[] {
+  const rand = mulberry32(seed)
+  const used = new Set(featuredClients.map((c) => c.name.toLowerCase()))
+  const out: Client[] = []
+  let guard = 0
+  while (out.length < count && guard < count * 20) {
+    guard++
+    const first = FIRST[Math.floor(rand() * FIRST.length)]
+    const last = LAST[Math.floor(rand() * LAST.length)]
+    const name = `${first} ${last}`
+    if (used.has(name.toLowerCase())) continue
+    used.add(name.toLowerCase())
+
+    const roll = rand()
+    const tier: ClientTier =
+      roll < 0.44 ? 'engaged' : roll < 0.74 ? 'attention' : roll < 0.9 ? 'reconnect' : 'incomplete'
+
+    if (tier === 'incomplete') {
+      const pending = rand() < 0.5
+      out.push({
+        name,
+        email: `${first}.${last}@email.com`.toLowerCase(),
+        sentiment: null,
+        status: pending ? 'pending' : 'incomplete',
+        secondaryStatus: pending ? 'incomplete' : undefined,
+        lastSignIn: randomClientDate(rand),
+        lastLabel: pending ? 'Last invited:' : undefined,
+        tier,
+      })
+      continue
+    }
+
+    // Sentiment trends down as the tier cools; engaged clients occasionally
+    // carry an amber caution, reconnect clients more often.
+    const base = tier === 'engaged' ? 4 : tier === 'attention' ? 3 : 2
+    const sentiment = Math.max(1, Math.min(5, base + (rand() < 0.35 ? 1 : 0) - (rand() < 0.25 ? 1 : 0)))
+    const warn = rand() < (tier === 'engaged' ? 0.12 : tier === 'attention' ? 0.3 : 0.45)
+    // A quarter of the engaged tier are freshly converted prospects.
+    const isNew = tier === 'engaged' && rand() < 0.28
+    // Occasionally attach a household label.
+    const household = rand() < 0.28 ? `${last} Family` : undefined
+
+    out.push({
+      name,
+      email: `${first}.${last}@email.com`.toLowerCase(),
+      household,
+      sentiment,
+      warn: warn || undefined,
+      // A profile in a scored tier is, by definition, complete.
+      status: 'complete',
+      lastSignIn: randomClientDate(rand),
+      tier,
+      isNew: isNew || undefined,
+    })
+  }
+  return out
+}
+
+// A stable KR score inside the client's tier band, derived from the name so it
+// never shifts between builds. Incomplete profiles have no score.
+const KR_BAND: Record<Exclude<ClientTier, 'incomplete'>, [number, number]> = {
+  engaged: [70, 99],
+  attention: [40, 69],
+  reconnect: [5, 39],
+}
+function krForClient(c: Client): number | null {
+  if (c.tier === 'incomplete') return null
+  if (c.kr != null) return c.kr
+  const [lo, hi] = KR_BAND[c.tier]
+  let h = 0
+  for (let i = 0; i < c.name.length; i++) h = (h * 31 + c.name.charCodeAt(i)) >>> 0
+  return lo + (h % (hi - lo + 1))
+}
+
+// Base book of business (before any prospect is converted this session).
+export const baseClients: Client[] = [...featuredClients, ...randomClients(22, 0xc11e)].map(
+  (c) => ({ ...c, kr: krForClient(c) }),
+)
+
+// Stats derived from the book so every headline agrees with the table.
+const clientCount = (t: ClientTier) => baseClients.filter((c) => c.tier === t).length
+// KR midpoint per tier band (engaged 70–100, attention 40–69, reconnect 0–39).
+const KR_MID: Record<Exclude<ClientTier, 'incomplete'>, number> = {
+  engaged: 85,
+  attention: 55,
+  reconnect: 30,
+}
+const scoredTiers: Exclude<ClientTier, 'incomplete'>[] = ['engaged', 'attention', 'reconnect']
+const scoredClients = scoredTiers.reduce((a, t) => a + clientCount(t), 0)
+
+export const clientStats = {
+  total: baseClients.length,
+  scored: scoredClients,
+  converted: baseClients.filter((c) => c.isNew).length,
+  byTier: {
+    engaged: clientCount('engaged'),
+    attention: clientCount('attention'),
+    reconnect: clientCount('reconnect'),
+    incomplete: clientCount('incomplete'),
+  },
+}
+
+// Actionable Insights, derived from the book rather than hand-listed: surface
+// the clients most in need of attention and describe each from their own row,
+// so the card always matches the table.
+function insightSeverity(c: Client): number {
+  let s = 0
+  if (c.tier === 'reconnect') s += 4
+  else if (c.tier === 'attention') s += 2
+  if (c.warn) s += 2
+  if (c.sentiment !== null && c.sentiment <= 2) s += 2
+  if (c.status === 'incomplete') s += 1
+  else if (c.status === 'pending') s += 1
+  return s
+}
+
+function insightLines(c: Client): string[] {
+  const lines: string[] = []
+  if (c.tier === 'reconnect') lines.push('In the Reconnect tier — engagement has cooled off.')
+  else if (c.tier === 'attention') lines.push('Sliding toward Reconnect — worth a check-in.')
+  if (c.sentiment !== null && c.sentiment <= 2) lines.push(`Low sentiment (${c.sentiment}/5).`)
+  else if (c.warn) lines.push('Sentiment flagged for a caution.')
+  if (c.status === 'incomplete') lines.push('Profile still incomplete.')
+  else if (c.status === 'pending') lines.push('Invite pending — not onboarded yet.')
+  lines.push(`Last sign-in ${c.lastSignIn}.`)
+  return lines.slice(0, 2)
+}
+
+export const clientInsights: ClientInsight[] = baseClients
+  .filter((c) => insightSeverity(c) > 0)
+  .sort((a, b) => insightSeverity(b) - insightSeverity(a))
+  .slice(0, 3)
+  .map((c) => ({ name: c.name, lines: insightLines(c) }))
+
+// Headline metric shown in the Clients "Top Line Metrics" card — the KR average
+// implied by the tier mix, so it moves with the book instead of being fixed.
+export const AVG_KR_SCORE = scoredClients
+  ? Math.round((scoredTiers.reduce((a, t) => a + clientCount(t) * KR_MID[t], 0) / scoredClients) * 10) / 10
+  : 0
+
 // A converted prospect becomes a freshly-onboarded ENGAGED client.
 export function convertedClient(name: string, email: string): Client {
   return {
     name,
     email,
+    kr: 78,
     sentiment: 4,
     status: 'complete',
     lastSignIn: new Date()

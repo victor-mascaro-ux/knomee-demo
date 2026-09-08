@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knomee Advisor — My Prospects (Review)</title>
+<title>Knomee — Adventures Wireframes (Review)</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -292,36 +292,6 @@
   }
 
   /* ════════════════════════════════════════════════════════
-     Theme preset: 1B "Smoke Tray" — dark translucent chrome,
-     floating detached rail + pill top bar. Pins unchanged.
-     ════════════════════════════════════════════════════════ */
-  .cc-stage[data-cc-theme="smoke-tray"] {
-    --cc-text:  #ffffff;
-    --cc-muted: rgba(255,255,255,0.6);
-    --cc-faint: rgba(255,255,255,0.42);
-    --cc-glass:        rgba(22,18,30,0.56);
-    --cc-glass-strong: rgba(22,18,30,0.62);
-    --cc-hairline:     rgba(255,255,255,0.12);
-    --cc-card:         rgba(255,255,255,0.06);
-    --cc-card-active:  rgba(255,255,255,0.14);
-    --cc-input-bg:     rgba(255,255,255,0.08);
-    --cc-ring: #fff;
-  }
-  /* Rail detaches and floats (inset, rounded) — the "unmistakably the tool"
-     read. With no separate top bar, it simply floats from the top edge. */
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-rail {
-    top: 16px; left: 16px; bottom: 16px; border-radius: 20px; border: 1px solid var(--cc-hairline);
-    overflow: hidden;
-  }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-count { background: rgba(255,255,255,0.12); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-ghost-btn:hover,
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-send { background: #fff; color: var(--cc-ink); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-empty { border-color: rgba(255,255,255,0.22); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-clear-btn:hover { color: #fff; }
-
-  /* ════════════════════════════════════════════════════════
      Theme preset: 1C "Branded Frost" — Neutral Frost plus a faint
      purple wash, purple accents, compact single-line rail rows.
      ════════════════════════════════════════════════════════ */
@@ -367,11 +337,11 @@
   <div class="cc-frame" id="ccFrame">
     <iframe id="ccProto" title="Prototype"></iframe>
     <script>
-      /* Deep links: open the prototype straight to the page named in the
-         address-bar hash (e.g. #/clients), so every page has its own link. */
+      /* Deep links: open straight to the anchor named in the address-bar
+         hash (e.g. #1b), so each wireframe option has its own shareable link. */
       (function () {
         var f = document.getElementById('ccProto');
-        f.src = './app/app.html?v=33' + (window.location.hash || '');
+        f.src = './wireframes/adventures.html?v=1' + (window.location.hash || '');
       })();
     </script>
     <div class="cc-catcher" id="ccCatcher"></div>
@@ -417,13 +387,15 @@
   // Config. PROJECT_ID must be unique per deployed prototype —
   // comments are namespaced by it in the shared Firestore project, so
   // two repos left on "change-me" would share one comment thread.
-  // Never use "state" (the video-feedback tool's own doc ID).
+  // Distinct from the main app's 'knomee-demo' PROJECT_ID: this is a
+  // separate design-review artifact (wireframe options, not the live
+  // prototype), so it gets its own comment thread.
   // THEME: 'neutral-frost' | 'smoke-tray' | 'branded-frost'
   // SEED_DEMO: true = local demo mode — no Firestore/localStorage,
   //            seeds 3 comments and opens one thread. For previewing
   //            the overlay itself; leave false in real projects.
   // ────────────────────────────────────────────────────────
-  const PROJECT_ID  = 'knomee-demo';
+  const PROJECT_ID  = 'knomee-demo-wireframes-adventures';
   const THEME       = 'branded-frost';
   const SEED_DEMO   = false;
   // Key that reveals/hides the commenting overlay. It stays completely
@@ -442,7 +414,7 @@
   const clearBtn = document.getElementById('ccClearAll');
   const rail     = document.getElementById('ccRail');
   const collapseBtn = document.getElementById('ccCollapse');
-  const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed';
+  const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed::wireframes-adventures';
 
   stage.dataset.ccTheme = THEME;
 
@@ -456,14 +428,10 @@
   let currentScreen = 'default';
 
   // ── Shared storage (Firestore) ──────────────────────────
-  // Deliberate deviation from the design spec's localStorage-only
-  // persistence: comments must be shared across reviewers/devices (same
-  // behavior as the knomee-video feedback tool), so Firestore is the
-  // source of truth and localStorage is only a fast-paint seed and
-  // offline fallback. Same Firebase project AND same top-level
-  // collection ("video-feedback") as the video tool — the project's
-  // security rules only allow that one collection name — namespaced
-  // by PROJECT_ID as the doc ID.
+  // Same Firebase project AND same top-level collection ("video-feedback")
+  // as the main app's overlay and the video tool — the project's security
+  // rules only allow that one collection name — namespaced by PROJECT_ID
+  // as the doc ID, so this stays a separate thread from 'knomee-demo'.
   const firebaseConfig = {
     apiKey: "AIzaSyBqmxrO__M6mGypXsxQ_HgCu81qs8mXe90",
     authDomain: "knomee-playbook.firebaseapp.com",
@@ -571,7 +539,7 @@
     stateRef.get().then(snap => {
       const claimedBy = snap.exists ? snap.data().claimedBy : null;
       if (claimedBy && claimedBy !== SITE_ID) {
-        showWarning('Another prototype (' + claimedBy + ') uses the same PROJECT_ID — you are seeing and overwriting each other\'s comments. Change PROJECT_ID in index.html. (Click to dismiss)', true);
+        showWarning('Another prototype (' + claimedBy + ') uses the same PROJECT_ID — you are seeing and overwriting each other\'s comments. Change PROJECT_ID in wireframes.html. (Click to dismiss)', true);
       }
       return stateRef.set({ claimedBy: SITE_ID }, { merge: true });
     }).catch(err => console.warn('Namespace conflict check failed', err));
@@ -581,7 +549,8 @@
   // Pins belong to a screen. The overlay reads the prototype's current
   // screen id without requiring integration: a prototype can expose
   // window.__ccScreenId, or use the .screen.active convention (like the
-  // dummy). Falls back to a single 'default' screen.
+  // dummy). Falls back to a single 'default' screen — this wireframe page
+  // is one static canvas, so everything stays on 'default'.
   function getScreenId() {
     try {
       const w = proto.contentWindow;

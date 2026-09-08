@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 1 336 35.5" fill="#FFFFFF" role="img" aria-label="Confetti Wealth">
+  <rect x="15" y="1" width="8" height="8" rx="1.5"/>
+  <rect x="2" y="12" width="9.5" height="9.5" rx="1.5"/>
+  <rect x="15.5" y="11.5" width="11.5" height="11.5" rx="1.5" opacity="0.72"/>
+  <rect x="31" y="13" width="8.5" height="8.5" rx="1.5"/>
+  <rect x="9" y="26" width="7.5" height="7.5" rx="1.5" opacity="0.72"/>
+  <rect x="20.5" y="25" width="11.5" height="11.5" rx="1.5"/>
+  <text x="54" y="28" font-family="Poppins, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="0.5">CONFETTI</text>
+  <text x="208" y="28" font-family="Poppins, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="26" font-weight="400" letter-spacing="2.5">WEALTH</text>
+</svg>

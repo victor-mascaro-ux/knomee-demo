@@ -3,10 +3,14 @@
    screens, and the device frame is the only place mobile styling lives.
    Design tokens come from index.css (--plum, --ocean, --line …). */
 
-.cx-stage {
+/* The phone is the whole page here — no advisor shell around it. */
+.cx-page {
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 4px 0 12px;
+  align-items: flex-start;
+  padding: 40px 20px 48px;
+  background: var(--page-bg, #fff);
 }
 
 /* ---------- iPhone frame ---------- */
@@ -302,6 +306,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  overflow: hidden;
   display: grid;
   place-items: center;
   background: #efeef1;
@@ -311,13 +316,21 @@
   width: 34px;
   height: 34px;
 }
-.cx-adv-art.is-joy {
-  background: #fff;
-  color: inherit;
+.cx-adv-art img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
-.cx-adv-art.is-joy svg {
-  width: 38px;
-  height: 38px;
+/* Locked adventures wear their real illustration, drained of colour — the same
+   thing the mobile design does to signal "not yet". */
+.cx-adv-art.has-img img {
+  filter: grayscale(1) opacity(0.4);
+}
+.cx-adv-art.has-img.is-open img {
+  filter: none;
+}
+.cx-adv-art.has-img.is-open {
+  background: #fff;
 }
 
 /* the one open adventure */

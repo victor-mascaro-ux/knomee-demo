@@ -1,36 +1,39 @@
 import {
+  Fragment,
   forwardRef,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
-import { prospects, tierGroups, type Prospect, type Tier } from './data/prospects'
+import { createPortal } from 'react-dom'
+import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
-  engagement,
-  outcomes,
-  byTier,
-  buildFunnel,
-  MIN_SAMPLE,
-  impactStats,
   modelClusters,
   CLUSTER_KEYS,
+  talkTo,
+  utmKeys,
+  impactStats,
+  byTier,
+  MIN_SAMPLE,
+  outcomes,
+  attribution,
+  marketingEffectiveness,
+  verbatims,
+  buildFunnel,
+  engagement,
   dropReadings,
   bySource,
   byNiche,
-  attribution,
-  marketingEffectiveness,
   experiments,
   currentConfigSince,
-  talkTo,
-  verbatims,
-  utmKeys,
+  type ClusterSeg,
   type Segment,
   type Experiment,
-  type ClusterSeg,
 } from './data/analytics'
 import {
   advisors,
@@ -61,6 +64,7 @@ import {
   type ClientTier,
 } from './data/clients'
 import {
+  KnomeeMark,
   ChartIcon,
   BoltIcon,
   ChevronUp,
@@ -81,9 +85,14 @@ import {
   TierBarsIcon,
   FunnelIcon,
   MegaphoneIcon,
+  HouseIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
+import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
+import { CLIENT_BRANDS } from './components/clientBrands'
+import { segModels, segMethod } from './data/segmentation'
+import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
 
@@ -91,24 +100,38 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
 // Shared name + chevron (+ optional "new" tag) so the Prospects and Clients
 // tables render the label identically and the arrow stays aligned with the name.
-function NameLink({ name, isNew }: { name: string; isNew?: boolean }) {
-  return (
-    <span className="name-line">
-      <span className="name-text">
-        {name}
-        <span className="name-chevron" aria-hidden>
-          ›
-        </span>
+function NameLink({ name, onClick }: { name: string; onClick?: () => void }) {
+  const inner = (
+    <span className="name-text">
+      {name}
+      <span className="name-chevron" aria-hidden>
+        ›
       </span>
-      {isNew && <span className="new-tag">new</span>}
     </span>
   )
+  if (onClick) {
+    return (
+      <button type="button" className="name-line name-link-btn" onClick={onClick}>
+        {inner}
+      </button>
+    )
+  }
+  return <span className="name-line">{inner}</span>
 }
 
 // Standard card help affordance: a "?" glyph that reveals its hint on hover.
-function HelpTip({ text }: { text: string }) {
+// The bubble opens to the LEFT by default (the "?" usually sits at a card's
+// right edge); pass side="right" where the glyph sits at the left instead, so
+// the bubble doesn't overflow off-screen.
+function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
-    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+    <span
+      className={`help-tip tt${side === 'right' ? ' help-tip-right' : ''}`}
+      data-tip={text}
+      tabIndex={0}
+      role="img"
+      aria-label={text}
+    >
       ?
     </span>
   )
@@ -120,6 +143,7 @@ function CollapsibleCard({
   hint,
   bodyClassName,
   className,
+  defaultOpen = true,
   children,
 }: {
   icon: ReactNode
@@ -127,9 +151,10 @@ function CollapsibleCard({
   hint?: string
   bodyClassName: string
   className?: string
+  defaultOpen?: boolean
   children: ReactNode
 }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(defaultOpen)
   return (
     <section className={`card ${className ?? ''}`}>
       <header className="card-head">
@@ -159,89 +184,229 @@ function CollapsibleCard({
   )
 }
 
-function TopLineMetrics() {
+// Tier metadata shared by the pulse bar and the drill-in filter. `book` is the
+// full-book count shown on the bar; the linked insight surfaces as the "why"
+// when a tier is focused.
+const TIER_META = [
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+]
+type TierKey = (typeof TIER_META)[number]['key']
+
+// The single layered dashboard: pulse (state) + the one next action always
+// visible; the full call-list and the evidence are discoverable layers. The
+// tier bar is the drill-in spine — focusing a tier filters the call-list and
+// surfaces that tier's insight.
+function CommandCenter() {
+  const [tier, setTier] = useState<TierKey | null>(null)
+  const [listOpen, setListOpen] = useState(false)
+  const [whyOpen, setWhyOpen] = useState(false)
+
+  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
+  const lead = flagged[0]
+  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
+  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
+  const orderedInsights = tierInsight
+    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
+    : insights
+
+  // Focusing a tier reveals its people; clicking it again clears the filter.
+  const pickTier = (k: TierKey) =>
+    setTier((prev) => {
+      const next = prev === k ? null : k
+      setListOpen(next !== null)
+      return next
+    })
+  const clear = () => {
+    setTier(null)
+    setListOpen(false)
+  }
+
   return (
-    <CollapsibleCard
-      className="metrics-card"
-      icon={<ChartIcon color="#7639a1" />}
-      title="Top Line Metrics"
-      hint="Totals, average KQ score, and the tier split."
-      bodyClassName="metrics-body"
-    >
-        <div className="metric-tiles">
+    <section className="card cmd-card">
+      <header className="card-head">
+        <div className="card-title">
+          <ChartIcon color="#7639a1" />
+          <span>Actionable Metrics</span>
+        </div>
+        <HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />
+      </header>
+
+      <div className="cmd-body">
+        {/* Layer 0 — the pulse */}
+        <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
             <span className="metric-label">TOTAL PROSPECTS</span>
-            <div className="metric-num">
-              <span className="metric-value tt" data-tip="Prospects in your book">12</span>
-            </div>
+            <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
           </div>
           <div className="metric-tile">
             <span className="metric-label">AVG KQ SCORE</span>
-            <div className="metric-num">
-              <span className="metric-value tt" data-tip="Average KQ across all prospects">55.9</span>
-            </div>
+            <div className="metric-num"><span className="metric-value">{prospectStats.avgKQ.toFixed(1)}</span></div>
           </div>
-
           <div className="metric-tile distribution">
             <div className="dist-head">
               <span className="metric-label">TIER DISTRIBUTION</span>
-              <span className="dist-note">1 incomplete profile not shown</span>
+              {tier ? (
+                <button className="cmd-clear" type="button" onClick={clear}>
+                  Clear filter ✕
+                </button>
+              ) : (
+                <span className="dist-filter-hint">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                    <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
+                  </svg>
+                  Tap a tier to filter
+                </span>
+              )}
             </div>
-            <div className="dist-bar">
-              <span className="seg seg-1 tt" data-tip="Tier 1 · 3 · 25%">3</span>
-              <span className="seg seg-2 tt" data-tip="Tier 2 · 5 · 42%">5</span>
-              <span className="seg seg-3 tt" data-tip="Tier 3 · 3 · 25%">3</span>
+            <div className="dist-bar cmd-dist-bar">
+              {TIER_META.map((m) => {
+                const n = prospectStats.byTier[m.tierId]
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    style={{ flex: n || 0.001 }}
+                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
+                      tier && tier !== m.key ? 'is-dim' : ''
+                    }`}
+                    onClick={() => pickTier(m.key)}
+                    aria-pressed={tier === m.key}
+                    data-tip={`${m.key} · ${m.name} · ${n}`}
+                  >
+                    {n}
+                  </button>
+                )
+              })}
             </div>
-            <div className="dist-legend">
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-1" />Tier 1 · Ready Now</span>
-                <span className="dist-leg-range">70–100 KQ</span>
-              </div>
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-2" />Tier 2 · Considering</span>
-                <span className="dist-leg-range">40–69 KQ</span>
-              </div>
-              <div className="dist-leg">
-                <span className="dist-leg-name"><i className="dot dot-3" />Tier 3 · Nurture</span>
-                <span className="dist-leg-range">0–39 KQ</span>
+            <div className="dist-legend dist-legend-bars">
+              {TIER_META.map((m) => (
+                <div className="dist-leg" key={m.key} style={{ flex: prospectStats.byTier[m.tierId] || 0.001 }}>
+                  <span className="dist-leg-name">
+                    <i className={`dot ${m.dot}`} />
+                    {m.key} · {m.name}
+                  </span>
+                  <span className="dist-leg-range">{m.range}</span>
+                </div>
+              ))}
+            </div>
+            {prospectStats.byTier.incomplete > 0 && (
+              <p className="dist-foot">
+                {prospectStats.byTier.incomplete} incomplete profile
+                {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Layer 0 — the one next action */}
+        <div className="cmd-focus">
+          <p className="cmd-focus-line">
+            {meta ? (
+              <>
+                <b>{meta.key} · {meta.name}</b> — {flagged.length} flagged to talk to this week.
+              </>
+            ) : (
+              <>
+                <b>{flagged.length} prospects</b> flagged to talk to this week.
+              </>
+            )}
+          </p>
+          {lead ? (
+            <button
+              className="cmd-lead"
+              type="button"
+              onClick={() => setListOpen((o) => !o)}
+              aria-expanded={listOpen}
+            >
+              <span className="cmd-lead-tag">Start with</span>
+              <span className="cmd-lead-name">{lead.name}</span>
+              <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>{lead.tier}</span>
+              <span className="cmd-lead-kq">KQ {lead.kq}</span>
+              <span className="cmd-lead-niche">{lead.niche}</span>
+              <span className="cmd-lead-more">
+                {listOpen ? 'Hide' : `See all ${flagged.length}`}
+                <ChevronDown />
+              </span>
+            </button>
+          ) : (
+            <p className="cmd-empty">
+              None flagged in this tier this week — keep them on a light-touch nurture track.
+            </p>
+          )}
+        </div>
+
+        {/* Layer 1 — the full call-list */}
+        <div className={`collapse ${listOpen && flagged.length ? 'open' : ''}`}>
+          <div className="collapse-inner">
+            <div className="talk-list cmd-talk-list">
+              {flagged.map((t) => (
+                <div className="talk-card" key={t.name}>
+                  <div className="talk-head">
+                    <span className="talk-name">{t.name}</span>
+                    <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
+                    <span className="talk-kq">KQ {t.kq}</span>
+                    <span className="talk-niche">{t.niche}</span>
+                  </div>
+                  <div className="talk-chips">
+                    {t.said.map((s, i) => (
+                      <span className="talk-chip-wrap" key={s}>
+                        <span className="talk-chip">{s}</span>
+                        {i < t.said.length - 1 && <ChevronRight />}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Layer 1 — the evidence */}
+        <div className="cmd-why">
+          <button
+            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
+            type="button"
+            aria-expanded={whyOpen}
+            onClick={() => setWhyOpen((o) => !o)}
+          >
+            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
+          </button>
+          {meta && tierInsight && !whyOpen && (
+            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
+              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
+              <span className="cmd-why-peek-more">Read more →</span>
+            </button>
+          )}
+          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
+            <div className="collapse-inner">
+              <div className="cmd-insights">
+                {orderedInsights.map((ins) => (
+                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
+                    <div className="insight-num">{ins.n}</div>
+                    <div className="insight-text">
+                      <div className="insight-title">{ins.title}</div>
+                      <p className="insight-body">{ins.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
-    </CollapsibleCard>
-  )
-}
-
-function ActionableInsights() {
-  const col1 = insights.slice(0, 4)
-  const col2 = insights.slice(4, 8)
-  return (
-    <CollapsibleCard
-      className="insights-card"
-      icon={<BoltIcon color="#7639a1" />}
-      title="Actionable Insights"
-      hint="Auto-generated takeaways, ranked by opportunity."
-      bodyClassName="insights-body"
-    >
-      {[col1, col2].map((col, i) => (
-        <div className="insights-col" key={i}>
-          {col.map((ins) => (
-            <div className="insight" key={ins.n}>
-              <div className="insight-num">{ins.n}</div>
-              <div className="insight-text">
-                <div className="insight-title">{ins.title}</div>
-                <p className="insight-body">{ins.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ))}
-    </CollapsibleCard>
+      </div>
+    </section>
   )
 }
 
 function ScoreBadge({ tier, value }: { tier: Tier; value: number | null }) {
   if (value === null) return <span className="score-badge empty">–</span>
+  return <span className={`score-badge score-${tier}`}>{value}</span>
+}
+
+function ClientScoreBadge({ tier, value }: { tier: ClientTier; value: number | null | undefined }) {
+  if (value == null) return <span className="score-badge empty">–</span>
   return <span className={`score-badge score-${tier}`}>{value}</span>
 }
 
@@ -258,11 +423,13 @@ function Avatar({ p }: { p: Prospect }) {
 function ProspectRow({
   p,
   onConvert,
+  onOpenProfile,
   checked,
   onToggle,
 }: {
   p: Prospect
   onConvert: (p: Prospect) => void
+  onOpenProfile: (p: Prospect) => void
   checked: boolean
   onToggle: () => void
 }) {
@@ -281,7 +448,7 @@ function ProspectRow({
         <div className="name-cell">
           <Avatar p={p} />
           <div className="name-block">
-            <NameLink name={p.name} />
+            <NameLink name={p.name} onClick={() => onOpenProfile(p)} />
             <span className="email-line">{p.email}</span>
           </div>
         </div>
@@ -339,41 +506,12 @@ function ProspectRow({
 // when the text is longer than that, reveal a chevron to expand the cell (and
 // its row) to the full text, and collapse it again.
 function TopActionCell({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false)
-  const [overflowing, setOverflowing] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const measure = () => {
-      // Overflow is only meaningful while clamped, so skip when expanded and
-      // keep the last known value.
-      if (expanded) return
-      setOverflowing(el.scrollHeight - el.clientHeight > 1)
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [text, expanded])
-
+  // Clamp to two lines; on hover, the full text opens in a card that floats
+  // over the dashboard (no ellipsis).
   return (
     <div className="top-action">
-      <div ref={ref} className={`top-action-text${expanded ? ' expanded' : ''}`}>
-        {text}
-      </div>
-      {overflowing && (
-        <button
-          type="button"
-          className="top-action-toggle"
-          aria-expanded={expanded}
-          aria-label={expanded ? 'Collapse' : 'Expand'}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? <ChevronUp /> : <ChevronDown />}
-        </button>
-      )}
+      <div className="top-action-text">{text}</div>
+      <div className="top-action-pop">{text}</div>
     </div>
   )
 }
@@ -433,17 +571,46 @@ function RowMenu({ items }: { items: MenuItem[] }) {
 
 function ProspectsTable({
   onConvert,
+  onOpenProfile,
   selected,
   onToggle,
   allChecked,
   onToggleAll,
 }: {
   onConvert: (p: Prospect) => void
+  onOpenProfile: (p: Prospect) => void
   selected: Set<string>
   onToggle: (name: string) => void
   allChecked: boolean
   onToggleAll: () => void
 }) {
+  // KQ Score sort. null = book order. 'desc' (caret down): normal tier order,
+  // strongest prospect first within each tier. 'asc' (caret up): the whole
+  // table flips — tier groups run 3 → 2 → 1 — with each tier still ordered
+  // strongest-first; incomplete profiles stay pinned last either way.
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const toggleGroup = (id: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  const sortRows = (rows: Prospect[]) => {
+    if (!sortDir) return rows
+    const scored = rows
+      .filter((p) => p.kq !== null)
+      .sort((a, b) => (b.kq as number) - (a.kq as number))
+    const unscored = rows.filter((p) => p.kq === null)
+    return [...scored, ...unscored]
+  }
+  // Scored tiers reverse when the caret points up; incomplete is always last.
+  const orderedGroups = (() => {
+    const scored = tierGroups.filter((g) => g.id !== 'incomplete')
+    const rest = tierGroups.filter((g) => g.id === 'incomplete')
+    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest]
+  })()
   return (
     <div className="table-wrap">
       <table className="prospects-table">
@@ -459,7 +626,17 @@ function ProspectsTable({
             </th>
             <th className="col-name">Name</th>
             <th className="col-kq">
-              <span className="th-sort">KQ Score <CaretDown /></span>
+              <button
+                type="button"
+                className="th-sort th-sort-btn"
+                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+                aria-label="Sort by KQ score"
+              >
+                KQ Score
+                <span className={`th-caret ${sortDir ? 'is-active' : ''} ${sortDir === 'asc' ? 'is-asc' : ''}`}>
+                  <CaretDown />
+                </span>
+              </button>
             </th>
             <th className="col-num">Intent</th>
             <th className="col-num">Clarity</th>
@@ -471,29 +648,48 @@ function ProspectsTable({
           </tr>
         </thead>
         <tbody>
-          {tierGroups.map((group) => {
+          {orderedGroups.map((group) => {
             const rows = prospects.filter((p) => p.tier === group.id)
             if (rows.length === 0) return null
+            const isCollapsed = collapsed.has(group.id)
             return (
-              <>
-                <tr className={`group-header group-${group.id}`} key={`h-${group.id}`}>
+              <Fragment key={`g-${group.id}`}>
+                <tr
+                  className={`group-header group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
+                  onClick={() => toggleGroup(group.id)}
+                >
                   <td colSpan={10}>
                     <div className="group-header-inner">
+                      <button
+                        type="button"
+                        className="group-toggle"
+                        aria-expanded={!isCollapsed}
+                        aria-label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleGroup(group.id)
+                        }}
+                      >
+                        <ChevronDown />
+                      </button>
                       <span>{group.title}</span>
+                      <span className="group-count">{rows.length}</span>
                       {group.range && <span className="group-range">{group.range}</span>}
                     </div>
                   </td>
                 </tr>
-                {rows.map((p) => (
-                  <ProspectRow
-                    p={p}
-                    key={p.name}
-                    onConvert={onConvert}
-                    checked={selected.has(p.name)}
-                    onToggle={() => onToggle(p.name)}
-                  />
-                ))}
-              </>
+                {!isCollapsed &&
+                  sortRows(rows).map((p) => (
+                    <ProspectRow
+                      p={p}
+                      key={p.name}
+                      onConvert={onConvert}
+                      onOpenProfile={onOpenProfile}
+                      checked={selected.has(p.name)}
+                      onToggle={() => onToggle(p.name)}
+                    />
+                  ))}
+              </Fragment>
             )
           })}
         </tbody>
@@ -505,9 +701,11 @@ function ProspectsTable({
 function Toolbar({
   downloadActive,
   onDownload,
+  onInvite,
 }: {
   downloadActive: boolean
   onDownload: () => void
+  onInvite: () => void
 }) {
   return (
     <div className="toolbar">
@@ -524,7 +722,7 @@ function Toolbar({
         >
           <DownloadIcon /> Download
         </button>
-        <button className="btn btn-primary" type="button">
+        <button className="btn btn-primary" type="button" onClick={onInvite}>
           <PlusIcon /> Invite
         </button>
       </div>
@@ -532,55 +730,16 @@ function Toolbar({
   )
 }
 
-// The prioritised call-list. Lives on the Prospects dashboard — that is where
-// the advisor decides who to act on — rather than buried in Analytics. Each
-// chip is something the prospect stated, never a tracked behaviour.
-function WhoToTalkTo() {
-  return (
-    <section className="card analytics-card who-to-talk">
-      <header className="card-head">
-        <div className="card-title">
-          <BoltIcon />
-          <span>Who to Talk to This Week</span>
-        </div>
-        <HelpTip text="Highest-intent prospects, with their stated reasoning." />
-      </header>
-      <div className="analytics-body">
-        <div className="talk-list">
-          {talkTo.map((t) => (
-            <div className="talk-card" key={t.name}>
-              <div className="talk-head">
-                <span className="talk-name">{t.name}</span>
-                <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
-                <span className="talk-kq">KQ {t.kq}</span>
-                <span className="talk-niche">{t.niche}</span>
-              </div>
-              <div className="talk-chips">
-                {t.said.map((s, i) => (
-                  <span className="talk-chip-wrap" key={s}>
-                    <span className="talk-chip">{s}</span>
-                    {i < t.said.length - 1 && <ChevronRight />}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="analytics-note">
-          Every score shows its reasoning. Each chip is something the prospect stated — never a
-          tracked behaviour.
-        </p>
-      </div>
-    </section>
-  )
-}
-
 function ProspectsScreen({
   onConvert,
   onDownload,
+  onInvite,
+  onOpenProfile,
 }: {
   onConvert: (p: Prospect) => void
   onDownload: () => void
+  onInvite: () => void
+  onOpenProfile: (p: Prospect) => void
 }) {
   const allNames = prospects.map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -595,13 +754,12 @@ function ProspectsScreen({
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
   return (
     <>
-      <h1 className="page-title">My Dashboard</h1>
-      <TopLineMetrics />
-      <ActionableInsights />
-      <WhoToTalkTo />
-      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
+      <h1 className="page-title">My Prospects</h1>
+      <CommandCenter />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
+        onOpenProfile={onOpenProfile}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}
@@ -613,27 +771,37 @@ function ProspectsScreen({
 
 /* ── Clients screen (the converted book of business) ── */
 
-function SentimentDots({
-  value,
-  warn,
-  tier,
-}: {
-  value: number | null
-  warn?: boolean
-  tier?: ClientTier
-}) {
+// Sentiment shown as a single colored face on a 1–5 scale (matching the
+// prospect app's "how do you feel about your money" faces): red frown → amber
+// → yellow neutral → lime smile → green grin.
+const SENTIMENT_FACES = [
+  { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
+  { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
+  { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
+  { color: '#6ee787', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
+  { color: '#17c964', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+]
+
+function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
   if (value === null) return <span className="dash">–</span>
+  const rounded = Math.max(1, Math.min(5, Math.round(value)))
+  const f = SENTIMENT_FACES[rounded - 1]
+  // Caution triangle only flags the two lowest (unhappy) faces.
+  const showWarn = warn && rounded <= 2
   return (
-    <div className={`sentiment${tier ? ` sentiment-${tier}` : ''}`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={`sdot ${i < value ? '' : 'empty'}`} />
-      ))}
-      {warn && (
+    <span className="sentiment-face tt" data-tip={`${f.label} · ${rounded}/5`}>
+      <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
+        <circle cx="12" cy="12" r="12" fill={f.color} />
+        <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
+        <circle cx="15" cy="10.4" r="1.5" fill="#2b2140" />
+        <path d={f.mouth} fill="none" stroke="#2b2140" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {showWarn && (
         <span className="sentiment-warn">
-          <WarnIcon />
+          <WarnIcon color="#b91c1c" />
         </span>
       )}
-    </div>
+    </span>
   )
 }
 
@@ -658,9 +826,17 @@ function ClientRow({
       </td>
       <td className="col-name">
         <div className="name-cell">
-          <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+          <span className="avatar-wrap">
+            <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+            {c.household && (
+              <span className="household-badge" title={c.household} aria-label={c.household}>
+                <HouseIcon />
+              </span>
+            )}
+            {c.isNew && <span className="new-tag avatar-new">new</span>}
+          </span>
           <div className="name-block">
-            <NameLink name={c.name} isNew={c.isNew} />
+            <NameLink name={c.name} />
             <span className="email-line">{c.email}</span>
           </div>
         </div>
@@ -674,17 +850,28 @@ function ClientRow({
           <span className="dash">—</span>
         )}
       </td>
+      <td className="col-kr">
+        <ClientScoreBadge tier={c.tier} value={c.kr} />
+      </td>
       <td className="col-sentiment">
-        <SentimentDots value={c.sentiment} warn={c.warn} tier={c.tier} />
+        <SentimentFace value={c.sentiment} warn={c.warn} />
       </td>
       <td className="col-status">
         {c.secondaryStatus ? (
           <div className="status-stack">
             <span className="status-badge status-pending">{c.status}</span>
-            <span className="status-badge">{c.secondaryStatus}</span>
+            <span className="status-badge status-incomplete">{c.secondaryStatus}</span>
           </div>
         ) : (
-          <span className={`status-badge ${c.status === 'pending' ? 'status-pending' : ''}`}>
+          <span
+            className={`status-badge ${
+              c.status === 'pending'
+                ? 'status-pending'
+                : c.status === 'incomplete'
+                  ? 'status-incomplete'
+                  : ''
+            }`}
+          >
             {c.status}
           </span>
         )}
@@ -707,8 +894,17 @@ function ClientRow({
   )
 }
 
-function ConfidencePie() {
+function ConfidencePie({
+  activeSentiment,
+  onPick,
+}: {
+  activeSentiment: number | null
+  onPick: (level: number) => void
+}) {
   const [hover, setHover] = useState<number | null>(null)
+  // The picked slice stays highlighted; hover previews another.
+  const sel = activeSentiment != null ? activeSentiment - 1 : null
+  const focus = hover ?? sel
   const cx = 50
   const cy = 50
   const r = 46
@@ -732,11 +928,12 @@ function ConfidencePie() {
             key={confidenceSegments[i].label}
             d={d}
             fill={confidenceSegments[i].color}
-            className={`pie-slice ${hover === i ? 'on' : ''} ${
-              hover !== null && hover !== i ? 'dim' : ''
+            className={`pie-slice ${focus === i ? 'on' : ''} ${
+              focus !== null && focus !== i ? 'dim' : ''
             }`}
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+            onClick={() => onPick(i + 1)}
           />
         ))}
       </svg>
@@ -744,9 +941,10 @@ function ConfidencePie() {
         {confidenceSegments.map((s, i) => (
           <li
             key={s.label}
-            className={hover === i ? 'on' : ''}
+            className={`${focus === i ? 'on' : ''} ${sel === i ? 'is-sel' : ''}`}
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+            onClick={() => onPick(i + 1)}
           >
             <span className="pie-swatch" style={{ background: s.color }} />
             <span className="pie-label">{s.label}</span>
@@ -828,15 +1026,40 @@ function ActiveChart() {
   )
 }
 
-function ClientsMetrics({ clients }: { clients: Client[] }) {
+// Small week-over-week delta: an up/down triangle + magnitude, colored by
+// direction. `note` (e.g. "this week") makes the weekly cadence explicit.
+function Delta({ value, note }: { value: number; note?: string }) {
+  const up = value >= 0
+  return (
+    <span className={`chart-delta ${up ? 'is-up' : 'is-down'}`}>
+      {up ? '▲' : '▼'} {Math.abs(value)}
+      {note ? <span className="chart-delta-note">{note}</span> : null}
+    </span>
+  )
+}
+
+const CLIENT_TIER_META = [
+  { tierId: 'engaged' as const, label: 'Tier 1 · Engaged', range: '70–100 KR', seg: 'seg-c1', dot: 'dot-c1' },
+  { tierId: 'attention' as const, label: 'Tier 2 · Attention', range: '40–69 KR', seg: 'seg-c2', dot: 'dot-c2' },
+  { tierId: 'reconnect' as const, label: 'Tier 3 · Reconnect', range: '0–39 KR', seg: 'seg-c3', dot: 'dot-c3' },
+]
+
+function ClientsMetrics({
+  clients,
+  filterTier,
+  onPickTier,
+  sentimentFilter,
+  onPickSentiment,
+}: {
+  clients: Client[]
+  filterTier: ClientTier | null
+  onPickTier: (t: ClientTier) => void
+  sentimentFilter: number | null
+  onPickSentiment: (level: number) => void
+}) {
   const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
-  const engaged = count('engaged')
-  const attention = count('attention')
-  const reconnect = count('reconnect')
   const incomplete = count('incomplete')
   const total = clients.length
-  const scored = engaged + attention + reconnect
-  const pct = (n: number) => (scored ? Math.round((n / scored) * 100) : 0)
 
   return (
     <CollapsibleCard
@@ -864,49 +1087,52 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
         <div className="metric-tile distribution">
           <div className="dist-head">
             <span className="metric-label">TIER DISTRIBUTION</span>
-            {incomplete > 0 && (
-              <span className="dist-note">
-                {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown
+            {filterTier ? (
+              <button className="cmd-clear" type="button" onClick={() => onPickTier(filterTier)}>
+                Clear filter ✕
+              </button>
+            ) : (
+              <span className="dist-filter-hint">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                  <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
+                </svg>
+                Tap a tier to filter
               </span>
             )}
           </div>
-          <div className="dist-bar">
-            <span
-              className="seg seg-c1 tt"
-              style={{ flex: engaged || 0.001 }}
-              data-tip={`Tier 1 · ${engaged} · ${pct(engaged)}%`}
-            >
-              {engaged}
-            </span>
-            <span
-              className="seg seg-c2 tt"
-              style={{ flex: attention || 0.001 }}
-              data-tip={`Tier 2 · ${attention} · ${pct(attention)}%`}
-            >
-              {attention}
-            </span>
-            <span
-              className="seg seg-c3 tt"
-              style={{ flex: reconnect || 0.001 }}
-              data-tip={`Tier 3 · ${reconnect} · ${pct(reconnect)}%`}
-            >
-              {reconnect}
-            </span>
+          <div className="dist-bar cmd-dist-bar">
+            {CLIENT_TIER_META.map((m) => {
+              const n = count(m.tierId)
+              return (
+                <button
+                  key={m.tierId}
+                  type="button"
+                  className={`seg ${m.seg} tt ${filterTier === m.tierId ? 'is-sel' : ''} ${
+                    filterTier && filterTier !== m.tierId ? 'is-dim' : ''
+                  }`}
+                  style={{ flex: n || 0.001 }}
+                  onClick={() => onPickTier(m.tierId)}
+                  aria-pressed={filterTier === m.tierId}
+                  data-tip={`${m.label} · ${n}`}
+                >
+                  {n}
+                </button>
+              )
+            })}
           </div>
-          <div className="dist-legend">
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c1" />Tier 1 · Engaged</span>
-              <span className="dist-leg-range">70–100 KR</span>
-            </div>
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c2" />Tier 2 · Attention</span>
-              <span className="dist-leg-range">40–69 KR</span>
-            </div>
-            <div className="dist-leg">
-              <span className="dist-leg-name"><i className="dot dot-c3" />Tier 3 · Reconnect</span>
-              <span className="dist-leg-range">0–39 KR</span>
-            </div>
+          <div className="dist-legend dist-legend-bars">
+            {CLIENT_TIER_META.map((m) => (
+              <div className="dist-leg" key={m.tierId} style={{ flex: count(m.tierId) || 0.001 }}>
+                <span className="dist-leg-name"><i className={`dot ${m.dot}`} />{m.label}</span>
+                <span className="dist-leg-range">{m.range}</span>
+              </div>
+            ))}
           </div>
+          {incomplete > 0 && (
+            <p className="dist-foot">
+              {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown
+            </p>
+          )}
         </div>
       </div>
 
@@ -915,13 +1141,23 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+              {sentimentFilter != null && (
+                <button
+                  className="cmd-clear"
+                  type="button"
+                  onClick={() => onPickSentiment(sentimentFilter)}
+                >
+                  Clear filter ✕
+                </button>
+              )}
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{confidenceScore}</span>
-              <HelpTip text="Blended client sentiment, from frustrated to delighted." />
+              <Delta value={2} note="this week" />
+              <HelpTip text="Blended client sentiment, from frustrated to delighted. Measured weekly." />
             </span>
           </div>
-          <ConfidencePie />
+          <ConfidencePie activeSentiment={sentimentFilter} onPick={onPickSentiment} />
         </div>
         <div className="chart-card">
           <div className="chart-head">
@@ -930,6 +1166,7 @@ function ClientsMetrics({ clients }: { clients: Client[] }) {
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{activeThisWeek}%</span>
+              <Delta value={activeSeries[activeSeries.length - 1].value - activeSeries[activeSeries.length - 2].value} />
               <HelpTip text="Share of clients logging in each week." />
             </span>
           </div>
@@ -948,6 +1185,7 @@ function ClientInsights() {
       title="Actionable Insights"
       hint="Clients flagged by engagement and sentiment."
       bodyClassName="client-insights-body"
+      defaultOpen={false}
     >
       {clientInsights.map((ins) => (
         <div className="client-insight" key={ins.name}>
@@ -967,7 +1205,15 @@ function ClientInsights() {
   )
 }
 
-function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload: () => void }) {
+function ClientsScreen({
+  clients,
+  onDownload,
+  onInvite,
+}: {
+  clients: Client[]
+  onDownload: () => void
+  onInvite: () => void
+}) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const toggle = (name: string) =>
@@ -979,12 +1225,71 @@ function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload:
     })
   const allChecked = selected.size === allNames.length && allNames.length > 0
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const toggleGroup = (id: string) =>
+    setCollapsed((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
+  const [tierFilter, setTierFilter] = useState<ClientTier | null>(null)
+  const pickTier = (t: ClientTier) => setTierFilter((prev) => (prev === t ? null : t))
+  // Clicking a confidence-pie sector filters the table to that sentiment.
+  const [sentimentFilter, setSentimentFilter] = useState<number | null>(null)
+  const pickSentiment = (level: number) =>
+    setSentimentFilter((prev) => (prev === level ? null : level))
+  // Column sort: KR (prospect-style — flips the tier order on ascending) or
+  // Household (alphabetical within each tier). Only one is active at a time.
+  const [sort, setSort] = useState<{ col: 'kr' | 'household' | null; dir: 'asc' | 'desc' }>({
+    col: null,
+    dir: 'desc',
+  })
+  const clickSort = (col: 'kr' | 'household') =>
+    setSort((s) =>
+      s.col === col
+        ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' }
+        : { col, dir: col === 'household' ? 'asc' : 'desc' },
+    )
+  // Scored tiers flip when KR is sorted ascending; incomplete stays last.
+  const krFlip = sort.col === 'kr' && sort.dir === 'asc'
+  const orderedGroups = (() => {
+    const scored = clientTierGroups.filter((g) => g.id !== 'incomplete')
+    const rest = clientTierGroups.filter((g) => g.id === 'incomplete')
+    return [...(krFlip ? [...scored].reverse() : scored), ...rest]
+  })()
+  const orderRows = (rows: Client[], groupId: ClientTier): Client[] => {
+    // The incomplete group keeps pending below the started-but-unfinished rows.
+    if (groupId === 'incomplete') {
+      return [...rows.filter((c) => c.status !== 'pending'), ...rows.filter((c) => c.status === 'pending')]
+    }
+    if (sort.col === 'kr') {
+      return [...rows].sort((a, b) => (b.kr ?? 0) - (a.kr ?? 0))
+    }
+    if (sort.col === 'household') {
+      const withH = rows
+        .filter((c) => c.household)
+        .sort((a, b) => {
+          const cmp = (a.household as string).localeCompare(b.household as string)
+          return sort.dir === 'asc' ? cmp : -cmp
+        })
+      const noH = rows.filter((c) => !c.household)
+      return [...withH, ...noH]
+    }
+    return rows
+  }
   return (
     <>
       <h1 className="page-title">My Clients</h1>
-      <ClientsMetrics clients={clients} />
+      <ClientsMetrics
+        clients={clients}
+        filterTier={tierFilter}
+        onPickTier={pickTier}
+        sentimentFilter={sentimentFilter}
+        onPickSentiment={pickSentiment}
+      />
       <ClientInsights />
-      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} />
+      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
           <thead>
@@ -998,38 +1303,94 @@ function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload:
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-household">Household</th>
-              <th className="col-sentiment">Sentiment</th>
-              <th className="col-status">
-                <span className="th-sort">Status <CaretDown /></span>
+              <th className="col-household">
+                <button
+                  type="button"
+                  className="th-sort th-sort-btn"
+                  onClick={() => clickSort('household')}
+                  aria-label="Sort by household"
+                >
+                  Household
+                  <span
+                    className={`th-caret ${sort.col === 'household' ? 'is-active' : ''} ${
+                      sort.col === 'household' && sort.dir === 'asc' ? 'is-asc' : ''
+                    }`}
+                  >
+                    <CaretDown />
+                  </span>
+                </button>
               </th>
+              <th className="col-kr">
+                <button
+                  type="button"
+                  className="th-sort th-sort-btn"
+                  onClick={() => clickSort('kr')}
+                  aria-label="Sort by KR score"
+                >
+                  KR Score
+                  <span
+                    className={`th-caret ${sort.col === 'kr' ? 'is-active' : ''} ${
+                      sort.col === 'kr' && sort.dir === 'asc' ? 'is-asc' : ''
+                    }`}
+                  >
+                    <CaretDown />
+                  </span>
+                </button>
+              </th>
+              <th className="col-sentiment">Sentiment</th>
+              <th className="col-status">Status</th>
               <th className="col-signin">Last Sign In</th>
               <th className="col-dots" />
             </tr>
           </thead>
           <tbody>
-            {clientTierGroups.map((group) => {
-              const rows = clients.filter((c) => c.tier === group.id)
+            {orderedGroups.map((group) => {
+              if (tierFilter && group.id !== tierFilter) return null
+              const rows = clients.filter(
+                (c) =>
+                  c.tier === group.id &&
+                  (sentimentFilter == null ||
+                    (c.sentiment != null && Math.round(c.sentiment) === sentimentFilter)),
+              )
               if (rows.length === 0) return null
+              const orderedRows = orderRows(rows, group.id)
+              const isCollapsed = collapsed.has(group.id)
               return (
-                <>
-                  <tr className={`group-header client-group-${group.id}`} key={`ch-${group.id}`}>
-                    <td colSpan={7}>
+                <Fragment key={`cg-${group.id}`}>
+                  <tr
+                    className={`group-header client-group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
+                    onClick={() => toggleGroup(group.id)}
+                  >
+                    <td colSpan={8}>
                       <div className="group-header-inner">
+                        <button
+                          type="button"
+                          className="group-toggle"
+                          aria-expanded={!isCollapsed}
+                          aria-label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleGroup(group.id)
+                          }}
+                        >
+                          <ChevronDown />
+                        </button>
                         <span>{group.title}</span>
+                        <span className="group-count">{rows.length}</span>
                         {group.range && <span className="group-range">{group.range}</span>}
                       </div>
                     </td>
                   </tr>
-                  {rows.map((c) => (
-                    <ClientRow
-                      c={c}
-                      key={c.name}
-                      checked={selected.has(c.name)}
-                      onToggle={() => toggle(c.name)}
-                    />
-                  ))}
-                </>
+                  {!isCollapsed &&
+                    orderedRows.map((c) => (
+                      <ClientRow
+                        c={c}
+                        key={c.name}
+                        checked={selected.has(c.name)}
+                        onToggle={() => toggle(c.name)}
+                      />
+                    ))}
+                </Fragment>
               )
             })}
           </tbody>
@@ -1039,361 +1400,38 @@ function ClientsScreen({ clients, onDownload }: { clients: Client[]; onDownload:
   )
 }
 
-/* ── UTM attribution card — ranked by clients produced, not clicks ── */
-
-function AttributionCard({
-  label,
-  rows,
-}: {
-  label: string
-  rows: { value: string; scored: number; clients: number }[]
-}) {
-  const ranked = [...rows].sort((a, b) => b.clients - a.clients)
-  const max = Math.max(...ranked.map((r) => r.clients), 1)
-  return (
-    <div className="utm-card">
-      <div className="utm-card-title">{label}</div>
-      <div className="attr-head">
-        <span>Source</span>
-        <span>Clients</span>
-        <span>Conv.</span>
-      </div>
-      <ul className="utm-list">
-        {ranked.map((r) => (
-          <li key={r.value}>
-            <span className="utm-value">{r.value}</span>
-            <span className="utm-track">
-              <span className="utm-fill" style={{ width: `${(r.clients / max) * 100}%` }} />
-            </span>
-            <span className="utm-count">{r.clients}</span>
-            <span className="attr-conv">
-              {Math.round((r.clients / r.scored) * 100)}%
-              <i className="attr-n">n={r.scored}</i>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-/* ── Analytics screen (engagement · outcomes · by tier · onboarding funnel) ── */
-
-function KQGauge({ value }: { value: number }) {
-  return (
-    <div className="kq-gauge">
-      <div className="kq-track">
-        <span className="kq-dot" style={{ left: `${value}%` }} />
-      </div>
-      <div className="kq-axis">
-        <span>0</span>
-        <span>Nurture</span>
-        <span>Considering</span>
-        <span>Ready</span>
-        <span>100</span>
-      </div>
-    </div>
-  )
-}
-
-function TierSector() {
-  return (
-    <>
-      <div className="sector-bar">
-        {byTier.map((t) => (
-          <span
-            key={t.tier}
-            className={`sector-seg ${t.pct < 6 ? 'sector-seg-narrow' : ''}`}
-            style={{ flex: t.pct, background: t.color }}
-          >
-            <span className="sector-lbl">{t.count}</span>
-          </span>
-        ))}
-      </div>
-      <div className="sector-legend">
-        {byTier.map((t) => (
-          <span key={t.tier}>
-            <i className="swatch" style={{ background: t.color }} />
-            {t.name} · {t.count} · {Math.round(t.pct)}%
-          </span>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function FunnelRow({ name, cfg, recommended }: { name: string; cfg: Experiment['cfg']; recommended?: boolean }) {
-  // Track hover by index: buildFunnel rebuilds segment objects each render, so
-  // object identity would never match after a state update.
-  const [hover, setHover] = useState<number | null>(null)
-  const { segments, complete } = buildFunnel(cfg)
-  return (
-    <div className="fm-row">
-      <div className="fm-row-head">
-        <span className="fm-row-name">{name}</span>
-        {recommended && <span className="fconfig-pill">Recommended</span>}
-        <span className="fm-row-complete">
-          <b>{complete}%</b> complete
-        </span>
-      </div>
-      <div className="ob-bar">
-        {segments.map((s, i) => (
-          <div
-            key={`${s.stage}-${i}`}
-            className={`ob-seg ${s.gate ? 'gate' : ''} ${s.completed ? 'done' : ''}`}
-            style={{ flex: s.pct, background: s.gate ? undefined : s.color, color: s.ink }}
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-          >
-            {s.pct >= 5 && <span className="ob-pct">{s.pct}%</span>}
-            {hover === i && (
-              <div className="ob-tip">
-                <b>{s.count}</b> {s.count === 1 ? 'person' : 'people'}{' '}
-                {s.completed
-                  ? 'completed onboarding'
-                  : s.gate
-                    ? 'dropped at the sign-up gate'
-                    : 'dropped off here'}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="ob-labels">
-        {segments.map((s, i) => (
-          <span key={`${s.stage}-l-${i}`} style={{ flex: s.pct }}>
-            {s.stage}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const FUNNEL_LEGEND = (
-  <div className="fm-legend">
-    <span>
-      <i className="swatch" style={{ background: '#8a52bf' }} />
-      Adventure drop-off
-    </span>
-    <span>
-      <i className="swatch fm-hatch" />
-      Sign-up gate
-    </span>
-    <span>
-      <i className="swatch" style={{ background: '#d8c5ec' }} />
-      Welcome
-    </span>
-    <span>
-      <i className="swatch" style={{ background: '#3dbdaa' }} />
-      Completed
-    </span>
-  </div>
-)
-
-/* ── 4a. Segmented drop-off ──
-   The aggregate bar hides both a high-volume/low-completion channel and a
-   low-volume/high-completion one. Splitting by source or niche is what makes
-   them distinguishable, so the split is a first-class control, not a detail. */
-
-type FunnelSplit = 'all' | 'source' | 'niche'
-
-const SPLITS: { key: FunnelSplit; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'source', label: 'By utm_source' },
-  { key: 'niche', label: 'By niche' },
-]
-
-function SegmentBar({ s, max }: { s: Segment; max: number }) {
-  const completion = Math.round((s.completed / s.invited) * 100)
-  const conv = Math.round((s.clients / s.scored) * 100)
-  return (
-    <div className="seg-row">
-      <span className="seg-row-name">{s.name}</span>
-      {/* Bar length encodes volume, fill encodes completion — so a wide-but-pale
-          row reads as high volume/low completion at a glance. */}
-      <span className="seg-row-track" style={{ width: `${(s.invited / max) * 100}%` }}>
-        <span className="seg-row-fill" style={{ width: `${completion}%` }}>
-          <b>{completion}%</b>
-        </span>
-      </span>
-      <span className="seg-row-meta">
-        <b>{s.completed}</b>/{s.invited} completed · <b>{s.clients}</b> clients ·{' '}
-        <span className="seg-row-conv">{conv}% conv</span> <i className="attr-n">n={s.scored}</i>
-      </span>
-    </div>
-  )
-}
-
-function SegmentedFunnel() {
-  const [split, setSplit] = useState<FunnelSplit>('all')
-  const segments = split === 'source' ? bySource : split === 'niche' ? byNiche : []
-  const max = Math.max(...segments.map((s) => s.invited), 1)
-  return (
-    <div className="funnel-seg-block">
-      <div className="seg-controls">
-        <span className="seg-controls-lbl">Split by</span>
-        {SPLITS.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            className={`seg-chip ${split === s.key ? 'on' : ''}`}
-            aria-pressed={split === s.key}
-            onClick={() => setSplit(s.key)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {split === 'all' ? (
-        <>
-          <FunnelRow name="All prospects · current configuration" cfg={{ welcome: true, gate: 'late' }} />
-          {FUNNEL_LEGEND}
-          <p className="seg-warn">
-            This aggregate view averages every channel together — it cannot tell a high-volume,
-            low-completion channel from a low-volume, high-completion one. Split by source to see them.
-          </p>
-        </>
-      ) : (
-        <>
-          <div className="seg-rows">
-            {segments.map((s) => (
-              <SegmentBar key={s.name} s={s} max={max} />
-            ))}
-          </div>
-          {split === 'niche' && (
-            <p className="seg-warn">Niches overlap — a prospect can match more than one, so these do not sum to 64.</p>
-          )}
-        </>
-      )}
-
-      <div className="drop-readings">
-        {dropReadings.map((d) => (
-          <div className="drop-reading" key={d.where}>
-            <span className="drop-where">{d.where}</span>
-            <ChevronRight />
-            <span className="drop-what">{d.reading}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ── 5. Onboarding experiments — configuration as a tested hypothesis ── */
-
-function ExperimentTable() {
-  // A Set rather than a single key: configurations are meant to be read against
-  // each other, so any number of drop-off bars can be open at once.
-  const [open, setOpen] = useState<Set<string>>(new Set(['won-late']))
-  const toggle = (key: string) =>
-    setOpen((s) => {
-      const n = new Set(s)
-      if (n.has(key)) n.delete(key)
-      else n.add(key)
-      return n
-    })
-  const allOpen = open.size === experiments.length
-  return (
-    <div className="exp-block">
-      <div className="exp-toolbar">
-        <span className="exp-count">
-          {open.size === 0
-            ? 'Open a configuration to see its drop-off'
-            : `${open.size} of ${experiments.length} open${open.size > 1 ? ' — bars share one scale, so segments compare directly' : ''}`}
-        </span>
-        <button
-          type="button"
-          className="exp-all"
-          onClick={() =>
-            setOpen(allOpen ? new Set() : new Set(experiments.map((e) => e.key)))
-          }
-        >
-          {allOpen ? 'Collapse all' : 'Compare all'}
-        </button>
-      </div>
-      <div className="exp-table">
-        <div className="exp-head">
-          <span>Configuration</span>
-          <span>Sign-ups</span>
-          <span>Completion</span>
-          <span>Conversion</span>
-          <span />
-        </div>
-        {experiments.map((e) => {
-          const { complete } = buildFunnel(e.cfg)
-          const thin = e.signUps < MIN_SAMPLE
-          const conv = Math.round((e.clients / e.signUps) * 100)
-          const isOpen = open.has(e.key)
-          return (
-            <div className="exp-row-wrap" key={e.key}>
-              <button
-                type="button"
-                className={`exp-row ${isOpen ? 'open' : ''} ${thin ? 'thin' : ''}`}
-                aria-expanded={isOpen}
-                onClick={() => toggle(e.key)}
-              >
-                <span className="exp-name">
-                  {e.name}
-                  {e.recommended && <span className="fconfig-pill">Recommended</span>}
-                </span>
-                <span>{e.signUps}</span>
-                {thin ? (
-                  <span className="exp-thin" >not enough data</span>
-                ) : (
-                  <span>{complete}%</span>
-                )}
-                {thin ? (
-                  <span className="exp-thin">not enough data</span>
-                ) : (
-                  <span className="conv-good">
-                    {conv}% <i className="attr-n">n={e.signUps}</i>
-                  </span>
-                )}
-                <span className={`exp-caret ${isOpen ? 'up' : ''}`}>
-                  <ChevronDown />
-                </span>
-              </button>
-              {/* Kept mounted and collapsed with the 0fr→1fr grid trick used by
-                  .collapse, so opening and closing both animate — unmounting on
-                  close would snap shut. */}
-              <div className={`exp-collapse ${isOpen ? 'open' : ''}`}>
-                <div className="exp-collapse-inner">
-                  <div className="exp-detail">
-                    <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      {/* One legend for the whole table — repeating it under every open row
-          crowded out the bars it was meant to explain. */}
-      {open.size > 0 && FUNNEL_LEGEND}
-      <p className="exp-note">
-        Current configuration <b>Welcome on · Gate late</b> switched on <b>{currentConfigSince}</b> — read
-        the period deltas above against that date. Welcome off · Gate late shows higher completion (38%)
-        but on 7 sign-ups, and it produced fewer clients; the recommendation follows conversion, not completion.
-      </p>
-    </div>
-  )
-}
 
 /* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
 
-// One clustered row: share of the book (scored / 40) crossed with the segment's
-// own conversion. Same bar grammar as before, now driven by the chosen model.
-function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
-  const share = Math.round((s.scored / 40) * 100)
+// One clustered row: share of the real respondent population (scored / model
+// total) crossed with the segment's conversion. The respondent count and
+// converted count ride on hover so the bars can run full-width.
+function ClusterRow({
+  s,
+  maxShare,
+  total,
+  onOpen,
+}: {
+  s: ClusterSeg
+  maxShare: number
+  total: number
+  onOpen: () => void
+}) {
+  const share = total ? Math.round((s.scored / total) * 100) : 0
   const conv = s.scored ? Math.round((s.clients / s.scored) * 100) : 0
-  const thin = s.scored < MIN_SAMPLE
-  const up = s.delta > 0
-  const flat = s.delta === 0
   return (
-    <div className="niche-row">
-      <span className="niche-name">{s.name}</span>
+    <button
+      className="niche-row niche-row-btn"
+      type="button"
+      onClick={onOpen}
+      title={`${s.scored.toLocaleString()} respondents · ${s.clients.toLocaleString()} converted`}
+    >
+      <span className="niche-name">
+        {s.name}
+        <span className="niche-open" aria-hidden>
+          ⓘ
+        </span>
+      </span>
       <span className="niche-bars">
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Share</i>
@@ -1401,7 +1439,6 @@ function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
             <span className="niche-fill share" style={{ width: `${(share / maxShare) * 100}%` }} />
           </span>
           <b className="niche-val">{share}%</b>
-          <i className="attr-n">n={s.scored}</i>
         </span>
         <span className="niche-bar-line">
           <i className="niche-bar-lbl">Converts</i>
@@ -1409,18 +1446,197 @@ function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
             <span className="niche-fill conv" style={{ width: `${conv}%` }} />
           </span>
           <b className="niche-val">{conv}%</b>
-          {thin ? (
-            <i className="exp-thin">n={s.scored} · too small</i>
-          ) : flat ? (
-            <i className="niche-delta">— flat vs last quarter</i>
-          ) : (
-            <i className={`niche-delta ${up ? 'up' : 'down'}`}>
-              {up ? '▲' : '▼'} {Math.abs(s.delta)} pts vs last quarter
-            </i>
-          )}
         </span>
       </span>
-    </div>
+    </button>
+  )
+}
+
+type ClusterKey = (typeof CLUSTER_KEYS)[number]
+
+// Plain-language "how a prospect lands here" per model, kept deliberately
+// jargon-free. A/B classify from concrete answer options; C/D from scores/flags.
+// Short, glanceable explainer content per model: the questions it reads (with
+// the Adventure each belongs to) and a one-line "how it's scored". Model D's
+// scored line is filled per-tag from the rule.
+type ExplainQ = { q: string; adv: string }
+const EXPLAIN: Record<ClusterKey, { questions: ExplainQ[]; scored: string }> = {
+  A: {
+    questions: [
+      { q: '“My ideal life includes…” (40 options)', adv: 'Future You' },
+      { q: 'Where attention should shift', adv: 'Financial Joy' },
+      { q: '“Future You” is doing', adv: 'Future You' },
+    ],
+    scored: 'Every ideal-life pick maps to one life area. Whichever area they lean toward most (allowing for its size) wins.',
+  },
+  B: {
+    questions: [
+      { q: '“I want money to help me with…” (pick 3)', adv: 'Financial Joy' },
+      { q: 'Confidence questions', adv: 'Confidence' },
+    ],
+    scored: 'Their top money reasons sort into five families; the standout one names it. Confidence sets the posture.',
+  },
+  C: {
+    questions: [
+      { q: 'Vision clarity, ideal-life breadth, horizon', adv: 'Future You' },
+      { q: 'Thought → steps → action, timeframe', adv: 'Goals' },
+    ],
+    scored: 'Two scores — how clear the vision is, how ready they are — each split at the middle of your book.',
+  },
+  D: {
+    questions: [{ q: 'Confidence, vision & readiness answers', adv: 'Confidence · Future You · Goals' }],
+    scored: '', // filled from the per-tag rule below
+  },
+}
+
+// A worked example per category: for each question the model reads, what a
+// respondent in this segment actually picked. The picks are drawn from the real
+// Adventure option vocabulary and align index-for-index with EXPLAIN[key].questions.
+const SEGMENT_PICKS: Record<ClusterKey, Record<string, string[]>> = {
+  A: {
+    'People & Generations': ['Family, Friends, Grandchildren', 'More focus on Family & relationships', 'Spending time with loved ones'],
+    'Home & Table': ['Staying home, Cooking, Pets, Garden', 'More focus on Home & comfort', 'Relaxing at home'],
+    'Health & Activity': ['Outdoors, Health, Sports, Fitness', 'More focus on Health & wellness', 'Staying active'],
+    'Culture & Creativity': ['Creative pursuits, Music, Art, Theater', 'More focus on Hobbies & interests', 'On a creative pursuit'],
+    'Work & Enterprise': ['Building a business, Meaningful work', 'More focus on Work & career', 'Working on something that matters'],
+    'Contribution': ['Philanthropic giving, Volunteering', 'More focus on Community & giving', 'Helping others'],
+    'Travel & Exploration': ['International travel, Domestic travel', 'More focus on Travel & adventure', 'Traveling'],
+    'Place & Setting': ['House, Country, Mountain, Ocean, Lake', 'Same focus across areas', 'Settled in the right place'],
+  },
+  B: {
+    Liberator: ['Choice / Freedom at rank 1', 'Confident — “I can achieve my goals” (4–5/5)'],
+    Experiencer: ['Enjoying the moment, Comfort', 'Assured — comfortable spending on what brings joy'],
+    Protector: ['Security, Supporting my family', 'Uneasy — some regret / second-guessing money moves'],
+    Contributor: ['Supporting my family, Giving back', 'Steady — values an advisor’s guidance'],
+    Achiever: ['Status', 'Driven — confident but competitive about progress'],
+  },
+  C: {
+    'Vivid but Stuck': ['Vision clarity 4–5/5, broad ideal-life picks', '“Thought about it, but no plans yet”'],
+    'Ready to Build': ['Vision clarity 4–5/5, clear horizon', '“I know what to do and I’ve started”'],
+    'Not Yet Looking': ['Vision clarity 1–2/5, few ideal-life picks', '“Not something I’m thinking about”'],
+    'Moving Without a Map': ['Vision clarity 1–2/5', '“I’ve already made changes” — acting without a clear vision'],
+  },
+  D: {
+    'Advisor-Receptive': ['Says an advisor improves their confidence (4–5/5) and wants guidance'],
+    'Deferred Joy': ['Wants MORE attention on wellbeing but scores low on spending for joy'],
+    'Vision-Action Gap': ['Vivid future vision (4–5/5) but readiness still at “thinking about it”'],
+    'Confidence Gap': ['Clear goals but a low overall confidence band (<14/25)'],
+    'Vision Fog': ['Vision clarity 1/5 with very few ideal-life elements chosen'],
+    'Decision Fatigue': ['Second-guesses money moves; many concerns, few next steps'],
+    'Self-Directed': ['Chose to pursue the goal without advisor support'],
+    'Horizon Mismatch': ['Goal timeframe far shorter than their stated planning horizon'],
+    'Planning Aversion': ['High concern about running out of money, no plan started'],
+    'Permission Gap': ['Wants to enjoy money but feels they “shouldn’t” spend it'],
+    'Solo Future': ['Pictures the future alone despite a family-oriented goal'],
+  },
+}
+
+// The intuitive explainer that opens when a category row is clicked: what the
+// label means, how a prospect ends up in it, and how to talk to them.
+function SegmentExplainer({
+  modelKey,
+  seg,
+  onClose,
+}: {
+  modelKey: ClusterKey
+  seg: ClusterSeg
+  onClose: () => void
+}) {
+  const def = segModels[modelKey].segments.find((d) => d.name === seg.name)
+  const ex = EXPLAIN[modelKey]
+  // Model D classifies by explicit per-tag rules; use the one for this tag as
+  // the plain "how it's scored" line.
+  const rule = segMethod[modelKey].rules?.find((r) => r[0] === seg.name)
+  const scored = rule ? `Flagged when: ${rule[1]}` : ex.scored
+  const share = Math.round((seg.scored / modelClusters[modelKey].n) * 100)
+  const conv = seg.scored ? Math.round((seg.clients / seg.scored) * 100) : 0
+  const bandStyle = useViewportBand(true)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  // Lock the page behind the modal so it can't scroll out from under the fixed
+  // overlay (which showed un-dimmed gaps during momentum scroll).
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prevH = html.style.overflow
+    const prevB = body.style.overflow
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = prevH
+      body.style.overflow = prevB
+    }
+  }, [])
+  // Portal to <body> so no transformed ancestor (the analytics card subtree)
+  // can trap the fixed-positioned backdrop and let it drift with scroll.
+  return createPortal(
+    <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal explain-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">{seg.name}</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body explain-body">
+          <div className="explain-sub">{modelClusters[modelKey].name}</div>
+
+          <section className="ex-sec">
+            <h3 className="ex-h">What it means</h3>
+            <p className="ex-text">{def?.blurb ?? seg.name}</p>
+          </section>
+
+          <section className="ex-sec">
+            <h3 className="ex-h">Questions used</h3>
+            <ul className="ex-q">
+              {ex.questions.map((qq, i) => {
+                const picked = SEGMENT_PICKS[modelKey]?.[seg.name]?.[i]
+                return (
+                  <li key={qq.q}>
+                    <div className="ex-q-top">
+                      <span className="ex-q-name">{qq.q}</span>
+                      <span className="ex-q-adv">{qq.adv}</span>
+                    </div>
+                    {picked && (
+                      <div className="ex-q-pick">
+                        <span className="ex-q-pick-lbl">Picked</span>
+                        {picked}
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+
+          <section className="ex-sec">
+            <h3 className="ex-h">How it’s scored</h3>
+            <p className="ex-text">{scored}</p>
+          </section>
+
+          <div className="explain-stats">
+            <div className="explain-stat">
+              <b>{seg.scored}</b>
+              <span>respondents</span>
+            </div>
+            <div className="explain-stat">
+              <b>{share}%</b>
+              <span>of group</span>
+            </div>
+            <div className="explain-stat">
+              <b>{conv}%</b>
+              <span>convert</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -1429,19 +1645,32 @@ function ClusterRow({ s, maxShare }: { s: ClusterSeg; maxShare: number }) {
 // "who your prospects are = what your prospects want" view — the labels come
 // straight from the Segmentation page, scored here by conversion.
 function ProspectClusters() {
-  const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('C')
+  const [key, setKey] = useState<(typeof CLUSTER_KEYS)[number]>('A')
   const model = modelClusters[key]
   const segs = [...model.segs].sort((a, b) => b.scored - a.scored)
-  const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / 40) * 100)))
+  const maxShare = Math.max(...segs.map((s) => Math.round((s.scored / model.n) * 100)))
+  const [openSeg, setOpenSeg] = useState<ClusterSeg | null>(null)
+  const ind = useSlideIndicator(key)
   return (
     <>
-      <nav className="cluster-switch" role="tablist" aria-label="Clustering model">
+      <nav className="cluster-switch slide-nav" role="tablist" aria-label="Clustering model" ref={ind.ref}>
+        {ind.box && (
+          <span
+            className="slide-ind slide-ind-round"
+            style={{
+              transform: `translate(${ind.box.left}px, ${ind.box.top}px)`,
+              width: ind.box.width,
+              height: ind.box.height,
+            }}
+          />
+        )}
         {CLUSTER_KEYS.map((k) => (
           <button
             key={k}
             type="button"
             role="tab"
             aria-selected={k === key}
+            data-active={k === key}
             className={`cluster-switch-btn ${k === key ? 'is-on' : ''}`}
             onClick={() => setKey(k)}
           >
@@ -1451,11 +1680,19 @@ function ProspectClusters() {
         ))}
       </nav>
 
-      <p className="cluster-spine">{model.spine}</p>
+      <p className="cluster-spine" title={`n = ${model.n.toLocaleString()} respondents`}>
+        {model.spine}
+      </p>
 
       <div className="niche-list">
         {segs.map((s) => (
-          <ClusterRow key={s.name} s={s} maxShare={maxShare} />
+          <ClusterRow
+            key={s.name}
+            s={s}
+            maxShare={maxShare}
+            total={model.n}
+            onOpen={() => setOpenSeg(s)}
+          />
         ))}
       </div>
 
@@ -1464,12 +1701,9 @@ function ProspectClusters() {
         <div>{model.lead}</div>
       </div>
 
-      <p className="analytics-note">
-        {model.exclusive
-          ? 'Every scored prospect lands in exactly one segment — shares sum to 100% and clients to 12.'
-          : 'Tags overlap: a prospect can carry several, so shares sum past 100% and per-tag clients past 12.'}{' '}
-        Labels are the exhaustive partition defined on the Segmentation page.
-      </p>
+      {openSeg && (
+        <SegmentExplainer modelKey={key} seg={openSeg} onClose={() => setOpenSeg(null)} />
+      )}
     </>
   )
 }
@@ -1651,6 +1885,369 @@ function AdminScreen() {
   )
 }
 
+function AttributionCard({
+  label,
+  rows,
+}: {
+  label: string
+  rows: { value: string; scored: number; clients: number }[]
+}) {
+  const ranked = [...rows].sort((a, b) => b.clients - a.clients)
+  const max = Math.max(...ranked.map((r) => r.clients), 1)
+  return (
+    <div className="utm-card">
+      <div className="utm-card-title">{label}</div>
+      <div className="attr-head">
+        <span>Source</span>
+        <span>Clients</span>
+        <span>Conv.</span>
+      </div>
+      <ul className="utm-list">
+        {ranked.map((r) => (
+          <li key={r.value}>
+            <span className="utm-value">{r.value}</span>
+            <span className="utm-track">
+              <span className="utm-fill" style={{ width: `${(r.clients / max) * 100}%` }} />
+            </span>
+            <span className="utm-count">{r.clients}</span>
+            <span className="attr-conv">
+              {Math.round((r.clients / r.scored) * 100)}%
+              <i className="attr-n">n={r.scored}</i>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function KQGauge({ value }: { value: number }) {
+  return (
+    <div className="kq-gauge">
+      <div className="kq-track">
+        <span className="kq-dot" style={{ left: `${value}%` }} />
+      </div>
+      <div className="kq-axis">
+        <span>0</span>
+        <span>Nurture</span>
+        <span>Considering</span>
+        <span>Ready</span>
+        <span>100</span>
+      </div>
+    </div>
+  )
+}
+
+function TierSector() {
+  return (
+    <>
+      <div className="sector-bar">
+        {byTier.map((t) => (
+          <span
+            key={t.tier}
+            className={`sector-seg ${t.pct < 6 ? 'sector-seg-narrow' : ''}`}
+            style={{ flex: t.pct, background: t.color }}
+          >
+            <span className="sector-lbl">{t.count}</span>
+          </span>
+        ))}
+      </div>
+      <div className="sector-legend">
+        {byTier.map((t) => (
+          <span key={t.tier}>
+            <i className="swatch" style={{ background: t.color }} />
+            {t.name} · {t.count} · {Math.round(t.pct)}%
+          </span>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function FunnelRow({ name, cfg, recommended }: { name: string; cfg: Experiment['cfg']; recommended?: boolean }) {
+  // Track hover by index: buildFunnel rebuilds segment objects each render, so
+  // object identity would never match after a state update.
+  const [hover, setHover] = useState<number | null>(null)
+  const { segments, complete } = buildFunnel(cfg)
+  return (
+    <div className="fm-row">
+      <div className="fm-row-head">
+        <span className="fm-row-name">{name}</span>
+        {recommended && <span className="fconfig-pill">Recommended</span>}
+        <span className="fm-row-complete">
+          <b>{complete}%</b> complete
+        </span>
+      </div>
+      <div className="ob-bar">
+        {segments.map((s, i) => (
+          <div
+            key={`${s.stage}-${i}`}
+            className={`ob-seg ${s.gate ? 'gate' : ''} ${s.completed ? 'done' : ''}`}
+            style={{ flex: s.pct, background: s.gate ? undefined : s.color, color: s.ink }}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+          >
+            {s.pct >= 5 && <span className="ob-pct">{s.pct}%</span>}
+            {hover === i && (
+              <div className="ob-tip">
+                <b>{s.count}</b> {s.count === 1 ? 'person' : 'people'}{' '}
+                {s.completed
+                  ? 'completed onboarding'
+                  : s.gate
+                    ? 'dropped at the sign-up gate'
+                    : 'dropped off here'}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="ob-labels">
+        {segments.map((s, i) => (
+          <span key={`${s.stage}-l-${i}`} style={{ flex: s.pct }}>
+            {s.stage}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const FUNNEL_LEGEND = (
+  <div className="fm-legend">
+    <span>
+      <i className="swatch" style={{ background: '#8a52bf' }} />
+      Adventure drop-off
+    </span>
+    <span>
+      <i className="swatch fm-hatch" />
+      Sign-up gate
+    </span>
+    <span>
+      <i className="swatch" style={{ background: '#d8c5ec' }} />
+      Welcome
+    </span>
+    <span>
+      <i className="swatch" style={{ background: '#3dbdaa' }} />
+      Completed
+    </span>
+  </div>
+)
+
+type FunnelSplit = 'all' | 'source' | 'niche'
+
+const SPLITS: { key: FunnelSplit; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'source', label: 'By utm_source' },
+  { key: 'niche', label: 'By niche' },
+]
+
+function SegmentBar({ s, max }: { s: Segment; max: number }) {
+  const completion = Math.round((s.completed / s.invited) * 100)
+  const conv = Math.round((s.clients / s.scored) * 100)
+  return (
+    <div className="seg-row">
+      <span className="seg-row-name">{s.name}</span>
+      <span className="seg-row-track" style={{ width: `${(s.invited / max) * 100}%` }}>
+        <span className="seg-row-fill" style={{ width: `${completion}%` }}>
+          <b>{completion}%</b>
+        </span>
+      </span>
+      <span className="seg-row-meta">
+        <b>{s.completed}</b>/{s.invited} completed · <b>{s.clients}</b> clients ·{' '}
+        <span className="seg-row-conv">{conv}% conv</span> <i className="attr-n">n={s.scored}</i>
+      </span>
+    </div>
+  )
+}
+
+function SegmentedFunnel() {
+  const [split, setSplit] = useState<FunnelSplit>('all')
+  const segments = split === 'source' ? bySource : split === 'niche' ? byNiche : []
+  const max = Math.max(...segments.map((s) => s.invited), 1)
+  return (
+    <div className="funnel-seg-block">
+      <div className="seg-controls">
+        <span className="seg-controls-lbl">Split by</span>
+        {SPLITS.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            className={`seg-chip ${split === s.key ? 'on' : ''}`}
+            aria-pressed={split === s.key}
+            onClick={() => setSplit(s.key)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {split === 'all' ? (
+        <>
+          <FunnelRow name="All prospects · current configuration" cfg={{ welcome: true, gate: 'late' }} />
+          {FUNNEL_LEGEND}
+          <p className="seg-warn">
+            This aggregate view averages every channel together — it cannot tell a high-volume,
+            low-completion channel from a low-volume, high-completion one. Split by source to see them.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="seg-rows">
+            {segments.map((s) => (
+              <SegmentBar key={s.name} s={s} max={max} />
+            ))}
+          </div>
+          {split === 'niche' && (
+            <p className="seg-warn">Niches overlap — a prospect can match more than one, so these do not sum to 64.</p>
+          )}
+        </>
+      )}
+
+      <div className="drop-readings">
+        {dropReadings.map((d) => (
+          <div className="drop-reading" key={d.where}>
+            <span className="drop-where">{d.where}</span>
+            <ChevronRight />
+            <span className="drop-what">{d.reading}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ExperimentTable() {
+  // A Set rather than a single key: configurations are meant to be read against
+  // each other, so any number of drop-off bars can be open at once.
+  const [open, setOpen] = useState<Set<string>>(new Set(['won-late']))
+  const toggle = (key: string) =>
+    setOpen((s) => {
+      const n = new Set(s)
+      if (n.has(key)) n.delete(key)
+      else n.add(key)
+      return n
+    })
+  const allOpen = open.size === experiments.length
+  return (
+    <div className="exp-block">
+      <div className="exp-toolbar">
+        <span className="exp-count">
+          {open.size === 0
+            ? 'Open a configuration to see its drop-off'
+            : `${open.size} of ${experiments.length} open${open.size > 1 ? ' — bars share one scale, so segments compare directly' : ''}`}
+        </span>
+        <button
+          type="button"
+          className="exp-all"
+          onClick={() =>
+            setOpen(allOpen ? new Set() : new Set(experiments.map((e) => e.key)))
+          }
+        >
+          {allOpen ? 'Collapse all' : 'Compare all'}
+        </button>
+      </div>
+      <div className="exp-table">
+        <div className="exp-head">
+          <span>Configuration</span>
+          <span>Sign-ups</span>
+          <span>Completion</span>
+          <span>Conversion</span>
+          <span />
+        </div>
+        {experiments.map((e) => {
+          const { complete } = buildFunnel(e.cfg)
+          const thin = e.signUps < MIN_SAMPLE
+          const conv = Math.round((e.clients / e.signUps) * 100)
+          const isOpen = open.has(e.key)
+          return (
+            <div className="exp-row-wrap" key={e.key}>
+              <button
+                type="button"
+                className={`exp-row ${isOpen ? 'open' : ''} ${thin ? 'thin' : ''}`}
+                aria-expanded={isOpen}
+                onClick={() => toggle(e.key)}
+              >
+                <span className="exp-name">
+                  {e.name}
+                  {e.recommended && <span className="fconfig-pill">Recommended</span>}
+                </span>
+                <span>{e.signUps}</span>
+                {thin ? (
+                  <span className="exp-thin">not enough data</span>
+                ) : (
+                  <span>{complete}%</span>
+                )}
+                {thin ? (
+                  <span className="exp-thin">not enough data</span>
+                ) : (
+                  <span className="conv-good">
+                    {conv}% <i className="attr-n">n={e.signUps}</i>
+                  </span>
+                )}
+                <span className={`exp-caret ${isOpen ? 'up' : ''}`}>
+                  <ChevronDown />
+                </span>
+              </button>
+              <div className={`exp-collapse ${isOpen ? 'open' : ''}`}>
+                <div className="exp-collapse-inner">
+                  <div className="exp-detail">
+                    <FunnelRow name={e.name} cfg={e.cfg} recommended={e.recommended} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {open.size > 0 && FUNNEL_LEGEND}
+      <p className="exp-note">
+        Current configuration <b>Welcome on · Gate late</b> switched on <b>{currentConfigSince}</b> — read
+        the period deltas above against that date. Welcome off · Gate late shows higher completion (38%)
+        but on 7 sign-ups, and it produced fewer clients; the recommendation follows conversion, not completion.
+      </p>
+    </div>
+  )
+}
+
+function FunnelHealth() {
+  const [open, setOpen] = useState(false)
+  return (
+    <section className="card analytics-card">
+      <button
+        type="button"
+        className="card-head fh-head"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="card-title">
+          <ChartIcon />
+          <span>Knomee Funnel Health</span>
+        </div>
+        <span className="fh-toggle">
+          {open ? 'Hide' : 'Show'} {open ? <ChevronUp /> : <ChevronDown />}
+        </span>
+      </button>
+      {open && (
+        <div className="analytics-body">
+          <div className="analytics-metrics">
+            {engagement.map((m) => (
+              <div className="analytics-metric" key={m.label}>
+                <div className="analytics-lbl">{m.label}</div>
+                <div className="analytics-num">{m.value}</div>
+                <div className={`analytics-sub ${m.tone}`}>{m.sub}</div>
+              </div>
+            ))}
+          </div>
+          <p className="analytics-note">
+            Aggregate diagnostic only. These totals cannot separate a targeting problem from a follow-up
+            problem — use the segmented drop-off above for that.
+          </p>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function AnalyticsScreen() {
   return (
     <>
@@ -1679,14 +2276,14 @@ function AnalyticsScreen() {
         </div>
       </section>
 
-      {/* 2 ── Hero: niche × conversion */}
+      {/* 2 ── Hero: who your prospects are × conversion (clickable clusters) */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <ChartIcon />
             <span>Who Your Prospects Are — And Which Convert</span>
           </div>
-          <HelpTip text="Cluster the book by any of the four models; each row is a segment's share against how many of it convert." />
+          <HelpTip text="Cluster the book by any of the four models. Each row is a segment — click it to see what the label means and how prospects land in it." />
         </header>
         <div className="analytics-body">
           <ProspectClusters />
@@ -1703,8 +2300,6 @@ function AnalyticsScreen() {
           <HelpTip text="Whether a higher KQ score predicts a client." />
         </header>
         <div className="analytics-body">
-          {/* Distribution first (how the book splits), then conversion per tier
-              (whether the split predicts anything). */}
           <TierSector />
           <div className="tier-hero">
             {byTier.map((t) => {
@@ -1824,52 +2419,188 @@ function AnalyticsScreen() {
         </div>
       </section>
 
-      {/* 8 ── Funnel health, collapsed */}
+      {/* 7 ── Funnel health, collapsed */}
       <FunnelHealth />
     </>
   )
 }
 
-/* ── 8. Aggregate funnel health — retained as a diagnostic, closed by default.
-   The segmented view in section 4 carries the decision value, so this stays
-   out of the way until someone goes looking for it. */
+/* ── Prospect welcome / landing page ─────────────────────────────────────
+   The prospect-facing page an advisor's client sees before they start the
+   Knomee questionnaire. Reached from the burger menu as a preview. The right
+   panel shows an example "Financial ID" — what the prospect walks away with. */
+const FID_QUESTIONS = [
+  'Should I weigh the tradeoffs between acquiring a company I’m excited about and buying a second home, or are both feasible in the next 5 years?',
+  'Given how important family and adventure travel are to me, should I spend more on vacations or a place on the lake?',
+  'Given that I value education, how should I be thinking about advanced degrees for my children?',
+]
+const FID_WANTS = ['Choice / Freedom', 'Adventure & travel', 'Supporting my family', 'Community involvement']
 
-function FunnelHealth() {
-  const [open, setOpen] = useState(false)
+// Two copy versions of the welcome page. They live on separate routes
+// (#/welcome and #/welcome-b) so their comment pins never overlap; a discreet
+// switcher in the header navigates between the two pages. Only the left column
+// changes between them; the right "Financial ID" preview is shared.
+type LandingKey = 'a' | 'b'
+interface LandingVersion {
+  label: string
+  firm: string
+  eyebrow: string
+  headline: string
+  sub?: string
+  body: string
+  checks: string[]
+  cta: string
+}
+// Same reassurance bullets across both versions.
+const LANDING_CHECKS = [
+  'Takes about 8 minutes',
+  'Tailored specifically for your future.',
+  'Your responses are private and shared only with Acme Advisors',
+]
+const LANDING_VERSIONS: Record<LandingKey, LandingVersion> = {
+  a: {
+    label: 'A',
+    firm: 'Acme Advisors',
+    eyebrow: 'Prepared for you by Acme Advisors',
+    headline: 'Great financial advice starts with understanding you.',
+    body: 'Most first meetings focus on numbers. The best ones start with understanding your goals, concerns, priorities, and the questions that matter most to you. Take 8 minutes to clarify what matters so you can make the most of your meeting with Acme Advisors.',
+    checks: LANDING_CHECKS,
+    cta: 'Get Started',
+  },
+  b: {
+    label: 'B',
+    firm: 'Acme Advisors',
+    eyebrow: 'Prepared for you by Acme Advisors',
+    headline: 'Before You Meet With an Advisor',
+    body: 'Spend 8 minutes preparing for a better financial conversation. This guided questionnaire helps you organize your thoughts, identify what’s most important to you, and uncover the financial questions you want answered. When you’re finished, an advisor at Acme Advisors will have a deeper understanding of what’s on your mind—so your conversation can be more personal, focused, and valuable.',
+    checks: LANDING_CHECKS,
+    cta: 'Begin Questionnaire',
+  },
+}
+
+function LandingScreen({
+  version,
+  onSwitch,
+}: {
+  version: LandingKey
+  onSwitch: (v: LandingKey) => void
+}) {
+  const v = LANDING_VERSIONS[version]
+  const firm = v.firm
   return (
-    <section className="card analytics-card">
-      <button
-        type="button"
-        className="card-head fh-head"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <div className="card-title">
-          <ChartIcon />
-          <span>Knomee Funnel Health</span>
-        </div>
-        <span className="fh-toggle">
-          {open ? 'Hide' : 'Show'} {open ? <ChevronUp /> : <ChevronDown />}
-        </span>
-      </button>
-      {open && (
-        <div className="analytics-body">
-          <div className="analytics-metrics">
-            {engagement.map((m) => (
-              <div className="analytics-metric" key={m.label}>
-                <div className="analytics-lbl">{m.label}</div>
-                <div className="analytics-num">{m.value}</div>
-                <div className={`analytics-sub ${m.tone}`}>{m.sub}</div>
-              </div>
+    <div className="landing">
+      <header className="landing-top">
+        <img className="landing-logo" src="./knomee-logo-white.svg" alt="knomee" />
+        <span className="landing-firm">{firm.toUpperCase()}</span>
+        <div className="landing-actions">
+          <div className="landing-ver" role="group" aria-label="Copy version">
+            {(['a', 'b'] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                className={`landing-ver-btn ${version === k ? 'is-on' : ''}`}
+                aria-pressed={version === k}
+                onClick={() => onSwitch(k)}
+              >
+                {LANDING_VERSIONS[k].label}
+              </button>
             ))}
           </div>
-          <p className="analytics-note">
-            Aggregate diagnostic only. These totals cannot separate a targeting problem from a follow-up
-            problem — use the segmented drop-off above for that.
+        </div>
+      </header>
+
+      <div className="landing-body">
+        <div className="landing-left">
+          <p className="landing-eyebrow">{v.eyebrow}</p>
+          <h1 className="landing-h1">{v.headline}</h1>
+          {v.sub && <p className="landing-subhead">{v.sub}</p>}
+          <p className="landing-lead">{v.body}</p>
+          <ul className="landing-checks">
+            {v.checks.map((t) => (
+              <li key={t}>
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#1aa179" strokeWidth="2">
+                  <path d="M3 8.4 6.4 12 13 4.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <div className="landing-cta-row">
+            <button className="landing-cta" type="button">{v.cta}</button>
+          </div>
+        </div>
+
+        <div className="landing-right">
+          <p className="landing-right-eyebrow">What you&rsquo;ll get</p>
+          <div className="fid-card">
+            <div className="fid-head">
+              <span className="fid-face" aria-hidden>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2a8f83" strokeWidth="1.8">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M8.5 14.5c.9 1 2.2 1.6 3.5 1.6s2.6-.6 3.5-1.6" strokeLinecap="round" />
+                  <path d="M9 9.5v.01M15 9.5v.01" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="fid-head-txt">
+                <span className="fid-dots" aria-label="5 out of 5">
+                  {'●●●●●'} <b>5/5</b>
+                </span>
+                <span className="fid-conf">Confidence: Strong</span>
+              </div>
+            </div>
+
+            <div className="fid-body">
+              <h3 className="fid-title">Your Financial ID</h3>
+
+              <div className="fid-vals">
+                <div className="fid-val fid-val-core">
+                  <div className="fid-val-h">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="#3b6fd4">
+                      <path d="M8 1 2.5 3.2v3.4c0 3.3 2.3 6.4 5.5 7.4 3.2-1 5.5-4.1 5.5-7.4V3.2L8 1Z" />
+                    </svg>
+                    Core Values
+                  </div>
+                  <p>Family, adventure travel, freedom, and community involvement.</p>
+                </div>
+                <div className="fid-val fid-val-vision">
+                  <div className="fid-val-h">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="#e07a1f">
+                      <path d="M9 1 3 9h4l-1 6 6-8H8l1-6Z" />
+                    </svg>
+                    Future Vision
+                  </div>
+                  <p>A place on the lake for family summers, room to travel widely, and the freedom to acquire a business I’m genuinely excited about.</p>
+                </div>
+              </div>
+
+              <p className="fid-label">I want money to help me with</p>
+              <div className="fid-chips">
+                {FID_WANTS.map((w) => (
+                  <span className="fid-chip" key={w}>{w}</span>
+                ))}
+              </div>
+
+              <div className="fid-questions">
+                <p className="fid-questions-h">
+                  <span aria-hidden>💬</span> Your most important questions
+                </p>
+                <ol className="fid-q-list">
+                  {FID_QUESTIONS.map((q, i) => (
+                    <li key={q}>
+                      <span className="fid-q-n">{i + 1}</span>
+                      {q}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <p className="landing-right-foot">
+            Yours to keep, and shared with {firm} before you meet.
           </p>
         </div>
-      )}
-    </section>
+      </div>
+    </div>
   )
 }
 
@@ -2007,6 +2738,316 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
   )
 }
 
+/* ── Invite flow ─────────────────────────────────────────────────────────
+   One modal, two tabs (prospect / client). Opened from the Invite button on
+   either dashboard, defaulting to that dashboard's kind. Sending an email,
+   copying the link, or copying the QR each fires the matching toast. All data
+   is demo-fake: the link is a placeholder and the QR is decorative. */
+
+// Modal positioning across embeddings.
+//
+// Default: let CSS `position: fixed; inset: 0` centre the modal in the visible
+// window. That is correct for a standalone page, an internally-scrolling
+// iframe, and the artifact preview — `fixed` pins to whatever the viewer sees,
+// so the modal never drifts with scroll.
+//
+// The one exception is the GitHub Pages embed: the app runs in a full-height,
+// same-origin iframe whose PARENT document scrolls. There `fixed` would centre
+// on the tall iframe (off-screen), so we anchor an absolutely-positioned
+// backdrop to the parent's visible band and follow the parent's scroll. We only
+// do this when the parent is reachable (same-origin) AND our own window does
+// not scroll — otherwise `fixed` is already right and we return nothing.
+function useViewportBand(active: boolean) {
+  const [band, setBand] = useState<{ top: number; height: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!active) return
+    let parentWin: Window | null = null
+    try {
+      if (window.parent !== window && typeof window.parent.scrollY === 'number') parentWin = window.parent
+    } catch {
+      parentWin = null
+    }
+    const selfScrolls = document.documentElement.scrollHeight > window.innerHeight + 2
+    // No reachable scrolling parent, or our own window scrolls → `fixed` is right.
+    if (!parentWin || selfScrolls) {
+      setBand(null)
+      return
+    }
+    const place = () => setBand({ top: parentWin!.scrollY, height: parentWin!.innerHeight })
+    place()
+    parentWin.addEventListener('scroll', place, { passive: true })
+    parentWin.addEventListener('resize', place)
+    return () => {
+      parentWin!.removeEventListener('scroll', place)
+      parentWin!.removeEventListener('resize', place)
+    }
+  }, [active])
+  return band ? ({ position: 'absolute', top: band.top, height: band.height } as const) : undefined
+}
+
+type InviteKind = 'prospect' | 'client'
+
+// Paper-plane send glyph, matching the mockup's input affordance.
+function SendGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.5 2.5 9 11" />
+      <path d="M17.5 2.5 12 17.5 9 11 2.5 8 17.5 2.5Z" />
+    </svg>
+  )
+}
+
+// Two-sheet copy glyph.
+function CopyGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="7" y="7" width="10" height="10" rx="2" />
+      <path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+    </svg>
+  )
+}
+
+// Decorative QR: three finder patterns + a seeded field of modules. It encodes
+// nothing — the link beside it is the real (placeholder) share target.
+function QrCode({ seed }: { seed: number }) {
+  const N = 21
+  let s = seed || 1
+  const rand = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff
+    return s / 0x7fffffff
+  }
+  const finders: [number, number][] = [
+    [0, 0],
+    [0, N - 7],
+    [N - 7, 0],
+  ]
+  const rects: { x: number; y: number }[] = []
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      // Separator ring around each finder stays white.
+      const nearFinder = finders.some(([fr, fc]) => r >= fr - 1 && r <= fr + 7 && c >= fc - 1 && c <= fc + 7)
+      const inFinder = finders.some(([fr, fc]) => r >= fr && r <= fr + 6 && c >= fc && c <= fc + 6)
+      let on: boolean
+      if (inFinder) {
+        const fr = r < 7 ? 0 : N - 7
+        const fc = c < 7 ? 0 : N - 7
+        const rr = r - fr
+        const cc = c - fc
+        on = rr === 0 || rr === 6 || cc === 0 || cc === 6 || (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4)
+      } else if (nearFinder) {
+        on = false
+      } else {
+        on = rand() > 0.5
+      }
+      if (on) rects.push({ x: c, y: r })
+    }
+  }
+  return (
+    <svg className="invite-qr-svg" viewBox={`-1 -1 ${N + 2} ${N + 2}`} role="img" aria-label="QR code">
+      <rect x={-1} y={-1} width={N + 2} height={N + 2} fill="#fff" />
+      {rects.map((m) => (
+        <rect key={`${m.x}-${m.y}`} x={m.x} y={m.y} width={1} height={1} fill="#111" />
+      ))}
+    </svg>
+  )
+}
+
+function InvitePreview({ kind }: { kind: InviteKind }) {
+  return (
+    <div className="invite-preview">
+      <div className="invite-preview-meta">
+        <div>
+          From: <b>info@knomee.com</b>
+        </div>
+        <div>
+          Subject: <b>Invitation to Join Beacon Planning</b>
+        </div>
+      </div>
+      <div className="invite-preview-card">
+        <div className="invite-preview-brand">
+          <KnomeeMark size={20} /> knomee
+        </div>
+        <h4>Your Invitation</h4>
+        <p>
+          Alex Advisor has invited you to join Beacon Planning on Knomee
+          {kind === 'client' ? ' as a client' : ''}.
+        </p>
+        <button className="invite-accept" type="button">
+          Accept Invitation
+        </button>
+        <p className="invite-preview-foot">
+          If you&rsquo;re having trouble with the above please email us at:{' '}
+          <a href="mailto:info@knomee.com" onClick={(e) => e.preventDefault()}>
+            info@knomee.com
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function InviteModal({
+  initialKind,
+  onClose,
+  showToast,
+}: {
+  initialKind: InviteKind
+  onClose: () => void
+  showToast: (msg: string) => void
+}) {
+  const [kind, setKind] = useState<InviteKind>(initialKind)
+  const [email, setEmail] = useState('')
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const tabInd = useSlideIndicator(kind)
+  const label = kind === 'prospect' ? 'Prospect' : 'Client'
+  const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // Clipboard may be blocked inside the embedding iframe; the toast is the
+  // demo's real feedback, so never let a copy failure swallow it.
+  const copy = (text: string, msg: string) => {
+    try {
+      navigator.clipboard?.writeText(text)
+    } catch {
+      /* ignore — demo still confirms via toast */
+    }
+    showToast(msg)
+  }
+
+  const send = () => {
+    if (!email.trim()) return
+    showToast(`${label} email sent`)
+    setEmail('')
+  }
+
+  const bandStyle = useViewportBand(true)
+
+  return (
+    <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">
+            Invite{' '}
+            <span className="invite-title-word" key={kind}>
+              {label}
+            </span>
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body invite-body">
+          <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
+            {tabInd.box && (
+              <span
+                className="slide-ind slide-ind-round"
+                style={{
+                  transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
+                  width: tabInd.box.width,
+                  height: tabInd.box.height,
+                }}
+              />
+            )}
+            {(['prospect', 'client'] as InviteKind[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                aria-selected={kind === k}
+                data-active={kind === k}
+                className={`invite-tab ${kind === k ? 'is-on' : ''}`}
+                onClick={() => setKind(k)}
+              >
+                Invite {k === 'prospect' ? 'Prospect' : 'Client'}
+              </button>
+            ))}
+          </div>
+
+          {/* Keyed on `kind` so the panel re-runs its enter animation on each
+              tab switch — the content cross-fades instead of snapping. */}
+          <div className="invite-panel" key={kind}>
+            <h3 className="invite-section">Send Invite Email</h3>
+            <label className="invite-field-label" htmlFor="invite-email">
+              Email
+            </label>
+            <div className="invite-email-row">
+              <input
+                id="invite-email"
+                type="email"
+                placeholder={`Add ${kind} email`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && send()}
+              />
+              <button
+                className="invite-send"
+                type="button"
+                aria-label={`Send ${kind} invite`}
+                onClick={send}
+              >
+                <SendGlyph />
+              </button>
+            </div>
+            <button
+              className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
+              type="button"
+              aria-expanded={previewOpen}
+              onClick={() => setPreviewOpen((v) => !v)}
+            >
+              Preview <ChevronDown />
+            </button>
+            {/* Height-animated reveal so the preview expands rather than pops. */}
+            <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`}>
+              <div className="collapse-inner">
+                <InvitePreview kind={kind} />
+              </div>
+            </div>
+
+            <h3 className="invite-section">Share {label} Link</h3>
+            <div className="invite-share">
+              <div className="invite-share-col invite-share-link">
+                <label className="invite-field-label">Link</label>
+                <div className="invite-link-box">
+                  <span className="invite-link-text">{link}</span>
+                  <button
+                    className="invite-copy"
+                    type="button"
+                    aria-label={`Copy ${kind} link`}
+                    onClick={() => copy(link, `${label} link copied`)}
+                  >
+                    <CopyGlyph />
+                  </button>
+                </div>
+              </div>
+              <div className="invite-share-col">
+                <label className="invite-field-label">QR Code</label>
+                <div className="invite-qr-box">
+                  <QrCode seed={kind === 'prospect' ? 7 : 23} />
+                  <button
+                    className="invite-copy invite-qr-copy"
+                    type="button"
+                    aria-label={`Copy ${kind} QR code`}
+                    onClick={() => copy(link, `${label} QR code copied`)}
+                  >
+                    <CopyGlyph />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ConvertModal({
   prospect,
   onCancel,
@@ -2016,8 +3057,9 @@ function ConvertModal({
   onCancel: () => void
   onConfirm: () => void
 }) {
+  const bandStyle = useViewportBand(true)
   return (
-    <div className="modal-backdrop" onClick={onCancel} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" style={bandStyle} onClick={onCancel} role="dialog" aria-modal="true">
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Convert to Client</h2>
@@ -2561,10 +3603,41 @@ const tabs: { id: Screen; label: string }[] = [
   { id: 'analytics', label: 'Analytics' },
 ]
 
+// ── Hash routing ──────────────────────────────────────────────────────────
+// Every page owns a hash (#/clients, #/welcome, …) so a single link opens
+// straight to it. Deep links survive reload and work on GitHub Pages with no
+// server config. The app runs inside an iframe on the live site, so the route
+// is also mirrored up to the parent window's address bar (the URL people copy).
+const ROUTE_VIEWS = [
+  'prospects',
+  'clients',
+  'analytics',
+  'segmentation',
+  'welcome',
+  'welcome-b',
+  'client-experience',
+  'admin',
+  'settings',
+] as const
+type RouteView = (typeof ROUTE_VIEWS)[number]
+
+function parseHashView(): RouteView | null {
+  if (typeof window === 'undefined') return null
+  const h = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
+  return (ROUTE_VIEWS as readonly string[]).includes(h) ? (h as RouteView) : null
+}
+
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('prospects')
+  const initialView = parseHashView()
+  const [screen, setScreen] = useState<Screen>(
+    initialView === 'clients' || initialView === 'analytics' ? initialView : 'prospects',
+  )
+  const tabsInd = useSlideIndicator<HTMLElement>(screen)
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
+  // When set, a prospect's full "Financial ID" profile page takes over the main
+  // area (reached by clicking a prospect's name in the table).
+  const [profileProspect, setProfileProspect] = useState<Prospect | null>(null)
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
   const showToast = (msg: string) => {
     setToast({ show: true, msg })
@@ -2574,17 +3647,34 @@ export default function App() {
   // Internal-only: show the empty dashboards. Off by default so the prototype
   // reads as the populated demo; toggled from the top-right menu.
   const [emptyMode, setEmptyMode] = useState(false)
+  // White-label demo: null = knomee, otherwise a client brand id.
+  const [brandId, setBrandId] = useState<string | null>(null)
+  const brand = CLIENT_BRANDS.find((b) => b.id === brandId) ?? null
+  // Co-brand credit placement: 'centered' (client centered) or 'left' (client
+  // leads the left). knomee always renders small + subordinate beneath it.
+  const [cobrandLayout, setCobrandLayout] = useState<'centered' | 'left'>('left')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
+  // Invite modal: null when closed, otherwise the tab it opens on.
+  const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
-  const [segmentationOpen, setSegmentationOpen] = useState(false)
-  // Also reached from the burger menu: the client-facing mobile app, which is
-  // the other half of the product the advisor screens describe.
-  const [clientExpOpen, setClientExpOpen] = useState(false)
+  const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
+  // The prospect-facing welcome page, previewed from the burger menu. Its two
+  // copy versions are separate routes (#/welcome, #/welcome-b) so their comment
+  // pins never overlap.
+  const [landingOpen, setLandingOpen] = useState(
+    initialView === 'welcome' || initialView === 'welcome-b',
+  )
+  const [landingVersion, setLandingVersion] = useState<'a' | 'b'>(
+    initialView === 'welcome-b' ? 'b' : 'a',
+  )
+  // The client-facing mobile app (the Adventures the prospect actually walks
+  // through), previewed from the burger menu on its own route.
+  const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
-  const [adminView, setAdminView] = useState(false)
+  const [adminView, setAdminView] = useState(initialView === 'admin')
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -2603,10 +3693,77 @@ export default function App() {
       ? 'admin'
       : segmentationOpen
         ? 'segmentation'
-        : clientExpOpen
-          ? 'client-experience'
-          : screen
-  }, [screen, segmentationOpen, clientExpOpen, adminView])
+        : landingOpen
+          ? landingVersion === 'b'
+            ? 'welcome-b'
+            : 'welcome-a'
+          : clientExpOpen
+            ? 'client-experience'
+            : screen
+  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, adminView])
+
+  // The single view the app is showing right now — the source of truth the
+  // URL hash reflects.
+  const currentView: RouteView = adminView
+    ? 'admin'
+    : settingsOpen
+      ? 'settings'
+      : segmentationOpen
+        ? 'segmentation'
+        : landingOpen
+          ? landingVersion === 'b'
+            ? 'welcome-b'
+            : 'welcome'
+          : clientExpOpen
+            ? 'client-experience'
+            : (screen as RouteView)
+
+  // ── Routing: URL hash ⇄ nav state ──
+  useEffect(() => {
+    const applyView = (v: RouteView) => {
+      setAdminView(v === 'admin')
+      setSettingsOpen(v === 'settings')
+      setSegmentationOpen(v === 'segmentation')
+      setLandingOpen(v === 'welcome' || v === 'welcome-b')
+      setClientExpOpen(v === 'client-experience')
+      if (v === 'welcome') setLandingVersion('a')
+      if (v === 'welcome-b') setLandingVersion('b')
+      if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
+    }
+    const syncFromHash = () => {
+      const v = parseHashView()
+      if (v) applyView(v)
+    }
+    // The parent (comment-overlay) frame forwards its address-bar hash here.
+    const onMessage = (e: MessageEvent) => {
+      const d = e.data
+      if (d && d.type === 'cc-nav' && typeof d.hash === 'string' && window.location.hash !== d.hash) {
+        window.location.hash = d.hash
+      }
+    }
+    window.addEventListener('hashchange', syncFromHash)
+    window.addEventListener('message', onMessage)
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash)
+      window.removeEventListener('message', onMessage)
+    }
+  }, [])
+
+  // State → hash, and mirror the route up to the parent window's address bar
+  // (the URL people actually copy on the live site).
+  useEffect(() => {
+    const hash = `#/${currentView}`
+    if (window.location.hash !== hash) {
+      window.history.replaceState(null, '', hash)
+    }
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: 'cc-route', hash }, '*')
+      } catch {
+        /* cross-origin parent — ignore */
+      }
+    }
+  }, [currentView])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -2632,122 +3789,221 @@ export default function App() {
 
   const clients = [...converted, ...baseClients]
 
-  return (
-    <div className="page">
-      {/* The mobile demo is the whole page: the advisor top bar goes away and
-          the way back lives in the phone's own menu. */}
-      {!clientExpOpen && (
-        <header className="topbar">
-          <div className="topbar-inner">
-            <div className="brand">
-              <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-              <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
-            </div>
-            <div className="menu-wrap" ref={menuRef}>
-              <button
-                className="menu-btn"
-                type="button"
-                aria-label="Menu"
-                aria-expanded={menuOpen}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setMenuOpen((v) => !v)
-                }}
-              >
-                <BurgerMenu />
-              </button>
-              {menuOpen && (
-                <div className="menu-pop">
-                  <div className="menu-account">
-                    <span className="menu-avatar">A</span>
-                    <span className="menu-name">Alex Advisor</span>
-                  </div>
-                  <button
-                    className="menu-item"
-                    type="button"
-                    onClick={() => {
-                      setSettingsOpen(true)
-                      setSegmentationOpen(false)
-                      setClientExpOpen(false)
-                      setAdminView(false)
-                      setMenuOpen(false)
-                    }}
-                  >
-                    Account Settings
-                  </button>
-                  <button className="menu-item" type="button">
-                    Sign Out
-                  </button>
-                  <div className="menu-divider" />
-                  <div className="menu-pop-title">Analysis</div>
-                  <button
-                    className="menu-item"
-                    type="button"
-                    onClick={() => {
-                      setSegmentationOpen(true)
-                      setSettingsOpen(false)
-                      setClientExpOpen(false)
-                      setAdminView(false)
-                      setMenuOpen(false)
-                    }}
-                  >
-                    Segmentation
-                  </button>
-                  <div className="menu-divider" />
-                  <div className="menu-pop-title">Mobile</div>
-                  <button
-                    className="menu-item"
-                    type="button"
-                    onClick={() => {
-                      setClientExpOpen(true)
-                      setSegmentationOpen(false)
-                      setSettingsOpen(false)
-                      setAdminView(false)
-                      setMenuOpen(false)
-                    }}
-                  >
-                    Client Experience
-                  </button>
-                  <div className="menu-divider" />
-                  <div className="menu-pop-title">Demo controls</div>
-                  <label className="menu-toggle">
-                    <span>Admin view (100 advisors)</span>
-                    <span className={`switch ${adminView ? 'on' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={adminView}
-                        onChange={(e) => {
-                          setAdminView(e.target.checked)
-                          setSettingsOpen(false)
-                          setSegmentationOpen(false)
-                          setClientExpOpen(false)
-                        }}
-                      />
-                      <span className="switch-knob" />
-                    </span>
-                  </label>
-                  <label className="menu-toggle">
-                    <span>Empty dashboards</span>
-                    <span className={`switch ${emptyMode ? 'on' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={emptyMode}
-                        onChange={(e) => setEmptyMode(e.target.checked)}
-                      />
-                      <span className="switch-knob" />
-                    </span>
-                  </label>
-                  <div className="menu-hint">
-                    Press <b>F2</b> to leave comments
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-      )}
+  // The prospect welcome page is a standalone full-screen page — it takes over
+  // the whole viewport with its own header, not embedded in the advisor shell.
+  if (landingOpen) {
+    return <LandingScreen version={landingVersion} onSwitch={setLandingVersion} />
+  }
 
-      {adminView ? (
+  // Same for the client's mobile app: the phone is the whole page, and the way
+  // back to the advisor side lives in the phone's own menu.
+  if (clientExpOpen) {
+    return <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+  }
+
+  return (
+    <div
+      className={`page ${brand ? 'brand-client' : ''}`}
+      style={
+        brand
+          ? ({ '--plum': brand.primary, '--purple-bolt': brand.accent } as CSSProperties)
+          : undefined
+      }
+    >
+      <header className="topbar">
+        <div className="topbar-inner">
+          <div className="brand">
+            {brand ? (
+              cobrandLayout === 'left' ? (
+                <div className="cobrand-stack">{brand.logo}</div>
+              ) : null
+            ) : adminView ? (
+              <>
+                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+                <span className="brand-sub">ADMIN</span>
+              </>
+            ) : (
+              <img className="brand-lockup" src="./knomee-advisor-white.svg" alt="knomee advisor" />
+            )}
+          </div>
+          {brand && cobrandLayout === 'centered' && (
+            <div className="cobrand-stack cobrand-center">{brand.logo}</div>
+          )}
+          <div className="menu-wrap" ref={menuRef}>
+            <button
+              className="menu-btn"
+              type="button"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuOpen((v) => !v)
+              }}
+            >
+              <BurgerMenu />
+            </button>
+            {menuOpen && (
+              <div className="menu-pop">
+                <div className="menu-account">
+                  <span className="menu-avatar">A</span>
+                  <span className="menu-name">Alex Advisor</span>
+                </div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setSettingsOpen(true)
+                    setSegmentationOpen(false)
+                    setClientExpOpen(false)
+                    setLandingOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Account Settings
+                </button>
+                <button className="menu-item" type="button">
+                  Sign Out
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Analysis</div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setSegmentationOpen(true)
+                    setSettingsOpen(false)
+                    setClientExpOpen(false)
+                    setLandingOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Segmentation
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Prospect view</div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setLandingOpen(true)
+                    setLandingVersion('a')
+                    setSettingsOpen(false)
+                    setClientExpOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Welcome page
+                </button>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setClientExpOpen(true)
+                    setLandingOpen(false)
+                    setSettingsOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Client Experience
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Demo controls</div>
+                <label className="menu-toggle">
+                  <span>Admin view (100 advisors)</span>
+                  <span className={`switch ${adminView ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={adminView}
+                      onChange={(e) => {
+                        setAdminView(e.target.checked)
+                        setSettingsOpen(false)
+                        setSegmentationOpen(false)
+                        setLandingOpen(false)
+                        setClientExpOpen(false)
+                      }}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
+                <label className="menu-toggle">
+                  <span>Empty dashboards</span>
+                  <span className={`switch ${emptyMode ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={emptyMode}
+                      onChange={(e) => setEmptyMode(e.target.checked)}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Client brand</div>
+                <button
+                  className={`menu-item ${!brandId ? 'is-on' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setBrandId(null)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Knomee (default)
+                </button>
+                {CLIENT_BRANDS.map((b) => (
+                  <button
+                    key={b.id}
+                    className={`menu-item ${brandId === b.id ? 'is-on' : ''}`}
+                    type="button"
+                    onClick={() => {
+                      setBrandId(b.id)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+                {brand && (
+                  <>
+                    <div className="menu-pop-title">Logo placement</div>
+                    <button
+                      className={`menu-item ${cobrandLayout === 'left' ? 'is-on' : ''}`}
+                      type="button"
+                      onClick={() => setCobrandLayout('left')}
+                    >
+                      Client left
+                    </button>
+                    <button
+                      className={`menu-item ${cobrandLayout === 'centered' ? 'is-on' : ''}`}
+                      type="button"
+                      onClick={() => setCobrandLayout('centered')}
+                    >
+                      Client centered
+                    </button>
+                  </>
+                )}
+                <div className="menu-hint">
+                  Press <b>C</b> to leave comments
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {profileProspect ? (
+        <main className="content content-profile">
+          <ProspectProfileScreen
+            prospect={profileProspect}
+            onBack={() => setProfileProspect(null)}
+            onConvert={(p) => setConvertTarget(p)}
+          />
+        </main>
+      ) : adminView ? (
         <main className="content">
           <AdminScreen />
         </main>
@@ -2764,25 +4020,36 @@ export default function App() {
           </button>
           <SegmentationScreen />
         </main>
-      ) : clientExpOpen ? (
-        // No desktop chrome around the device — the way back lives in the
-        // phone's own menu, so the mobile demo is driven from inside it.
-        <main className="content">
-          <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
-        </main>
       ) : (
       <main className="content">
-        <nav className="tabs">
+        <nav className="tabs slide-nav" ref={tabsInd.ref}>
+          {tabsInd.box && (
+            <span
+              className="slide-ind slide-ind-underline"
+              style={{
+                transform: `translateX(${tabsInd.box.left}px)`,
+                width: tabsInd.box.width,
+              }}
+            />
+          )}
           {tabs.map((t) => (
             <button
               key={t.id}
               className={`tab ${screen === t.id ? 'tab-active' : ''}`}
               type="button"
+              data-active={screen === t.id}
               onClick={() => setScreen(t.id)}
             >
               {t.label}
             </button>
           ))}
+          {brand && (
+            <span className="tabs-powered">
+              <span className="tabs-powered-text">powered by</span>
+              <KnomeeMark size={16} color="#240446" />
+              <span className="tabs-powered-name">knomee</span>
+            </span>
+          )}
         </nav>
 
         {screen === 'prospects' &&
@@ -2792,13 +4059,19 @@ export default function App() {
             <ProspectsScreen
               onConvert={setConvertTarget}
               onDownload={() => showToast('CSV downloaded')}
+              onInvite={() => setInviteKind('prospect')}
+              onOpenProfile={setProfileProspect}
             />
           ))}
         {screen === 'clients' &&
           (emptyMode ? (
             <EmptyScreen variant="clients" onCta={() => setEmptyMode(false)} />
           ) : (
-            <ClientsScreen clients={clients} onDownload={() => showToast('CSV downloaded')} />
+            <ClientsScreen
+              clients={clients}
+              onDownload={() => showToast('CSV downloaded')}
+              onInvite={() => setInviteKind('client')}
+            />
           ))}
         {screen === 'analytics' &&
           (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
@@ -2810,6 +4083,13 @@ export default function App() {
           prospect={convertTarget}
           onCancel={() => setConvertTarget(null)}
           onConfirm={confirmConvert}
+        />
+      )}
+      {inviteKind && (
+        <InviteModal
+          initialKind={inviteKind}
+          onClose={() => setInviteKind(null)}
+          showToast={showToast}
         />
       )}
       <Toast show={toast.show} message={toast.msg} />

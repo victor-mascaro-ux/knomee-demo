@@ -1,433 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knomee Advisor — My Prospects (Review)</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<style>
-  /* ════════════════════════════════════════════════════════
-     Knomee comments overlay — "Neutral Frost"
-     Every rule is scoped under .cc-stage / a .cc- prefix so
-     nothing leaks into (or out of) the host prototype, which
-     additionally lives in its own iframe.
-     ════════════════════════════════════════════════════════ */
-
-  .cc-stage {
-    /* ── design tokens (Neutral Frost defaults) ── */
-    --cc-ink:          #1E1A28;
-    --cc-text:         #37323F;
-    --cc-muted:        #6E6880;
-    --cc-faint:        #9A94A6;
-    --cc-glass:        rgba(255,255,255,0.62);
-    --cc-glass-strong: rgba(255,255,255,0.72);
-    --cc-hairline:     rgba(20,10,40,0.08);
-    --cc-card:         rgba(255,255,255,0.55);
-    --cc-card-active:  rgba(255,255,255,0.85);
-    --cc-purple:       #4A1C72;
-    --cc-purple-deep:  #240446;
-    --cc-knomee-teal:  #2DD2B0;
-    --cc-knomee-teal-ink: #06403A;
-    --cc-blur:   24px;
-    --cc-radius: 16px;
-    --cc-ring:   var(--cc-ink);      /* focus rings — ink, not brand */
-    --cc-pin-ring: var(--cc-ink);    /* active pin outer ring */
-    --cc-pin:      #FFD84D;          /* sticky-note yellow — pin fill */
-    --cc-pin-ink:  #4A3B00;          /* dark amber — the digit on the pin */
-    --cc-input-bg: rgba(255,255,255,0.6);
-    --cc-panel-wash: none;           /* branded-frost adds a purple wash */
-
-    position: relative; width: 100%; height: 100vh; overflow: hidden;
-    background: #0a0a0a;
-  }
-  .cc-stage *, .cc-stage *::before, .cc-stage *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  /* chrome type register: deliberately NOT the prototype's font */
-  .cc-chrome, .cc-chrome * { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
-
-  /* ── the prototype frame ── */
-  .cc-frame { position: absolute; inset: 0; background: #fff; overflow: hidden; }
-  .cc-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
-
-  /* ── shared frosted surface ── */
-  .cc-frost {
-    background: var(--cc-glass);
-    background-image: var(--cc-panel-wash);
-    -webkit-backdrop-filter: blur(var(--cc-blur));
-    backdrop-filter: blur(var(--cc-blur));
-    border: 1px solid var(--cc-hairline);
-  }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .cc-frost { background-color: rgba(255,255,255,0.94); }
-    .cc-stage[data-cc-theme="smoke-tray"] .cc-frost { background-color: rgba(22,18,30,0.94); }
-  }
-
-  /* ── focus rings (a11y) ── */
-  .cc-stage :is(button, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--cc-ring); outline-offset: 2px;
-  }
-
-  /* Shared bits (K chip lives in the rail header; ghost btn = exit ×). */
-  .cc-kchip {
-    width: 26px; height: 26px; border-radius: 8px; flex: none;
-    background: var(--cc-knomee-teal); color: var(--cc-knomee-teal-ink);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800;
-  }
-  .cc-ghost-btn {
-    width: 34px; height: 34px; border-radius: 10px; border: 0; background: transparent;
-    color: var(--cc-muted); font-size: 18px; cursor: pointer; flex: none;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, color 0.15s;
-  }
-  .cc-ghost-btn:hover { background: var(--cc-hairline); color: var(--cc-text); }
-  /* The "exit comment mode" × only means something while comment mode is on;
-     the collapse chevron is what tucks the persistent menu away. */
-  #ccCloseMode { display: none; }
-  .cc-stage.cc-mode #ccCloseMode { display: flex; }
-
-  /* ════════ Comments rail ════════
-     A persistent, collapsible left menu — always present (independent of
-     comment mode) so existing comment cards are reachable at all times.
-     Full height, in front of the prototype (incl. the prototype's own
-     header). There is deliberately NO full-width overlay top bar — that
-     used to sit over the prototype's header and tint it. The rail is the
-     only left-edge chrome, so the rest of the prototype header keeps its
-     real color. It defaults to the slim collapsed tab (see init) so it
-     never covers the prototype until you expand it. */
-  .cc-rail {
-    position: absolute; top: 0; left: 0; bottom: 0; width: 322px; z-index: 55;
-    display: flex; flex-direction: column; overflow: hidden;
-    border-top: 0; border-left: 0; border-bottom: 0;
-    transition: width 0.18s ease;
-  }
-  .cc-rail-head { padding: 14px 12px 12px 16px; border-bottom: 1px solid var(--cc-hairline); flex: none; }
-  .cc-rail-head-row { display: flex; align-items: center; gap: 9px; }
-  .cc-rail-head-row h2 { font-size: 14px; font-weight: 800; color: var(--cc-text); white-space: nowrap; }
-  .cc-count {
-    min-width: 22px; height: 22px; border-radius: 999px; padding: 0 7px;
-    background: rgba(20,10,40,0.08); color: var(--cc-text);
-    font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .cc-rail-spacer { flex: 1; }
-  .cc-collapse-btn { font-size: 15px; }
-  .cc-collapse-btn svg { transition: transform 0.18s ease; }
-  .cc-rail-subrow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 6px; padding-left: 2px; white-space: nowrap; }
-  .cc-rail-sub { font-size: 12px; color: var(--cc-faint); }
-  .cc-clear-btn {
-    background: none; border: 0; color: var(--cc-muted); font-size: 12px; font-weight: 600;
-    text-decoration: underline; cursor: pointer; padding: 2px; flex: none;
-  }
-  .cc-clear-btn:hover { color: var(--cc-ink); }
-  .cc-clear-btn:disabled { opacity: 0.4; cursor: default; text-decoration: none; }
-
-  .cc-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-  .cc-list::-webkit-scrollbar { width: 8px; }
-  .cc-list::-webkit-scrollbar-thumb { background: rgba(20,10,40,0.15); border-radius: 8px; }
-
-  /* ── Collapsed rail: a slim tab showing just the K chip, count and the
-     expand chevron. Lets you tuck the column away to see more of the
-     prototype while staying in comment mode (pins stay live). ── */
-  .cc-rail.cc-collapsed { width: 50px; }
-  .cc-rail.cc-collapsed .cc-rail-head { padding: 12px 6px; }
-  .cc-rail.cc-collapsed .cc-rail-head-row { flex-direction: column; gap: 12px; }
-  .cc-rail.cc-collapsed .cc-rail-head-row h2,
-  .cc-rail.cc-collapsed .cc-rail-spacer,
-  .cc-rail.cc-collapsed #ccCloseMode,
-  .cc-rail.cc-collapsed .cc-rail-subrow,
-  .cc-rail.cc-collapsed .cc-list { display: none; }
-  .cc-rail.cc-collapsed .cc-collapse-btn svg { transform: rotate(180deg); }
-
-  .cc-card {
-    position: relative; display: flex; gap: 10px; padding: 10px; border-radius: 12px;
-    background: var(--cc-card); border: 1px solid var(--cc-hairline);
-    cursor: pointer; text-align: left; width: 100%;
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  .cc-card:hover { background: var(--cc-card-active); }
-  .cc-card.cc-active {
-    background: var(--cc-card-active); border-color: rgba(20,10,40,0.18);
-    box-shadow: 0 10px 30px -12px rgba(20,10,40,0.35);
-  }
-  .cc-thumb {
-    position: relative; width: 64px; height: 40px; border-radius: 7px; overflow: hidden;
-    flex: none; background: rgba(20,10,40,0.08); border: 1px solid var(--cc-hairline);
-  }
-  .cc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cc-thumb-dot {
-    position: absolute; width: 8px; height: 8px; border-radius: 50%;
-    background: var(--cc-pin); border: 1.5px solid #fff; box-shadow: 0 0 0 1px var(--cc-ink);
-    transform: translate(-50%, -50%);
-  }
-  .cc-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; justify-content: center; }
-  .cc-card-meta { display: flex; align-items: center; gap: 7px; }
-  .cc-time { font-size: 11px; color: var(--cc-faint); font-weight: 500; font-variant-numeric: tabular-nums; }
-  .cc-snippet {
-    font-size: 12.5px; color: var(--cc-text); line-height: 1.4;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  /* ── empty state ── */
-  .cc-empty {
-    margin: 24px 14px; padding: 28px 18px; text-align: center;
-    border: 1.5px dashed rgba(20,10,40,0.18); border-radius: 14px; color: var(--cc-muted);
-  }
-  .cc-empty svg { display: block; margin: 0 auto 12px; opacity: 0.55; }
-  .cc-empty-title { font-size: 13px; font-weight: 700; color: var(--cc-text); margin-bottom: 4px; }
-  .cc-empty-sub { font-size: 12px; line-height: 1.55; }
-
-  /* ════════ 3. Pins ════════
-     Teardrop map pins: ink fill, white number, white halo + shadow so they
-     read on any prototype background, light or dark. The tip anchors on the
-     exact clicked coordinate (wrapper bottom-center = the point). */
-  .cc-pin-layer { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
-  .cc-pin-wrap {
-    position: absolute; width: 40px; height: 40px;         /* ≥40px hit target */
-    margin-left: -20px; margin-top: -40px;
-    pointer-events: auto; cursor: pointer; background: none; border: 0; padding: 0;
-  }
-  .cc-pin {
-    position: absolute; left: 6px; top: 6px; width: 28px; height: 28px;
-    background: var(--cc-pin);
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);                             /* sharp corner -> tip */
-    box-shadow: 0 0 0 2px #fff, 0 4px 10px rgba(20,10,40,0.4);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .cc-pin > span {
-    transform: rotate(45deg);                              /* digit upright */
-    color: var(--cc-pin-ink); font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums;
-  }
-  .cc-pin-wrap:hover .cc-pin { transform: rotate(-45deg) scale(1.08); }
-  .cc-pin-wrap.cc-active .cc-pin {
-    transform: rotate(-45deg) scale(1.12);
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4.5px var(--cc-pin-ring), 0 6px 14px rgba(20,10,40,0.45);
-  }
-
-  /* mini pin token used in rail cards */
-  .cc-token {
-    width: 20px; height: 20px; flex: none;
-    background: var(--cc-pin); border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 1.5px #fff;
-  }
-  .cc-token > span { transform: rotate(45deg); color: var(--cc-pin-ink); font-size: 10px; font-weight: 800; }
-
-  /* ── click-catcher (comment mode only) ── */
-  .cc-catcher {
-    position: absolute; inset: 0; z-index: 30; display: none;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath d='M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z' fill='none' stroke='%231E1A28' stroke-width='3.2' stroke-linejoin='round' stroke-opacity='0.9'/%3E%3Cpath d='M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z' fill='%23FFD84D' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 6 22, crosshair;
-  }
-  .cc-stage.cc-mode .cc-catcher { display: block; }
-
-  /* ════════ Thread popover ════════
-     No avatars, no author names — timestamp + delete only. */
-  .cc-popover {
-    position: absolute; width: 300px; z-index: 70;
-    border-radius: var(--cc-radius);
-    background: var(--cc-glass-strong);
-    background-image: var(--cc-panel-wash);
-    -webkit-backdrop-filter: blur(var(--cc-blur));
-    backdrop-filter: blur(var(--cc-blur));
-    border: 1px solid var(--cc-hairline);
-    box-shadow: 0 24px 60px -18px rgba(20,10,40,0.4);
-    overflow: hidden;
-  }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .cc-popover { background-color: rgba(255,255,255,0.96); }
-    .cc-stage[data-cc-theme="smoke-tray"] .cc-popover { background-color: rgba(22,18,30,0.96); }
-  }
-  .cc-pop-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 0 14px; }
-  .cc-pop-time { font-size: 11.5px; color: var(--cc-faint); font-weight: 500; font-variant-numeric: tabular-nums; }
-  .cc-pop-actions { display: flex; }
-  .cc-icon-btn {
-    width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px;
-    color: var(--cc-muted); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, color 0.15s;
-  }
-  .cc-icon-btn:hover { background: var(--cc-hairline); color: var(--cc-ink); }
-  .cc-msgs { padding: 2px 14px 6px; display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; }
-  .cc-msg + .cc-msg { border-top: 1px solid var(--cc-hairline); padding-top: 10px; }
-  .cc-msg-time { font-size: 11px; color: var(--cc-faint); font-variant-numeric: tabular-nums; margin-bottom: 2px; }
-  .cc-msg-text { font-size: 13px; color: var(--cc-text); line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
-  .cc-pop-foot { display: flex; gap: 8px; padding: 8px 12px 12px; align-items: flex-end; }
-  .cc-reply {
-    flex: 1; resize: none; min-height: 40px; max-height: 140px; overflow-y: auto;
-    border-radius: 12px; border: 1px solid var(--cc-hairline); background: var(--cc-input-bg);
-    padding: 10px 12px; font-size: 13px; line-height: 1.4; color: var(--cc-text); outline: none;
-  }
-  .cc-reply::placeholder { color: var(--cc-faint); }
-  .cc-send {
-    width: 40px; height: 40px; border-radius: 12px; border: 0; flex: none;
-    background: var(--cc-ink); color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.15s;
-  }
-  .cc-send:hover { opacity: 0.85; }
-
-  /* ════════ 6. Esc pill ════════ */
-  .cc-esc {
-    position: absolute; left: 16px; bottom: 24px; z-index: 60; display: none;
-    background: rgba(20,14,30,0.72); color: rgba(255,255,255,0.92);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-    font-size: 11.5px; font-weight: 500; padding: 7px 12px; border-radius: 999px;
-    pointer-events: none; white-space: nowrap;
-  }
-  .cc-esc b { color: #fff; font-weight: 800; }
-  .cc-stage.cc-mode .cc-esc { display: block; }
-
-  /* ── error toast (persist failures / namespace conflicts) ── */
-  .cc-warning {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-    background: #c0392b; color: white; font-size: 13px; font-weight: 500;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    padding: 10px 20px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    z-index: 100; max-width: 460px; text-align: center;
-  }
-
-  /* ════════════════════════════════════════════════════════
-     Theme preset: 1B "Smoke Tray" — dark translucent chrome,
-     floating detached rail + pill top bar. Pins unchanged.
-     ════════════════════════════════════════════════════════ */
-  .cc-stage[data-cc-theme="smoke-tray"] {
-    --cc-text:  #ffffff;
-    --cc-muted: rgba(255,255,255,0.6);
-    --cc-faint: rgba(255,255,255,0.42);
-    --cc-glass:        rgba(22,18,30,0.56);
-    --cc-glass-strong: rgba(22,18,30,0.62);
-    --cc-hairline:     rgba(255,255,255,0.12);
-    --cc-card:         rgba(255,255,255,0.06);
-    --cc-card-active:  rgba(255,255,255,0.14);
-    --cc-input-bg:     rgba(255,255,255,0.08);
-    --cc-ring: #fff;
-  }
-  /* Rail detaches and floats (inset, rounded) — the "unmistakably the tool"
-     read. With no separate top bar, it simply floats from the top edge. */
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-rail {
-    top: 16px; left: 16px; bottom: 16px; border-radius: 20px; border: 1px solid var(--cc-hairline);
-    overflow: hidden;
-  }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-count { background: rgba(255,255,255,0.12); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-ghost-btn:hover,
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-send { background: #fff; color: var(--cc-ink); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-empty { border-color: rgba(255,255,255,0.22); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
-  .cc-stage[data-cc-theme="smoke-tray"] .cc-clear-btn:hover { color: #fff; }
-
-  /* ════════════════════════════════════════════════════════
-     Theme preset: 1C "Branded Frost" — Neutral Frost plus a faint
-     purple wash, purple accents, compact single-line rail rows.
-     ════════════════════════════════════════════════════════ */
-  .cc-stage[data-cc-theme="branded-frost"] {
-    --cc-panel-wash: linear-gradient(rgba(74,28,114,0.07), rgba(74,28,114,0.03));
-    --cc-pin-ring: var(--cc-purple);
-  }
-  .cc-stage[data-cc-theme="branded-frost"] .cc-count { background: rgba(74,28,114,0.12); color: var(--cc-purple); }
-  .cc-stage[data-cc-theme="branded-frost"] .cc-card { padding: 8px 10px; }
-  .cc-stage[data-cc-theme="branded-frost"] .cc-thumb { display: none; }
-  .cc-stage[data-cc-theme="branded-frost"] .cc-card.cc-active::before {
-    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
-    background: var(--cc-purple); border-radius: 3px;
-  }
-
-  /* ════════════════════════════════════════════════════════
-     knomee-demo integration overrides
-     ════════════════════════════════════════════════════════ */
-  /* 1) The whole overlay is invisible until the activation key arms it,
-        so the prototype looks and behaves completely normally by default. */
-  .cc-stage:not(.cc-armed) .cc-rail,
-  .cc-stage:not(.cc-armed) .cc-esc,
-  .cc-stage:not(.cc-armed) .cc-catcher,
-  .cc-stage:not(.cc-armed) .cc-pin-layer { display: none !important; }
-
-  /* 2) The prototype is a long, scrolling page — not a fixed screen. Let the
-        document scroll and size the iframe to its full content height (done in
-        JS), so dropped pins anchor to the content and scroll with it. The
-        chrome floats fixed above the scrolling frame. */
-  html, body { height: auto; }
-  .cc-stage { height: auto; min-height: 100vh; overflow: visible; background: #fff; }
-  .cc-frame { position: relative; inset: auto; }
-  .cc-frame iframe { height: 100vh; } /* fallback until JS reports content height */
-  .cc-rail { position: fixed; }
-  .cc-esc  { position: fixed; }
-</style>
-</head>
-<body style="margin:0">
-
-<div class="cc-stage" id="ccStage" data-cc-theme="neutral-frost">
-
-  <!-- the prototype under review -->
-  <div class="cc-frame" id="ccFrame">
-    <iframe id="ccProto" title="Prototype"></iframe>
-    <script>
-      /* Deep links: open the prototype straight to the page named in the
-         address-bar hash (e.g. #/clients), so every page has its own link. */
-      (function () {
-        var f = document.getElementById('ccProto');
-        f.src = './app/app.html?v=33' + (window.location.hash || '');
-      })();
-    </script>
-    <div class="cc-catcher" id="ccCatcher"></div>
-    <div class="cc-pin-layer" id="ccPinLayer"></div>
-    <!-- thread popover appended here -->
-  </div>
-
-  <!-- comments rail (full height, in front of the prototype's own header) -->
-  <aside class="cc-rail cc-frost cc-chrome" id="ccRail">
-    <div class="cc-rail-head">
-      <div class="cc-rail-head-row">
-        <div class="cc-kchip" title="Comments" aria-label="Comments">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 4H19C20.105 4 21 4.895 21 6V15C21 16.105 20.105 17 19 17H9.414L5.707 20.707C5.421 20.993 5 20.789 5 20.384V17C3.895 17 3 16.105 3 15V6C3 4.895 3.895 4 5 4Z" fill="currentColor"/>
-          </svg>
-        </div>
-        <h2>Comments</h2>
-        <span class="cc-count" id="ccCount">0</span>
-        <span class="cc-rail-spacer"></span>
-        <button class="cc-ghost-btn cc-collapse-btn" id="ccCollapse" title="Collapse comments" aria-label="Collapse comments">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="cc-ghost-btn" id="ccCloseMode" title="Exit comment mode" aria-label="Exit comment mode">×</button>
-      </div>
-      <div class="cc-rail-subrow">
-        <span class="cc-rail-sub">Click a card to open it.</span>
-        <button class="cc-clear-btn" id="ccClearAll" disabled>Clear all</button>
-      </div>
-    </div>
-    <div class="cc-list" id="ccList"></div>
-  </aside>
-
-  <!-- 6. esc pill -->
-  <div class="cc-esc cc-chrome">Press <b>Esc</b> to exit comment mode</div>
-
-</div>
-
-<script>
 (function () {
   'use strict';
 
   // ────────────────────────────────────────────────────────
-  // Config. PROJECT_ID must be unique per deployed prototype —
-  // comments are namespaced by it in the shared Firestore project, so
-  // two repos left on "change-me" would share one comment thread.
-  // Never use "state" (the video-feedback tool's own doc ID).
+  // Config — change these for your project.
+  //
+  // PROJECT_ID: unique id for THIS project. Comments are namespaced by it as
+  //   the Firestore doc id, so two sites on the same id share one thread.
+  //   MUST be unique.
   // THEME: 'neutral-frost' | 'smoke-tray' | 'branded-frost'
-  // SEED_DEMO: true = local demo mode — no Firestore/localStorage,
-  //            seeds 3 comments and opens one thread. For previewing
-  //            the overlay itself; leave false in real projects.
+  // COLLECTION: top-level Firestore collection comments live under. Your
+  //   security rules must allow read/write on {COLLECTION}/{PROJECT_ID}/threads.
+  // SEED_DEMO: true = seeds 3 fake comments and skips Firestore — for
+  //   previewing the overlay itself. Leave false in real projects.
+  // ACTIVATION_KEY / the "c" shortcut: reveals/hides the overlay.
+  //
+  // Persistence is ALWAYS Firestore (shared, real-time) — never localStorage.
+  // You MUST load the two firebase-*-compat.js <script> tags in the host page
+  // and fill in `firebaseConfig` below with YOUR OWN Firebase project.
   // ────────────────────────────────────────────────────────
-  const PROJECT_ID  = 'knomee-demo';
-  const THEME       = 'branded-frost';
-  const SEED_DEMO   = false;
-  // Key that reveals/hides the commenting overlay. It stays completely
-  // hidden until this is pressed (F12 is reserved for browser devtools).
+  const PROJECT_ID = 'CHANGE-ME-unique-project-id';
+  const THEME      = 'neutral-frost';
+  const COLLECTION = 'overlay-comments';
+  const SEED_DEMO  = false;
   const ACTIVATION_KEY = 'F2';
   // ────────────────────────────────────────────────────────
 
@@ -442,11 +36,8 @@
   const clearBtn = document.getElementById('ccClearAll');
   const rail     = document.getElementById('ccRail');
   const collapseBtn = document.getElementById('ccCollapse');
-  const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed';
 
   stage.dataset.ccTheme = THEME;
-
-  const STORE_KEY = 'knomee-prototype-feedback::' + PROJECT_ID;
 
   let store = { threads: [] };
   let draft = null;            // unpersisted thread while composing the first note
@@ -456,26 +47,20 @@
   let currentScreen = 'default';
 
   // ── Shared storage (Firestore) ──────────────────────────
-  // Deliberate deviation from the design spec's localStorage-only
-  // persistence: comments must be shared across reviewers/devices (same
-  // behavior as the knomee-video feedback tool), so Firestore is the
-  // source of truth and localStorage is only a fast-paint seed and
-  // offline fallback. Same Firebase project AND same top-level
-  // collection ("video-feedback") as the video tool — the project's
-  // security rules only allow that one collection name — namespaced
-  // by PROJECT_ID as the doc ID.
+  // Firestore is the single source of truth for comments — shared across every
+  // reviewer, in real time. Fill in with YOUR OWN Firebase project.
   const firebaseConfig = {
-    apiKey: "AIzaSyBqmxrO__M6mGypXsxQ_HgCu81qs8mXe90",
-    authDomain: "knomee-playbook.firebaseapp.com",
-    projectId: "knomee-playbook",
-    storageBucket: "knomee-playbook.firebasestorage.app",
-    messagingSenderId: "956493019959",
-    appId: "1:956493019959:web:13f099b4ea42ef948d78b2"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  const stateRef = db.collection('video-feedback').doc(PROJECT_ID);
-  const threadsRef = stateRef.collection('comments');
+  const stateRef = db.collection(COLLECTION).doc(PROJECT_ID);
+  const threadsRef = stateRef.collection('threads');
 
   // Accepts both the current schema and legacy single-text comments
   // (pre-threads) so old data keeps rendering. Legacy comments have no
@@ -493,39 +78,19 @@
     };
   }
 
-  function loadLocalFallback() {
-    if (SEED_DEMO) return;
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const items = Array.isArray(parsed.threads) ? parsed.threads
-          : (Array.isArray(parsed.comments) ? parsed.comments : []);
-        store.threads = items.map(normalize);
-      }
-    } catch (e) { /* keep defaults */ }
-  }
-  function cacheLocally() {
-    if (SEED_DEMO) return;
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ threads: store.threads })); }
-    catch (e) { /* best-effort only */ }
-  }
-
   function initSync() {
     if (SEED_DEMO) return;
     threadsRef.orderBy('createdAt').onSnapshot(snap => {
       store.threads = snap.docs.map(d => normalize(d.data()));
-      cacheLocally();
       renderAll();
       refreshOpenThread();
     }, err => {
       console.warn('Firestore sync error', err);
-      showWarning("Can't reach the shared comment server — showing your last saved copy.");
+      showWarning("Can't reach the shared comment server — check your Firebase config and rules.");
     });
   }
 
   function persistThread(t) {
-    cacheLocally();
     if (SEED_DEMO) return;
     threadsRef.doc(t.id).set(t).catch(err => {
       console.warn('Could not save comment', err);
@@ -533,7 +98,6 @@
     });
   }
   function persistDelete(id) {
-    cacheLocally();
     if (SEED_DEMO) return;
     threadsRef.doc(id).delete().catch(err => {
       console.warn('Could not delete comment', err);
@@ -951,7 +515,6 @@
     rail.classList.toggle('cc-collapsed', on);
     collapseBtn.title = on ? 'Expand comments' : 'Collapse comments';
     collapseBtn.setAttribute('aria-label', collapseBtn.title);
-    try { localStorage.setItem(RAIL_COLLAPSED_KEY, on ? '1' : '0'); } catch (e) { /* best-effort */ }
   }
   collapseBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1035,7 +598,6 @@
     const ids = store.threads.map(t => t.id);
     store.threads = [];
     closeThread();
-    cacheLocally();
     if (!SEED_DEMO) {
       const batch = db.batch();
       ids.forEach(id => batch.delete(threadsRef.doc(id)));
@@ -1066,11 +628,8 @@
 
   // ── Init ─────────────────────────────────────────────────
   // The menu is persistent, so default it to the slim collapsed tab — it
-  // stays reachable at all times without covering the prototype. Only an
-  // explicit '0' (the reviewer expanded it before) keeps it open on load.
-  try { setRailCollapsed(localStorage.getItem(RAIL_COLLAPSED_KEY) !== '0'); }
-  catch (e) { setRailCollapsed(true); }
-  loadLocalFallback();
+  // stays reachable at all times without covering the prototype.
+  setRailCollapsed(true);
   renderAll();
   initSync();
   checkNamespaceConflict();
@@ -1079,6 +638,3 @@
     setTimeout(seedDemo, 600);
   }
 })();
-</script>
-</body>
-</html>

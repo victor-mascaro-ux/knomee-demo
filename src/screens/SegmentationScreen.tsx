@@ -16,6 +16,8 @@ import {
   type ModelKey,
   type ScoredProspect,
 } from '../data/segmentation'
+import { useSlideIndicator } from '../useSlideIndicator'
+import { evidence, evidenceMeta, type DistRow } from '../data/evidence'
 import './segmentation.css'
 
 /* ── local icons, so this screen has no dependency on App.tsx internals ── */
@@ -406,7 +408,10 @@ function Method({ model }: { model: ModelKey }) {
 
 /* ── screen ── */
 export default function SegmentationScreen() {
-  const [model, setModel] = useState<ModelKey>('C')
+  // 'overview' is the cover: what the page is and what each model means. The
+  // four model keys are the detail views the cover leads into.
+  const [model, setModel] = useState<ModelKey | 'overview'>('overview')
+  const segInd = useSlideIndicator(model)
   const [openProspect, setOpenProspect] = useState<ScoredProspect | null>(null)
   const [openSegment, setOpenSegment] = useState<string | null>(null)
 
@@ -427,19 +432,31 @@ export default function SegmentationScreen() {
     <>
       <h1 className="page-title">Audience Segmentation</h1>
 
-      <div className="seg-banner">
-        <b>Prototype.</b> Every label is an exhaustive partition of the Adventure&rsquo;s closed
-        option space — no free text assigns a label. Verified against{' '}
-        {segProof.n.toLocaleString()} synthetic respondents: {segProof.crashes} crashes,{' '}
-        {segProof.unlabeled} unlabeled, every label reachable. <b>Caveat:</b> 8 real profiles from 4
-        households, and no conversion outcomes — nothing here is validated against conversion.
-      </div>
-
-      <nav className="seg-switch">
+      <nav className="seg-switch slide-nav" ref={segInd.ref}>
+        {segInd.box && (
+          <span
+            className="slide-ind slide-ind-pill"
+            style={{
+              transform: `translate(${segInd.box.left}px, ${segInd.box.top}px)`,
+              width: segInd.box.width,
+              height: segInd.box.height,
+            }}
+          />
+        )}
+        <button
+          type="button"
+          data-active={model === 'overview'}
+          className={`seg-switch-btn ${model === 'overview' ? 'is-on' : ''}`}
+          onClick={() => setModel('overview')}
+        >
+          <span className="seg-switch-k">◎</span>
+          Overview
+        </button>
         {MODEL_KEYS.map((k) => (
           <button
             key={k}
             type="button"
+            data-active={model === k}
             className={`seg-switch-btn ${model === k ? 'is-on' : ''}`}
             onClick={() => setModel(k)}
           >
@@ -449,6 +466,10 @@ export default function SegmentationScreen() {
         ))}
       </nav>
 
+      {model === 'overview' ? (
+        <Overview onPick={setModel} />
+      ) : (
+        <>
       <div className="seg-spine">
         <b>Organising spine —</b> {segModels[model].spine}.{' '}
         {segModels[model].kind === 'multi'
@@ -611,11 +632,117 @@ export default function SegmentationScreen() {
           </div>
         </Disclosure>
       </Card>
+        </>
+      )}
 
       {openProspect && <ProspectSheet p={openProspect} onClose={() => setOpenProspect(null)} />}
-      {openSegment && (
+      {openSegment && model !== 'overview' && (
         <SegmentSheet model={model} name={openSegment} onClose={() => setOpenSegment(null)} />
       )}
     </>
+  )
+}
+
+/* ── Overview / cover: what the page is, and what each model means. Each card
+   leads into a model's detail view. This is the default landing state. ── */
+function Overview({ onPick }: { onPick: (k: ModelKey) => void }) {
+  return (
+    <>
+      <div className="seg-overview-intro">
+        <p>
+          <b>Audience Segmentation groups your prospects by what they told the Adventure</b> — their
+          goals, their language, how ready they are — rather than by demographics. Four independent
+          models each cut the same book a different way; pick the lens that fits the decision you are
+          making. Every label is an exhaustive partition of the Adventure&rsquo;s closed option
+          space, so no prospect is ever left unclassified.
+        </p>
+      </div>
+
+      <div className="seg-overview-grid">
+        {MODEL_KEYS.map((k) => {
+          const m = segModels[k]
+          return (
+            <button key={k} type="button" className="seg-overview-card" onClick={() => onPick(k)}>
+              <div className="seg-overview-top">
+                <span className="seg-overview-k">{k}</span>
+                <span className="seg-overview-name">{m.name}</span>
+              </div>
+              <p className="seg-overview-spine">{m.spine}.</p>
+              <div className="seg-overview-foot">
+                <span className="seg-overview-meta">
+                  {m.segments.length} segments · {m.kind === 'multi' ? 'overlapping' : 'exclusive'}
+                </span>
+                <span className="seg-overview-go">Explore →</span>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      <p className="seg-note seg-overview-hint">
+        Pick a model above, or a card, to see its quadrants, segment mix, the full prospect list and
+        how each label is calculated.
+      </p>
+
+      <EvidenceSection />
+    </>
+  )
+}
+
+// Real respondent evidence from the five Adventures — the aggregate findings
+// that inform (or don't) how prospects are categorised.
+function EvidenceRows({ rows }: { rows: DistRow[] }) {
+  const max = Math.max(...rows.map((r) => r.pct), 1)
+  return (
+    <div className="ev-rows">
+      {rows.map((r) => (
+        <div className="ev-row" key={r.label}>
+          <span className="ev-row-label">{r.label}</span>
+          <span className="ev-row-track">
+            <i className="ev-row-fill" style={{ width: `${(r.pct / max) * 100}%` }} />
+          </span>
+          <b className="ev-row-val">{r.display}</b>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function EvidenceSection() {
+  return (
+    <div className="ev-section">
+      <div className="ev-head">
+        <h4 className="ev-title">What real respondents said</h4>
+        <span className="ev-meta">
+          {evidenceMeta.source} · {evidenceMeta.period}
+        </span>
+      </div>
+      <div className="ev-grid">
+        {evidence.map((e) => (
+          <section className="ev-card" key={e.key}>
+            <header className="ev-card-head">
+              <div>
+                <div className="ev-card-title">{e.title}</div>
+                <div className="ev-card-sub" title={`n=${e.n}`}>
+                  {e.adventure}
+                </div>
+              </div>
+              <span className="ev-informs" title="Which model this Adventure feeds">
+                {e.informs}
+              </span>
+            </header>
+            <div className="ev-block-h">{e.primary.heading}</div>
+            <EvidenceRows rows={e.primary.rows} />
+            {e.secondary && (
+              <>
+                <div className="ev-block-h">{e.secondary.heading}</div>
+                <EvidenceRows rows={e.secondary.rows} />
+              </>
+            )}
+            {e.note && <p className="ev-note">{e.note}</p>}
+          </section>
+        ))}
+      </div>
+    </div>
   )
 }

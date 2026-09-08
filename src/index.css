@@ -22,6 +22,11 @@
      it so the logo, tabs and title always line up, and the top padding tracks
      the side padding so horizontal and vertical spacing stay even. */
   --page-pad: 40px;
+  /* Height every header logo renders at — the knomee lockup and any client
+     (white-label) logo share it, so a co-branded bar keeps both marks at the
+     same visual height. Client logos must be supplied trimmed + white for this
+     box height to equal their visual height (see docs/logo-guidelines). */
+  --brand-logo-h: 19.5px;
 }
 
 * {
@@ -32,14 +37,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-}
-
-/* Reserve the scrollbar gutter permanently. Without it, anything that changes
-   page height — switching to Analytics, opening an accordion, expanding an
-   experiment — can cross the threshold where a classic scrollbar appears, and
-   the ~15px width change reflows the whole page sideways as a visible shake. */
-html {
-  scrollbar-gutter: stable;
 }
 
 body {
@@ -58,14 +55,16 @@ body {
 
 /* ---------- Top bar ---------- */
 .topbar {
-  height: 60px;
+  height: 64px;
   background: var(--plum);
   display: flex;
   align-items: center;
+  border-bottom: 1px solid var(--line);
 }
 /* Inner wrapper shares the content's max-width + horizontal padding so the
    logo lines up exactly with the page title and the first tab below it. */
 .topbar-inner {
+  position: relative;
   width: 100%;
   max-width: 1520px;
   height: 100%;
@@ -81,6 +80,57 @@ body {
   align-items: center;
   gap: 9px;
   color: #fff;
+}
+
+/* White-label: the client's logo is the dominant brand, with a small, dimmed
+   "powered by knomee" credit tucked beneath it so knomee reads as the
+   secondary, supporting brand rather than a second competing logo.
+   Two placements: left (client leads the bar) or centered. */
+.client-logo {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+.cobrand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  color: #fff;
+}
+.cobrand-stack.cobrand-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+}
+.cobrand-stack.cobrand-center .client-logo {
+  height: 34px;
+}
+.powered-by {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.72;
+}
+.powered-by-text {
+  font-size: 7.5px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.cobrand-knomee {
+  height: 9px;
+  width: auto;
+  display: block;
+}
+
+.brand-lockup {
+  height: var(--brand-logo-h);
+  width: auto;
+  display: block;
 }
 
 .brand-name {
@@ -128,6 +178,30 @@ body {
   margin-bottom: 8px;
 }
 
+/* "powered by knomee" credit, pinned to the right of the tab row (client
+   brand / white-label mode only). Uses knomee's own plum so it reads as a
+   knomee credit even on a client-themed page. */
+.tabs-powered {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tabs-powered-text {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-text);
+}
+.tabs-powered-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #240446;
+}
+
 .tab {
   background: none;
   border: none;
@@ -147,7 +221,7 @@ body {
 }
 
 .tab-active {
-  color: #111;
+  color: var(--plum);
   font-weight: 600;
 }
 
@@ -352,6 +426,47 @@ body {
   font-size: 11px;
   font-weight: 600;
   color: var(--grey-text);
+}
+/* "Tap a tier to filter" hint in the distribution header. */
+.dist-filter-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a69fb5;
+}
+/* Incomplete-profiles footnote, moved below the legend. */
+.dist-foot {
+  margin: 12px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a69fb5;
+}
+/* Bars-aligned legend: each tier label sits under the LEFT edge of its bar
+   segment (same flex + gap as the bar), and the last one right-aligns to the
+   bar's right edge. */
+.dist-legend-bars {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.dist-legend-bars .dist-leg {
+  align-items: flex-start;
+  min-width: 0;
+}
+/* Only the Prospects command-center right-aligns the last tier: its tier-3 bar
+   can be very narrow and sit far right, so a left-aligned label would overflow.
+   The Clients distribution is more even, so every tier aligns to its left border. */
+.cmd-card .dist-legend-bars .dist-leg:last-child {
+  align-items: flex-end;
+  text-align: right;
+}
+.dist-legend-bars .dist-leg-name {
+  white-space: nowrap;
+}
+.dist-legend-bars .dist-leg-range {
+  text-align: inherit;
 }
 
 .dot {
@@ -637,15 +752,50 @@ body {
   margin-top: 12px;
 }
 .col-name {
-  width: 250px;
+  width: 330px;
 }
 .col-kq {
   width: 100px;
+  text-align: center;
 }
 .col-num {
   width: 80px;
   color: #444;
   text-align: center;
+}
+/* Center the KQ / Intent / Clarity / Receptivity headers too (the base thead
+   rule left-aligns everything). */
+.prospects-table thead th.col-kq,
+.prospects-table thead th.col-num,
+.clients-table thead th.col-sentiment {
+  text-align: center;
+}
+/* Center the sentiment faces under their centered header. */
+.col-sentiment {
+  text-align: center;
+}
+/* KQ Score sortable header button + direction caret. */
+.th-sort-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.th-caret {
+  display: inline-flex;
+  color: #b7b0c2;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.th-caret.is-active {
+  color: var(--plum);
+}
+.th-caret.is-asc {
+  transform: rotate(180deg);
 }
 /* Center the number horizontally and give it a line box the same height as the
    KQ score badge (40px) so, top-aligned, its midline matches the badge number. */
@@ -666,23 +816,41 @@ body {
   line-height: 1.45;
 }
 .top-action {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 6px;
 }
-/* Clamp the copy to 3 lines with an ellipsis; the .expanded modifier releases
-   the clamp so the full text (and its row) grows to fit. */
+/* Clamp the copy to 2 lines with an ellipsis. */
 .top-action-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
-.top-action-text.expanded {
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  overflow: visible;
+/* On hover, the full text opens in a card floating over the dashboard. */
+.top-action-pop {
+  position: absolute;
+  top: -10px;
+  left: -12px;
+  right: -12px;
+  padding: 11px 13px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(20, 10, 40, 0.2);
+  color: #444;
+  line-height: 1.45;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 50;
+}
+.top-action:hover .top-action-pop {
+  opacity: 1;
+  visibility: visible;
 }
 .top-action-toggle {
   flex: none;
@@ -714,6 +882,39 @@ body {
   color: #444;
   white-space: nowrap;
 }
+/* Clients table: fixed layout so the data columns keep tidy widths and the
+   trailing (dots) column absorbs the slack — Last Sign In then ends well before
+   the KR range in the tier header, separating the two like Top Action does on
+   Prospects. */
+.clients-table {
+  table-layout: fixed;
+}
+.clients-table .col-check {
+  width: 55px;
+}
+.clients-table .col-name {
+  width: 300px;
+}
+.clients-table .col-kr {
+  width: 110px;
+  text-align: center;
+}
+.clients-table .col-household {
+  width: 215px;
+}
+.clients-table .col-sentiment {
+  width: 170px;
+}
+.clients-table .col-status {
+  width: 195px;
+}
+.clients-table .col-signin {
+  width: 230px;
+}
+.clients-table .col-dots {
+  width: auto;
+  text-align: right;
+}
 .col-bolt {
   width: 60px;
 }
@@ -739,7 +940,8 @@ input[type='checkbox'] {
 .group-header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
   padding: 9px 20px;
   font-size: 12.5px;
   font-weight: 600;
@@ -748,9 +950,48 @@ input[type='checkbox'] {
 }
 
 .group-range {
+  margin-left: auto;
   font-weight: 600;
   font-size: 12px;
   opacity: 0.95;
+}
+
+/* Collapsible tier groups */
+.group-header {
+  cursor: pointer;
+}
+.group-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 -2px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.18s ease;
+}
+.group-header.is-collapsed .group-toggle {
+  transform: rotate(-90deg);
+}
+.group-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.group-incomplete .group-count,
+.client-group-incomplete .group-count {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .group-tier1 .group-header-inner {
@@ -780,6 +1021,44 @@ input[type='checkbox'] {
   border-radius: 50%;
   object-fit: cover;
   flex: none;
+}
+
+/* Avatar with an overlaid status badge (e.g. the "new" pill on a fresh
+   client). The badge sits in front of the circle, centered on its bottom edge. */
+.avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+.new-tag.avatar-new {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 2;
+  box-shadow: 0 0 0 2px #fff;
+}
+/* Small badge on the avatar's bottom-right marking clients in a household. */
+.household-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e9d9f7;
+  color: var(--plum);
+  box-shadow: 0 0 0 2px #fff;
+  z-index: 3;
+}
+.household-badge svg {
+  display: block;
+  width: 11px;
+  height: 11px;
 }
 
 .avatar-initial {
@@ -813,6 +1092,7 @@ input[type='checkbox'] {
    stays aligned with the name in every table (Prospects and Clients). */
 .name-text {
   line-height: 1;
+  white-space: nowrap;
 }
 .name-chevron {
   margin-left: 5px;
@@ -822,6 +1102,24 @@ input[type='checkbox'] {
 }
 .name-line .new-tag {
   align-self: center;
+}
+/* Client names match the prospect table's lighter weight. */
+.clients-table .name-line,
+.clients-table .name-text {
+  font-weight: 400;
+}
+/* Clickable name (opens the prospect's profile). */
+button.name-link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+button.name-link-btn:hover .name-text {
+  text-decoration: underline;
 }
 
 .email-line {
@@ -849,6 +1147,15 @@ input[type='checkbox'] {
 }
 .score-tier3 {
   background: var(--prospect-3);
+}
+.score-engaged {
+  background: var(--client-1);
+}
+.score-attention {
+  background: var(--client-2);
+}
+.score-reconnect {
+  background: var(--client-3);
 }
 .score-badge.empty {
   background: var(--pearl);
@@ -1112,6 +1419,24 @@ input[type='checkbox'] {
   opacity: 1;
 }
 
+/* Right-opening variant: glyph sits at the LEFT of a row (e.g. a category
+   label), so the bubble opens rightward to avoid clipping off the left edge. */
+.help-tip-right::after {
+  left: calc(100% + 9px);
+  right: auto;
+  transform: translateY(-50%) translateX(-3px);
+}
+.help-tip-right:hover::after,
+.help-tip-right:focus-visible::after {
+  transform: translateY(-50%) translateX(0);
+}
+.help-tip-right::before {
+  left: calc(100% + 4px);
+  right: auto;
+  border-width: 5px 5px 5px 0;
+  border-color: transparent #240446 transparent transparent;
+}
+
 /* Standard card help glyph — a "?" that reveals its hint on hover/focus. */
 .help-tip {
   display: inline-flex;
@@ -1159,8 +1484,14 @@ input[type='checkbox'] {
 .chart-head-l {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 4px 7px;
   min-width: 0;
+}
+/* When a "Clear filter" appears in a chart head, it drops to its own line
+   under the label rather than crowding the figure. */
+.chart-head-l .cmd-clear {
+  flex-basis: 100%;
 }
 
 .search-box {
@@ -1267,6 +1598,14 @@ input[type='checkbox'] {
   align-items: center;
   gap: 4px;
 }
+.sentiment-face {
+  position: relative;
+  display: inline-flex;
+  line-height: 0;
+}
+.sentiment-face svg {
+  display: block;
+}
 .sdot {
   width: 12px;
   height: 12px;
@@ -1291,10 +1630,21 @@ input[type='checkbox'] {
 .sentiment-incomplete .sdot:not(.empty) {
   background: var(--grey-text);
 }
+/* Caution triangle sits as a badge on the face's bottom-right corner, so the
+   face itself stays centered in the column whether or not a warning is shown. */
 .sentiment-warn {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
   display: inline-flex;
-  align-items: center;
-  margin-left: 2px;
+  line-height: 0;
+  z-index: 2;
+}
+.sentiment-warn svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff);
 }
 
 .status-badge {
@@ -1311,6 +1661,13 @@ input[type='checkbox'] {
   border-color: #f59e0b;
   color: #b45309;
   font-weight: 600;
+}
+/* Incomplete: a soft warm tint — clearly distinct from "complete" without the
+   loudness of the amber "pending" badge. */
+.status-badge.status-incomplete {
+  border-color: #e6d3a6;
+  background: #fbf6ea;
+  color: #977a3c;
 }
 .status-stack {
   display: flex;
@@ -1641,6 +1998,8 @@ input[type='checkbox'] {
   margin-top: 16px;
 }
 .chart-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px 18px;
@@ -1656,16 +2015,38 @@ input[type='checkbox'] {
   font-weight: 700;
   color: #111;
 }
+.chart-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chart-delta.is-up {
+  color: #16a34a;
+}
+.chart-delta.is-down {
+  color: #dc2626;
+}
+.chart-delta-note {
+  margin-left: 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--grey-text);
+}
 
 .confidence {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 22px;
+  justify-content: center;
+  gap: 30px;
   padding: 6px 0;
 }
 .pie {
-  width: 128px;
-  height: 128px;
+  width: 168px;
+  height: 168px;
   flex: none;
 }
 .pie-slice {
@@ -1682,14 +2063,14 @@ input[type='checkbox'] {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 150px;
+  gap: 14px;
+  min-width: 168px;
 }
 .pie-legend li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  gap: 11px;
+  font-size: 14px;
   color: #444;
   font-weight: 500;
   cursor: pointer;
@@ -1839,11 +2220,11 @@ input[type='checkbox'] {
   border-radius: 9px;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  animation: modalPop 0.15s ease-out;
+  animation: modalPop 0.24s cubic-bezier(0.22, 0.81, 0.28, 1.05);
 }
 @keyframes modalPop {
   from {
-    transform: scale(0.96);
+    transform: scale(0.955) translateY(10px);
     opacity: 0;
   }
   to {
@@ -2453,7 +2834,7 @@ input[type='checkbox'] {
 }
 .niche-bar-line {
   display: grid;
-  grid-template-columns: 62px 1fr 42px 150px;
+  grid-template-columns: 62px 1fr 42px;
   align-items: center;
   gap: 10px;
 }
@@ -3771,6 +4152,14 @@ input[type='checkbox'] {
   background: #f5f2fa;
   color: var(--plum);
 }
+.menu-item.is-on {
+  font-weight: 700;
+  color: var(--plum);
+}
+.menu-item.is-on::after {
+  content: '✓';
+  float: right;
+}
 .menu-divider {
   height: 1px;
   background: var(--line);
@@ -4181,4 +4570,1277 @@ input[type='checkbox'] {
 .admin-badge.off {
   background: var(--pearl);
   color: var(--grey-text);
+}
+
+/* ---------- Invite modal ---------- */
+.invite-modal {
+  width: 540px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+.invite-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Tab pills */
+.invite-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 4px;
+  background: var(--pearl);
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+.invite-tab {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-text);
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.invite-tab:hover {
+  color: var(--plum);
+}
+.invite-tab.is-on {
+  background: var(--plum);
+  color: #fff;
+}
+.invite-section {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--plum);
+  margin: 12px 0 8px;
+}
+.invite-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #201a2e;
+  margin-bottom: 6px;
+}
+/* Email input + send */
+.invite-email-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.invite-email-row input {
+  flex: 1;
+  font: inherit;
+  font-size: 14px;
+  padding: 11px 44px 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: #1a1a1a;
+  background: #fff;
+}
+.invite-email-row input::placeholder {
+  color: var(--ash);
+  font-style: italic;
+}
+.invite-email-row input:focus {
+  outline: none;
+  border-color: var(--lilac);
+}
+.invite-send {
+  position: absolute;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--purple-bolt);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.invite-send:hover {
+  background: #f2ebfa;
+  color: var(--plum);
+}
+/* Preview toggle */
+.invite-preview-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-bolt);
+  cursor: pointer;
+  padding: 8px 0 2px;
+}
+.invite-preview-toggle:hover {
+  color: var(--plum);
+}
+.invite-preview-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.invite-preview-toggle.is-open svg {
+  transform: rotate(180deg);
+}
+/* Email preview */
+.invite-preview {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 6px 0 4px;
+}
+.invite-preview-meta {
+  font-size: 12px;
+  color: var(--grey-text);
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.invite-preview-meta b {
+  color: #201a2e;
+}
+.invite-preview-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+  background: #fff;
+}
+.invite-preview-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--plum);
+  margin-bottom: 14px;
+}
+.invite-preview-card h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #201a2e;
+  margin: 0 0 10px;
+}
+.invite-preview-card p {
+  font-size: 13.5px;
+  color: #3a3247;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+.invite-accept {
+  border: none;
+  background: #5b53d9;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.invite-accept:hover {
+  background: #4a43c4;
+}
+.invite-preview-foot {
+  font-size: 12px !important;
+  color: var(--grey-text) !important;
+  margin: 0 !important;
+}
+.invite-preview-foot a {
+  color: var(--purple-bolt);
+}
+/* Share link + QR */
+.invite-share {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.invite-share-link {
+  flex: 1;
+  min-width: 0;
+}
+.invite-link-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px 10px 10px 13px;
+}
+.invite-link-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.invite-copy {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--grey-text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.invite-copy:hover {
+  background: var(--pearl);
+  color: var(--plum);
+}
+.invite-qr-box {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+}
+.invite-qr-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.invite-qr-copy {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.9);
+}
+@media (max-width: 560px) {
+  .invite-share {
+    flex-direction: column;
+  }
+  .invite-qr-box {
+    align-self: flex-start;
+  }
+}
+
+/* ---------- Micro-interactions & animation polish ---------- */
+/* Buttons: press feedback + primary hover lift */
+.btn-primary:hover {
+  box-shadow: 0 6px 18px rgba(36, 4, 70, 0.28);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+.btn-download.active:hover {
+  transform: translateY(-1px);
+}
+
+/* Invite send plane nudges toward "send" on hover */
+.invite-send svg {
+  transition: transform 0.16s ease;
+}
+.invite-send:hover svg {
+  transform: translate(2px, -2px);
+}
+/* Copy buttons press in */
+.invite-copy {
+  transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+}
+.invite-copy:active {
+  transform: scale(0.86);
+}
+
+/* Pills & switches: press feedback (hover/colour already handled above) */
+.invite-tab,
+.cluster-switch-btn,
+.seg-switch-btn,
+.tab {
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease, transform 0.12s ease;
+}
+.invite-tab:active,
+.cluster-switch-btn:active,
+.seg-switch-btn:active {
+  transform: scale(0.96);
+}
+
+/* Accept button in the invite preview */
+.invite-accept {
+  transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+.invite-accept:hover {
+  box-shadow: 0 6px 16px rgba(91, 83, 217, 0.4);
+  transform: translateY(-1px);
+}
+.invite-accept:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Tab-switch: the panel below the pills cross-fades on each `key` change. */
+.invite-panel {
+  animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
+}
+@keyframes invitePanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* The title's changing word cross-fades in step with the tab switch. */
+.invite-title-word {
+  display: inline-block;
+  animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
+}
+/* Email preview: height reveal (via .collapse) plus a fade on its contents. */
+.invite-preview-collapse .collapse-inner {
+  opacity: 0;
+  transition: opacity 0.3s ease 0.04s;
+}
+.invite-preview-collapse.open .collapse-inner {
+  opacity: 1;
+}
+.invite-preview {
+  transform-origin: top center;
+}
+
+/* Interactive list cards get a gentle hover lift */
+.talk-card {
+  transition: transform 0.16s ease, box-shadow 0.18s ease, border-color 0.16s ease;
+}
+.talk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.09);
+}
+.client-insight,
+.insight {
+  transition: transform 0.16s ease;
+}
+.client-insight:hover,
+.insight:hover {
+  transform: translateX(2px);
+}
+/* Segmentation overview cards already lift; add press feedback */
+.seg-overview-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Impact / KPI tiles ease on hover where they already scale */
+.impact-card {
+  transition: transform 0.16s ease, box-shadow 0.18s ease, border-color 0.16s ease;
+}
+
+/* Honour reduced-motion for the entrance animations added here */
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .invite-panel,
+  .invite-title-word {
+    animation: none;
+  }
+  .invite-preview-toggle svg,
+  .invite-preview-collapse .collapse-inner {
+    transition: none;
+  }
+  .btn-primary:hover,
+  .btn:active,
+  .talk-card:hover,
+  .insight:hover,
+  .client-insight:hover,
+  .invite-accept:hover,
+  .invite-send:hover svg,
+  .invite-tab:active,
+  .cluster-switch-btn:active,
+  .seg-switch-btn:active,
+  .invite-copy:active {
+    transform: none;
+  }
+}
+
+/* ---------- Sliding active indicator for segmented toggles ---------- */
+/* A single highlight element slides/resizes to the active item (measured by
+   useSlideIndicator) instead of each item snapping its own background on. */
+.slide-nav {
+  position: relative;
+}
+.slide-nav > button {
+  position: relative;
+  z-index: 1;
+}
+.slide-ind {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  background: var(--plum);
+  pointer-events: none;
+  transition: transform 0.32s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.32s cubic-bezier(0.22, 0.81, 0.28, 1.02), height 0.28s ease;
+  will-change: transform, width;
+}
+.slide-ind-round {
+  border-radius: 999px;
+}
+.slide-ind-pill {
+  border-radius: 8px;
+  background: #1a1050;
+}
+.slide-ind-underline {
+  top: auto;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px;
+  transition: transform 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02);
+}
+/* Active items let the sliding highlight show through rather than painting
+   their own fill (the highlight is what moves). */
+.invite-tabs.slide-nav .invite-tab.is-on {
+  background: transparent;
+}
+.cluster-switch.slide-nav .cluster-switch-btn.is-on {
+  background: transparent;
+  border-color: transparent;
+}
+.seg-switch.slide-nav .seg-switch-btn.is-on {
+  background: transparent;
+  border-color: transparent;
+}
+.tabs.slide-nav .tab-active::after {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-ind {
+    transition: none;
+  }
+}
+
+/* ---------- Command Center: single layered Prospects dashboard ---------- */
+.cmd-body {
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.cmd-pulse {
+  margin: 0;
+}
+/* Tier bar segments become drill-in buttons */
+.cmd-dist-bar .seg {
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.2s ease, box-shadow 0.18s ease, filter 0.16s ease, transform 0.12s ease;
+}
+.cmd-dist-bar .seg:hover {
+  filter: brightness(1.07);
+}
+.cmd-dist-bar .seg:active {
+  transform: scale(0.98);
+}
+.cmd-dist-bar .seg.is-sel {
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px var(--plum);
+  z-index: 1;
+}
+.cmd-dist-bar .seg.is-dim {
+  opacity: 0.38;
+}
+.cmd-clear {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--plum);
+  cursor: pointer;
+  padding: 0;
+}
+.cmd-clear:hover {
+  text-decoration: underline;
+}
+/* Focus line + the one lead action */
+.cmd-focus {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cmd-focus-line {
+  margin: 0;
+  font-size: 14px;
+  color: #3a3247;
+}
+.cmd-focus-line b {
+  color: #201a2e;
+}
+.cmd-lead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--plum);
+  background: linear-gradient(90deg, #faf7fe, #fff);
+  border-radius: 12px;
+  padding: 12px 15px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: box-shadow 0.18s ease, transform 0.14s ease, border-color 0.16s ease;
+}
+.cmd-lead:hover {
+  box-shadow: 0 8px 22px rgba(36, 4, 70, 0.1);
+  transform: translateY(-1px);
+}
+.cmd-lead-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--grey-text);
+}
+.cmd-lead-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #201a2e;
+}
+.cmd-lead-kq {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--plum);
+  background: #f0e9f8;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.cmd-lead-niche {
+  font-size: 13px;
+  color: var(--grey-text);
+}
+.cmd-lead-more {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple-bolt);
+}
+.cmd-lead-more svg {
+  width: 14px;
+  height: 14px;
+}
+.cmd-empty {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--grey-text);
+  font-style: italic;
+}
+/* Evidence layer */
+.cmd-why {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.cmd-why-toggle {
+  align-self: flex-start;
+}
+.cmd-why-peek {
+  text-align: left;
+  border: 0;
+  background: #f7f4fc;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: #3a3247;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.cmd-why-peek b {
+  color: var(--plum);
+}
+.cmd-why-peek-more {
+  color: var(--purple-bolt);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cmd-insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 28px;
+  padding-top: 4px;
+}
+.cmd-insights .insight {
+  margin: 0;
+}
+.cmd-insights .insight.is-flagged {
+  background: #f3ecfb;
+}
+@media (max-width: 860px) {
+  .cmd-insights {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Clickable category rows (Analytics clustering) ---------- */
+.niche-row-btn {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.niche-row-btn:hover {
+  background: #faf7fe;
+}
+.niche-open {
+  margin-left: 7px;
+  color: var(--ash);
+  font-size: 12px;
+  transition: color 0.15s ease;
+}
+.niche-row-btn:hover .niche-open {
+  color: var(--purple-bolt);
+}
+
+/* ---------- Segment explainer modal ---------- */
+.explain-modal {
+  width: 520px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+.explain-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.explain-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--grey-text);
+}
+.explain-h {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--plum);
+  margin: 0 0 6px;
+}
+.explain-block p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #3a3247;
+}
+.explain-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.explain-chip {
+  font-size: 12.5px;
+  background: #f0e9f8;
+  color: var(--plum);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-weight: 500;
+}
+.explain-note {
+  margin-top: 10px !important;
+  font-size: 12.5px !important;
+  color: var(--grey-text) !important;
+  background: #f7f4fc;
+  border-radius: 8px;
+  padding: 9px 11px;
+}
+.explain-hook {
+  font-style: italic;
+  color: #201a2e !important;
+  font-size: 15px !important;
+}
+.explain-action {
+  margin-top: 6px !important;
+  font-size: 13px !important;
+  color: var(--grey-text) !important;
+}
+.explain-stats {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.explain-stat {
+  flex: 1;
+  text-align: center;
+  background: #faf9fc;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.explain-stat b {
+  font-size: 20px;
+  color: var(--plum);
+  font-variant-numeric: tabular-nums;
+}
+.explain-stat span {
+  font-size: 10.5px;
+  color: var(--grey-text);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Explainer: Adventure inputs + scoring detail */
+.explain-sub-h {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--grey-text);
+  margin: 16px 0 8px;
+}
+.explain-inputs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.explain-inputs li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a3247;
+  border-left: 2px solid var(--lilac);
+  padding-left: 11px;
+}
+.explain-inputs b {
+  color: #201a2e;
+}
+.explain-input-desc {
+  color: var(--grey-text);
+}
+.explain-input-role {
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--plum);
+  background: #f0e9f8;
+  border-radius: 999px;
+  padding: 1px 8px;
+  vertical-align: 1px;
+}
+.explain-rule {
+  font-size: 14px !important;
+  color: #201a2e !important;
+  background: #f3ecfb;
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-weight: 500;
+}
+.explain-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.explain-steps li {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.explain-step-label {
+  display: block;
+  color: var(--plum);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.explain-step-detail {
+  color: #3a3247;
+}
+.explain-step-formula {
+  display: block;
+  margin-top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  background: #f6f4fa;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
+  color: #4a3f5e;
+  white-space: pre-wrap;
+}
+
+/* Explainer — simplified 3-section layout */
+.ex-sec {
+  margin: 0;
+}
+.ex-h {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--grey-text);
+  margin: 0 0 6px;
+}
+.ex-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #201a2e;
+}
+.ex-q {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ex-q li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #faf9fc;
+}
+.ex-q-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ex-q-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #201a2e;
+}
+/* The worked example: what a respondent in this segment actually picked. */
+.ex-q-pick {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #3a3350;
+  padding-left: 12px;
+  border-left: 2px solid #d9c7ee;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.ex-q-pick-lbl {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+.ex-q-adv {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--plum);
+  background: #f0e9f8;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* Respondent-count badge on the clustering spine */
+.cluster-n {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--plum);
+  background: #f0e9f8;
+  border-radius: 999px;
+  padding: 2px 9px;
+  vertical-align: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Prospect welcome / landing page (previewed from the burger menu)
+   ───────────────────────────────────────────────────────────────────────── */
+.landing {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: #fff;
+}
+.landing-top {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 28px;
+  background: linear-gradient(90deg, #2a0f4a 0%, #3a1a5e 100%);
+}
+.landing-actions {
+  position: absolute;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Discreet A/B copy switcher — a small segmented pill in the header. */
+.landing-ver {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.landing-ver-btn {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.landing-ver-btn.is-on {
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a0f4a;
+}
+.landing-exit {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.landing-exit:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+.landing-logo {
+  position: absolute;
+  left: 26px;
+  height: 26px;
+}
+.landing-firm {
+  color: #fff;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  letter-spacing: 4px;
+}
+.landing-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+}
+.landing-left {
+  padding: 54px 52px 60px;
+}
+.landing-eyebrow {
+  margin: 0 0 18px;
+  color: #7639a1;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.landing-h1 {
+  margin: 0 0 22px;
+  font-size: 40px;
+  line-height: 1.12;
+  font-weight: 800;
+  color: #26123f;
+  letter-spacing: -0.5px;
+}
+.landing-h1 + .landing-subhead {
+  margin: -12px 0 22px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #7639a1;
+  line-height: 1.35;
+}
+.landing-lead {
+  margin: 0 0 30px;
+  max-width: 34em;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #6d6478;
+}
+.landing-checks {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.landing-checks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #34293f;
+  font-weight: 500;
+}
+.landing-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.landing-cta {
+  border: 0;
+  cursor: pointer;
+  background: #2a0f4a;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 15px 34px;
+  border-radius: 999px;
+  transition: transform 0.12s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.landing-cta:hover {
+  background: #3a1a5e;
+  box-shadow: 0 8px 22px rgba(42, 15, 74, 0.28);
+  transform: translateY(-1px);
+}
+.landing-nodl {
+  color: #9a90a6;
+  font-size: 14px;
+}
+
+/* Right panel */
+.landing-right {
+  position: relative;
+  padding: 40px 40px 46px;
+  background:
+    radial-gradient(120% 70% at 80% -10%, rgba(150, 96, 200, 0.45) 0%, rgba(150, 96, 200, 0) 55%),
+    linear-gradient(180deg, #3a1a5e 0%, #24103f 100%);
+}
+.landing-right-eyebrow {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+.landing-right-foot {
+  margin: 20px 2px 0;
+  color: #c6b4e2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Financial ID card */
+.fid-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15, 6, 32, 0.34);
+}
+.fid-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(90deg, #17a08f 0%, #23bda9 100%);
+}
+.fid-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  flex: none;
+}
+.fid-head-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: #fff;
+}
+.fid-dots {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #bff05a;
+}
+.fid-dots b {
+  color: #fff;
+  margin-left: 4px;
+  letter-spacing: 0;
+  font-size: 12.5px;
+}
+.fid-conf {
+  font-size: 15px;
+  font-weight: 800;
+}
+.fid-body {
+  padding: 18px 18px 20px;
+}
+.fid-title {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #23163a;
+}
+.fid-vals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.fid-val {
+  background: #f7f5fb;
+  border: 1px solid #ece6f5;
+  border-bottom-width: 3px;
+  border-radius: 10px;
+  padding: 12px 12px 11px;
+}
+.fid-val-core {
+  border-bottom-color: #3b6fd4;
+}
+.fid-val-vision {
+  border-bottom-color: #8a52bf;
+}
+.fid-val-h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #23163a;
+  margin-bottom: 6px;
+}
+.fid-val p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #6d6478;
+}
+.fid-label {
+  margin: 0 0 9px;
+  color: #7639a1;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.fid-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.fid-chip {
+  border: 1px solid #e0d6ee;
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3a2b52;
+  background: #fff;
+}
+.fid-questions {
+  background: #f4f2f8;
+  border-radius: 12px;
+  padding: 14px 14px 15px;
+}
+.fid-questions-h {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #3a2b52;
+}
+.fid-q-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  counter-reset: none;
+}
+.fid-q-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #eceaf2;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #2f2545;
+}
+.fid-q-n {
+  flex: none;
+  color: #7639a1;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .landing-body {
+    grid-template-columns: 1fr;
+  }
+  .landing-left {
+    padding: 36px 26px 40px;
+  }
+  .landing-h1 {
+    font-size: 30px;
+  }
+  .landing-right {
+    padding: 30px 24px 34px;
+  }
+  .landing-firm {
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+  .fid-vals {
+    grid-template-columns: 1fr;
+  }
 }

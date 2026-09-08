@@ -1,0 +1,6 @@
+/* Knomee typefaces — all three are Google-hosted webfonts.
+   Poppins  → primary UI + display (weights 300–800)
+   Sedan    → serif accent, used for the advisory firm name in product nav
+   Roboto   → used only inside the Google "Continue with Google" button, to match Google's own styling
+   NOTE: loaded from Google Fonts CDN rather than self-hosted binaries. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Sedan:ital@0;1&family=Roboto:wght@400;500&display=swap');

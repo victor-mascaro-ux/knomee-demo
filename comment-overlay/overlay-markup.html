@@ -1,0 +1,49 @@
+<!--
+  Commenting-overlay markup. Paste this into the host page's <body> (as the
+  FIRST child, before your own content). Everything is namespaced under
+  `.cc-stage` / `.cc-` so it won't collide with the host app.
+
+  WRAPPER MODEL (default): the thing being reviewed lives in the #ccProto
+  iframe below — point its src at your app. INLINE MODEL: delete the
+  <div id="ccFrame"> block entirely and instead put your app's own root
+  element right after this markup; then see README "Inline model".
+-->
+<div class="cc-stage" id="ccStage" data-cc-theme="neutral-frost">
+
+  <!-- the app / prototype under review -->
+  <div class="cc-frame" id="ccFrame">
+    <iframe id="ccProto" title="Prototype" src="REPLACE_WITH_YOUR_APP_URL"></iframe>
+    <div class="cc-catcher" id="ccCatcher"></div>
+    <div class="cc-pin-layer" id="ccPinLayer"></div>
+    <!-- thread popover appended here -->
+  </div>
+
+  <!-- comments rail (full height, in front of the app's own header) -->
+  <aside class="cc-rail cc-frost cc-chrome" id="ccRail">
+    <div class="cc-rail-head">
+      <div class="cc-rail-head-row">
+        <div class="cc-kchip" title="Comments" aria-label="Comments">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 4H19C20.105 4 21 4.895 21 6V15C21 16.105 20.105 17 19 17H9.414L5.707 20.707C5.421 20.993 5 20.789 5 20.384V17C3.895 17 3 16.105 3 15V6C3 4.895 3.895 4 5 4Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <h2>Comments</h2>
+        <span class="cc-count" id="ccCount">0</span>
+        <span class="cc-rail-spacer"></span>
+        <button class="cc-ghost-btn cc-collapse-btn" id="ccCollapse" title="Collapse comments" aria-label="Collapse comments">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="cc-ghost-btn" id="ccCloseMode" title="Exit comment mode" aria-label="Exit comment mode">×</button>
+      </div>
+      <div class="cc-rail-subrow">
+        <span class="cc-rail-sub">Click a card to open it.</span>
+        <button class="cc-clear-btn" id="ccClearAll" disabled>Clear all</button>
+      </div>
+    </div>
+    <div class="cc-list" id="ccList"></div>
+  </aside>
+
+  <!-- esc pill -->
+  <div class="cc-esc cc-chrome">Press <b>Esc</b> to exit comment mode</div>
+
+</div>

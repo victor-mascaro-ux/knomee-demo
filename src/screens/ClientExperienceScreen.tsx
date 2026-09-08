@@ -8,7 +8,24 @@ import {
   type AdventureIcon,
   type TabId,
 } from '../data/experience'
+import icFinancialJoy from '../assets/adventures/financial-joy.svg'
+import icConfidence from '../assets/adventures/confidence.svg'
+import icOutlook from '../assets/adventures/outlook.svg'
+import icFutureYou from '../assets/adventures/future-you.svg'
+import icGoals from '../assets/adventures/goals.svg'
+import icLifeEvents from '../assets/adventures/life-events.svg'
 import './client-experience.css'
+
+/* The adventures that already have a real illustration in the design system use
+   it; the rest fall back to the line drawings below until assets exist. */
+const artwork: Partial<Record<AdventureIcon, string>> = {
+  joy: icFinancialJoy,
+  confidence: icConfidence,
+  outlook: icOutlook,
+  future: icFutureYou,
+  goals: icGoals,
+  events: icLifeEvents,
+}
 
 /* ── adventure illustrations ──────────────────────────────────────────────
    One flat line drawing per adventure, all on the same 40×40 grid so the
@@ -236,15 +253,26 @@ function IPhone({ children }: { children: ReactNode }) {
 }
 
 /* ── the Adventures home screen ── */
+function AdventureArt({ a }: { a: Adventure }) {
+  const src = artwork[a.icon]
+  return (
+    <span className={`cx-adv-art ${src ? 'has-img' : ''} ${a.state === 'open' ? 'is-open' : ''}`}>
+      {src ? (
+        <img src={src} alt="" />
+      ) : (
+        <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
+          {art[a.icon]}
+        </svg>
+      )}
+    </span>
+  )
+}
+
 function AdventureRow({ a }: { a: Adventure }) {
   if (a.state === 'open') {
     return (
       <div className="cx-adv cx-adv-open">
-        <span className="cx-adv-art is-joy">
-          <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
-            {art[a.icon]}
-          </svg>
-        </span>
+        <AdventureArt a={a} />
         <div className="cx-adv-main">
           <div className="cx-adv-title">{a.title}</div>
           {a.blurb && <div className="cx-adv-blurb">{a.blurb}</div>}
@@ -265,11 +293,7 @@ function AdventureRow({ a }: { a: Adventure }) {
   }
   return (
     <div className="cx-adv cx-adv-locked">
-      <span className="cx-adv-art">
-        <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
-          {art[a.icon]}
-        </svg>
-      </span>
+      <AdventureArt a={a} />
       <div className="cx-adv-title">{a.title}</div>
     </div>
   )
@@ -358,7 +382,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="cx-stage">
+    <div className="cx-page">
       <IPhone>
         <header className="cx-appbar">
           <div className="cx-appbar-brand">

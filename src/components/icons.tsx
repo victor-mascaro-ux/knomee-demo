@@ -1,12 +1,32 @@
 // Inline SVG icons used across the Prospects dashboard.
 // Sized via CSS (width/height) and inherit color via `currentColor` unless noted.
 
-export function KnomeeMark({ size = 26 }: { size?: number }) {
+export function KnomeeMark({ size = 26, color = 'currentColor' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 26 26" fill="none" aria-hidden>
-      <circle cx="13" cy="13" r="12" stroke="#ffffff" strokeWidth="1.6" />
-      <circle cx="13" cy="13" r="4.3" fill="#ffffff" />
-      <circle cx="13" cy="13" r="8.1" stroke="#ffffff" strokeWidth="1.4" opacity="0.55" />
+      <circle cx="13" cy="13" r="12" stroke={color} strokeWidth="1.6" />
+      <circle cx="13" cy="13" r="4.3" fill={color} />
+      <circle cx="13" cy="13" r="8.1" stroke={color} strokeWidth="1.4" opacity="0.55" />
+    </svg>
+  )
+}
+
+export function HouseIcon({ color = 'currentColor' }: { color?: string }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 11 12 4l9 7" />
+      <path d="M5.5 9.2V19h13V9.2" />
+      <path d="M10 19v-3.4a2 2 0 0 1 4 0V19" />
     </svg>
   )
 }
@@ -156,9 +176,9 @@ export function LockIcon() {
   )
 }
 
-export function WarnIcon() {
+export function WarnIcon({ color = '#f59e0b' }: { color?: string }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={color} aria-hidden>
       <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
       <line x1="12" y1="9" x2="12" y2="13" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
       <line x1="12" y1="17" x2="12.01" y2="17" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
