@@ -83,6 +83,7 @@ import {
   MegaphoneIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
+import ClientExperienceScreen from './screens/ClientExperienceScreen'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
 
@@ -2578,6 +2579,9 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(false)
+  // Also reached from the burger menu: the client-facing mobile app, which is
+  // the other half of the product the advisor screens describe.
+  const [clientExpOpen, setClientExpOpen] = useState(false)
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(false)
@@ -2599,8 +2603,10 @@ export default function App() {
       ? 'admin'
       : segmentationOpen
         ? 'segmentation'
-        : screen
-  }, [screen, segmentationOpen, adminView])
+        : clientExpOpen
+          ? 'client-experience'
+          : screen
+  }, [screen, segmentationOpen, clientExpOpen, adminView])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -2628,96 +2634,118 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-            <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
-          </div>
-          <div className="menu-wrap" ref={menuRef}>
-            <button
-              className="menu-btn"
-              type="button"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={(e) => {
-                e.stopPropagation()
-                setMenuOpen((v) => !v)
-              }}
-            >
-              <BurgerMenu />
-            </button>
-            {menuOpen && (
-              <div className="menu-pop">
-                <div className="menu-account">
-                  <span className="menu-avatar">A</span>
-                  <span className="menu-name">Alex Advisor</span>
+      {/* The mobile demo is the whole page: the advisor top bar goes away and
+          the way back lives in the phone's own menu. */}
+      {!clientExpOpen && (
+        <header className="topbar">
+          <div className="topbar-inner">
+            <div className="brand">
+              <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+              <span className="brand-sub">{adminView ? 'ADMIN' : 'ADVISOR'}</span>
+            </div>
+            <div className="menu-wrap" ref={menuRef}>
+              <button
+                className="menu-btn"
+                type="button"
+                aria-label="Menu"
+                aria-expanded={menuOpen}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen((v) => !v)
+                }}
+              >
+                <BurgerMenu />
+              </button>
+              {menuOpen && (
+                <div className="menu-pop">
+                  <div className="menu-account">
+                    <span className="menu-avatar">A</span>
+                    <span className="menu-name">Alex Advisor</span>
+                  </div>
+                  <button
+                    className="menu-item"
+                    type="button"
+                    onClick={() => {
+                      setSettingsOpen(true)
+                      setSegmentationOpen(false)
+                      setClientExpOpen(false)
+                      setAdminView(false)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    Account Settings
+                  </button>
+                  <button className="menu-item" type="button">
+                    Sign Out
+                  </button>
+                  <div className="menu-divider" />
+                  <div className="menu-pop-title">Analysis</div>
+                  <button
+                    className="menu-item"
+                    type="button"
+                    onClick={() => {
+                      setSegmentationOpen(true)
+                      setSettingsOpen(false)
+                      setClientExpOpen(false)
+                      setAdminView(false)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    Segmentation
+                  </button>
+                  <div className="menu-divider" />
+                  <div className="menu-pop-title">Mobile</div>
+                  <button
+                    className="menu-item"
+                    type="button"
+                    onClick={() => {
+                      setClientExpOpen(true)
+                      setSegmentationOpen(false)
+                      setSettingsOpen(false)
+                      setAdminView(false)
+                      setMenuOpen(false)
+                    }}
+                  >
+                    Client Experience
+                  </button>
+                  <div className="menu-divider" />
+                  <div className="menu-pop-title">Demo controls</div>
+                  <label className="menu-toggle">
+                    <span>Admin view (100 advisors)</span>
+                    <span className={`switch ${adminView ? 'on' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={adminView}
+                        onChange={(e) => {
+                          setAdminView(e.target.checked)
+                          setSettingsOpen(false)
+                          setSegmentationOpen(false)
+                          setClientExpOpen(false)
+                        }}
+                      />
+                      <span className="switch-knob" />
+                    </span>
+                  </label>
+                  <label className="menu-toggle">
+                    <span>Empty dashboards</span>
+                    <span className={`switch ${emptyMode ? 'on' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={emptyMode}
+                        onChange={(e) => setEmptyMode(e.target.checked)}
+                      />
+                      <span className="switch-knob" />
+                    </span>
+                  </label>
+                  <div className="menu-hint">
+                    Press <b>F2</b> to leave comments
+                  </div>
                 </div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setSettingsOpen(true)
-                    setSegmentationOpen(false)
-                    setAdminView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Account Settings
-                </button>
-                <button className="menu-item" type="button">
-                  Sign Out
-                </button>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Analysis</div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setSegmentationOpen(true)
-                    setSettingsOpen(false)
-                    setAdminView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Segmentation
-                </button>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Demo controls</div>
-                <label className="menu-toggle">
-                  <span>Admin view (100 advisors)</span>
-                  <span className={`switch ${adminView ? 'on' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={adminView}
-                      onChange={(e) => {
-                        setAdminView(e.target.checked)
-                        setSettingsOpen(false)
-                        setSegmentationOpen(false)
-                      }}
-                    />
-                    <span className="switch-knob" />
-                  </span>
-                </label>
-                <label className="menu-toggle">
-                  <span>Empty dashboards</span>
-                  <span className={`switch ${emptyMode ? 'on' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={emptyMode}
-                      onChange={(e) => setEmptyMode(e.target.checked)}
-                    />
-                    <span className="switch-knob" />
-                  </span>
-                </label>
-                <div className="menu-hint">
-                  Press <b>F2</b> to leave comments
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {adminView ? (
         <main className="content">
@@ -2735,6 +2763,12 @@ export default function App() {
             ‹ Back to dashboard
           </button>
           <SegmentationScreen />
+        </main>
+      ) : clientExpOpen ? (
+        // No desktop chrome around the device — the way back lives in the
+        // phone's own menu, so the mobile demo is driven from inside it.
+        <main className="content">
+          <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
         </main>
       ) : (
       <main className="content">

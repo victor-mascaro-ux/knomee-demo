@@ -62,5 +62,16 @@ src/
   index.css              # design tokens + all styling
   reviewBridge.ts        # forwards F2 + reports height to the overlay
   components/icons.tsx    # inline SVG icons
-  data/{prospects,insights,clients}.ts
+  screens/               # pages reached from the burger menu
+    SegmentationScreen.tsx + segmentation.css
+    ClientExperienceScreen.tsx + client-experience.css
+  data/{prospects,insights,clients,segmentation,experience}.ts
 ```
+
+## Client Experience (mobile)
+
+Burger menu → **Mobile → Client Experience** shows the client-facing app inside
+an iPhone frame (390 × 844): the **My Adventures** home screen, with a three-
+destination tab bar — Adventures · Knomee · Financial ID. The way back to the
+adviser side lives in the phone's own burger menu ("Advisor Experience"), so
+the mobile demo is driven entirely from inside the device.
