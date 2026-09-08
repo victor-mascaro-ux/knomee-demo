@@ -1,0 +1,135 @@
+/* ============================================================
+   KNOMEE · COLOR TOKENS  (canonical)
+   ------------------------------------------------------------
+   Reconciled from two divergent sources in knomee-demo:
+     A. wireframes/tokens/colors.css  — curated, semantic, but stale
+     B. src/index.css :root           — smaller, but what actually ships
+   Where they disagree, the SHIPPED value (B) wins and the
+   conflict is marked  CONFLICT  with both values recorded.
+   ============================================================ */
+:root {
+  /* ---- Brand purple (the spine of the brand) ---- */
+  --k-plum:          #240446;  /* primary brand — nav bars, headlines, primary buttons */
+  --k-plum-ink:      #1a0433;  /* darkest text tint of the plum family */
+  --k-plum-hover:    #34105e;  /* primary button hover (shipped) */
+  --k-grape:         #7639a1;  /* interactive purple — links, prospect tier 2 */
+  --k-grape-bar:     #7538b2;  /* 6px accent bar on feature cards */
+  --k-grape-light:   #e9d9f4;  /* light purple surface / soft badge fill */
+  --k-grape-vivid:   #9b19fb;  /* vivid grape accent */
+  --k-orchid:        #a56ccc;  /* modal button hover (shipped) */
+  --k-plum-050:      rgba(36, 4, 70, 0.05);  /* faint plum card-tray wash */
+  --k-plum-wash:     #f7f2fc;  /* download button hover wash (shipped) */
+
+  /* ---- Teal / "joy" greens (consumer-facing warmth) ---- */
+  --k-teal:          #3dbdaa;  /* consumer accent — save CTA, question numbers */
+  --k-teal-deep:     #2fa896;  /* teal hover */
+  --k-teal-light:    #e6f7f5;  /* teal wash surface */
+  --k-mint:          #c0ffe7;  /* pale mint highlight */
+  --k-ocean:         #086375;  /* deep teal — KQ tier 1, bar-chart icon, progress fill */
+  --k-steel:         #6ba1ac;  /* muted teal — KQ tier 2 */
+  --k-aqua:          #6bd6c4;  /* aqua tint (brand vector family) */
+  --k-forest:        #0f4a3a;  /* deepest green — client tier 1 (shipped) */
+
+  /* ---- Lilac / violet accents ---- */
+  --k-lilac:         #b98ddc;  /* KQ tier 3 badge */
+  --k-lilac-soft:    #c9a8dd;  /* prospect tier 3 group header (shipped)
+                                  CONFLICT — token file said #d4b3eb */
+  --k-bolt:          #9b51e0;  /* "convert" action / lightning violet */
+  --k-bolt-deep:     #7c3aed;  /* bolt hover */
+
+  /* ---- Signal / status ---- */
+  --k-tangerine:     #ff9525;  /* energy accent — lightning icon, timers */
+  --k-lime:          #affc41;  /* "new" tag, sparkle accent */
+  --k-amber:         #f59e0b;  /* warning triangle */
+  --k-amber-ink:     #b45309;  /* warning text */
+  --k-green:         #009966;  /* success / sparkle */
+  --k-green-lime:    #84cc16;  /* toast confirmation dot */
+  --k-green-bright:  #22c55e;  /* inline success check */
+
+  /* ---- Mobile "open adventure" pair (client experience only) ---- */
+  --k-adv-open:      #e9f7c9;  /* the one unlocked adventure's card fill */
+  --k-adv-open-edge: #c6e68d;  /* its 1.5px border */
+
+  /* ---- Neutrals (warm-cool gray ramp) ---- */
+  --k-ink:           #1a1a1a;  /* primary body text on light */
+  --k-ink-soft:      #333333;  /* table body copy, tab hover (shipped) */
+  --k-body:          #364153;  /* long-form body copy */
+  --k-muted:         #6a7282;  /* secondary text */
+  --k-slate:         #757575;  /* tertiary text, table headers, inactive tabs */
+  --k-ash:           #afafaf;  /* placeholder / disabled */
+  --k-stone:         #cccccc;  /* control borders, unchecked, switch off */
+  --k-pearl:         #eeeeee;  /* disabled fills, empty score badge */
+  --k-line:          #e8e8e8;  /* THE workhorse hairline — cards, tables, dividers
+                                  CONFLICT — token file's --k-border was #e0e0e0;
+                                  shipped code uses #e8e8e8 everywhere */
+  --k-cloud:         #fafafa;  /* zebra / hover wash / disabled field */
+  --k-cloud-cool:    #f8fafa;  /* table row hover (shipped) */
+  --k-cloud-warm:    #fbfbfc;  /* de-emphasised "thin" row (shipped) */
+  --k-white:         #ffffff;
+  --k-black:         #000000;
+
+  /* ============================================================
+     SEMANTIC ALIASES — reach for these in product code
+     ============================================================ */
+  --text-strong:     var(--k-plum);
+  --text-body:       var(--k-ink);
+  --text-table:      var(--k-ink-soft);
+  --text-secondary:  var(--k-slate);
+  --text-muted:      var(--k-muted);
+  --text-placeholder: var(--k-ash);
+  --text-disabled:   var(--k-ash);
+  --text-inverse:    var(--k-white);
+  --text-link:       var(--k-plum);
+  --text-link-hover: var(--k-grape);
+
+  --surface-page:    var(--k-white);   /* CONFLICT — token file said #f5f5f7;
+                                          the shipped app paints the page white */
+  --surface-card:    var(--k-white);
+  --surface-sunken:  var(--k-cloud);
+  --surface-hover:   var(--k-cloud-cool);
+  --surface-tray:    var(--k-plum-050);
+  --surface-brand:   var(--k-plum);
+  --surface-accent:  var(--k-teal-light);
+
+  --border-default:  var(--k-line);
+  --border-hairline: var(--k-pearl);
+  --border-strong:   var(--k-plum);
+  --border-control:  var(--k-stone);
+  --border-hover:    var(--k-stone);
+
+  --action-primary:        var(--k-plum);
+  --action-primary-hover:  var(--k-plum-hover);
+  --action-accent:         var(--k-teal);
+  --action-accent-hover:   var(--k-teal-deep);
+  --action-bolt:           var(--k-bolt);
+  --action-bolt-hover:     var(--k-bolt-deep);
+
+  --status-success:  var(--k-green-lime);
+  --status-warning:  var(--k-amber);
+  --status-info:     var(--k-ocean);
+  --status-new:      var(--k-lime);
+
+  /* ---- Ramp 1: KQ score tiers (advisor lead scoring, per-prospect) ---- */
+  --kq-1:            var(--k-ocean);   /* ready now */
+  --kq-2:            var(--k-steel);   /* considering */
+  --kq-3:            var(--k-lilac);   /* nurture */
+
+  /* ---- Ramp 2: Prospect group headers (plum family) ---- */
+  --prospect-1:      var(--k-plum);
+  --prospect-2:      var(--k-grape);
+  --prospect-3:      var(--k-lilac-soft);
+
+  /* ---- Ramp 3: Client engagement tiers (green→teal family) ----
+     CONFLICT — the token file had these in the purple family
+     (#5b21b6 / #8b5cf6 / #6ba1ac). The shipped app uses green→teal,
+     which is what keeps Clients visually distinct from Prospects. */
+  --client-1:        var(--k-forest);
+  --client-2:        var(--k-ocean);
+  --client-3:        var(--k-steel);
+
+  /* ---- Aliases used by the two white-label demo brands ---- */
+  --brand-affirm:    #1aa3c6;
+  --brand-affirm-2:  #1590b0;
+  --brand-confetti:  #0093b0;
+  --brand-confetti-2:#007e98;
+}

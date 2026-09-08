@@ -1,0 +1,55 @@
+/* ============================================================
+   KNOMEE · TYPOGRAPHY TOKENS
+   ------------------------------------------------------------
+   The shipped app uses 30 distinct font sizes, including nine
+   half-pixel values (7.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5).
+   This is a 14-step scale that every one of those snaps onto.
+   Migration rule: round to the NEAREST step; if exactly between
+   two steps, take the LARGER (dense tables read better up).
+   ============================================================ */
+:root {
+  /* ---- Families ---- */
+  --font-ui:     'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif:  'Sedan', Georgia, 'Times New Roman', serif;  /* advisory firm name in nav */
+  --font-google: 'Roboto', -apple-system, sans-serif;         /* ONLY inside "Continue with Google" */
+
+  /* ---- Size scale ---- */
+  --text-micro: 8px;    /* "POWERED BY" eyebrow (was 7.5/8/9) */
+  --text-2xs:   10px;   /* dense chart labels (was 9.5/10/10.5) */
+  --text-xs:    11px;   /* "new" tag, legends (was 11/11.5) */
+  --text-sm:    12px;   /* group headers, meta (was 12/12.5) — most common size */
+  --text-base:  13px;   /* table body (was 13/13.5) */
+  --text-md:    14px;   /* table headers, inputs (was 14/14.5) */
+  --text-lg:    15px;   /* button label */
+  --text-xl:    16px;   /* tabs, modal buttons */
+  --text-2xl:   18px;   /* card title (was 17/18/19) */
+  --text-3xl:   20px;   /* brand name, section head */
+  --text-4xl:   24px;   /* page title (was 22/24/26) */
+  --text-5xl:   32px;   /* metric figure (was 30/34) */
+  --text-6xl:   40px;   /* hero metric (was 36/37/38/40) */
+  --text-7xl:   56px;   /* display (was 58) */
+
+  /* ---- Weights ----
+     Poppins 300 is loaded but unused in shipped code; 400 and 900
+     appear twice each. 600/700/800 carry the whole interface. */
+  --weight-light:    300;
+  --weight-regular:  400;
+  --weight-medium:   500;  /* "new" tag, switch labels */
+  --weight-semibold: 600;  /* DEFAULT for headings, buttons, table th */
+  --weight-bold:     700;  /* score badges, metric figures */
+  --weight-heavy:    800;  /* display numerals */
+
+  /* ---- Line heights ---- */
+  --leading-tight:  1.2;   /* display + metric figures */
+  --leading-snug:   1.35;  /* headings */
+  --leading-normal: 1.45;  /* table cells (shipped value) */
+  --leading-relaxed: 1.6;  /* long-form body copy */
+
+  /* ---- Tracking ---- */
+  --tracking-eyebrow: 0.13em;  /* uppercase "POWERED BY" */
+  --tracking-group:   0.6px;   /* uppercase tier group headers */
+  --tracking-tag:     0.3px;   /* "new" tag */
+  --tracking-brand:   0.2px;   /* brand wordmark */
+  --tracking-title:  -0.2px;   /* mobile screen title */
+  --tracking-normal:  0;
+}

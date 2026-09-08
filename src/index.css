@@ -1,32 +1,32 @@
+/* The design system owns colour, type and space. These three files are synced
+   from the Knomee Design System project on claude.ai/design (see
+   src/tokens/README.md) and are pure `:root` declarations — importing them
+   changes nothing by itself. */
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/layout.css';
+
+/* The names this app has always used, now aliases onto the design-system
+   tokens rather than a second copy of the hex values. Every value here is
+   identical to what shipped, so this is a rewiring, not a restyle — and the
+   ~4,000 lines below keep referring to the short names.
+   --page-pad and --brand-logo-h are no longer declared here at all: they come
+   from tokens/layout.css, which is now their only home. */
 :root {
-  --plum: #240446;
-  --ocean: #086375;
-  --steel: #6ba1ac;
-  --lilac: #b98ddc;
-  /* Tier ramps — Prospects (plum) and Clients (teal), tiers 1 → 3 */
-  --prospect-1: #240446;
-  --prospect-2: #7639a1;
-  --prospect-3: #c9a8dd;
-  --client-1: #0f4a3a;
-  --client-2: #086375;
-  --client-3: #6ba1ac;
-  --purple-bolt: #9b51e0;
-  --grey-text: #757575;
-  --ash: #afafaf;
-  --stone: #cccccc;
-  --pearl: #eeeeee;
-  --line: #e8e8e8;
-  --bg: #ffffff;
-  --page-bg: #ffffff;
-  /* Single source of truth for page inset — the top bar and the content share
-     it so the logo, tabs and title always line up, and the top padding tracks
-     the side padding so horizontal and vertical spacing stay even. */
-  --page-pad: 40px;
-  /* Height every header logo renders at — the knomee lockup and any client
-     (white-label) logo share it, so a co-branded bar keeps both marks at the
-     same visual height. Client logos must be supplied trimmed + white for this
-     box height to equal their visual height (see docs/logo-guidelines). */
-  --brand-logo-h: 19.5px;
+  --plum: var(--k-plum);
+  --ocean: var(--k-ocean);
+  --steel: var(--k-steel);
+  --lilac: var(--k-lilac);
+  --purple-bolt: var(--k-bolt);
+  --grey-text: var(--k-slate);
+  --ash: var(--k-ash);
+  --stone: var(--k-stone);
+  --pearl: var(--k-pearl);
+  --line: var(--k-line);
+  --bg: var(--k-white);
+  --page-bg: var(--surface-page);
+  /* The tier ramps — Prospects (plum) and Clients (green→teal) — are defined
+     once in tokens/colors.css as --prospect-1..3 / --client-1..3. */
 }
 
 * {
