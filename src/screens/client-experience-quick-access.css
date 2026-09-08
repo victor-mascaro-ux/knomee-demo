@@ -141,3 +141,33 @@
 .vx-card-tag{font-size:10px;font-weight:var(--weight-bold);text-transform:uppercase;letter-spacing:.4px;color:var(--text-secondary);margin-bottom:2px}
 .vx-card b{font-size:16.5px;line-height:1.25}
 .vx-card i{font-size:12.5px;color:var(--text-secondary);margin-top:3px}
+
+/* ---------- gestures ----------
+   A mouse cannot flick a phone screen, so the demo lends it the gestures the
+   real thing lives on: drag the content, throw a sheet away by its grip. */
+.cx-viewport{cursor:grab}
+.cx-viewport.is-dragging{cursor:grabbing;user-select:none}
+.cx-viewport.is-dragging *{cursor:grabbing}
+.kx-grip{position:absolute;top:0;left:0;right:0;height:26px;display:block;cursor:grab;touch-action:none;z-index:2}
+.kx-grip:active{cursor:grabbing}
+.kx-grip::after{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.32)}
+.kx-sheet{padding-top:34px}
+.vx-sheet{padding-top:44px}
+/* Tap feedback: everything you can press answers the press. */
+.cx-adv-done,.cx-adv-locked{transition:transform var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+.cx-adv-done:active,.cx-adv-locked:active{transform:scale(.988)}
+.cx-adv-more:active{transform:scale(.9)}
+.cx-tab:active{transform:scale(.94)}
+.cx-tab-center:active{transform:none}
+.cx-tab-center:active .cx-tab-mark{transform:scale(.94)}
+.cx-appbar-burger:active{transform:scale(.9)}
+.vx-dismiss:active,.vx-send:active,.cx-sheet-item:active{transform:scale(.97)}
+
+/* ---------- the edge seam, properly ----------
+   The screen clips its children with `overflow:hidden` + a 52px radius. That
+   clip is antialiased against the screen's own background, which leaves a
+   hairline of it down each edge that no child can cover — the sheet is cut off
+   exactly at the boundary, so bleeding it wider cannot help. While a sheet is
+   up, the screen itself takes the sheet's ground, so the hairline is the same
+   near-black as the bezel beside it and there is nothing to see. */
+.cx-screen.has-sheet{background:var(--mood-ground)}

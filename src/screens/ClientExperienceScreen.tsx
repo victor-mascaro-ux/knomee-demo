@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useDragScroll, useSwipeDown } from './mobileGestures'
 import {
   MOOD_ANGLES,
   MOOD_ARC,
@@ -275,7 +276,15 @@ function useZoom() {
 /* ── iPhone frame ──────────────────────────────────────────────────────────
    390 × 844 logical screen (iPhone 14) inside a titanium bezel, with the
    Dynamic Island and side buttons so it reads as a device, not a div. */
-function IPhone({ children, scale = 1 }: { children: ReactNode; scale?: number }) {
+function IPhone({
+  children,
+  scale = 1,
+  dim = false,
+}: {
+  children: ReactNode
+  scale?: number
+  dim?: boolean
+}) {
   return (
     <div className="cx-device" style={scale === 1 ? undefined : { transform: `scale(${scale})` }}>
       <span className="cx-key cx-key-silent" />
@@ -283,7 +292,7 @@ function IPhone({ children, scale = 1 }: { children: ReactNode; scale?: number }
       <span className="cx-key cx-key-voldn" />
       <span className="cx-key cx-key-power" />
       <div className="cx-bezel">
-        <div className="cx-screen">
+        <div className={`cx-screen ${dim ? 'has-sheet' : ''}`}>
           <div className="cx-island" />
           <div className="cx-statusbar">
             <span className="cx-time">9:41</span>
@@ -434,11 +443,19 @@ function AdventuresScreen() {
 /* ── quick access: one tap on the knomee mark ──────────────────────────────
    The next adventure, four things worth doing, and the mood arc — a flat plum
    disc that runs off the bottom of the screen, faces along its rim. */
-function KnomeeSheet() {
+function KnomeeSheet({ onClose }: { onClose: () => void }) {
   const [mood, setMood] = useState<MoodId | null>(null)
   const { r, faceR, face } = MOOD_ARC
+  const swipe = useSwipeDown(onClose)
   return (
-    <div className="kx-sheet" role="dialog" aria-modal="true" aria-label="Quick access">
+    <div
+      className="kx-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Quick access"
+      style={sheetStyle(swipe)}
+    >
+      <span className="kx-grip" aria-hidden {...swipe.handlers} />
       <div className="kx-next">
         <ActionRow a={quickNext} />
       </div>
@@ -487,9 +504,18 @@ function KnomeeSheet() {
 /* ── voice capture: long-press the knomee mark ─────────────────────────────
    Listening → what it heard, offered for editing → the thing it created. The
    transcript is scripted; the point is the shape of the interaction. */
+/** A sheet follows the finger while held, and springs when released. */
+function sheetStyle(swipe: ReturnType<typeof useSwipeDown>) {
+  return {
+    transform: swipe.offset ? `translateY(${swipe.offset}px)` : undefined,
+    transition: swipe.holding ? 'none' : 'transform 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05)',
+  }
+}
+
 type VoicePhase = 'listen' | 'ready' | 'done'
 
 function VoiceSheet({ onClose }: { onClose: () => void }) {
+  const swipe = useSwipeDown(onClose)
   const [phase, setPhase] = useState<VoicePhase>('listen')
   const [heard, setHeard] = useState(0)
   const said = voiceScript.said
@@ -519,7 +545,9 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-label="Tell Knomee"
+      style={sheetStyle(swipe)}
     >
+      <span className="kx-grip" aria-hidden {...swipe.handlers} />
       <div className="vx-rings" aria-hidden>
         <svg viewBox="0 0 288 288">
           <defs>
@@ -676,6 +704,8 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
   const [sheet, setSheet] = useState(false)
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [pressing, setPressing] = useState(false)
+  const viewport = useRef<HTMLDivElement>(null)
+  useDragScroll(viewport)
   const { scale: fitScale, windowH } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom
@@ -732,7 +762,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
           the scaled height and the page never grows a phantom scrollbar. */}
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale}>
+        <IPhone scale={scale} dim={sheet || voiceOpen}>
           <header className="cx-appbar">
             <div className="cx-appbar-brand">
               <img src="./knomee-logo-white.svg" alt="knomee" />
@@ -750,11 +780,11 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
             </button>
           </header>
 
-          <div className="cx-viewport">
+          <div className="cx-viewport" ref={viewport}>
             {tab === 'adventures' ? <AdventuresScreen /> : <StubScreen />}
           </div>
 
-          {sheet && <KnomeeSheet />}
+          {sheet && <KnomeeSheet onClose={() => setSheet(false)} />}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
 
           <nav

@@ -624,11 +624,33 @@
 /* Rows that pair an icon with a label. */
 .pp-goal-done,
 .pp-q-date,
-.pp-show,
 .pp-date {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+/* The footer disclosure stays a full-width centred control — it only needed the
+   icon centred with its label, not a change of box. */
+.pp-show,
+.pp-showless {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+/* The medallion's icon belongs in the middle of the disc. Without this it is a
+   300px flex sibling of the ring and the badge blows out to four times its
+   width — which is exactly what it was doing on the client page. */
+.pp-badge-disc {
+  position: relative;
+}
+.pp-badge-ic {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
 }
 .pp-goal-caret {
   display: inline-flex;
