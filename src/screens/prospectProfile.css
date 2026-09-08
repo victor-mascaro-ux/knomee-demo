@@ -599,3 +599,39 @@
   transform: translateX(2px);
   color: var(--plum, #240446);
 }
+
+/* ---------- line icons in place of emoji ----------
+   The profile pages used emoji as icons; they are now drawn from the design
+   system's icon set, so the rows that held a glyph need proper alignment. */
+.pp-meta-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.pp-meta-row svg {
+  flex: none;
+  color: var(--grey-text, #8b8598);
+}
+.pp-card-title > svg {
+  flex: none;
+  color: var(--plum, #240446);
+}
+.pp-hl-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--plum, #240446);
+}
+/* Rows that pair an icon with a label. */
+.pp-goal-done,
+.pp-q-date,
+.pp-show,
+.pp-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pp-goal-caret {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ash, #b9b3c6);
+}

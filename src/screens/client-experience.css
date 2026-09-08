@@ -25,8 +25,8 @@
   border-radius: 69px;
   background: linear-gradient(145deg, #d8d6dd 0%, #8e8b96 22%, #57545f 50%, #9a97a2 78%, #cfcdd4 100%);
   box-shadow:
-    0 24px 60px rgba(20, 12, 40, 0.28),
-    0 4px 12px rgba(20, 12, 40, 0.14);
+    0 34px 80px rgba(0, 0, 0, 0.55),
+    0 6px 18px rgba(0, 0, 0, 0.35);
   /* the fit scale lives on this element's transform, so the entrance fades
      only — a transform animation would fight it */
   transform-origin: top left;
@@ -511,14 +511,21 @@
 /* The phone is the whole page here — no advisor shell around it. The page is a
    column so the view controls can sit under the device instead of over it. Its
    height is set from the measured window in JS: `100vh` would be wrong inside
-   the review iframe, which is sized to the document rather than the window. */
+   the review iframe, which is sized to the document rather than the window.
+
+   The ground is a flat neutral dark — Figma's prototype canvas — rather than the
+   app's white or anything branded. The device is the whole subject here, and a
+   neutral stage is what makes its titanium rail and its own white screen read as
+   an object rather than a rectangle on a page. Deliberately not a brand colour:
+   a plum stage would tint the judgement of everything on the screen. It also
+   gives the frosted sheets inside something dark to sample at their edges. */
 .cx-page {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: var(--space-20);
-  background: var(--surface-page);
+  background: #1e1e1e;
 }
 /* Holds the scaled device: `transform` doesn't shrink the box it came from, so
    this wrapper is sized to the scaled result and clips nothing. */
@@ -546,15 +553,17 @@
 .cx-view button {
   font: inherit;
   cursor: pointer;
-  color: #9a96a6;
-  background: var(--surface-card);
-  border: var(--border-thin) solid #ececf0;
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.07);
+  border: var(--border-thin) solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-pill);
-  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
 }
 .cx-view button:hover {
-  color: var(--text-strong);
-  border-color: #d9d3e4;
+  color: var(--text-inverse);
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.14);
 }
 .cx-fit-btn {
   display: inline-flex;
@@ -568,9 +577,9 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
-  border: var(--border-thin) solid #ececf0;
+  border: var(--border-thin) solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-pill);
-  background: var(--surface-card);
+  background: rgba(255, 255, 255, 0.07);
 }
 .cx-zoom button {
   border: none;
@@ -584,7 +593,7 @@
 .cx-zoom-pct {
   font-size: 11.5px;
   font-weight: var(--weight-semibold);
-  color: #6f6a7d;
+  color: rgba(255, 255, 255, 0.78);
   min-width: 40px;
   text-align: center;
   font-variant-numeric: tabular-nums;

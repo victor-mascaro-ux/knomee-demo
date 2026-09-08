@@ -3,6 +3,17 @@ import './prospectProfile.css'
 import { financialId } from '../data/financialId'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
+import {
+  BulbIcon,
+  CalendarIcon,
+  CaretIcon,
+  CheckIcon,
+  RowChevron,
+  HIGHLIGHT_ICON,
+  MailIcon,
+  MedalIcon,
+  type HighlightIcon,
+} from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -175,11 +186,15 @@ export default function ProspectProfileScreen({
             </div>
             <h2 className="pp-name">{prospect.name}</h2>
             <div className="pp-meta">
-              <span className="pp-meta-row">📅 Joined {fi.joined}</span>
-              <span className="pp-meta-row">✉️ {prospect.email}</span>
+              <span className="pp-meta-row">
+                <CalendarIcon /> Joined {fi.joined}
+              </span>
+              <span className="pp-meta-row">
+                <MailIcon /> {prospect.email}
+              </span>
             </div>
             <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
-              ⚡ Convert to Client
+              Convert to Client
             </button>
           </div>
         </aside>
@@ -228,13 +243,20 @@ export default function ProspectProfileScreen({
               {/* Key Highlights */}
               <section className="pp-card">
                 <div className="pp-card-head">
-                  <span className="pp-card-title">💡 Key Highlights</span>
+                  <span className="pp-card-title">
+                    <BulbIcon size={19} /> Key Highlights
+                  </span>
                 </div>
                 <div className="pp-highlights">
                   {fi.keyHighlights.map((h) => (
                     <div className="pp-highlight" key={h.title}>
                       <div className="pp-highlight-title">
-                        <span className="pp-hl-icon">{h.icon}</span>
+                        <span className="pp-hl-icon">
+                          {(() => {
+                            const Ic = HIGHLIGHT_ICON[h.icon as HighlightIcon]
+                            return Ic ? <Ic /> : null
+                          })()}
+                        </span>
                         {h.title}
                       </div>
                       <p className="pp-highlight-text">{h.text}</p>
@@ -257,11 +279,13 @@ export default function ProspectProfileScreen({
                           <div className="pp-goal-main">
                             <span className="pp-goal-title">{g.title}</span>
                             {g.completed && (
-                              <span className="pp-goal-done">✓ Completed: {g.completed}</span>
+                              <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>
                             )}
                           </div>
                           <ReadinessBars level={g.readiness} />
-                          <span className="pp-goal-caret">›</span>
+                          <span className="pp-goal-caret">
+                            <RowChevron />
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -270,7 +294,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
                     <div className="pp-chips">
@@ -285,7 +309,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     {(
                       [
@@ -310,7 +334,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <span className="pp-fy-label pp-concern">Concerns</span>
                     {fi.outlook.concerns.map((c) => (
@@ -328,7 +352,9 @@ export default function ProspectProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">🏅 Badges</span>
+                      <span className="pp-card-title">
+                        <MedalIcon size={19} /> Badges
+                      </span>
                     </div>
                     <div className="pp-badges">
                       {fi.badges.map((label) => (
@@ -345,14 +371,14 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <div className="pp-confidence">
                       <span className="pp-confidence-label">{fi.confidence}</span>
                       <Gauge label={fi.confidence} />
                     </div>
                     <button className="pp-show" type="button">
-                      Show results ⌄
+                      Show results <CaretIcon />
                     </button>
                   </section>
 
@@ -383,9 +409,17 @@ export default function ProspectProfileScreen({
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
-                            {q.resolved ? `✓ Resolved: ${q.resolved}` : q.date}
+                            {q.resolved ? (
+                              <>
+                                <CheckIcon /> Resolved: {q.resolved}
+                              </>
+                            ) : (
+                              q.date
+                            )}
                           </span>
-                          <span className="pp-goal-caret">›</span>
+                          <span className="pp-goal-caret">
+                            <RowChevron />
+                          </span>
                         </div>
                       ))}
                     </div>

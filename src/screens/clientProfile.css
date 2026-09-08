@@ -285,3 +285,40 @@
     display: none;
   }
 }
+
+/* ---------- sidebar people: portraits, and rows you can open ---------- */
+.cp-person {
+  width: 100%;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.cp-person.is-static {
+  cursor: default;
+}
+.cp-person.is-static:hover {
+  background: none;
+}
+.cp-person svg {
+  flex: none;
+  color: var(--text-placeholder);
+}
+.cp-person-av {
+  overflow: hidden;
+}
+.cp-person-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* The big portrait carries a photo the same way, falling back to the initial. */
+.pp-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

@@ -1,10 +1,21 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
-import { clientProfile } from '../data/clientProfile'
+import { avatarFor, clientProfile } from '../data/clientProfile'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
+import {
+  BulbIcon,
+  CalendarIcon,
+  CaretIcon,
+  CheckIcon,
+  HIGHLIGHT_ICON,
+  MailIcon,
+  MedalIcon,
+  RowChevron,
+  type HighlightIcon,
+} from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -30,6 +41,25 @@ const ADVENTURE_ICON: Record<string, string> = {
 // The mobile app's own mood ramp, reused so the check-in the client tapped on
 // their phone is the very same face the advisor sees here.
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
+
+/* A person's portrait, or their initial while there is no file for them. */
+function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
+  const [failed, setFailed] = useState(false)
+  const initial = name.charAt(0).toUpperCase()
+  const cls = size === 'lg' ? 'pp-avatar' : 'cp-person-av'
+  if (failed) {
+    return (
+      <span className={cls}>
+        {size === 'lg' ? <span className="pp-avatar-initial">{initial}</span> : initial}
+      </span>
+    )
+  }
+  return (
+    <span className={cls}>
+      <img src={avatarFor(name)} alt="" onError={() => setFailed(true)} />
+    </span>
+  )
+}
 
 function ReadinessBars({ level }: { level: number }) {
   return (
@@ -158,10 +188,12 @@ function GoalRow({ g }: { g: ClientGoal }) {
           </span>
         )}
         <span className="pp-goal-title">{g.title}</span>
-        {g.completed && <span className="pp-goal-done">✓ Completed: {g.completed}</span>}
+        {g.completed && <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>}
       </div>
       <ReadinessBars level={g.readiness} />
-      <span className="pp-goal-caret">›</span>
+      <span className="pp-goal-caret">
+                            <RowChevron />
+                          </span>
     </div>
   )
 }
@@ -177,7 +209,6 @@ export default function ClientProfileScreen({
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
   const cp = clientProfile
-  const initial = client.name.charAt(0).toUpperCase()
 
   // Open the profile scrolled to the top, regardless of where the client's row
   // sat in the table. On the live site the app runs in a full-height iframe and
@@ -214,13 +245,15 @@ export default function ClientProfileScreen({
       <div className="pp-layout">
         <aside className="pp-side">
           <div className="pp-side-inner">
-            <div className="pp-avatar">
-              <span className="pp-avatar-initial">{initial}</span>
-            </div>
+            <Portrait name={client.name} size="lg" />
             <h2 className="pp-name">{client.name}</h2>
             <div className="pp-meta">
-              <span className="pp-meta-row">📅 Joined {cp.joined}</span>
-              <span className="pp-meta-row">✉️ {client.email}</span>
+              <span className="pp-meta-row">
+                <CalendarIcon /> Joined {cp.joined}
+              </span>
+              <span className="pp-meta-row">
+                <MailIcon /> {client.email}
+              </span>
             </div>
 
             <div className="cp-side-block">
@@ -229,22 +262,26 @@ export default function ClientProfileScreen({
                 <span className="cp-side-count">{cp.members.length}</span>
               </button>
               {cp.members.map((m) => (
-                <div className={`cp-person ${m.current ? 'is-current' : ''}`} key={m.name}>
-                  <span className="cp-person-av">{m.name.charAt(0)}</span>
+                <button
+                  className={`cp-person ${m.current ? 'is-current' : ''}`}
+                  type="button"
+                  key={m.name}
+                >
+                  <Portrait name={m.name} size="sm" />
                   <span className="cp-person-main">
                     <b>{m.name}</b>
                     <i>{m.role}</i>
                   </span>
-                  <span className="pp-goal-caret">›</span>
-                </div>
+                  <RowChevron />
+                </button>
               ))}
             </div>
 
             <div className="cp-side-block">
               <span className="cp-side-head is-static">Advisory Team</span>
               {cp.team.map((m) => (
-                <div className="cp-person" key={m.name}>
-                  <span className="cp-person-av">{m.name.charAt(0)}</span>
+                <div className="cp-person is-static" key={m.name}>
+                  <Portrait name={m.name} size="sm" />
                   <span className="cp-person-main">
                     <b>{m.name}</b>
                     <i>{m.role}</i>
@@ -318,16 +355,23 @@ export default function ClientProfileScreen({
             <>
               <section className="pp-card">
                 <div className="pp-card-head">
-                  <span className="pp-card-title">💡 Key Highlights</span>
+                  <span className="pp-card-title">
+                    <BulbIcon size={19} /> Key Highlights
+                  </span>
                   <button className="pp-show" type="button">
-                    SHOW LESS ⌃
+                    Show less <CaretIcon up />
                   </button>
                 </div>
                 <div className="pp-highlights">
                   {cp.keyHighlights.map((h) => (
                     <div className="pp-highlight" key={h.title}>
                       <div className="pp-highlight-title">
-                        <span className="pp-hl-icon">{h.icon}</span>
+                        <span className="pp-hl-icon">
+                          {(() => {
+                            const Ic = HIGHLIGHT_ICON[h.icon as HighlightIcon]
+                            return Ic ? <Ic /> : null
+                          })()}
+                        </span>
                         {h.title}
                       </div>
                       <p className="pp-highlight-text">{h.text}</p>
@@ -360,7 +404,7 @@ export default function ClientProfileScreen({
                       ))}
                     </div>
                     <button className="pp-show cp-show-centre" type="button">
-                      See less ⌃
+                      See less <CaretIcon up />
                     </button>
                   </section>
 
@@ -370,7 +414,7 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icFinancialJoy} alt="" />
                         Financial Joy
                       </span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <p className="pp-prompt">{cp.financialJoy.prompt}</p>
                     <div className="pp-chips">
@@ -388,7 +432,7 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icFutureYou} alt="" />
                         Future You
                       </span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     {(
                       [
@@ -416,7 +460,7 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icOutlook} alt="" />
                         Outlook
                       </span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <span className="pp-fy-label pp-concern">Concerns</span>
                     {cp.outlook.concerns.map((c) => (
@@ -434,8 +478,10 @@ export default function ClientProfileScreen({
 
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title">🏅 Badges</span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-card-title">
+                        <MedalIcon size={19} /> Badges
+                      </span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <div className="pp-badges">
                       {cp.badges.map((label) => (
@@ -469,14 +515,14 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icConfidence} alt="" />
                         Confidence
                       </span>
-                      <span className="pp-date">05/03/2025 ⌄</span>
+                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
                     </div>
                     <div className="pp-confidence">
                       <span className="pp-confidence-label">{cp.confidence}</span>
                       <Gauge label={cp.confidence} />
                     </div>
                     <button className="pp-show" type="button">
-                      Show results ⌄
+                      Show results <CaretIcon />
                     </button>
                   </section>
 
@@ -499,7 +545,7 @@ export default function ClientProfileScreen({
                       ))}
                     </div>
                     <button className="pp-show" type="button">
-                      See more ⌄
+                      See more <CaretIcon />
                     </button>
                   </section>
 
@@ -516,14 +562,22 @@ export default function ClientProfileScreen({
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
-                            {q.resolved ? `✓ Resolved: ${q.resolved}` : q.date}
+                            {q.resolved ? (
+                              <>
+                                <CheckIcon /> Resolved: {q.resolved}
+                              </>
+                            ) : (
+                              q.date
+                            )}
                           </span>
-                          <span className="pp-goal-caret">›</span>
+                          <span className="pp-goal-caret">
+                            <RowChevron />
+                          </span>
                         </div>
                       ))}
                     </div>
                     <button className="pp-show" type="button">
-                      See less ⌃
+                      See less <CaretIcon up />
                     </button>
                   </section>
                 </div>

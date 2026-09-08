@@ -23,12 +23,12 @@ export interface ProfileQuestion {
 export const financialId = {
   joined: 'March 2023',
   keyHighlights: [
-    { icon: '🎯', title: 'Core Values', text: 'Security, independence, simplicity, and connection' },
-    { icon: '✨', title: 'Joy & Motivation', text: 'Time with her husband and cultural experiences like theater' },
-    { icon: '⚠️', title: 'Biggest Concern', text: 'Preparing for future health outcomes for herself and Vic' },
-    { icon: '🎯', title: 'Hopes', text: 'Having the strength to manage it all and seeing Vic’s health improve' },
-    { icon: '🖼️', title: 'Lifestyle Aspiration', text: 'Living near family with the freedom to travel, connect, and enjoy meaningful experiences' },
-    { icon: '⚡', title: 'Future Vision', text: 'Near loved ones, traveling, and staying active with family in the years ahead' },
+    { icon: 'target', title: 'Core Values', text: 'Security, independence, simplicity, and connection' },
+    { icon: 'sparkle', title: 'Joy & Motivation', text: 'Time with her husband and cultural experiences like theater' },
+    { icon: 'warning', title: 'Biggest Concern', text: 'Preparing for future health outcomes for herself and Vic' },
+    { icon: 'target', title: 'Hopes', text: 'Having the strength to manage it all and seeing Vic’s health improve' },
+    { icon: 'frame', title: 'Lifestyle Aspiration', text: 'Living near family with the freedom to travel, connect, and enjoy meaningful experiences' },
+    { icon: 'bolt', title: 'Future Vision', text: 'Near loved ones, traveling, and staying active with family in the years ahead' },
   ],
   goals: [
     { title: 'Family Disney beach vacation to Oahu.', readiness: 4 },
