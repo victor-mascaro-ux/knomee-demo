@@ -50,6 +50,15 @@
   --k-adv-open:      #e9f7c9;  /* the one unlocked adventure's card fill */
   --k-adv-open-edge: #c6e68d;  /* its 1.5px border */
 
+  /* ---- Mood faces (client experience: "How do you feel about your money today?") ---- */
+  --mood-1:          #ff9080;  /* worried */
+  --mood-2:          #ffd060;  /* unsure */
+  --mood-3:          #fff040;  /* neutral */
+  --mood-4:          #e0ff70;  /* good */
+  --mood-5:          #a0f040;  /* great — the lime end of the ramp */
+  --mood-ink:        var(--k-plum-ink);  /* eyes and mouth on every face */
+  --mood-ground:     #08060d;  /* the near-black product ground the plum mood arc reads against */
+
   /* ---- Neutrals (warm-cool gray ramp) ---- */
   --k-ink:           #1a1a1a;  /* primary body text on light */
   --k-ink-soft:      #333333;  /* table body copy, tab hover (shipped) */
