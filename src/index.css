@@ -184,6 +184,10 @@ body {
 .tabs-powered {
   margin-left: auto;
   align-self: center;
+  /* The tabs carry 16px of bottom padding for the active underline; matching it
+     here lifts the credit so it centres on the tab *labels*, not on the whole
+     row. */
+  margin-bottom: 16px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -191,15 +195,17 @@ body {
 .tabs-powered-text {
   font-size: 10px;
   font-weight: 600;
+  line-height: 1;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--grey-text);
 }
-.tabs-powered-name {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #240446;
+/* The real knomee lockup (mark + wordmark) from the design system, in knomee's
+   plum so it reads as a knomee credit on a client-themed page. */
+.tabs-powered-logo {
+  display: block;
+  height: 18px;
+  width: auto;
 }
 
 .tab {

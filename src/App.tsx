@@ -4083,8 +4083,11 @@ export default function App() {
           {brand && (
             <span className="tabs-powered">
               <span className="tabs-powered-text">powered by</span>
-              <KnomeeMark size={16} color="#240446" />
-              <span className="tabs-powered-name">knomee</span>
+              <img
+                className="tabs-powered-logo"
+                src="./knomee-logo-plum.svg"
+                alt="knomee"
+              />
             </span>
           )}
         </nav>
