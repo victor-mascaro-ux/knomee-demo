@@ -448,7 +448,7 @@
   left: 0;
   bottom: 0;
   width: 390px;
-  height: 94px;
+  height: 96px;
   pointer-events: none;
 }
 .cx-tab {
@@ -480,21 +480,21 @@
 .cx-tab.is-on .cx-tab-lbl {
   font-weight: 700;
 }
-/* the centre mark sits into the swell: its top lines up with the flat edge */
+/* The centre mark sits into the swell, label-free and sized to fill the space
+   the label used to take: its top lines up with the bar's flat edge. */
 .cx-tab-center {
-  gap: 3px;
-  margin-top: -5px;
-  /* the mark is the brand, not a state — it stays grey either way */
-  color: #8c8b93;
+  margin-top: -8px;
+  justify-content: center;
 }
-.cx-tab-center:hover {
-  color: #6f6e78;
+.cx-tab-mark {
+  width: 62px;
+  height: 62px;
+  display: block;
+  transition: opacity 0.12s ease;
 }
-.cx-tab-center.is-on {
-  color: #6f6e78;
-}
-.cx-tab-center.is-on .cx-tab-lbl {
-  color: var(--plum);
+.cx-tab-center:hover .cx-tab-mark,
+.cx-tab-center.is-on .cx-tab-mark {
+  opacity: 0.72;
 }
 
 .cx-home-bar {

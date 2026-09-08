@@ -14,6 +14,7 @@ import icOutlook from '../assets/adventures/outlook.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icGoals from '../assets/adventures/goals.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
+import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 
 /* The adventures that already have a real illustration in the design system use
@@ -173,29 +174,17 @@ const TabFinId = () => (
     <path d="M20 9.4h5.6M20 14h4.2M20 18.4h5.6" strokeLinecap="round" />
   </svg>
 )
-// The centre tab: the knomee labyrinth with the heart at its middle. Always the
-// brand grey — it is the mark, not a state indicator.
-const TabKnomee = ({ size = 50 }: { size?: number }) => (
-  <svg viewBox="0 0 44 44" width={size} height={size} fill="none" aria-hidden>
-    <g stroke="currentColor" strokeLinecap="round">
-      <circle cx="22" cy="22" r="19.4" strokeWidth="3.3" strokeDasharray="93 29" strokeDashoffset="24" />
-      <circle cx="22" cy="22" r="13.2" strokeWidth="3.3" strokeDasharray="59 24" strokeDashoffset="-14" />
-      <path
-        d="M22 28.4c-4.9-3.3-7.2-5.5-7.2-8.2a3.7 3.7 0 0 1 6.9-1.9 3.7 3.7 0 0 1 6.9 1.9c0 2.7-2.3 4.9-7.2 8.2Z"
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-    </g>
-  </svg>
-)
+// The centre tab is the knomee mark itself — the real logo art, lifted from the
+// wordmark lockup. It carries no label: the mark is the label.
+const TabKnomee = () => <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
 /* The bar's own top edge, arcing up around the centre mark. Drawn at the
    screen's exact 390px width so the arc is never distorted: a filled body plus
    an open stroke along the top, so only that edge carries the hairline. */
-// Chord 70, rise 16 — a shallow swell the mark sits into, not a dome around it.
-const TAB_EDGE = 'M0 16H160a46.3 46.3 0 0 1 70 0h160'
+// Chord 82, rise 18 — a shallow swell the mark sits into, not a dome around it.
+const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
 const TabBarEdge = () => (
-  <svg className="cx-tab-edge" viewBox="0 0 390 94" width="390" height="94" aria-hidden>
-    <path d={`${TAB_EDGE}V94H0Z`} fill="#fff" />
+  <svg className="cx-tab-edge" viewBox="0 0 390 96" width="390" height="96" aria-hidden>
+    <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
     <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
   </svg>
 )
@@ -413,10 +402,10 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
                 key={t.id}
                 type="button"
                 className={`cx-tab cx-tab-center ${tab === t.id ? 'is-on' : ''}`}
+                aria-label={t.label}
                 onClick={() => setTab(t.id)}
               >
                 <TabKnomee />
-                <span className="cx-tab-lbl">{t.label}</span>
               </button>
             ) : (
               <button
