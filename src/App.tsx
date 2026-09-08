@@ -89,6 +89,7 @@ import {
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
+import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
@@ -3614,6 +3615,7 @@ const ROUTE_VIEWS = [
   'segmentation',
   'welcome',
   'welcome-b',
+  'client-experience',
   'admin',
   'settings',
 ] as const
@@ -3667,6 +3669,9 @@ export default function App() {
   const [landingVersion, setLandingVersion] = useState<'a' | 'b'>(
     initialView === 'welcome-b' ? 'b' : 'a',
   )
+  // The client-facing mobile app (the Adventures the prospect actually walks
+  // through), previewed from the burger menu on its own route.
+  const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
@@ -3692,8 +3697,10 @@ export default function App() {
           ? landingVersion === 'b'
             ? 'welcome-b'
             : 'welcome-a'
-          : screen
-  }, [screen, segmentationOpen, landingOpen, landingVersion, adminView])
+          : clientExpOpen
+            ? 'client-experience'
+            : screen
+  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, adminView])
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
@@ -3707,7 +3714,9 @@ export default function App() {
           ? landingVersion === 'b'
             ? 'welcome-b'
             : 'welcome'
-          : (screen as RouteView)
+          : clientExpOpen
+            ? 'client-experience'
+            : (screen as RouteView)
 
   // ── Routing: URL hash ⇄ nav state ──
   useEffect(() => {
@@ -3716,6 +3725,7 @@ export default function App() {
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
+      setClientExpOpen(v === 'client-experience')
       if (v === 'welcome') setLandingVersion('a')
       if (v === 'welcome-b') setLandingVersion('b')
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
@@ -3785,6 +3795,12 @@ export default function App() {
     return <LandingScreen version={landingVersion} onSwitch={setLandingVersion} />
   }
 
+  // Same for the client's mobile app: the phone is the whole page, and the way
+  // back to the advisor side lives in the phone's own menu.
+  if (clientExpOpen) {
+    return <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+  }
+
   return (
     <div
       className={`page ${brand ? 'brand-client' : ''}`}
@@ -3838,6 +3854,7 @@ export default function App() {
                   onClick={() => {
                     setSettingsOpen(true)
                     setSegmentationOpen(false)
+                    setClientExpOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
@@ -3856,6 +3873,7 @@ export default function App() {
                   onClick={() => {
                     setSegmentationOpen(true)
                     setSettingsOpen(false)
+                    setClientExpOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
@@ -3872,12 +3890,29 @@ export default function App() {
                     setLandingOpen(true)
                     setLandingVersion('a')
                     setSettingsOpen(false)
+                    setClientExpOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
                   }}
                 >
                   Welcome page
+                </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Mobile</div>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setClientExpOpen(true)
+                    setLandingOpen(false)
+                    setSettingsOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Client Experience
                 </button>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
@@ -3892,6 +3927,7 @@ export default function App() {
                         setSettingsOpen(false)
                         setSegmentationOpen(false)
                         setLandingOpen(false)
+                        setClientExpOpen(false)
                       }}
                     />
                     <span className="switch-knob" />
