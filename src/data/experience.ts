@@ -139,7 +139,12 @@ export const voice = {
   firstWordMs: 1100,
   settleMs: 520,
   hint: 'Say anything. Knomee turns it into the right next step.',
-  result: { title: 'Divorce', meta: 'Added to Life Events · 3 min to finish', art: 'divorce' as ArtKey },
+  result: {
+    tag: 'Personal',
+    title: 'Divorce',
+    meta: 'Added to Life Events · 3 min to finish',
+    art: 'divorce' as ArtKey,
+  },
 }
 
 /** Signed-in client, shown as the avatar initial in the in-phone menu. */
