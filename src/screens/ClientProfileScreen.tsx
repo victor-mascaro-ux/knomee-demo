@@ -23,7 +23,7 @@ import icOutlook from '../assets/adventures/outlook.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
-import icAward from '../assets/adventures/award.svg'
+import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import icVision from '../assets/adventures/vision.png'
 import moodGood from '../assets/moods/good.svg'
@@ -414,7 +414,7 @@ export default function ClientProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icAward} alt="" />
+                        <img className="pp-card-ic" src={icBadges} alt="" />
                         Badges
                       </span>
                       <span className="pp-date">05/03/2025 <CaretIcon /></span>

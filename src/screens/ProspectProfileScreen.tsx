@@ -21,7 +21,7 @@ import icOutlook from '../assets/adventures/outlook.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
-import icAward from '../assets/adventures/award.svg'
+import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -250,7 +250,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icAward} alt="" />
+                        <img className="pp-card-ic" src={icBadges} alt="" />
                         Badges
                       </span>
                     </div>

@@ -645,19 +645,18 @@
   justify-content: center;
   gap: 5px;
 }
-/* The medallion's icon belongs in the middle of the disc. Without this it is a
-   300px flex sibling of the ring and the badge blows out to four times its
-   width — which is exactly what it was doing on the client page. */
+/* The badge is a single piece of artwork — rosette, illustration and both
+   curved texts are all in the SVG, so the disc is just a frame for it. */
 .pp-badge-disc {
   position: relative;
 }
-.pp-badge-ic {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 34px;
-  height: 34px;
-  transform: translate(-50%, -50%);
+.pp-badge-art {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.pp-badge {
+  width: 104px;
 }
 .pp-goal-caret {
   display: inline-flex;

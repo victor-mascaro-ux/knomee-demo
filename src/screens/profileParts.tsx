@@ -3,6 +3,12 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
+import bgConfidence from '../assets/badges/confidence.svg'
+import bgFinancialJoy from '../assets/badges/financial-joy.svg'
+import bgFutureYou from '../assets/badges/future-you.svg'
+import bgGoals from '../assets/badges/goals.svg'
+import bgOutlook from '../assets/badges/outlook.svg'
+
 export function ReadinessBars({ level }: { level: number }) {
   return (
     <span className="pp-bars" aria-label={`Readiness ${level} of 5`}>
@@ -59,50 +65,23 @@ export function Gauge({ label }: { label: string }) {
   )
 }
 
-const BADGE_TINT: Record<string, string> = {
-  'Financial Joy': '#bfe6dd',
-  Confidence: '#fbe3a6',
-  Outlook: '#f6c6d4',
-  'Future You': '#d2ecbe',
-  Goals: '#c6e2f6',
+/* The real badges, drawn by the brand: a star rosette carrying the adventure's
+   own illustration, with its name and ADVENTURE COMPLETE already set on the
+   curve. Nothing here is drawn in code — the artwork is the badge. */
+const BADGE_ART: Record<string, string> = {
+  'Financial Joy': bgFinancialJoy,
+  Confidence: bgConfidence,
+  Outlook: bgOutlook,
+  'Future You': bgFutureYou,
+  Goals: bgGoals,
 }
 
-// A scalloped "seal" medallion: a wavy colored ring with the adventure icon in
-// the middle and the category / "ADVENTURE COMPLETE" curved around it, like the
-// real product's badges.
-export function BadgeMedallion({ label, icon }: { label: string; icon: string }) {
-  const tint = BADGE_TINT[label] ?? '#e6e6ee'
-  const slug = label.replace(/\s+/g, '-').toLowerCase()
-  const cx = 60
-  const cy = 60
-  const R = 46
-  const n = 18
-  const bump = 6.5
-  const bumps = Array.from({ length: n }, (_, i) => {
-    const a = (i / n) * 2 * Math.PI
-    return <circle key={i} cx={cx + R * Math.cos(a)} cy={cy + R * Math.sin(a)} r={bump} fill={tint} />
-  })
+export function BadgeMedallion({ label }: { label: string; icon?: string }) {
+  const art = BADGE_ART[label]
+  if (!art) return null
   return (
     <span className="pp-badge-disc">
-      <svg viewBox="0 0 120 120" width="90" height="90">
-        <defs>
-          <path id={`pp-top-${slug}`} d="M 22 60 A 38 38 0 0 1 98 60" fill="none" />
-          <path id={`pp-bot-${slug}`} d="M 24 60 A 36 36 0 0 0 96 60" fill="none" />
-        </defs>
-        {bumps}
-        <circle cx={cx} cy={cy} r={R} fill={tint} />
-        <text className="pp-badge-arc">
-          <textPath href={`#pp-top-${slug}`} startOffset="50%" textAnchor="middle">
-            {label.toUpperCase()}
-          </textPath>
-        </text>
-        <text className="pp-badge-arc">
-          <textPath href={`#pp-bot-${slug}`} startOffset="50%" textAnchor="middle">
-            ADVENTURE COMPLETE
-          </textPath>
-        </text>
-        <image href={icon} x={cx - 27} y={cy - 27} width="54" height="54" />
-      </svg>
+      <img className="pp-badge-art" src={art} alt={`${label} — adventure complete`} />
     </span>
   )
 }
