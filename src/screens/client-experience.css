@@ -7,7 +7,6 @@
    column so the view controls can sit under the device instead of over it. */
 .cx-page {
   position: relative;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -86,12 +85,16 @@
 
 /* ---------- iPhone frame ---------- */
 /* Titanium rail → black bezel → 390 × 844 screen. The rail is a gradient
-   border rather than a flat stroke so the device reads as hardware. */
+   border rather than a flat stroke so the device reads as hardware.
+   The boxes nest exactly: 390 screen + 2×5 bezel + 2×12 rail = 424 wide and
+   844 + 10 + 24 = 878 tall, with each radius 
+   the next one in plus its inset (52 → 57 → 69), or the screen spills over the
+   bezel and the black frame vanishes down the sides. */
 .cx-device {
   position: relative;
-  width: 414px;
+  width: 424px;
   padding: 12px;
-  border-radius: 68px;
+  border-radius: 69px;
   background: linear-gradient(145deg, #d8d6dd 0%, #8e8b96 22%, #57545f 50%, #9a97a2 78%, #cfcdd4 100%);
   box-shadow:
     0 24px 60px rgba(20, 12, 40, 0.28),
