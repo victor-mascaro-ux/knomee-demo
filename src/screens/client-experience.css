@@ -22,12 +22,15 @@
 }
 
 /* ---------- view controls ---------- */
-/* Below the phone, never over it: `margin-top: auto` drops them to the bottom
-   of the window at the default fit, and they follow the device down when zoom
-   makes it taller than the window. They sit outside the scaled subtree, so
-   their own size never changes with the fit scale or the zoom. */
+/* Bottom-right corner, and never over the phone: `margin-top: auto` drops them
+   to the bottom of the window at the default fit, `align-self: flex-end` puts
+   them in the corner, and staying in the page flow means they follow the device
+   down when zoom makes it taller than the window rather than sitting on top of
+   it. Outside the scaled subtree, so their own size never changes with the fit
+   scale or the zoom. */
 .cx-view {
   margin-top: auto;
+  align-self: flex-end;
   padding-top: 14px;
   height: 46px;
   display: flex;
