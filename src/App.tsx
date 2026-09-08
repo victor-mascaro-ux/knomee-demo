@@ -91,6 +91,11 @@ import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import ClientProfileScreen from './screens/ClientProfileScreen'
+import moodWorried from './assets/moods/worried.svg'
+import moodUnsure from './assets/moods/unsure.svg'
+import moodNeutral from './assets/moods/neutral.svg'
+import moodGood from './assets/moods/good.svg'
+import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
@@ -790,12 +795,15 @@ function ProspectsScreen({
 // Sentiment shown as a single colored face on a 1–5 scale (matching the
 // prospect app's "how do you feel about your money" faces): red frown → amber
 // → yellow neutral → lime smile → green grin.
+// The client's own mood ramp, the same five faces they tap in the mobile app
+// and that ride the check-in band on their profile. Drawn once by the brand
+// rather than three times in code.
 const SENTIMENT_FACES = [
-  { color: '#ef4444', label: 'Frustrated', mouth: 'M8 16.4 Q12 12 16 16.4' },
-  { color: '#f97316', label: 'Concerned', mouth: 'M8 15.4 Q12 13.2 16 15.4' },
-  { color: '#facc15', label: 'Neutral', mouth: 'M8.4 14.6 H15.6' },
-  { color: '#6ee787', label: 'Positive', mouth: 'M8 14 Q12 17.6 16 14' },
-  { color: '#17c964', label: 'Delighted', mouth: 'M8 13.6 Q12 18.8 16 13.6' },
+  { art: moodWorried, label: 'Frustrated' },
+  { art: moodUnsure, label: 'Concerned' },
+  { art: moodNeutral, label: 'Neutral' },
+  { art: moodGood, label: 'Positive' },
+  { art: moodGreat, label: 'Delighted' },
 ]
 
 function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }) {
@@ -806,12 +814,7 @@ function SentimentFace({ value, warn }: { value: number | null; warn?: boolean }
   const showWarn = warn && rounded <= 2
   return (
     <span className="sentiment-face tt" data-tip={`${f.label} · ${rounded}/5`}>
-      <svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label={`Sentiment: ${f.label}`}>
-        <circle cx="12" cy="12" r="12" fill={f.color} />
-        <circle cx="9" cy="10.4" r="1.5" fill="#2b2140" />
-        <circle cx="15" cy="10.4" r="1.5" fill="#2b2140" />
-        <path d={f.mouth} fill="none" stroke="#2b2140" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <img className="sentiment-art" src={f.art} alt={`Sentiment: ${f.label}`} />
       {showWarn && (
         <span className="sentiment-warn">
           <WarnIcon color="#b91c1c" />

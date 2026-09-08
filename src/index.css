@@ -5850,3 +5850,11 @@ button.name-link-btn:hover .name-text {
     grid-template-columns: 1fr;
   }
 }
+
+/* The sentiment face is the client's own mood art, at table scale. */
+.sentiment-art {
+  width: 26px;
+  height: 26px;
+  display: block;
+  border-radius: 50%;
+}
