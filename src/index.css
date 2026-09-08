@@ -199,6 +199,14 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--grey-text);
+  /* Optical, not geometric. `align-items: center` lines up the two *boxes*, and
+     two offsets then stack against us: the lockup hangs its wordmark ~1.6px
+     below the mark's centre at this size, and an all-caps run with no
+     descenders sits 0.5px above its own line box's centre. Left alone the
+     eyebrow reads ~2px high; this drops its cap band onto the wordmark's
+     mid-line. translate rather than margin so the flex box itself, and with it
+     the credit's alignment to the tab labels, does not move. */
+  transform: translateY(2px);
 }
 /* The real knomee lockup (mark + wordmark) from the design system, in knomee's
    plum so it reads as a knomee credit on a client-themed page. */
