@@ -619,6 +619,13 @@
 .pp-hl-icon {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line, #e7e4ee);
   color: var(--plum, #240446);
 }
 /* Rows that pair an icon with a label. */

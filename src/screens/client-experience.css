@@ -207,7 +207,12 @@
 }
 
 /* ---------- scrolling app content ---------- */
+/* Explicitly white rather than transparent. The screen beneath it goes dark
+   while a sheet is up (so the rounded clip's antialiased edge has nothing
+   white to reveal), and without this the app itself would inherit that dark
+   ground — visible the moment a sheet is dragged down off it. */
 .cx-viewport {
+  background: var(--surface-card);
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
