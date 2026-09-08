@@ -382,6 +382,9 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
 const DEVICE_H = 878
 const DEVICE_W = 414
 const FIT_PAD = 40 // breathing room around the device
+// The view controls sit under the phone rather than over it, so the height they
+// occupy comes off the space the phone is allowed to fill.
+const CONTROLS_H = 46
 
 function parentWindow(): Window | null {
   try {
@@ -463,7 +466,7 @@ function useFitToWindow() {
         /* cross-origin — keep our own */
       }
       setScale(
-        Math.min(1, (h - FIT_PAD) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
+        Math.min(1, (h - FIT_PAD - CONTROLS_H) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
       )
     }
     measure()

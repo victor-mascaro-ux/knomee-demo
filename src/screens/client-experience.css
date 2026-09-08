@@ -3,13 +3,14 @@
    screens, and the device frame is the only place mobile styling lives.
    Design tokens come from index.css (--plum, --ocean, --line …). */
 
-/* The phone is the whole page here — no advisor shell around it. */
+/* The phone is the whole page here — no advisor shell around it. The page is a
+   column so the view controls can sit under the device instead of over it. */
 .cx-page {
   position: relative;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
   background: var(--page-bg, #fff);
 }
@@ -21,14 +22,14 @@
 }
 
 /* ---------- view controls ---------- */
-/* Out of the phone, top-right, and quiet enough to ignore until wanted.
-   Pinned to the viewport, never inside the scaled subtree: the device's fit
-   scale and the zoom both leave these controls at a constant size and place. */
+/* Below the phone, never over it: `margin-top: auto` drops them to the bottom
+   of the window at the default fit, and they follow the device down when zoom
+   makes it taller than the window. They sit outside the scaled subtree, so
+   their own size never changes with the fit scale or the zoom. */
 .cx-view {
-  position: fixed;
-  top: 14px;
-  right: 16px;
-  z-index: 5;
+  margin-top: auto;
+  padding-top: 14px;
+  height: 46px;
   display: flex;
   align-items: center;
   gap: 8px;
