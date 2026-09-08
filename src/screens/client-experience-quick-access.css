@@ -118,3 +118,13 @@
 .vx-second:active{transform:translateY(1px) scale(.985)}
 .vx-dismiss{background:none;border:none;font:inherit;font-size:13.5px;color:rgba(255,255,255,.72);cursor:pointer;padding:6px 10px;border-radius:var(--radius-lg)}
 .vx-dismiss:hover{color:var(--text-inverse);background:rgba(255,255,255,.1)}
+
+/* ---------- edge seam fix ----------
+   `backdrop-filter` samples pixels beyond the element's own box, so an overlay
+   whose edge lands exactly on the screen's picks up the white page behind it
+   and leaves a pale seam down both sides. Bleed the ground past the screen and
+   let .cx-screen's overflow clip the fringe; the horizontal padding gains the
+   same amount, so the content keeps the inset the design gave it. */
+.kx-sheet,.vx-sheet{left:-20px;right:-20px}
+.kx-sheet{padding-left:calc(var(--space-16) + 20px);padding-right:calc(var(--space-16) + 20px)}
+.vx-sheet{padding-left:52px;padding-right:52px}
