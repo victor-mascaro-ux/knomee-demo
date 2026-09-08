@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   adventureProgress,
   adventures,
@@ -192,9 +192,12 @@ const TabBarEdge = () => (
 /* ── iPhone frame ──────────────────────────────────────────────────────────
    390 × 844 logical screen (iPhone 14) inside a titanium bezel, with the
    Dynamic Island and side buttons so it reads as a device, not a div. */
-function IPhone({ children }: { children: ReactNode }) {
+function IPhone({ children, scale = 1 }: { children: ReactNode; scale?: number }) {
   return (
-    <div className="cx-device">
+    <div
+      className="cx-device"
+      style={scale === 1 ? undefined : { transform: `scale(${scale})` }}
+    >
       <span className="cx-key cx-key-silent" />
       <span className="cx-key cx-key-volup" />
       <span className="cx-key cx-key-voldn" />
@@ -366,13 +369,136 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
   )
 }
 
+/* ── keep the whole device on screen ──────────────────────────────────────
+   The frame is a fixed 878 × 414 (a 390 × 844 screen inside its bezel), which
+   is taller than most laptop windows. Rather than reflow the mobile layout at
+   breakpoints — a scaled-down phone is still a phone, a reflowed one is not —
+   scale the frame down until it fits, and never scale it up past 1.
+
+   On the live site this runs inside the overlay's iframe, which is sized to the
+   full document height (the parent scrolls, not the frame). So `innerHeight`
+   here is the content's own height and tells us nothing; the parent's viewport
+   is the window that has to hold the phone. Same origin, but guarded anyway. */
+const DEVICE_H = 878
+const DEVICE_W = 414
+const FIT_PAD = 40 // breathing room around the device
+
+function parentWindow(): Window | null {
+  try {
+    return window.parent && window.parent !== window ? window.parent : null
+  } catch {
+    return null // cross-origin embed — fall back to our own viewport
+  }
+}
+
+/* ── zoom on top of the fit ───────────────────────────────────────────────
+   Ctrl/⌘ + wheel and Ctrl/⌘ + = / - / 0, the shortcuts people already use to
+   zoom a page — captured so they scale the phone instead of the whole demo.
+   Zoom multiplies the fit scale, so 100% always means "as large as fits". */
+const MIN_ZOOM = 0.4
+const MAX_ZOOM = 3
+const ZOOM_STEP = 0.1
+const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z))
+
+function useZoom() {
+  const [zoom, setZoom] = useState(1)
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return
+      e.preventDefault() // otherwise the browser zooms the whole page
+      setZoom((z) => clampZoom(z * (1 - e.deltaY * 0.0015)))
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault()
+        setZoom((z) => clampZoom(z + ZOOM_STEP))
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault()
+        setZoom((z) => clampZoom(z - ZOOM_STEP))
+      } else if (e.key === '0') {
+        e.preventDefault()
+        setZoom(1)
+      }
+    }
+    // Non-passive, or preventDefault on the wheel is ignored. Bound on the
+    // parent too: on the live site this page is an iframe and the pointer may
+    // well be over the parent's margin when the wheel turns.
+    const targets = [window, parentWindow()].filter(Boolean) as Window[]
+    for (const w of targets) {
+      try {
+        w.addEventListener('wheel', onWheel, { passive: false })
+        w.addEventListener('keydown', onKey)
+      } catch {
+        /* cross-origin — skip */
+      }
+    }
+    return () => {
+      for (const w of targets) {
+        try {
+          w.removeEventListener('wheel', onWheel)
+          w.removeEventListener('keydown', onKey)
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }, [])
+  return { zoom, setZoom }
+}
+
+function useFitToWindow() {
+  const [scale, setScale] = useState(1)
+  useEffect(() => {
+    const measure = () => {
+      const p = parentWindow()
+      let h = window.innerHeight
+      let w = window.innerWidth
+      try {
+        if (p) {
+          h = p.innerHeight
+          w = p.innerWidth
+        }
+      } catch {
+        /* cross-origin — keep our own */
+      }
+      setScale(
+        Math.min(1, (h - FIT_PAD) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
+      )
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    const p = parentWindow()
+    try {
+      p?.addEventListener('resize', measure)
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      window.removeEventListener('resize', measure)
+      try {
+        p?.removeEventListener('resize', measure)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [])
+  return scale
+}
+
 export default function ClientExperienceScreen({ onExit }: { onExit: () => void }) {
   const [tab, setTab] = useState<TabId>('adventures')
   const [menuOpen, setMenuOpen] = useState(false)
+  const fit = useFitToWindow()
+  const { zoom, setZoom } = useZoom()
+  const scale = fit * zoom
 
   return (
     <div className="cx-page">
-      <IPhone>
+      {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
+          the scaled height and the page never grows a phantom scrollbar. */}
+      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
+        <IPhone scale={scale}>
         <header className="cx-appbar">
           <div className="cx-appbar-brand">
             <img src="./knomee-logo-white.svg" alt="knomee" />
@@ -423,8 +549,49 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
 
         <div className="cx-home-bar" />
 
-        {menuOpen && <MobileMenu onExit={onExit} onClose={() => setMenuOpen(false)} />}
-      </IPhone>
+          {menuOpen && <MobileMenu onExit={onExit} onClose={() => setMenuOpen(false)} />}
+        </IPhone>
+      </div>
+
+      {/* View controls, kept out of the phone and deliberately quiet: fit is
+          always there to get back to the default, and the zoom stepper only
+          shows once you have zoomed away from it. */}
+      <div className="cx-view" role="group" aria-label="View">
+        {zoom !== 1 && (
+          <span className="cx-zoom">
+            <button
+              type="button"
+              onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))}
+              aria-label="Zoom out"
+            >
+              &minus;
+            </button>
+            <span className="cx-zoom-pct">{Math.round(zoom * 100)}%</span>
+            <button
+              type="button"
+              onClick={() => setZoom((z) => clampZoom(z + ZOOM_STEP))}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </span>
+        )}
+        <button
+          type="button"
+          className="cx-fit-btn"
+          onClick={() => setZoom(1)}
+          title="Ctrl/Cmd + wheel or + / − to zoom · Ctrl/Cmd + 0 to reset"
+        >
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path
+              d="M2 6V2.6h3.4M14 6V2.6h-3.4M2 10v3.4h3.4M14 10v3.4h-3.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Fit to screen
+        </button>
+      </div>
     </div>
   )
 }

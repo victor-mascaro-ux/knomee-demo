@@ -5,12 +5,79 @@
 
 /* The phone is the whole page here — no advisor shell around it. */
 .cx-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 40px 20px 48px;
+  padding: 20px;
   background: var(--page-bg, #fff);
+}
+/* Holds the scaled device: `transform` doesn't shrink the box it came from, so
+   this wrapper is sized to the scaled result and clips nothing. */
+.cx-fit {
+  position: relative;
+  flex: none;
+}
+
+/* ---------- view controls ---------- */
+/* Out of the phone, top-right, and quiet enough to ignore until wanted.
+   Pinned to the viewport, never inside the scaled subtree: the device's fit
+   scale and the zoom both leave these controls at a constant size and place. */
+.cx-view {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cx-view button {
+  font: inherit;
+  cursor: pointer;
+  color: #9a96a6;
+  background: #fff;
+  border: 1px solid #ececf0;
+  border-radius: 999px;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+.cx-view button:hover {
+  color: var(--plum);
+  border-color: #d9d3e4;
+}
+.cx-fit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 12px 6px 10px;
+}
+.cx-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #ececf0;
+  border-radius: 999px;
+  background: #fff;
+}
+.cx-zoom button {
+  border: none;
+  background: none;
+  width: 24px;
+  height: 24px;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 50%;
+}
+.cx-zoom-pct {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6f6a7d;
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- iPhone frame ---------- */
@@ -25,7 +92,10 @@
   box-shadow:
     0 24px 60px rgba(20, 12, 40, 0.28),
     0 4px 12px rgba(20, 12, 40, 0.14);
-  animation: fadeUp 0.5s ease both;
+  /* the fit scale lives on this element's transform, so the entrance fades
+     only — a transform animation would fight it */
+  transform-origin: top left;
+  animation: cxFade 0.45s ease both;
 }
 .cx-bezel {
   border-radius: 57px;
@@ -512,22 +582,6 @@
   background: #12101a;
 }
 
-/* ---------- fits on a laptop ---------- */
-/* The device is a fixed 844px tall, so shrink the whole frame rather than
-   reflowing the mobile layout — a scaled-down phone is still a phone. */
-@media (max-height: 980px), (max-width: 620px) {
-  .cx-device {
-    transform: scale(0.86);
-    transform-origin: top center;
-    margin-bottom: -122px;
-  }
-}
-@media (max-width: 460px) {
-  .cx-device {
-    transform: scale(0.7);
-    margin-bottom: -262px;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .cx-device {
     animation: none;
