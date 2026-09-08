@@ -605,9 +605,15 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
             <CheckIcon />
             Life event created
           </div>
+          {/* The same anatomy the event will have on the Financial ID — the
+              adventure row's art disc, then category, title and meta — so the
+              client is looking at the record itself, not a receipt for it. */}
           <div className="vx-card">
-            <img src={art[voiceScript.result.art]} alt="" />
-            <div>
+            <span className="cx-adv-art has-img is-open">
+              <img src={art[voiceScript.result.art]} alt="" />
+            </span>
+            <div className="vx-card-main">
+              <span className="vx-card-tag">{voiceScript.result.tag}</span>
               <b>{voiceScript.result.title}</b>
               <i>{voiceScript.result.meta}</i>
             </div>
