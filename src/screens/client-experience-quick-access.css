@@ -1,0 +1,120 @@
+/* ============================================================
+   KNOMEE · CLIENT EXPERIENCE — QUICK ACCESS & VOICE CAPTURE
+   ------------------------------------------------------------
+   ADDITIONS to the shipped mobile layer, built from tokens:
+     .cx-adv-done  — a completed adventure row (source shipped only
+                     open + locked states)
+     .cx-start-outline — the mobile echo of the advisor outline button
+     .px-*  — long-press feedback: the mark's five strokes fill to plum
+              inside-out (heart → rings → outer rings), then pulse
+     .kx-*  — the single-tap quick-access sheet: next adventure, a 2x2
+              grid of knomee actions, and the mood arc
+     .vx-*  — the long-press voice capture: pulsing mark, streamed
+              transcript, editable field with an inline send, lime finish
+   Both sheets sit under the app bar and above the tab bar, which keeps
+   its white bump on top (z-index 7).
+   ============================================================ */
+/* ADDITION: the completed state. The source only shipped open + locked rows;
+   this is the same card geometry on white with a hairline and a ⋯ overflow. */
+.cx-adv-done{background:var(--surface-card);border:var(--border-thin) solid var(--border-default);padding:13px var(--space-14);gap:var(--space-12);transition:border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+.cx-adv-done:hover{border-color:var(--border-hover);box-shadow:var(--elev-2)}
+.cx-adv-meta{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);margin-top:3px}
+.cx-adv-meta svg{color:var(--k-ocean)}
+.cx-adv-more{flex:none;background:none;border:none;padding:6px 2px;border-radius:var(--radius-md);color:var(--k-ash);cursor:pointer;display:grid;place-items:center;transition:color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.cx-adv-more:hover{color:var(--text-secondary);background:var(--surface-sunken)}
+/* ADDITION: outline pill, the mobile echo of the advisor outline button. */
+.cx-start-outline{background:var(--surface-card);border:1.5px solid var(--action-primary);color:var(--action-primary)}
+.cx-start-outline:hover{background:var(--k-plum-wash)}
+/* ---------- Knomee quick-access sheet (ADDITION) ----------
+   Flat plum-ink ground so white type carries without a scrim gradient;
+   the mood arc is a flat --k-plum disc, no gradient anywhere. */
+:root{--mood-face:46px}
+/* Long-press feedback: the mark's five strokes fill to deep purple in
+   anatomical order — heart, upper ring, lower ring, upper outer, lower
+   outer — then the whole mark pulses once and the voice sheet starts. */
+/* The centre mark enlarged so its padding inside the tab bar's white bump
+   matches the padding on either side. */
+.cx-tab-mark{width:70px;height:70px}
+.px-fill{position:absolute;left:50%;bottom:29px;width:70px;height:70px;transform:translateX(-50%);z-index:8;pointer-events:none;animation:pxPulse .1s var(--ease-out) .19s both}
+.px-fill svg{width:70px;height:70px;display:block;overflow:visible}
+.px-fill path{fill:var(--k-plum);transform-origin:50% 50%;transform-box:view-box;animation:pxFill .07s var(--ease-out) both}
+@keyframes pxFill{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pxPulse{50%{transform:translateX(-50%) scale(1.09)}}
+.px-fill.is-static{animation:none}
+.px-fill.is-static path{animation:none}
+.cx-tab-center.is-on .cx-tab-mark{opacity:1}
+/* The tab bar's white arc stays above both overlays. */
+.cx-tabbar{z-index:7}
+/* Both overlays share one ground and one inset; -1px overlaps the app bar so
+   no hairline of the page shows between them. */
+.kx-sheet,.vx-sheet{top:calc(54px + var(--mobile-appbar-h) - 1px);background:color-mix(in srgb, var(--mood-ground) 82%, transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.kx-sheet{position:absolute;left:0;right:0;bottom:calc(var(--mobile-tabbar-h) + 22px);z-index:4;overflow:hidden;display:flex;flex-direction:column;gap:30px;padding:30px var(--space-16) 0;animation:cxFade var(--dur-base) var(--ease-out) both}
+.kx-next{flex:none}
+.kx-actions{list-style:none;margin:0;padding:0;flex:none;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-12)}
+.kx-action{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:var(--space-8);background:rgba(255,255,255,.05);border:var(--border-thin) solid rgba(255,255,255,.14);font:inherit;font-size:14.5px;font-weight:var(--weight-semibold);color:var(--text-inverse);text-align:center;padding:14px 10px;border-radius:var(--radius-2xl);cursor:pointer;animation:cxDrop var(--dur-enter) var(--ease-out) both;transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.kx-action:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.kx-action:active{transform:translateY(1px) scale(.985)}
+.kx-action span{flex:none;width:44px;height:44px;border-radius:var(--radius-circle);background:var(--surface-card);display:grid;place-items:center;overflow:hidden}
+/* The DS illustrations carry their own white disc, so they fill the slot;
+   raster art without one is inset to the same optical size. */
+.kx-action img{width:100%;height:100%;display:block}
+.kx-action img.is-raster{width:62%;height:62%}
+.kx-arc{position:absolute;left:50%;top:calc(100% - 228px);width:500px;height:500px;transform:translateX(-50%);border-radius:var(--radius-circle);background:var(--k-plum)}
+.kx-mood{position:absolute;width:46px;height:46px;padding:0;border:none;background:none;border-radius:var(--radius-circle);cursor:pointer;animation:cxDrop var(--dur-enter) var(--ease-out) both;transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+.kx-mood svg{width:100%;height:100%;display:block}
+.kx-mood img{width:100%;height:100%;display:block}
+.kx-mood:hover{transform:translateY(-2px)}
+.kx-mood:active{transform:scale(.93)}
+.kx-mood.is-on{box-shadow:0 0 0 3px var(--k-white)}
+.kx-ask{position:absolute;left:50%;transform:translateX(-50%);top:144px;width:250px;text-align:center;color:var(--text-inverse);font-size:21px;font-weight:var(--weight-semibold);line-height:var(--leading-snug);text-wrap:pretty}
+/* ---------- Long-press voice capture (ADDITION) ----------
+   The mark's own concentric rings fill outward like a scanner, then the
+   sheet listens. Ocean is the scanning colour; lime confirms. */
+.vx-sheet{position:absolute;left:0;right:0;bottom:calc(var(--mobile-tabbar-h) + 22px);z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:var(--space-20);padding:44px 32px 0;text-align:center;animation:cxFade var(--dur-base) var(--ease-out) both}
+.vx-rings{position:relative;width:124px;height:124px;flex:none;display:grid;place-items:center}
+.vx-rings svg{width:124px;height:124px;display:block;overflow:visible}
+.vx-rings path{transform-origin:50% 50%;transform-box:view-box;animation:vxOut .5s var(--ease-out) both,vxRipple 1.05s var(--ease-out) infinite;transition:fill var(--dur-enter) var(--ease-out)}
+.vx-sheet.is-done .vx-rings path{animation:vxOut .5s var(--ease-out) both}
+/* The mark keeps one position and one box across every phase; once listening
+   ends the ripple stops. Only the lime confirmation scales the art down. */
+.vx-sheet.is-settled .vx-rings path{animation:vxOut .5s var(--ease-out) both}
+.vx-sheet.is-done .vx-rings svg{transform:scale(.71)}
+@keyframes vxOut{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes vxRipple{0%,100%{transform:scale(1)}20%{transform:scale(1.07)}42%{transform:scale(.985)}}
+.vx-cap{font-size:12.5px;letter-spacing:.7px;text-transform:uppercase;font-weight:var(--weight-heavy);color:var(--k-aqua)}
+.vx-hint{font-size:13.5px;line-height:var(--leading-snug);color:rgba(255,255,255,.72);max-width:250px}
+/* The mark lands on lime once the task exists, matching the confirmation. */
+.vx-sheet.is-done .vx-rings path{fill:var(--k-lime)}
+.vx-wave{display:flex;align-items:flex-end;gap:5px;height:26px}
+.vx-wave i{width:4px;height:26px;border-radius:2px;background:var(--k-teal);transform-origin:bottom center;animation:vxWave .9s var(--ease-out) infinite}
+@keyframes vxWave{0%,100%{transform:scaleY(.27)}50%{transform:scaleY(1)}}
+.vx-card{width:100%;max-width:296px;background:var(--surface-card);border-radius:var(--radius-2xl);padding:var(--space-16);display:flex;align-items:center;gap:var(--space-12);text-align:left;animation:cxDrop var(--dur-enter) var(--ease-out) both}
+.vx-card img{width:46px;height:46px;flex:none;display:block;object-fit:contain}
+.vx-card b{display:block;font-size:16.5px;color:var(--text-strong)}
+.vx-card i{display:block;font-style:normal;font-size:13px;color:var(--text-secondary);margin-top:2px}
+.vx-done{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:var(--weight-heavy);letter-spacing:.7px;text-transform:uppercase;color:var(--k-lime)}
+.vx-acts{display:flex;align-items:center;justify-content:center;gap:var(--space-10);width:100%;max-width:296px}
+/* Words land in a white card and stay editable — the same card, hairline and
+   plum pill the rest of the system uses; "Listen again" is text, not a button. */
+.vx-say{width:100%;max-width:296px;background:var(--surface-card);border:var(--border-thin) solid var(--border-default);border-radius:var(--radius-2xl);padding:var(--space-14) var(--space-16);text-align:left;font-size:17px;line-height:var(--leading-snug);color:var(--text-strong);min-height:58px;animation:cxDrop var(--dur-enter) var(--ease-out) both}
+.vx-say.is-editable{display:flex;align-items:flex-end;gap:var(--space-12);padding:var(--space-12) var(--space-12) var(--space-12) var(--space-16)}
+.vx-say-field{flex:1;min-width:0;outline:none;padding:6px 0}
+.vx-say-field:focus{outline:none}
+.vx-say.is-editable:focus-within{border-color:var(--border-strong);box-shadow:var(--ring-focus)}
+.vx-say:focus-visible,.vx-say:focus{outline:none;box-shadow:var(--ring-focus);border-color:var(--border-strong)}
+.vx-say-word{animation:vxWord .24s var(--ease-out) both}
+@keyframes vxWord{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.vx-caret{display:inline-block;width:2px;height:17px;vertical-align:-2px;background:var(--k-teal);animation:vxCaret .9s steps(1) infinite}
+@keyframes vxCaret{50%{opacity:0}}
+.vx-send{flex:none;width:38px;height:38px;display:grid;place-items:center;border:none;background:var(--action-primary);color:var(--text-inverse);border-radius:var(--radius-circle);cursor:pointer;transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+.vx-send:hover{background:var(--action-primary-hover);transform:translateY(-1px);box-shadow:var(--glow-brand)}
+.vx-send:active{transform:scale(.93);box-shadow:none}
+.vx-primary{border:none;background:var(--action-primary);color:var(--text-inverse);font:inherit;font-size:var(--text-xl);font-weight:var(--weight-bold);padding:11px 24px;border-radius:26px;cursor:pointer;transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+.vx-primary:hover{background:var(--action-primary-hover);transform:translateY(-1px);box-shadow:var(--glow-brand)}
+.vx-primary:active{transform:translateY(1px) scale(.985);box-shadow:none}
+/* Secondary: the system's white-on-plum-text pill. Cancel stays plain text. */
+.vx-second{border:1.5px solid var(--text-inverse);background:none;color:var(--text-inverse);font:inherit;font-size:var(--text-xl);font-weight:var(--weight-semibold);padding:10px 24px;border-radius:26px;cursor:pointer;transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.vx-second:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.vx-second:active{transform:translateY(1px) scale(.985)}
+.vx-dismiss{background:none;border:none;font:inherit;font-size:13.5px;color:rgba(255,255,255,.72);cursor:pointer;padding:6px 10px;border-radius:var(--radius-lg)}
+.vx-dismiss:hover{color:var(--text-inverse);background:rgba(255,255,255,.1)}
