@@ -380,7 +380,7 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
    here is the content's own height and tells us nothing; the parent's viewport
    is the window that has to hold the phone. Same origin, but guarded anyway. */
 const DEVICE_H = 878
-const DEVICE_W = 414
+const DEVICE_W = 424
 const FIT_PAD = 40 // breathing room around the device
 // The view controls sit under the phone rather than over it, so the height they
 // occupy comes off the space the phone is allowed to fill.
@@ -405,6 +405,22 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z))
 
 function useZoom() {
   const [zoom, setZoom] = useState(1)
+  // Back to the fit, and back to the top with it: zooming in scrolls the page
+  // (the parent's page, on the live site), and zooming out should return the
+  // whole view — controls included — not leave you parked below the device.
+  const reset = () => {
+    setZoom(1)
+    try {
+      window.scrollTo({ top: 0 })
+    } catch {
+      /* ignore */
+    }
+    try {
+      parentWindow()?.scrollTo({ top: 0 })
+    } catch {
+      /* ignore */
+    }
+  }
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       if (!e.ctrlKey && !e.metaKey) return
@@ -421,7 +437,7 @@ function useZoom() {
         setZoom((z) => clampZoom(z - ZOOM_STEP))
       } else if (e.key === '0') {
         e.preventDefault()
-        setZoom(1)
+        reset()
       }
     }
     // Non-passive, or preventDefault on the wheel is ignored. Bound on the
@@ -447,11 +463,11 @@ function useZoom() {
       }
     }
   }, [])
-  return { zoom, setZoom }
+  return { zoom, setZoom, reset }
 }
 
 function useFitToWindow() {
-  const [scale, setScale] = useState(1)
+  const [fit, setFit] = useState({ scale: 1, windowH: 0 })
   useEffect(() => {
     const measure = () => {
       const p = parentWindow()
@@ -465,9 +481,10 @@ function useFitToWindow() {
       } catch {
         /* cross-origin — keep our own */
       }
-      setScale(
-        Math.min(1, (h - FIT_PAD - CONTROLS_H) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
-      )
+      setFit({
+        scale: Math.min(1, (h - FIT_PAD - CONTROLS_H) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
+        windowH: h,
+      })
     }
     measure()
     window.addEventListener('resize', measure)
@@ -486,18 +503,22 @@ function useFitToWindow() {
       }
     }
   }, [])
-  return scale
+  return fit
 }
 
 export default function ClientExperienceScreen({ onExit }: { onExit: () => void }) {
   const [tab, setTab] = useState<TabId>('adventures')
   const [menuOpen, setMenuOpen] = useState(false)
-  const fit = useFitToWindow()
-  const { zoom, setZoom } = useZoom()
-  const scale = fit * zoom
+  const { scale: fitScale, windowH } = useFitToWindow()
+  const { zoom, setZoom, reset: resetZoom } = useZoom()
+  const scale = fitScale * zoom
 
   return (
-    <div className="cx-page">
+    // The page is exactly as tall as the window it has to fit in. `100vh` would
+    // be wrong here: inside the review iframe, which is sized to the document,
+    // it grows every time the content does and never comes back down — leaving
+    // the controls stranded below the fold after a zoom out.
+    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
           the scaled height and the page never grows a phantom scrollbar. */}
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
@@ -582,7 +603,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
         <button
           type="button"
           className="cx-fit-btn"
-          onClick={() => setZoom(1)}
+          onClick={resetZoom}
           title="Ctrl/Cmd + wheel or + / − to zoom · Ctrl/Cmd + 0 to reset"
         >
           <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
