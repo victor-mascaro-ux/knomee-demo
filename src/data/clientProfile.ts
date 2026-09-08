@@ -25,6 +25,12 @@ export interface TeamMember {
   role: string
 }
 
+/** Photos are dropped into public/avatars/ by hand; see the README there. A
+    person with no file keeps their initial, which is what the design shows for
+    the members without a portrait. */
+export const avatarFor = (name: string) =>
+  `./avatars/${name.toLowerCase().replace(/[^a-z]+/g, '-')}.jpg`
+
 /** One tile on a vision board: a photograph, or a note the client wrote. */
 export type BoardTile =
   | { kind: 'photo'; src: string; alt: string; tall?: boolean }
@@ -60,32 +66,32 @@ export const clientProfile = {
 
   keyHighlights: [
     {
-      icon: '🎯',
+      icon: 'target',
       title: 'Core Values',
       text: 'Family, freedom, meaningful connection, and a life that feels grounded and joyful.',
     },
     {
-      icon: '✨',
+      icon: 'sparkle',
       title: 'Joy & Motivation',
       text: 'Travel, enjoying the moment, and having the flexibility to live generously and on her own terms.',
     },
     {
-      icon: '⚠️',
+      icon: 'warning',
       title: 'Biggest Concern',
       text: 'Balancing college costs for her kids with future health needs and aging-family responsibilities.',
     },
     {
-      icon: '🎯',
+      icon: 'target',
       title: 'Hopes',
       text: 'Navigating major change, including a separation and a career shift, while rethinking what comes next.',
     },
     {
-      icon: '🖼️',
+      icon: 'frame',
       title: 'Lifestyle Aspiration',
       text: 'Navigating major change, including a separation and a career shift, while rethinking what comes next.',
     },
     {
-      icon: '⚡',
+      icon: 'bolt',
       title: 'Future Vision',
       text: 'Living by the beach or abroad, possibly running a business, helping others, building a warm home life.',
     },
@@ -145,7 +151,7 @@ export const clientProfile = {
       tag: 'Personal',
       kind: '',
       text: 'Separation: Going through a separation',
-      date: '✓ Completed: 05/03/2025',
+      date: 'Completed: 05/03/2025',
     },
   ] as LifeEvent[],
 

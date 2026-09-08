@@ -199,7 +199,7 @@ type TierKey = (typeof TIER_META)[number]['key']
 // visible; the full call-list and the evidence are discoverable layers. The
 // tier bar is the drill-in spine — focusing a tier filters the call-list and
 // surfaces that tier's insight.
-function CommandCenter() {
+function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => void }) {
   const [tier, setTier] = useState<TierKey | null>(null)
   const [listOpen, setListOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
@@ -345,7 +345,22 @@ function CommandCenter() {
               {flagged.map((t) => (
                 <div className="talk-card" key={t.name}>
                   <div className="talk-head">
-                    <span className="talk-name">{t.name}</span>
+                    {(() => {
+                      // The card names a real person in the book — make it the
+                      // same link their row in the table is.
+                      const rec = prospects.find((p) => p.name === t.name)
+                      return rec && onOpenProfile ? (
+                        <button
+                          type="button"
+                          className="talk-name name-link-btn"
+                          onClick={() => onOpenProfile(rec)}
+                        >
+                          {t.name}
+                        </button>
+                      ) : (
+                        <span className="talk-name">{t.name}</span>
+                      )
+                    })()}
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
                     <span className="talk-kq">KQ {t.kq}</span>
                     <span className="talk-niche">{t.niche}</span>
@@ -756,7 +771,7 @@ function ProspectsScreen({
   return (
     <>
       <h1 className="page-title">My Prospects</h1>
-      <CommandCenter />
+      <CommandCenter onOpenProfile={onOpenProfile} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
@@ -846,9 +861,13 @@ function ClientRow({
       </td>
       <td className="col-household">
         {c.household ? (
-          <a href="#" className="household-link" onClick={(e) => e.preventDefault()}>
+          <button
+            type="button"
+            className="household-link name-link-btn"
+            onClick={() => onOpenProfile?.(c)}
+          >
             {c.household}
-          </a>
+          </button>
         ) : (
           <span className="dash">—</span>
         )}
@@ -3729,6 +3748,10 @@ export default function App() {
   // ── Routing: URL hash ⇄ nav state ──
   useEffect(() => {
     const applyView = (v: RouteView) => {
+      // A profile is a layer over a view, not a view of its own, so any route
+      // change closes it — otherwise #/clients could leave a profile on screen.
+      setProfileProspect(null)
+      setProfileClient(null)
       setAdminView(v === 'admin')
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
