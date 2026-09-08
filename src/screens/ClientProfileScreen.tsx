@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
+import { BadgeMedallion, Gauge, ReadinessBars } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -24,6 +25,7 @@ import icFutureYou from '../assets/adventures/future-you.svg'
 import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
+import icVision from '../assets/adventures/vision.png'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -57,73 +59,6 @@ function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
   return (
     <span className={cls}>
       <img src={avatarFor(name)} alt="" onError={() => setFailed(true)} />
-    </span>
-  )
-}
-
-function ReadinessBars({ level }: { level: number }) {
-  return (
-    <span className="pp-bars" aria-label={`Readiness ${level} of 5`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <i key={i} className={i <= level ? 'is-on' : ''} style={{ height: 4 + i * 2 }} />
-      ))}
-    </span>
-  )
-}
-
-function Gauge({ label }: { label: string }) {
-  return (
-    <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
-      <svg viewBox="0 0 120 66" width="120" height="66">
-        <defs>
-          <linearGradient id="cpGauge" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#e9d9f4" />
-            <stop offset="1" stopColor="#7639a1" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M10 60a50 50 0 0 1 100 0"
-          fill="none"
-          stroke="url(#cpGauge)"
-          strokeWidth="13"
-          strokeLinecap="round"
-        />
-        <circle cx="88" cy="27" r="9" fill="#fff" stroke="#e8e8e8" />
-        <path
-          d="M84.5 27.2 87 29.6l4.4-5"
-          fill="none"
-          stroke="#240446"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  )
-}
-
-function BadgeMedallion({ label, icon }: { label: string; icon: string }) {
-  const id = `cp-arc-${label.replace(/\s+/g, '')}`
-  return (
-    <span className="pp-badge-disc">
-      <svg viewBox="0 0 96 96" width="96" height="96">
-        <defs>
-          <path id={`${id}-top`} d="M48 48m-37 0a37 37 0 0 1 74 0" fill="none" />
-          <path id={`${id}-bot`} d="M48 48m-37 0a37 37 0 0 0 74 0" fill="none" />
-        </defs>
-        <circle cx="48" cy="48" r="30" className="pp-badge-ring" />
-        <text className="pp-badge-arc">
-          <textPath href={`#${id}-top`} startOffset="50%" textAnchor="middle">
-            {label.toUpperCase()}
-          </textPath>
-        </text>
-        <text className="pp-badge-arc">
-          <textPath href={`#${id}-bot`} startOffset="50%" textAnchor="middle">
-            ADVENTURE COMPLETE
-          </textPath>
-        </text>
-      </svg>
-      <img className="pp-badge-ic" src={icon} alt="" />
     </span>
   )
 }
@@ -495,7 +430,7 @@ export default function ClientProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icLifeEvents} alt="" />
+                        <img className="pp-card-ic" src={icVision} alt="" />
                         Future Vision Board
                       </span>
                     </div>

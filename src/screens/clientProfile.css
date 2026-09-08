@@ -5,6 +5,10 @@
 
 /* ---------- sidebar: household + advisory team ---------- */
 .cp-side-block {
+  /* The sidebar centres its children, so without this each block shrinks to
+     its own content width and the two headings sit at different left edges. */
+  align-self: stretch;
+  width: 100%;
   margin-top: var(--space-24);
   padding-top: var(--space-16);
   border-top: var(--border-thin) solid var(--border-default);
