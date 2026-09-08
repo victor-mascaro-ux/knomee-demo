@@ -59,7 +59,9 @@ public/
   knomee-logo-white.svg  # brand wordmark used in the top bar
 src/
   App.tsx                # tabs, prospects, clients, convert flow
-  index.css              # design tokens + all styling
+  tokens/                # design tokens, synced from Claude Design
+    colors.css typography.css layout.css
+  index.css              # aliases the tokens + all styling
   reviewBridge.ts        # forwards F2 + reports height to the overlay
   components/icons.tsx    # inline SVG icons
   screens/               # pages reached from the burger menu
@@ -67,6 +69,18 @@ src/
     ClientExperienceScreen.tsx + client-experience.css
   data/{prospects,insights,clients,segmentation,experience}.ts
 ```
+
+## Design tokens
+
+Colour, type and space live in `src/tokens/`, synced from the **Knomee Design
+System** project on claude.ai/design — which was itself built from this repo and
+reconciled the two token files that had drifted apart (`src/index.css` and
+`wireframes/tokens/colors.css`; the shipped values won). `index.css` aliases its
+long-standing names (`--plum`, `--line`, …) onto those tokens, so the value for
+any colour now exists in exactly one place. `src/screens/client-experience.css`
+is the design system's mobile layer, kept beside the screen it styles.
+
+See `src/tokens/README.md` for what is and isn't imported, and how to re-sync.
 
 ## Client Experience (mobile)
 

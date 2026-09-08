@@ -1,95 +1,23 @@
-/* Client Experience — the mobile side of the product.
-   Everything is scoped to .cx-* so nothing here can leak into the advisor
-   screens, and the device frame is the only place mobile styling lives.
-   Design tokens come from index.css (--plum, --ocean, --line …). */
+/* ============================================================
+   KNOMEE · CLIENT EXPERIENCE (MOBILE) LAYER
+   ------------------------------------------------------------
+   The consumer-facing side of the product. Everything is scoped
+   to .cx-* so nothing here leaks into the advisor screens, and
+   the device frame is the only place mobile styling lives.
 
-/* The phone is the whole page here — no advisor shell around it. The page is a
-   column so the view controls can sit under the device instead of over it. */
-.cx-page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background: var(--page-bg, #fff);
-}
-/* Holds the scaled device: `transform` doesn't shrink the box it came from, so
-   this wrapper is sized to the scaled result and clips nothing. */
-.cx-fit {
-  position: relative;
-  flex: none;
-}
+   This is the design system's tokens/mobile.css (Knomee Design
+   System on claude.ai/design), kept next to the screen it styles
+   and expanded to this repo's formatting. Every value comes from
+   the token files imported by index.css — see src/tokens/README.md.
+   The demo harness at the foot of the file (the page, the fit
+   scaling, the view controls) belongs to this app, not to the
+   design system.
+   ============================================================ */
 
-/* ---------- view controls ---------- */
-/* Bottom-right corner, and never over the phone: `margin-top: auto` drops them
-   to the bottom of the window at the default fit, `align-self: flex-end` puts
-   them in the corner, and staying in the page flow means they follow the device
-   down when zoom makes it taller than the window rather than sitting on top of
-   it. Outside the scaled subtree, so their own size never changes with the fit
-   scale or the zoom. */
-.cx-view {
-  margin-top: auto;
-  align-self: flex-end;
-  padding-top: 14px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cx-view button {
-  font: inherit;
-  cursor: pointer;
-  color: #9a96a6;
-  background: #fff;
-  border: 1px solid #ececf0;
-  border-radius: 999px;
-  transition: color 0.12s ease, border-color 0.12s ease;
-}
-.cx-view button:hover {
-  color: var(--plum);
-  border-color: #d9d3e4;
-}
-.cx-fit-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  padding: 6px 12px 6px 10px;
-}
-.cx-zoom {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid #ececf0;
-  border-radius: 999px;
-  background: #fff;
-}
-.cx-zoom button {
-  border: none;
-  background: none;
-  width: 24px;
-  height: 24px;
-  font-size: 15px;
-  line-height: 1;
-  border-radius: 50%;
-}
-.cx-zoom-pct {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #6f6a7d;
-  min-width: 40px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---------- iPhone frame ---------- */
-/* Titanium rail → black bezel → 390 × 844 screen. The rail is a gradient
-   border rather than a flat stroke so the device reads as hardware.
-   The boxes nest exactly: 390 screen + 2×5 bezel + 2×12 rail = 424 wide and
-   844 + 10 + 24 = 878 tall, with each radius 
-   the next one in plus its inset (52 → 57 → 69), or the screen spills over the
-   bezel and the black frame vanishes down the sides. */
+/* ---------- iPhone 14 frame: 390x844 screen in a titanium rail ----------
+   The boxes nest exactly: 390 screen + 2x5 bezel + 2x12 rail = 424 wide,
+   844 + 10 + 24 = 878 tall. Each radius is the next one in plus its inset
+   (52 -> 57 -> 69), or the screen spills over the bezel. */
 .cx-device {
   position: relative;
   width: 424px;
@@ -102,7 +30,7 @@
   /* the fit scale lives on this element's transform, so the entrance fades
      only — a transform animation would fight it */
   transform-origin: top left;
-  animation: cxFade 0.45s ease both;
+  animation: cxFade var(--dur-enter) var(--ease-out) both;
 }
 .cx-bezel {
   border-radius: 57px;
@@ -111,17 +39,17 @@
 }
 .cx-screen {
   position: relative;
-  width: 390px;
-  height: 844px;
+  width: var(--phone-w);
+  height: var(--phone-h);
   border-radius: 52px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface-card);
   display: flex;
   flex-direction: column;
   /* the screen owns the mobile type scale — nothing inherits the desktop size */
-  font-size: 15px;
+  font-size: var(--text-lg);
   line-height: 1.4;
-  color: #1a1a1a;
+  color: var(--text-body);
 }
 
 /* physical side keys */
@@ -130,30 +58,10 @@
   background: linear-gradient(180deg, #b6b3bd, #6d6a75);
   border-radius: 3px;
 }
-.cx-key-silent {
-  left: -2px;
-  top: 132px;
-  width: 4px;
-  height: 30px;
-}
-.cx-key-volup {
-  left: -2px;
-  top: 186px;
-  width: 4px;
-  height: 58px;
-}
-.cx-key-voldn {
-  left: -2px;
-  top: 256px;
-  width: 4px;
-  height: 58px;
-}
-.cx-key-power {
-  right: -2px;
-  top: 214px;
-  width: 4px;
-  height: 92px;
-}
+.cx-key-silent { left: -2px; top: 132px; width: 4px; height: 30px; }
+.cx-key-volup  { left: -2px; top: 186px; width: 4px; height: 58px; }
+.cx-key-voldn  { left: -2px; top: 256px; width: 4px; height: 58px; }
+.cx-key-power  { right: -2px; top: 214px; width: 4px; height: 92px; }
 
 .cx-island {
   position: absolute;
@@ -176,8 +84,8 @@
   justify-content: space-between;
 }
 .cx-time {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.2px;
 }
 .cx-status-right {
@@ -186,18 +94,18 @@
   gap: 5px;
 }
 
-/* ---------- in-app top bar ---------- */
+/* ---------- in-app top bar ----------
+   The wordmark occupies the same share of the bar as it does on the desktop
+   top bar — 22px in a 60px bar (0.367), so 20.5px in this 56px one. */
 .cx-appbar {
   flex: none;
-  height: 56px;
-  background: var(--plum);
+  height: var(--mobile-appbar-h);
+  background: var(--surface-brand);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
 }
-/* The wordmark occupies the same share of the bar as it does on the desktop
-   top bar — 22px in a 60px bar (0.367), so 20.5px in this 56px one. */
 .cx-appbar-brand img {
   height: 20.5px;
   width: auto;
@@ -206,104 +114,92 @@
 .cx-appbar-burger {
   background: none;
   border: none;
-  padding: 4px;
+  padding: var(--space-4);
   margin-right: -4px;
   display: grid;
   place-items: center;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   opacity: 0.92;
-  transition: opacity 0.12s ease, background 0.12s ease;
+  transition: opacity var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 .cx-appbar-burger:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* ---------- in-phone menu ---------- */
-/* Drops out from under the app bar and dims the screen behind it, the way the
+/* ---------- in-phone menu ----------
+   Drops out from under the app bar and dims the screen behind it, the way the
    real app would — the burger itself stays visible so it can be tapped shut. */
 .cx-sheet {
   position: absolute;
   inset: 110px 0 0;
   z-index: 4;
   background: rgba(12, 6, 26, 0.42);
-  animation: cxFade 0.16s ease both;
+  animation: cxFade var(--dur-base) var(--ease-out) both;
 }
 .cx-sheet-panel {
-  background: #fff;
-  border-bottom: 1px solid #e6e3ec;
+  background: var(--surface-card);
+  border-bottom: var(--border-thin) solid #e6e3ec;
   border-radius: 0 0 18px 18px;
-  padding: 16px 18px 18px;
+  padding: var(--space-16) 18px 18px;
   box-shadow: 0 14px 28px rgba(20, 12, 40, 0.16);
-  animation: cxDrop 0.2s ease both;
+  animation: cxDrop var(--dur-slow) var(--ease-out) both;
 }
 .cx-sheet-account {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #ededf0;
+  padding-bottom: var(--space-14);
+  border-bottom: var(--border-thin) solid #ededf0;
 }
 .cx-sheet-account b {
   display: block;
   font-size: 14.5px;
-  color: var(--plum);
+  color: var(--text-strong);
 }
 .cx-sheet-account i {
   display: block;
   font-style: normal;
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: #8c8998;
   margin-top: 1px;
 }
 .cx-sheet-avatar {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
-  background: var(--plum);
-  color: #fff;
+  border-radius: var(--radius-circle);
+  background: var(--surface-brand);
+  color: var(--text-inverse);
   display: grid;
   place-items: center;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
 }
 .cx-sheet-item {
   width: 100%;
-  margin-top: 12px;
+  margin-top: var(--space-12);
   background: none;
   border: none;
   font: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--plum);
-  padding: 12px 2px;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  padding: var(--space-12) 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.12s ease;
+  border-radius: var(--radius-lg);
+  transition: background var(--dur-fast) var(--ease-out);
 }
 .cx-sheet-item:hover {
   background: #f6f2fb;
 }
 .cx-sheet-hint {
-  font-size: 12px;
+  font-size: var(--text-sm);
   color: #8c8998;
   padding: 0 2px;
-}
-
-@keyframes cxFade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes cxDrop {
-  from {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
 }
 
 /* ---------- scrolling app content ---------- */
@@ -311,7 +207,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 16px 22px;
+  padding: 0 var(--space-16) 22px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -321,7 +217,7 @@
 
 /* progress */
 .cx-progress {
-  padding: 14px 0 2px;
+  padding: var(--space-14) 0 2px;
 }
 .cx-progress-top {
   display: flex;
@@ -333,21 +229,21 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  margin-top: 8px;
+  margin-top: var(--space-8);
 }
 .cx-progress-track {
   flex: 1;
   height: 9px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: #e7e6ea;
   overflow: hidden;
 }
 .cx-progress-track i {
   display: block;
   height: 100%;
-  border-radius: 6px;
-  background: var(--ocean);
-  transition: width 0.4s ease;
+  border-radius: var(--radius-sm);
+  background: var(--k-ocean);
+  transition: width var(--dur-enter) var(--ease-out);
 }
 .cx-progress-pct {
   font-size: 12.5px;
@@ -358,12 +254,12 @@
 
 .cx-screen-title {
   margin: 18px 0 0;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ddd9e2;
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-thin) solid #ddd9e2;
   font-size: 27px;
-  font-weight: 600;
-  color: var(--plum);
-  letter-spacing: -0.2px;
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  letter-spacing: var(--tracking-title);
 }
 
 /* ---------- adventure rows ---------- */
@@ -371,10 +267,10 @@
   display: flex;
   flex-direction: column;
   gap: 11px;
-  padding-top: 14px;
+  padding-top: var(--space-14);
 }
 .cx-adv {
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
 }
@@ -382,7 +278,7 @@
   flex: none;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -407,15 +303,15 @@
   filter: none;
 }
 .cx-adv-art.has-img.is-open {
-  background: #fff;
+  background: var(--surface-card);
 }
 
 /* the one open adventure */
 .cx-adv-open {
-  background: #e9f7c9;
-  border: 1.5px solid #c6e68d;
-  padding: 13px 14px;
-  gap: 12px;
+  background: var(--k-adv-open);
+  border: 1.5px solid var(--k-adv-open-edge);
+  padding: 13px var(--space-14);
+  gap: var(--space-12);
 }
 .cx-adv-main {
   flex: 1;
@@ -423,12 +319,12 @@
 }
 .cx-adv-title {
   font-size: 17.5px;
-  font-weight: 700;
-  color: var(--plum);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
 }
 .cx-adv-blurb {
   font-size: 13.5px;
-  line-height: 1.35;
+  line-height: var(--leading-snug);
   color: #3d3948;
   margin-top: 3px;
 }
@@ -437,7 +333,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: var(--space-10);
 }
 .cx-adv-min {
   display: inline-flex;
@@ -448,15 +344,15 @@
 }
 .cx-start {
   border: none;
-  background: var(--plum);
-  color: #fff;
+  background: var(--action-primary);
+  color: var(--text-inverse);
   font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 11px 24px;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  padding: 11px var(--space-24);
   border-radius: 26px;
   cursor: pointer;
-  transition: transform 0.12s ease, background 0.12s ease;
+  transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 .cx-start:hover {
   background: #3a1268;
@@ -468,63 +364,63 @@
 /* the locked ones */
 .cx-adv-locked {
   background: #f8f8f9;
-  border: 1px solid #ededf0;
-  padding: 17px 14px;
-  gap: 14px;
+  border: var(--border-thin) solid #ededf0;
+  padding: 17px var(--space-14);
+  gap: var(--space-14);
 }
 .cx-adv-locked .cx-adv-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
   color: #c4c2cb;
 }
 
-/* ---------- tabs that aren't designed yet ---------- */
+/* ---------- surfaces that are not designed yet ---------- */
 .cx-stub {
-  padding: 60px 8px;
+  padding: 60px var(--space-8);
   text-align: center;
   color: #55525e;
 }
 .cx-stub-badge {
   display: inline-block;
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.7px;
   text-transform: uppercase;
   color: #8e88a0;
-  border: 1px dashed #d6d2de;
+  border: var(--border-thin) dashed #d6d2de;
   border-radius: 20px;
-  padding: 5px 12px;
+  padding: 5px var(--space-12);
 }
 .cx-stub h3 {
-  margin: 16px 0 8px;
+  margin: var(--space-16) 0 var(--space-8);
   font-size: 22px;
-  font-weight: 600;
-  color: var(--plum);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
 }
 .cx-stub p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--text-md);
   line-height: 1.5;
 }
 
-/* ---------- bottom tab bar ---------- */
-/* The bar's top edge arcs up around the centre mark, so the mark rides on the
+/* ---------- bottom tab bar ----------
+   The bar's top edge arcs up around the centre mark, so the mark rides on the
    bar rather than sitting in a button of its own. The edge is an SVG drawn at
-   the screen's exact width (390px) and the buttons stack on top of it. */
+   the screen's exact width and the buttons stack on top of it. */
 .cx-tabbar {
   position: relative;
   flex: none;
-  height: 78px;
+  height: var(--mobile-tabbar-h);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 6px;
+  padding: 0 var(--space-6);
 }
 .cx-tab-edge {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 390px;
+  width: var(--phone-w);
   height: 96px;
   pointer-events: none;
 }
@@ -539,23 +435,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-4);
   color: #8c8998;
   cursor: pointer;
-  transition: color 0.12s ease;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 .cx-tab:hover {
   color: #5c5470;
 }
 .cx-tab.is-on {
-  color: var(--plum);
+  color: var(--text-strong);
 }
 .cx-tab-lbl {
   font-size: 12.5px;
   letter-spacing: 0.1px;
 }
 .cx-tab.is-on .cx-tab-lbl {
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 /* The centre mark sits into the swell, label-free and sized to fill the space
    the label used to take: its top lines up with the bar's flat edge. */
@@ -567,7 +463,7 @@
   width: 62px;
   height: 62px;
   display: block;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--dur-fast) var(--ease-out);
 }
 .cx-tab-center:hover .cx-tab-mark,
 .cx-tab-center.is-on .cx-tab-mark {
@@ -577,7 +473,7 @@
 .cx-home-bar {
   flex: none;
   height: 22px;
-  background: #fff;
+  background: var(--surface-card);
   display: grid;
   place-items: center;
 }
@@ -589,8 +485,107 @@
   background: #12101a;
 }
 
+@keyframes cxFade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes cxDrop {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .cx-device {
     animation: none;
   }
+}
+
+/* ============================================================
+   DEMO HARNESS — this app, not the design system
+   The page the device stands on, the fit-to-window scaling and
+   the view controls. None of it exists on a real handset.
+   ============================================================ */
+
+/* The phone is the whole page here — no advisor shell around it. The page is a
+   column so the view controls can sit under the device instead of over it. Its
+   height is set from the measured window in JS: `100vh` would be wrong inside
+   the review iframe, which is sized to the document rather than the window. */
+.cx-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-20);
+  background: var(--surface-page);
+}
+/* Holds the scaled device: `transform` doesn't shrink the box it came from, so
+   this wrapper is sized to the scaled result and clips nothing. */
+.cx-fit {
+  position: relative;
+  flex: none;
+}
+
+/* ---------- view controls ---------- */
+/* Bottom-right corner, and never over the phone: `margin-top: auto` drops them
+   to the bottom of the window at the default fit, `align-self: flex-end` puts
+   them in the corner, and staying in the page flow means they follow the device
+   down when zoom makes it taller than the window rather than sitting on top of
+   it. Outside the scaled subtree, so their own size never changes with the fit
+   scale or the zoom. */
+.cx-view {
+  margin-top: auto;
+  align-self: flex-end;
+  padding-top: var(--space-14);
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.cx-view button {
+  font: inherit;
+  cursor: pointer;
+  color: #9a96a6;
+  background: var(--surface-card);
+  border: var(--border-thin) solid #ececf0;
+  border-radius: var(--radius-pill);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.cx-view button:hover {
+  color: var(--text-strong);
+  border-color: #d9d3e4;
+}
+.cx-fit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+  padding: var(--space-6) var(--space-12) var(--space-6) var(--space-10);
+}
+.cx-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--border-thin) solid #ececf0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+}
+.cx-zoom button {
+  border: none;
+  background: none;
+  width: 24px;
+  height: 24px;
+  font-size: var(--text-lg);
+  line-height: 1;
+  border-radius: var(--radius-circle);
+}
+.cx-zoom-pct {
+  font-size: 11.5px;
+  font-weight: var(--weight-semibold);
+  color: #6f6a7d;
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }

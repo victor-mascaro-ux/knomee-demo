@@ -1,0 +1,88 @@
+/* ============================================================
+   KNOMEE · SPACE, RADIUS, ELEVATION & MOTION TOKENS
+   ============================================================ */
+:root {
+  /* ---- Spacing ramp (4px base, with the 2px half-step the
+          dense advisor tables actually need) ---- */
+  --space-0:   0;
+  --space-px:  1px;
+  --space-2:   2px;
+  --space-4:   4px;
+  --space-6:   6px;
+  --space-8:   8px;
+  --space-10:  10px;   /* default flex gap */
+  --space-12:  12px;   /* table cell padding */
+  --space-14:  14px;
+  --space-16:  16px;   /* card padding */
+  --space-20:  20px;
+  --space-24:  24px;
+  --space-32:  32px;
+  --space-40:  40px;
+
+  /* Single source of truth for the page inset. The top bar and the
+     content share it so logo, tabs and title always line up, and the
+     top padding tracks the side padding. Shipped in src/index.css. */
+  --page-pad: 40px;
+  --content-max: 1520px;
+
+  /* ---- Radius ramp (snaps the shipped 4/5/6/7/8/9/10/12/14) ---- */
+  --radius-xs:     4px;
+  --radius-sm:     6px;   /* absorbs 5 and 7 */
+  --radius-md:     8px;   /* score badge, insight row */
+  --radius-lg:     10px;  /* buttons, search box, "new" tag */
+  --radius-xl:     12px;  /* metric tile, talk card, tier row */
+  --radius-2xl:    14px;  /* analytics card head, mobile adventure row */
+  --radius-pill:   999px; /* switch, modal buttons */
+  --radius-circle: 50%;   /* avatar, card-title icon */
+
+  /* ---- Elevation ---- */
+  --elev-0: none;
+  --elev-1: 0 4px 12px rgba(16, 24, 40, 0.10);   /* outline button hover */
+  --elev-2: 0 6px 18px rgba(16, 24, 40, 0.08);   /* card hover — most common */
+  --elev-3: 0 8px 22px rgba(16, 24, 40, 0.09);   /* raised card hover */
+  --elev-4: 0 4px 24px rgba(0, 0, 0, 0.25);      /* modal */
+  --elev-5: 0 8px 40px rgba(0, 0, 0, 0.35);      /* overlay / phone frame */
+
+  /* Coloured glows — a brand-tinted shadow, not a neutral one */
+  --glow-brand: 0 6px 18px rgba(36, 4, 70, 0.28);    /* primary button hover */
+  --glow-bolt:  0 4px 12px rgba(155, 81, 224, 0.40); /* convert button hover */
+  --glow-ocean: 0 8px 20px rgba(8, 99, 117, 0.30);
+  --ring-focus: 0 0 0 3px rgba(36, 4, 70, 0.12);     /* search box focus ring */
+  --ring-punch: 0 0 0 2px #ffffff;                   /* tag punched out of a row */
+
+  /* ---- Border widths ---- */
+  --border-thin: 1px;   /* everything structural */
+  --border-thick: 2px;  /* modal buttons, checked control */
+
+  /* ---- Motion ---- */
+  --dur-fast:  0.14s;   /* tab / chip state */
+  --dur-base:  0.16s;   /* the default — hover, background */
+  --dur-mid:   0.18s;   /* transform + shadow together */
+  --dur-slow:  0.20s;   /* colour cross-fade */
+  --dur-enter: 0.40s;   /* riseIn / fadeUp on mount */
+  --dur-bar:   0.70s;   /* bar + funnel draw */
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);        /* bars, funnels */
+  --ease-out:      ease;                                 /* the shipped default */
+  --ease-pop:      cubic-bezier(0.22, 0.81, 0.28, 1.05); /* modal entrance overshoot */
+
+  /* Stagger step for list entrances (talk cards, seg rows, analytics cards) */
+  --stagger: 0.06s;
+
+  /* ---- Fixed component metrics that behave as tokens ---- */
+  --topbar-h:      64px;
+  --brand-logo-h:  19.5px;  /* knomee lockup AND any white-label client logo
+                               render at this height so a co-branded bar
+                               keeps both marks visually equal */
+  --client-logo-h: 34px;    /* client logo when it leads the bar */
+  --avatar-size:   38px;
+  --bolt-size:     38px;
+  --badge-w:       52px;
+  --badge-h:       40px;
+  --switch-w:      40px;
+  --switch-h:      22px;
+  --phone-w:       390px;   /* iPhone frame for the client experience demo */
+  --phone-h:       844px;
+  --mobile-appbar-h: 56px;
+  --mobile-tabbar-h: 78px;
+}
