@@ -171,3 +171,17 @@
    up, the screen itself takes the sheet's ground, so the hairline is the same
    near-black as the bezel beside it and there is nothing to see. */
 .cx-screen.has-sheet{background:var(--mood-ground)}
+
+/* The transcript card is one element across listening and settled, so it must
+   not replay its entrance when the phase changes — only the controls around it
+   are new. The field itself carries the words in both phases. */
+.vx-say{animation:cxDrop var(--dur-enter) var(--ease-out) both}
+.vx-say.is-editable{animation:none}
+.vx-say .vx-say-field{flex:1;min-width:0}
+.vx-say:not(.is-editable) .vx-say-field{padding:0}
+.vx-send{animation:cxDrop var(--dur-base) var(--ease-out) both}
+.vx-acts{animation:cxDrop var(--dur-enter) var(--ease-out) both}
+
+/* The burger menu is the app's own chrome and outranks everything the knomee
+   mark opens — including the tab bar's white bump and the press fill. */
+.cx-sheet{z-index:10}

@@ -138,7 +138,7 @@ const MARK_PARTS = [
 const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
 
 /* ── keep the whole device on screen ──────────────────────────────────────
-   The frame is a fixed 878 × 424, taller than most laptop windows. Rather than
+   The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
    reflow the mobile layout at breakpoints — a scaled-down phone is still a
    phone, a reflowed one is not — scale the frame until it fits, never above 1.
 
@@ -146,8 +146,8 @@ const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
    full document height (the parent scrolls, not the frame). So `innerHeight`
    here is the content's own height and tells us nothing; the parent's viewport
    is the window that has to hold the phone. Same origin, but guarded anyway. */
-const DEVICE_H = 878
-const DEVICE_W = 424
+const DEVICE_H = 882
+const DEVICE_W = 428
 const FIT_PAD = 40
 // The view controls sit under the phone rather than over it, so the height they
 // occupy comes off the space the phone is allowed to fill.
@@ -568,45 +568,44 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
         </svg>
       </div>
 
-      {phase === 'listen' && (
+      {phase !== 'done' && <div className="vx-cap">{live ? 'Listening' : 'Heard you'}</div>}
+
+      {live && heard === 0 && (
         <>
-          <div className="vx-cap">Listening</div>
-          {heard === 0 ? (
-            <>
-              <div className="vx-wave" aria-hidden>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <i key={i} style={{ animationDelay: `${i * 0.11}s` }} />
-                ))}
-              </div>
-              <div className="vx-hint">{voiceScript.hint}</div>
-            </>
-          ) : (
-            <div className="vx-say">
-              {said.slice(0, heard).map((w, i) => (
-                <span key={i} className="vx-say-word">
-                  {i ? ' ' : ''}
-                  {w}
-                </span>
-              ))}
-              <span className="vx-caret" aria-hidden />
-            </div>
-          )}
+          <div className="vx-wave" aria-hidden>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <i key={i} style={{ animationDelay: `${i * 0.11}s` }} />
+            ))}
+          </div>
+          <div className="vx-hint">{voiceScript.hint}</div>
         </>
       )}
 
-      {phase === 'ready' && (
-        <>
-          <div className="vx-cap">Heard you</div>
-          <div className="vx-say is-editable">
-            <div
-              className="vx-say-field"
-              contentEditable
-              suppressContentEditableWarning
-              role="textbox"
-              aria-label="Edit what Knomee heard"
-            >
-              {said.join(' ')}
-            </div>
+      {/* One card across both phases. The words land in it while listening and
+          stay exactly where they are when listening stops — it is the same
+          element, so nothing re-enters. Only the send button and the actions
+          arrive, which is the point: the transcript is settled, the choices
+          about it are new. */}
+      {phase !== 'done' && (live ? heard > 0 : true) && (
+        <div className={`vx-say ${live ? '' : 'is-editable'}`}>
+          <div
+            className="vx-say-field"
+            contentEditable={!live}
+            suppressContentEditableWarning
+            role={live ? undefined : 'textbox'}
+            aria-label={live ? undefined : 'Edit what Knomee heard'}
+          >
+            {live
+              ? said.slice(0, heard).map((w, i) => (
+                  <span key={i} className="vx-say-word">
+                    {i ? ' ' : ''}
+                    {w}
+                  </span>
+                ))
+              : said.join(' ')}
+            {live && <span className="vx-caret" aria-hidden />}
+          </div>
+          {!live && (
             <button
               className="vx-send"
               type="button"
@@ -615,16 +614,19 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
             >
               <ArrowRight size={17} />
             </button>
-          </div>
-          <div className="vx-acts">
-            <button className="vx-second" type="button" onClick={onClose}>
-              Cancel
-            </button>
-            <button className="vx-primary" type="button" onClick={listenAgain}>
-              Listen again
-            </button>
-          </div>
-        </>
+          )}
+        </div>
+      )}
+
+      {phase === 'ready' && (
+        <div className="vx-acts">
+          <button className="vx-second" type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="vx-primary" type="button" onClick={listenAgain}>
+            Listen again
+          </button>
+        </div>
       )}
 
       {phase === 'done' && (

@@ -15,15 +15,19 @@
    ============================================================ */
 
 /* ---------- iPhone 14 frame: 390x844 screen in a titanium rail ----------
-   The boxes nest exactly: 390 screen + 2x5 bezel + 2x12 rail = 424 wide,
-   844 + 10 + 24 = 878 tall. Each radius is the next one in plus its inset
-   (52 -> 57 -> 69), or the screen spills over the bezel. */
+   The boxes nest exactly: 390 screen + 2x7 bezel + 2x12 rail = 428 wide,
+   844 + 14 + 24 = 882 tall. Each radius is the next one in plus its inset
+   (52 -> 59 -> 71), or the screen spills over the bezel.
+
+   The bezel is 7px rather than a hairline, and the rail is graphite rather than
+   polished steel, because a near-white rail sitting directly against a dark
+   screen reads as a seam in the render rather than as the edge of a phone. */
 .cx-device {
   position: relative;
-  width: 424px;
+  width: 428px;
   padding: 12px;
-  border-radius: 69px;
-  background: linear-gradient(145deg, #d8d6dd 0%, #8e8b96 22%, #57545f 50%, #9a97a2 78%, #cfcdd4 100%);
+  border-radius: 71px;
+  background: linear-gradient(145deg, #8b8894 0%, #5f5c68 22%, #3b3843 50%, #6a6772 78%, #918e9a 100%);
   box-shadow:
     0 34px 80px rgba(0, 0, 0, 0.55),
     0 6px 18px rgba(0, 0, 0, 0.35);
@@ -33,9 +37,9 @@
   animation: cxFade var(--dur-enter) var(--ease-out) both;
 }
 .cx-bezel {
-  border-radius: 57px;
+  border-radius: 59px;
   background: #08060d;
-  padding: 5px;
+  padding: 7px;
 }
 .cx-screen {
   position: relative;
