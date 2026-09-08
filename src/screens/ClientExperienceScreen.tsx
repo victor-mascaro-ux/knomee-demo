@@ -696,7 +696,12 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
   }
 
   const pickTab = (id: TabId) => {
-    if (held.current) return
+    // Swallow the click that ends a long press — but only that one, or a
+    // stray click with no press before it would wedge the tab bar shut.
+    if (held.current) {
+      held.current = false
+      return
+    }
     if (id === 'knomee') {
       if (voiceOpen) {
         setVoiceOpen(false)
