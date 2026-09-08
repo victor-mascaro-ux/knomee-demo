@@ -1,0 +1,537 @@
+import { useEffect, useState } from 'react'
+import './prospectProfile.css'
+import './clientProfile.css'
+import { clientProfile } from '../data/clientProfile'
+import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
+import type { Client } from '../data/clients'
+import { DownloadIcon } from '../components/icons'
+import addIcon from '../assets/adventures/add.svg'
+import icFinancialJoy from '../assets/adventures/financial-joy.svg'
+import icConfidence from '../assets/adventures/confidence.svg'
+import icOutlook from '../assets/adventures/outlook.svg'
+import icFutureYou from '../assets/adventures/future-you.svg'
+import icGoals from '../assets/adventures/goals.svg'
+import icQuestions from '../assets/adventures/questions.svg'
+import icLifeEvents from '../assets/adventures/life-events.svg'
+import moodGood from '../assets/moods/good.svg'
+import moodGreat from '../assets/moods/great.svg'
+import moodNeutral from '../assets/moods/neutral.svg'
+import moodUnsure from '../assets/moods/unsure.svg'
+import moodWorried from '../assets/moods/worried.svg'
+
+const ADVENTURE_ICON: Record<string, string> = {
+  'Financial Joy': icFinancialJoy,
+  Confidence: icConfidence,
+  Outlook: icOutlook,
+  'Future You': icFutureYou,
+  Goals: icGoals,
+}
+
+// The mobile app's own mood ramp, reused so the check-in the client tapped on
+// their phone is the very same face the advisor sees here.
+const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
+
+function ReadinessBars({ level }: { level: number }) {
+  return (
+    <span className="pp-bars" aria-label={`Readiness ${level} of 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <i key={i} className={i <= level ? 'is-on' : ''} style={{ height: 4 + i * 2 }} />
+      ))}
+    </span>
+  )
+}
+
+function Gauge({ label }: { label: string }) {
+  return (
+    <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
+      <svg viewBox="0 0 120 66" width="120" height="66">
+        <defs>
+          <linearGradient id="cpGauge" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#e9d9f4" />
+            <stop offset="1" stopColor="#7639a1" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M10 60a50 50 0 0 1 100 0"
+          fill="none"
+          stroke="url(#cpGauge)"
+          strokeWidth="13"
+          strokeLinecap="round"
+        />
+        <circle cx="88" cy="27" r="9" fill="#fff" stroke="#e8e8e8" />
+        <path
+          d="M84.5 27.2 87 29.6l4.4-5"
+          fill="none"
+          stroke="#240446"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  )
+}
+
+function BadgeMedallion({ label, icon }: { label: string; icon: string }) {
+  const id = `cp-arc-${label.replace(/\s+/g, '')}`
+  return (
+    <span className="pp-badge-disc">
+      <svg viewBox="0 0 96 96" width="96" height="96">
+        <defs>
+          <path id={`${id}-top`} d="M48 48m-37 0a37 37 0 0 1 74 0" fill="none" />
+          <path id={`${id}-bot`} d="M48 48m-37 0a37 37 0 0 0 74 0" fill="none" />
+        </defs>
+        <circle cx="48" cy="48" r="30" className="pp-badge-ring" />
+        <text className="pp-badge-arc">
+          <textPath href={`#${id}-top`} startOffset="50%" textAnchor="middle">
+            {label.toUpperCase()}
+          </textPath>
+        </text>
+        <text className="pp-badge-arc">
+          <textPath href={`#${id}-bot`} startOffset="50%" textAnchor="middle">
+            ADVENTURE COMPLETE
+          </textPath>
+        </text>
+      </svg>
+      <img className="pp-badge-ic" src={icon} alt="" />
+    </span>
+  )
+}
+
+/* A vision-board tile. Photographs live in public/vision/ and are dropped in by
+   hand, so a missing file falls back to a labelled tint rather than a broken
+   image — the board keeps its shape whatever is or isn't there yet. */
+function BoardPhoto({ src, alt, tall }: { src: string; alt: string; tall?: boolean }) {
+  const [failed, setFailed] = useState(false)
+  return (
+    <div className={`cp-tile cp-tile-photo ${tall ? 'is-tall' : ''} ${failed ? 'is-missing' : ''}`}>
+      {failed ? <span className="cp-tile-alt">{alt}</span> : <img src={src} alt={alt} onError={() => setFailed(true)} />}
+    </div>
+  )
+}
+
+function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
+  return (
+    <div className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''}`}>
+      {tile.title && <span className="cp-note-title">{tile.title}</span>}
+      {tile.text && <p className="cp-note-text">{tile.text}</p>}
+      {tile.items && (
+        <ul className="cp-note-list">
+          {tile.items.map((i) => (
+            <li key={i}>{i}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function Board({ board }: { board: VisionBoard }) {
+  return (
+    <div className="cp-board">
+      <h4 className="cp-board-title">{board.title}</h4>
+      <p className="cp-board-blurb">{board.blurb}</p>
+      <div className="cp-board-grid">
+        {board.tiles.map((t, i) =>
+          t.kind === 'photo' ? (
+            <BoardPhoto key={i} src={t.src} alt={t.alt} tall={t.tall} />
+          ) : (
+            <BoardNote key={i} tile={t} />
+          ),
+        )}
+      </div>
+    </div>
+  )
+}
+
+function GoalRow({ g }: { g: ClientGoal }) {
+  return (
+    <div className={`pp-goal ${g.completed ? 'is-done' : ''}`}>
+      <div className="pp-goal-main">
+        {g.tags && g.tags.length > 0 && (
+          <span className="cp-goal-tags">
+            {g.tags.map((t) => (
+              <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
+                {t}
+              </span>
+            ))}
+          </span>
+        )}
+        <span className="pp-goal-title">{g.title}</span>
+        {g.completed && <span className="pp-goal-done">✓ Completed: {g.completed}</span>}
+      </div>
+      <ReadinessBars level={g.readiness} />
+      <span className="pp-goal-caret">›</span>
+    </div>
+  )
+}
+
+type ClientTab = 'id' | 'insights'
+
+export default function ClientProfileScreen({
+  client,
+  onBack,
+}: {
+  client: Client
+  onBack: () => void
+}) {
+  const [tab, setTab] = useState<ClientTab>('id')
+  const cp = clientProfile
+  const initial = client.name.charAt(0).toUpperCase()
+
+  // Open the profile scrolled to the top, regardless of where the client's row
+  // sat in the table. On the live site the app runs in a full-height iframe and
+  // the PARENT page scrolls, so reset that too — and re-assert after the parent
+  // resizes the iframe to the (taller) profile.
+  useEffect(() => {
+    const toTop = () => {
+      window.scrollTo(0, 0)
+      const el = document.scrollingElement || document.documentElement
+      if (el) el.scrollTop = 0
+      if (document.body) document.body.scrollTop = 0
+      try {
+        if (window.parent && window.parent !== window) window.parent.scrollTo(0, 0)
+      } catch {
+        /* cross-origin parent — ignore */
+      }
+    }
+    toTop()
+    const raf = requestAnimationFrame(toTop)
+    const t = window.setTimeout(toTop, 150)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(t)
+    }
+  }, [client.name])
+
+  // Two columns, filled column-first — the live goals lead each column and the
+  // completed ones settle beneath, as the design lays them out.
+  const half = Math.ceil(cp.goals.length / 2)
+  const goalCols = [cp.goals.slice(0, half), cp.goals.slice(half)]
+
+  return (
+    <div className="pp cp">
+      <div className="pp-layout">
+        <aside className="pp-side">
+          <div className="pp-side-inner">
+            <div className="pp-avatar">
+              <span className="pp-avatar-initial">{initial}</span>
+            </div>
+            <h2 className="pp-name">{client.name}</h2>
+            <div className="pp-meta">
+              <span className="pp-meta-row">📅 Joined {cp.joined}</span>
+              <span className="pp-meta-row">✉️ {client.email}</span>
+            </div>
+
+            <div className="cp-side-block">
+              <button className="cp-side-head" type="button">
+                {cp.household} <span className="cp-side-caret">›</span>
+                <span className="cp-side-count">{cp.members.length}</span>
+              </button>
+              {cp.members.map((m) => (
+                <div className={`cp-person ${m.current ? 'is-current' : ''}`} key={m.name}>
+                  <span className="cp-person-av">{m.name.charAt(0)}</span>
+                  <span className="cp-person-main">
+                    <b>{m.name}</b>
+                    <i>{m.role}</i>
+                  </span>
+                  <span className="pp-goal-caret">›</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="cp-side-block">
+              <span className="cp-side-head is-static">Advisory Team</span>
+              {cp.team.map((m) => (
+                <div className="cp-person" key={m.name}>
+                  <span className="cp-person-av">{m.name.charAt(0)}</span>
+                  <span className="cp-person-main">
+                    <b>{m.name}</b>
+                    <i>{m.role}</i>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <main className="pp-main">
+          <nav className="pp-crumb">
+            <button type="button" className="pp-crumb-link" onClick={onBack}>
+              My Clients
+            </button>
+            <span className="pp-crumb-sep">›</span>
+            <button type="button" className="pp-crumb-link" onClick={onBack}>
+              {cp.household}
+            </button>
+            <span className="pp-crumb-sep">›</span>
+            <span className="pp-crumb-cur">{client.name}</span>
+          </nav>
+
+          {/* The check-in band: the mood the client last tapped on their phone. */}
+          <div className="cp-checkin">
+            <span className="cp-checkin-face">
+              <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
+            </span>
+            <span className="cp-checkin-main">
+              <span className="cp-checkin-dots" aria-hidden>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
+                ))}
+              </span>
+              <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
+            </span>
+            <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
+          </div>
+
+          <div className="pp-tabs">
+            {(
+              [
+                ['id', 'Financial ID'],
+                ['insights', 'Client Insights'],
+              ] as [ClientTab, string][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`pp-tab ${tab === id ? 'is-active' : ''}`}
+                onClick={() => setTab(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="pp-title-row">
+            <h1 className="pp-title">{client.name}’s Financial ID</h1>
+            <button className="btn btn-download active" type="button">
+              <DownloadIcon /> Download PDF
+            </button>
+          </div>
+
+          {tab !== 'id' ? (
+            <div className="pp-placeholder">
+              Client Insights — engagement, sentiment and the next conversation to have. Not built
+              in this prototype.
+            </div>
+          ) : (
+            <>
+              <section className="pp-card">
+                <div className="pp-card-head">
+                  <span className="pp-card-title">💡 Key Highlights</span>
+                  <button className="pp-show" type="button">
+                    SHOW LESS ⌃
+                  </button>
+                </div>
+                <div className="pp-highlights">
+                  {cp.keyHighlights.map((h) => (
+                    <div className="pp-highlight" key={h.title}>
+                      <div className="pp-highlight-title">
+                        <span className="pp-hl-icon">{h.icon}</span>
+                        {h.title}
+                      </div>
+                      <p className="pp-highlight-text">{h.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <div className="pp-cols">
+                <div className="pp-col-main">
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icGoals} alt="" />
+                        Goals
+                      </span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
+                    </div>
+                    <div className="cp-goal-cols">
+                      {goalCols.map((col, i) => (
+                        <div className="cp-goal-col" key={i}>
+                          <div className="cp-goal-col-head">
+                            <span>Goal</span>
+                            <span>Readiness</span>
+                          </div>
+                          {col.map((g) => (
+                            <GoalRow g={g} key={g.title} />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    <button className="pp-show cp-show-centre" type="button">
+                      See less ⌃
+                    </button>
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icFinancialJoy} alt="" />
+                        Financial Joy
+                      </span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
+                    </div>
+                    <p className="pp-prompt">{cp.financialJoy.prompt}</p>
+                    <div className="pp-chips">
+                      {cp.financialJoy.chips.map((c) => (
+                        <span className="pp-chip" key={c}>
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icFutureYou} alt="" />
+                        Future You
+                      </span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
+                    </div>
+                    {(
+                      [
+                        ['Where', cp.futureYou.where],
+                        ['What', cp.futureYou.what],
+                        ['Who', cp.futureYou.who],
+                      ] as [string, string[]][]
+                    ).map(([label, items]) => (
+                      <div className="pp-fy-group" key={label}>
+                        <span className="pp-fy-label">{label}</span>
+                        <div className="pp-chips">
+                          {items.map((it) => (
+                            <span className="pp-chip" key={it}>
+                              {it}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icOutlook} alt="" />
+                        Outlook
+                      </span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
+                    </div>
+                    <span className="pp-fy-label pp-concern">Concerns</span>
+                    {cp.outlook.concerns.map((c) => (
+                      <p className="pp-quote" key={c}>
+                        “{c}”
+                      </p>
+                    ))}
+                    <span className="pp-fy-label pp-hope">Hopes</span>
+                    {cp.outlook.hopes.map((h) => (
+                      <p className="pp-quote" key={h}>
+                        “{h}”
+                      </p>
+                    ))}
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">🏅 Badges</span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
+                    </div>
+                    <div className="pp-badges">
+                      {cp.badges.map((label) => (
+                        <div className="pp-badge" key={label}>
+                          <BadgeMedallion label={label} icon={ADVENTURE_ICON[label]} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icLifeEvents} alt="" />
+                        Future Vision Board
+                      </span>
+                    </div>
+                    <div className="cp-boards">
+                      {cp.boards.map((b) => (
+                        <Board board={b} key={b.title} />
+                      ))}
+                    </div>
+                  </section>
+                </div>
+
+                {/* Right rail */}
+                <div className="pp-rail">
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icConfidence} alt="" />
+                        Confidence
+                      </span>
+                      <span className="pp-date">05/03/2025 ⌄</span>
+                    </div>
+                    <div className="pp-confidence">
+                      <span className="pp-confidence-label">{cp.confidence}</span>
+                      <Gauge label={cp.confidence} />
+                    </div>
+                    <button className="pp-show" type="button">
+                      Show results ⌄
+                    </button>
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icLifeEvents} alt="" />
+                        Life Events
+                      </span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
+                    </div>
+                    <div className="pp-events">
+                      {cp.lifeEvents.map((e, i) => (
+                        <div className="pp-event" key={i}>
+                          <span className="pp-event-tag">{e.tag}</span>
+                          {e.kind && <span className="pp-event-kind">{e.kind}</span>}
+                          <span className="pp-event-text">{e.text}</span>
+                          <span className="pp-event-date">{e.date}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="pp-show" type="button">
+                      See more ⌄
+                    </button>
+                  </section>
+
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic" src={icQuestions} alt="" />
+                        Questions
+                      </span>
+                      <img className="pp-add" src={addIcon} alt="Add" />
+                    </div>
+                    <div className="pp-questions">
+                      {cp.questions.map((q, i) => (
+                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
+                          <span className="pp-q-text">{q.q}</span>
+                          <span className="pp-q-date">
+                            {q.resolved ? `✓ Resolved: ${q.resolved}` : q.date}
+                          </span>
+                          <span className="pp-goal-caret">›</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="pp-show" type="button">
+                      See less ⌃
+                    </button>
+                  </section>
+                </div>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+    </div>
+  )
+}
