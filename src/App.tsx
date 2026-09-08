@@ -90,6 +90,7 @@ import {
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
+import ClientProfileScreen from './screens/ClientProfileScreen'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { useSlideIndicator } from './useSlideIndicator'
@@ -809,10 +810,12 @@ function ClientRow({
   c,
   checked,
   onToggle,
+  onOpenProfile,
 }: {
   c: Client
   checked: boolean
   onToggle: () => void
+  onOpenProfile?: (c: Client) => void
 }) {
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
@@ -836,7 +839,7 @@ function ClientRow({
             {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
-            <NameLink name={c.name} />
+            <NameLink name={c.name} onClick={onOpenProfile ? () => onOpenProfile(c) : undefined} />
             <span className="email-line">{c.email}</span>
           </div>
         </div>
@@ -1209,10 +1212,12 @@ function ClientsScreen({
   clients,
   onDownload,
   onInvite,
+  onOpenProfile,
 }: {
   clients: Client[]
   onDownload: () => void
   onInvite: () => void
+  onOpenProfile: (c: Client) => void
 }) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -1388,6 +1393,7 @@ function ClientsScreen({
                         key={c.name}
                         checked={selected.has(c.name)}
                         onToggle={() => toggle(c.name)}
+                        onOpenProfile={onOpenProfile}
                       />
                     ))}
                 </Fragment>
@@ -3638,6 +3644,8 @@ export default function App() {
   // When set, a prospect's full "Financial ID" profile page takes over the main
   // area (reached by clicking a prospect's name in the table).
   const [profileProspect, setProfileProspect] = useState<Prospect | null>(null)
+  // The client counterpart, opened from a client's name in the Clients table.
+  const [profileClient, setProfileClient] = useState<Client | null>(null)
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
   const showToast = (msg: string) => {
     setToast({ show: true, msg })
@@ -3997,7 +4005,11 @@ export default function App() {
         </div>
       </header>
 
-      {profileProspect ? (
+      {profileClient ? (
+        <main className="content content-profile">
+          <ClientProfileScreen client={profileClient} onBack={() => setProfileClient(null)} />
+        </main>
+      ) : profileProspect ? (
         <main className="content content-profile">
           <ProspectProfileScreen
             prospect={profileProspect}
@@ -4073,6 +4085,7 @@ export default function App() {
               clients={clients}
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('client')}
+              onOpenProfile={setProfileClient}
             />
           ))}
         {screen === 'analytics' &&
