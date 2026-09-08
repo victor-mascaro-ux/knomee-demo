@@ -358,7 +358,7 @@ export default function ClientProfileScreen({
                   <span className="pp-card-title">
                     <BulbIcon size={19} /> Key Highlights
                   </span>
-                  <button className="pp-show" type="button">
+                  <button className="cp-head-toggle" type="button">
                     Show less <CaretIcon up />
                   </button>
                 </div>
@@ -403,7 +403,7 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
-                    <button className="pp-show cp-show-centre" type="button">
+                    <button className="pp-show" type="button">
                       See less <CaretIcon up />
                     </button>
                   </section>
