@@ -104,9 +104,11 @@ function Head({
   children?: React.ReactNode
 }) {
   return (
-    <div className="rd-head">
-      <span className={`rd-head-ic rd-ic-${tone}`}>{icon}</span>
-      <h3 className="rd-head-title">{title}</h3>
+    <div className="pp-card-head">
+      <span className="pp-card-title">
+        <span className={`rd-head-ic rd-ic-${tone}`}>{icon}</span>
+        {title}
+      </span>
       {children}
     </div>
   )
@@ -195,7 +197,7 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
   const shown = useCountUp(seen ? d.score : 0)
   return (
     <div
-      className={`rd-dim${d.evidence?.length ? ' tt' : ''}`}
+      className={`rd-dim${d.evidence?.length ? ' tt tt-up' : ''}`}
       data-tip={d.evidence?.join(' · ')}
       ref={ref}
       style={{ animationDelay: `${0.06 + i * 0.06}s` }}
@@ -210,7 +212,7 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
 
 export function ReadinessSnapshot({ s }: { s: Snapshot }) {
   return (
-    <section className="rd-card rd-snapshot">
+    <section className="pp-card rd-card rd-snapshot">
       <Head icon={<BarsGlyph />} tone="grape" title="Conversion Readiness Snapshot" />
       <div className="rd-snapshot-body">
         <div className="rd-kq">
@@ -253,7 +255,7 @@ function Action({ children }: { children: string }) {
 
 export function VelocityCard({ v }: { v: Velocity }) {
   return (
-    <section className="rd-card rd-col">
+    <section className="pp-card rd-card rd-col">
       <Head icon={<BoltGlyph />} tone="grape" title={v.title} />
       <div className="rd-velocity">
         <span className="rd-verdict">{v.verdict}</span>
@@ -289,7 +291,7 @@ function DriverList({ items, kind }: { items: Driver[]; kind: 'motivator' | 'con
 
 export function MotivatorsCard({ items, action }: { items: Driver[]; action?: string }) {
   return (
-    <section className="rd-card rd-col">
+    <section className="pp-card rd-card rd-col">
       <Head icon={<SparkGlyph />} tone="green" title="Motivators" />
       <DriverList items={items} kind="motivator" />
       {action && <Action>{action}</Action>}
@@ -299,7 +301,7 @@ export function MotivatorsCard({ items, action }: { items: Driver[]; action?: st
 
 export function ApprehensionsCard({ items, action }: { items: Driver[]; action?: string }) {
   return (
-    <section className="rd-card rd-col">
+    <section className="pp-card rd-card rd-col">
       <Head icon={<AlertGlyph />} tone="crimson" title="Apprehensions" />
       <DriverList items={items} kind="concern" />
       {action && <Action>{action}</Action>}
@@ -401,7 +403,7 @@ export function StartersCard({
   keyRows: { tag: TagName; meaning: string }[]
 }) {
   return (
-    <section className="rd-card">
+    <section className="pp-card rd-card">
       <Head icon={<ChatGlyph />} tone="grape" title="Conversation Starters" />
       <div className="rd-starters">
         {starters.map((s, i) => (
@@ -451,7 +453,7 @@ export function QuestionsCard({
   note?: string
 }) {
   return (
-    <section className="rd-card">
+    <section className="pp-card rd-card">
       <Head icon={<ChatGlyph />} tone="teal" title="Questions They May Ask">
         {note && <span className="rd-head-note">{note}</span>}
       </Head>
@@ -469,7 +471,7 @@ export function QuestionsCard({
 function Word({ w, i }: { w: WordT; i: number }) {
   return (
     <span
-      className={`rd-word${w.hint ? ' tt' : ''}`}
+      className={`rd-word${w.hint ? ' tt tt-up' : ''}`}
       data-tip={w.hint}
       style={{ animationDelay: `${i * 0.03}s` }}
     >
@@ -480,7 +482,7 @@ function Word({ w, i }: { w: WordT; i: number }) {
 
 export function CommunicationRail({ d }: { d: PlaybookTab }) {
   return (
-    <section className="rd-card rd-comm">
+    <section className="pp-card rd-card rd-comm">
       <Head icon={<ChatGlyph />} tone="grape" title="Communication" />
 
       <h4 className="rd-comm-label">Words to Use</h4>

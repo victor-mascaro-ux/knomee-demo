@@ -14,49 +14,36 @@
   gap: var(--space-16);
 }
 
-/* ── the card and its head ── */
+/* ── the card and its head ──
+   Both tabs use the Financial ID's own card (.pp-card) and its head, so a
+   candidate's three tabs are one page rather than two card systems side by
+   side. All that is added here is the glyph: the ID's cards carry adventure
+   artwork, these carry a line icon in the card's accent, in the same 22px
+   white disc. */
 .rd-card {
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-2xl);
-  background: var(--surface-card);
-  padding: var(--space-16) var(--space-20) var(--space-20);
-}
-.rd-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-10);
-  padding-bottom: var(--space-14);
+  /* The containers space themselves — .rd and .rd-cols own the gap. */
+  margin-bottom: 0;
 }
 .rd-head-ic {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
   display: grid;
   place-items: center;
   flex: none;
 }
 .rd-ic-grape {
-  background: var(--k-grape-light);
   color: var(--k-grape);
 }
 .rd-ic-green {
-  background: var(--k-teal-light);
   color: var(--signal-motivator);
 }
 .rd-ic-crimson {
-  background: var(--k-crimson-light);
   color: var(--signal-concern);
 }
 .rd-ic-teal {
-  background: var(--k-teal-light);
   color: var(--k-ocean);
-}
-.rd-head-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text-strong);
 }
 .rd-head-note {
   margin-left: auto;
@@ -65,9 +52,6 @@
 }
 
 /* ── the snapshot ── */
-.rd-snapshot {
-  background: var(--k-plum-050);
-}
 .rd-snapshot-body {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
@@ -190,8 +174,9 @@
 }
 .rd-dim.tt::after,
 .rd-word.tt::after {
-  max-width: 300px;
   white-space: normal;
+  width: max-content;
+  max-width: 340px;
   line-height: 1.45;
   text-align: left;
 }
@@ -251,9 +236,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-16);
   align-items: start;
-}
-.rd-col .rd-head-title {
-  font-size: 15px;
 }
 
 .rd-velocity {

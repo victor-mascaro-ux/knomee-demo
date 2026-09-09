@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyState, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -179,6 +179,7 @@ export default function ClientProfileScreen({
   // the card shows collapsed. The two columns are a grid, so the cards read
   // across the rows (1 2 / 3 4) rather than down the columns (1 5 / 2 6).
   const [confidence, setConfidence] = useState(false)
+  const highlights = useCollapsed(cp.keyHighlights, COLLAPSED_ROWS)
   const goals = useCollapsed(orderGoals(cp.goals), COLLAPSED_GOALS)
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
@@ -303,13 +304,17 @@ export default function ClientProfileScreen({
                     <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
-                  <button className="cp-head-toggle" type="button">
-                    Show less <CaretIcon up />
-                  </button>
+                  {highlights.overflows && (
+                    <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
+                  )}
                 </div>
                 <div className="pp-highlights">
-                  {cp.keyHighlights.map((h) => (
-                    <div className="pp-highlight" key={h.title}>
+                  {highlights.shown.map((h, i) => (
+                    <div
+                      className={`pp-highlight ${highlights.entering(i) ?? ''}`}
+                      style={highlights.delay(i)}
+                      key={h.title}
+                    >
                       <div className="pp-highlight-title">
                         <HighlightIcon source={h.icon} />
                         {h.title}
