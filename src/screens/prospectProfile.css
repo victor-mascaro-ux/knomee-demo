@@ -923,6 +923,15 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* The rail fades in without the rise. It is a sticky element, and a sticky
+   offset and an entrance are the same channel: `pp-rise` runs with
+   `fill: both`, so once it lands it pins `transform: translateY(0)` for good,
+   and a running animation outranks an inline style — anything that positions
+   this element by transform afterwards is silently ignored. */
+@keyframes pp-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .pp-main > * {
     animation: pp-rise 0.32s ease both;
@@ -930,7 +939,7 @@
   .pp-main > *:nth-child(2) { animation-delay: 0.03s; }
   .pp-main > *:nth-child(3) { animation-delay: 0.06s; }
   .pp-main > *:nth-child(4) { animation-delay: 0.09s; }
-  .pp-side-inner { animation: pp-rise 0.32s ease both; }
+  .pp-side-inner { animation: pp-fade 0.32s ease both; }
 }
 
 /* Elevated white tiles lift on hover. */
@@ -939,7 +948,8 @@
 .pp-quote,
 .pp-question,
 .pp-event,
-.pp-confidence {
+.pp-confidence,
+.pp-attn-row {
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
   /* background is in the list because the openable rows tint rather than lift,
      and this rule would otherwise drop it from their transition. */
@@ -954,10 +964,15 @@
 .pp-quote:hover,
 .pp-question:hover,
 .pp-event:hover,
-.pp-confidence:hover {
+.pp-confidence:hover,
+.pp-attn-row:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(20, 10, 40, 0.09);
 }
+
+/* The attention rows lift with the rest but keep their own left bar: the
+   purple outline is what the bordered tiles wear, and recolouring a 3px accent
+   would throw away the one thing that separates more from less. */
 /* Every white tile inside a card outlines in purple on hover, the way the chips
    do. It is the one hover cue they all share — the lift and the tint say what
    kind of thing you are pointing at, the outline says you are pointing at it. */
