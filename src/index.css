@@ -3805,18 +3805,28 @@ button.name-link-btn:hover .name-text {
 .settings-back:hover {
   color: var(--plum);
 }
+/* `clip`, not `hidden`: both trim the sidebar's fill to the rounded corner,
+   but `hidden` makes this box a scroll container, and a scroll container is
+   the scrollport its sticky descendants measure against — so the lateral menu
+   inside had nothing to stick to. `clip` creates no scrollport. */
 .settings-grid {
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 32px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: clip;
   min-height: 520px;
 }
+/* A lateral menu stays put while the column beside it scrolls. The strip and
+   its divider stay full height; the block inside it is what sticks. */
 .settings-side {
   background: #fafafa;
   border-right: 1px solid var(--line);
+}
+.settings-side-inner {
+  position: sticky;
+  top: 12px;
   padding: 26px 18px;
 }
 .settings-side-head h1 {
@@ -4450,10 +4460,13 @@ button.name-link-btn:hover .name-text {
     gap: 0;
   }
   .settings-side {
-    padding: 8px 0 12px;
     border-right: none;
     border-bottom: 1px solid var(--line);
     background: transparent;
+  }
+  .settings-side-inner {
+    position: static;
+    padding: 8px 0 12px;
   }
   .settings-side-head h1 {
     font-size: 20px;

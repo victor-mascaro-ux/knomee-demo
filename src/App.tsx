@@ -3638,22 +3638,27 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
       </button>
       <div className="settings-grid">
         <aside className="settings-side">
-          <div className="settings-side-head">
-            <h1>Account</h1>
-            <p>Manage your account info.</p>
+          {/* The aside stays stretched so its divider runs the full height of
+              the panel; the inner block is what stays put as you scroll, the
+              same split the profile rail uses. */}
+          <div className="settings-side-inner">
+            <div className="settings-side-head">
+              <h1>Account</h1>
+              <p>Manage your account info.</p>
+            </div>
+            <nav className="settings-nav">
+              {nav.map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  className={`settings-nav-item ${section === n.id ? 'active' : ''}`}
+                  onClick={() => setSection(n.id)}
+                >
+                  {n.label}
+                </button>
+              ))}
+            </nav>
           </div>
-          <nav className="settings-nav">
-            {nav.map((n) => (
-              <button
-                key={n.id}
-                type="button"
-                className={`settings-nav-item ${section === n.id ? 'active' : ''}`}
-                onClick={() => setSection(n.id)}
-              >
-                {n.label}
-              </button>
-            ))}
-          </nav>
         </aside>
         <section className="settings-main">
           {section === 'profile' && <ProfilePanel />}
