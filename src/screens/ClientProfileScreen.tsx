@@ -484,22 +484,6 @@ export default function ClientProfileScreen({
 
         <main className="pp-main">
 
-          {/* The check-in band: the mood the client last tapped on their phone. */}
-          <div className="cp-checkin">
-            <span className="cp-checkin-face">
-              <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
-            </span>
-            <span className="cp-checkin-main">
-              <span className="cp-checkin-dots" aria-hidden>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
-                ))}
-              </span>
-              <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
-            </span>
-            <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
-          </div>
-
           {!mine && (
             <div className="pp-tabs">
               {(
@@ -522,6 +506,22 @@ export default function ClientProfileScreen({
               ))}
             </div>
           )}
+
+          {/* The check-in band: the mood the client last tapped on their phone. */}
+          <div className="cp-checkin">
+            <span className="cp-checkin-face">
+              <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
+            </span>
+            <span className="cp-checkin-main">
+              <span className="cp-checkin-dots" aria-hidden>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
+                ))}
+              </span>
+              <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
+            </span>
+            <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
+          </div>
 
           <div className="pp-title-row">
             <h1 className="pp-title">{client.name}’s Financial ID</h1>
