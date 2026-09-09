@@ -239,9 +239,14 @@
   object-fit: contain;
 }
 .pp-add {
+  display: inline-flex;
   width: 24px;
   height: 24px;
+  flex: none;
   cursor: pointer;
+  /* The interactive purple, and ocean on the client page — both the darker,
+     readable end of their family rather than the surface tint. */
+  color: var(--add-ink, #7639a1);
 }
 /* The date in a card's header picks which sitting of the adventure you are
    looking at, so it is a control, not a caption. */

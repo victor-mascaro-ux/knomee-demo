@@ -84,7 +84,14 @@ export function ReadinessLevel({ level }: { level: number }) {
 
 /* Where each label parks the needle. The demo data only ever says "Strong";
    anything unrecognised points at the top band rather than off the dial. */
-const GAUGE_LEVEL: Record<string, number> = { Weak: 0, Moderate: 1, Strong: 2 }
+const GAUGE_LEVEL: Record<string, number> = {
+  Weak: 0,
+  Moderate: 1,
+  /* The advisor flow words the middle band "Balanced" rather than "Moderate" —
+     same wedge, its own vocabulary. */
+  Balanced: 1,
+  Strong: 2,
+}
 /* The needle vector is drawn already pointing 27.3° above horizontal — inside
    the "Strong" band — so it is rotated by the difference for the other two. */
 const NEEDLE_ART_ANGLE = 27.3
@@ -145,6 +152,12 @@ const BADGE_ART: Record<string, string> = {
   Outlook: bgOutlook,
   'Future You': bgFutureYou,
   Goals: bgGoals,
+  /* The advisor flow renames two of the five — Financial Joy becomes Practice
+     Joy, Goals becomes The Move — and the medallions carry their name inside
+     the vector, so these two borrow the artwork of the adventure they replace
+     until the brand draws their own. */
+  'Practice Joy': bgFinancialJoy,
+  'The Move': bgGoals,
 }
 
 export function BadgeMedallion({ label }: { label: string; icon?: string }) {
@@ -306,11 +319,17 @@ export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => 
 /* The answers behind the dial: each statement with the slider left where the
    client left it, read-only. The mean of the five is what puts the needle in
    the Strong band, so the two can never disagree. */
-export function ConfidenceResults({ open }: { open: boolean }) {
+export function ConfidenceResults({
+  open,
+  answers = confidenceAnswers,
+}: {
+  open: boolean
+  answers?: { statement: string; value: number; low: string; high: string }[]
+}) {
   if (!open) return null
   return (
     <div className="pp-conf-results">
-      {confidenceAnswers.map((a, i) => (
+      {answers.map((a, i) => (
         <div
           className="pp-conf-answer pp-row-in"
           key={a.statement}
@@ -377,4 +396,23 @@ export function lifeEventArt(kind: string | undefined, text: string) {
 
 export function LifeEventIcon({ kind, text }: { kind?: string; text: string }) {
   return <span className="pp-event-ic"><img src={lifeEventArt(kind, text)} alt="" /></span>
+}
+
+/* The add control, drawn rather than imported, so its glyph takes the page's
+   accent — plum-purple on a prospect, ocean on a client — instead of being
+   fixed in a file. The white disc is the same one the card icons sit on. */
+export function AddButton() {
+  return (
+    <span className="pp-add" aria-label="Add" role="img">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden>
+        <circle cx="12" cy="12" r="12" fill="#fff" />
+        <path
+          d="M12 6.7v10.6M6.7 12h10.6"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
+  )
 }
