@@ -17,7 +17,7 @@
  */
 
 import { steps, type Step } from './advisorFlow'
-import { isQuestion, type Answers, type Derived } from './advisorAnswers'
+import { isAnswered, isQuestion, type Answers } from './advisorAnswers'
 
 /* ── one sitting, as a row ──────────────────────────────────────────────── */
 
@@ -32,6 +32,11 @@ export interface Sitting {
   /** Fire-and-forget: the post went out, and an opaque response cannot tell us
       it landed. Null until something has been attempted. */
   sentAt: string | null
+  /** How much of the flow this sitting got through. Kept for the Recorded
+      answers table and deliberately NOT a column: it is a fact about the
+      sitting, not something anybody answered. */
+  answered: number
+  total: number
   /** Header → value, in `recordHeaders()` order. */
   values: Record<string, string>
 }
@@ -43,7 +48,13 @@ const label = (id: string, text: string | undefined, cap = 64) => {
   return t.length > cap ? `${id} · ${t.slice(0, t.lastIndexOf(' ', cap))}…` : `${id} · ${t}`
 }
 
-/** The columns every tab carries before the questions start. */
+/** The columns before the questions start: who was answering and when.
+ *
+ * Nothing computed goes on a tab. The score, the tier, the stage, the route and
+ * the three questions the flow hands back are all rules over the answers in
+ * these same rows — putting them here would mean a tab holding two kinds of
+ * thing, and a stale copy of the derived half the moment a rule changes. The
+ * sheet records what somebody answered; the Business ID is what that means. */
 const LEAD = [
   'Sitting ID',
   'Recorded at',
@@ -52,18 +63,7 @@ const LEAD = [
   'Assets',
   'Firm',
   'Completed',
-  'EQ',
-  'Tier',
-  'Intent',
-  'Clarity',
-  'Receptivity',
-  'Stage',
-  'Confidence',
-  'Route',
 ] as const
-
-/** And the ones after them: what the flow told this person to go and ask. */
-const TAIL = ['Question 1', 'Question 2', 'Question 3'] as const
 
 /** One column per thing the flow actually asks — a scale set spends a column
     per statement and the attention grid one per area, so a tab can be read
@@ -89,7 +89,7 @@ function questionColumns(): { header: string; step: Step; part?: number; row?: s
 }
 
 export function recordHeaders(): string[] {
-  return [...LEAD, ...questionColumns().map((c) => c.header), ...TAIL]
+  return [...LEAD, ...questionColumns().map((c) => c.header)]
 }
 
 /** The answer to one question, as a cell. */
@@ -119,7 +119,7 @@ function cell(c: { step: Step; part?: number; row?: string }, a: Answers): strin
   }
 }
 
-export function sittingOf(a: Answers, d: Derived, id: string): Sitting {
+export function sittingOf(a: Answers, id: string): Sitting {
   const values: Record<string, string> = {
     'Sitting ID': id,
     'Recorded at': new Date().toISOString(),
@@ -128,21 +128,13 @@ export function sittingOf(a: Answers, d: Derived, id: string): Sitting {
     Assets: a.identity.book.trim(),
     Firm: a.identity.firm.trim(),
     Completed: a.completed,
-    EQ: String(d.kq),
-    Tier: `${d.tier.tier} · ${d.tier.name}`,
-    Intent: String(d.scores.intent),
-    Clarity: String(d.scores.clarity),
-    Receptivity: String(d.scores.receptivity),
-    Stage: d.stage,
-    Confidence: d.id.readiness.confidence,
-    Route: d.routePick,
   }
   for (const c of questionColumns()) values[c.header] = cell(c, a)
-  d.id.questions.slice(0, 3).forEach((q, i) => {
-    values[`Question ${i + 1}`] = q
-  })
+  const asked = steps.filter(isQuestion)
   return {
     id,
+    answered: asked.filter((s) => isAnswered(s, a)).length,
+    total: asked.length,
     // A tab per person, named the way they named themselves. Sheets refuses
     // : \ / ? * [ ] in a tab name and caps it at 100 characters.
     tab: (a.identity.name.trim() || 'Anonymous').replace(/[:\\/?*[\]]/g, ' ').slice(0, 90),
@@ -191,8 +183,8 @@ function writeLedger(rows: Sitting[]) {
 
 /** Upsert the sitting on the ledger. Called on every answer, so the row is
     always the current state of the sheet rather than a stale copy of it. */
-export function noteSitting(a: Answers, d: Derived, id: string): Sitting {
-  const fresh = sittingOf(a, d, id)
+export function noteSitting(a: Answers, id: string): Sitting {
+  const fresh = sittingOf(a, id)
   const rows = ledger()
   const at = rows.findIndex((r) => r.id === id)
   if (at < 0) {
