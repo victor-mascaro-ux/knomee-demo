@@ -107,9 +107,17 @@ function Board({ board }: { board: VisionBoard }) {
   )
 }
 
-function GoalRow({ g }: { g: ClientGoal }) {
+function GoalRow({
+  g,
+  className,
+  style,
+}: {
+  g: ClientGoal
+  className?: string
+  style?: React.CSSProperties
+}) {
   return (
-    <div className={`pp-goal ${g.completed ? 'is-done' : ''}`}>
+    <div className={`pp-goal ${g.completed ? 'is-done' : ''} ${className ?? ''}`} style={style}>
       <div className="pp-goal-main">
         {g.tags && g.tags.length > 0 && (
           <span className="cp-goal-tags">
@@ -168,12 +176,10 @@ export default function ClientProfileScreen({
     }
   }, [client.name])
 
-  // Ordered by stage with the completed ones last, then cut to what the card
-  // shows collapsed, and only then split into two columns filled column-first —
-  // so the four on show are the four earliest, not the first two of each column.
+  // Ordered by stage, furthest along first, completed last — then cut to what
+  // the card shows collapsed. The two columns are a grid, so the cards read
+  // across the rows (1 2 / 3 4) rather than down the columns (1 5 / 2 6).
   const goals = useCollapsed(orderGoals(cp.goals), COLLAPSED_GOALS)
-  const half = Math.ceil(goals.shown.length / 2)
-  const goalCols = [goals.shown.slice(0, half), goals.shown.slice(half)]
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
 
@@ -324,12 +330,13 @@ export default function ClientProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="cp-goal-cols">
-                      {goalCols.map((col, i) => (
-                        <div className="cp-goal-col" key={i}>
-                          {col.map((g) => (
-                            <GoalRow g={g} key={g.title} />
-                          ))}
-                        </div>
+                      {goals.shown.map((g, i) => (
+                        <GoalRow
+                          g={g}
+                          key={g.title}
+                          className={goals.entering(i)}
+                          style={goals.delay(i)}
+                        />
                       ))}
                     </div>
                     {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
@@ -464,7 +471,7 @@ export default function ClientProfileScreen({
                     </div>
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
-                        <div className="pp-event" key={i}>
+                        <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                           <span className="pp-event-tag">{e.tag}</span>
                           {e.kind && <span className="pp-event-kind">{e.kind}</span>}
                           <span className="pp-event-text">{e.text}</span>
@@ -485,7 +492,7 @@ export default function ClientProfileScreen({
                     </div>
                     <div className="pp-questions">
                       {questions.shown.map((q, i) => (
-                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
+                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`} style={questions.delay(i)} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
                             {q.resolved ? (

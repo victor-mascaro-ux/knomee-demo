@@ -147,18 +147,13 @@
 }
 
 /* ---------- goals in two columns ---------- */
+/* One grid rather than two stacked columns, so the cards fill across the rows
+   (1 2 / 3 4) instead of down the columns (1 5 / 2 6). */
 .cp-goal-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 var(--space-24);
+  gap: var(--space-12) var(--space-24);
   align-items: start;
-}
-/* The rows stack in the column itself, so the gap belongs here — the goal cards
-   were sitting flush against each other. */
-.cp-goal-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
 }
 .cp-goal-tags {
   display: inline-flex;
