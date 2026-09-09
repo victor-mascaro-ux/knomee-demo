@@ -769,6 +769,7 @@
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
     'advisor-flow': 'Advisor as Prospect',
+    'advisor-self': 'Advisor as Prospect (answer it yourself)',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
     'firm-analytics': 'Dynasty · Analytics',
@@ -1478,18 +1479,23 @@
        an advisor signing up to knomee. It has no tab and no menu item, so this
        row is the only way in. */
     ['mobile-advisor', 'Mobile (Advisor)', '#/advisor-flow'],
+    /* The same flow with the answers taken out, so the room can take it. It
+       keeps its own sheet in this browser and builds its own Business ID,
+       readiness and Toolkit — the walkthrough above stays Marcus's. */
+    ['mobile-self', 'Mobile (Answer it yourself)', '#/advisor-self'],
     ['welcome', 'Welcome Page (Client)', '#/welcome']
   ];
   // Only these two take you out of the app shell. The desktop row is where you
   // already are on any advisor page, so it must not count as "somewhere else"
   // when the persona rows decide whether to mark themselves.
-  const STANDALONE = ['mobile', 'mobile-advisor', 'welcome'];
+  const STANDALONE = ['mobile', 'mobile-advisor', 'mobile-self', 'welcome'];
   // The welcome page's own A/B switch decides which version, so both count.
   const screenIsOn = (id) => {
     const v = canon(demoState.view);
     if (id === 'desktop') return SHELL_VIEWS.indexOf(v) !== -1;
     if (id === 'mobile') return v === 'client-experience';
     if (id === 'mobile-advisor') return v === 'advisor-flow';
+    if (id === 'mobile-self') return v === 'advisor-self';
     return v === id || (id === 'welcome' && v === 'welcome-b');
   };
 

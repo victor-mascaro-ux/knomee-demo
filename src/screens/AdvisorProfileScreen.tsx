@@ -13,15 +13,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
-import { advisor, businessId } from '../data/advisorFlow'
-import {
-  confidenceAnswers,
-  kq,
-  toolkitTab,
-  readinessTab,
-  route,
-  tier,
-} from '../data/advisorProfile'
+import { marcusProfile, type AdvisorProfileData } from '../data/advisorProfile'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
@@ -73,9 +65,19 @@ export default function AdvisorProfileScreen({
   onAdd,
   ownerMenu,
   mine,
+  tabs,
+  data = marcusProfile,
 }: {
   onBack: () => void
   onAdd?: () => void
+  /* Whose page this is. Marcus's is assembled in `advisorProfile.ts`; a page
+     built from answers somebody just typed into the phone arrives from
+     `advisorAnswers.ts`. Same bundle either way — the screen cannot tell. */
+  data?: AdvisorProfileData
+  /* The three tabs, on a page that is otherwise wearing `mine`. Reading your
+     own readiness is not the same act as a rep reading it about you, but it is
+     the same page — so it is a switch on this one rather than a copy. */
+  tabs?: boolean
   /* Marcus reading his own Business ID in his own app, rather than a
      Dynasty rep reading it about him. Same page — it is the one thing the
      eight minutes produced — with the firm's furniture off it: no breadcrumb
@@ -89,7 +91,9 @@ export default function AdvisorProfileScreen({
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const [photoFailed, setPhotoFailed] = useState(false)
-  const d = businessId
+  const d = data.id
+  const who = data.who
+  const showTabs = !mine || tabs
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
 
   // Open scrolled to the top however far down the table the row sat. On the
@@ -124,21 +128,21 @@ export default function AdvisorProfileScreen({
             My Candidates
           </button>
           <span className="pp-crumb-sep">›</span>
-          <span className="pp-crumb-cur">{advisor.name}</span>
+          <span className="pp-crumb-cur">{who.name}</span>
         </nav>
       )}
       <div className="pp-layout">
         {/* Left profile sidebar */}
         <aside className="pp-side">
           <div className="pp-side-inner">
-            <div className={`pp-avatar ap-portrait${photoFailed ? '' : ' has-photo'}`}>
-              {photoFailed ? (
-                <span>{advisor.initial}</span>
+            <div className={`pp-avatar ap-portrait${photoFailed || !who.photo ? '' : ' has-photo'}`}>
+              {photoFailed || !who.photo ? (
+                <span>{who.initial}</span>
               ) : (
-                <img src={advisor.photo} alt="" onError={() => setPhotoFailed(true)} />
+                <img src={who.photo} alt="" onError={() => setPhotoFailed(true)} />
               )}
             </div>
-            <h2 className="pp-name">{advisor.name}</h2>
+            <h2 className="pp-name">{who.name}</h2>
             <div className="pp-meta">
               <span className="pp-meta-row">
                 <CalendarIcon /> Completed {d.header.completed}
@@ -156,22 +160,24 @@ export default function AdvisorProfileScreen({
             <div className="ap-side-stat">
               <span className="ap-side-stat-k">Enterprise Quotient</span>
               <span className="ap-side-stat-v">
-                {kq}
+                {data.kq}
                 <i>
-                  Tier {tier.tier} · {tier.name}
+                  Tier {data.tier.tier} · {data.tier.name}
                 </i>
               </span>
             </div>
             <div className="ap-side-stat">
               <span className="ap-side-stat-k">Route</span>
-              <span className="ap-side-stat-v ap-side-stat-text">{route.pick}</span>
+              <span className="ap-side-stat-v ap-side-stat-text" title={data.routeWhy}>
+                {data.routePick}
+              </span>
             </div>
           </div>
         </aside>
 
         {/* Main column */}
         <main className="pp-main">
-          {!mine && (
+          {showTabs && (
           <div className="pp-tabs">
             {(Object.keys(TAB_LABEL) as ProfileTab[]).map((id) => (
               <button
@@ -191,7 +197,7 @@ export default function AdvisorProfileScreen({
 
           <div className="pp-title-row">
             <h1 className="pp-title">
-              {tab === 'id' ? `${advisor.name}’s Business ID` : TAB_LABEL[tab]}
+              {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
             </h1>
             {ownerMenu}
             <button className="btn btn-download active" type="button">
@@ -199,9 +205,9 @@ export default function AdvisorProfileScreen({
             </button>
           </div>
 
-          {tab === 'id' && <BusinessIdTab stageLevel={stageLevel} />}
-          {tab === 'readiness' && <ReadinessTabView d={readinessTab} />}
-          {tab === 'toolkit' && <ToolkitTabView d={toolkitTab} />}
+          {tab === 'id' && <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} />}
+          {tab === 'readiness' && <ReadinessTabView d={data.readiness} />}
+          {tab === 'toolkit' && <ToolkitTabView d={data.toolkit} />}
         </main>
       </div>
     </div>
@@ -217,8 +223,15 @@ export default function AdvisorProfileScreen({
    advisor reading his own page and a client reading theirs are looking at the
    same instrument. */
 
-function BusinessIdTab({ stageLevel }: { stageLevel: number }) {
-  const d = businessId
+function BusinessIdTab({
+  d,
+  confidence: answers,
+  stageLevel,
+}: {
+  d: AdvisorProfileData['id']
+  confidence: AdvisorProfileData['confidence']
+  stageLevel: number
+}) {
   const [confidence, setConfidence] = useState(false)
   // The change he named, read as a goal at the stage the flow put him in.
   const goals = [{ title: d.move.change, readiness: stageLevel }]
@@ -389,7 +402,7 @@ function BusinessIdTab({ stageLevel }: { stageLevel: number }) {
               <span className="pp-confidence-label">{d.readiness.confidence}</span>
               <Gauge label={d.readiness.confidence} />
             </div>
-            <ConfidenceResults open={confidence} answers={confidenceAnswers} />
+            <ConfidenceResults open={confidence} answers={answers} />
             <button
               className="pp-show"
               type="button"

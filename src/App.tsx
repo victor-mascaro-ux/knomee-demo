@@ -95,6 +95,7 @@ import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import ClientMobileScreen from './screens/ClientMobileScreen'
 import AdvisorMobileScreen from './screens/AdvisorMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
+import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
@@ -3731,6 +3732,7 @@ const ROUTE_VIEWS = [
   'client-mobile',
   'advisor-mobile',
   'advisor-flow',
+  'advisor-self',
   'admin',
   'settings',
   'firm-candidates',
@@ -3818,6 +3820,11 @@ export default function App() {
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
   const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
+  // The same five adventures with the answers taken out — the page where the
+  // person reading the demo takes the flow themselves. The walkthrough above is
+  // Marcus's and stays pre-filled; this one starts empty and computes its
+  // Business ID, readiness and Toolkit from whatever is typed into it.
+  const [advisorSelfOpen, setAdvisorSelfOpen] = useState(initialView === 'advisor-self')
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
@@ -3860,7 +3867,9 @@ export default function App() {
           ? landingVersion === 'b'
             ? 'welcome-b'
             : 'welcome'
-          : advisorFlowOpen
+          : advisorSelfOpen
+            ? 'advisor-self'
+            : advisorFlowOpen
             ? 'advisor-flow'
             : advisorMobileOpen
               ? 'advisor-mobile'
@@ -3946,6 +3955,7 @@ export default function App() {
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
       setAdvisorFlowOpen(v === 'advisor-flow')
+      setAdvisorSelfOpen(v === 'advisor-self')
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
       setClientMobileOpen(v === 'client-mobile')
@@ -4079,6 +4089,15 @@ export default function App() {
     return (
       <>
         <AdvisorFlowScreen onExit={() => setAdvisorFlowOpen(false)} />
+        {brand && <PoweredBy />}
+      </>
+    )
+  }
+
+  if (advisorSelfOpen) {
+    return (
+      <>
+        <AdvisorSelfScreen onExit={() => setAdvisorSelfOpen(false)} />
         {brand && <PoweredBy />}
       </>
     )

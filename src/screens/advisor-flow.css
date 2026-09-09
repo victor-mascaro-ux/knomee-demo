@@ -399,3 +399,195 @@
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.78);
 }
+
+/* ── answering ──────────────────────────────────────────────────────────────
+   The walkthrough renders its answers as read-only spans; the answerable page
+   (`AdvisorSelfScreen`) renders the same classes as real buttons and fields.
+   So everything below is keyed on the ELEMENT rather than on a new class — the
+   look is shared, and only the version you can press picks up a cursor, a
+   hover and a font of its own. */
+
+button.af-opt,
+button.af-dot,
+button.af-radio,
+button.af-hint {
+  font: inherit;
+  cursor: pointer;
+}
+button.af-opt {
+  text-align: left;
+}
+button.af-dot {
+  font-size: 13.5px;
+}
+button.af-radio {
+  padding: 0;
+  background: #fff;
+}
+button.af-hint {
+  display: block;
+  width: 100%;
+  padding: 3px 0;
+  border: 0;
+  background: none;
+  font-size: 13.5px;
+  text-align: left;
+}
+button.af-hint:hover,
+button.af-opt:hover {
+  color: var(--k-grape, #7639a1);
+}
+
+.af-field {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16px;
+  padding: 13px 15px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 12px;
+  background: #faf7fd;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-strong, #240446);
+  -webkit-appearance: none;
+}
+.af-field::placeholder {
+  color: #a5a1ae;
+}
+.af-field:focus {
+  outline: none;
+  border-color: var(--k-grape, #7639a1);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(118, 57, 161, 0.13);
+}
+.af-textarea {
+  min-height: 96px;
+  resize: none;
+  overflow: hidden;
+}
+/* The field an "Other" option opens sits under its own row rather than at the
+   foot of the list, so it reads as part of the option it belongs to. */
+.af-other {
+  margin-top: 8px;
+}
+.af-count {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #8a8792;
+}
+
+.af-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+.af-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: var(--weight-bold, 700);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8792;
+}
+.af-label .af-field {
+  margin-top: 6px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* A question holds its own button until it has an answer — and Skip sits next
+   to it, because refusing a question is itself an answer. */
+.af-next:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.af-skip {
+  flex: none;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #8a8792;
+  padding: 11px 4px;
+  cursor: pointer;
+}
+.af-skip:hover {
+  color: #55525e;
+}
+
+/* The second button on the questions screen: the same eight minutes, read the
+   way a platform would read them. */
+.af-secondary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 18px;
+  border: 1.5px solid var(--k-plum, #240446);
+  border-radius: 26px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--k-plum, #240446);
+  cursor: pointer;
+}
+
+/* Before the first adventure is finished the Business ID tab has nothing to
+   draw, and says so rather than drawing empty cards. */
+.af-blank {
+  padding: 34px 0 10px;
+  text-align: center;
+}
+
+/* ── the report ─────────────────────────────────────────────────────────────
+   The desktop page, opened from inside the phone demo. It borrows the app's
+   own `.content-profile` shell, and only needs a bar of its own to get back. */
+
+.af-report {
+  background: #fff;
+}
+.af-report-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px var(--page-pad, 32px);
+  background: var(--plum, #240446);
+  color: #fff;
+}
+.af-report-back {
+  flex: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.34);
+  border-radius: 26px;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  padding: 7px 15px;
+  cursor: pointer;
+}
+.af-report-back:hover {
+  border-color: #fff;
+}
+.af-report-note {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.76);
+}
+/* The profile page pins its tabs under the app's top bar and its breadcrumb.
+   Here it has neither — this bar is the whole chrome — so the two offsets it
+   stacks against are restated for the report, or the tabs would pin 90px down
+   the page and the cards would scroll through the daylight above them. */
+.af-report .pp {
+  --topbar-h: 45px;
+  --pp-crumb-h: 0px;
+}
+@media (max-width: 620px) {
+  .af-report-note {
+    display: none;
+  }
+}
