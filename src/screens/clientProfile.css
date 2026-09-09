@@ -233,6 +233,28 @@
   overflow: hidden;
   border-radius: var(--radius-md);
   min-width: 0;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+/* The board's tiles answer the pointer like every other card on the page —
+   they lift and cast; the image inside pushes in a little as they do. */
+.cp-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(20, 10, 40, 0.14);
+}
+.cp-tile img {
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.cp-tile:hover img {
+  transform: scale(1.05);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cp-tile,
+  .cp-tile img {
+    transition: none;
+  }
+  .cp-tile:hover img {
+    transform: none;
+  }
 }
 .cp-tile-photo {
   background: var(--surface-sunken);

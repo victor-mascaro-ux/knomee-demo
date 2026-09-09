@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -46,6 +46,7 @@ export default function ProspectProfileScreen({
   const fi = financialId
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
+  const [confidence, setConfidence] = useState(false)
   const goals = useCollapsed(orderGoals(fi.goals), COLLAPSED_GOALS)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
@@ -279,8 +280,14 @@ export default function ProspectProfileScreen({
                       <span className="pp-confidence-label">{fi.confidence}</span>
                       <Gauge label={fi.confidence} />
                     </div>
-                    <button className="pp-show" type="button">
-                      Show results <CaretIcon />
+                    <ConfidenceResults open={confidence} />
+                    <button
+                      className="pp-show"
+                      type="button"
+                      aria-expanded={confidence}
+                      onClick={() => setConfidence((v) => !v)}
+                    >
+                      {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
                     </button>
                   </section>
 

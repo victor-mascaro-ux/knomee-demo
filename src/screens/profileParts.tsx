@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
+import { confidenceAnswers } from '../data/financialId'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -225,20 +226,50 @@ export function orderGoals<T extends { readiness: number; completed?: string }>(
 export const COLLAPSED_ROWS = 3
 export const COLLAPSED_GOALS = 4
 
+/* Long enough for the last row's stagger to finish: 0.26s of animation on top
+   of three steps of delay. */
+const ROW_OUT_MS = 420
+
 export function useCollapsed<T>(items: T[], max: number) {
   const [open, setOpen] = useState(false)
+  /* Collapsing cannot just drop the rows — React would unmount them before they
+     could animate. They stay mounted through the exit and leave after it. */
+  const [closing, setClosing] = useState(false)
+  const timer = useRef<number>()
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  const toggle = () => {
+    window.clearTimeout(timer.current)
+    if (open) {
+      setOpen(false)
+      setClosing(true)
+      timer.current = window.setTimeout(() => setClosing(false), ROW_OUT_MS)
+    } else {
+      setClosing(false)
+      setOpen(true)
+    }
+  }
+
+  const extra = open || closing
   return {
-    shown: open ? items : items.slice(0, max),
+    shown: extra ? items : items.slice(0, max),
     open,
-    toggle: () => setOpen((o) => !o),
+    toggle,
     /* No control when everything already fits. */
     overflows: items.length > max,
-    /* Rows past this index are the ones an expand just revealed, so they are
-       the ones that animate in. Returns undefined for the rest, which keeps the
-       class attribute clean. */
-    entering: (i: number) => (open && i >= max ? 'pp-row-in' : undefined),
-    /* Staggered off the first revealed row, not off the top of the list. */
-    delay: (i: number) => (open && i >= max ? { animationDelay: `${(i - max) * 45}ms` } : undefined),
+    /* Only the rows an expand revealed animate — the ones already on screen
+       hold still. They drop in on the way out and lift back out on the way
+       back. */
+    entering: (i: number) =>
+      i < max ? undefined : open ? 'pp-row-in' : closing ? 'pp-row-out' : undefined,
+    /* Staggered off the first revealed row, not off the top of the list. On the
+       way out the order reverses, so the list closes from the bottom up. */
+    delay: (i: number) => {
+      if (i < max) return undefined
+      if (open) return { animationDelay: `${(i - max) * 45}ms` }
+      if (closing) return { animationDelay: `${(items.length - 1 - i) * 35}ms` }
+      return undefined
+    },
   }
 }
 
@@ -247,5 +278,36 @@ export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => 
     <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
       {open ? 'See less' : 'See more'} <CaretIcon up={open} />
     </button>
+  )
+}
+
+/* The answers behind the dial: each statement with the slider left where the
+   client left it, read-only. The mean of the five is what puts the needle in
+   the Strong band, so the two can never disagree. */
+export function ConfidenceResults({ open }: { open: boolean }) {
+  if (!open) return null
+  return (
+    <div className="pp-conf-results">
+      {confidenceAnswers.map((a, i) => (
+        <div
+          className="pp-conf-answer pp-row-in"
+          key={a.statement}
+          style={{ animationDelay: `${i * 45}ms` }}
+        >
+          <p className="pp-conf-statement">{a.statement}</p>
+          <div
+            className="pp-conf-track"
+            role="img"
+            aria-label={`${a.statement} — ${a.value} out of 100, between "${a.low}" and "${a.high}"`}
+          >
+            <span className="pp-conf-dot" style={{ left: `${a.value}%` }} />
+          </div>
+          <div className="pp-conf-ends">
+            <span>{a.low}</span>
+            <span>{a.high}</span>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
