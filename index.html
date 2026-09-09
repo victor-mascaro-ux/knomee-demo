@@ -720,6 +720,7 @@
     welcome: 'Welcome page (A)',
     'welcome-b': 'Welcome page (B)',
     'client-experience': 'Client Experience',
+    'client-mobile': 'Client profile on mobile',
     'advisor-flow': 'Advisor as Prospect',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
@@ -1351,6 +1352,26 @@
     return 'advisor';
   };
 
+  // The demo's other screens. These sat in the product's own burger menu under
+  // Analysis / Prospect view / Mobile — but no advisor opens their account menu
+  // to look at the page their prospects see, or at their own flow. They are
+  // demo scaffolding, so they belong out here, and the labels are the ones the
+  // menu used. From the standalone ones (the welcome page, either phone, the
+  // advisor's flow) this panel is now the only way out, which is one more
+  // reason for it to carry them.
+  const SCREENS = [
+    ['segmentation', 'Segmentation', '#/segmentation'],
+    ['welcome', 'Welcome page', '#/welcome'],
+    ['client-experience', 'Client Experience', '#/client-experience'],
+    ['client-mobile', 'Client profile on mobile', '#/client-mobile'],
+    ['advisor-flow', 'Advisor as Prospect', '#/advisor-flow']
+  ];
+  // The welcome page's own A/B switch decides which version, so both count.
+  const screenIsOn = (id) => {
+    const v = canon(demoState.view);
+    return v === id || (id === 'welcome' && v === 'welcome-b');
+  };
+
   function demoSet(key, value) {
     demoState[key] = value;                 // optimistic; the app echoes back
     if (proto.contentWindow) {
@@ -1459,15 +1480,27 @@
     }
 
     // ── persona ──
+    // One of the other screens showing means none of the personas' own
+    // dashboards is, so the persona rows stay unmarked rather than claiming a
+    // page they aren't on.
+    const elsewhere = SCREENS.some(sc => screenIsOn(sc[0]));
     const mine = personaOf(canon(demoState.view));
-    const g = demoGroup('Persona');
+    const gp = demoGroup('Persona');
     PERSONAS.forEach(p => {
-      const on = p[0] === mine;
+      const on = !elsewhere && p[0] === mine;
       // Picking the persona you are already in would only yank the demo back
       // to that persona's first screen.
-      g.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
+      gp.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
     });
-    demoBody.appendChild(g);
+    demoBody.appendChild(gp);
+
+    // ── the other screens ──
+    const gs = demoGroup('Screens');
+    SCREENS.forEach(sc => {
+      const on = screenIsOn(sc[0]);
+      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(sc[2]); }));
+    });
+    demoBody.appendChild(gs);
   }
 
   function setDemoArmed(on) {
