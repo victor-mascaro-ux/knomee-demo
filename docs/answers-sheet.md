@@ -50,6 +50,61 @@ in for every device instead, set `DEFAULT_ENDPOINT` in
 > sheet of placeholder answers. Do not point it at anything you would mind
 > strangers writing to, and redeploy (which issues a new URL) if it leaks.
 
+## Testing it without answering anything
+
+Three tests, cheapest first. The first two do not involve the prototype at all,
+which is the point: when something is wrong you want to know *which* hop broke,
+and re-answering thirty questions to find out is no way to spend an afternoon.
+All three are also listed on the **Recorded answers** screen.
+
+### 1. The script against the sheet — no deployment, no app
+
+In the Apps Script editor, choose **`testRow`** from the function dropdown and
+press **Run**. Authorise it the first time.
+
+- ✅ A `_test` tab appears with one row on it.
+- **Run it a second time.** The row is *updated*, not duplicated — that is the
+  `Sitting ID` upsert the real rows depend on. The execution log says
+  `Wrote updated row 2`.
+- ❌ An error here is the script or the binding, and nothing else is worth
+  looking at yet.
+
+### 2. The deployment — no app
+
+Open your `/exec` URL in a browser tab. Then open it again with `?test=1` on
+the end.
+
+- ✅ Plain: `{"ok":true,"service":"knomee advisor answers","tabs":[…]}`
+- ✅ With `?test=1`: the same plus `"wrote":{…,"action":"appended"}`, and
+  another row on `_test`.
+- ❌ A Google sign-in page means *Who has access* is not **Anyone**. Fix that
+  and **redeploy** — editing a deployment's settings needs a new version.
+
+This is the **only test on this path that answers for itself**. Everything
+after it asks you to go and look at the sheet, because a post from the
+prototype comes back opaque by design.
+
+### 3. The prototype, on the real code path
+
+**Recorded answers → Post a test row.** Same method, same headers, same body
+shape as a finished sitting; it just goes to `_test`.
+
+- ✅ A `_test` row whose Note says *Posted from the prototype*.
+- ❌ Nothing in the sheet, having passed test 2, means the URL saved in the
+  browser is not the one you deployed.
+
+The message the app shows says the row was **sent** and nothing more. It cannot
+tell you it arrived, so it does not pretend to.
+
+### And a full sitting in four taps
+
+When you want a real row rather than a test one, don't answer anything: phone
+menu → **Fill in the sample answers** (loads the worked example into your own
+sheet) → menu → **Restart for the next person**, which records it and posts it.
+That writes a complete, realistic tab in about ten seconds.
+
+Delete the `_test` tab whenever you like — nothing reads it.
+
 ## What lands in the sheet
 
 One tab per person, named from the "Who's answering?" screen (blank →
