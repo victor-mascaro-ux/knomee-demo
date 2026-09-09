@@ -1,12 +1,14 @@
 /* My Candidates — the firm's pipeline, and the first tab of the Dynasty view.
-   The advisor's Prospects screen anatomy (title, command centre, toolbar,
-   tier-grouped table) with the firm's own columns and its own centre of
-   gravity: the behavioural clusters.
 
-   The table and the clusters read the same array, so they cannot disagree.
-   Clicking a cluster or a readiness stage filters the table to exactly the
-   people the card is talking about — a card that cannot show you its own
-   members is an assertion, not an insight. */
+   Deliberately the advisor's My Prospects screen, part for part: the same
+   Actionable Metrics dashboard (pulse, the one next action, the call-list, the
+   numbered reasoning behind it), the same toolbar, the same tier-grouped
+   table. Only the data underneath is the firm's, and only the columns that
+   have no advisor equivalent are new — stage, AUM, team size, route.
+
+   Everything the dashboard states is computed in `candidates.ts` and
+   `candidateInsights.ts`, which the table reads too, so the two halves of the
+   screen cannot disagree. */
 
 import { Fragment, useState } from 'react'
 import './firmCandidates.css'
@@ -16,31 +18,38 @@ import {
   profileOwner,
   tierGroups,
   type Candidate,
-  type Stage,
   type Tier,
 } from '../data/candidates'
-import { clusterOf, clusters, clusterLead, MIN_SAMPLE, unclustered } from '../data/candidateInsights'
-import type { ClusterKey } from '../data/candidateInsights'
+import { insights, talkTo } from '../data/candidateInsights'
 import {
   CaretDown,
   ChartIcon,
   ChevronDown,
+  ChevronRight,
   DownloadIcon,
   PlusIcon,
   SearchIcon,
 } from '../components/icons'
 
-/* The five stages, deepest colour at the far end, so the bar reads as
-   progress. Every value is a token. */
-const STAGE_META: { stage: Stage; fill: string; ink: string }[] = [
-  { stage: 'Pre-contemplation', fill: 'var(--k-grape-light)', ink: 'var(--k-plum)' },
-  { stage: 'Contemplation', fill: 'var(--k-lilac-soft)', ink: 'var(--k-plum)' },
-  { stage: 'Preparation', fill: 'var(--k-lilac)', ink: 'var(--k-plum)' },
-  { stage: 'Action', fill: 'var(--k-grape)', ink: 'var(--k-white)' },
-  { stage: 'Maintenance', fill: 'var(--k-plum)', ink: 'var(--k-white)' },
+/* The same three tiers the advisor's dashboard drills into, and the insight
+   each one surfaces as its "why". */
+const TIER_META = [
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
 ]
+type TierKey = (typeof TIER_META)[number]['key']
 
 const money = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1)}B` : `$${m}M`)
+
+/** The dashboard's help affordance, same glyph and bubble as the advisor's. */
+function HelpTip({ text }: { text: string }) {
+  return (
+    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+      ?
+    </span>
+  )
+}
 
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
   const isOwner = c.name === profileOwner
@@ -65,208 +74,249 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
   )
 }
 
-/* ── the command centre ─────────────────────────────────────────────────── */
+/* ── the command centre ─────────────────────────────────────────────────────
+   The advisor's layered dashboard, unchanged in shape: pulse (state) and the
+   one next action always visible; the call-list and the reasoning are
+   discoverable layers; the tier bar is the drill-in spine. */
 
-function Pulse({
-  stage,
-  onStage,
-}: {
-  stage: Stage | null
-  onStage: (s: Stage) => void
-}) {
-  return (
-    <div className="metric-tiles fc-pulse">
-      <div className="metric-tile">
-        <span className="metric-label">CANDIDATES</span>
-        <div className="metric-num">
-          <span className="metric-value">{candidateStats.total}</span>
-        </div>
-        <span className="fc-tile-sub">{candidateStats.scored} completed the flow</span>
-      </div>
-      <div className="metric-tile">
-        <span className="metric-label">AUM IN PIPELINE</span>
-        <div className="metric-num">
-          <span className="metric-value">{money(candidateStats.aum)}</span>
-        </div>
-        <span className="fc-tile-sub">avg KQ {candidateStats.avgKQ}</span>
-      </div>
-      <div className="metric-tile distribution">
-        <div className="dist-head">
-          <span className="metric-label">READINESS STAGE</span>
-          <span className="fc-tile-sub">
-            The column no other pipeline has. Tap a stage to filter.
-          </span>
-        </div>
-        <div className="dist-bar fc-stage-bar">
-          {candidateStats.byStage.map((s, i) => {
-            const meta = STAGE_META[i]
-            return (
-              <button
-                key={s.stage}
-                type="button"
-                className={`seg tt ${stage === s.stage ? 'is-sel' : ''} ${
-                  stage && stage !== s.stage ? 'is-dim' : ''
-                }`}
-                style={{ flex: s.count || 0.001, background: meta.fill, color: meta.ink }}
-                onClick={() => onStage(s.stage)}
-                aria-pressed={stage === s.stage}
-                data-tip={`${s.stage} · ${s.count} advisors · ${s.share}%`}
-              >
-                {s.count}
-              </button>
-            )
-          })}
-        </div>
-        <div className="dist-legend fc-stage-legend">
-          {candidateStats.byStage.map((s, i) => (
-            <div className="dist-leg" key={s.stage} style={{ flex: s.count || 0.001 }}>
-              <span className="dist-leg-name">
-                <i className="dot" style={{ background: STAGE_META[i].fill }} />
-                {s.stage}
-              </span>
-              <span className="dist-leg-range">{s.share}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
+function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => void }) {
+  const [tier, setTier] = useState<TierKey | null>(null)
+  const [listOpen, setListOpen] = useState(false)
+  const [whyOpen, setWhyOpen] = useState(false)
 
-function ClusterCard({
-  c,
-  active,
-  onPick,
-  onOpen,
-}: {
-  c: (typeof clusters)[number]
-  active: boolean
-  onPick: () => void
-  onOpen: (c: Candidate) => void
-}) {
-  const [open, setOpen] = useState(false)
-  return (
-    <section className={`fc-cluster ${active ? 'is-active' : ''}`}>
-      <header className="fc-cluster-head">
-        <span className="fc-cluster-n">{c.n}</span>
-        <div className="fc-cluster-title">
-          <h3>{c.name}</h3>
-          <p>{c.spine}</p>
-        </div>
-      </header>
+  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
+  const lead = flagged[0]
+  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
+  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
+  const orderedInsights = tierInsight
+    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
+    : insights
 
-      <div className="fc-cluster-stats">
-        <span className="fc-stat">
-          <b>{c.size}</b> advisors
-        </span>
-        <span className="fc-stat">
-          <b>{c.share}%</b> of pipeline
-        </span>
-        <span className="fc-stat">
-          avg KQ <b>{c.avgKQ}</b>
-        </span>
-        <span className="fc-stat">
-          avg book <b>{money(c.avgAUM)}</b>
-        </span>
-        <span className={`fc-stat ${c.thin ? 'is-thin' : ''}`}>
-          converts <b>{c.conv}%</b>
-          <i>
-            {c.signed}/{c.size}
-            {c.thin ? ` · n≤${MIN_SAMPLE}, not yet evidence` : ''}
-          </i>
-        </span>
-      </div>
+  const pickTier = (k: TierKey) =>
+    setTier((prev) => {
+      const next = prev === k ? null : k
+      setListOpen(next !== null)
+      return next
+    })
+  const clear = () => {
+    setTier(null)
+    setListOpen(false)
+  }
 
-      <p className="fc-cluster-appr">
-        <span className="fc-k">Recurring apprehension</span>
-        {c.apprehension.label} — {c.apprehension.count} of {c.size} ({c.apprehension.share}%)
-      </p>
-
-      <p className="fc-cluster-action">
-        <span className="fc-do">Do</span>
-        {c.action}
-      </p>
-      <p className="fc-cluster-why">{c.why}</p>
-
-      <div className="fc-cluster-foot">
-        <button type="button" className="fc-link" onClick={onPick} aria-pressed={active}>
-          {active ? 'Clear filter ✕' : 'Show in table'}
-        </button>
-        <button
-          type="button"
-          className="fc-link"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-        >
-          {open ? 'Hide the names' : `See the ${c.size}`} <ChevronDown />
-        </button>
-      </div>
-      <div className={`collapse ${open ? 'open' : ''}`}>
-        <div className="collapse-inner">
-          <div className="fc-members">
-            {c.members.map((m) => (
-              <span className="fc-member" key={m.name}>
-                {m.name === profileOwner ? (
-                  <button type="button" className="fc-member-link" onClick={() => onOpen(m)}>
-                    {m.name}
-                  </button>
-                ) : (
-                  m.name
-                )}
-                <i>
-                  KQ {m.kq} · {money(m.aum)}
-                </i>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function CommandCenter({
-  cluster,
-  onCluster,
-  stage,
-  onStage,
-  onOpen,
-}: {
-  cluster: ClusterKey | null
-  onCluster: (k: ClusterKey) => void
-  stage: Stage | null
-  onStage: (s: Stage) => void
-  onOpen: (c: Candidate) => void
-}) {
   return (
     <section className="card cmd-card">
       <header className="card-head">
         <div className="card-title">
           <ChartIcon color="#7639a1" />
-          <span>Actionable Insights</span>
+          <span>Actionable Metrics</span>
         </div>
+        <HelpTip text="The pipeline at a glance, who to talk to, and the reasoning behind it." />
       </header>
+
       <div className="cmd-body">
-        <Pulse stage={stage} onStage={onStage} />
-        <p className="fc-lead">{clusterLead}</p>
-        <div className="fc-clusters">
-          {clusters.map((c) => (
-            <ClusterCard
-              key={c.key}
-              c={c}
-              active={cluster === c.key}
-              onPick={() => onCluster(c.key)}
-              onOpen={onOpen}
-            />
-          ))}
+        {/* Layer 0 — the pulse */}
+        <div className="metric-tiles cmd-pulse">
+          <div className="metric-tile">
+            <span className="metric-label">TOTAL CANDIDATES</span>
+            <div className="metric-num">
+              <span className="metric-value">{candidateStats.total}</span>
+            </div>
+          </div>
+          <div className="metric-tile">
+            <span className="metric-label">AVG KQ SCORE</span>
+            <div className="metric-num">
+              <span className="metric-value">{candidateStats.avgKQ.toFixed(1)}</span>
+            </div>
+          </div>
+          <div className="metric-tile distribution">
+            <div className="dist-head">
+              <span className="metric-label">TIER DISTRIBUTION</span>
+              {tier ? (
+                <button className="cmd-clear" type="button" onClick={clear}>
+                  Clear filter ✕
+                </button>
+              ) : (
+                <span className="dist-filter-hint">
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    aria-hidden
+                  >
+                    <path
+                      d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  Tap a tier to filter
+                </span>
+              )}
+            </div>
+            <div className="dist-bar cmd-dist-bar">
+              {TIER_META.map((m) => {
+                const n = candidateStats.byTier[m.tierId]
+                return (
+                  <button
+                    key={m.key}
+                    type="button"
+                    style={{ flex: n || 0.001 }}
+                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
+                      tier && tier !== m.key ? 'is-dim' : ''
+                    }`}
+                    onClick={() => pickTier(m.key)}
+                    aria-pressed={tier === m.key}
+                    data-tip={`${m.key} · ${m.name} · ${n}`}
+                  >
+                    {n}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="dist-legend dist-legend-bars">
+              {TIER_META.map((m) => (
+                <div
+                  className="dist-leg"
+                  key={m.key}
+                  style={{ flex: candidateStats.byTier[m.tierId] || 0.001 }}
+                >
+                  <span className="dist-leg-name">
+                    <i className={`dot ${m.dot}`} />
+                    {m.key} · {m.name}
+                  </span>
+                  <span className="dist-leg-range">{m.range}</span>
+                </div>
+              ))}
+            </div>
+            {candidateStats.byTier.incomplete > 0 && (
+              <p className="dist-foot">
+                {candidateStats.byTier.incomplete} incomplete profile
+                {candidateStats.byTier.incomplete === 1 ? '' : 's'} not shown
+              </p>
+            )}
+          </div>
         </div>
-        {unclustered.length > 0 && (
-          <p className="fc-unclustered">
-            {unclustered.length} scored advisor{unclustered.length === 1 ? '' : 's'} match no
-            cluster rule. They are in the table and in no card — if this number grows, the rules
-            need revisiting rather than the pipeline.
+
+        {/* Layer 0 — the one next action */}
+        <div className="cmd-focus">
+          <p className="cmd-focus-line">
+            {meta ? (
+              <>
+                <b>
+                  {meta.key} · {meta.name}
+                </b>{' '}
+                — {flagged.length} flagged to talk to this week.
+              </>
+            ) : (
+              <>
+                <b>{flagged.length} candidates</b> flagged to talk to this week.
+              </>
+            )}
           </p>
-        )}
+          {lead ? (
+            <button
+              className="cmd-lead"
+              type="button"
+              onClick={() => setListOpen((o) => !o)}
+              aria-expanded={listOpen}
+            >
+              <span className="cmd-lead-tag">Start with</span>
+              <span className="cmd-lead-name">{lead.name}</span>
+              <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
+                {lead.tier}
+              </span>
+              <span className="cmd-lead-kq">KQ {lead.kq}</span>
+              <span className="cmd-lead-niche">{lead.niche}</span>
+              <span className="cmd-lead-more">
+                {listOpen ? 'Hide' : `See all ${flagged.length}`}
+                <ChevronDown />
+              </span>
+            </button>
+          ) : (
+            <p className="cmd-empty">
+              None flagged in this tier this week — keep them on a light-touch nurture track.
+            </p>
+          )}
+        </div>
+
+        {/* Layer 1 — the full call-list */}
+        <div className={`collapse ${listOpen && flagged.length ? 'open' : ''}`}>
+          <div className="collapse-inner">
+            <div className="talk-list cmd-talk-list">
+              {flagged.map((t) => (
+                <div className="talk-card" key={t.name}>
+                  <div className="talk-head">
+                    {(() => {
+                      // Only the candidate whose profile is built out is a link,
+                      // the same rule the Prospects and Clients tables follow.
+                      const rec = candidates.find((c) => c.name === t.name)
+                      return rec && rec.name === profileOwner ? (
+                        <button
+                          type="button"
+                          className="talk-name name-link-btn"
+                          onClick={() => onOpenProfile(rec)}
+                        >
+                          {t.name}
+                        </button>
+                      ) : (
+                        <span className="talk-name">{t.name}</span>
+                      )
+                    })()}
+                    <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
+                      {t.tier}
+                    </span>
+                    <span className="talk-kq">KQ {t.kq}</span>
+                    <span className="talk-niche">{t.niche}</span>
+                  </div>
+                  <div className="talk-chips">
+                    {t.said.map((s, i) => (
+                      <span className="talk-chip-wrap" key={s}>
+                        <span className="talk-chip">{s}</span>
+                        {i < t.said.length - 1 && <ChevronRight />}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Layer 1 — the evidence */}
+        <div className="cmd-why">
+          <button
+            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
+            type="button"
+            aria-expanded={whyOpen}
+            onClick={() => setWhyOpen((o) => !o)}
+          >
+            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
+          </button>
+          {meta && tierInsight && !whyOpen && (
+            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
+              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
+              <span className="cmd-why-peek-more">Read more →</span>
+            </button>
+          )}
+          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
+            <div className="collapse-inner">
+              <div className="cmd-insights">
+                {orderedInsights.map((ins) => (
+                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
+                    <div className="insight-num">{ins.n}</div>
+                    <div className="insight-text">
+                      <div className="insight-title">{ins.title}</div>
+                      <p className="insight-body">{ins.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -364,7 +414,7 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
             <th className="col-num">AUM</th>
             <th className="col-num">Team</th>
             <th className="col-firm-word">Route</th>
-            <th className="col-action">Top action</th>
+            <th className="col-action">Top Action</th>
           </tr>
         </thead>
         <tbody>
@@ -384,7 +434,9 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                         type="button"
                         className="group-toggle"
                         aria-expanded={!isCollapsed}
-                        aria-label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+                        aria-label={
+                          isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`
+                        }
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleGroup(group.id)
@@ -406,7 +458,7 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
         </tbody>
       </table>
       {rows.length === 0 && (
-        <p className="fc-empty">Nothing matches this filter. Clear it to see the pipeline.</p>
+        <p className="fc-empty">No candidate matches that search.</p>
       )}
     </div>
   )
@@ -423,32 +475,16 @@ export default function FirmCandidatesScreen({
   onDownload: () => void
   onInvite: () => void
 }) {
-  const [cluster, setCluster] = useState<ClusterKey | null>(null)
-  const [stage, setStage] = useState<Stage | null>(null)
   const [query, setQuery] = useState('')
-
-  const pickCluster = (k: ClusterKey) => setCluster((p) => (p === k ? null : k))
-  const pickStage = (s: Stage) => setStage((p) => (p === s ? null : s))
-
   const q = query.trim().toLowerCase()
   const rows = candidates.filter(
-    (c) =>
-      (!cluster || clusterOf(c) === cluster) &&
-      (!stage || c.stage === stage) &&
-      (!q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q)),
+    (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
   )
-  const activeCluster = clusters.find((c) => c.key === cluster)
 
   return (
     <>
       <h1 className="page-title">My Candidates</h1>
-      <CommandCenter
-        cluster={cluster}
-        onCluster={pickCluster}
-        stage={stage}
-        onStage={pickStage}
-        onOpen={onOpenProfile}
-      />
+      <CommandCenter onOpenProfile={onOpenProfile} />
 
       <div className="toolbar">
         <div className="search-box">
@@ -469,25 +505,6 @@ export default function FirmCandidatesScreen({
           </button>
         </div>
       </div>
-
-      {(activeCluster || stage) && (
-        <div className="fc-filters">
-          <span className="fc-filter-lead">
-            Showing {rows.length} of {candidateStats.total}
-          </span>
-          {activeCluster && (
-            <button type="button" className="fc-chip" onClick={() => setCluster(null)}>
-              {activeCluster.n}. {activeCluster.name} ✕
-            </button>
-          )}
-          {stage && (
-            <button type="button" className="fc-chip" onClick={() => setStage(null)}>
-              {stage} ✕
-            </button>
-          )}
-          {activeCluster && <span className="fc-filter-do">{activeCluster.action}</span>}
-        </div>
-      )}
 
       <Table rows={rows} onOpen={onOpenProfile} />
     </>

@@ -14,6 +14,7 @@
 import {
   candidates,
   candidateStats,
+  profileOwner as MARCUS,
   type Candidate,
 } from './candidates'
 import { MIN_SAMPLE } from './analytics'
@@ -200,3 +201,160 @@ const best = [...clusters]
 export const clusterLead = `${largest.size} of ${candidateStats.scored} advisors — the largest group in the pipeline — can describe the firm they want and have taken no step toward it.${
   best ? ` The group that actually converts is “${best.name}”: ${best.signed} of ${best.size}.` : ''
 } Two different conversations, and today they get the same one.`
+
+/* ── the call-list and the numbered insights ─────────────────────────────
+   My Candidates carries the same Actionable Metrics dashboard the advisor's
+   My Prospects does — pulse, the one next action, the call-list, then the
+   numbered reasoning behind it. These are the firm's versions of `talkTo` and
+   `insights`, derived from the pipeline rather than typed in. */
+
+export interface FirmTalkTo {
+  name: string
+  tier: string
+  kq: number
+  /** The firm's equivalent of a niche: which cluster they landed in. */
+  niche: string
+  /** What they said, in their own answers. */
+  said: string[]
+}
+
+const TIER_LABEL: Record<string, string> = {
+  tier1: 'Tier 1',
+  tier2: 'Tier 2',
+  tier3: 'Tier 3',
+}
+
+const STAGE_CHIP: Record<string, string> = {
+  'Pre-contemplation': 'Not thinking about it',
+  Contemplation: 'Thought about it, no steps taken',
+  Preparation: 'Knows the steps, starting',
+  Action: 'Taking action now',
+  Maintenance: 'Made changes, staying on track',
+}
+
+const SEAT_CHIP: Record<string, string> = {
+  'G2 not aligned': 'The junior advisors are not aligned yet',
+  Spouse: 'Spouse has a say',
+  Partner: 'A business partner has a say',
+  Aligned: 'Team already aligned',
+  'Nobody but me': 'Nobody else has a say',
+}
+
+const money = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1)}B` : `$${m}M`)
+
+function chips(c: Candidate): string[] {
+  return [
+    c.change,
+    STAGE_CHIP[c.stage ?? ''] ?? '',
+    `Blocked on ${c.apprehension.toLowerCase()}`,
+    SEAT_CHIP[c.secondSeat] ?? '',
+    `${money(c.aum)} · team of ${c.team}`,
+  ].filter(Boolean)
+}
+
+/* Marcus is the one candidate whose answers we hold verbatim, so his chips are
+   his own words rather than a summary of his fields. */
+const MARCUS_CHIPS = [
+  'Wants ownership, control, his team’s future',
+  '“Do the clients come with me”',
+  'Two junior advisors owed something he cannot give them',
+  'Asked for a platform partner outright',
+  'Three years of weighing it, no step taken',
+]
+
+const topOf = (key: ClusterKey, by: (c: Candidate) => number, n = 1) =>
+  [...(clusters.find((c) => c.key === key)?.members ?? [])].sort((a, b) => by(b) - by(a)).slice(0, n)
+
+const kqOf = (c: Candidate) => c.kq ?? 0
+const aumOf = (c: Candidate) => c.aum
+
+/* Who to talk to this week: the strongest of the groups whose next action is a
+   conversation, plus the biggest book among the advisors who want it and have
+   not started. The three clusters whose action is NOT a call this week —
+   unclear, succession, no-fit — are deliberately absent. */
+const flaggedCandidates: Candidate[] = [
+  ...topOf('ready-blocked', kqOf, 2),
+  ...topOf('team-blocked', kqOf, 1),
+  ...topOf('wants-waiting', aumOf, 3),
+]
+
+export const talkTo: FirmTalkTo[] = flaggedCandidates
+  .filter((c, i, xs) => xs.findIndex((x) => x.name === c.name) === i)
+  .map((c) => ({
+    name: c.name,
+    tier: TIER_LABEL[c.tier] ?? 'Tier 2',
+    kq: c.kq as number,
+    niche: clusters.find((cl) => cl.key === clusterOf(c))?.name ?? '',
+    said: c.name === MARCUS ? MARCUS_CHIPS : chips(c),
+  }))
+  .sort((a, b) => b.kq - a.kq)
+
+export interface Insight {
+  n: number
+  title: string
+  body: string
+}
+
+const S = candidateStats.scored
+const share = (n: number) => Math.round((n / S) * 100)
+const t1 = candidateStats.byTier.tier1
+const t2 = candidateStats.byTier.tier2
+const t3 = candidateStats.byTier.tier3
+const cl = (key: ClusterKey) => clusters.find((c) => c.key === key)!
+
+const dims: [string, number][] = [
+  ['Intent', candidateStats.avgIntent],
+  ['Clarity', candidateStats.avgClarity],
+  ['Receptivity', candidateStats.avgReceptivity],
+]
+const softest = [...dims].sort((a, b) => a[1] - b[1])[0]
+
+const ready = cl('ready-blocked')
+const waiting = cl('wants-waiting')
+const succession = cl('succession')
+const team = cl('team-blocked')
+const unclear = cl('unclear')
+const noFit = cl('no-fit')
+
+export const insights: Insight[] = [
+  {
+    n: 1,
+    title: `${share(t1)}% Actionable Now`,
+    body: `${t1} of ${S} scored candidates (${share(t1)}%) fall in Tier 1 (KQ 70–100). ${ready.size} of them are “${ready.name.toLowerCase()}” — high intent, high clarity, one blocker left — and they convert at ${ready.conv}%. Answer that one blocker with evidence and book the meeting; this is where the quarter is won.`,
+  },
+  {
+    n: 2,
+    title: 'Intent Is the Gap, Not Interest',
+    body: `Pipeline avg Clarity is ${candidateStats.avgClarity} against avg Intent of ${candidateStats.avgIntent}. Advisors can describe the firm they want long before they take a step toward it, so the pipeline's problem is movement rather than appetite. Sell the transition, not the destination.`,
+  },
+  {
+    n: 3,
+    title: `${softest[0]} Is the Softest Dimension`,
+    body: `Avg ${softest[0]} is ${softest[1]} — the lowest of the three. The work is not explaining the platform better; it is turning a standing preference into a dated decision with a named first step.`,
+  },
+  {
+    n: 4,
+    title: `${waiting.size} Want It and Haven’t Started`,
+    body: `The largest group at ${waiting.share}% of the pipeline, avg KQ ${waiting.avgKQ}, converting at ${waiting.conv}%. ${waiting.apprehension.count} of ${waiting.size} name ${waiting.apprehension.label.toLowerCase()} as the blocker. ${waiting.action} These are lost to inertia, not to a competitor.`,
+  },
+  {
+    n: 5,
+    title: `${succession.size} Are Succession-Shaped, Not Independence-Shaped`,
+    body: `Future You says winding down or an exit, or the named change is a sale or a successor. ${succession.action} Sending these to Connect is the most expensive routing error available — a quarter of rep time on a firm they never intended to build.`,
+  },
+  {
+    n: 6,
+    title: `${team.size} Are Blocked on the Second Seat`,
+    body: `Their own readiness is high — avg KQ ${team.avgKQ} — and the G2 advisors are not aligned. ${team.action} The blocker is a conversation the advisor has not had yet, usually because they cannot answer it.`,
+  },
+  {
+    n: 7,
+    title: 'Tier 2 Is the Biggest Opportunity Pool',
+    body: `${t2} of ${S} scored candidates (${share(t2)}%) sit in Tier 2 — the largest segment. ${unclear.size} of them are “${unclear.name.toLowerCase()}”: something is wrong and they cannot say what independence would fix. ${unclear.action} Pitching that group wastes the meeting, and they can tell.`,
+  },
+  {
+    n: 8,
+    title: 'Tier 3 Should Stay in a Low-Touch Nurture Track',
+    body: `${t3} of ${S} scored candidates (${share(t3)}%) fall in Tier 3. ${noFit.size} advisors chose “change nothing, but fix the parts that don’t work”. ${noFit.action} The instrument has to be able to reach this conclusion, or the whole thing reads as a funnel.`,
+  },
+]
