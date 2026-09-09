@@ -66,32 +66,32 @@ export const clientProfile = {
 
   keyHighlights: [
     {
-      icon: 'target',
+      icon: 'financial-joy',
       title: 'Core Values',
       text: 'Family, freedom, meaningful connection, and a life that feels grounded and joyful.',
     },
     {
-      icon: 'sparkle',
+      icon: 'financial-joy',
       title: 'Joy & Motivation',
       text: 'Travel, enjoying the moment, and having the flexibility to live generously and on her own terms.',
     },
     {
-      icon: 'warning',
+      icon: 'outlook',
       title: 'Biggest Concern',
       text: 'Balancing college costs for her kids with future health needs and aging-family responsibilities.',
     },
     {
-      icon: 'target',
+      icon: 'outlook',
       title: 'Hopes',
       text: 'Navigating major change, including a separation and a career shift, while rethinking what comes next.',
     },
     {
-      icon: 'frame',
+      icon: 'future-you',
       title: 'Lifestyle Aspiration',
       text: 'Navigating major change, including a separation and a career shift, while rethinking what comes next.',
     },
     {
-      icon: 'bolt',
+      icon: 'future-you',
       title: 'Future Vision',
       text: 'Living by the beach or abroad, possibly running a business, helping others, building a warm home life.',
     },
