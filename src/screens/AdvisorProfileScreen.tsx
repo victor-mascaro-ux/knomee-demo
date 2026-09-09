@@ -46,6 +46,7 @@ import icTheMove from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
+import { scrollPageToTop } from '../reviewBridge'
 
 type ProfileTab = 'id' | 'readiness' | 'playbook'
 
@@ -177,7 +178,10 @@ export default function AdvisorProfileScreen({
                 key={id}
                 type="button"
                 className={`pp-tab ${tab === id ? 'is-active' : ''}`}
-                onClick={() => setTab(id)}
+                onClick={() => {
+                  setTab(id)
+                  scrollPageToTop()
+                }}
               >
                 {TAB_LABEL[id]}
               </button>

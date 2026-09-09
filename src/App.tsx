@@ -99,6 +99,7 @@ import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import CollapsibleCard from './components/CollapsibleCard'
+import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -4202,7 +4203,10 @@ export default function App() {
                   className={`tab ${firmScreen === t.id ? 'tab-active' : ''}`}
                   type="button"
                   data-active={firmScreen === t.id}
-                  onClick={() => setFirmScreen(t.id)}
+                  onClick={() => {
+                    setFirmScreen(t.id)
+                    scrollPageToTop()
+                  }}
                 >
                   {t.label}
                 </button>
@@ -4272,7 +4276,10 @@ export default function App() {
               className={`tab ${screen === t.id ? 'tab-active' : ''}`}
               type="button"
               data-active={screen === t.id}
-              onClick={() => setScreen(t.id)}
+              onClick={() => {
+                setScreen(t.id)
+                scrollPageToTop()
+              }}
             >
               {t.label}
             </button>

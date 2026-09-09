@@ -22,6 +22,7 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
+import { scrollPageToTop } from '../reviewBridge'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -122,7 +123,10 @@ export default function ProspectProfileScreen({
                 key={id}
                 type="button"
                 className={`pp-tab ${tab === id ? 'is-active' : ''}`}
-                onClick={() => setTab(id)}
+                onClick={() => {
+                  setTab(id)
+                  scrollPageToTop()
+                }}
               >
                 {label}
               </button>

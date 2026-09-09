@@ -58,9 +58,10 @@
   padding: 13px 28px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   /* Where you are does not scroll away from you. Opaque, or the cards read
-     through it as it holds. */
+     through it as it holds. Offsets start at the top bar's height, since the
+     bar holds its own place above this one. */
   position: sticky;
-  top: 0;
+  top: var(--topbar-h);
   z-index: 6;
   background: #fff;
 }
@@ -98,7 +99,7 @@
   /* Under both bars. It used to pin at 12px from the top of the window, which
      is behind them — the rail stopped while everything around it kept moving,
      and the whole column looked like it had come loose. */
-  top: calc(var(--pp-crumb-h) + var(--pp-tabs-h) + 12px);
+  top: calc(var(--topbar-h) + var(--pp-crumb-h) + var(--pp-tabs-h) + 12px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -171,9 +172,9 @@
   gap: 10px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   margin-bottom: 20px;
-  /* Under the breadcrumb, and staying there. */
+  /* Under the bar and the breadcrumb, and staying there. */
   position: sticky;
-  top: var(--pp-crumb-h);
+  top: calc(var(--topbar-h) + var(--pp-crumb-h));
   z-index: 5;
   background: #fff;
 }
@@ -960,6 +961,12 @@
   .pp-main > *:nth-child(3) { animation-delay: 0.06s; }
   .pp-main > *:nth-child(4) { animation-delay: 0.09s; }
   .pp-side-inner { animation: pp-fade 0.32s ease both; }
+  /* The tab bar is sticky too, and a sticky offset and a transform-based
+     entrance are the same channel: pp-rise runs with `fill: both`, so after it
+     lands it pins translateY(0) and anything positioning this element by
+     transform is discarded. It fades instead. Declared after `.pp-main > *`,
+     which it ties with on specificity. */
+  .pp-tabs { animation: pp-fade 0.32s ease both; }
 }
 
 /* Elevated white tiles lift on hover. */

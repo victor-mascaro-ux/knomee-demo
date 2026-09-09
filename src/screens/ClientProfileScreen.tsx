@@ -29,6 +29,7 @@ import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodWorried from '../assets/moods/worried.svg'
+import { scrollPageToTop } from '../reviewBridge'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -511,7 +512,10 @@ export default function ClientProfileScreen({
                   key={id}
                   type="button"
                   className={`pp-tab ${tab === id ? 'is-active' : ''}`}
-                  onClick={() => setTab(id)}
+                  onClick={() => {
+                    setTab(id)
+                    scrollPageToTop()
+                  }}
                 >
                   {label}
                 </button>
