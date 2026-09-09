@@ -367,6 +367,15 @@
     display: none;
   }
 }
+/* Three tiles across is a postage stamp on a phone. This lives here rather
+   than in prospectProfile.css because that file loads first — the board's own
+   3-column rule would win on equal specificity. */
+@container (max-width: 720px) {
+  .cp-board-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 128px;
+  }
+}
 
 /* ---------- sidebar people: portraits, and rows you can open ---------- */
 .cp-person {

@@ -5,7 +5,7 @@
    the desktop renders. Its phone layout answers to a container query on .pp, so
    putting it in a 393px screen is enough to trigger it. */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './client-experience.css'
 import ClientProfileScreen from './ClientProfileScreen'
 import {
@@ -18,6 +18,7 @@ import {
   useFitToWindow,
   useZoom,
 } from './ClientExperienceScreen'
+import { useDragScroll } from './mobileGestures'
 import { clientProfile } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 
@@ -42,6 +43,13 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom
   const [, force] = useState(0)
+  /* The rail — portrait, household, advisory team — sits at the foot of the
+     page on a phone. The burger brings it up as a drawer so it is a tap away
+     rather than a long scroll. */
+  const [menuOpen, setMenuOpen] = useState(false)
+  const viewport = useRef<HTMLDivElement>(null)
+  /* Drag to scroll, as a finger would. */
+  useDragScroll(viewport)
 
   return (
     <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
@@ -56,11 +64,33 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
             <div className="cx-appbar-brand">
               <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
             </div>
+            <button
+              className="cx-appbar-burger"
+              type="button"
+              aria-label={menuOpen ? 'Close menu' : 'Menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
           </header>
           {/* The screen scrolls; what scrolls inside it is the desktop page. */}
-          <div className="cx-viewport cxm-viewport">
+          <div
+            className={`cx-viewport cxm-viewport${menuOpen ? ' is-menu-open' : ''}`}
+            ref={viewport}
+          >
             <ClientProfileScreen client={EMILY} onBack={() => force((n) => n + 1)} />
           </div>
+          {menuOpen && (
+            <button
+              className="cxm-scrim"
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+            />
+          )}
         </IPhone>
       </div>
 

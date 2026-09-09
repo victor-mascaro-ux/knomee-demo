@@ -24,6 +24,14 @@ import type {
   Word as WordT,
 } from '../data/readiness'
 import { CheckIcon } from '../components/icons'
+import icScore from '../assets/cards/readiness-score.svg'
+import icVelocity from '../assets/cards/velocity.svg'
+import icMotivators from '../assets/cards/motivators.svg'
+import icApprehensions from '../assets/cards/apprehensions.svg'
+import icStarters from '../assets/cards/starters.svg'
+import icCommunication from '../assets/cards/communication.svg'
+import icTopAction from '../assets/cards/top-action.svg'
+import icQuestions from '../assets/adventures/questions.svg'
 
 /* ── shared bits ────────────────────────────────────────────────────────── */
 
@@ -91,22 +99,23 @@ function Tag({ name }: { name: TagName }) {
   return <span className={`rd-tag ${TAG_CLASS[name]}`}>{name}</span>
 }
 
-/** The card head every panel shares: a tinted glyph, then the title. */
+/** The card head every panel shares — the Financial ID's head exactly: the
+    card's own symbol on a 22px white disc, then the title. Each symbol is
+    colour-coded to what the card is about, so the card is findable before it
+    is read. */
 function Head({
   icon,
-  tone,
   title,
   children,
 }: {
-  icon: React.ReactNode
-  tone: string
+  icon: string
   title: string
   children?: React.ReactNode
 }) {
   return (
     <div className="pp-card-head">
       <span className="pp-card-title">
-        <span className={`rd-head-ic rd-ic-${tone}`}>{icon}</span>
+        <img className="pp-card-ic" src={icon} alt="" />
         {title}
       </span>
       {children}
@@ -114,37 +123,8 @@ function Head({
   )
 }
 
-/* ── glyphs. Line icons at 18px on a tinted disc, matching the dashboard's
-      card-title treatment. ── */
-
-const BarsGlyph = () => (
-  <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden>
-    <rect x="2" y="9" width="3.4" height="7" rx="1" fill="currentColor" />
-    <rect x="7.3" y="5" width="3.4" height="11" rx="1" fill="currentColor" />
-    <rect x="12.6" y="2" width="3.4" height="14" rx="1" fill="currentColor" />
-  </svg>
-)
-const BoltGlyph = () => (
-  <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden>
-    <path d="M10.2 1.5 3.6 10.2h4.2l-1.2 6.3 6.9-9h-4.4l1.1-6Z" fill="currentColor" />
-  </svg>
-)
-const SparkGlyph = () => (
-  <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden>
-    <path
-      d="M9 1.6l1.5 4.2 4.2 1.5-4.2 1.5L9 13l-1.5-4.2L3.3 7.3l4.2-1.5L9 1.6Z"
-      fill="currentColor"
-    />
-    <path d="M14.6 11.4l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z" fill="currentColor" />
-  </svg>
-)
-const AlertGlyph = () => (
-  <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden>
-    <circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M9 5.3v4.4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    <circle cx="9" cy="12.4" r="1" fill="currentColor" />
-  </svg>
-)
+/* The one glyph still drawn in code: the small bubble that marks each starter
+   and each question row. The card symbols are artwork, in ../assets/cards. */
 const ChatGlyph = () => (
   <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden>
     <path
@@ -213,7 +193,7 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
 export function ReadinessSnapshot({ s }: { s: Snapshot }) {
   return (
     <section className="pp-card rd-card rd-snapshot">
-      <Head icon={<BarsGlyph />} tone="grape" title="Conversion Readiness Snapshot" />
+      <Head icon={icScore} title="Conversion Readiness Snapshot" />
       <div className="rd-snapshot-body">
         <div className="rd-kq">
           <span className="rd-kq-title">Knomee Quotient (KQ)</span>
@@ -256,7 +236,7 @@ function Action({ children }: { children: string }) {
 export function VelocityCard({ v }: { v: Velocity }) {
   return (
     <section className="pp-card rd-card rd-col">
-      <Head icon={<BoltGlyph />} tone="grape" title={v.title} />
+      <Head icon={icVelocity} title={v.title} />
       <div className="rd-velocity">
         <span className="rd-verdict">{v.verdict}</span>
         <ul className="rd-points">
@@ -292,7 +272,7 @@ function DriverList({ items, kind }: { items: Driver[]; kind: 'motivator' | 'con
 export function MotivatorsCard({ items, action }: { items: Driver[]; action?: string }) {
   return (
     <section className="pp-card rd-card rd-col">
-      <Head icon={<SparkGlyph />} tone="green" title="Motivators" />
+      <Head icon={icMotivators} title="Motivators" />
       <DriverList items={items} kind="motivator" />
       {action && <Action>{action}</Action>}
     </section>
@@ -302,7 +282,7 @@ export function MotivatorsCard({ items, action }: { items: Driver[]; action?: st
 export function ApprehensionsCard({ items, action }: { items: Driver[]; action?: string }) {
   return (
     <section className="pp-card rd-card rd-col">
-      <Head icon={<AlertGlyph />} tone="crimson" title="Apprehensions" />
+      <Head icon={icApprehensions} title="Apprehensions" />
       <DriverList items={items} kind="concern" />
       {action && <Action>{action}</Action>}
     </section>
@@ -404,7 +384,7 @@ export function StartersCard({
 }) {
   return (
     <section className="pp-card rd-card">
-      <Head icon={<ChatGlyph />} tone="grape" title="Conversation Starters" />
+      <Head icon={icStarters} title="Conversation Starters" />
       <div className="rd-starters">
         {starters.map((s, i) => (
           <StarterRow s={s} i={i} key={s.quote} />
@@ -454,7 +434,7 @@ export function QuestionsCard({
 }) {
   return (
     <section className="pp-card rd-card">
-      <Head icon={<ChatGlyph />} tone="teal" title="Questions They May Ask">
+      <Head icon={icQuestions} title="Questions They May Ask">
         {note && <span className="rd-head-note">{note}</span>}
       </Head>
       <div className="rd-asks">
@@ -483,7 +463,7 @@ function Word({ w, i }: { w: WordT; i: number }) {
 export function CommunicationRail({ d }: { d: PlaybookTab }) {
   return (
     <section className="pp-card rd-card rd-comm">
-      <Head icon={<ChatGlyph />} tone="grape" title="Communication" />
+      <Head icon={icCommunication} title="Communication" />
 
       <h4 className="rd-comm-label">Words to Use</h4>
       <div className="rd-words rd-words-use">
@@ -513,9 +493,7 @@ export function PlaybookTabView({ d, extras }: { d: PlaybookTab; extras?: React.
   return (
     <div className="rd">
       <div className="rd-top-action">
-        <span className="rd-top-ic" aria-hidden>
-          <SparkGlyph />
-        </span>
+        <img className="pp-card-ic rd-top-ic" src={icTopAction} alt="" />
         <b>Top Action</b>
         <span className="rd-top-text">{d.topAction}</span>
       </div>
