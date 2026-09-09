@@ -137,9 +137,9 @@ const ChatGlyph = () => (
   </svg>
 )
 
-/* ── the KQ ring ────────────────────────────────────────────────────────── */
+/* ── the score ring ─────────────────────────────────────────────────────── */
 
-function KqRing({ value }: { value: number }) {
+function ScoreRing({ value, label }: { value: number; label: string }) {
   const { ref, seen } = useSeen<HTMLDivElement>()
   const shown = useCountUp(seen ? value : 0)
   // A 270°-gap-free dial: the track is the full circle, the fill is the score,
@@ -165,7 +165,7 @@ function KqRing({ value }: { value: number }) {
           transform="rotate(-90 100 100)"
         />
       </svg>
-      <span className="rd-ring-num" aria-label={`Knomee Quotient ${value}`}>
+      <span className="rd-ring-num" aria-label={`${label} ${value}`}>
         {shown}
       </span>
     </div>
@@ -191,17 +191,20 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
 }
 
 export function ReadinessSnapshot({ s }: { s: Snapshot }) {
+  const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
   return (
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title="Conversion Readiness Snapshot" />
       <div className="rd-snapshot-body">
         <div className="rd-kq">
-          <span className="rd-kq-title">Knomee Quotient (KQ)</span>
+          <span className="rd-kq-title">
+            {score.name} ({score.abbr})
+          </span>
           <span className="rd-kq-q">{s.question}</span>
-          <KqRing value={s.kq} />
+          <ScoreRing value={s.kq} label={score.name} />
         </div>
         <div className="rd-breakdown">
-          <span className="rd-breakdown-label">KQ Breakdown:</span>
+          <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
           <div className="rd-dims">
             {s.dimensions.map((d, i) => (
               <DimensionCard d={d} i={i} key={d.key} />

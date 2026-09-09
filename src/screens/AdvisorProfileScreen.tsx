@@ -153,7 +153,7 @@ export default function AdvisorProfileScreen({
               Add to Network
             </button>
             <div className="ap-side-stat">
-              <span className="ap-side-stat-k">Knomee Quotient</span>
+              <span className="ap-side-stat-k">Enterprise Quotient</span>
               <span className="ap-side-stat-v">
                 {kq}
                 <i>

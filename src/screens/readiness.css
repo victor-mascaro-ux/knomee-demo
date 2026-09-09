@@ -193,7 +193,7 @@
   transform: none;
 }
 
-/* The tier banner takes its tier's colour from the KQ ramp. */
+/* The tier banner takes its tier's colour from the score ramp. */
 .rd-tier {
   margin-top: var(--space-12);
   padding: var(--space-12) var(--space-14);

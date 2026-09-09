@@ -358,6 +358,7 @@ export default function ClientProfileScreen({
   client,
   onBack,
   ownerMenu,
+  mine,
 }: {
   client: Client
   onBack: () => void
@@ -367,6 +368,13 @@ export default function ClientProfileScreen({
      a desktop. Nothing renders here on a desktop, where the rail is on screen
      already. */
   ownerMenu?: ReactNode
+  /* Emily reading her own Financial ID in her own app, rather than her advisor
+     reading it about her. Same page — it is the artefact the five adventures
+     produce — without the two things that only make sense from a client list:
+     the breadcrumb back to one, and the Client Insights tab beside it, which is
+     the advisor's read on her and not hers. The rail is untouched: her
+     household and her advisory team are hers. */
+  mine?: boolean
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
   const cp = clientProfile
@@ -406,18 +414,20 @@ export default function ClientProfileScreen({
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
 
   return (
-    <div className="pp cp">
-      <nav className="pp-crumb">
-        <button type="button" className="pp-crumb-link" onClick={onBack}>
-        My Clients
-        </button>
-        <span className="pp-crumb-sep">›</span>
-        <button type="button" className="pp-crumb-link" onClick={onBack}>
-        {cp.household}
-        </button>
-        <span className="pp-crumb-sep">›</span>
-        <span className="pp-crumb-cur">{client.name}</span>
-      </nav>
+    <div className={`pp cp ${mine ? 'cp-mine' : ''}`}>
+      {!mine && (
+        <nav className="pp-crumb">
+          <button type="button" className="pp-crumb-link" onClick={onBack}>
+            My Clients
+          </button>
+          <span className="pp-crumb-sep">›</span>
+          <button type="button" className="pp-crumb-link" onClick={onBack}>
+            {cp.household}
+          </button>
+          <span className="pp-crumb-sep">›</span>
+          <span className="pp-crumb-cur">{client.name}</span>
+        </nav>
+      )}
       <div className="pp-layout">
         <aside className="pp-side">
           <div className="pp-side-inner">
@@ -487,23 +497,25 @@ export default function ClientProfileScreen({
             <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
           </div>
 
-          <div className="pp-tabs">
-            {(
-              [
-                ['id', 'Financial ID'],
-                ['insights', 'Client Insights'],
-              ] as [ClientTab, string][]
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`pp-tab ${tab === id ? 'is-active' : ''}`}
-                onClick={() => setTab(id)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {!mine && (
+            <div className="pp-tabs">
+              {(
+                [
+                  ['id', 'Financial ID'],
+                  ['insights', 'Client Insights'],
+                ] as [ClientTab, string][]
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`pp-tab ${tab === id ? 'is-active' : ''}`}
+                  onClick={() => setTab(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="pp-title-row">
             <h1 className="pp-title">{client.name}’s Financial ID</h1>
