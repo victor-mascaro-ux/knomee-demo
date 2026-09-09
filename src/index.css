@@ -455,6 +455,11 @@ body {
 .metric-value.metric-value-kq {
   color: var(--k-grape);
 }
+/* The same on Clients: KR leads the row and wears the ramp's own mid tone,
+   the way KQ wears the prospect ramp's. */
+.metric-value.metric-value-kr {
+  color: var(--client-2);
+}
 
 .metric-tile.distribution {
   gap: 10px;

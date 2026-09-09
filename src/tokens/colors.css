@@ -28,7 +28,18 @@
   --k-ocean:         #086375;  /* deep teal — KQ tier 1, bar-chart icon, progress fill */
   --k-steel:         #6ba1ac;  /* muted teal — KQ tier 2 */
   --k-aqua:          #6bd6c4;  /* aqua tint (brand vector family) */
-  --k-forest:        #0f4a3a;  /* deepest green — client tier 1 (shipped) */
+  --k-forest:        #0f4a3a;  /* deepest green (shipped). Still the curiosity
+                                  tag's ink; no longer client tier 1. */
+  --k-emerald:       #055c3c;  /* client tier 1. --k-forest is 66% saturated at
+                                  17% lightness, which reads as black rather
+                                  than as green — the tier the whole ramp is
+                                  anchored on did not look like a colour. This
+                                  is 89% saturated, the same as the purple the
+                                  prospect ramp is anchored on, at 19%
+                                  lightness. 8.07:1 on white, so it stays the
+                                  darkest of the three (8.07 / 6.88 / 2.87) and
+                                  its hue (158) reads green against tier 2's
+                                  teal (190). */
 
   /* ---- Lilac / violet accents ---- */
   --k-lilac:         #b98ddc;  /* KQ tier 3 badge */
@@ -172,7 +183,7 @@
      CONFLICT — the token file had these in the purple family
      (#5b21b6 / #8b5cf6 / #6ba1ac). The shipped app uses green→teal,
      which is what keeps Clients visually distinct from Prospects. */
-  --client-1:        var(--k-forest);
+  --client-1:        var(--k-emerald);
   --client-2:        var(--k-ocean);
   --client-3:        var(--k-steel);
 
