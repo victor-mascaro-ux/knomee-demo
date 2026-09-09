@@ -322,10 +322,6 @@ export default function ClientProfileScreen({
                     <div className="cp-goal-cols">
                       {goalCols.map((col, i) => (
                         <div className="cp-goal-col" key={i}>
-                          <div className="cp-goal-col-head">
-                            <span>Goal</span>
-                            <span>Readiness</span>
-                          </div>
                           {col.map((g) => (
                             <GoalRow g={g} key={g.title} />
                           ))}
