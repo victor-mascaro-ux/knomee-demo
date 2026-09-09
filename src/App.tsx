@@ -94,6 +94,7 @@ import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
+import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -102,14 +103,7 @@ import moodGood from './assets/moods/good.svg'
 import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
-import { advisor as candidate, independenceId } from './data/advisorFlow'
-import {
-  kq as candidateKQ,
-  route as candidateRoute,
-  teamSize as candidateTeam,
-  tier as candidateTier,
-  topAction as candidateTopAction,
-} from './data/advisorProfile'
+import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
@@ -809,77 +803,8 @@ function ProspectsScreen({
   )
 }
 
-/* ── The firm's first tab ─────────────────────────────────────────────────
-   My Candidates: advisors Dynasty is assessing. The pipeline itself — its
-   command centre and its behavioural clusters — is the next ship; what lands
-   here now is the one candidate whose flow is complete, so the profile behind
-   his name is reachable. */
-
-function FirmCandidatesScreen({ onOpenProfile }: { onOpenProfile: () => void }) {
-  return (
-    <>
-      <h1 className="page-title">My Candidates</h1>
-      <p className="firm-note">
-        Advisors being assessed for the platform — and assessing it back. One candidate has
-        completed the flow; the full pipeline and its clusters land next.
-      </p>
-      <div className="table-wrap">
-        <table className="prospects-table">
-          <thead>
-            <tr>
-              <th className="col-name">Name / firm</th>
-              <th className="col-kq">KQ Score</th>
-              <th className="col-firm-word">Stage</th>
-              <th className="col-num">AUM</th>
-              <th className="col-num">Team</th>
-              <th className="col-firm-word">Route</th>
-              <th className="col-action">Top action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className={`group-header group-tier${candidateTier.tier}`}>
-              <td colSpan={7}>
-                <div className="group-header-inner">
-                  <span>
-                    TIER {candidateTier.tier} - {candidateTier.name.toUpperCase()}
-                  </span>
-                  <span className="group-count">1</span>
-                  <span className="group-range">
-                    {candidateTier.min}-{candidateTier.max} KQ
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="col-name">
-                <div className="name-cell">
-                  <span className="avatar-wrap">
-                    <span className="avatar avatar-initial">{candidate.initial}</span>
-                  </span>
-                  <div className="name-block">
-                    <NameLink name={candidate.name} onClick={onOpenProfile} />
-                    <span className="email-line">{candidate.firm}</span>
-                  </div>
-                </div>
-              </td>
-              <td className="col-kq">
-                <span className={`score-badge score-tier${candidateTier.tier}`}>{candidateKQ}</span>
-              </td>
-              <td className="col-firm-word">{independenceId.readiness.stage}</td>
-              <td className="col-num">{candidate.book}</td>
-              <td className="col-num">{candidateTeam}</td>
-              <td className="col-firm-word">{candidateRoute.pick.replace('Dynasty ', '')}</td>
-              <td className="col-action">
-                <TopActionCell text={candidateTopAction.title} />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
-}
-
+/* A firm tab that has not landed yet. It says what will be there rather than
+   pretending to be empty. */
 function FirmSoon({ title, body }: { title: string; body: string }) {
   return (
     <>
@@ -4313,7 +4238,11 @@ export default function App() {
             </nav>
 
             {firmScreen === 'firm-candidates' && (
-              <FirmCandidatesScreen onOpenProfile={() => setCandidateOpen(true)} />
+              <FirmCandidatesScreen
+                onOpenProfile={() => setCandidateOpen(true)}
+                onDownload={() => showToast('CSV downloaded')}
+                onInvite={() => setInviteKind('prospect')}
+              />
             )}
             {firmScreen === 'firm-network' && (
               <FirmSoon
