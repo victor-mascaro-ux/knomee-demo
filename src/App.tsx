@@ -3995,7 +3995,15 @@ export default function App() {
   // Same for the client's mobile app: the phone is the whole page, and the way
   // back to the advisor side lives in the phone's own menu.
   if (clientMobileOpen) {
-    return <ClientMobileScreen onExit={() => setClientMobileOpen(false)} />
+    return (
+      <ClientMobileScreen
+        onExit={() => setClientMobileOpen(false)}
+        onAccountSettings={() => {
+          setClientMobileOpen(false)
+          setSettingsOpen(true)
+        }}
+      />
+    )
   }
 
   if (clientExpOpen) {

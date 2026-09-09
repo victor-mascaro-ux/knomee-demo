@@ -5,7 +5,7 @@
    the desktop renders. Its phone layout answers to a container query on .pp, so
    putting it in a 393px screen is enough to trigger it. */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './client-experience.css'
 import ClientProfileScreen from './ClientProfileScreen'
 import {
@@ -37,7 +37,13 @@ const EMILY = {
   tier: 'engaged',
 } as Client
 
-export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
+export default function ClientMobileScreen({
+  onExit,
+  onAccountSettings,
+}: {
+  onExit: () => void
+  onAccountSettings?: () => void
+}) {
   useDarkGround()
   const { scale: fitScale, windowH } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
@@ -47,7 +53,19 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
      page on a phone. The burger brings it up as a drawer so it is a tap away
      rather than a long scroll. */
   const [menuOpen, setMenuOpen] = useState(false)
+  /* The advisor's account menu is a separate thing from the client's rail, so
+     it gets its own control on its own side of the bar. */
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!accountOpen) return
+    const away = (e: MouseEvent) => {
+      if (!accountRef.current?.contains(e.target as Node)) setAccountOpen(false)
+    }
+    document.addEventListener('click', away)
+    return () => document.removeEventListener('click', away)
+  }, [accountOpen])
   /* Drag to scroll, as a finger would. */
   useDragScroll(viewport)
 
@@ -61,20 +79,69 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
               product, not the client's app, so it keeps the plum header it has
               on a desktop rather than opening straight onto a white page. */}
           <header className="cx-appbar cxm-appbar">
-            <div className="cx-appbar-brand">
-              <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
-            </div>
+            {/* Burger on the left, because the drawer it opens comes in from
+                the left. A control on one edge that throws a panel onto the
+                other edge makes the eye chase the screen, and it stops the
+                control being the way back out. */}
             <button
               className="cx-appbar-burger"
               type="button"
               aria-label={menuOpen ? 'Close menu' : 'Menu'}
               aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((o) => !o)}
+              onClick={() => {
+                setAccountOpen(false)
+                setMenuOpen((o) => !o)
+              }}
             >
               <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
                 <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
               </svg>
             </button>
+            <div className="cx-appbar-brand">
+              <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
+            </div>
+            {/* And the advisor's own menu on the right, where its popover
+                opens — the same account block the desktop top bar carries.
+                Without it the phone had no way to reach Alex Advisor's
+                settings at all. */}
+            <div className="menu-wrap cxm-account" ref={accountRef}>
+              <button
+                className="cxm-account-btn"
+                type="button"
+                aria-label="Account"
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(false)
+                  setAccountOpen((o) => !o)
+                }}
+              >
+                A
+              </button>
+              {accountOpen && (
+                <div className="menu-pop cxm-menu-pop" role="menu">
+                  <div className="menu-account">
+                    <span className="menu-avatar">A</span>
+                    <span className="menu-name">Alex Advisor</span>
+                  </div>
+                  <button
+                    className="menu-item"
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountOpen(false)
+                      onAccountSettings?.()
+                    }}
+                  >
+                    Account Settings
+                  </button>
+                  <button className="menu-item" type="button" role="menuitem">
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </header>
           {/* The screen scrolls; what scrolls inside it is the desktop page. */}
           <div
