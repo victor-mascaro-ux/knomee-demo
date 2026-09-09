@@ -464,24 +464,25 @@
   flex-direction: column;
   gap: var(--space-14);
 }
+/* The same block as .rd-driver — an accent bar and a line of text — so it
+   takes the same sunken wash. The `background: none` the four tag variants
+   below used to carry went with it. */
 .rd-key-row {
-  padding-left: var(--space-12);
+  padding: var(--space-10) var(--space-12);
   border-left: 3px solid var(--border-control);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-sunken);
 }
 .rd-key-row.rd-tag-positive {
-  background: none;
   border-left-color: var(--tag-positive-ink);
 }
 .rd-key-row.rd-tag-curiosity {
-  background: none;
   border-left-color: var(--tag-curiosity-ink);
 }
 .rd-key-row.rd-tag-self {
-  background: none;
   border-left-color: var(--tag-self-ink);
 }
 .rd-key-row.rd-tag-validate {
-  background: none;
   border-left-color: var(--tag-validate-ink);
 }
 .rd-key-tag {
@@ -526,6 +527,7 @@
   padding: var(--space-12);
   border: var(--border-thin) solid var(--border-default);
   border-radius: var(--radius-xl);
+  background: var(--surface-sunken);
   margin-bottom: var(--space-16);
 }
 .rd-word {
