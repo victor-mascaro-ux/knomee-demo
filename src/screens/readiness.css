@@ -183,6 +183,18 @@
   color: var(--text-table);
 }
 
+/* A score that can show its working: the dimension card carries the answers it
+   was computed from on the dashboard's own hover tooltip. */
+.rd-dim.tt {
+  cursor: help;
+}
+.rd-dim.tt::after {
+  max-width: 320px;
+  white-space: normal;
+  line-height: 1.45;
+  text-align: left;
+}
+
 /* The tier banner takes its tier's colour from the KQ ramp. */
 .rd-tier {
   margin-top: var(--space-12);

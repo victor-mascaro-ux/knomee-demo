@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { AddButton, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -476,6 +476,9 @@ export default function ClientProfileScreen({
                       </span>
                       <AddButton />
                     </div>
+                    {events.shown.length === 0 ? (
+                      <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
+                    ) : (
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
                         <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
@@ -495,6 +498,8 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
+                    )}
+                    
                     {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
@@ -504,8 +509,11 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icQuestions} alt="" />
                         Questions
                       </span>
-                      <AddButton />
+                      <AddButton muted={questions.shown.length === 0} />
                     </div>
+                    {questions.shown.length === 0 ? (
+                      <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
+                    ) : (
                     <div className="pp-questions">
                       {questions.shown.map((q, i) => (
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`} style={questions.delay(i)} key={i}>
@@ -525,6 +533,8 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
+                    )}
+                    
                     {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
                   </section>
                 </div>

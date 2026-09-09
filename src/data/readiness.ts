@@ -21,6 +21,9 @@ export interface KqDimension {
   score: number
   /** The one-line read under the number. */
   caption: string
+  /** The answers the score was computed from. Shown on hover, so the number
+      can always be traced back to something the person actually said. */
+  evidence?: string[]
 }
 
 export interface Snapshot {
