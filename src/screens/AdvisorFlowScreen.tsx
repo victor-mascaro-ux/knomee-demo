@@ -12,12 +12,16 @@
 import { useMemo, useRef, useState } from 'react'
 import { useDragScroll } from './mobileGestures'
 import {
+  ActionRow,
   ArrowRight,
   CheckIcon,
   ClockIcon,
+  CompletedRow,
   DEVICE_H,
   DEVICE_W,
   IPhone,
+  LockedRow,
+  ProgressMeter,
   TabAdventures,
   TabFinId,
   ZOOM_CONTROLS_TITLE,
@@ -28,28 +32,16 @@ import {
 import {
   advisor,
   advisorAdventures,
+  advisorProgress,
   conversionSnapshot,
   independenceId,
-  lockedAdvisorAdventures,
   steps,
+  type AdventureId,
   type Step,
 } from '../data/advisorFlow'
-import icFinancialJoy from '../assets/adventures/financial-joy.svg'
-import icConfidence from '../assets/adventures/confidence.svg'
-import icOutlook from '../assets/adventures/outlook.svg'
-import icFutureYou from '../assets/adventures/future-you.svg'
-import icGoals from '../assets/adventures/goals.svg'
 import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 import './advisor-flow.css'
-
-const art: Record<string, string> = {
-  'financial-joy': icFinancialJoy,
-  confidence: icConfidence,
-  outlook: icOutlook,
-  'future-you': icFutureYou,
-  goals: icGoals,
-}
 
 const ZOOM_STEP = 0.1
 const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
@@ -94,7 +86,15 @@ function Scale({ low, high, value }: { low: string; high: string; value: number 
 
 /* ── the step renderer ── */
 
-function StepBody({ step, onHome }: { step: Step; onHome: () => void }) {
+function StepBody({
+  step,
+  onHome,
+  onAdventure,
+}: {
+  step: Step
+  onHome: () => void
+  onAdventure: (id: AdventureId) => void
+}) {
   switch (step.kind) {
     case 'welcome':
       return (
@@ -120,48 +120,42 @@ function StepBody({ step, onHome }: { step: Step; onHome: () => void }) {
     case 'home':
       return (
         <>
-          <div className="cx-progress">
-            <div className="cx-progress-top">
-              <span>Progress</span>
-              <span>5/5 Adventures Completed</span>
-            </div>
-            <div className="cx-progress-row">
-              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden>
-                <circle cx="10" cy="10" r="8.6" stroke="#240446" strokeWidth="1.5" />
-                <path d="M6 10.3 8.9 13l5-5.6" stroke="#086375" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="cx-progress-track">
-                <i style={{ width: '100%' }} />
-              </div>
-              <span className="cx-progress-pct">100%</span>
-            </div>
-          </div>
+          <ProgressMeter done={advisorProgress.done} required={advisorProgress.required} />
           <h2 className="cx-screen-title">My Adventures</h2>
           <div className="cx-adv-list">
-            {advisorAdventures.map((a) => (
-              <div className="cx-adv cx-adv-done" key={a.id}>
-                <span className="cx-adv-art has-img is-open">
-                  <img src={art[a.art]} alt="" />
-                </span>
-                <div className="cx-adv-main">
-                  <div className="cx-adv-title">{a.title}</div>
-                  <div className="cx-adv-meta">
-                    <CheckIcon />
-                    Completed {advisor.completedOn}
-                  </div>
-                </div>
-                <span className="cx-adv-min">
-                  <ClockIcon />
-                  {a.minutes} min
-                </span>
-              </div>
-            ))}
-            {lockedAdvisorAdventures.map((t) => (
-              <div className="cx-adv cx-adv-locked" key={t}>
-                <span className="cx-adv-art" />
-                <div className="cx-adv-title">{t}</div>
-              </div>
-            ))}
+            {advisorAdventures.map((a) => {
+              // Every row opens its adventure — this is a walkthrough, so the
+              // state a row wears is a look, not a gate.
+              const open = () => onAdventure(a.id)
+              if (a.state === 'done') {
+                return (
+                  <CompletedRow
+                    key={a.id}
+                    title={a.title}
+                    artKey={a.art}
+                    on={advisor.completedOn}
+                    onRow={open}
+                  />
+                )
+              }
+              if (a.state === 'open') {
+                return (
+                  <ActionRow
+                    key={a.id}
+                    a={{
+                      title: a.title,
+                      art: a.art,
+                      blurb: a.blurb,
+                      minutes: a.minutes,
+                      label: 'Start',
+                    }}
+                    onAct={open}
+                    onRow={open}
+                  />
+                )
+              }
+              return <LockedRow key={a.id} title={a.title} artKey={a.art} onRow={open} />
+            })}
           </div>
         </>
       )
@@ -502,7 +496,12 @@ function IndependenceIdScreen() {
 /* ── the screen ── */
 
 export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
-  const [i, setI] = useState(0)
+  // Where you have been, not just where you are: tapping a row on the
+  // adventures list jumps across the flow, and Back has to mean "the screen I
+  // came from" rather than "the step before this one" — otherwise Back out of
+  // The Move would land in the middle of Future You.
+  const [trail, setTrail] = useState<number[]>([0])
+  const i = trail[trail.length - 1]
   const [tab, setTab] = useState<'flow' | 'finid'>('flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
@@ -513,9 +512,10 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
 
   const step = steps[i]
   const last = i === steps.length - 1
+  // The adventures list has no forward button of its own — you pick a row.
+  const home = step.kind === 'home'
   const cta = useMemo(() => {
     if (step.cta) return step.cta
-    if (step.kind === 'home') return 'Start the first adventure'
     if (step.kind === 'unlock' || step.kind === 'stage') return 'Submit'
     if (step.kind === 'summary') return 'Continue'
     return 'OK'
@@ -523,9 +523,20 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
 
   // Scroll back to the top of the phone on every step change; a long question
   // followed by a short one would otherwise open half-way down.
+  const toTop = () => viewport.current?.scrollTo({ top: 0 })
   const go = (n: number) => {
-    setI(n)
-    viewport.current?.scrollTo({ top: 0 })
+    setTrail((t) => [...t, n])
+    toTop()
+  }
+  const back = () => {
+    setTrail((t) => (t.length > 1 ? t.slice(0, -1) : t))
+    toTop()
+  }
+
+  // Tapping a row on the adventures list drops you at that adventure's intro.
+  const openAdventure = (id: AdventureId) => {
+    const at = steps.findIndex((s) => s.adventure === id)
+    if (at >= 0) go(at)
   }
 
   return (
@@ -554,23 +565,38 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
               <IndependenceIdScreen />
             ) : (
               <>
-                <StepBody step={step} onHome={() => setTab('finid')} />
-                {!last && (
-                  <div className="af-nav">
-                    {i > 0 && (
-                      <button className="af-back" type="button" onClick={() => go(i - 1)}>
-                        Back
-                      </button>
-                    )}
-                    <button className="cx-start af-next" type="button" onClick={() => go(i + 1)}>
-                      {cta}
-                    </button>
+                <StepBody
+                  step={step}
+                  onHome={() => setTab('finid')}
+                  onAdventure={openAdventure}
+                />
+                {/* Back and OK ride the bottom of the screen rather than the
+                    end of the content — a long question used to push them
+                    below the fold. */}
+                <div className="af-foot">
+                  {!last && (
+                    <div className="af-nav">
+                      {trail.length > 1 && (
+                        <button className="af-back" type="button" onClick={back}>
+                          Back
+                        </button>
+                      )}
+                      {!home && (
+                        <button
+                          className="cx-start af-next"
+                          type="button"
+                          onClick={() => go(i + 1)}
+                        >
+                          {cta}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div className="af-progress" aria-hidden>
+                    {steps.map((s, n) => (
+                      <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                    ))}
                   </div>
-                )}
-                <div className="af-progress" aria-hidden>
-                  {steps.map((s, n) => (
-                    <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                  ))}
                 </div>
               </>
             )}
