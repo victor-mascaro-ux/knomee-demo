@@ -20,7 +20,7 @@ import icOtherEvent from '../assets/life-events/other.svg'
 import icPropertyPurchase from '../assets/life-events/property-purchase.svg'
 import icRelocation from '../assets/life-events/relocation.svg'
 import icRetirement from '../assets/life-events/retirement.svg'
-import icSaleOfBusiness from '../assets/life-events/sale-of-business.svg'
+import icSalesOfBusiness from '../assets/life-events/sales-of-business.svg'
 import icSeparation from '../assets/life-events/separation.svg'
 import icVacation from '../assets/life-events/vacation.svg'
 import icVehiclePurchase from '../assets/life-events/vehicle-purchase.svg'
@@ -332,18 +332,23 @@ export function ConfidenceResults({ open }: { open: boolean }) {
   )
 }
 
-/* The life-event artwork, keyed by the event the client picked on mobile. The
-   same illustrations they chose from, so the advisor sees what they saw. */
+/* The life-event artwork, keyed by the option the client tapped and listed in
+   the picker's own order. The three supercategory icons ship alongside these
+   but are not mapped: they head the picker's sections, and an event that has
+   been chosen names itself. */
 const LIFE_EVENT_ART: Record<string, string> = {
+  // Purchase
   'vehicle purchase': icVehiclePurchase,
   'property purchase': icPropertyPurchase,
+  // Professional
   education: icEducation,
   'career change': icCareerChange,
   relocation: icRelocation,
   'new business': icNewBusiness,
-  'sale of business': icSaleOfBusiness,
-  'sales of business': icSaleOfBusiness,
+  'sales of business': icSalesOfBusiness,
+  'sale of business': icSalesOfBusiness,
   retirement: icRetirement,
+  // Personal
   'new marriage': icNewMarriage,
   'new baby': icNewBaby,
   separation: icSeparation,

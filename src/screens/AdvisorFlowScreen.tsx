@@ -34,7 +34,6 @@ import {
   advisor,
   advisorAdventures,
   advisorProgress,
-  conversionSnapshot,
   independenceId,
   steps,
   type AdventureId,
@@ -479,16 +478,6 @@ function IndependenceIdScreen() {
           </li>
         ))}
       </ol>
-
-      <h3 className="af-id-h">What the platform sees</h3>
-      <div className="af-snapshot">
-        {conversionSnapshot.map((r) => (
-          <div className="af-snap-row" key={r.k}>
-            <span>{r.k}</span>
-            <span>{r.v}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
