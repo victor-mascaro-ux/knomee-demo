@@ -404,20 +404,27 @@
   }
   .cc-demo-body {
     flex: 1; overflow-y: auto; padding: 12px 10px 16px;
-    display: flex; flex-direction: column; gap: 16px;
+    display: flex; flex-direction: column; gap: 12px;
   }
   .cc-demo-body::-webkit-scrollbar { width: 8px; }
   .cc-demo-body::-webkit-scrollbar-thumb { background: rgba(20,10,40,0.16); border-radius: 8px; }
   .cc-demo-group { display: flex; flex-direction: column; gap: 3px; }
-  /* The group label has to out-rank the options under it, or the eye lands on
-     whichever row happens to be selected and has to work back out to find the
-     heading it belongs to. It was the quietest thing in the panel — 10px in
-     the faintest grey — while a selected row was bold, tinted and dotted. */
+  /* The group label is a band across the whole tray, not a line of small caps
+     floating over the rows. Structure beats weight: the band says "a new group
+     starts here" without having to out-shout anything, which leaves the rows
+     free to use weight for what weight is for — which one is selected.
+     The negative margin cancels the body's side padding so it runs edge to
+     edge. */
   .cc-demo-title {
     font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--cc-text); padding: 0 6px 5px;
+    color: var(--cc-text);
+    margin: 0 -10px 3px; padding: 7px 16px;
+    background: rgba(20,10,40,0.055);
+    border-top: 1px solid var(--cc-hairline);
+    border-bottom: 1px solid var(--cc-hairline);
     display: flex; align-items: center; gap: 6px;
   }
+  .cc-stage[data-cc-theme="smoke-tray"] .cc-demo-title { background: rgba(255,255,255,0.07); }
   /* A glyph per section, so the eye lands on the right group rather than
      reading three lines of small caps. Muted like the label it sits with — a
      marker, not a decoration. */
@@ -432,14 +439,30 @@
     flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .cc-demo-row:hover, .cc-demo-btn:hover { background: var(--cc-hairline); }
-  /* Selected is a state, and the tint and the dot already say so. Bold on top
-     of both made the row shout over its own heading. */
-  .cc-demo-btn.cc-on { background: rgba(45,210,176,0.18); font-weight: 500; }
+  /* Selected is weight and the dot, nothing more. The tinted pill was a second
+     shape competing with the band above it. */
+  .cc-demo-btn.cc-on { font-weight: 700; }
   .cc-demo-btn .cc-demo-dot {
     width: 5px; height: 5px; border-radius: 50%; background: var(--cc-knomee-teal); flex: none;
     opacity: 0;
   }
   .cc-demo-btn.cc-on .cc-demo-dot { opacity: 1; }
+  /* Two states in one control, each named. The track is the same tint the
+     switch uses when it is on, so the panel keeps one vocabulary for "this is
+     the state you are in". */
+  .cc-demo-seg {
+    display: flex; gap: 3px; padding: 3px; margin: 2px 0;
+    border-radius: 11px; background: var(--cc-hairline);
+  }
+  .cc-demo-seg-btn {
+    flex: 1; min-width: 0; border: 0; border-radius: 8px; background: transparent;
+    padding: 6px 8px; font: inherit; font-size: 12.5px; color: var(--cc-muted);
+    cursor: pointer; transition: background 0.13s, color 0.13s;
+  }
+  .cc-demo-seg-btn:hover { color: var(--cc-text); }
+  .cc-demo-seg-btn.cc-on {
+    background: rgba(45,210,176,0.28); color: var(--cc-text); font-weight: 500;
+  }
   /* the toggle switch — same shape language as the prototype's own */
   .cc-switch {
     position: relative; width: 32px; height: 18px; border-radius: 999px; flex: none;
@@ -1540,6 +1563,28 @@
     return b;
   }
 
+  // A two-state toggle that names both states, rather than a switch that names
+  // one and leaves the other implied. Mobile and desktop are two views of the
+  // page you are on; neither is the deviation from the other.
+  function demoSegment(labels, activeIndex, onPick) {
+    const row = document.createElement('div');
+    row.className = 'cc-demo-seg';
+    row.setAttribute('role', 'group');
+    labels.forEach((label, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cc-demo-seg-btn' + (i === activeIndex ? ' cc-on' : '');
+      b.setAttribute('aria-pressed', i === activeIndex ? 'true' : 'false');
+      b.textContent = label;
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (i !== activeIndex) onPick(i);
+      });
+      row.appendChild(b);
+    });
+    return row;
+  }
+
   function renderDemo() {
     // The scene names the profile you have open, not just the table behind it:
     // the Mobile view switch is a view of THIS page, and on a profile the panel
@@ -1565,12 +1610,8 @@
         } else if (c.kind === 'navToggle') {
           g.appendChild(demoToggleRow(c.label, c.isOn(), v => c.apply(v)));
         } else if (c.kind === 'viewToggle') {
-          const on = c.isOn();
-          const h = demoTitle(c.label, ICONS.mobile);
-          h.style.paddingTop = '6px';
-          g.appendChild(h);
-          g.appendChild(demoPick('Mobile', on, () => { if (!on) c.apply(true); }));
-          g.appendChild(demoPick('Desktop', !on, () => { if (on) c.apply(false); }));
+          g.appendChild(demoSegment(['Mobile', 'Desktop'], c.isOn() ? 0 : 1,
+            i => c.apply(i === 0)));
         } else if (c.kind === 'brands') {
           const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
