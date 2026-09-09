@@ -11,6 +11,8 @@
  * All figures and answers are placeholder demo data.
  */
 
+import { confidenceAnswers, financialId } from './financialId'
+
 /* ── the shape ──────────────────────────────────────────────────────────── */
 
 export interface KqDimension {
@@ -132,7 +134,22 @@ export const RECOMMENDATIONS_KEY: { tag: TagName; meaning: string }[] = [
   },
 ]
 
-/* ── Sarah Mitchell — the prospect side ─────────────────────────────────── */
+/* ── Sarah Mitchell — the prospect side ───────────────────────────────────
+   Her scores show their working the same way the candidate's do: each
+   dimension card names the adventure that feeds it and the answers behind
+   it, and each word in the Communication rail says why it is on the list.
+   Where the evidence is a figure, it is read off her Financial ID rather
+   than typed in here, so a tooltip cannot disagree with the card it came
+   from. */
+
+/* Goals carry the readiness stage; the ones already at the top of the scale
+   are what makes her Intent read high. */
+const goalsAtTop = financialId.goals.filter((g) => !g.completed && g.readiness === 5)
+const goalsDone = financialId.goals.filter((g) => g.completed).length
+const conf = (needle: string) => confidenceAnswers.find((a) => a.statement.includes(needle))
+const believesInGoals = conf('achieve my financial goals')
+const spendsOnJoy = conf('bring me joy')
+
 
 export const prospectReadiness: ReadinessTab = {
   snapshot: {
@@ -144,18 +161,36 @@ export const prospectReadiness: ReadinessTab = {
         question: 'Are they actively working toward a goal?',
         score: 83,
         caption: 'Actively pursuing a meaningful goal',
+        evidence: [
+          'Goals · the readiness stage she set on each one',
+          `At the top of the scale: ${goalsAtTop.map((g) => g.title.replace(/\.$/, '')).join(' · ')}`,
+          `${goalsDone} goals already finished and logged`,
+          'Her lead goal — the Oahu family trip — sits one stage off the top',
+        ],
       },
       {
         key: 'Clarity',
         question: 'Can they articulate what they want?',
         score: 62,
         caption: 'Vision present, not fully formed',
+        evidence: [
+          'Future You · where, what and who',
+          `Where: ${financialId.futureYou.where.join(', ')}`,
+          `Doing: ${financialId.futureYou.what.join(', ')}`,
+          'Four things at once and two places — the picture is there, the edges are not',
+        ],
       },
       {
         key: 'Receptivity',
         question: 'Are they open to guidance?',
         score: 100,
         caption: 'Explicitly open, support-seeking',
+        evidence: [
+          `Confidence · the ${confidenceAnswers.length} statements behind the dial`,
+          `“${believesInGoals?.statement}” — ${believesInGoals?.value} of 100`,
+          `“${spendsOnJoy?.statement}” — ${spendsOnJoy?.value} of 100`,
+          'She says outright that working with an advisor improves her confidence',
+        ],
       },
     ],
     tier: {
@@ -266,28 +301,31 @@ export const prospectPlaybook: PlaybookTab = {
     },
   ],
   words: {
+    /* Each word says why it is on the list, in her own answers. The reasons
+       for the avoid list are absences, which are as readable as anything she
+       did say: she wrote about people and places, never about mechanics. */
     use: [
-      'Security',
-      'Independence',
-      'Simplicity',
-      'Confidence',
-      'Enjoy',
-      'Future',
-      'Health',
-      'Family',
-      'Travel',
-      'Strength',
-    ].map((word) => ({ word })),
+      { word: 'Security', hint: 'Named first among her core values.' },
+      { word: 'Independence', hint: 'A core value, in her own words.' },
+      { word: 'Simplicity', hint: 'A core value — which is also why the avoid list is what it is.' },
+      { word: 'Confidence', hint: 'She says working with an advisor improves it.' },
+      { word: 'Enjoy', hint: '“I spend money on things that bring me joy” — 79 of 100.' },
+      { word: 'Future', hint: 'Future You: near loved ones, travelling, staying active.' },
+      { word: 'Health', hint: 'Her biggest concern is future health outcomes, hers and Vic’s.' },
+      { word: 'Family', hint: 'Connection is a core value; her hopes are about her kids.' },
+      { word: 'Travel', hint: 'In her perfect day and in her Future You.' },
+      { word: 'Strength', hint: 'Her stated hope: having the strength to manage it all.' },
+    ],
     avoid: [
-      'Complex',
-      'Aggressive',
-      'Risk-Taking',
-      'Portfolio Optimization',
-      'Returns',
-      'Benchmarks',
-      'Products',
-      'Abstract Jargon',
-      'Obligations',
-    ].map((word) => ({ word })),
+      { word: 'Complex', hint: 'Simplicity is a core value. This is its opposite.' },
+      { word: 'Aggressive', hint: 'Nothing she wrote is about appetite for risk.' },
+      { word: 'Risk-Taking', hint: 'She never framed any goal as a risk to take.' },
+      { word: 'Portfolio Optimization', hint: 'She named no mechanics anywhere in the flow.' },
+      { word: 'Returns', hint: 'She is moved by meaning, not by performance.' },
+      { word: 'Benchmarks', hint: 'Never mentioned. Nothing she wants is measured against a market.' },
+      { word: 'Products', hint: 'Never mentioned. Her answers are about people and places.' },
+      { word: 'Abstract Jargon', hint: 'Simplicity again — she asked for a trust explained plainly.' },
+      { word: 'Obligations', hint: 'Her concerns are about people she loves, not liabilities.' },
+    ],
   },
 }
