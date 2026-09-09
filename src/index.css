@@ -60,8 +60,15 @@ body {
 }
 
 /* ---------- Top bar ---------- */
+/* The bar stays. It carries the brand, the persona and the way out of every
+   screen, and none of that is worth scrolling away from. z-index clears the
+   page's own layers (the row hover card is 50, the account menu 60 and lives
+   inside this bar anyway) and stays under the modals, which are 200 and up. */
 .topbar {
-  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--topbar-h);
   background: var(--plum);
   display: flex;
   align-items: center;
@@ -3902,7 +3909,8 @@ button.name-link-btn:hover .name-text {
 }
 .settings-side-inner {
   position: sticky;
-  top: 12px;
+  /* Clear of the bar, which no longer scrolls out of the way. */
+  top: calc(var(--topbar-h) + 12px);
   padding: 26px 18px;
 }
 .settings-side-head h1 {

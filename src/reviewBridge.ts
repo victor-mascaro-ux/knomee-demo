@@ -46,8 +46,8 @@ const isDemoCombo = (e: KeyboardEvent) => {
 // change to the overlay. Each rail is translated by exactly what `sticky`
 // would have done: hold `top` once the rail would pass it, and stop at the
 // bottom of the column it belongs to.
-const STICKY_RAILS = '.pp-side-inner, .settings-side-inner'
-const STICKY_TOP = 12
+const STICKY_RAILS =
+  '.topbar, .pp-crumb, .pp-tabs, .pp-side-inner, .settings-side-inner'
 
 function initStickyRails(frame: Element) {
   const shifts = new WeakMap<HTMLElement, number>()
@@ -72,6 +72,9 @@ function initStickyRails(frame: Element) {
         return
       }
 
+      // Each element's own `top` rather than one constant: the bar pins at 0
+      // and the rails pin below it.
+      const stickyTop = parseFloat(getComputedStyle(el).top) || 0
       const prev = shifts.get(el) || 0
       const elRect = el.getBoundingClientRect()
       const cRect = container.getBoundingClientRect()
@@ -79,7 +82,7 @@ function initStickyRails(frame: Element) {
       // Sticky stops at the bottom of its containing block rather than
       // escaping it.
       const maxShift = Math.max(0, cRect.bottom - naturalTop - elRect.height)
-      const wanted = STICKY_TOP - (frameTop + naturalTop)
+      const wanted = stickyTop - (frameTop + naturalTop)
       const shift = Math.min(Math.max(0, wanted), maxShift)
 
       if (Math.abs(shift - prev) > 0.5) {
@@ -181,4 +184,18 @@ export function initReviewBridge() {
 
   const frame = window.frameElement
   if (frame) initStickyRails(frame)
+}
+
+/* Back to the top of the page. Inside the review frame this document does not
+   scroll — the parent does — so scrolling here alone would look like nothing
+   happened. Same-origin, so the parent can be scrolled directly; standalone,
+   the first call is the one that does the work. */
+export function scrollPageToTop() {
+  window.scrollTo(0, 0)
+  if (window.parent === window) return
+  try {
+    window.parent.scrollTo(0, 0)
+  } catch {
+    /* cross-origin parent: nothing we can do, and nothing that breaks */
+  }
 }
