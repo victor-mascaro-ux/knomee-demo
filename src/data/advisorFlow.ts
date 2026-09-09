@@ -72,9 +72,10 @@ export const advisor = {
 }
 
 /* ── the adventures list, as the advisor sees it on the home screen ────────
-   Only the five, shown in the three states the design system has for a row:
-   one behind you, one open, the rest still locked. It is a walkthrough, so
-   every row opens its adventure whatever state it wears. */
+   Only the five, and the walkthrough opens where the flow does: Practice Joy
+   is the one open adventure, the other four still locked. Nothing is behind
+   him yet, so the meter reads 0/5. Every row opens its adventure whatever
+   state it wears — the state is a look, not a gate. */
 
 export interface AdvisorAdventure {
   id: AdventureId
@@ -92,7 +93,7 @@ export const advisorAdventures: AdvisorAdventure[] = [
     art: 'financial-joy',
     minutes: 2,
     blurb: 'Get clear on what you want the practice to give you.',
-    state: 'done',
+    state: 'open',
   },
   {
     id: 'confidence',
@@ -100,7 +101,7 @@ export const advisorAdventures: AdvisorAdventure[] = [
     art: 'confidence',
     minutes: 1,
     blurb: 'Check in on your relationship with the practice.',
-    state: 'open',
+    state: 'locked',
   },
   {
     id: 'outlook',
