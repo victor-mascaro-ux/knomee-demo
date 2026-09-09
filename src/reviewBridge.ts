@@ -23,6 +23,14 @@ const isToggleCombo = (e: KeyboardEvent) => {
   }
   return false
 }
+// "d" for demo does the same for the overlay's demo panel — a separate layer
+// with its own key, so summoning the demo controls never arms commenting.
+const isDemoCombo = (e: KeyboardEvent) => {
+  if ((e.key === 'd' || e.key === 'D') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    return !isEditableTarget(e.target)
+  }
+  return false
+}
 
 export function initReviewBridge() {
   if (window.parent === window) return
@@ -32,6 +40,9 @@ export function initReviewBridge() {
     if (isToggleCombo(e)) {
       e.preventDefault()
       parent.postMessage({ type: 'cc-activate' }, '*')
+    } else if (isDemoCombo(e)) {
+      e.preventDefault()
+      parent.postMessage({ type: 'cc-demo-activate' }, '*')
     }
   })
 

@@ -321,6 +321,9 @@
 .pp-highlights {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  /* Every row the height of the tallest, so all six cards match rather than
+     each row sizing itself to its own longest text. */
+  grid-auto-rows: 1fr;
   gap: 14px;
 }
 .pp-highlight {
