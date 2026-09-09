@@ -146,18 +146,15 @@ export const clientProfile = {
 
   lifeEvents: [
     {
-      tag: 'Purchase',
-      kind: 'Advisor Added',
-      text: 'Property purchase: Bought the beach house in Costa Rica for our wedding …',
+      kind: 'Property purchase',
+      text: 'Bought the beach house in Costa Rica for our wedding …',
       date: '05/03/2025',
+      advisorAdded: true,
     },
-    { tag: 'Professional', kind: '', text: 'Career change: Laid off in March', date: '05/03/2025' },
-    {
-      tag: 'Personal',
-      kind: '',
-      text: 'Separation: Going through a separation',
-      date: 'Completed: 05/03/2025',
-    },
+    { kind: 'Career change', text: 'Laid off in March', date: '05/03/2025' },
+    { kind: 'Separation', text: 'Going through a separation', date: 'Completed: 05/03/2025' },
+    { kind: 'New baby', text: 'First grandchild due in October', date: '04/02/2025' },
+    { kind: 'Health issues', text: "Vic's treatment continues through the summer", date: '03/10/2025' },
   ] as LifeEvent[],
 
   questions: [

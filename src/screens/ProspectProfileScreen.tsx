@@ -301,9 +301,16 @@ export default function ProspectProfileScreen({
                         <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
-                            {e.kind && <span className="pp-event-kind">{e.kind}</span>}
+                            <span className="pp-event-head">
+                              <span className="pp-event-kind">{e.kind}</span>
+                            </span>
                             <span className="pp-event-text">{e.text}</span>
-                            <span className="pp-event-date">{e.date}</span>
+                            <span className="pp-event-meta">
+                              <span className="pp-event-date">{e.date}</span>
+                              {e.advisorAdded && (
+                                <span className="pp-event-added">Advisor added</span>
+                              )}
+                            </span>
                           </span>
                         </div>
                       ))}
