@@ -5,6 +5,26 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
+import icCareerChange from '../assets/life-events/career-change.svg'
+import icDeathOfParents from '../assets/life-events/death-of-parents.svg'
+import icDebtRepayment from '../assets/life-events/debt-repayment.svg'
+import icDivorce from '../assets/life-events/divorce.svg'
+import icEducation from '../assets/life-events/education.svg'
+import icEmptyNester from '../assets/life-events/empty-nester.svg'
+import icHealthIssues from '../assets/life-events/health-issues.svg'
+import icInheritance from '../assets/life-events/inheritance.svg'
+import icNewBaby from '../assets/life-events/new-baby.svg'
+import icNewBusiness from '../assets/life-events/new-business.svg'
+import icNewMarriage from '../assets/life-events/new-marriage.svg'
+import icOtherEvent from '../assets/life-events/other.svg'
+import icPropertyPurchase from '../assets/life-events/property-purchase.svg'
+import icRelocation from '../assets/life-events/relocation.svg'
+import icRetirement from '../assets/life-events/retirement.svg'
+import icSaleOfBusiness from '../assets/life-events/sale-of-business.svg'
+import icSeparation from '../assets/life-events/separation.svg'
+import icVacation from '../assets/life-events/vacation.svg'
+import icVehiclePurchase from '../assets/life-events/vehicle-purchase.svg'
+import icWidowhood from '../assets/life-events/widowhood.svg'
 import { confidenceAnswers } from '../data/financialId'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
@@ -310,4 +330,44 @@ export function ConfidenceResults({ open }: { open: boolean }) {
       ))}
     </div>
   )
+}
+
+/* The life-event artwork, keyed by the event the client picked on mobile. The
+   same illustrations they chose from, so the advisor sees what they saw. */
+const LIFE_EVENT_ART: Record<string, string> = {
+  'vehicle purchase': icVehiclePurchase,
+  'property purchase': icPropertyPurchase,
+  education: icEducation,
+  'career change': icCareerChange,
+  relocation: icRelocation,
+  'new business': icNewBusiness,
+  'sale of business': icSaleOfBusiness,
+  'sales of business': icSaleOfBusiness,
+  retirement: icRetirement,
+  'new marriage': icNewMarriage,
+  'new baby': icNewBaby,
+  separation: icSeparation,
+  divorce: icDivorce,
+  'death of parent(s)': icDeathOfParents,
+  'death of parents': icDeathOfParents,
+  widowhood: icWidowhood,
+  inheritance: icInheritance,
+  'health issues': icHealthIssues,
+  'debt repayment': icDebtRepayment,
+  vacation: icVacation,
+  'empty nester': icEmptyNester,
+  other: icOtherEvent,
+}
+
+/* The event names itself either in `kind` or at the head of `text` — "Property
+   purchase: Bought the beach house". Read whichever carries it. */
+export function lifeEventArt(kind: string | undefined, text: string) {
+  const named = kind && LIFE_EVENT_ART[kind.trim().toLowerCase()]
+  if (named) return named
+  const lead = text.split(':')[0]
+  return LIFE_EVENT_ART[lead.trim().toLowerCase()] ?? icOtherEvent
+}
+
+export function LifeEventIcon({ kind, text }: { kind?: string; text: string }) {
+  return <span className="pp-event-ic"><img src={lifeEventArt(kind, text)} alt="" /></span>
 }

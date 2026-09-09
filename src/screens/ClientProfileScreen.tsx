@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -479,10 +479,12 @@ export default function ClientProfileScreen({
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
                         <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
-                          <span className="pp-event-tag">{e.tag}</span>
-                          {e.kind && <span className="pp-event-kind">{e.kind}</span>}
-                          <span className="pp-event-text">{e.text}</span>
-                          <span className="pp-event-date">{e.date}</span>
+                          <LifeEventIcon kind={e.kind} text={e.text} />
+                          <span className="pp-event-body">
+                            {e.kind && <span className="pp-event-kind">{e.kind}</span>}
+                            <span className="pp-event-text">{e.text}</span>
+                            <span className="pp-event-date">{e.date}</span>
+                          </span>
                         </div>
                       ))}
                     </div>
