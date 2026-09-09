@@ -591,3 +591,107 @@ button.af-opt:hover {
     display: none;
   }
 }
+
+/* ── the record ─────────────────────────────────────────────────────────────
+   Back-of-house: where the answers went and how they get to Drive. It borrows
+   the report's shell and otherwise wants nothing clever — a column of prose,
+   one field, three buttons and a table. */
+
+.af-record {
+  max-width: 760px;
+  padding: 26px 0 90px;
+}
+.af-record-h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--plum, #240446);
+}
+.af-record-h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--plum, #240446);
+}
+.af-record-body {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #55525e;
+}
+.af-record-body code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #f3f0f8;
+  font-size: 12.5px;
+}
+.af-record-card {
+  margin-top: 22px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--line, #e7e4ee);
+  border-radius: 14px;
+  background: #fff;
+}
+.af-record-card .af-label {
+  display: block;
+  margin-top: 16px;
+}
+.af-record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+/* The flow's secondary button is full width inside a 390px phone; out here it
+   sits in a row with two others. */
+.af-record-btn {
+  width: auto;
+  margin-top: 0;
+}
+.af-record-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.af-record-note {
+  margin: 14px 0 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--k-teal-light, #e6f7f5);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #2b5c56;
+}
+.af-record-table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.af-record-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line, #e7e4ee);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8792;
+  text-align: left;
+}
+.af-record-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f1eff5;
+  color: #3f3c49;
+  vertical-align: top;
+}
+.af-record-sent {
+  color: #2b5c56;
+}
+.af-record-waiting {
+  color: #9a5b2b;
+}
+.af-record-link {
+  color: var(--k-grape, #7639a1);
+  font-weight: 600;
+}

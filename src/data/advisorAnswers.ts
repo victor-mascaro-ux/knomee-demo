@@ -48,9 +48,21 @@ export interface Answers {
   scaleSet: Record<string, number[]>
   /** The date the sheet was opened — the sitting every card is dated by. */
   completed: string
+  /** Which sitting this is, on the record in `advisorRecord.ts`. A restart
+      hands out a new one, which is what makes the recorded answers a history
+      of people rather than one row being overwritten all evening. */
+  sittingId: string
 }
 
 const OTHER = 'Other'
+
+/** Enough to keep two sittings apart on one device; not a security boundary.
+    It lives here rather than in `advisorRecord.ts` so a sheet can be created
+    without the recording module — the record reads sheets, not the other way
+    round. */
+export function newSittingId(): string {
+  return `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
 
 /** 09.09.2026 — the format the profile's Completed line already speaks. */
 export function today(): string {
@@ -69,6 +81,7 @@ export function emptyAnswers(): Answers {
     scale: {},
     scaleSet: {},
     completed: today(),
+    sittingId: newSittingId(),
   }
 }
 
@@ -98,8 +111,12 @@ export function loadAnswers(): Answers {
     const raw = window.localStorage.getItem(KEY)
     if (!raw) return emptyAnswers()
     // Merged over a fresh sheet, so a copy stored under an older shape cannot
-    // arrive missing a bucket every rule below assumes is there.
-    return { ...emptyAnswers(), ...(JSON.parse(raw) as Partial<Answers>) }
+    // arrive missing a bucket every rule below assumes is there — including a
+    // sheet saved before sittings had ids, which keeps the fresh one's.
+    const stored = JSON.parse(raw) as Partial<Answers>
+    const merged = { ...emptyAnswers(), ...stored }
+    if (!stored.sittingId) merged.sittingId = newSittingId()
+    return merged
   } catch {
     return emptyAnswers()
   }
