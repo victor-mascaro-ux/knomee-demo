@@ -432,13 +432,17 @@ function ClientScoreBadge({ tier, value }: { tier: ClientTier; value: number | n
   return <span className={`score-badge score-${tier}`}>{value}</span>
 }
 
-function Avatar({ p }: { p: Prospect }) {
+/* Takes a name and an optional stock URL rather than a whole record, so the
+   Clients table can look for a photograph the same way the Prospects table
+   does — it was rendering an initial unconditionally, which is why a client
+   with a file in public/avatars/ still showed a letter. */
+function Avatar({ name, avatar }: { name: string; avatar?: string }) {
   /* A photograph dropped into public/avatars/ wins over whatever the record
      carries; the initial is what is left when neither is there. */
   const [attempt, setAttempt] = useState(0)
-  const sources = avatarSources(p.name, p.avatar)
+  const sources = avatarSources(name, avatar)
   if (attempt >= sources.length) {
-    return <span className="avatar avatar-initial">{initial(p.name)}</span>
+    return <span className="avatar avatar-initial">{initial(name)}</span>
   }
   return (
     <img
@@ -477,7 +481,7 @@ function ProspectRow({
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
-            <Avatar p={p} />
+            <Avatar name={p.name} avatar={p.avatar} />
             {p.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
@@ -875,7 +879,7 @@ function ClientRow({
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
-            <span className="avatar avatar-initial">{c.name.charAt(0).toUpperCase()}</span>
+            <Avatar name={c.name} />
             {c.household && (
               <span className="household-badge" title={c.household} aria-label={c.household}>
                 <HouseIcon />

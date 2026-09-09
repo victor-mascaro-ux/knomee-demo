@@ -44,7 +44,6 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Call now — “worked since 13, ready for adventures”; lead with Future You vision',
     tier: 'tier1',
-    isNew: true,
   },
   {
     name: 'Emma Rossi',

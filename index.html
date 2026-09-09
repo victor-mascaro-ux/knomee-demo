@@ -1474,17 +1474,22 @@
   const SCREENS = [
     ['desktop', 'Desktop (Advisor)', '#/prospects'],
     ['mobile', 'Mobile (Client)', '#/client-experience'],
+    /* The advisor's own eight minutes — the same flow a client walks, walked by
+       an advisor signing up to knomee. It has no tab and no menu item, so this
+       row is the only way in. */
+    ['mobile-advisor', 'Mobile (Advisor)', '#/advisor-flow'],
     ['welcome', 'Welcome Page (Client)', '#/welcome']
   ];
   // Only these two take you out of the app shell. The desktop row is where you
   // already are on any advisor page, so it must not count as "somewhere else"
   // when the persona rows decide whether to mark themselves.
-  const STANDALONE = ['mobile', 'welcome'];
+  const STANDALONE = ['mobile', 'mobile-advisor', 'welcome'];
   // The welcome page's own A/B switch decides which version, so both count.
   const screenIsOn = (id) => {
     const v = canon(demoState.view);
     if (id === 'desktop') return SHELL_VIEWS.indexOf(v) !== -1;
     if (id === 'mobile') return v === 'client-experience';
+    if (id === 'mobile-advisor') return v === 'advisor-flow';
     return v === id || (id === 'welcome' && v === 'welcome-b');
   };
 
