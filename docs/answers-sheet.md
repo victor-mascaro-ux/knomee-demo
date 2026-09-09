@@ -113,10 +113,20 @@ is appended if the flow ever grows a question.
 
 | Group | Columns |
 | --- | --- |
-| Identity | `Sitting ID`, `Recorded at`, `Name`, `Role`, `Assets`, `Firm`, `Completed` |
-| The read | `EQ`, `Tier`, `Intent`, `Clarity`, `Receptivity`, `Stage`, `Confidence`, `Route` |
-| The answers | one column per question — a scale set spends a column per statement (`cf-q.1` … `cf-q.6`) and the attention grid one per area, so a column can be read down |
-| The output | `Question 1`, `Question 2`, `Question 3` — what the flow told them to go and ask |
+| Who and when | `Sitting ID`, `Recorded at`, `Name`, `Role`, `Assets`, `Firm`, `Completed` |
+| What they answered | one column per question — a scale set spends a column per statement (`cf-q.1` … `cf-q.6`) and the attention grid one per area, so a column can be read down |
+
+**Nothing computed goes on a tab.** The EQ, the tier, the three dimensions, the
+readiness stage, the confidence band, the route and the three questions the flow
+hands back are all rules over the answers in these same rows — `derive()` in
+`src/data/advisorAnswers.ts`. Putting them in the sheet would mean a tab holding
+two different kinds of thing, and a stale copy of the derived half the moment a
+rule changes.
+
+So: **the sheet records what somebody answered. The Business ID is what those
+answers mean.** One is the record; the other is read off it, live, every time.
+A row is a complete record of a sitting — every question, verbatim — so a
+Business ID can be rebuilt from it exactly.
 
 `Sitting ID` is the key: sending the same sitting twice **updates** its row
 rather than adding a second one, so an operator can post mid-flow and again at

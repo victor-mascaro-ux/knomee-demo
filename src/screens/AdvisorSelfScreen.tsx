@@ -669,8 +669,8 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
   const answered = !d.empty || Object.keys(answers.text).length > 0 ||
     Object.keys(answers.choice).length > 0 || !!answers.identity.name.trim()
   useEffect(() => {
-    if (answered) noteSitting(answers, d, answers.sittingId)
-  }, [answers, d, answered])
+    if (answered) noteSitting(answers, answers.sittingId)
+  }, [answers, answered])
 
   const restart = useCallback((next: Answers) => {
     setAnswers(next)
@@ -681,9 +681,9 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
      under a new id — a new person, a new Business ID. The row it just sent
      stays on the record whether or not the post got anywhere. */
   const close = useCallback(() => {
-    if (answered) void pushSitting(noteSitting(answers, d, answers.sittingId))
+    if (answered) void pushSitting(noteSitting(answers, answers.sittingId))
     restart(emptyAnswers())
-  }, [answered, answers, d, restart])
+  }, [answered, answers, restart])
 
   if (view === 'report') return <FlowReport d={d} onBack={() => setView('flow')} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
@@ -697,7 +697,7 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
       onSend={() => {
-        if (answered) void pushSitting(noteSitting(answers, d, answers.sittingId))
+        if (answered) void pushSitting(noteSitting(answers, answers.sittingId))
       }}
       onRestart={close}
       onSample={() => restart(sampleAnswers())}
@@ -1314,8 +1314,8 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
                   <tr>
                     <th>Tab</th>
                     <th>Answered</th>
-                    <th>EQ</th>
-                    <th>Stage</th>
+                    <th>Questions</th>
+                    <th>The change they named</th>
                     <th>Posted</th>
                   </tr>
                 </thead>
@@ -1324,8 +1324,12 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
                     <tr key={r.id}>
                       <td>{r.tab}</td>
                       <td>{new Date(r.at).toLocaleString()}</td>
-                      <td>{r.values.EQ}</td>
-                      <td>{r.values.Stage}</td>
+                      <td>
+                        {r.answered ?? 0} of {r.total ?? 0}
+                      </td>
+                      {/* Their own answer rather than a score — the sheet no
+                          longer holds a score, and this table reads the sheet. */}
+                      <td>{r.values[Object.keys(r.values).find((k) => k.startsWith('mv-q1 ')) ?? ''] || '—'}</td>
                       <td className={r.sentAt ? 'af-record-sent' : 'af-record-waiting'}>
                         {r.sentAt ? new Date(r.sentAt).toLocaleString() : 'not yet'}
                       </td>
