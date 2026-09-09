@@ -161,9 +161,16 @@ export function sittingOf(a: Answers, d: Derived, id: string): Sitting {
 const LEDGER = 'knomee.advisor-record.v1'
 const ENDPOINT = 'knomee.advisor-endpoint.v1'
 
-/* Filled in once the Apps Script web app is deployed, so a fresh browser
-   records without anybody pasting anything. Empty means "ask the operator". */
-const DEFAULT_ENDPOINT = ''
+/* The deployed Apps Script web app, so a fresh browser records without anybody
+   pasting anything. A device that has saved its own URL keeps using that one.
+
+   This is a write-only endpoint to one demo spreadsheet and it is
+   unauthenticated — it is in public source, so anyone who reads it can append
+   rows. That is the price of a static page recording anything at all, and it is
+   the right trade for a sheet of placeholder answers. Redeploy for a new URL if
+   it ever gets abused. */
+const DEFAULT_ENDPOINT =
+  'https://script.google.com/macros/s/AKfycbz3ee0ohML5kXhkyaPGsovJLbkIGTXpuf-RnV4W6CEhUyYCI3euGSw_Sfg8_w3PtRTEew/exec'
 
 export function ledger(): Sitting[] {
   try {
