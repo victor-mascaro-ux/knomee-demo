@@ -630,3 +630,13 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+
+/* The advisor's bar inside the device frame: the same plum header the desktop
+   carries, at the phone's own height, with no burger — the demo's controls sit
+   under the phone, not in it. */
+.cxm-appbar {
+  justify-content: flex-start;
+}
+.cxm-viewport {
+  padding: 0;
+}

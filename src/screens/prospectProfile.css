@@ -715,6 +715,19 @@
     grid-template-columns: 1fr;
     gap: 0;
   }
+  /* The page opens on what you came for. The rail — portrait, household,
+     advisory team — follows the Financial ID rather than standing in front of
+     it, which on a phone was most of a screen before a single card. The name
+     is already in the breadcrumb and the title above. */
+  .pp-side {
+    order: 2;
+    border-bottom: 0;
+    border-top: 1px solid var(--line, #e7e4ee);
+    margin-top: 8px;
+  }
+  .pp-main {
+    order: 1;
+  }
   /* Grid children default to min-width:auto, so a wide table or a long word
      pushes the track past the screen — which is where the sideways scroll
      came from. */

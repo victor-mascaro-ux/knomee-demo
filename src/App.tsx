@@ -4033,7 +4033,10 @@ export default function App() {
                 <span className="brand-sub">ADMIN</span>
               </>
             ) : (
-              <img className="brand-lockup" src="./knomee-advisor-white.svg" alt="knomee advisor" />
+              <>
+                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+                <span className="brand-sub">ADVISOR</span>
+              </>
             )}
           </div>
           {brand && cobrandLayout === 'centered' && (
