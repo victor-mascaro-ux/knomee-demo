@@ -8,11 +8,15 @@ Square, 200×200 or larger, face centred.
 
 | File | Who |
 |---|---|
-| `marcus-hale.png` | the candidate (firm side) — a **cut-out on a transparent ground**, so it sits on a grey disc rather than filling one. PNG for that reason; the rest are square JPEGs. |
-| `emily-watson.jpg` | the client |
-| `sebastian-watson.jpg` | household member |
-| `jennifer-martinez.jpg` | advisor |
-| `david-chen.jpg` | support |
+| `marcus-hale.png` | the candidate (firm side) — a **cut-out on a transparent ground**, so it sits on a grey disc rather than filling one |
+| `emily-watson.png` | the client |
+| `sarah-mitchell.png` | the prospect |
+| `sebastian-watson.png` | household member |
+| `jennifer-martinez.png` | advisor |
+| `david-chen.png` | support |
+
+`.png` or `.jpg` — the app tries PNG, then JPEG, then whatever the record
+already carried, then the initial. You do not have to convert anything.
 
 A person with no file keeps their initial in a plum disc, which is what the
 design shows for Sebastian and David — and in the firm's pipeline that is the

@@ -38,7 +38,9 @@ const avatarSlug = (name: string) => name.toLowerCase().replace(/[^a-z]+/g, '-')
     back rather than breaking the picture. The initial is the last resort. */
 export const avatarSources = (name: string, fallback?: string) => {
   const slug = avatarSlug(name)
-  return [`./avatars/${slug}.jpg`, `./avatars/${slug}.png`, ...(fallback ? [fallback] : [])]
+  /* PNG first because every file in public/avatars/ is one — the order is not a
+     rule, only which spelling is tried without a wasted request. */
+  return [`./avatars/${slug}.png`, `./avatars/${slug}.jpg`, ...(fallback ? [fallback] : [])]
 }
 
 /** One tile on a vision board: a photograph, or a note the client wrote. */
