@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { clientProfile } from './data/clientProfile'
+import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import {
@@ -91,6 +93,7 @@ import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
+import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -99,6 +102,8 @@ import moodGood from './assets/moods/good.svg'
 import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
+import { advisor as candidate, independenceId } from './data/advisorFlow'
+import { kq as candidateKQ, route as candidateRoute, tier as candidateTier, topAction as candidateTopAction } from './data/advisorProfile'
 import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
@@ -353,9 +358,10 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                   <div className="talk-head">
                     {(() => {
                       // The card names a real person in the book — make it the
-                      // same link their row in the table is.
+                      // same link their row in the table is, which means only
+                      // the one whose profile is built out.
                       const rec = prospects.find((p) => p.name === t.name)
-                      return rec && onOpenProfile ? (
+                      return rec && onOpenProfile && rec.name === financialId.owner ? (
                         <button
                           type="button"
                           className="talk-name name-link-btn"
@@ -473,7 +479,10 @@ function ProspectRow({
             {p.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
-            <NameLink name={p.name} onClick={() => onOpenProfile(p)} />
+            <NameLink
+              name={p.name}
+              onClick={p.name === financialId.owner ? () => onOpenProfile(p) : undefined}
+            />
             <span className="email-line">{p.email}</span>
           </div>
         </div>
@@ -794,6 +803,86 @@ function ProspectsScreen({
   )
 }
 
+/* ── The firm's first tab ─────────────────────────────────────────────────
+   My Candidates: advisors Dynasty is assessing. The pipeline itself — its
+   command centre and its behavioural clusters — is the next ship; what lands
+   here now is the one candidate whose flow is complete, so the profile behind
+   his name is reachable. */
+
+function FirmCandidatesScreen({ onOpenProfile }: { onOpenProfile: () => void }) {
+  return (
+    <>
+      <h1 className="page-title">My Candidates</h1>
+      <p className="firm-note">
+        Advisors being assessed for the platform — and assessing it back. One candidate has
+        completed the flow; the full pipeline and its clusters land next.
+      </p>
+      <div className="table-wrap">
+        <table className="prospects-table">
+          <thead>
+            <tr>
+              <th className="col-name">Name / firm</th>
+              <th className="col-kq">KQ Score</th>
+              <th className="col-firm-word">Stage</th>
+              <th className="col-num">AUM</th>
+              <th className="col-num">Team</th>
+              <th className="col-firm-word">Route</th>
+              <th className="col-action">Top action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className={`group-header group-tier${candidateTier.tier}`}>
+              <td colSpan={7}>
+                <div className="group-header-inner">
+                  <span>
+                    TIER {candidateTier.tier} - {candidateTier.name.toUpperCase()}
+                  </span>
+                  <span className="group-count">1</span>
+                  <span className="group-range">
+                    {candidateTier.min}-{candidateTier.max} KQ
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td className="col-name">
+                <div className="name-cell">
+                  <span className="avatar-wrap">
+                    <span className="avatar avatar-initial">{candidate.initial}</span>
+                  </span>
+                  <div className="name-block">
+                    <NameLink name={candidate.name} onClick={onOpenProfile} />
+                    <span className="email-line">{candidate.firm}</span>
+                  </div>
+                </div>
+              </td>
+              <td className="col-kq">
+                <span className={`score-badge score-tier${candidateTier.tier}`}>{candidateKQ}</span>
+              </td>
+              <td className="col-firm-word">{independenceId.readiness.stage}</td>
+              <td className="col-num">{candidate.book}</td>
+              <td className="col-num">4</td>
+              <td className="col-firm-word">{candidateRoute.pick.replace('Dynasty ', '')}</td>
+              <td className="col-action">
+                <TopActionCell text={candidateTopAction.title} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+function FirmSoon({ title, body }: { title: string; body: string }) {
+  return (
+    <>
+      <h1 className="page-title">{title}</h1>
+      <div className="pp-placeholder firm-soon">{body}</div>
+    </>
+  )
+}
+
 /* ── Clients screen (the converted book of business) ── */
 
 // Sentiment shown as a single colored face on a 1–5 scale (matching the
@@ -861,20 +950,33 @@ function ClientRow({
             {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
-            <NameLink name={c.name} onClick={onOpenProfile ? () => onOpenProfile(c) : undefined} />
+            <NameLink
+              name={c.name}
+              onClick={
+                onOpenProfile && c.name === clientProfile.owner
+                  ? () => onOpenProfile(c)
+                  : undefined
+              }
+            />
             <span className="email-line">{c.email}</span>
           </div>
         </div>
       </td>
       <td className="col-household">
         {c.household ? (
-          <button
-            type="button"
-            className="household-link name-link-btn"
-            onClick={() => onOpenProfile?.(c)}
-          >
-            {c.household}
-          </button>
+          /* The household opens the same one built-out profile, so it is a link
+             only on the row whose profile that is. */
+          onOpenProfile && c.name === clientProfile.owner ? (
+            <button
+              type="button"
+              className="household-link name-link-btn"
+              onClick={() => onOpenProfile(c)}
+            >
+              {c.household}
+            </button>
+          ) : (
+            <span className="household-link is-static">{c.household}</span>
+          )
         ) : (
           <span className="dash">—</span>
         )}
@@ -3635,6 +3737,21 @@ const tabs: { id: Screen; label: string }[] = [
   { id: 'analytics', label: 'Analytics' },
 ]
 
+/* ── The firm persona (Dynasty) ───────────────────────────────────────────
+   A second product on the same engine: a platform recruiting advisors ONTO
+   itself, where the advisor is the one being assessed. It is not a fourth tab
+   on the advisor's dashboard — a Dynasty rep never sees an advisor's retail
+   prospects, and an advisor never sees Dynasty's recruiting pipeline. So the
+   firm view REPLACES the tab bar while it is active, wears its own top-bar
+   label, and owns its own routes. */
+type FirmScreen = 'firm-candidates' | 'firm-network' | 'firm-analytics'
+
+const firmTabs: { id: FirmScreen; label: string }[] = [
+  { id: 'firm-candidates', label: 'My Candidates' },
+  { id: 'firm-network', label: 'My Network' },
+  { id: 'firm-analytics', label: 'Analytics' },
+]
+
 // ── Hash routing ──────────────────────────────────────────────────────────
 // Every page owns a hash (#/clients, #/welcome, …) so a single link opens
 // straight to it. Deep links survive reload and work on GitHub Pages with no
@@ -3651,6 +3768,9 @@ const ROUTE_VIEWS = [
   'advisor-flow',
   'admin',
   'settings',
+  'firm-candidates',
+  'firm-network',
+  'firm-analytics',
 ] as const
 type RouteView = (typeof ROUTE_VIEWS)[number]
 
@@ -3733,6 +3853,20 @@ export default function App() {
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
+  // The firm (Dynasty) persona — see the note above `firmTabs`. Its screens
+  // replace the advisor's entirely while it is on.
+  const isFirmRoute = (v: RouteView | null): v is FirmScreen =>
+    v === 'firm-candidates' || v === 'firm-network' || v === 'firm-analytics'
+  const [firmView, setFirmView] = useState(isFirmRoute(initialView))
+  const [firmScreen, setFirmScreen] = useState<FirmScreen>(
+    isFirmRoute(initialView) ? initialView : 'firm-candidates',
+  )
+  const firmTabsInd = useSlideIndicator<HTMLElement>(firmScreen)
+  // Only Marcus Hale's flow is complete, so he is the one candidate with a
+  // profile behind his name.
+  const [candidateOpen, setCandidateOpen] = useState(
+    initialView === 'firm-candidates' && initialProfile === profileSlug(candidate.name),
+  )
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -3747,7 +3881,9 @@ export default function App() {
   // Expose the current screen to the commenting overlay so comment pins are
   // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
   useEffect(() => {
-    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = adminView
+    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = firmView
+      ? firmScreen
+      : adminView
       ? 'admin'
       : segmentationOpen
         ? 'segmentation'
@@ -3758,11 +3894,13 @@ export default function App() {
           : clientExpOpen
             ? 'client-experience'
             : screen
-  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, advisorFlowOpen, adminView])
+  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, advisorFlowOpen, adminView, firmView, firmScreen])
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
-  const currentView: RouteView = adminView
+  const currentView: RouteView = firmView
+    ? firmScreen
+    : adminView
     ? 'admin'
     : settingsOpen
       ? 'settings'
@@ -3794,6 +3932,9 @@ export default function App() {
           : null,
       )
       setAdminView(v === 'admin')
+      setFirmView(isFirmRoute(v))
+      if (isFirmRoute(v)) setFirmScreen(v)
+      setCandidateOpen(v === 'firm-candidates' && slug === profileSlug(candidate.name))
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
       setAdvisorFlowOpen(v === 'advisor-flow')
@@ -3830,7 +3971,9 @@ export default function App() {
         ? profileSlug(profileProspect.name)
         : currentView === 'clients' && profileClient
           ? profileSlug(profileClient.name)
-          : null
+          : currentView === 'firm-candidates' && candidateOpen
+            ? profileSlug(candidate.name)
+            : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
@@ -3842,7 +3985,7 @@ export default function App() {
         /* cross-origin parent — ignore */
       }
     }
-  }, [currentView, profileProspect, profileClient])
+  }, [currentView, profileProspect, profileClient, candidateOpen])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -3900,6 +4043,11 @@ export default function App() {
               cobrandLayout === 'left' ? (
                 <div className="cobrand-stack">{brand.logo}</div>
               ) : null
+            ) : firmView ? (
+              <>
+                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
+                <span className="brand-sub">ENTERPRISE</span>
+              </>
             ) : adminView ? (
               <>
                 <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
@@ -3940,6 +4088,7 @@ export default function App() {
                     setClientExpOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
+                    setFirmView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -3959,6 +4108,7 @@ export default function App() {
                     setClientExpOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
+                    setFirmView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -3977,6 +4127,7 @@ export default function App() {
                     setAdvisorFlowOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
+                    setFirmView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -3993,6 +4144,7 @@ export default function App() {
                     setSettingsOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
+                    setFirmView(false)
                     setMenuOpen(false)
                   }}
                 >
@@ -4008,11 +4160,33 @@ export default function App() {
                     setSettingsOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
+                    setFirmView(false)
                     setMenuOpen(false)
                   }}
                 >
                   Advisor as Prospect
                 </button>
+                <div className="menu-divider" />
+                <div className="menu-pop-title">Enterprise</div>
+                <label className="menu-toggle">
+                  <span>Dynasty view (the firm side)</span>
+                  <span className={`switch ${firmView ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={firmView}
+                      onChange={(e) => {
+                        setFirmView(e.target.checked)
+                        setAdminView(false)
+                        setSettingsOpen(false)
+                        setSegmentationOpen(false)
+                        setLandingOpen(false)
+                        setClientExpOpen(false)
+                        setAdvisorFlowOpen(false)
+                      }}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
                 <label className="menu-toggle">
@@ -4023,6 +4197,7 @@ export default function App() {
                       checked={adminView}
                       onChange={(e) => {
                         setAdminView(e.target.checked)
+                        setFirmView(false)
                         setSettingsOpen(false)
                         setSegmentationOpen(false)
                         setLandingOpen(false)
@@ -4096,7 +4271,59 @@ export default function App() {
         </div>
       </header>
 
-      {profileClient ? (
+      {firmView ? (
+        candidateOpen ? (
+          <main className="content content-profile">
+            <AdvisorProfileScreen
+              onBack={() => setCandidateOpen(false)}
+              onAdd={() => showToast('Added to Network')}
+            />
+          </main>
+        ) : (
+          <main className="content">
+            {/* The firm's own tab bar. It replaces the advisor's rather than
+                extending it — the two products never share navigation. */}
+            <nav className="tabs slide-nav" ref={firmTabsInd.ref}>
+              {firmTabsInd.box && (
+                <span
+                  className="slide-ind slide-ind-underline"
+                  style={{
+                    transform: `translateX(${firmTabsInd.box.left}px)`,
+                    width: firmTabsInd.box.width,
+                  }}
+                />
+              )}
+              {firmTabs.map((t) => (
+                <button
+                  key={t.id}
+                  className={`tab ${firmScreen === t.id ? 'tab-active' : ''}`}
+                  type="button"
+                  data-active={firmScreen === t.id}
+                  onClick={() => setFirmScreen(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+
+            {firmScreen === 'firm-candidates' && (
+              <FirmCandidatesScreen onOpenProfile={() => setCandidateOpen(true)} />
+            )}
+            {firmScreen === 'firm-network' && (
+              <FirmSoon
+                title="My Network"
+                body="Advisors who have joined the platform — Dynasty's Network Partners, and what each one's Independence ID said before they signed."
+              />
+            )}
+            {firmScreen === 'firm-analytics' && (
+              <FirmSoon
+                title="Analytics"
+                body="The pipeline in aggregate: stage distribution, cluster performance, ranked apprehensions, and whether the recommended route matched where the deal actually went."
+              />
+            )}
+          </main>
+        )
+      ) : profileClient ? (
         <main className="content content-profile">
           <ClientProfileScreen client={profileClient} onBack={() => setProfileClient(null)} />
         </main>

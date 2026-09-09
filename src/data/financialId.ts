@@ -72,6 +72,11 @@ export interface ProfileQuestion {
 
 export const financialId = {
   joined: 'March 2023',
+  /* Whose profile this is. One prospect page is built out and it is hers, so
+     only her name in the Prospects table opens it — the same rule the Clients
+     table follows for Emily Watson. */
+  owner: 'Sarah Mitchell',
+
   keyHighlights: [
     { icon: 'financial-joy', title: 'Core Values', text: 'Security, independence, simplicity, and connection' },
     { icon: 'financial-joy', title: 'Joy & Motivation', text: 'Time with her husband and cultural experiences like theater' },

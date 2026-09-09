@@ -9,6 +9,19 @@
 .pp {
   padding: 0 0 40px;
   color: #2a2340;
+
+  /* The readiness ramp and the confidence dial, as tokens rather than literals,
+     so a page can restate them. These are the prospect's purples — the brand
+     Confidence Gauge's own three wedges and the five-step bar ramp. */
+  --bar-1: #240446;
+  --bar-2: #4c1d95;
+  --bar-3: #7038c8;
+  --bar-4: #9b51e0;
+  --bar-5: #b57ceb;
+  --bar-off: #e2def0;
+  --dial-1: #e9d9f4;
+  --dial-2: #b98ddc;
+  --dial-3: #7639a1;
 }
 /* The main column carries the top inset so the sidebar strip runs flush up to
    the header bar. */
@@ -414,7 +427,7 @@
      Rounded, which the source artwork is not — knomee's design system takes the
      softer corner, so the bars follow it. */
   border-radius: 2px;
-  background: #e2def0;
+  background: var(--bar-off);
 }
 .pp-bar.on {
   background: var(--purple-bolt, #9b51e0);
