@@ -160,16 +160,6 @@
   flex-direction: column;
   gap: var(--space-12);
 }
-.cp-goal-col-head {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 var(--space-12) var(--space-6);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  /* The column labels are purple, not plum — they head the table rather than
-     titling the card. */
-  color: var(--purple-bolt, #9b51e0);
-}
 .cp-goal-tags {
   display: inline-flex;
   gap: var(--space-4);
