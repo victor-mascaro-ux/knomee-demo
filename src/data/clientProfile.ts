@@ -33,7 +33,13 @@ export const avatarFor = (name: string) =>
 
 /** One tile on a vision board: a photograph, or a note the client wrote. */
 export type BoardTile =
-  | { kind: 'photo'; src: string; alt: string; tall?: boolean }
+  /* A photograph takes one cell, or claims a second one — `tall` for a second
+     row, `wide` for a second column. A landscape photograph must never take
+     `tall`: a wide scene in a 1-wide, 2-high cell is cropped to a slot it was
+     never shot for. It is `wide` or it is the plain square cell. BoardPhoto
+     enforces that from the file's own dimensions, so a landscape image dropped
+     into public/vision/ later cannot break the rule either. */
+  | { kind: 'photo'; src: string; alt: string; tall?: boolean; wide?: boolean }
   | { kind: 'note'; title?: string; text?: string; items?: string[]; tone?: 'mint' | 'lilac' }
 
 export interface VisionBoard {
@@ -47,6 +53,14 @@ const photo = (src: string, alt: string, tall?: boolean): BoardTile => ({
   src: `./vision/${src}.png`,
   alt,
   tall,
+})
+
+/* The landscape ones: a full row of their own rather than a square crop. */
+const widePhoto = (src: string, alt: string): BoardTile => ({
+  kind: 'photo',
+  src: `./vision/${src}.png`,
+  alt,
+  wide: true,
 })
 
 export const clientProfile = {
@@ -185,7 +199,7 @@ export const clientProfile = {
           title: 'My Morning Affirmation',
           text: 'Wake up to ocean waves. Feel the salt air. Live where vacation meets everyday life.',
         },
-        photo('family-gatherings', 'Family together outdoors'),
+        widePhoto('family-gatherings', 'Family together outdoors'),
         photo('sunset-walks', 'Sun low over the water', true),
         photo('coastal-interior', 'Looking out to the coast', true),
         photo('peaceful-mornings', 'Silhouettes against a sunset'),
@@ -227,7 +241,7 @@ export const clientProfile = {
             'Meditation practice',
           ],
         },
-        photo('strength-balance', 'Strength training'),
+        widePhoto('strength-balance', 'Strength training'),
         photo('peaceful-sanctuary', 'Trees and a path to walk'),
       ],
     },

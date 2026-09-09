@@ -311,6 +311,10 @@
 .cp-tile.is-tall {
   grid-row: span 2;
 }
+/* The landscape cell: a second column rather than a second row. */
+.cp-tile.is-wide {
+  grid-column: span 2;
+}
 /* A photograph that has not been dropped into public/vision/ yet. */
 .cp-tile-photo.is-missing {
   display: grid;
