@@ -256,6 +256,52 @@ export async function pushSitting(row: Sitting): Promise<boolean> {
   }
 }
 
+/* ── testing the hop ────────────────────────────────────────────────────────
+   The browser-to-script hop is the part most likely to be misconfigured, and
+   the part that answering thirty questions to find out about would be a cruel
+   way to learn. These two send something small down the same wire:
+
+   `pushTestRow` posts on the real code path — same method, same headers, same
+   body shape — to a `_test` tab. It reports that it SENT, not that it landed,
+   for the same reason a real row does.
+
+   `testUrl` is the GET the operator can open in a browser tab, which is the
+   one test on this path with a visible answer, since the script replies with
+   JSON a person can read. */
+
+export async function pushTestRow(): Promise<boolean> {
+  const url = endpoint()
+  if (!url) return false
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        tab: '_test',
+        headers: ['Sitting ID', 'Recorded at', 'Name', 'Note'],
+        values: {
+          'Sitting ID': 'test-row-posted',
+          'Recorded at': new Date().toISOString(),
+          Name: 'Test row',
+          Note: 'Posted from the prototype. Not a real sitting.',
+        },
+      }),
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** The deployment, as a link a person can open. `?test=1` makes the script
+    write a row as well as answer, so one tab proves the whole round trip. */
+export function testUrl(write = false): string {
+  const url = endpoint()
+  if (!url) return ''
+  return write ? `${url}${url.includes('?') ? '&' : '?'}test=1` : url
+}
+
 /** Everything the spreadsheet has not been handed yet, oldest first. */
 export function unsent(): Sitting[] {
   return ledger().filter((r) => !r.sentAt)

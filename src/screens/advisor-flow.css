@@ -695,3 +695,62 @@ button.af-opt:hover {
   color: var(--k-grape, #7639a1);
   font-weight: 600;
 }
+
+/* The three tests, as a numbered list that reads like prose rather than like a
+   form. The counter is drawn rather than listed, so the number lines up with
+   the first line of a paragraph that runs to three. */
+.af-record-steps {
+  counter-reset: af-step;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* The numbered disc is positioned rather than laid out: these items are
+   paragraphs with inline code and links in them, and a grid container would
+   make every one of those a cell of its own. */
+.af-record-steps li {
+  counter-increment: af-step;
+  position: relative;
+  padding-left: 33px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #55525e;
+}
+.af-record-steps li::before {
+  content: counter(af-step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--plum, #240446);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.af-record-steps b {
+  color: var(--plum, #240446);
+}
+.af-record-steps code,
+.af-record-body code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #f3f0f8;
+  font-size: 12.5px;
+}
+/* A link wearing the secondary button, for the one test that opens a tab. */
+.af-record-anchor {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.cx-start:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

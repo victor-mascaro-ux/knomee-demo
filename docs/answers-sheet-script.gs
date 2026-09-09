@@ -24,9 +24,54 @@ function doPost(e) {
   }
 }
 
-/** A GET is only ever a person checking the deployment is alive. */
-function doGet() {
-  return json({ ok: true, service: 'knomee advisor answers', tabs: tabNames() });
+/**
+ * A GET is a person checking the deployment from a browser tab, which is the
+ * only test on this path with a visible answer — a POST from the prototype
+ * comes back opaque by design.
+ *
+ * Plain `/exec` reports what it can see. `/exec?test=1` also writes a row to
+ * the `_test` tab, so one URL in one tab proves the whole round trip: the
+ * deployment, its access setting, and the write. A GET that changes something
+ * is bad manners, which is why it takes an explicit flag and puts the row
+ * somewhere that is obviously not a person.
+ */
+function doGet(e) {
+  var wants = e && e.parameter && e.parameter.test;
+  if (!wants) return json({ ok: true, service: 'knomee advisor answers', tabs: tabNames() });
+  var result = record(testPayload('from a browser tab'));
+  return json({
+    ok: true,
+    wrote: result,
+    tabs: tabNames(),
+    note: 'A row was added to the _test tab. Delete that tab whenever you like.',
+  });
+}
+
+/**
+ * Run this from the Apps Script editor — the Run button, no deployment needed —
+ * to check the script against the spreadsheet before anything else is in play.
+ * A `_test` tab appears with one row on it. Run it twice: the second run
+ * UPDATES that row rather than adding another, which is the upsert the real
+ * rows rely on.
+ */
+function testRow() {
+  var result = record(testPayload('from the Apps Script editor'));
+  Logger.log('Wrote %s row %s on tab "%s"', result.action, result.row, result.tab);
+  return result;
+}
+
+/** A row that could not be mistaken for somebody's answers. */
+function testPayload(where) {
+  return {
+    tab: '_test',
+    headers: ['Sitting ID', 'Recorded at', 'Name', 'Note'],
+    values: {
+      'Sitting ID': 'test-row',
+      'Recorded at': new Date().toISOString(),
+      Name: 'Test row',
+      Note: 'Written ' + where + '. Not a real sitting.',
+    },
+  };
 }
 
 function record(body) {

@@ -59,8 +59,10 @@ import {
   ledger,
   noteSitting,
   pushSitting,
+  pushTestRow,
   pushUnsent,
   setEndpoint,
+  testUrl,
   type Sitting,
 } from '../data/advisorRecord'
 import knomeeMark from '../assets/knomee-mark.svg'
@@ -1230,6 +1232,76 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
               </button>
             </div>
             {note && <p className="af-record-note">{note}</p>}
+          </section>
+
+          {/* Before the flow is worth answering twice: prove the wire. Three
+              tests, cheapest first, and the middle one is the only one that
+              can answer for itself. */}
+          <section className="af-record-card">
+            <h2 className="af-record-h2">Test it before you answer anything</h2>
+            <ol className="af-record-steps">
+              <li>
+                <b>Without deploying anything.</b> In the Apps Script editor, pick{' '}
+                <code>testRow</code> and press Run. A <code>_test</code> tab appears in the
+                spreadsheet with one row. Run it twice — the second run updates that row instead of
+                adding another, which is the behaviour real sittings rely on.
+              </li>
+              <li>
+                <b>Once it is deployed.</b> Open{' '}
+                {url ? (
+                  <a
+                    className="af-record-link"
+                    href={testUrl(true)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    the endpoint with <code>?test=1</code>
+                  </a>
+                ) : (
+                  <code>your /exec URL + ?test=1</code>
+                )}{' '}
+                in a browser tab. The script answers with JSON listing the tabs and writes another
+                test row. This is the only test that tells you it worked rather than asking you to
+                go and look — save the URL above first.
+              </li>
+              <li>
+                <b>From this page, on the real code path.</b> The button below posts exactly what a
+                finished sitting posts, to the <code>_test</code> tab. A post from a page like this
+                one comes back blank, so check the spreadsheet.
+              </li>
+            </ol>
+            <div className="af-record-actions">
+              <button
+                className="cx-start"
+                type="button"
+                disabled={!url}
+                onClick={() => {
+                  setNote('Posting a test row…')
+                  void pushTestRow().then((ok) =>
+                    setNote(
+                      ok
+                        ? 'Test row posted. Look for a _test tab in the spreadsheet — if it is not there, the deployment is not set to “Anyone”.'
+                        : 'Nothing was sent. Save a web-app URL above first.',
+                    ),
+                  )
+                }}
+              >
+                Post a test row
+              </button>
+              {url && (
+                <a
+                  className="af-secondary af-record-btn af-record-anchor"
+                  href={testUrl(false)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open the endpoint
+                </a>
+              )}
+            </div>
+            <p className="af-record-body">
+              Delete the <code>_test</code> tab whenever you like — nothing reads it.
+            </p>
           </section>
 
           <section className="af-record-card">
