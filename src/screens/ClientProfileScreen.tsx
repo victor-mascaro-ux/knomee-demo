@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { DateSelect, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -168,10 +168,14 @@ export default function ClientProfileScreen({
     }
   }, [client.name])
 
-  // Two columns, filled column-first — the live goals lead each column and the
-  // completed ones settle beneath, as the design lays them out.
-  const half = Math.ceil(cp.goals.length / 2)
-  const goalCols = [cp.goals.slice(0, half), cp.goals.slice(half)]
+  // Ordered by stage with the completed ones last, then cut to what the card
+  // shows collapsed, and only then split into two columns filled column-first —
+  // so the four on show are the four earliest, not the first two of each column.
+  const goals = useCollapsed(orderGoals(cp.goals), COLLAPSED_GOALS)
+  const half = Math.ceil(goals.shown.length / 2)
+  const goalCols = [goals.shown.slice(0, half), goals.shown.slice(half)]
+  const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
+  const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
 
   return (
     <div className="pp cp">
@@ -328,9 +332,7 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
-                    <button className="pp-show" type="button">
-                      See less <CaretIcon up />
-                    </button>
+                    {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
 
                   <section className="pp-card">
@@ -387,7 +389,7 @@ export default function ClientProfileScreen({
                       </span>
                       <DateSelect />
                     </div>
-                    <span className="pp-fy-label pp-concern">Concerns</span>
+                    <span className="pp-fy-label">Concerns</span>
                     {cp.outlook.concerns.map((c) => (
                       <p className="pp-quote" key={c}>
                         “{c}”
@@ -461,7 +463,7 @@ export default function ClientProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-events">
-                      {cp.lifeEvents.map((e, i) => (
+                      {events.shown.map((e, i) => (
                         <div className="pp-event" key={i}>
                           <span className="pp-event-tag">{e.tag}</span>
                           {e.kind && <span className="pp-event-kind">{e.kind}</span>}
@@ -470,9 +472,7 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
-                    <button className="pp-show" type="button">
-                      See more <CaretIcon />
-                    </button>
+                    {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
                   <section className="pp-card">
@@ -484,7 +484,7 @@ export default function ClientProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-questions">
-                      {cp.questions.map((q, i) => (
+                      {questions.shown.map((q, i) => (
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
@@ -502,9 +502,7 @@ export default function ClientProfileScreen({
                         </div>
                       ))}
                     </div>
-                    <button className="pp-show" type="button">
-                      See less <CaretIcon up />
-                    </button>
+                    {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
                   </section>
                 </div>
               </div>

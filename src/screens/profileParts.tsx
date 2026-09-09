@@ -210,3 +210,36 @@ export function DateSelect({ dates = CHECKIN_DATES }: { dates?: string[] }) {
     </span>
   )
 }
+
+/* A goal's order is its progress: the stage it has reached, earliest first, and
+   the finished ones settle at the bottom whatever stage they got to. */
+export function orderGoals<T extends { readiness: number; completed?: string }>(goals: T[]) {
+  return [...goals].sort((a, b) => {
+    const done = Number(Boolean(a.completed)) - Number(Boolean(b.completed))
+    return done !== 0 ? done : a.readiness - b.readiness
+  })
+}
+
+/* Cards open showing a few rows and grow on demand. Four for goals, which sit
+   two to a row, three everywhere else. */
+export const COLLAPSED_ROWS = 3
+export const COLLAPSED_GOALS = 4
+
+export function useCollapsed<T>(items: T[], max: number) {
+  const [open, setOpen] = useState(false)
+  return {
+    shown: open ? items : items.slice(0, max),
+    open,
+    toggle: () => setOpen((o) => !o),
+    /* No control when everything already fits. */
+    overflows: items.length > max,
+  }
+}
+
+export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  return (
+    <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
+      {open ? 'See less' : 'See more'} <CaretIcon up={open} />
+    </button>
+  )
+}
