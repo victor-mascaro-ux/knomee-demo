@@ -11,6 +11,7 @@
    screen cannot disagree. */
 
 import { Fragment, useState } from 'react'
+import CollapsibleCard from '../components/CollapsibleCard'
 import './firmCandidates.css'
 import {
   candidates,
@@ -105,28 +106,29 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
   }
 
   return (
-    <section className="card cmd-card">
-      <header className="card-head">
-        <div className="card-title">
-          <ChartIcon color="#7639a1" />
-          <span>Actionable Metrics</span>
-        </div>
-        <HelpTip text="The pipeline at a glance, who to talk to, and the reasoning behind it." />
-      </header>
-
-      <div className="cmd-body">
-        {/* Layer 0 — the pulse */}
-        <div className="metric-tiles cmd-pulse">
+    <CollapsibleCard
+      className="cmd-card"
+      icon={<ChartIcon color="#7639a1" />}
+      title="Actionable Metrics"
+      hint={<HelpTip text="The pipeline at a glance, who to talk to, and the reasoning behind it." />}
+      bodyClassName="cmd-body"
+      defaultOpen
+    >
+      {/* Layer 0 — the pulse. KQ leads, as on the advisor's screen: it is the
+          number the page ranks on and the one the tier bar is a split of. */}
+      <div className="metric-tiles cmd-pulse">
+          <div className="metric-tile">
+            <span className="metric-label">AVG KQ SCORE</span>
+            <div className="metric-num">
+              <span className="metric-value metric-value-kq">
+                {candidateStats.avgKQ.toFixed(1)}
+              </span>
+            </div>
+          </div>
           <div className="metric-tile">
             <span className="metric-label">TOTAL CANDIDATES</span>
             <div className="metric-num">
               <span className="metric-value">{candidateStats.total}</span>
-            </div>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-label">AVG KQ SCORE</span>
-            <div className="metric-num">
-              <span className="metric-value">{candidateStats.avgKQ.toFixed(1)}</span>
             </div>
           </div>
           <div className="metric-tile distribution">
@@ -318,8 +320,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </div>
           </div>
         </div>
-      </div>
-    </section>
+    </CollapsibleCard>
   )
 }
 
@@ -353,13 +354,13 @@ function Row({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
           <span className={`score-badge score-${c.tier}`}>{c.kq}</span>
         )}
       </td>
-      <td className="col-num">{c.intent ?? '–'}</td>
-      <td className="col-num">{c.clarity ?? '–'}</td>
-      <td className="col-num">{c.receptivity ?? '–'}</td>
-      <td className="col-firm-word">{c.stage ?? '–'}</td>
-      <td className="col-num">{money(c.aum)}</td>
-      <td className="col-num">{c.team}</td>
-      <td className="col-firm-word">{c.route}</td>
+      <td className="col-num col-intent">{c.intent ?? '–'}</td>
+      <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
+      <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
+      <td className="col-firm-word col-stage">{c.stage ?? '–'}</td>
+      <td className="col-num col-aum">{money(c.aum)}</td>
+      <td className="col-num col-team">{c.team}</td>
+      <td className="col-firm-word col-route">{c.route}</td>
       <td className="col-action">
         <div className="top-action">
           <div className="top-action-text">{c.topAction}</div>
@@ -416,13 +417,13 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                 </span>
               </button>
             </th>
-            <th className="col-num">Intent</th>
-            <th className="col-num">Clarity</th>
-            <th className="col-num">Receptivity</th>
-            <th className="col-firm-word">Stage</th>
-            <th className="col-num">AUM</th>
-            <th className="col-num">Team</th>
-            <th className="col-firm-word">Route</th>
+            <th className="col-num col-intent">Intent</th>
+            <th className="col-num col-clarity">Clarity</th>
+            <th className="col-num col-receptivity">Receptivity</th>
+            <th className="col-firm-word col-stage">Stage</th>
+            <th className="col-num col-aum">AUM</th>
+            <th className="col-num col-team">Team</th>
+            <th className="col-firm-word col-route">Route</th>
             <th className="col-action">Top Action</th>
           </tr>
         </thead>

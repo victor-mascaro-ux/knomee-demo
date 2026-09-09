@@ -98,6 +98,7 @@ import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
+import CollapsibleCard from './components/CollapsibleCard'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -152,53 +153,6 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   )
 }
 
-function CollapsibleCard({
-  icon,
-  title,
-  hint,
-  bodyClassName,
-  className,
-  defaultOpen = true,
-  children,
-}: {
-  icon: ReactNode
-  title: string
-  hint?: string
-  bodyClassName: string
-  className?: string
-  defaultOpen?: boolean
-  children: ReactNode
-}) {
-  const [open, setOpen] = useState(defaultOpen)
-  return (
-    <section className={`card ${className ?? ''}`}>
-      <header className="card-head">
-        <div className="card-title">
-          {icon}
-          <span>{title}</span>
-        </div>
-        <div className="card-head-right">
-          {hint && <HelpTip text={hint} />}
-          <button
-            className={`show-toggle ${open ? '' : 'collapsed'}`}
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-          >
-            {open ? 'SHOW LESS' : 'SHOW MORE'} <ChevronUp />
-          </button>
-        </div>
-      </header>
-
-      <div className={`collapse ${open ? 'open' : ''}`}>
-        <div className="collapse-inner">
-          <div className={bodyClassName}>{children}</div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // Tier metadata shared by the pulse bar and the drill-in filter. `book` is the
 // full-book count shown on the bar; the linked insight surfaces as the "why"
 // when a tier is focused.
@@ -243,7 +197,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
       className="cmd-card"
       icon={<ChartIcon color="#7639a1" />}
       title="Actionable Metrics"
-      hint="Your book at a glance, who to talk to, and the reasoning behind it."
+      hint={<HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />}
       bodyClassName="cmd-body"
       defaultOpen
     >
@@ -1132,7 +1086,7 @@ function ClientsMetrics({
       className="metrics-card"
       icon={<ChartIcon />}
       title="Top Line Metrics"
-      hint="Totals, average KR score, and the tier split."
+      hint={<HelpTip text="Totals, average KR score, and the tier split." />}
       bodyClassName="metrics-body"
     >
       <div className="metric-tiles">
@@ -1249,7 +1203,7 @@ function ClientInsights() {
       className="insights-card"
       icon={<BoltIcon />}
       title="Actionable Insights"
-      hint="Clients flagged by engagement and sentiment."
+      hint={<HelpTip text="Clients flagged by engagement and sentiment." />}
       bodyClassName="client-insights-body"
       defaultOpen={false}
     >

@@ -409,9 +409,13 @@
   .cc-demo-body::-webkit-scrollbar { width: 8px; }
   .cc-demo-body::-webkit-scrollbar-thumb { background: rgba(20,10,40,0.16); border-radius: 8px; }
   .cc-demo-group { display: flex; flex-direction: column; gap: 3px; }
+  /* The group label has to out-rank the options under it, or the eye lands on
+     whichever row happens to be selected and has to work back out to find the
+     heading it belongs to. It was the quietest thing in the panel — 10px in
+     the faintest grey — while a selected row was bold, tinted and dotted. */
   .cc-demo-title {
-    font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--cc-faint); padding: 0 6px 5px;
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--cc-text); padding: 0 6px 5px;
     display: flex; align-items: center; gap: 6px;
   }
   /* A glyph per section, so the eye lands on the right group rather than
@@ -428,7 +432,9 @@
     flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .cc-demo-row:hover, .cc-demo-btn:hover { background: var(--cc-hairline); }
-  .cc-demo-btn.cc-on { background: rgba(45,210,176,0.18); font-weight: 700; }
+  /* Selected is a state, and the tint and the dot already say so. Bold on top
+     of both made the row shout over its own heading. */
+  .cc-demo-btn.cc-on { background: rgba(45,210,176,0.18); font-weight: 500; }
   .cc-demo-btn .cc-demo-dot {
     width: 5px; height: 5px; border-radius: 50%; background: var(--cc-knomee-teal); flex: none;
     opacity: 0;
@@ -1371,9 +1377,11 @@
           navigateFrame(mobileBackTo || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
         }
       } },
-    { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS },
-    { key: 'cobrand', kind: 'cobrand', label: 'Logo placement', views: SHELL_VIEWS,
-      when: () => !!demoState.brand }
+    { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS }
+    // Logo placement — client left / client centered — was here. It is a choice
+    // the white-label deal settles once, not something a presenter flips in
+    // front of a room, and it earned a row in the tray on every shell screen.
+    // The bar still reads demoState.cobrand, which stays on its default.
   ];
 
   // Only what the product itself cannot reach. Every screen behind a tab or a
@@ -1457,11 +1465,6 @@
       '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
         '<path d="M8.3 2.4H12A1.6 1.6 0 0 1 13.6 4v3.7c0 .43-.17.83-.47 1.13l-4.4 4.4a1.6 1.6 0 0 1-2.26 0l-3.7-3.7a1.6 1.6 0 0 1 0-2.26l4.4-4.4c.3-.3.7-.47 1.13-.47Z" stroke="currentColor" stroke-width="1.5"/>' +
         '<circle cx="10.5" cy="5.5" r="1.05" fill="currentColor"/>' +
-      '</svg>',
-    placement:
-      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
-        '<rect x="1.5" y="3.4" width="13" height="9.2" rx="1.5" stroke="currentColor" stroke-width="1.5"/>' +
-        '<rect x="3.5" y="5.6" width="4.2" height="2.2" rx="0.8" fill="currentColor"/>' +
       '</svg>'
   };
 
@@ -1546,14 +1549,6 @@
             .forEach(b => {
               g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
             });
-        } else if (c.kind === 'cobrand') {
-          const h = demoTitle(c.label, ICONS.placement);
-          h.style.paddingTop = '6px';
-          g.appendChild(h);
-          g.appendChild(demoPick('Client left', demoState.cobrand === 'left',
-            () => demoSet('cobrand', 'left')));
-          g.appendChild(demoPick('Client centered', demoState.cobrand === 'centered',
-            () => demoSet('cobrand', 'centered')));
         }
       });
       demoBody.appendChild(g);

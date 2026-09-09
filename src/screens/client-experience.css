@@ -643,13 +643,13 @@
 }
 /* The title breaks to its own line and the controls share the one under it —
    the initial and Download PDF, side by side, rather than three stacked rows. */
-.cxm-viewport .pp-title-row {
+.cx-viewport .pp-title-row {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
-.cxm-viewport .pp-title-row .pp-title {
+.cx-viewport .pp-title-row .pp-title {
   flex: 1 0 100%;
 }
 /* Emily's initial, under her name, opening her rail. Sized to the download
@@ -713,7 +713,7 @@
    the frame's outer edge. Absolute resolves against .cx-screen — the same
    containing block the scrim uses — which is the screen exactly, and keeps the
    drawer still while the page behind it scrolls. */
-.cxm-viewport.is-menu-open .pp-side {
+.cx-viewport.is-menu-open .pp-side {
   position: absolute;
   /* The screen stacks status bar, app bar, then the scrolling page, so the
      drawer starts below both — not below the app bar alone. */
@@ -735,7 +735,7 @@
      one width off screen. Opacity has no such failure mode. */
   animation: cxmScrimIn 0.18s ease both;
 }
-.cxm-viewport.is-menu-open .pp-side-inner {
+.cx-viewport.is-menu-open .pp-side-inner {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
@@ -760,7 +760,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cxm-viewport.is-menu-open .pp-side,
+  .cx-viewport.is-menu-open .pp-side,
   .cxm-scrim {
     animation: none;
   }

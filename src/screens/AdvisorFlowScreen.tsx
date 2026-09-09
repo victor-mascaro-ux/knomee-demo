@@ -353,6 +353,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
   const i = trail[trail.length - 1]
   const [tab, setTab] = useState<'flow' | 'finid'>('flow')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [railOpen, setRailOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   useDarkGround()
@@ -450,13 +451,34 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
             )}
           </header>
 
-          <div className="cx-viewport" ref={viewport}>
+          <div
+            className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
+            ref={viewport}
+          >
             {tab === 'finid' ? (
               /* The Independence ID he reads is the Independence ID the firm
                  reads — one page, his answers, the same cards. It used to be a
                  second, flatter rendering of the same data that lived only
                  here, so the two drifted every time one of them was touched. */
-              <AdvisorProfileScreen mine onBack={() => setTab('flow')} />
+              <AdvisorProfileScreen
+                mine
+                onBack={() => setTab('flow')}
+                ownerMenu={
+                  /* The same control his page carries everywhere else: his own
+                     portrait, under his name, opening his rail from the left. */
+                  <button
+                    className="cxm-rail-btn"
+                    type="button"
+                    aria-label={railOpen ? 'Close my details' : 'My details'}
+                    aria-expanded={railOpen}
+                    onClick={() => setRailOpen((o) => !o)}
+                  >
+                    <span className="cxm-rail-initial cxm-rail-photo">
+                      <img src={advisor.photo} alt="" />
+                    </span>
+                  </button>
+                }
+              />
             ) : (
               <>
                 <StepBody
@@ -522,6 +544,15 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
           )}
 
           <div className="cx-home-bar" />
+
+          {tab === 'finid' && railOpen && (
+            <button
+              className="cxm-scrim"
+              type="button"
+              aria-label="Close my details"
+              onClick={() => setRailOpen(false)}
+            />
+          )}
 
           {menuOpen && (
             <div className="cx-sheet" onClick={() => setMenuOpen(false)}>

@@ -4360,14 +4360,14 @@ button.name-link-btn:hover .name-text {
   .prospects-cols .col-signup {
     display: none;
   }
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(4),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(4),
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(5),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(5),
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(6),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(6),
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(7),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(7) {
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(4),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(4),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(5),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(5),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(6),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(6),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(7),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(7) {
     display: none;
   }
 
@@ -4512,8 +4512,8 @@ button.name-link-btn:hover .name-text {
   .prospects-cols .col-action {
     display: none;
   }
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(8),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(8) {
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(8),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(8) {
     display: none;
   }
   .clients-table thead th:nth-child(4),
@@ -4536,12 +4536,12 @@ button.name-link-btn:hover .name-text {
   .prospects-cols tbody tr:not(.group-header) td.col-name {
     padding-left: 20px;
   }
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(1),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody tr:not(.group-header) td:nth-child(1),
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(3),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(3),
-  .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(9),
-  .prospects-table:not(.clients-table):not(.prospects-cols) tbody td:nth-child(9) {
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(1),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody tr:not(.group-header) td:nth-child(1),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(3),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(3),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) thead th:nth-child(9),
+  .prospects-table:not(.clients-table):not(.prospects-cols):not(.fc-table) tbody td:nth-child(9) {
     display: none;
   }
   .clients-table thead th:nth-child(1),
