@@ -1,5 +1,8 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="300" height="300" rx="150" fill="white"/>
+<!-- icon-inset: the symbol sits inside the disc, so the white ring reads -->
+<g transform="translate(150 150) scale(0.7) translate(-150 -150)">
 <path d="M120 66c-37 0-66 29-66 66 0 34 24 60 57 63-8 25-27 43-52 50l12 39c56-16 95-66 95-127 0-56-19-91-46-91Z" fill="#6C19FF"/>
 <path d="M244 66c-37 0-66 29-66 66 0 34 24 60 57 63-8 25-27 43-52 50l12 39c56-16 95-66 95-127 0-56-19-91-46-91Z" fill="#3DD9EB"/>
+</g>
 </svg>

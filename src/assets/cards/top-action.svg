@@ -1,4 +1,7 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="300" height="300" rx="150" fill="white"/>
+<!-- icon-inset: the symbol sits inside the disc, so the white ring reads -->
+<g transform="translate(150 150) scale(0.7) translate(-150 -150)">
 <path d="M180 26L84 172h54l-18 102 96-150h-56l20-98Z" fill="#FF9525"/>
+</g>
 </svg>

@@ -649,7 +649,7 @@ function ProspectsTable({
   })()
   return (
     <div className="table-wrap">
-      <table className="prospects-table">
+      <table className="prospects-table prospects-cols">
         <thead>
           <tr>
             <th className="col-check">
