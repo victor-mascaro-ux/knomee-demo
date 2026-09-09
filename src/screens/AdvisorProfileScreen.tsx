@@ -3,9 +3,9 @@
    vocabulary of cards, tabs and rails, but the content is a different
    decision: this person is being recruited, not sold to.
 
-   Tab 1 renders `independenceId` straight out of the advisor flow. Tabs 2 and
-   3 read `advisorProfile.ts`, where the scores are authored once and every
-   other figure is computed from them. */
+   Tab 1 is the Financial ID page itself, card for card, carrying the advisor's
+   answers. Tabs 2 and 3 read `advisorProfile.ts`, where the scores are
+   authored once and every other figure is computed from them. */
 
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
@@ -17,6 +17,7 @@ import {
   bookProfileRead,
   columnActions,
   compClock,
+  confidenceAnswers,
   dimensions,
   engagementLevel,
   hisQuestions,
@@ -35,9 +36,21 @@ import {
   verbosity,
   words,
 } from '../data/advisorProfile'
-import { Gauge, HighlightIcon, ReadinessLevel, TTM_STAGES } from './profileParts'
+import {
+  AddButton,
+  BadgeMedallion,
+  COLLAPSED_ROWS,
+  ConfidenceResults,
+  DateSelect,
+  Gauge,
+  HighlightIcon,
+  ReadinessLevel,
+  ShowToggle,
+  TTM_STAGES,
+  useCollapsed,
+} from './profileParts'
 import { DownloadIcon } from '../components/icons'
-import { CalendarIcon, CheckIcon } from '../components/profileIcons'
+import { CalendarIcon, CaretIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icPracticeJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -46,6 +59,7 @@ import icFutureYou from '../assets/adventures/future-you.svg'
 import icTheMove from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
+import icLifeEvents from '../assets/adventures/life-events.svg'
 
 type ProfileTab = 'id' | 'readiness' | 'playbook'
 
@@ -53,18 +67,6 @@ const TAB_LABEL: Record<ProfileTab, string> = {
   id: 'Independence ID',
   readiness: 'Advisor Readiness',
   playbook: 'Recruiting Playbook',
-}
-
-/* The five adventures, and the artwork each badge wears. The client badges are
-   finished medallions with their own names set into the vector, so the advisor
-   set cannot borrow them — these are the adventure illustrations on a disc,
-   naming themselves underneath. */
-const BADGE_ART: Record<string, string> = {
-  'Practice Joy': icPracticeJoy,
-  Confidence: icConfidence,
-  Outlook: icOutlook,
-  'Future You': icFutureYou,
-  'The Move': icTheMove,
 }
 
 function CardHead({ icon, title, right }: { icon: string; title: string; right?: string }) {
@@ -203,15 +205,28 @@ export default function AdvisorProfileScreen({
 }
 
 /* ── Tab 1 — Independence ID ─────────────────────────────────────────────
-   Structurally the Financial ID: highlights across the top, then a content
-   column and a rail. Goals, Life Events and Questions have no advisor
-   equivalent yet, so they are absent rather than filled with invention. */
+   The Financial ID page itself, card for card and rail for rail, carrying the
+   advisor's answers instead of the client's: the change he named where the
+   goals go, Practice Joy where Financial Joy goes, his six Confidence
+   statements behind the same dial, and the three questions the flow handed him
+   where the client's questions sit. Nothing is added and nothing dropped — an
+   advisor reading his own page and a client reading theirs are looking at the
+   same instrument. */
 
 function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
   const d = independenceId
   const [confidence, setConfidence] = useState(false)
+  // The change he named, read as a goal at the stage the flow put him in.
+  const goals = [{ title: d.move.change, readiness: stageLevel }]
+  // He has taken the flow once, so every card's date picker offers that sitting.
+  const dates = [d.header.completed]
+  const questions = useCollapsed(
+    d.questions.map((q) => ({ q, date: d.header.completed })),
+    COLLAPSED_ROWS,
+  )
   return (
     <>
+      {/* Key Highlights */}
       <section className="pp-card">
         <CardHead icon={icKeyHighlights} title="Key Highlights" />
         <div className="pp-highlights">
@@ -228,9 +243,40 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
       </section>
 
       <div className="pp-cols">
+        {/* Left content column */}
         <div className="pp-col-main">
           <section className="pp-card">
-            <CardHead icon={icPracticeJoy} title="Practice Joy" />
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icTheMove} alt="" />
+                Goals
+              </span>
+              <AddButton />
+            </div>
+            <div className="pp-goals">
+              {goals.map((g) => (
+                <div className="pp-goal" key={g.title}>
+                  <div className="pp-goal-main">
+                    <span className="pp-goal-title">{g.title}</span>
+                  </div>
+                  <ReadinessLevel level={g.readiness} />
+                  <span className="pp-goal-caret">
+                    <RowChevron />
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="ap-goal-when">Timeline: {d.move.when}</p>
+          </section>
+
+          <section className="pp-card">
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icPracticeJoy} alt="" />
+                Practice Joy
+              </span>
+              <DateSelect dates={dates} />
+            </div>
             <p className="pp-prompt">{d.practiceJoy.prompt}</p>
             <div className="pp-chips">
               {d.practiceJoy.chips.map((c) => (
@@ -239,14 +285,12 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
                 </span>
               ))}
             </div>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icPracticeJoy} title="Attention" />
-            <p className="pp-prompt">Where he wants his days to go</p>
+            {/* The second half of the same adventure: where he wants his days to
+                go. It rides in this card rather than a new one, so the page
+                keeps the client page's shape. */}
             <div className="ap-attention">
               <div>
-                <span className="pp-fy-label">More</span>
+                <span className="pp-fy-label">More attention</span>
                 {d.attention.more.map((m) => (
                   <div className="ap-attn-row ap-attn-more" key={m}>
                     {m}
@@ -254,7 +298,7 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
                 ))}
               </div>
               <div>
-                <span className="pp-fy-label">Less</span>
+                <span className="pp-fy-label">Less attention</span>
                 {d.attention.less.map((m) => (
                   <div className="ap-attn-row ap-attn-less" key={m}>
                     {m}
@@ -265,7 +309,13 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
           </section>
 
           <section className="pp-card">
-            <CardHead icon={icFutureYou} title="Future You" />
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icFutureYou} alt="" />
+                Future You
+              </span>
+              <DateSelect dates={dates} />
+            </div>
             {(
               [
                 ['Where', d.futureYou.where],
@@ -287,7 +337,13 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
           </section>
 
           <section className="pp-card">
-            <CardHead icon={icOutlook} title="Outlook" />
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icOutlook} alt="" />
+                Outlook
+              </span>
+              <DateSelect dates={dates} />
+            </div>
             <span className="pp-fy-label">Concerns</span>
             {d.outlook.concerns.map((c) => (
               <p className="pp-quote" key={c}>
@@ -303,17 +359,16 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
           </section>
 
           <section className="pp-card">
-            <CardHead icon={icBadges} title="Badges" />
-            <div className="ap-badges">
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icBadges} alt="" />
+                Badges
+              </span>
+            </div>
+            <div className="pp-badges">
               {d.badges.map((label) => (
-                <div className="ap-badge" key={label}>
-                  <span className="ap-badge-disc">
-                    <img src={BADGE_ART[label]} alt="" />
-                  </span>
-                  <span className="ap-badge-label">{label}</span>
-                  <span className="ap-badge-done">
-                    <CheckIcon size={10} /> Complete
-                  </span>
+                <div className="pp-badge" key={label}>
+                  <BadgeMedallion label={label} />
                 </div>
               ))}
             </div>
@@ -323,56 +378,69 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
         {/* Right rail */}
         <div className="pp-rail">
           <section className="pp-card">
-            <CardHead icon={icTheMove} title="Readiness" />
-            <div className="ap-stage">
-              <span className="ap-stage-name">{d.readiness.stage}</span>
-              <ReadinessLevel level={stageLevel} />
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icConfidence} alt="" />
+                Confidence
+              </span>
+              <DateSelect dates={dates} />
             </div>
-            <p className="ap-stage-note">{d.readiness.note}</p>
-            <div className="ap-conf">
-              <span className="pp-fy-label">Confidence band</span>
-              <div className="pp-confidence">
-                <span className="pp-confidence-label">{d.readiness.confidence}</span>
-                <Gauge label={d.readiness.confidence} />
-              </div>
-              <button
-                className="pp-show"
-                type="button"
-                aria-expanded={confidence}
-                onClick={() => setConfidence((v) => !v)}
-              >
-                {confidence ? 'Hide the two lowest' : 'What pulls it down'}
-              </button>
-              {confidence && (
-                <div className="ap-conf-low">
-                  <p>
-                    Lowest of the six: that his current firm gets him the practice he wants, and
-                    the share of his time spent on work he enjoys — both 2 of 5.
-                  </p>
-                </div>
-              )}
+            <div className="pp-confidence">
+              <span className="pp-confidence-label">{d.readiness.confidence}</span>
+              <Gauge label={d.readiness.confidence} />
             </div>
+            <ConfidenceResults open={confidence} answers={confidenceAnswers} />
+            <button
+              className="pp-show"
+              type="button"
+              aria-expanded={confidence}
+              onClick={() => setConfidence((v) => !v)}
+            >
+              {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
+            </button>
           </section>
 
           <section className="pp-card">
-            <CardHead icon={icTheMove} title="The Move" />
-            <div className="ap-move">
-              {(
-                [
-                  ['The change', d.move.change],
-                  ['Timeline', d.move.when],
-                  ['Why it’s worth it', d.move.worthIt],
-                  ['What’s hard', d.move.challenging],
-                  ['Who else has a say', d.move.stakeholders],
-                  ['Hardest to bring along', d.move.hardest],
-                ] as [string, string][]
-              ).map(([k, v]) => (
-                <div className="ap-move-row" key={k}>
-                  <span className="ap-move-k">{k}</span>
-                  <span className="ap-move-v">{v}</span>
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icLifeEvents} alt="" />
+                Life Events
+              </span>
+              <AddButton />
+            </div>
+            {/* The advisor adventures do not ask for these yet, and inventing
+                them would put words in his mouth. The card stays so the page is
+                the page, and says why it is empty. */}
+            <p className="ap-empty">
+              Nothing recorded. The advisor adventures do not ask for life events yet — a rep can
+              add one here.
+            </p>
+          </section>
+
+          <section className="pp-card">
+            <div className="pp-card-head">
+              <span className="pp-card-title">
+                <img className="pp-card-ic" src={icQuestions} alt="" />
+                Questions
+              </span>
+              <AddButton />
+            </div>
+            <div className="pp-questions">
+              {questions.shown.map((q, i) => (
+                <div
+                  className={`pp-question ${questions.entering(i) ?? ''}`}
+                  style={questions.delay(i)}
+                  key={q.q}
+                >
+                  <span className="pp-q-text">{q.q}</span>
+                  <span className="pp-q-date">{q.date}</span>
+                  <span className="pp-goal-caret">
+                    <RowChevron />
+                  </span>
                 </div>
               ))}
             </div>
+            {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
           </section>
         </div>
       </div>
@@ -640,7 +708,11 @@ function PlaybookTab() {
           </section>
 
           <section className="pp-card ap-his">
-            <CardHead icon={icQuestions} title="His three questions" right="What the flow told him to ask" />
+            <CardHead
+              icon={icQuestions}
+              title="His three questions"
+              right="What the flow told him to ask"
+            />
             <ol className="ap-his-list">
               {hisQuestions.items.map((q, i) => (
                 <li key={q}>
@@ -683,8 +755,8 @@ function PlaybookTab() {
             <CardHead icon={icConfidence} title="Verbosity" />
             <p className="ap-verdict">{verbosity.level}</p>
             <p className="ap-meta-line">
-              {verbosity.answers} written answers · {verbosity.avgWords} words on average ·
-              longest {verbosity.longest}
+              {verbosity.answers} written answers · {verbosity.avgWords} words on average · longest{' '}
+              {verbosity.longest}
             </p>
             <p className="ap-body">{verbosity.reading}</p>
           </section>

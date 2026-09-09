@@ -90,12 +90,27 @@
   vertical-align: 1px;
 }
 
-/* ── Tab 1: attention, badges, readiness, the move ── */
+/* ── Tab 1: the two additions the Financial ID page needs ──
+   The attention split rides inside the Practice Joy card (it is the second half
+   of that adventure), and the Goals card carries the timeline he named. */
 .ap-attention {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
-  margin-top: 4px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--k-line);
+}
+.ap-goal-when {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--k-slate);
+}
+.ap-empty {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--k-muted);
 }
 .ap-attn-row {
   margin-top: 6px;
