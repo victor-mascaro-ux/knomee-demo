@@ -14,6 +14,20 @@
  *     "values": { "Sitting ID": "s-...", "Recorded at": "...", ... } }
  */
 
+/* The spreadsheet is addressed by id rather than by "whichever one is active",
+   so this works whether the project is bound to the sheet (Extensions → Apps
+   Script) or standalone (script.google.com). getActiveSpreadsheet() returns
+   nothing in the standalone case, which fails in a way that looks like the
+   script not running at all. */
+var SHEET_ID = '1BS4zugcZQQceTAUfBjrVfx6BzweonWHwXppIgNIHBmk';
+
+function book() {
+  if (SHEET_ID) return SpreadsheetApp.openById(SHEET_ID);
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (!active) throw new Error('No spreadsheet: set SHEET_ID at the top of this script.');
+  return active;
+}
+
 function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
@@ -56,7 +70,14 @@ function doGet(e) {
  */
 function testRow() {
   var result = record(testPayload('from the Apps Script editor'));
-  Logger.log('Wrote %s row %s on tab "%s"', result.action, result.row, result.tab);
+  Logger.log(
+    'Wrote %s row %s on tab "%s" of "%s". Tabs now: %s',
+    result.action,
+    result.row,
+    result.tab,
+    book().getName(),
+    tabNames().join(', '),
+  );
   return result;
 }
 
@@ -85,8 +106,8 @@ function record(body) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var book = SpreadsheetApp.getActiveSpreadsheet();
-    var tab = book.getSheetByName(name) || createTab(book, name, headers);
+    var sheet = book();
+    var tab = sheet.getSheetByName(name) || createTab(sheet, name, headers);
     var head = headerRow(tab, headers);
 
     // The row goes where its Sitting ID already is, so re-sending a sitting
@@ -116,8 +137,8 @@ function record(body) {
   }
 }
 
-function createTab(book, name, headers) {
-  var tab = book.insertSheet(name);
+function createTab(sheet, name, headers) {
+  var tab = sheet.insertSheet(name);
   tab.getRange(1, 1, 1, headers.length).setValues([headers]);
   tab.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   tab.setFrozenRows(1);
@@ -126,8 +147,8 @@ function createTab(book, name, headers) {
   tab.setColumnWidth(2, 170);
   // Sheet1 is the empty tab a new spreadsheet arrives with. Once there is a
   // real tab it is only in the way.
-  var blank = book.getSheetByName('Sheet1');
-  if (blank && blank.getLastRow() === 0 && book.getSheets().length > 1) book.deleteSheet(blank);
+  var blank = sheet.getSheetByName('Sheet1');
+  if (blank && blank.getLastRow() === 0 && sheet.getSheets().length > 1) sheet.deleteSheet(blank);
   return tab;
 }
 
@@ -164,7 +185,7 @@ function sheetName(raw) {
 }
 
 function tabNames() {
-  return SpreadsheetApp.getActiveSpreadsheet()
+  return book()
     .getSheets()
     .map(function (s) {
       return s.getName();
