@@ -688,7 +688,10 @@
   grid-row: 1 / 3;
 }
 
-@media (max-width: 1080px) {
+/* Container, not viewport: the rail has to fold below the main column inside a
+   393px device frame too, and a media query there is answering the desktop
+   window it is standing on. */
+@container (max-width: 1080px) {
   .pp-cols {
     grid-template-columns: 1fr;
   }
