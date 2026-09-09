@@ -15,35 +15,13 @@
 }
 
 /* ── the card and its head ──
-   Both tabs use the Financial ID's own card (.pp-card) and its head, so a
-   candidate's three tabs are one page rather than two card systems side by
-   side. All that is added here is the glyph: the ID's cards carry adventure
-   artwork, these carry a line icon in the card's accent, in the same 22px
-   white disc. */
+   Both tabs use the Financial ID's own card (.pp-card) and its head, down to
+   the 22px white disc its artwork sits in (.pp-card-ic) — so a candidate's
+   three tabs are one page rather than two card systems side by side. The
+   symbols themselves live in ../assets/cards. */
 .rd-card {
   /* The containers space themselves — .rd and .rd-cols own the gap. */
   margin-bottom: 0;
-}
-.rd-head-ic {
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-circle);
-  background: var(--surface-card);
-  display: grid;
-  place-items: center;
-  flex: none;
-}
-.rd-ic-grape {
-  color: var(--k-grape);
-}
-.rd-ic-green {
-  color: var(--signal-motivator);
-}
-.rd-ic-crimson {
-  color: var(--signal-concern);
-}
-.rd-ic-teal {
-  color: var(--k-ocean);
 }
 .rd-head-note {
   margin-left: auto;
@@ -371,12 +349,6 @@
 .rd-top-ic {
   width: 26px;
   height: 26px;
-  border-radius: var(--radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--k-grape-light);
-  color: var(--k-grape);
-  flex: none;
 }
 .rd-top-action b {
   color: var(--text-strong);
