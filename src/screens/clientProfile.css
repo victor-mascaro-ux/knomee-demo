@@ -3,6 +3,42 @@
    prospectProfile.css, so the two pages stay one page with two states. Scoped
    to .cp-* under .cp, and every value is a design-system token. */
 
+/* ---------- the client palette ----------
+   The Clients dashboard is ocean and teal where Prospects is purple, and the
+   client's Financial ID belongs to the first of those. Restating the tokens
+   here turns the whole page over — labels, bar ramp, confidence dial, hover
+   outlines — without a single component knowing which side it is rendering on.
+   Drawn from the design system's teal family: --k-forest, --k-ocean, --k-teal,
+   --k-mint. */
+.pp.cp {
+  --purple-bolt: var(--k-teal, #3dbdaa);
+  --plum: var(--k-forest, #0f4a3a);
+  --text-strong: var(--k-forest, #0f4a3a);
+  --text-link: var(--k-ocean, #086375);
+
+  --bar-1: #0f4a3a;
+  --bar-2: #12695a;
+  --bar-3: #16897a;
+  --bar-4: #2fb39c;
+  --bar-5: #6fd8c2;
+  --bar-off: #dbeeea;
+
+  --dial-1: #d9f2ed;
+  --dial-2: #6fd0bf;
+  --dial-3: #086375;
+}
+/* "New" is the one goal tag whose lilac belongs to the purple side; on this
+   page it takes the mint the palette already uses for "Updated". Sensitive
+   keeps its amber — attention is not a brand colour. */
+.pp.cp .cp-goal-tag.is-new {
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+}
+.pp.cp .cp-goal-tag.is-updated {
+  background: var(--k-mint);
+  color: var(--k-forest);
+}
+
 /* ---------- sidebar: household + advisory team ---------- */
 .cp-side-block {
   /* The sidebar centres its children, so without this each block shrinks to

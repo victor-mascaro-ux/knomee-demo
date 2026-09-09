@@ -69,12 +69,12 @@ body {
   align-items: center;
   border-bottom: 1px solid var(--line);
 }
-/* Inner wrapper shares the content's max-width + horizontal padding so the
-   logo lines up exactly with the page title and the first tab below it. */
+/* The bar runs the full width of the screen and so does its contents — the
+   logo keeps the page's own inset, but the burger sits at the screen's edge
+   rather than at the edge of a 1520px column the profile pages do not use. */
 .topbar-inner {
   position: relative;
   width: 100%;
-  max-width: 1520px;
   height: 100%;
   margin: 0 auto;
   padding: 0 var(--page-pad);
@@ -1702,6 +1702,13 @@ button.name-link-btn:hover .name-text {
   color: var(--plum);
   text-decoration: underline;
   font-size: 13px;
+}
+/* The households with no profile behind them read as plain text — underlining
+   something that does not open is a promise the page cannot keep. */
+.household-link.is-static {
+  color: var(--grey-text);
+  text-decoration: none;
+  cursor: default;
 }
 .dash {
   color: var(--ash);

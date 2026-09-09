@@ -59,6 +59,13 @@ export const clientProfile = {
     { name: 'Sebastian Watson', role: 'Spouse' },
   ] as HouseholdMember[],
 
+  /* Whose profile this is. There is one built-out client page and it is hers —
+     her household, her advisory team, her vision board — so only her name in
+     the Clients table opens it. Opening it from another client's row put their
+     name above the Watson family. */
+
+  owner: 'Emily Watson',
+
   team: [
     { name: 'Jennifer Martinez', role: 'Advisor' },
     { name: 'David Chen', role: 'Support' },

@@ -39,10 +39,12 @@ import bgOutlook from '../assets/badges/outlook.svg'
    the stage outright — "My readiness stage to my goal is: PREPARATION" — so the
    advisor's table names it too, rather than leaving them to count bars and
    translate. */
-const TTM_STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance']
+export const TTM_STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance']
 /* The bars climb in colour as well as height, deep plum through to violet, so
    the ramp reads as progress. Unfilled steps keep the pale wash. */
-const BAR_RAMP = ['#240446', '#4c1d95', '#7038c8', '#9b51e0', '#b57ceb']
+/* The ramp lives in CSS so a page can restate it — the client's Financial ID
+   runs the same five steps in the client palette's greens. */
+const BAR_RAMP = ['var(--bar-1)', 'var(--bar-2)', 'var(--bar-3)', 'var(--bar-4)', 'var(--bar-5)']
 const BAR_W = 4
 const BAR_GAP = 1.5
 
@@ -109,15 +111,15 @@ export function Gauge({ label }: { label: string }) {
       <svg viewBox="0 0 72 42" width="58" height="34">
         <path
           d="M72 35.9999C72 29.6806 70.3366 23.4726 67.1769 17.9999C64.0173 12.5272 59.4727 7.98266 54 4.823L45 20.4115C47.7363 21.9913 50.0086 24.2636 51.5885 26.9999C53.1683 29.7363 54 32.8403 54 35.9999H72Z"
-          fill="#7639A1"
+          fill="var(--dial-3)"
         />
         <path
           d="M54 4.823C48.5273 1.66334 42.3193 7.53571e-08 36 0C29.6807 -7.53571e-08 23.4727 1.66342 18 4.82308L27 20.4115C29.7363 18.8317 32.8403 18 36 18C39.1597 18 42.2637 18.8316 45 20.4115L54 4.823Z"
-          fill="#B98DDC"
+          fill="var(--dial-2)"
         />
         <path
           d="M18 4.82308C12.5273 7.98274 7.98275 12.5272 4.82309 17.9999C1.66343 23.4726 2.0591e-06 29.6806 0 35.9999L18 35.9999C18 32.8402 18.8317 29.7363 20.4115 26.9999C21.9914 24.2636 24.2637 21.9914 27 20.4115L18 4.82308Z"
-          fill="#E9D9F4"
+          fill="var(--dial-1)"
         />
         <g transform={needle}>
           <path
