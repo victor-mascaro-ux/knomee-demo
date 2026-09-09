@@ -534,16 +534,16 @@ body {
   justify-content: flex-start;
   gap: 2px;
 }
+/* Every tier aligns to its own left border, on both distributions.
+   Prospects used to right-align its last tier because that column can be
+   narrower than the label in it — 104px of column for 106px of "Tier 3 ·
+   Nurture" — which put one label on a different edge from the other two and
+   read as a mistake rather than as a fit. The column was the thing at fault:
+   `min-width: 0` let a flex item shrink below its own content. It holds its
+   label now, and the tiers keep their left edge. */
 .dist-legend-bars .dist-leg {
   align-items: flex-start;
-  min-width: 0;
-}
-/* Only the Prospects command-center right-aligns the last tier: its tier-3 bar
-   can be very narrow and sit far right, so a left-aligned label would overflow.
-   The Clients distribution is more even, so every tier aligns to its left border. */
-.cmd-card .dist-legend-bars .dist-leg:last-child {
-  align-items: flex-end;
-  text-align: right;
+  min-width: min-content;
 }
 .dist-legend-bars .dist-leg-name {
   white-space: nowrap;
@@ -768,6 +768,19 @@ body {
 
 .prospects-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* The dashboards' tables carry no rule between rows. The tier band already
+   groups them and the hover wash already tracks one, so a line under every row
+   was a third system doing the same job — and at forty-odd rows it read as the
+   dominant texture of the screen rather than as its structure. The header
+   keeps its rule: that is the boundary of the body, not a line inside it.
+   Equal specificity to the rule above, so it has to sit after it. */
+.prospects-cols tbody td,
+.clients-table tbody td,
+.fc-table tbody td,
+.empty-table tbody td {
+  border-bottom: 0;
 }
 
 /* The outer edge of the table is 20px; the gutter between cells is 12px.
