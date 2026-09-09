@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { DateSelect, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -44,6 +44,11 @@ export default function ProspectProfileScreen({
   const [tab, setTab] = useState<ProfileTab>('id')
   const initial = prospect.name.charAt(0).toUpperCase()
   const fi = financialId
+  // Goals run earliest stage first with the completed ones last; each card
+  // opens showing a few rows and grows on demand.
+  const goals = useCollapsed(orderGoals(fi.goals), COLLAPSED_GOALS)
+  const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
+  const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
 
   // Open the profile scrolled to the top, regardless of where the prospect's
   // row sat in the table when it was clicked. On the live site the app runs in
@@ -165,7 +170,7 @@ export default function ProspectProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-goals">
-                      {fi.goals.map((g) => (
+                      {goals.shown.map((g) => (
                         <div className={`pp-goal ${g.completed ? 'is-done' : ''}`} key={g.title}>
                           <div className="pp-goal-main">
                             <span className="pp-goal-title">{g.title}</span>
@@ -180,6 +185,7 @@ export default function ProspectProfileScreen({
                         </div>
                       ))}
                     </div>
+                    {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
 
                   <section className="pp-card">
@@ -227,7 +233,7 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
                       <DateSelect />
                     </div>
-                    <span className="pp-fy-label pp-concern">Concerns</span>
+                    <span className="pp-fy-label">Concerns</span>
                     {fi.outlook.concerns.map((c) => (
                       <p className="pp-quote" key={c}>
                         “{c}”
@@ -280,7 +286,7 @@ export default function ProspectProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-events">
-                      {fi.lifeEvents.map((e, i) => (
+                      {events.shown.map((e, i) => (
                         <div className="pp-event" key={i}>
                           <span className="pp-event-tag">{e.tag}</span>
                           <span className="pp-event-kind">{e.kind}</span>
@@ -289,6 +295,7 @@ export default function ProspectProfileScreen({
                         </div>
                       ))}
                     </div>
+                    {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
                   <section className="pp-card">
@@ -297,7 +304,7 @@ export default function ProspectProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-questions">
-                      {fi.questions.map((q, i) => (
+                      {questions.shown.map((q, i) => (
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
@@ -315,6 +322,9 @@ export default function ProspectProfileScreen({
                         </div>
                       ))}
                     </div>
+                    {questions.overflows && (
+                      <ShowToggle open={questions.open} onToggle={questions.toggle} />
+                    )}
                   </section>
                 </div>
               </div>

@@ -421,10 +421,12 @@
 }
 
 /* Chips */
+/* Section labels: purple and light. They name the question the answers below
+   are to, so they should read quieter than the answers, not heavier. */
 .pp-prompt {
   margin: 0 0 12px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--purple-bolt, #9b51e0);
 }
 .pp-chips {
@@ -449,15 +451,13 @@
 .pp-fy-label {
   display: block;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--purple-bolt, #9b51e0);
   margin-bottom: 8px;
 }
 
-/* Outlook */
-.pp-concern {
-  color: #c2497f;
-}
+/* Outlook — Concerns and Hopes are section labels like the rest, not a warning
+   and a reassurance. The pink was reading as an alarm on the advisor's page. */
 .pp-hope {
   color: var(--purple-bolt, #9b51e0);
   margin-top: 12px;
@@ -658,6 +658,16 @@
 .pp-event:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(20, 10, 40, 0.09);
+}
+/* Every white tile inside a card outlines in purple on hover, the way the chips
+   do. It is the one hover cue they all share — the lift and the tint say what
+   kind of thing you are pointing at, the outline says you are pointing at it. */
+.pp-highlight:hover,
+.pp-goal:hover,
+.pp-quote:hover,
+.pp-question:hover,
+.pp-event:hover {
+  border-color: var(--purple-bolt, #9b51e0);
 }
 
 /* Chips nudge and tint toward plum on hover. */
