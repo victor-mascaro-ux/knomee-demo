@@ -346,16 +346,6 @@ export const words = {
   ],
 }
 
-export const engagementLevel = {
-  level: 'High',
-  detail: `All ${independenceId.badges.length} adventures completed, finished ${independenceId.header.completed}.`,
-  reading:
-    'Nobody made him do this. He answered a question about his marriage honestly, on a screen belonging to a firm that is recruiting him.',
-}
-
-export const repTakeaway =
-  'He is not shopping, he is deciding — and he has been deciding for three years. Answer the attrition question with numbers and bring an equity answer for two junior advisors, and the deciding ends. Lead with payout, which he never asked for, and it does not.'
-
 /* ── the same two tabs the prospect page renders ─────────────────────────
    Marcus's answers poured into the Prospect Readiness / Prospect Playbook
    shape, so the candidate page IS that page rather than a lookalike. The four
@@ -406,8 +396,5 @@ export const playbookTab: PlaybookTab = {
     use: words.use.map((w) => ({ word: w.word, hint: w.why })),
     avoid: words.avoid.map((w) => ({ word: w.word, hint: w.why })),
   },
-  engagement: `${engagementLevel.level} — ${engagementLevel.detail}`,
-  takeawayLabel: 'Rep takeaway',
-  takeaway: repTakeaway,
   questionsNote: 'The three the flow told him to ask — they are on his phone',
 }

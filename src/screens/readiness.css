@@ -542,26 +542,6 @@
   text-decoration-color: var(--k-ash);
 }
 
-.rd-comm-box {
-  padding: var(--space-12) var(--space-14);
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-xl);
-}
-.rd-comm-k {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--k-plum-ink);
-}
-.rd-comm-v {
-  margin: var(--space-4) 0 var(--space-12);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--text-table);
-}
-.rd-comm-v:last-child {
-  margin-bottom: 0;
-}
 
 /* ── copy affordance ── */
 .rd-copy {

@@ -479,12 +479,6 @@ export function CommunicationRail({ d }: { d: PlaybookTab }) {
         ))}
       </div>
 
-      <div className="rd-comm-box">
-        <span className="rd-comm-k">Engagement Level</span>
-        <p className="rd-comm-v">{d.engagement}</p>
-        <span className="rd-comm-k">{d.takeawayLabel}</span>
-        <p className="rd-comm-v">{d.takeaway}</p>
-      </div>
     </section>
   )
 }

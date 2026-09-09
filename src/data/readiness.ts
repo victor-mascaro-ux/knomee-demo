@@ -102,10 +102,6 @@ export interface PlaybookTab {
   key: { tag: TagName; meaning: string }[]
   questions: AskedQuestion[]
   words: { use: Word[]; avoid: Word[] }
-  engagement: string
-  /** "Advisor takeaway" on the prospect side, "Rep takeaway" on the firm's. */
-  takeawayLabel: string
-  takeaway: string
   /** Sits under the Questions head. The firm side uses it to say the three are
       the ones the flow handed the candidate, so a rep knows they are coming. */
   questionsNote?: string
@@ -294,7 +290,4 @@ export const prospectPlaybook: PlaybookTab = {
       'Obligations',
     ].map((word) => ({ word })),
   },
-  engagement: 'Moderately expressive respondent',
-  takeawayLabel: 'Advisor takeaway',
-  takeaway: 'A direct, purposeful communication style will likely resonate with her',
 }
