@@ -347,14 +347,26 @@
   .cc-stage:not(.cc-armed) .cc-catcher,
   .cc-stage:not(.cc-armed) .cc-pin-layer { display: none !important; }
 
-  /* 2) The prototype is a long, scrolling page — not a fixed screen. Let the
-        document scroll and size the iframe to its full content height (done in
-        JS), so dropped pins anchor to the content and scroll with it. The
-        chrome floats fixed above the scrolling frame. */
+  /* 2) Two scroll models, and which one is in use depends on whether comments
+        are armed.
+
+        Armed: the prototype is one long page. The iframe is sized to its full
+        content height (in JS) and THIS document scrolls, so a dropped pin
+        anchors to the content and travels with it.
+
+        Not armed — which is how the demo is watched — the frame is one viewport
+        tall and the prototype scrolls inside itself. That is the only way its
+        own `position: sticky` can do anything: sticky answers to the scrollport
+        its element lives in, and a frame tall enough to show everything never
+        scrolls, so a profile's breadcrumb, tabs and rail had nothing to stick
+        to. */
   html, body { height: auto; }
   .cc-stage { height: auto; min-height: 100vh; overflow: visible; background: #fff; }
   .cc-frame { position: relative; inset: auto; }
   .cc-frame iframe { height: 100vh; } /* fallback until JS reports content height */
+  .cc-stage:not(.cc-armed) { height: 100vh; min-height: 0; overflow: hidden; }
+  .cc-stage:not(.cc-armed) .cc-frame { position: absolute; inset: 0; }
+  .cc-stage:not(.cc-armed) .cc-frame iframe { height: 100% !important; }
   .cc-rail { position: fixed; }
   .cc-esc  { position: fixed; }
 
@@ -1184,11 +1196,18 @@
   // the key again (or Esc) hides everything and returns the prototype to a
   // clean, fully interactive state.
   let armed = false;
+  // The last height the prototype reported, and the rule for when it is used.
+  let lastFrameHeight = 0;
+  function applyFrameHeight() {
+    if (!armed) { proto.style.height = ''; return; }
+    proto.style.height = (lastFrameHeight > 1 ? lastFrameHeight : window.innerHeight) + 'px';
+  }
   function setArmed(on) {
     armed = on;
     stage.classList.toggle('cc-armed', on);
     setMode(on);
-    if (!on) setRailCollapsed(true);
+    applyFrameHeight();
+    if (!on) { setRailCollapsed(true); window.scrollTo(0, 0); }
   }
   function toggleArmed() { setArmed(!armed); }
 
@@ -1229,7 +1248,11 @@
       toggleArmed();
     } else if (d.type === 'cc-frame-height' && typeof d.height === 'number') {
       // 0 means "a fixed-layout page — one viewport tall" (see reviewBridge).
-      proto.style.height = (d.height > 1 ? d.height : window.innerHeight) + 'px';
+      // Only while comments are armed: unarmed, the frame is one viewport tall
+      // and the prototype scrolls inside it, which is what lets its own sticky
+      // chrome hold. Remembered either way, so arming applies it at once.
+      lastFrameHeight = d.height;
+      applyFrameHeight();
     } else if (d.type === 'cc-route' && typeof d.hash === 'string') {
       // Mirror the prototype's current page into our address bar so the URL
       // people copy always points at the page they're looking at.
