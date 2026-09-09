@@ -194,6 +194,17 @@ export default function ClientProfileScreen({
 
   return (
     <div className="pp cp">
+      <nav className="pp-crumb">
+        <button type="button" className="pp-crumb-link" onClick={onBack}>
+        My Clients
+        </button>
+        <span className="pp-crumb-sep">›</span>
+        <button type="button" className="pp-crumb-link" onClick={onBack}>
+        {cp.household}
+        </button>
+        <span className="pp-crumb-sep">›</span>
+        <span className="pp-crumb-cur">{client.name}</span>
+      </nav>
       <div className="pp-layout">
         <aside className="pp-side">
           <div className="pp-side-inner">
@@ -246,17 +257,6 @@ export default function ClientProfileScreen({
         </aside>
 
         <main className="pp-main">
-          <nav className="pp-crumb">
-            <button type="button" className="pp-crumb-link" onClick={onBack}>
-              My Clients
-            </button>
-            <span className="pp-crumb-sep">›</span>
-            <button type="button" className="pp-crumb-link" onClick={onBack}>
-              {cp.household}
-            </button>
-            <span className="pp-crumb-sep">›</span>
-            <span className="pp-crumb-cur">{client.name}</span>
-          </nav>
 
           {/* The check-in band: the mood the client last tapped on their phone. */}
           <div className="cp-checkin">

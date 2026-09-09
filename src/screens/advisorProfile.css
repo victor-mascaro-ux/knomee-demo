@@ -25,9 +25,12 @@
   color: var(--k-slate);
 }
 .ap-side-stat-v {
+  /* The number leads and the tier reads under it: side by side, the tier
+     looked like a unit on the score. */
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   font-size: 28px;
   font-weight: 700;
   color: var(--k-plum);

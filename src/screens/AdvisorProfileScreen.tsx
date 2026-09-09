@@ -103,6 +103,13 @@ export default function AdvisorProfileScreen({
 
   return (
     <div className="pp ap">
+      <nav className="pp-crumb">
+        <button type="button" className="pp-crumb-link" onClick={onBack}>
+        My Candidates
+        </button>
+        <span className="pp-crumb-sep">›</span>
+        <span className="pp-crumb-cur">{advisor.name}</span>
+      </nav>
       <div className="pp-layout">
         {/* Left profile sidebar */}
         <aside className="pp-side">
@@ -112,10 +119,6 @@ export default function AdvisorProfileScreen({
             </div>
             <h2 className="pp-name">{advisor.name}</h2>
             <div className="pp-meta">
-              <span className="pp-meta-row">{advisor.role}</span>
-              <span className="pp-meta-row">
-                {advisor.book} · {advisor.firm}
-              </span>
               <span className="pp-meta-row">
                 <CalendarIcon /> Completed {d.header.completed}
               </span>
@@ -141,13 +144,6 @@ export default function AdvisorProfileScreen({
 
         {/* Main column */}
         <main className="pp-main">
-          <nav className="pp-crumb">
-            <button type="button" className="pp-crumb-link" onClick={onBack}>
-              My Candidates
-            </button>
-            <span className="pp-crumb-sep">›</span>
-            <span className="pp-crumb-cur">{advisor.name}</span>
-          </nav>
           <div className="pp-tabs">
             {(Object.keys(TAB_LABEL) as ProfileTab[]).map((id) => (
               <button
