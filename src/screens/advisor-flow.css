@@ -322,6 +322,20 @@
   color: #2b5c56;
 }
 
+/* Inside an adventure the app bar names it and offers the way out — the X
+   sits where the burger does, so the target people already reach for is the
+   one that closes back to the list. */
+.af-appbar-title {
+  font-size: 19px;
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+  letter-spacing: -0.01em;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 /* nav ──────────────────────────────────────────────────────────────────────
    Inside an adventure this bar takes the tab bar's place at the foot of the
    device: Back, the primary button and the step meter, always on screen
