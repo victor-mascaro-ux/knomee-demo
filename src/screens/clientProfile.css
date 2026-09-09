@@ -31,6 +31,7 @@
   --dial-3: #086375;
   --avatar-bg: var(--k-teal-light, #e6f7f5);
   --avatar-ink: var(--k-ocean, #086375);
+  --add-ink: var(--k-ocean, #086375);
 }
 /* "New" takes the lime the tokens reserve for exactly this, which is also what
    the Clients dashboard badges it with — one colour for "new" wherever it
@@ -218,11 +219,13 @@
 /* One pill, three states. They share a shape, a size and a medium weight — what
    separates them is hue, drawn from the design system's own soft pairs rather
    than the semibold green/grape/teal that shouted over the goal title. */
+/* One size for every pill on the page — the goal tags had drifted a step
+   larger than "Advisor added" beside them. */
 .cp-goal-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: var(--weight-medium, 500);
   letter-spacing: 0;
-  padding: 2px 9px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--k-grape-light);
   color: var(--k-grape);

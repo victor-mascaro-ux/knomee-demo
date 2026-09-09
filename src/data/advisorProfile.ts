@@ -24,6 +24,16 @@ const said = (id: string) => step(id)?.answer ?? ''
 /** One statement out of the Confidence set, with where he left the slider. */
 const statement = (i: number) => step('cf-q')?.statements?.[i]
 
+/** His six Confidence statements, rescaled from the flow's 1-5 sliders onto the
+    0-100 track the profile's dial already draws, so the firm-side page can use
+    the same component as the client's rather than a second one that drifts. */
+export const confidenceAnswers = (step('cf-q')?.statements ?? []).map((s) => ({
+  statement: s.text,
+  low: s.low,
+  high: s.high,
+  value: Math.round(((s.value - 1) / 4) * 100),
+}))
+
 /* ── the Knomee Quotient, retrained on an advisor ────────────────────────
    Same three dimensions as the client score; different questions feed them.
    The three dimension scores are the only authored numbers on the tab — the

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -11,7 +11,6 @@ import {
   RowChevron,
   MailIcon,
 } from '../components/profileIcons'
-import addIcon from '../assets/adventures/add.svg'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -168,7 +167,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
-                      <img className="pp-add" src={addIcon} alt="Add" />
+                      <AddButton />
                     </div>
                     <div className="pp-goals">
                       {goals.shown.map((g, i) => (
@@ -294,7 +293,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>
-                      <img className="pp-add" src={addIcon} alt="Add" />
+                      <AddButton />
                     </div>
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
@@ -321,7 +320,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>
-                      <img className="pp-add" src={addIcon} alt="Add" />
+                      <AddButton />
                     </div>
                     <div className="pp-questions">
                       {questions.shown.map((q, i) => (
