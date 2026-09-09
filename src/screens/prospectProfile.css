@@ -1083,3 +1083,83 @@
   font-size: 11.5px;
   color: var(--grey-text, #8b8598);
 }
+
+/* ── Empty states ─────────────────────────────────────────────────────────
+   The dashed tray a card wears before anything is in it: the brand's grey
+   artwork on a white disc, and one line saying what would go here. Life
+   Events is a button — the whole tray invites the click — and Questions is a
+   statement, because an advisor cannot ask a question on the client's behalf.
+   Both live under .pp so the prospect, client and candidate pages share one
+   empty state rather than three. */
+.pp-empty {
+  width: 100%;
+  margin-top: 2px;
+  padding: 28px 16px 26px;
+  border: 2px dashed var(--k-stone, #cccccc);
+  border-radius: 14px;
+  background: var(--k-cloud, #fafafa);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.pp-empty-disc {
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: var(--k-white, #ffffff);
+  display: grid;
+  place-items: center;
+}
+.pp-empty-disc img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+.pp-empty-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--k-ash, #afafaf);
+}
+
+/* The tray that can be filled in behaves like a control: it lifts, its dashes
+   take the page's accent, and the disc rises with it. */
+.pp-empty-cta {
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.18s ease;
+}
+.pp-empty-cta:hover {
+  border-color: var(--purple-bolt, #9b51e0);
+  background: var(--k-white, #ffffff);
+}
+.pp-empty-cta .pp-empty-disc,
+.pp-empty-cta .pp-empty-label {
+  transition: transform 0.18s ease, color 0.16s ease;
+}
+.pp-empty-cta:hover .pp-empty-disc {
+  transform: translateY(-2px);
+}
+.pp-empty-cta:hover .pp-empty-label {
+  color: var(--plum, #240446);
+}
+
+/* A "+" with nothing to add to yet reads as unavailable rather than absent. */
+.pp-add.is-muted {
+  color: var(--k-ash, #afafaf);
+  cursor: default;
+}
+.pp-add.is-muted:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-empty-cta:hover,
+  .pp-empty-cta:hover .pp-empty-disc {
+    transform: none;
+  }
+}

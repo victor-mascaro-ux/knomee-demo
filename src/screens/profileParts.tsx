@@ -26,6 +26,8 @@ import icVacation from '../assets/life-events/vacation.svg'
 import icVehiclePurchase from '../assets/life-events/vehicle-purchase.svg'
 import icWidowhood from '../assets/life-events/widowhood.svg'
 import { confidenceAnswers } from '../data/financialId'
+import emptyLifeEvents from '../assets/empty/life-events.svg'
+import emptyQuestions from '../assets/empty/questions.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -353,6 +355,59 @@ export function ConfidenceResults({
   )
 }
 
+/* ── Empty states ─────────────────────────────────────────────────────────
+   A card with nothing in it yet says which card it is, in the brand's own
+   grey artwork, and says whether there is anything to do about it. Life
+   Events invites you to add one — the box is the button. Questions cannot be
+   added by an advisor, only asked, so its box is a statement and its "+" is
+   muted. */
+
+export const EMPTY_ART = {
+  lifeEvents: emptyLifeEvents,
+  questions: emptyQuestions,
+}
+
+export function EmptyState({
+  art,
+  label,
+  cta,
+}: {
+  art: string
+  label: string
+  /** Renders the box as a button with a leading "+", for the card that can
+      actually be filled in. */
+  cta?: boolean
+}) {
+  const inner = (
+    <>
+      <span className="pp-empty-disc">
+        <img src={art} alt="" />
+      </span>
+      <span className="pp-empty-label">
+        {cta && (
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden>
+            <path
+              d="M12 5.5v13M5.5 12h13"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
+        {label}
+      </span>
+    </>
+  )
+  if (cta) {
+    return (
+      <button type="button" className="pp-empty pp-empty-cta">
+        {inner}
+      </button>
+    )
+  }
+  return <div className="pp-empty">{inner}</div>
+}
+
 /* The life-event artwork, keyed by the option the client tapped and listed in
    the picker's own order. The three supercategory icons ship alongside these
    but are not mapped: they head the picker's sections, and an event that has
@@ -401,9 +456,9 @@ export function LifeEventIcon({ kind, text }: { kind?: string; text: string }) {
 /* The add control, drawn rather than imported, so its glyph takes the page's
    accent — plum-purple on a prospect, ocean on a client — instead of being
    fixed in a file. The white disc is the same one the card icons sit on. */
-export function AddButton() {
+export function AddButton({ muted }: { muted?: boolean } = {}) {
   return (
-    <span className="pp-add" aria-label="Add" role="img">
+    <span className={`pp-add${muted ? ' is-muted' : ''}`} aria-label="Add" role="img">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden>
         <circle cx="12" cy="12" r="12" fill="#fff" />
         <path

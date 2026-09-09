@@ -194,7 +194,12 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
   const { ref, seen } = useSeen<HTMLDivElement>()
   const shown = useCountUp(seen ? d.score : 0)
   return (
-    <div className="rd-dim" ref={ref} style={{ animationDelay: `${0.06 + i * 0.06}s` }}>
+    <div
+      className={`rd-dim${d.evidence?.length ? ' tt' : ''}`}
+      data-tip={d.evidence?.join(' · ')}
+      ref={ref}
+      style={{ animationDelay: `${0.06 + i * 0.06}s` }}
+    >
       <span className="rd-dim-key">{d.key}</span>
       <span className="rd-dim-q">{d.question}</span>
       <span className="rd-dim-score">{shown}</span>

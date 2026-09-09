@@ -171,11 +171,6 @@ export const motivators: Ranked[] = [
     label: 'His team’s future',
     detail: 'Hopes to hand Ana and Dev equity instead of a bonus.',
   },
-  {
-    rank: 4,
-    label: 'Income',
-    detail: 'Ranked fourth — he did not pick it in Practice Joy at all. Leading with payout reads as a misread of him.',
-  },
 ]
 
 export const apprehensions: Ranked[] = [
@@ -189,7 +184,7 @@ export const apprehensions: Ranked[] = [
   {
     rank: 4,
     label: 'Deferred comp he would walk away from',
-    detail: 'Unvested and dated. See the comp clock.',
+    detail: `Named among what makes the move hard: “${said('mv-q9')}”`,
   },
 ]
 
@@ -259,50 +254,17 @@ export const secondSeat = {
    sorts by lives here, once. */
 export const teamSize = 4
 
-/* The real timeline on a breakaway is not a readiness score, it is a vesting
-   date. The total is summed from the tranches so the two cannot disagree. */
-export const compTranches = [
-  { amount: 420, vests: '15 Mar 2027' },
-  { amount: 530, vests: '15 Mar 2028' },
-  { amount: 450, vests: '15 Mar 2029' },
-]
-
-const deferredTotal = compTranches.reduce((a, t) => a + t.amount, 0)
-/** "$1.4M" — written once, from the tranches. */
-export const deferredLabel = `$${(deferredTotal / 1000).toFixed(1)}M`
-
+/* The two things the flow actually establishes about the book. A custodian,
+   a deferred-comp balance and a vesting schedule are all things a rep has to
+   ask for — the adventures never do, so they are not on this page. */
 export const bookProfile = [
   { label: 'AUM', value: advisor.book, detail: 'Self-reported in the flow' },
   {
     label: 'Team',
-    value: `${teamSize} advisors · 2 support`,
-    detail: 'Lead advisor, two juniors, one associate',
-  },
-  {
-    label: 'Current custodian',
-    value: `${advisor.firm} platform · self-clearing`,
-    detail: 'No custodial relationship of his own to carry across',
-  },
-  {
-    label: 'Deferred comp exposure',
-    value: `${deferredLabel} unvested`,
-    detail: `${compTranches.length} tranches — see the comp clock`,
+    value: `${teamSize} advisors`,
+    detail: `“${advisor.role}”, in his own words`,
   },
 ]
-
-/** The book card still has to change something, or it is trivia. */
-export const bookProfileRead =
-  'No custodial relationship of his own to carry across — one fewer transition workstream than a typical breakaway. Say that out loud in the first meeting; he does not know it counts in his favour.'
-
-export const compClock = {
-  tranches: compTranches,
-  total: deferredTotal,
-  label: deferredLabel,
-  last: compTranches[compTranches.length - 1],
-  reading: `Every month before ${compTranches[compTranches.length - 1].vests} costs him something on the way out, and the last tranche is the biggest of the three. His stated window (${picked('mv-q2')}) contains that date.`,
-  action:
-    'Model the net-of-forfeiture number against that date before the second meeting. He has not done that arithmetic — whoever does it first frames the decision.',
-}
 
 /* ── the Recruiting Playbook ────────────────────────────────────────────── */
 
@@ -359,10 +321,10 @@ export const questionsTheyAsk: AskedQuestion[] = [
   {
     q: 'What happens to my deferred comp?',
     guidance:
-      'Say the number back to him before he says it to you, then move the conversation from the gross figure he is walking away from to what he nets over five years.',
+      'He named it himself as one of the things that makes the move hard, and the flow does not ask what it is worth — so the first job is getting the number out of him rather than quoting one back.',
     points: [
-      `${deferredLabel} unvested across ${compTranches.length} tranches, the last on ${compClock.last.vests} — say the number back to him before he says it to you.`,
-      'Show the net-of-forfeiture comparison over five years, not the gross payout.',
+      'Ask for the balance and the vesting dates. Nothing on this page tells you either.',
+      'Then show the net-of-forfeiture comparison over five years, not the gross payout.',
       'Name the transition-capital options plainly, including the ones Dynasty does not offer.',
     ],
   },
@@ -381,7 +343,7 @@ export const questionsTheyAsk: AskedQuestion[] = [
     guidance:
       'Treat this as the promise he cannot keep where he is. Bring the mechanics, not the intention — and help him work out who tells Ana and Dev, and when.',
     points: [
-      'The equity mechanics for Ana and Dev — grant, vesting, and what it is worth if he sells in ten years.',
+      'The equity mechanics for Ana and Dev — grant, vesting, and what it is worth when, in his words, he is “done with it”.',
       'What they can own at Dynasty that they provably cannot own at a wirehouse.',
       'Who tells them, and when. He has not told them yet and is afraid of doing it before he is sure.',
     ],
@@ -406,8 +368,10 @@ export const words = {
     { word: 'what you’d own', why: 'Turns the abstraction into the thing he pictured in Future You.' },
   ],
   avoid: [
-    { word: 'payout', why: 'Income ranked fourth. Payout language reads as a misread of him.' },
-    { word: 'platform', why: 'He asked for a partner, not a platform. The noun makes Dynasty the product.' },
+    {
+      word: 'payout',
+      why: 'Income was there to pick in Practice Joy and he did not pick it. Payout language reads as a misread of him.',
+    },
     { word: 'technology', why: 'Named nowhere in eight minutes of answers.' },
     { word: 'custodian', why: 'Named nowhere. He has no custodial relationship of his own.' },
     { word: 'comp grid', why: 'The vocabulary of the firm he is leaving.' },
@@ -439,7 +403,7 @@ export const engagementLevel = {
 }
 
 export const repTakeaway =
-  'He is not shopping, he is deciding — and he has been deciding for three years. Answer the attrition question with numbers and bring an equity answer for two junior advisors, and the deciding ends. Lead with payout and it does not.'
+  'He is not shopping, he is deciding — and he has been deciding for three years. Answer the attrition question with numbers and bring an equity answer for two junior advisors, and the deciding ends. Lead with payout, which he never asked for, and it does not.'
 
 /* ── the same two tabs the prospect page renders ─────────────────────────
    Marcus's answers poured into the Prospect Readiness / Prospect Playbook
@@ -456,6 +420,8 @@ export const readinessTab: ReadinessTab = {
       question: d.question,
       score: d.score,
       caption: d.read,
+      // The answers behind the number, so hovering it shows its own working.
+      evidence: [d.source, ...d.evidence],
     })),
     tier: {
       n: tier.tier,

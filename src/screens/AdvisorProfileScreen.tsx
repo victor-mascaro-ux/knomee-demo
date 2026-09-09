@@ -15,8 +15,6 @@ import './advisorProfile.css'
 import { advisor, independenceId } from '../data/advisorFlow'
 import {
   bookProfile,
-  bookProfileRead,
-  compClock,
   confidenceAnswers,
   kq,
   playbookTab,
@@ -29,15 +27,14 @@ import { PlaybookTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
   BadgeMedallion,
-  COLLAPSED_ROWS,
   ConfidenceResults,
   DateSelect,
+  EMPTY_ART,
+  EmptyState,
   Gauge,
   HighlightIcon,
   ReadinessLevel,
-  ShowToggle,
   TTM_STAGES,
-  useCollapsed,
 } from './profileParts'
 import { DownloadIcon } from '../components/icons'
 import { CalendarIcon, CaretIcon, RowChevron } from '../components/profileIcons'
@@ -212,10 +209,6 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
   const goals = [{ title: d.move.change, readiness: stageLevel }]
   // He has taken the flow once, so every card's date picker offers that sitting.
   const dates = [d.header.completed]
-  const questions = useCollapsed(
-    d.questions.map((q) => ({ q, date: d.header.completed })),
-    COLLAPSED_ROWS,
-  )
   return (
     <>
       {/* Key Highlights */}
@@ -401,12 +394,9 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
               <AddButton />
             </div>
             {/* The advisor adventures do not ask for these yet, and inventing
-                them would put words in his mouth. The card stays so the page is
-                the page, and says why it is empty. */}
-            <p className="ap-empty">
-              Nothing recorded. The advisor adventures do not ask for life events yet — a rep can
-              add one here.
-            </p>
+                them would put words in his mouth — so the card wears the empty
+                tray a client's would, and the tray invites the rep to add one. */}
+            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
           </section>
 
           <section className="pp-card">
@@ -415,24 +405,12 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
                 <img className="pp-card-ic" src={icQuestions} alt="" />
                 Questions
               </span>
-              <AddButton />
+              <AddButton muted />
             </div>
-            <div className="pp-questions">
-              {questions.shown.map((q, i) => (
-                <div
-                  className={`pp-question ${questions.entering(i) ?? ''}`}
-                  style={questions.delay(i)}
-                  key={q.q}
-                >
-                  <span className="pp-q-text">{q.q}</span>
-                  <span className="pp-q-date">{q.date}</span>
-                  <span className="pp-goal-caret">
-                    <RowChevron />
-                  </span>
-                </div>
-              ))}
-            </div>
-            {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
+            {/* He has asked nobody anything yet — this card is for questions he
+                puts to Dynasty. The three the flow handed HIM are a different
+                thing and live on the Recruiting Playbook. */}
+            <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
           </section>
         </div>
       </div>
@@ -496,23 +474,8 @@ function EnterpriseCards() {
             </div>
           ))}
         </div>
-        <Action>{bookProfileRead}</Action>
       </section>
 
-      <section className="pp-card">
-        <CardHead icon={icConfidence} title="The comp clock" right="A date, not a score" />
-        <div className="ap-clock">
-          {compClock.tranches.map((t) => (
-            <div className="ap-tranche" key={t.vests}>
-              <span className="ap-tranche-amt">${t.amount}K</span>
-              <span className="ap-tranche-date">vests {t.vests}</span>
-            </div>
-          ))}
-        </div>
-        <p className="ap-clock-total">{compClock.label} unvested in total</p>
-        <p className="ap-body">{compClock.reading}</p>
-        <Action>{compClock.action}</Action>
-      </section>
     </div>
   )
 }
