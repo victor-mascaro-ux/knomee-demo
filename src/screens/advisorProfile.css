@@ -886,25 +886,3 @@
     flex-direction: column;
   }
 }
-
-/* ── The firm's My Candidates table, while it is still one row ───────────
-   Phase 2 replaces this screen; the two utility classes it needs live here
-   so nothing lands in the shared table stylesheet for a stub. */
-.firm-note {
-  margin: -6px 0 16px;
-  max-width: 720px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--k-muted);
-}
-.prospects-table th.col-firm-word,
-.prospects-table td.col-firm-word {
-  white-space: nowrap;
-  font-size: 12.5px;
-  color: var(--k-ink-soft);
-}
-.firm-soon {
-  max-width: 720px;
-  text-align: left;
-  line-height: 1.6;
-}
