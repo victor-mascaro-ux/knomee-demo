@@ -93,6 +93,7 @@ import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import ClientMobileScreen from './screens/ClientMobileScreen'
+import AdvisorMobileScreen from './screens/AdvisorMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3700,6 +3701,7 @@ const ROUTE_VIEWS = [
   'welcome-b',
   'client-experience',
   'client-mobile',
+  'advisor-mobile',
   'advisor-flow',
   'admin',
   'settings',
@@ -3784,6 +3786,7 @@ export default function App() {
   const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
   // Emily's Financial ID in the device frame, opened from the demo menu.
   const [clientMobileOpen, setClientMobileOpen] = useState(initialView === 'client-mobile')
+  const [advisorMobileOpen, setAdvisorMobileOpen] = useState(initialView === 'advisor-mobile')
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
   const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
@@ -3831,7 +3834,9 @@ export default function App() {
             : 'welcome'
           : advisorFlowOpen
             ? 'advisor-flow'
-            : clientMobileOpen
+            : advisorMobileOpen
+              ? 'advisor-mobile'
+              : clientMobileOpen
               ? 'client-mobile'
               : clientExpOpen
               ? 'client-experience'
@@ -3916,6 +3921,7 @@ export default function App() {
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
       setClientMobileOpen(v === 'client-mobile')
+      setAdvisorMobileOpen(v === 'advisor-mobile')
       if (v === 'welcome') setLandingVersion('a')
       if (v === 'welcome-b') setLandingVersion('b')
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
@@ -3995,6 +4001,20 @@ export default function App() {
 
   // Same for the client's mobile app: the phone is the whole page, and the way
   // back to the advisor side lives in the phone's own menu.
+  // Marcus's Independence ID in the same frame. The firm side has its own
+  // profile page, so it gets its own phone route rather than sharing hers.
+  if (advisorMobileOpen) {
+    return (
+      <AdvisorMobileScreen
+        onExit={() => setAdvisorMobileOpen(false)}
+        onAccountSettings={() => {
+          setAdvisorMobileOpen(false)
+          setSettingsOpen(true)
+        }}
+      />
+    )
+  }
+
   if (clientMobileOpen) {
     return (
       <ClientMobileScreen

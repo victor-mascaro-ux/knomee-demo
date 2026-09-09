@@ -357,7 +357,7 @@ type ClientTab = 'id' | 'insights'
 export default function ClientProfileScreen({
   client,
   onBack,
-  clientMenu,
+  ownerMenu,
 }: {
   client: Client
   onBack: () => void
@@ -366,7 +366,7 @@ export default function ClientProfileScreen({
      the app bar — the app bar's burger is the advisor's own menu, as it is on
      a desktop. Nothing renders here on a desktop, where the rail is on screen
      already. */
-  clientMenu?: ReactNode
+  ownerMenu?: ReactNode
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
   const cp = clientProfile
@@ -507,7 +507,7 @@ export default function ClientProfileScreen({
 
           <div className="pp-title-row">
             <h1 className="pp-title">{client.name}’s Financial ID</h1>
-            {clientMenu}
+            {ownerMenu}
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
             </button>

@@ -726,6 +726,7 @@
     'welcome-b': 'Welcome page (B)',
     'client-experience': 'Client Experience',
     'client-mobile': 'Client profile on mobile',
+    'advisor-mobile': 'Independence ID on mobile',
     'advisor-flow': 'Advisor as Prospect',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
@@ -1333,6 +1334,19 @@
   // screen (Emily's), so without this, turning the view off from it would have
   // to guess a client — it remembers the page you turned it on from.
   let mobileBackTo = null;
+  // Which phone route belongs to the page you are on, and the way back out of
+  // it. The client's Financial ID and the candidate's Independence ID are the
+  // same page carrying different answers, so each has its own frame.
+  const MOBILE_OF = {
+    'clients': '#/client-mobile',
+    'client-mobile': '#/client-mobile',
+    'firm-candidates': '#/advisor-mobile',
+    'advisor-mobile': '#/advisor-mobile'
+  };
+  const BACK_FROM_MOBILE = {
+    'client-mobile': '#/clients/emily-watson',
+    'advisor-mobile': '#/firm-candidates/marcus-hale'
+  };
   const CONTROLS = [
     { key: 'empty', kind: 'toggle', label: 'Empty state',
       views: ['prospects', 'clients', 'analytics'],
@@ -1345,15 +1359,16 @@
     // in a list of destinations — and it only appears where there is a client
     // page to look at.
     { key: 'mobile', kind: 'navToggle', label: 'Mobile view',
-      views: ['clients', 'client-mobile'],
-      when: () => canon(demoState.view) === 'client-mobile' || !!demoState.profile,
-      isOn: () => canon(demoState.view) === 'client-mobile',
+      views: ['clients', 'client-mobile', 'firm-candidates', 'advisor-mobile'],
+      when: () => MOBILE_OF[canon(demoState.view)] || !!demoState.profile,
+      isOn: () => !!BACK_FROM_MOBILE[canon(demoState.view)],
       apply: (on) => {
+        const here = canon(demoState.view);
         if (on) {
           mobileBackTo = currentRoute;
-          navigateFrame('#/client-mobile');
+          navigateFrame(MOBILE_OF[here] || '#/client-mobile');
         } else {
-          navigateFrame(mobileBackTo || '#/clients/emily-watson');
+          navigateFrame(mobileBackTo || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
         }
       } },
     { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS },
