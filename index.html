@@ -1513,7 +1513,14 @@
   }
 
   function renderDemo() {
-    demoHere.textContent = SCREEN_LABELS[canon(demoState.view)] || demoState.view;
+    // The scene names the profile you have open, not just the table behind it:
+    // the Mobile view switch is a view of THIS page, and on a profile the panel
+    // otherwise read as if it belonged to the list.
+    const scene = SCREEN_LABELS[canon(demoState.view)] || demoState.view;
+    const who = demoState.profile
+      ? demoState.profile.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+      : null;
+    demoHere.textContent = who ? scene + ' › ' + who : scene;
     demoBody.innerHTML = '';
 
     // ── this page ──
