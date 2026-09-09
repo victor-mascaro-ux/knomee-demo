@@ -4404,11 +4404,6 @@ button.name-link-btn:hover .name-text {
   content: '✓';
   float: right;
 }
-.menu-divider {
-  height: 1px;
-  background: var(--line);
-  margin: 8px 0;
-}
 
 /* ---------- Responsive — mirrors the converting flow ----------
    Tables never scroll horizontally; instead columns are dropped
