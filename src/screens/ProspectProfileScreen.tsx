@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
+import { prospectPlaybook, prospectReadiness } from '../data/readiness'
+import { PlaybookTabView, ReadinessTabView } from './readinessParts'
 import { AddButton, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
@@ -128,16 +130,22 @@ export default function ProspectProfileScreen({
           </div>
 
           <div className="pp-title-row">
-            <h1 className="pp-title">{prospect.name}’s Financial ID</h1>
+            <h1 className="pp-title">
+              {tab === 'id'
+                ? `${prospect.name}’s Financial ID`
+                : tab === 'readiness'
+                  ? 'Prospect Readiness'
+                  : 'Prospect Playbook'}
+            </h1>
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
             </button>
           </div>
 
-          {tab !== 'id' ? (
-            <div className="pp-placeholder">
-              {tab === 'readiness' ? 'Prospect Readiness' : 'Prospect Playbook'} — coming soon.
-            </div>
+          {tab === 'readiness' ? (
+            <ReadinessTabView d={prospectReadiness} />
+          ) : tab === 'playbook' ? (
+            <PlaybookTabView d={prospectPlaybook} />
           ) : (
             <>
               {/* Key Highlights */}

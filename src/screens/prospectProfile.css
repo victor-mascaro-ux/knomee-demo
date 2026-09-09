@@ -9,6 +9,9 @@
 .pp {
   padding: 0 0 40px;
   color: #2a2340;
+  /* The phone layout answers to this element's width, not the window's, so the
+     same rules serve a real phone and the device frame the demo menu opens. */
+  container-type: inline-size;
 
   /* The readiness ramp and the confidence dial, as tokens rather than literals,
      so a page can restate them. These are the prospect's purples — the brand
@@ -698,10 +701,13 @@
    a 375px screen. Everything becomes one column, the rail becomes a header band
    you scroll past in a moment rather than a full screen of portrait, and the
    tabs scroll sideways instead of wrapping into three ragged lines. */
+/* The page gutter is outside .pp, so it stays a viewport question. */
 @media (max-width: 720px) {
   .content.content-profile {
     padding: 0 16px 32px;
   }
+}
+@container (max-width: 720px) {
   .pp-layout {
     grid-template-columns: 1fr;
     gap: 0;

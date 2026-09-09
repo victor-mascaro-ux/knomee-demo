@@ -1,0 +1,823 @@
+/* Readiness & Playbook — the two tabs the prospect page and the candidate page
+   share. Namespaced under .rd so it cannot reach anything else, and every
+   colour, radius, duration and easing is a token: the four behavioural tags
+   come from the --tag-* pairs added to the design system for them, and the
+   readiness accents from --signal-motivator / --signal-concern.
+
+   Motion mirrors the profile pages: cards rise on mount with a stagger, white
+   tiles lift and outline in purple on hover, the ring and the numbers draw
+   over --dur-bar, and the whole thing holds still under reduced motion. */
+
+.rd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+/* ── the card and its head ── */
+.rd-card {
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-card);
+  padding: var(--space-16) var(--space-20) var(--space-20);
+}
+.rd-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  padding-bottom: var(--space-14);
+}
+.rd-head-ic {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.rd-ic-grape {
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+}
+.rd-ic-green {
+  background: var(--k-teal-light);
+  color: var(--signal-motivator);
+}
+.rd-ic-crimson {
+  background: var(--k-crimson-light);
+  color: var(--signal-concern);
+}
+.rd-ic-teal {
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+}
+.rd-head-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-strong);
+}
+.rd-head-note {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ── the snapshot ── */
+.rd-snapshot {
+  background: var(--k-plum-050);
+}
+.rd-snapshot-body {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--space-20);
+  align-items: start;
+}
+.rd-kq {
+  padding: var(--space-16);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.rd-kq-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--k-grape);
+}
+.rd-kq-q {
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.rd-ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: grid;
+  place-items: center;
+  margin-top: var(--space-8);
+}
+.rd-ring svg {
+  display: block;
+}
+.rd-ring-track {
+  fill: none;
+  stroke: var(--k-pearl);
+  stroke-width: 18;
+}
+.rd-ring-fill {
+  fill: none;
+  stroke: url(#rd-ring-grad);
+  stroke-width: 18;
+  stroke-linecap: round;
+  transition: stroke-dasharray var(--dur-bar) var(--ease-standard);
+}
+/* The gradient's stops are tokens, so the dial belongs to the brand ramp
+   rather than to two hard-coded hexes. */
+.rd-ring-stop-a {
+  stop-color: var(--k-bolt);
+}
+.rd-ring-stop-b {
+  stop-color: var(--k-grape-vivid);
+}
+.rd-ring-num {
+  position: absolute;
+  font-size: 62px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--k-plum-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rd-breakdown-label {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding-bottom: var(--space-10);
+}
+.rd-dims {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.rd-dim {
+  padding: var(--space-14) var(--space-12) var(--space-16);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+.rd-dim-key {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--k-grape);
+}
+.rd-dim-q {
+  font-size: 11.5px;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  min-height: 32px;
+}
+.rd-dim-score {
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--k-plum-ink);
+  font-variant-numeric: tabular-nums;
+}
+.rd-dim-caption {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-table);
+}
+
+/* The tier banner takes its tier's colour from the KQ ramp. */
+.rd-tier {
+  margin-top: var(--space-12);
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-xl);
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: var(--space-4) var(--space-10);
+  align-items: center;
+  background: var(--k-teal-light);
+}
+.rd-tier-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-xs);
+  background: var(--kq-1);
+}
+.rd-tier-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--k-plum-ink);
+}
+.rd-tier-body,
+.rd-tier-note {
+  grid-column: 2;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.rd-tier-note {
+  margin-top: var(--space-4);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.rd-tier-2 {
+  background: var(--k-grape-light);
+}
+.rd-tier-2 .rd-tier-swatch {
+  background: var(--k-grape);
+}
+.rd-tier-3 {
+  background: var(--surface-sunken);
+}
+.rd-tier-3 .rd-tier-swatch {
+  background: var(--kq-3);
+}
+
+/* ── the three columns ── */
+.rd-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-16);
+  align-items: start;
+}
+.rd-col .rd-head-title {
+  font-size: 15px;
+}
+
+.rd-velocity {
+  padding: var(--space-14);
+  border-radius: var(--radius-xl);
+  background: var(--surface-sunken);
+  border: var(--border-thin) solid var(--border-hairline);
+}
+.rd-verdict {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--k-grape);
+  padding-bottom: var(--space-12);
+}
+.rd-points {
+  margin: 0;
+  padding-left: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.rd-points li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-table);
+}
+
+.rd-drivers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+/* What drives someone and what holds them back, as two opposed signals: a
+   3px bar in the accent, and nothing else competing with the text. */
+.rd-driver {
+  padding: var(--space-2) 0 var(--space-2) var(--space-12);
+  border-left: 3px solid var(--border-control);
+}
+.rd-driver-motivator {
+  border-left-color: var(--signal-motivator);
+}
+.rd-driver-concern {
+  border-left-color: var(--signal-concern);
+}
+.rd-driver-title {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--k-plum-ink);
+}
+.rd-driver-body {
+  margin: var(--space-4) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-table);
+}
+
+/* The firm side's one extra line per card. */
+.rd-action {
+  margin: var(--space-12) 0 0;
+  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--k-plum-050);
+  border-left: 3px solid var(--k-grape);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--k-plum-ink);
+}
+.rd-action-tag {
+  display: inline-block;
+  margin-right: var(--space-8);
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--k-plum);
+  color: var(--text-inverse);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+/* ── the playbook ── */
+.rd-top-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  padding: var(--space-14) var(--space-16);
+  border-radius: var(--radius-xl);
+  background: var(--k-plum-050);
+  border: var(--border-thin) solid var(--k-grape-light);
+  font-size: 14px;
+  color: var(--text-table);
+}
+.rd-top-ic {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+  flex: none;
+}
+.rd-top-action b {
+  color: var(--text-strong);
+}
+
+.rd-play-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 372px;
+  gap: var(--space-16);
+  align-items: start;
+}
+.rd-play-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  min-width: 0;
+}
+
+.rd-starters,
+.rd-asks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.rd-starter,
+.rd-ask {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: var(--space-10);
+  padding: var(--space-14);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+}
+.rd-starter-ic {
+  color: var(--k-grape);
+  line-height: 0;
+  padding-top: 2px;
+}
+.rd-ask-ic {
+  color: var(--k-teal);
+  line-height: 0;
+  padding-top: 2px;
+}
+.rd-starter-quote,
+.rd-ask-q {
+  margin: 0;
+  font-size: 13.5px;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text-table);
+}
+.rd-ask-q {
+  font-weight: 600;
+  color: var(--k-plum-ink);
+}
+.rd-starter-why,
+.rd-ask-guidance {
+  margin: var(--space-8) 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.rd-starter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  padding-top: var(--space-10);
+}
+
+/* The four tags, one pair each, so the same tag reads the same in the starter
+   and in the key beneath it. */
+.rd-tag {
+  padding: 3px 9px;
+  border-radius: var(--radius-xs);
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rd-tag-positive {
+  background: var(--tag-positive-bg);
+  color: var(--tag-positive-ink);
+}
+.rd-tag-curiosity {
+  background: var(--tag-curiosity-bg);
+  color: var(--tag-curiosity-ink);
+}
+.rd-tag-self {
+  background: var(--tag-self-bg);
+  color: var(--tag-self-ink);
+}
+.rd-tag-validate {
+  background: var(--tag-validate-bg);
+  color: var(--tag-validate-ink);
+}
+
+.rd-sub-head {
+  margin: var(--space-20) 0 var(--space-10);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--k-plum-ink);
+}
+.rd-key {
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-14);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.rd-key-row {
+  padding-left: var(--space-12);
+  border-left: 3px solid var(--border-control);
+}
+.rd-key-row.rd-tag-positive {
+  background: none;
+  border-left-color: var(--tag-positive-ink);
+}
+.rd-key-row.rd-tag-curiosity {
+  background: none;
+  border-left-color: var(--tag-curiosity-ink);
+}
+.rd-key-row.rd-tag-self {
+  background: none;
+  border-left-color: var(--tag-self-ink);
+}
+.rd-key-row.rd-tag-validate {
+  background: none;
+  border-left-color: var(--tag-validate-ink);
+}
+.rd-key-tag {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--k-plum-ink);
+}
+.rd-key-meaning {
+  margin: var(--space-4) 0 0;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+.rd-ask-points {
+  margin-top: var(--space-10);
+  display: flex;
+  flex-direction: column;
+}
+.rd-ask-point {
+  padding: var(--space-6) 0 var(--space-6) var(--space-12);
+  border-left: 3px solid var(--k-teal);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-table);
+}
+
+/* Their own three questions — the honest-fit design pointing both ways. */
+.rd-theirs {
+  border-left: 4px solid var(--k-teal);
+}
+.rd-theirs-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.rd-theirs-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: var(--space-10);
+  padding: var(--space-12) var(--space-14);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+}
+.rd-theirs-n {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-circle);
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+  font-size: 11.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.rd-theirs-q {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-table);
+}
+
+/* ── the communication rail ── */
+.rd-comm-label {
+  margin: 0 0 var(--space-10);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--k-plum-ink);
+}
+.rd-comm-label-inline {
+  margin: 0;
+}
+.rd-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-16);
+}
+.rd-word {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+.rd-words-use .rd-word {
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+}
+.rd-words-avoid .rd-word {
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-control);
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: var(--k-ash);
+}
+
+.rd-verbosity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding-bottom: var(--space-12);
+}
+.rd-verb-pill {
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--k-teal-light);
+  color: var(--signal-motivator);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.rd-verb-words {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.rd-comm-box {
+  padding: var(--space-12) var(--space-14);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+}
+.rd-comm-k {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--k-plum-ink);
+}
+.rd-comm-v {
+  margin: var(--space-4) 0 var(--space-12);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.rd-comm-v:last-child {
+  margin-bottom: 0;
+}
+
+/* ── copy affordance ── */
+.rd-copy {
+  position: absolute;
+  top: var(--space-10);
+  right: var(--space-10);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  border: var(--border-thin) solid var(--border-default);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+.rd-copy svg {
+  display: block;
+}
+.rd-starter:hover .rd-copy,
+.rd-ask:hover .rd-copy,
+.rd-theirs-list li:hover .rd-copy,
+.rd-copy:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.rd-copy:hover {
+  color: var(--k-grape);
+  border-color: var(--k-grape);
+}
+.rd-copy.is-done {
+  opacity: 1;
+  transform: translateY(0);
+  color: var(--k-green);
+  border-color: var(--k-green);
+}
+
+/* ── motion ──────────────────────────────────────────────────────────────
+   The same vocabulary as the profile pages: an 8px rise on mount, a 2px lift
+   with a purple outline on hover, and nothing at all under reduced motion. */
+@keyframes rdRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rd > *,
+  .rd-cols > *,
+  .rd-play-main > *,
+  .rd-play-rail > * {
+    animation: rdRise 0.32s var(--ease-out) both;
+  }
+  .rd-cols > *:nth-child(2),
+  .rd-play-main > *:nth-child(2) {
+    animation-delay: 0.05s;
+  }
+  .rd-cols > *:nth-child(3),
+  .rd-play-main > *:nth-child(3) {
+    animation-delay: 0.1s;
+  }
+  .rd-play-rail > * {
+    animation-delay: 0.08s;
+  }
+  .rd-dim,
+  .rd-driver,
+  .rd-points li,
+  .rd-starter,
+  .rd-ask,
+  .rd-word,
+  .rd-theirs-list li {
+    animation: rdRise 0.3s var(--ease-out) both;
+  }
+}
+
+/* Every white tile in a card lifts, casts and outlines in purple — the one
+   hover cue the profile pages all share. */
+.rd-dim,
+.rd-starter,
+.rd-ask,
+.rd-theirs-list li,
+.rd-kq {
+  box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
+  transition:
+    transform var(--dur-mid) var(--ease-out),
+    box-shadow var(--dur-mid) var(--ease-out),
+    border-color var(--dur-mid) var(--ease-out);
+}
+.rd-dim:hover,
+.rd-starter:hover,
+.rd-ask:hover,
+.rd-theirs-list li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elev-2);
+  border-color: var(--k-bolt);
+}
+/* The dial is the page's one big number: it lifts but keeps its border, so it
+   reads as a panel rather than a row. */
+.rd-kq:hover {
+  box-shadow: var(--elev-2);
+}
+.rd-kq:hover .rd-ring-num {
+  color: var(--k-plum);
+}
+
+/* Words nudge and tint the way the profile chips do. */
+.rd-word {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+  cursor: default;
+}
+.rd-words-use .rd-word:hover {
+  transform: translateY(-1px);
+  color: var(--k-plum);
+}
+.rd-words-avoid .rd-word:hover {
+  transform: translateY(-1px);
+  border-color: var(--k-crimson);
+  color: var(--k-crimson);
+}
+
+/* A driver's bar thickens toward its accent on hover of the card. */
+.rd-driver {
+  transition: border-left-color var(--dur-base) var(--ease-out);
+}
+.rd-driver:hover .rd-driver-title {
+  color: var(--k-plum);
+}
+
+/* The four tags lift a hair, so a pill reads as a label you can look up in the
+   key rather than a static swatch. */
+.rd-tag {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.rd-starter:hover .rd-tag {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rd-dim:hover,
+  .rd-starter:hover,
+  .rd-ask:hover,
+  .rd-theirs-list li:hover,
+  .rd-word:hover,
+  .rd-starter:hover .rd-tag {
+    transform: none;
+  }
+  .rd-ring-fill {
+    transition: none;
+  }
+}
+
+/* ── narrower desktops ── */
+@media (max-width: 1380px) {
+  .rd-snapshot-body {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  .rd-play-cols {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+@media (max-width: 1180px) {
+  .rd-snapshot-body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .rd-breakdown {
+    width: 100%;
+  }
+  .rd-cols {
+    grid-template-columns: 1fr;
+  }
+  .rd-play-cols {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 900px) {
+  .rd-dims {
+    grid-template-columns: 1fr;
+  }
+  .rd-dim-q {
+    min-height: 0;
+  }
+}
