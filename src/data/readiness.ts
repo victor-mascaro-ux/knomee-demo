@@ -83,6 +83,8 @@ export interface AskedQuestion {
   quote: string
   /** How to answer it. */
   guidance: string
+  /** What the advisor or the firm could tackle using the question — three
+      openings it creates, not a script for answering it. */
   points: string[]
 }
 
@@ -100,13 +102,13 @@ export interface PlaybookTab {
   key: { tag: TagName; meaning: string }[]
   questions: AskedQuestion[]
   words: { use: Word[]; avoid: Word[] }
-  verbosity: { level: string; words: number }
   engagement: string
   /** "Advisor takeaway" on the prospect side, "Rep takeaway" on the firm's. */
   takeawayLabel: string
   takeaway: string
-  /** Firm side only: the three questions the flow handed the candidate. */
-  theirQuestions?: { note: string; items: string[] }
+  /** Sits under the Questions head. The firm side uses it to say the three are
+      the ones the flow handed the candidate, so a rep knows they are coming. */
+  questionsNote?: string
 }
 
 /* The four tags are conversation technique rather than domain knowledge, so
@@ -292,7 +294,6 @@ export const prospectPlaybook: PlaybookTab = {
       'Obligations',
     ].map((word) => ({ word })),
   },
-  verbosity: { level: 'high', words: 248 },
   engagement: 'Moderately expressive respondent',
   takeawayLabel: 'Advisor takeaway',
   takeaway: 'A direct, purposeful communication style will likely resonate with her',
