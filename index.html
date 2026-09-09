@@ -1331,31 +1331,25 @@
       when: () => !!demoState.brand }
   ];
 
-  // The scenes worth jumping to mid-demo, in the order a demo walks them.
-  const SCENES = [
-    { title: 'Advisor', items: [
-      ['#/prospects', 'My Prospects'],
-      ['#/clients', 'My Clients'],
-      ['#/analytics', 'Analytics'],
-      ['#/segmentation', 'Segmentation'],
-      ['#/settings', 'Account Settings']
-    ] },
-    { title: 'Dynasty · the firm', items: [
-      ['#/firm-candidates', 'My Candidates'],
-      ['#/firm-candidates/marcus-hale', 'Marcus Hale'],
-      ['#/firm-network', 'Network'],
-      ['#/firm-analytics', 'Analytics']
-    ] },
-    { title: 'Knomee admin', items: [
-      ['#/admin', '100-advisor overview']
-    ] },
-    { title: 'What the prospect sees', items: [
-      ['#/welcome', 'Welcome page (A)'],
-      ['#/welcome-b', 'Welcome page (B)'],
-      ['#/client-experience', 'Client Experience'],
-      ['#/advisor-flow', 'Advisor as Prospect']
-    ] }
+  // Only what the product itself cannot reach. Every screen behind a tab or a
+  // menu item — the advisor's three tabs, the firm's three, Segmentation,
+  // Account Settings, the welcome page, the phone, a candidate's profile — is
+  // navigated the way the demo's audience would navigate it, and listing it
+  // here as well would only teach a presenter to drive from the panel.
+  //
+  // Which persona you are is the one thing no tab offers: the personas replace
+  // each other's whole shell, so there is nowhere inside one to stand and pick
+  // another.
+  const PERSONAS = [
+    ['advisor', 'Advisor', '#/prospects'],
+    ['firm', 'Dynasty · the firm', '#/firm-candidates'],
+    ['admin', 'Knomee admin', '#/admin']
   ];
+  const personaOf = (view) => {
+    if (view === 'admin') return 'admin';
+    if (view.indexOf('firm-') === 0) return 'firm';
+    return 'advisor';
+  };
 
   function demoSet(key, value) {
     demoState[key] = value;                 // optimistic; the app echoes back
@@ -1376,21 +1370,19 @@
     if (demoArmed) renderDemo();
   }
 
-  // Is this the page we're on? An exact route match wins, so a profile marks
-  // its own entry rather than the table behind it.
-  function sceneIsOn(hash) {
-    if (currentRoute === hash) return true;
-    const exact = SCENES.some(g => g.items.some(it => it[0] === currentRoute));
-    return !exact && hash === '#/' + demoState.view;
-  }
+  // Only the brands worth showing a prospect. The others stay in the code —
+  // they are still real white labels, just not in this menu.
+  const MENU_BRANDS = ['confetti'];
 
   function demoGroup(title) {
     const g = document.createElement('div');
     g.className = 'cc-demo-group';
-    const h = document.createElement('div');
-    h.className = 'cc-demo-title';
-    h.textContent = title;
-    g.appendChild(h);
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'cc-demo-title';
+      h.textContent = title;
+      g.appendChild(h);
+    }
     return g;
   }
 
@@ -1432,7 +1424,10 @@
     const here = CONTROLS.filter(c =>
       c.views.indexOf(canon(demoState.view)) !== -1 && (!c.when || c.when()));
     if (here.length) {
-      const g = demoGroup('This page');
+      // No "this page" heading over these: each control names itself (and the
+      // panel's own header says which page you're on), so a wrapper title only
+      // stacked one all-caps line on top of another.
+      const g = demoGroup(null);
       here.forEach(c => {
         if (c.kind === 'toggle') {
           g.appendChild(demoToggleRow(c.label, !!demoState[c.key], v => demoSet(c.key, v)));
@@ -1443,9 +1438,11 @@
           h.textContent = c.label;
           g.appendChild(h);
           g.appendChild(demoPick('Knomee', !demoState.brand, () => demoSet('brand', null)));
-          demoState.brands.forEach(b => {
-            g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
-          });
+          demoState.brands
+            .filter(b => MENU_BRANDS.indexOf(b.id) !== -1)
+            .forEach(b => {
+              g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
+            });
         } else if (c.kind === 'cobrand') {
           const h = document.createElement('div');
           h.className = 'cc-demo-title';
@@ -1461,14 +1458,16 @@
       demoBody.appendChild(g);
     }
 
-    // ── go to ──
-    SCENES.forEach(group => {
-      const g = demoGroup(group.title);
-      group.items.forEach(it => {
-        g.appendChild(demoPick(it[1], sceneIsOn(it[0]), () => navigateFrame(it[0])));
-      });
-      demoBody.appendChild(g);
+    // ── persona ──
+    const mine = personaOf(canon(demoState.view));
+    const g = demoGroup('Persona');
+    PERSONAS.forEach(p => {
+      const on = p[0] === mine;
+      // Picking the persona you are already in would only yank the demo back
+      // to that persona's first screen.
+      g.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
     });
+    demoBody.appendChild(g);
   }
 
   function setDemoArmed(on) {

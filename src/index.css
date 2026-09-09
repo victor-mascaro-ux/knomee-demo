@@ -65,7 +65,9 @@ body {
   background: var(--plum);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--line);
+  /* No border. --line is the hairline that separates one light surface from
+     another; drawn along the foot of a plum bar it reads as a white stripe on
+     the dark. The bar's own colour is the boundary. */
 }
 /* The bar runs the full width of the screen and so does its contents — the
    logo keeps the page's own inset, but the burger sits at the screen's edge
@@ -1593,7 +1595,9 @@ button.name-link-btn:hover .name-text {
 
 /* ---------- Clients screen ---------- */
 .brand-logo {
-  height: 22px;
+  /* The knomee mark on the enterprise / admin bars — same height as the
+     advisor lockup, so no persona wears a smaller knomee than another. */
+  height: var(--brand-logo-h);
   width: auto;
   display: block;
 }
@@ -4281,7 +4285,7 @@ button.name-link-btn:hover .name-text {
 /* Phone: stack the toolbar (converting flow behavior) */
 @media (max-width: 640px) {
   .brand-logo {
-    height: 18px;
+    height: 22px;
   }
   .brand-sub {
     font-size: 11px;
