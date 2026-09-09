@@ -13,6 +13,7 @@
 // All figures and answers are invented. No real advisor or firm is represented.
 
 import { advisor, independenceId, steps } from './advisorFlow'
+import { RECOMMENDATIONS_KEY, type PlaybookTab, type ReadinessTab } from './readiness'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
 
@@ -42,6 +43,10 @@ export const confidenceAnswers = (step('cf-q')?.statements ?? []).map((s) => ({
 export interface Dimension {
   key: 'Intent' | 'Clarity' | 'Receptivity'
   score: number
+  /** The question the snapshot card asks under the dimension's name. The
+      client version asks "Are they actively working toward a goal?"; an
+      advisor's decision needs its own three. */
+  question: string
   /** What the dimension means for an advisor, not a retail prospect. */
   measures: string
   /** Which screens of the flow feed it. */
@@ -64,6 +69,7 @@ export const dimensions: Dimension[] = [
   {
     key: 'Intent',
     score: 45,
+    question: 'Is this a live decision, or a recurring mood?',
     measures: 'Whether this is a live decision or a recurring mood.',
     source: 'The Move · Q5–Q7 (the readiness stage)',
     evidence: [
@@ -77,6 +83,7 @@ export const dimensions: Dimension[] = [
   {
     key: 'Clarity',
     score: 78,
+    question: 'Do they know what kind of independence they want?',
     measures: 'Whether he knows what kind of independence he wants.',
     source: 'Future You · the vision and its clarity rating (Q7)',
     evidence: [
@@ -89,6 +96,7 @@ export const dimensions: Dimension[] = [
   {
     key: 'Receptivity',
     score: 85,
+    question: 'Would they let a platform help?',
     measures: 'Whether he would let a platform help, or insists on doing it alone.',
     source: 'Confidence · item 6, and The Move · Q4',
     evidence: [
@@ -338,27 +346,10 @@ export const starters: Starter[] = [
   },
 ]
 
-export const recommendationsKey: { tag: StarterTag; meaning: string }[] = [
-  {
-    tag: 'Positive Talk',
-    meaning: 'Name what is already true and working, in his words, before adding anything of your own.',
-  },
-  {
-    tag: 'Demonstrate Curiosity',
-    meaning: 'Ask about the part he has not resolved. Questions gather what the flow could not, and hand him the floor.',
-  },
-  {
-    tag: 'Self-Reinforcement',
-    meaning: 'Point at evidence he produced himself. He will not argue with his own answer.',
-  },
-  {
-    tag: 'Acknowledge and Validate',
-    meaning: 'Say the hard thing back plainly. Hesitation that goes unnamed hardens.',
-  },
-]
-
 export interface AskedQuestion {
   q: string
+  /** How to answer it, before the talking points. */
+  guidance: string
   points: string[]
 }
 
@@ -367,6 +358,8 @@ export interface AskedQuestion {
 export const questionsTheyAsk: AskedQuestion[] = [
   {
     q: 'What happens to my deferred comp?',
+    guidance:
+      'Say the number back to him before he says it to you, then move the conversation from the gross figure he is walking away from to what he nets over five years.',
     points: [
       `${deferredLabel} unvested across ${compTranches.length} tranches, the last on ${compClock.last.vests} — say the number back to him before he says it to you.`,
       'Show the net-of-forfeiture comparison over five years, not the gross payout.',
@@ -375,6 +368,8 @@ export const questionsTheyAsk: AskedQuestion[] = [
   },
   {
     q: 'Do the clients actually come?',
+    guidance:
+      'Answer with published evidence for teams his size, including what went wrong in the worst cases. This is the only question on the page that has to be answered with numbers.',
     points: [
       'Published retention for teams of four at $500M–$1B, not a headline average.',
       'The two worst outcomes in the last ten moves, and what went wrong in each.',
@@ -383,6 +378,8 @@ export const questionsTheyAsk: AskedQuestion[] = [
   },
   {
     q: 'What does my team get on day one?',
+    guidance:
+      'Treat this as the promise he cannot keep where he is. Bring the mechanics, not the intention — and help him work out who tells Ana and Dev, and when.',
     points: [
       'The equity mechanics for Ana and Dev — grant, vesting, and what it is worth if he sells in ten years.',
       'What they can own at Dynasty that they provably cannot own at a wirehouse.',
@@ -424,8 +421,10 @@ const wordCount = (t: string) => t.trim().split(/\s+/).length
 const totalWords = textAnswers.reduce((a, t) => a + wordCount(t), 0)
 
 export const verbosity = {
-  level: 'High',
+  level: 'high',
   answers: textAnswers.length,
+  /** What the Verbosity Indicator counts. */
+  words: totalWords,
   avgWords: Math.round(totalWords / textAnswers.length),
   longest: Math.max(...textAnswers.map(wordCount)),
   reading:
@@ -441,3 +440,58 @@ export const engagementLevel = {
 
 export const repTakeaway =
   'He is not shopping, he is deciding — and he has been deciding for three years. Answer the attrition question with numbers and bring an equity answer for two junior advisors, and the deciding ends. Lead with payout and it does not.'
+
+/* ── the same two tabs the prospect page renders ─────────────────────────
+   Marcus's answers poured into the Prospect Readiness / Prospect Playbook
+   shape, so the candidate page IS that page rather than a lookalike. The four
+   enterprise-only cards — route, second seat, book, comp clock — are passed to
+   the view as extras, since the client version has no slot for them. */
+
+export const readinessTab: ReadinessTab = {
+  snapshot: {
+    question: 'How ready is this advisor to move?',
+    kq,
+    dimensions: dimensions.map((d) => ({
+      key: d.key,
+      question: d.question,
+      score: d.score,
+      caption: d.read,
+    })),
+    tier: {
+      n: tier.tier,
+      name: tier.name,
+      body: tierBanner.body,
+      note: tierBanner.note,
+    },
+  },
+  velocity: {
+    title: 'How Quickly Will This Advisor Move?',
+    verdict: velocity.read.replace(/\.$/, ''),
+    points: [velocity.body, ...velocity.reasons.map((r) => `${r.label} — ${r.detail}`)],
+    action: velocity.action,
+  },
+  motivators: motivators.map((m) => ({ title: m.label, body: m.detail })),
+  apprehensions: apprehensions.map((a) => ({ title: a.label, body: a.detail })),
+  motivatorsAction: columnActions.motivators,
+  apprehensionsAction: columnActions.apprehensions,
+}
+
+export const playbookTab: PlaybookTab = {
+  topAction: topAction.title,
+  starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag] })),
+  key: RECOMMENDATIONS_KEY,
+  questions: questionsTheyAsk.map((q) => ({
+    quote: q.q,
+    guidance: q.guidance,
+    points: q.points,
+  })),
+  words: {
+    use: words.use.map((w) => ({ word: w.word, hint: w.why })),
+    avoid: words.avoid.map((w) => ({ word: w.word, hint: w.why })),
+  },
+  verbosity: { level: verbosity.level, words: verbosity.words },
+  engagement: `${engagementLevel.level} — ${engagementLevel.detail}`,
+  takeawayLabel: 'Rep takeaway',
+  takeaway: repTakeaway,
+  theirQuestions: { note: hisQuestions.note, items: hisQuestions.items },
+}

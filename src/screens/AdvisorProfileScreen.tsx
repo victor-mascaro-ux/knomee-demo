@@ -3,39 +3,29 @@
    vocabulary of cards, tabs and rails, but the content is a different
    decision: this person is being recruited, not sold to.
 
-   Tab 1 is the Financial ID page itself, card for card, carrying the advisor's
-   answers. Tabs 2 and 3 read `advisorProfile.ts`, where the scores are
-   authored once and every other figure is computed from them. */
+   All three tabs are the prospect page's own tabs: the Financial ID card for
+   card, and Prospect Readiness / Prospect Playbook rendered from the shared
+   components in `readinessParts.tsx`. Only the content is the advisor's, and
+   only four cards are new — route, second seat, book profile and the comp
+   clock, which the client version has no slot for. */
 
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
 import { advisor, independenceId } from '../data/advisorFlow'
 import {
-  apprehensions,
   bookProfile,
   bookProfileRead,
-  columnActions,
   compClock,
   confidenceAnswers,
-  dimensions,
-  engagementLevel,
-  hisQuestions,
   kq,
-  motivators,
-  questionsTheyAsk,
-  recommendationsKey,
-  repTakeaway,
+  playbookTab,
+  readinessTab,
   route,
   secondSeat,
-  starters,
   tier,
-  tierBanner,
-  topAction,
-  velocity,
-  verbosity,
-  words,
 } from '../data/advisorProfile'
+import { PlaybookTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
   BadgeMedallion,
@@ -196,8 +186,10 @@ export default function AdvisorProfileScreen({
           </div>
 
           {tab === 'id' && <IndependenceIdTab stageLevel={stageLevel} />}
-          {tab === 'readiness' && <ReadinessTab />}
-          {tab === 'playbook' && <PlaybookTab />}
+          {tab === 'readiness' && (
+            <ReadinessTabView d={readinessTab} extras={<EnterpriseCards />} />
+          )}
+          {tab === 'playbook' && <PlaybookTabView d={playbookTab} />}
         </main>
       </div>
     </div>
@@ -448,332 +440,79 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
   )
 }
 
-/* ── Tab 2 — Advisor Readiness ───────────────────────────────────────────
-   The Knomee Quotient, its three dimensions and the enterprise-only fields a
-   retail profile has no equivalent for: route, second seat, book, comp clock. */
+/* ── Tabs 2 and 3 ────────────────────────────────────────────────────────
+   The prospect page's Readiness and Playbook, rendered from the shared
+   components with Marcus's answers. The only thing this screen adds is the
+   four enterprise-only cards the client version has no slot for — route,
+   second seat, book profile and the comp clock — which ride under the three
+   columns as `extras`. */
 
-function Ring({ value }: { value: number }) {
-  // A 100-point dial drawn as a stroked arc: 270° of sweep, plum on a pale
-  // wash, so the score reads as a position rather than a colour.
-  const r = 62
-  const c = 2 * Math.PI * r
-  const sweep = 0.75
+function EnterpriseCards() {
   return (
-    <svg className="ap-ring-svg" viewBox="0 0 160 160" width="160" height="160" aria-hidden>
-      <circle
-        cx="80"
-        cy="80"
-        r={r}
-        className="ap-ring-track"
-        strokeDasharray={`${c * sweep} ${c}`}
-        transform="rotate(135 80 80)"
-      />
-      <circle
-        cx="80"
-        cy="80"
-        r={r}
-        className="ap-ring-fill"
-        strokeDasharray={`${c * sweep * (value / 100)} ${c}`}
-        transform="rotate(135 80 80)"
-      />
-    </svg>
-  )
-}
-
-function ReadinessTab() {
-  return (
-    <>
-      <section className="pp-card ap-kq">
-        <div className="ap-ring">
-          <Ring value={kq} />
-          <div className="ap-ring-mid">
-            <span className="ap-ring-num">{kq}</span>
-            <span className="ap-ring-cap">Knomee Quotient</span>
-          </div>
-          <span className={`ap-tier ap-tier-${tier.tier}`}>
-            Tier {tier.tier} · {tier.name}
-          </span>
-          <span className="ap-ring-band">
-            {tier.min}–{tier.max} band
-          </span>
-        </div>
-        <div className="ap-dims">
-          {dimensions.map((dim) => (
-            <div className="ap-dim" key={dim.key}>
-              <div className="ap-dim-head">
-                <span className="ap-dim-key">{dim.key}</span>
-                <span className="ap-dim-score">{dim.score}</span>
-              </div>
-              <div className="ap-dim-track">
-                <span className="ap-dim-bar" style={{ width: `${dim.score}%` }} />
-              </div>
-              <p className="ap-dim-measures">{dim.measures}</p>
-              <p className="ap-dim-read">{dim.read}</p>
-              <span className="ap-dim-src">{dim.source}</span>
-              <ul className="ap-dim-evidence">
-                {dim.evidence.map((e) => (
-                  <li key={e}>{e}</li>
-                ))}
-              </ul>
+    <div className="ap-cols2">
+      <section className="pp-card">
+        <CardHead icon={icTheMove} title="Route" right="One entry point, three destinations" />
+        <div className="ap-routes">
+          {route.options.map((o) => (
+            <div className={`ap-route ${o.matched ? 'is-on' : ''}`} key={o.key}>
+              <span className="ap-route-head">
+                <span className="ap-route-name">{o.name}</span>
+                {o.matched && <span className="ap-route-pick">Recommended</span>}
+              </span>
+              <span className="ap-route-for">{o.forWhom}</span>
+              <span className="ap-route-why">{o.why}</span>
             </div>
           ))}
         </div>
+        <p className="ap-body">{route.why}</p>
+        <Action>{route.action}</Action>
       </section>
 
-      <section className="ap-banner">
-        <div className="ap-banner-main">
-          <span className="ap-banner-head">{tierBanner.headline}</span>
-          <p className="ap-banner-body">{tierBanner.body}</p>
+      <section className="pp-card">
+        <CardHead icon={icQuestions} title="Second seat" right="Who else must be convinced" />
+        <div className="ap-seats">
+          {secondSeat.seats.map((s) => (
+            <div className="ap-seat" key={s.order}>
+              <span className="ap-seat-n">{s.order}</span>
+              <span className="ap-seat-body">
+                <span className="ap-seat-who">{s.who}</span>
+                <span className="ap-seat-why">{s.why}</span>
+              </span>
+            </div>
+          ))}
         </div>
-        <p className="ap-banner-note">{tierBanner.note}</p>
+        <p className="ap-body">{secondSeat.note}</p>
+        <Action>{secondSeat.action}</Action>
       </section>
 
-      <div className="ap-cols3">
-        <section className="pp-card">
-          <CardHead icon={icTheMove} title="How quickly will this advisor move?" />
-          <p className="ap-verdict">{velocity.read}</p>
-          <p className="ap-body">{velocity.body}</p>
-          <div className="ap-reasons">
-            {velocity.reasons.map((r) => (
-              <div className="ap-reason" key={r.label}>
-                <span className="ap-reason-k">{r.label}</span>
-                <span className="ap-reason-v">{r.detail}</span>
-              </div>
-            ))}
-          </div>
-          <Action>{velocity.action}</Action>
-        </section>
-
-        <section className="pp-card">
-          <CardHead icon={icPracticeJoy} title="Motivators" />
-          <ol className="ap-ranked">
-            {motivators.map((m) => (
-              <li className={`ap-rank ${m.label === 'Income' ? 'is-low' : ''}`} key={m.label}>
-                <span className="ap-rank-n">{m.rank}</span>
-                <span className="ap-rank-body">
-                  <span className="ap-rank-k">{m.label}</span>
-                  <span className="ap-rank-v">{m.detail}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <Action>{columnActions.motivators}</Action>
-        </section>
-
-        <section className="pp-card">
-          <CardHead icon={icOutlook} title="Apprehensions" />
-          <ol className="ap-ranked">
-            {apprehensions.map((a) => (
-              <li className="ap-rank" key={a.label}>
-                <span className="ap-rank-n">{a.rank}</span>
-                <span className="ap-rank-body">
-                  <span className="ap-rank-k">{a.label}</span>
-                  <span className="ap-rank-v">{a.detail}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <Action>{columnActions.apprehensions}</Action>
-        </section>
-      </div>
-
-      <div className="ap-cols2">
-        <section className="pp-card">
-          <CardHead icon={icTheMove} title="Route" right="One entry point, three destinations" />
-          <div className="ap-routes">
-            {route.options.map((o) => (
-              <div className={`ap-route ${o.matched ? 'is-on' : ''}`} key={o.key}>
-                <span className="ap-route-head">
-                  <span className="ap-route-name">{o.name}</span>
-                  {o.matched && <span className="ap-route-pick">Recommended</span>}
-                </span>
-                <span className="ap-route-for">{o.forWhom}</span>
-                <span className="ap-route-why">{o.why}</span>
-              </div>
-            ))}
-          </div>
-          <p className="ap-body">{route.why}</p>
-          <Action>{route.action}</Action>
-        </section>
-
-        <section className="pp-card">
-          <CardHead icon={icQuestions} title="Second seat" right="Who else must be convinced" />
-          <div className="ap-seats">
-            {secondSeat.seats.map((s) => (
-              <div className="ap-seat" key={s.order}>
-                <span className="ap-seat-n">{s.order}</span>
-                <span className="ap-seat-body">
-                  <span className="ap-seat-who">{s.who}</span>
-                  <span className="ap-seat-why">{s.why}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="ap-body">{secondSeat.note}</p>
-          <Action>{secondSeat.action}</Action>
-        </section>
-
-        <section className="pp-card">
-          <CardHead icon={icKeyHighlights} title="Book profile" />
-          <div className="ap-book">
-            {bookProfile.map((b) => (
-              <div className="ap-book-row" key={b.label}>
-                <span className="ap-book-k">{b.label}</span>
-                <span className="ap-book-v">{b.value}</span>
-                <span className="ap-book-d">{b.detail}</span>
-              </div>
-            ))}
-          </div>
-          <Action>{bookProfileRead}</Action>
-        </section>
-
-        <section className="pp-card">
-          <CardHead icon={icConfidence} title="The comp clock" right="A date, not a score" />
-          <div className="ap-clock">
-            {compClock.tranches.map((t) => (
-              <div className="ap-tranche" key={t.vests}>
-                <span className="ap-tranche-amt">${t.amount}K</span>
-                <span className="ap-tranche-date">vests {t.vests}</span>
-              </div>
-            ))}
-          </div>
-          <p className="ap-clock-total">{compClock.label} unvested in total</p>
-          <p className="ap-body">{compClock.reading}</p>
-          <Action>{compClock.action}</Action>
-        </section>
-      </div>
-    </>
-  )
-}
-
-/* ── Tab 3 — Recruiting Playbook ─────────────────────────────────────────
-   Conversation technique, which transfers from the client version almost
-   intact. The two panels that get sharper here are the words and the
-   questions — an advisor's questions are finite and answerable. */
-
-function PlaybookTab() {
-  return (
-    <>
-      <section className="pp-card ap-top">
-        <CardHead icon={icTheMove} title="Top Action" />
-        <p className="ap-top-title">{topAction.title}</p>
-        <p className="ap-body">{topAction.body}</p>
+      <section className="pp-card">
+        <CardHead icon={icKeyHighlights} title="Book profile" />
+        <div className="ap-book">
+          {bookProfile.map((b) => (
+            <div className="ap-book-row" key={b.label}>
+              <span className="ap-book-k">{b.label}</span>
+              <span className="ap-book-v">{b.value}</span>
+              <span className="ap-book-d">{b.detail}</span>
+            </div>
+          ))}
+        </div>
+        <Action>{bookProfileRead}</Action>
       </section>
 
-      <div className="pp-cols">
-        <div className="pp-col-main">
-          <section className="pp-card">
-            <CardHead icon={icQuestions} title="Conversation Starters" />
-            <div className="ap-starters">
-              {starters.map((s) => (
-                <div className="ap-starter" key={s.line}>
-                  <span className={`ap-tag ap-tag-${s.tag.split(' ')[0].toLowerCase()}`}>
-                    {s.tag}
-                  </span>
-                  <p className="ap-starter-line">“{s.line}”</p>
-                  <p className="ap-starter-why">{s.why}</p>
-                </div>
-              ))}
+      <section className="pp-card">
+        <CardHead icon={icConfidence} title="The comp clock" right="A date, not a score" />
+        <div className="ap-clock">
+          {compClock.tranches.map((t) => (
+            <div className="ap-tranche" key={t.vests}>
+              <span className="ap-tranche-amt">${t.amount}K</span>
+              <span className="ap-tranche-date">vests {t.vests}</span>
             </div>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icKeyHighlights} title="Strategic Recommendations Key" />
-            <div className="ap-key">
-              {recommendationsKey.map((k) => (
-                <div className="ap-key-row" key={k.tag}>
-                  <span className={`ap-tag ap-tag-${k.tag.split(' ')[0].toLowerCase()}`}>
-                    {k.tag}
-                  </span>
-                  <span className="ap-key-meaning">{k.meaning}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icQuestions} title="Questions They May Ask" />
-            <div className="ap-asked">
-              {questionsTheyAsk.map((q) => (
-                <div className="ap-ask" key={q.q}>
-                  <p className="ap-ask-q">{q.q}</p>
-                  <ul className="ap-ask-points">
-                    {q.points.map((p) => (
-                      <li key={p}>{p}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="pp-card ap-his">
-            <CardHead
-              icon={icQuestions}
-              title="His three questions"
-              right="What the flow told him to ask"
-            />
-            <ol className="ap-his-list">
-              {hisQuestions.items.map((q, i) => (
-                <li key={q}>
-                  <span className="ap-his-n">{i + 1}</span>
-                  <span className="ap-his-q">{q}</span>
-                </li>
-              ))}
-            </ol>
-            <Action>{hisQuestions.note}</Action>
-          </section>
+          ))}
         </div>
-
-        {/* Communication rail */}
-        <div className="pp-rail">
-          <section className="pp-card">
-            <CardHead icon={icPracticeJoy} title="Words to Use" />
-            <div className="ap-words">
-              {words.use.map((w) => (
-                <div className="ap-word ap-word-use" key={w.word}>
-                  <span className="ap-word-w">{w.word}</span>
-                  <span className="ap-word-why">{w.why}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icOutlook} title="Words to Avoid" />
-            <div className="ap-words">
-              {words.avoid.map((w) => (
-                <div className="ap-word ap-word-avoid" key={w.word}>
-                  <span className="ap-word-w">{w.word}</span>
-                  <span className="ap-word-why">{w.why}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icConfidence} title="Verbosity" />
-            <p className="ap-verdict">{verbosity.level}</p>
-            <p className="ap-meta-line">
-              {verbosity.answers} written answers · {verbosity.avgWords} words on average · longest{' '}
-              {verbosity.longest}
-            </p>
-            <p className="ap-body">{verbosity.reading}</p>
-          </section>
-
-          <section className="pp-card">
-            <CardHead icon={icConfidence} title="Engagement Level" />
-            <p className="ap-verdict">{engagementLevel.level}</p>
-            <p className="ap-meta-line">{engagementLevel.detail}</p>
-            <p className="ap-body">{engagementLevel.reading}</p>
-          </section>
-
-          <section className="pp-card ap-takeaway">
-            <span className="ap-takeaway-k">Rep takeaway</span>
-            <p className="ap-takeaway-v">{repTakeaway}</p>
-          </section>
-        </div>
-      </div>
-    </>
+        <p className="ap-clock-total">{compClock.label} unvested in total</p>
+        <p className="ap-body">{compClock.reading}</p>
+        <Action>{compClock.action}</Action>
+      </section>
+    </div>
   )
 }

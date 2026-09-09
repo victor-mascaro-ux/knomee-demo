@@ -92,6 +92,7 @@ import {
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
+import ClientMobileScreen from './screens/ClientMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3697,6 +3698,7 @@ const ROUTE_VIEWS = [
   'welcome',
   'welcome-b',
   'client-experience',
+  'client-mobile',
   'advisor-flow',
   'admin',
   'settings',
@@ -3779,6 +3781,8 @@ export default function App() {
   // The client-facing mobile app (the Adventures the prospect actually walks
   // through), previewed from the burger menu on its own route.
   const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
+  // Emily's Financial ID in the device frame, opened from the demo menu.
+  const [clientMobileOpen, setClientMobileOpen] = useState(initialView === 'client-mobile')
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
   const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
@@ -3826,7 +3830,9 @@ export default function App() {
             : 'welcome'
           : advisorFlowOpen
             ? 'advisor-flow'
-            : clientExpOpen
+            : clientMobileOpen
+              ? 'client-mobile'
+              : clientExpOpen
               ? 'client-experience'
               : (screen as RouteView)
 
@@ -3898,6 +3904,7 @@ export default function App() {
       setAdvisorFlowOpen(v === 'advisor-flow')
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
+      setClientMobileOpen(v === 'client-mobile')
       if (v === 'welcome') setLandingVersion('a')
       if (v === 'welcome-b') setLandingVersion('b')
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
@@ -3977,6 +3984,10 @@ export default function App() {
 
   // Same for the client's mobile app: the phone is the whole page, and the way
   // back to the advisor side lives in the phone's own menu.
+  if (clientMobileOpen) {
+    return <ClientMobileScreen onExit={() => setClientMobileOpen(false)} />
+  }
+
   if (clientExpOpen) {
     return <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
   }
@@ -4044,6 +4055,7 @@ export default function App() {
                     setSettingsOpen(true)
                     setSegmentationOpen(false)
                     setClientExpOpen(false)
+                    setClientMobileOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
                     setFirmView(false)
@@ -4064,6 +4076,7 @@ export default function App() {
                     setSegmentationOpen(true)
                     setSettingsOpen(false)
                     setClientExpOpen(false)
+                    setClientMobileOpen(false)
                     setLandingOpen(false)
                     setAdminView(false)
                     setFirmView(false)
@@ -4082,6 +4095,7 @@ export default function App() {
                     setLandingVersion('a')
                     setSettingsOpen(false)
                     setClientExpOpen(false)
+                    setClientMobileOpen(false)
                     setAdvisorFlowOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
@@ -4112,8 +4126,25 @@ export default function App() {
                   className="menu-item"
                   type="button"
                   onClick={() => {
+                    setClientMobileOpen(true)
+                    setClientExpOpen(false)
+                    setLandingOpen(false)
+                    setSettingsOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setFirmView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Client profile on mobile
+                </button>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
                     setAdvisorFlowOpen(true)
                     setClientExpOpen(false)
+                    setClientMobileOpen(false)
                     setLandingOpen(false)
                     setSettingsOpen(false)
                     setSegmentationOpen(false)
