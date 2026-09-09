@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -179,6 +179,7 @@ export default function ClientProfileScreen({
   // Ordered by stage, furthest along first, completed last — then cut to what
   // the card shows collapsed. The two columns are a grid, so the cards read
   // across the rows (1 2 / 3 4) rather than down the columns (1 5 / 2 6).
+  const [confidence, setConfidence] = useState(false)
   const goals = useCollapsed(orderGoals(cp.goals), COLLAPSED_GOALS)
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
@@ -456,8 +457,14 @@ export default function ClientProfileScreen({
                       <span className="pp-confidence-label">{cp.confidence}</span>
                       <Gauge label={cp.confidence} />
                     </div>
-                    <button className="pp-show" type="button">
-                      Show results <CaretIcon />
+                    <ConfidenceResults open={confidence} />
+                    <button
+                      className="pp-show"
+                      type="button"
+                      aria-expanded={confidence}
+                      onClick={() => setConfidence((v) => !v)}
+                    >
+                      {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
                     </button>
                   </section>
 

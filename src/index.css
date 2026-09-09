@@ -39,6 +39,14 @@ body {
   padding: 0;
 }
 
+/* Reserve the scrollbar's width whether or not one is showing. Without it,
+   expanding an accordion makes the page scroll for the first time and the
+   scrollbar takes ~15px off the content box — every card in the grid narrows
+   at the moment the rows appear. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #1a1a1a;

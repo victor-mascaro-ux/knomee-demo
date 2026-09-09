@@ -1,3 +1,48 @@
+
+/* The five statements behind the Confidence dial. `value` is where the client
+   left the slider, 0-100. They sit high because the dial reads Strong — a
+   result and its answers cannot disagree. The last two are worded so that the
+   right-hand end is the good end, which is why they read high too. */
+export interface ConfidenceAnswer {
+  statement: string
+  value: number
+  low: string
+  high: string
+}
+
+export const confidenceAnswers: ConfidenceAnswer[] = [
+  {
+    statement: 'I’m confident in my current financial condition to live the life I want.',
+    value: 82,
+    low: 'not confident',
+    high: 'very confident',
+  },
+  {
+    statement: 'I feel confident that I can weather unexpected financial challenges and changes.',
+    value: 74,
+    low: 'not confident',
+    high: 'very confident',
+  },
+  {
+    statement: 'I believe I can achieve my financial goals.',
+    value: 88,
+    low: 'not confident',
+    high: 'very confident',
+  },
+  {
+    statement: 'I spend money on experiences, causes, services, and items that bring me joy.',
+    value: 79,
+    low: 'never',
+    high: 'most of the time',
+  },
+  {
+    statement: 'I regret or second-guess my financial decisions.',
+    value: 71,
+    low: 'often regret',
+    high: 'never regret',
+  },
+]
+
 // Demo content for a prospect's "Financial ID" profile page. All placeholder
 // data — one rich profile stands in for whichever prospect is opened.
 
@@ -36,6 +81,11 @@ export const financialId = {
     { title: 'Save for a down payment on a second home', readiness: 3 },
     { title: 'Add alternatives to portfolio - angel invest', readiness: 1 },
     { title: 'Purchase a new car', readiness: 5 },
+    { title: 'Build a year of living expenses in cash', readiness: 5 },
+    { title: 'Set up a trust for the grandchildren', readiness: 3 },
+    { title: 'Take a sabbatical in 2027', readiness: 1 },
+    { title: 'Move the parents closer to us', readiness: 2 },
+    { title: 'Fund a scholarship at my old school', readiness: 4 },
     { title: 'Buy a boat', readiness: 2, completed: '05/03/2025' },
     { title: 'Increase gift to my favorite philanthropy', readiness: 4, completed: '05/03/2025' },
     { title: 'Go on vacation with family to Mexico in 2025', readiness: 2, completed: '05/03/2025' },

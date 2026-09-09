@@ -107,6 +107,11 @@ export const clientProfile = {
       tags: ['New', 'Sensitive'],
     },
     { title: 'Purchase a new car', readiness: 5, tags: ['Updated'] },
+    { title: 'Build a year of living expenses in cash', readiness: 5 },
+    { title: 'Set up a trust for the grandchildren', readiness: 3 },
+    { title: 'Take a sabbatical in 2027', readiness: 1, tags: ['New'] },
+    { title: 'Move the parents closer to us', readiness: 2, tags: ['Sensitive'] },
+    { title: 'Fund a scholarship at my old school', readiness: 4 },
     { title: 'Buy a boat', readiness: 2, completed: '05/03/2025' },
     { title: 'Go on vacation with family to Mexico in 2025', readiness: 3, completed: '05/03/2025' },
     { title: 'Buy a house by the beach', readiness: 2 },
@@ -158,7 +163,11 @@ export const clientProfile = {
   questions: [
     { q: 'Can I afford to go to college?', date: '05/03/2025' },
     { q: 'Can I afford this family vacation?', date: '05/03/2025' },
-    { q: 'Should I start a new company?', resolved: '05/03/2025' },
+    { q: 'Should I start a new company?', date: '04/18/2025' },
+    { q: 'How much should we keep liquid for Vic’s care?', date: '03/22/2025' },
+    { q: 'Is now the right time to buy the beach house?', date: '02/09/2025' },
+    { q: 'Should I take the severance or negotiate?', resolved: '01/15/2025' },
+    { q: 'Can we help the kids with a deposit without hurting our plan?', resolved: '11/30/2024' },
   ] as ProfileQuestion[],
 
   boards: [
