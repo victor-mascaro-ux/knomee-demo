@@ -1070,7 +1070,7 @@ function FlowPhone({
                   Advisor Experience
                   <ArrowRight />
                 </button>
-                <div className="cx-sheet-hint">Switches back to the adviser demo.</div>
+                <div className="cx-sheet-hint">Switches back to the advisor demo.</div>
               </div>
             </div>
           )}
