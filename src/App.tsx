@@ -3860,13 +3860,23 @@ export default function App() {
           brand: brandId,
           cobrand: cobrandLayout,
           brands: CLIENT_BRANDS.map((b) => ({ id: b.id, name: b.name })),
+          // Whose page is open over the table, if anyone's. The panel offers
+          // the phone rendering as a view of THIS page, so it has to know
+          // there is one — and it hides the controls a profile covers up.
+          profile: profileClient
+            ? profileSlug(profileClient.name)
+            : profileProspect
+              ? profileSlug(profileProspect.name)
+              : candidateOpen
+                ? profileSlug(candidate.name)
+                : null,
         },
         '*',
       )
     } catch {
       /* cross-origin parent — ignore */
     }
-  }, [currentView, emptyMode, brandId, cobrandLayout])
+  }, [currentView, emptyMode, brandId, cobrandLayout, profileClient, profileProspect, candidateOpen])
 
   useEffect(() => {
     const onDemo = (e: MessageEvent) => {

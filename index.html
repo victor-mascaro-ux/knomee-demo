@@ -412,7 +412,12 @@
   .cc-demo-title {
     font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--cc-faint); padding: 0 6px 5px;
+    display: flex; align-items: center; gap: 6px;
   }
+  /* A glyph per section, so the eye lands on the right group rather than
+     reading three lines of small caps. Muted like the label it sits with — a
+     marker, not a decoration. */
+  .cc-demo-title svg { width: 13px; height: 13px; flex: none; }
   .cc-demo-row, .cc-demo-btn {
     display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
     padding: 7px 8px; border: 0; border-radius: 9px; background: transparent;
@@ -1313,7 +1318,7 @@
   // sets (cc-demo-set). Everything else is navigation, which the route
   // already handles.
   let demoArmed = false;
-  let demoState = { view: 'prospects', empty: false, brand: null, cobrand: 'left', brands: [] };
+  let demoState = { view: 'prospects', empty: false, brand: null, cobrand: 'left', brands: [], profile: null };
 
   // Which controls each page offers. A control that isn't listed for a page is
   // one that would do nothing there — the panel never shows a dead switch.
@@ -1324,9 +1329,33 @@
     'prospects', 'clients', 'analytics', 'segmentation', 'settings',
     'admin', 'firm-candidates', 'firm-network', 'firm-analytics'
   ];
+  // Where the phone rendering sends you back to. The mobile client page is one
+  // screen (Emily's), so without this, turning the view off from it would have
+  // to guess a client — it remembers the page you turned it on from.
+  let mobileBackTo = null;
   const CONTROLS = [
     { key: 'empty', kind: 'toggle', label: 'Empty state',
-      views: ['prospects', 'clients', 'analytics'] },
+      views: ['prospects', 'clients', 'analytics'],
+      // A profile is a layer over the table, so emptying the table behind it
+      // changes nothing you can see.
+      when: () => !demoState.profile },
+    // Mobile is a view of the client page, not a separate screen: the phone
+    // frame renders the very same profile the desktop does, at 393px. So it is
+    // a switch on the page you are already looking at rather than two entries
+    // in a list of destinations — and it only appears where there is a client
+    // page to look at.
+    { key: 'mobile', kind: 'navToggle', label: 'Mobile view',
+      views: ['clients', 'client-mobile'],
+      when: () => canon(demoState.view) === 'client-mobile' || !!demoState.profile,
+      isOn: () => canon(demoState.view) === 'client-mobile',
+      apply: (on) => {
+        if (on) {
+          mobileBackTo = currentRoute;
+          navigateFrame('#/client-mobile');
+        } else {
+          navigateFrame(mobileBackTo || '#/clients/emily-watson');
+        }
+      } },
     { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS },
     { key: 'cobrand', kind: 'cobrand', label: 'Logo placement', views: SHELL_VIEWS,
       when: () => !!demoState.brand }
@@ -1363,7 +1392,6 @@
     ['segmentation', 'Segmentation', '#/segmentation'],
     ['welcome', 'Welcome page', '#/welcome'],
     ['client-experience', 'Client Experience', '#/client-experience'],
-    ['client-mobile', 'Client profile on mobile', '#/client-mobile'],
     ['advisor-flow', 'Advisor as Prospect', '#/advisor-flow']
   ];
   // The welcome page's own A/B switch decides which version, so both count.
@@ -1386,7 +1414,8 @@
       empty: !!d.empty,
       brand: (typeof d.brand === 'string') ? d.brand : null,
       cobrand: d.cobrand === 'centered' ? 'centered' : 'left',
-      brands: Array.isArray(d.brands) ? d.brands : demoState.brands
+      brands: Array.isArray(d.brands) ? d.brands : demoState.brands,
+      profile: (typeof d.profile === 'string') ? d.profile : null
     };
     if (demoArmed) renderDemo();
   }
@@ -1395,16 +1424,47 @@
   // they are still real white labels, just not in this menu.
   const MENU_BRANDS = ['confetti'];
 
-  function demoGroup(title) {
+  // Section glyphs, drawn at 13px in the label's own muted colour: a person for
+  // who you are, two frames for where you go, a tag for the white label, a bar
+  // with a mark in it for where that label's logo sits.
+  const ICONS = {
+    persona:
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+        '<circle cx="8" cy="5.2" r="2.6" stroke="currentColor" stroke-width="1.6"/>' +
+        '<path d="M2.9 13.7c0-2.7 2.3-4.3 5.1-4.3s5.1 1.6 5.1 4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>' +
+      '</svg>',
+    screens:
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+        '<rect x="1.5" y="2.3" width="9.5" height="7.6" rx="1.4" stroke="currentColor" stroke-width="1.5"/>' +
+        '<path d="M5.3 12.7h7a1.7 1.7 0 0 0 1.7-1.7V5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>',
+    brand:
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+        '<path d="M8.3 2.4H12A1.6 1.6 0 0 1 13.6 4v3.7c0 .43-.17.83-.47 1.13l-4.4 4.4a1.6 1.6 0 0 1-2.26 0l-3.7-3.7a1.6 1.6 0 0 1 0-2.26l4.4-4.4c.3-.3.7-.47 1.13-.47Z" stroke="currentColor" stroke-width="1.5"/>' +
+        '<circle cx="10.5" cy="5.5" r="1.05" fill="currentColor"/>' +
+      '</svg>',
+    placement:
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+        '<rect x="1.5" y="3.4" width="13" height="9.2" rx="1.5" stroke="currentColor" stroke-width="1.5"/>' +
+        '<rect x="3.5" y="5.6" width="4.2" height="2.2" rx="0.8" fill="currentColor"/>' +
+      '</svg>'
+  };
+
+  function demoGroup(title, icon) {
     const g = document.createElement('div');
     g.className = 'cc-demo-group';
-    if (title) {
-      const h = document.createElement('div');
-      h.className = 'cc-demo-title';
-      h.textContent = title;
-      g.appendChild(h);
-    }
+    if (title) g.appendChild(demoTitle(title, icon));
     return g;
+  }
+
+  function demoTitle(title, icon) {
+    const h = document.createElement('div');
+    h.className = 'cc-demo-title';
+    if (icon) h.innerHTML = icon;
+    const t = document.createElement('span');
+    t.textContent = title;
+    h.appendChild(t);
+    return h;
   }
 
   function demoToggleRow(label, on, onChange) {
@@ -1452,11 +1512,11 @@
       here.forEach(c => {
         if (c.kind === 'toggle') {
           g.appendChild(demoToggleRow(c.label, !!demoState[c.key], v => demoSet(c.key, v)));
+        } else if (c.kind === 'navToggle') {
+          g.appendChild(demoToggleRow(c.label, c.isOn(), v => c.apply(v)));
         } else if (c.kind === 'brands') {
-          const h = document.createElement('div');
-          h.className = 'cc-demo-title';
+          const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
-          h.textContent = c.label;
           g.appendChild(h);
           g.appendChild(demoPick('Knomee', !demoState.brand, () => demoSet('brand', null)));
           demoState.brands
@@ -1465,10 +1525,8 @@
               g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
             });
         } else if (c.kind === 'cobrand') {
-          const h = document.createElement('div');
-          h.className = 'cc-demo-title';
+          const h = demoTitle(c.label, ICONS.placement);
           h.style.paddingTop = '6px';
-          h.textContent = c.label;
           g.appendChild(h);
           g.appendChild(demoPick('Client left', demoState.cobrand === 'left',
             () => demoSet('cobrand', 'left')));
@@ -1485,7 +1543,7 @@
     // page they aren't on.
     const elsewhere = SCREENS.some(sc => screenIsOn(sc[0]));
     const mine = personaOf(canon(demoState.view));
-    const gp = demoGroup('Persona');
+    const gp = demoGroup('Persona', ICONS.persona);
     PERSONAS.forEach(p => {
       const on = !elsewhere && p[0] === mine;
       // Picking the persona you are already in would only yank the demo back
@@ -1495,7 +1553,7 @@
     demoBody.appendChild(gp);
 
     // ── the other screens ──
-    const gs = demoGroup('Screens');
+    const gs = demoGroup('Screens', ICONS.screens);
     SCREENS.forEach(sc => {
       const on = screenIsOn(sc[0]);
       gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(sc[2]); }));
