@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { DateSelect, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -185,7 +185,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
-                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
+                      <DateSelect />
                     </div>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
                     <div className="pp-chips">
@@ -200,7 +200,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
-                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
+                      <DateSelect />
                     </div>
                     {(
                       [
@@ -225,7 +225,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
-                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
+                      <DateSelect />
                     </div>
                     <span className="pp-fy-label pp-concern">Concerns</span>
                     {fi.outlook.concerns.map((c) => (
@@ -263,7 +263,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
-                      <span className="pp-date">05/03/2025 <CaretIcon /></span>
+                      <DateSelect />
                     </div>
                     <div className="pp-confidence">
                       <span className="pp-confidence-label">{fi.confidence}</span>
