@@ -202,8 +202,9 @@ export default function ClientProfileScreen({
 
             <div className="cp-side-block">
               <button className="cp-side-head" type="button">
-                {cp.household} <span className="cp-side-caret">›</span>
+                {cp.household}
                 <span className="cp-side-count">{cp.members.length}</span>
+                <RowChevron />
               </button>
               {cp.members.map((m) => (
                 <button
