@@ -40,8 +40,11 @@
 }
 /* The main column carries the top inset so the sidebar strip runs flush up to
    the header bar. */
+/* No top inset: the tab bar is the first thing in this column and it pins
+   directly under the breadcrumb, so any padding above it is distance the bar
+   has to travel before it holds still. */
 .pp-main {
-  padding-top: 14px;
+  padding-top: 0;
   /* The 40px + 48px that used to sit below the whole layout. */
   padding-bottom: 88px;
 }
@@ -96,10 +99,12 @@
 }
 .pp-side-inner {
   position: sticky;
-  /* Under both bars. It used to pin at 12px from the top of the window, which
-     is behind them — the rail stopped while everything around it kept moving,
-     and the whole column looked like it had come loose. */
-  top: calc(var(--topbar-h) + var(--pp-crumb-h) + var(--pp-tabs-h) + 12px);
+  /* Under the two full-width bars, and nothing else. `top` on a sticky element
+     is a minimum offset from the viewport, not just a stopping point — it
+     pushes the element down even at rest. Counting the tab bar's height in
+     here therefore started the rail 54px below the top of its own column, for
+     a bar that sits in the other column and never overlaps it. */
+  top: calc(var(--topbar-h) + var(--pp-crumb-h));
   display: flex;
   flex-direction: column;
   align-items: center;
