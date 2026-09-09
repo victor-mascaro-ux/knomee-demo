@@ -15,6 +15,9 @@ import type { ArtKey } from './experience'
 
 export type StepKind =
   | 'welcome'
+  /** Who is answering — the four fields a Business ID is headed with. Not in
+      the walkthrough below; `AdvisorSelfScreen` prepends one of its own. */
+  | 'identity'
   | 'home'
   | 'intro'
   | 'reflect'
@@ -45,6 +48,9 @@ export interface Step {
   options?: string[]
   /** Pre-selected answers. */
   chosen?: string[]
+  /** Cap on a multi-choice question, where the screen asks for one — Practice
+      Joy asks for between one and three. Unset means as many as you like. */
+  max?: number
   /** Grid rows for the attention question. */
   rows?: { label: string; value: 'More' | 'Same' | 'Less' }[]
   /** Free-text question: the prompt hints beside it, and the mocked answer. */
@@ -191,6 +197,7 @@ export const steps: Step[] = [
       'Legacy',
       'Other',
     ],
+    max: 3,
     chosen: ['Ownership', 'Control over how I serve', 'My team’s future'],
   },
   {
@@ -719,6 +726,12 @@ export const businessId = {
     'How short can the transition actually be, and who carries operations while it is happening?',
   ],
 }
+
+/* The shape of a Business ID, taken from the worked example rather than
+   declared beside it — so a Business ID computed from somebody else's answers
+   (see `advisorAnswers.ts`) has to carry every card this one does, and adding a
+   card here is a compile error there until it is filled. */
+export type BusinessId = typeof businessId
 
 /* What the enterprise reads from the same eight minutes. Kept short on purpose:
    the conversion video does this in three lines, and a rep about to dial needs

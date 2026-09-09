@@ -12,7 +12,7 @@
 //
 // All figures and answers are invented. No real advisor or firm is represented.
 
-import { advisor, businessId, steps } from './advisorFlow'
+import { advisor, businessId, steps, type BusinessId } from './advisorFlow'
 import { RECOMMENDATIONS_KEY, type ToolkitTab, type ReadinessTab } from './readiness'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
@@ -398,4 +398,36 @@ export const toolkitTab: ToolkitTab = {
     avoid: words.avoid.map((w) => ({ word: w.word, hint: w.why })),
   },
   questionsNote: 'The three the flow told him to ask — they are on his phone',
+}
+
+/* ── one bundle, one page ────────────────────────────────────────────────
+   Everything the candidate profile draws, in one object. Marcus's copy is
+   assembled from the module above; a copy computed from somebody else's
+   answers is assembled in `advisorAnswers.ts`. The screen takes the bundle and
+   knows nothing about which of the two it was handed, which is what stops a
+   second, flatter rendering of the same page from growing beside this one. */
+
+export interface AdvisorProfileData {
+  who: { name: string; initial: string; photo?: string }
+  id: BusinessId
+  /** The six Confidence statements on the 0-100 track the dial draws. */
+  confidence: { statement: string; low: string; high: string; value: number }[]
+  kq: number
+  tier: { tier: number; name: string }
+  routePick: string
+  routeWhy: string
+  readiness: ReadinessTab
+  toolkit: ToolkitTab
+}
+
+export const marcusProfile: AdvisorProfileData = {
+  who: { name: advisor.name, initial: advisor.initial, photo: advisor.photo },
+  id: businessId,
+  confidence: confidenceAnswers,
+  kq,
+  tier: { tier: tier.tier, name: tier.name },
+  routePick: route.pick,
+  routeWhy: route.why,
+  readiness: readinessTab,
+  toolkit: toolkitTab,
 }

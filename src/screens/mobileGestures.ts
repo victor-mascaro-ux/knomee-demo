@@ -37,6 +37,11 @@ export function useDragScroll<T extends HTMLElement>(ref: RefObject<T | null>) {
 
     const onDown = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.button !== 0) return
+      // A drag that starts inside a field is a text selection, not a flick.
+      // Now that the advisor flow can be typed into, taking it over would make
+      // selecting your own sentence scroll the phone instead.
+      if ((e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable]'))
+        return
       cancelAnimationFrame(raf)
       dragging = true
       pointer = e.pointerId
