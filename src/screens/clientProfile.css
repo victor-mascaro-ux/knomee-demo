@@ -192,14 +192,14 @@
   color: var(--k-grape);
 }
 .cp-goal-tag.is-updated {
-  background: var(--k-teal-light);
-  color: var(--k-ocean);
+  background: var(--k-mint);
+  color: var(--k-forest);
 }
-/* Neutral on purpose: "Sensitive" is a note to handle the goal carefully, not a
-   badge to draw the eye. */
+/* "Sensitive" is the one that has to catch the eye before the advisor opens
+   their mouth, so it takes the design system's warning pair. */
 .cp-goal-tag.is-sensitive {
-  background: var(--pearl, #efeef2);
-  color: var(--text-secondary, #6a6480);
+  background: var(--k-amber-light);
+  color: var(--k-amber-ink);
 }
 /* The disclosure that sits in a card header rather than its footer: compact and
    right-aligned, where .pp-show is full-width and centred. */
