@@ -64,11 +64,48 @@ function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
 /* A vision-board tile. Photographs live in public/vision/ and are dropped in by
    hand, so a missing file falls back to a labelled tint rather than a broken
    image — the board keeps its shape whatever is or isn't there yet. */
-function BoardPhoto({ src, alt, tall }: { src: string; alt: string; tall?: boolean }) {
+/* Wider than this and the picture is a landscape one, whatever the tile asked
+   for. 1.15 rather than 1.0 so a square file that is a pixel off — every
+   photograph in public/vision/ is 292×298 — is not read as landscape. */
+const LANDSCAPE = 1.15
+
+function BoardPhoto({
+  src,
+  alt,
+  tall,
+  wide,
+}: {
+  src: string
+  alt: string
+  tall?: boolean
+  wide?: boolean
+}) {
   const [failed, setFailed] = useState(false)
+  /* A landscape photograph never takes the tall cell. The tile cannot know the
+     file's shape until it loads, so the image reports it and the tall spans is
+     dropped — the rule holds for photographs dropped in later too, without
+     anyone having to remember it. */
+  const [landscape, setLandscape] = useState(false)
+  const isTall = tall && !landscape
   return (
-    <div className={`cp-tile cp-tile-photo ${tall ? 'is-tall' : ''} ${failed ? 'is-missing' : ''}`}>
-      {failed ? <span className="cp-tile-alt">{alt}</span> : <img src={src} alt={alt} onError={() => setFailed(true)} />}
+    <div
+      className={`cp-tile cp-tile-photo ${isTall ? 'is-tall' : ''} ${wide ? 'is-wide' : ''} ${
+        failed ? 'is-missing' : ''
+      }`}
+    >
+      {failed ? (
+        <span className="cp-tile-alt">{alt}</span>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          onError={() => setFailed(true)}
+          onLoad={(e) => {
+            const im = e.currentTarget
+            if (im.naturalHeight && im.naturalWidth / im.naturalHeight > LANDSCAPE) setLandscape(true)
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -97,7 +134,7 @@ function Board({ board }: { board: VisionBoard }) {
       <div className="cp-board-grid">
         {board.tiles.map((t, i) =>
           t.kind === 'photo' ? (
-            <BoardPhoto key={i} src={t.src} alt={t.alt} tall={t.tall} />
+            <BoardPhoto key={i} src={t.src} alt={t.alt} tall={t.tall} wide={t.wide} />
           ) : (
             <BoardNote key={i} tile={t} />
           ),
