@@ -13,15 +13,83 @@
   color: var(--k-ink-soft);
 }
 
-/* Ten columns instead of nine: the numeric ones hold their line, and Top Action
-   keeps enough width to stay two lines. */
+/* Ten columns instead of nine, on the same module the advisor's table uses:
+   Name three columns, every reading one, and Top Action the remainder. */
+.prospects-table.fc-table {
+  table-layout: fixed;
+}
+.fc-table .col-name {
+  width: 23.75%; /* 3 columns — the same Name width the advisor's table has */
+}
+.fc-table .col-kq,
+.fc-table .col-num,
+.fc-table .col-firm-word {
+  width: 6.8%; /* 1 column each */
+}
+.fc-table .col-action {
+  width: auto; /* the remainder */
+}
 .fc-table td.col-num,
 .fc-table th.col-num {
   white-space: nowrap;
 }
-.fc-table td.col-action,
-.fc-table th.col-action {
-  min-width: 220px;
+
+/* One flat row rather than one height per longest Top Action, a 48px header,
+   and the 20px outer edge with 12px between cells. */
+.fc-table thead th {
+  padding: 12px;
+  height: 48px;
+}
+.fc-table tbody tr:not(.group-header) td {
+  padding: 12px;
+  height: var(--row-h);
+  vertical-align: middle;
+}
+.fc-table thead th:first-child,
+.fc-table tbody tr:not(.group-header) td:first-child {
+  padding-left: 20px;
+}
+.fc-table thead th:last-child,
+.fc-table tbody tr:not(.group-header) td:last-child {
+  padding-right: 20px;
+}
+.fc-table .top-action-text {
+  min-height: calc(2 * 1.45em);
+}
+
+/* ── Columns go by name ──
+   This table was being dropped by position, by the generic nth-child rules
+   written for the advisor's nine columns. It has ten and a different order, so
+   at 1024 it lost Stage and AUM rather than the readings, and at 480 the rule
+   for the advisor's checkbox took out Name — the one column the row is. KQ
+   stays to the last breakpoint: it is what the screen ranks on. */
+@media (max-width: 1200px) {
+  .fc-table .col-team {
+    display: none;
+  }
+}
+@media (max-width: 1024px) {
+  .fc-table .col-intent,
+  .fc-table .col-clarity,
+  .fc-table .col-receptivity {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .fc-table .col-route {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .fc-table .col-stage,
+  .fc-table .col-aum {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .fc-table .col-action {
+    display: none;
+  }
 }
 
 .fc-empty {
