@@ -9,12 +9,34 @@ import bgFutureYou from '../assets/badges/future-you.svg'
 import bgGoals from '../assets/badges/goals.svg'
 import bgOutlook from '../assets/badges/outlook.svg'
 
+/* The bars climb in colour as well as height — deep plum through to violet —
+   so a glance at the ramp reads as readiness rather than "four of something".
+   Unfilled steps keep the pale wash. */
+const BAR_RAMP = ['#240446', '#4c1d95', '#7038c8', '#9b51e0', '#b57ceb']
+const BAR_W = 3.5
+const BAR_GAP = 2
+
 export function ReadinessBars({ level }: { level: number }) {
   return (
     <span className="pp-bars" aria-label={`Readiness ${level} of 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={`pp-bar ${i <= level ? 'on' : ''}`} style={{ height: 5 + i * 2.4 }} />
+        <span
+          key={i}
+          className={`pp-bar ${i <= level ? 'on' : ''}`}
+          style={{
+            height: 5 + i * 2.4,
+            ...(i <= level ? { background: BAR_RAMP[i - 1] } : null),
+          }}
+        />
       ))}
+      {/* The marker sits under the step actually reached, so the level is
+          readable without counting the bars. */}
+      {level > 0 && (
+        <span
+          className="pp-bar-mark"
+          style={{ left: (level - 1) * (BAR_W + BAR_GAP) + BAR_W / 2 }}
+        />
+      )}
     </span>
   )
 }
