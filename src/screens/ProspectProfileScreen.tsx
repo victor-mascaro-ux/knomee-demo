@@ -141,7 +141,8 @@ export default function ProspectProfileScreen({
               <section className="pp-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">
-                    <BulbIcon size={19} /> Key Highlights
+                    <span className="pp-card-disc"><BulbIcon size={13} /></span>
+                    Key Highlights
                   </span>
                 </div>
                 <div className="pp-highlights">

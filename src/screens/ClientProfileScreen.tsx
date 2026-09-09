@@ -291,7 +291,8 @@ export default function ClientProfileScreen({
               <section className="pp-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">
-                    <BulbIcon size={19} /> Key Highlights
+                    <span className="pp-card-disc"><BulbIcon size={13} /></span>
+                    Key Highlights
                   </span>
                   <button className="cp-head-toggle" type="button">
                     Show less <CaretIcon up />

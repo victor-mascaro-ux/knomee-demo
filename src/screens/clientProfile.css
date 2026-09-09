@@ -165,26 +165,19 @@
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
+/* One pill for every goal tag. They used to be three different colours at
+   semibold — a green "New", a grape "Sensitive", a teal "Updated" — which read
+   as three unrelated components shouting over the goal title. The design system
+   sets them as one quiet lilac pill in sentence case at medium weight, the way
+   the Life Events tags are set. */
 .cp-goal-tag {
-  font-size: 10px;
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-tag);
-  padding: 2px var(--space-6);
-  border-radius: var(--radius-xs);
-  background: var(--k-grape-light);
-  color: var(--text-strong);
-}
-.cp-goal-tag.is-new {
-  background: var(--k-mint);
-  color: var(--k-forest);
-}
-.cp-goal-tag.is-sensitive {
+  font-size: 11px;
+  font-weight: var(--weight-medium, 500);
+  letter-spacing: 0;
+  padding: 2px 9px;
+  border-radius: 999px;
   background: var(--k-grape-light);
   color: var(--k-grape);
-}
-.cp-goal-tag.is-updated {
-  background: var(--k-teal-light);
-  color: var(--k-ocean);
 }
 /* The disclosure that sits in a card header rather than its footer: compact and
    right-aligned, where .pp-show is full-width and centred. */

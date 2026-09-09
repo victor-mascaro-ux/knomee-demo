@@ -544,7 +544,20 @@
   flex-direction: column;
   align-items: center;
   padding: var(--space-20);
-  background: #1e1e1e;
+  background: var(--cx-ground);
+}
+/* The device stands on a dark ground, and the ground is the whole window — not
+   just the box the phone happens to fill. On the review shell the frame can be
+   taller than the phone (and stays taller for a beat after zooming out), which
+   used to show the app's white document as a band underneath. Painting the
+   document itself while a mobile view is mounted leaves nowhere for that band
+   to appear. */
+:root {
+  --cx-ground: #1e1e1e;
+}
+.cx-dark-ground,
+.cx-dark-ground body {
+  background: var(--cx-ground);
 }
 /* Holds the scaled device: `transform` doesn't shrink the box it came from, so
    this wrapper is sized to the scaled result and clips nothing. */
