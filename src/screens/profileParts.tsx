@@ -45,7 +45,7 @@ export function Gauge({ label }: { label: string }) {
   return (
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
       {/* Taller than the dial so the bulb can hang below the baseline. */}
-      <svg viewBox="0 0 72 42" width="112" height="65">
+      <svg viewBox="0 0 72 42" width="76" height="44">
         <path
           d="M72 35.9999C72 29.6806 70.3366 23.4726 67.1769 17.9999C64.0173 12.5272 59.4727 7.98266 54 4.823L45 20.4115C47.7363 21.9913 50.0086 24.2636 51.5885 26.9999C53.1683 29.7363 54 32.8403 54 35.9999H72Z"
           fill="#7639A1"
