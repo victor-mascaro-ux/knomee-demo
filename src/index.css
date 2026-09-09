@@ -69,11 +69,17 @@ body {
      another; drawn along the foot of a plum bar it reads as a white stripe on
      the dark. The bar's own colour is the boundary. */
 }
-/* The bar runs the full width of the screen and so does its contents — the
-   logo keeps the page's own inset, but the burger sits at the screen's edge
-   rather than at the edge of a 1520px column the profile pages do not use. */
+/* The bar runs the full width of the screen and so do its contents: the burger
+   stays at the screen's edge rather than at the edge of a 1520px column the
+   profile pages do not use. The logo, though, is offset onto the content
+   column, so above 1600px it still lands on the same edge as the first tab and
+   the page title instead of drifting (vw − 1520) / 2 to their left.
+   The offset is measured off this element with a container query rather than
+   100vw, because 100vw includes the scrollbar and would put the logo ~7px past
+   the title — which is the one misalignment this is here to prevent. */
 .topbar-inner {
   position: relative;
+  container-type: inline-size;
   width: 100%;
   height: 100%;
   margin: 0 auto;
@@ -88,6 +94,12 @@ body {
   align-items: center;
   gap: var(--brand-sub-gap);
   color: #fff;
+  /* 100cqi is .topbar-inner's content box, so 100cqi + 2 x --page-pad is the
+     page width the content column centres inside. Zero below 1600px. */
+  margin-left: max(
+    0px,
+    calc((100cqi + var(--page-pad) * 2 - var(--content-max)) / 2)
+  );
 }
 
 /* White-label: the client's logo is the dominant brand, with a small, dimmed
@@ -167,12 +179,27 @@ body {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* ---------- Content shell ---------- */
+/* ---------- Content shell ----------
+   The page module: twelve columns, one gutter, inside the shell that already
+   existed. Blocks span all twelve by default and re-divide their own content
+   box the same way, so a block's width is a span rather than a pixel count and
+   the ratios hold at every viewport.
+   Note that grid turns margin collapsing OFF. The rhythm below is therefore
+   written as one margin per gap, never a pair that relies on collapse:
+   --block-gap between blocks, --label-gap from a label to its block,
+   --tight-gap from a control strip to what it controls. */
 .content {
-  max-width: 1520px;
+  max-width: var(--content-max);
   margin: 0 auto;
-  /* top inset equals the side inset (even), roomier bottom for scroll space */
-  padding: var(--page-pad) var(--page-pad) 56px;
+  /* Every inset is the page inset; the block rhythm supplies the rest. */
+  padding: var(--page-pad) var(--page-pad) var(--space-40);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  align-content: start;
+}
+.content > * {
+  grid-column: 1 / -1;
 }
 
 /* ---------- Tabs ---------- */
@@ -180,7 +207,7 @@ body {
   display: flex;
   gap: 10px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 /* The "powered by knomee" credit, under a client's brand only. It sits in the
@@ -263,10 +290,10 @@ body {
 
 /* ---------- Page title ---------- */
 .page-title {
-  font-size: 36px;
+  font-size: var(--text-5xl);
   font-weight: 600;
   color: var(--plum);
-  margin: 28px 0 22px;
+  margin: var(--block-gap) 0 var(--label-gap);
   letter-spacing: -0.5px;
 }
 
@@ -276,15 +303,17 @@ body {
   border-radius: 14px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  margin-bottom: 22px;
+  margin-bottom: var(--block-gap);
   overflow: hidden;
 }
 
+/* The head and every body share --card-pad, so the title and the content
+   under it start from one left edge rather than 17px and 25px. */
 .card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 12px var(--card-pad);
   background: #fafafa;
   border-bottom: 1px solid var(--line);
 }
@@ -335,22 +364,33 @@ body {
 
 /* ---------- Top line metrics ---------- */
 .metrics-body {
-  padding: 22px 16px;
+  padding: var(--card-pad);
 }
 
+/* Spans, not pixels. The two number tiles were pinned at 200px from 1024px
+   upward, so every pixel gained above that width went to the distribution
+   tile — 200 / 200 / 934 at a full column, a 4.7:1 ratio nobody chose.
+   3 / 3 / 6 of twelve holds 2.07:1 at every width. */
 .metric-tiles {
   display: grid;
-  grid-template-columns: 200px 200px 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  row-gap: var(--grid-gutter);
+}
+.metric-tiles > .metric-tile {
+  grid-column: span 3;
+}
+.metric-tiles > .metric-tile.distribution {
+  grid-column: span 6;
 }
 
 .metric-tile {
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Total Prospects / Avg KQ tiles: label stays top-left, number centered in
@@ -373,7 +413,7 @@ body {
 }
 
 .metric-value {
-  font-size: 58px;
+  font-size: var(--text-7xl);
   font-weight: 700;
   color: #111;
   line-height: 1;
@@ -385,8 +425,8 @@ body {
 
 .dist-bar {
   display: flex;
-  height: 34px;
-  border-radius: 7px;
+  height: 32px;
+  border-radius: 8px;
   gap: 2px;
 }
 
@@ -428,7 +468,7 @@ body {
 .dist-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 40px;
+  gap: 8px var(--grid-gutter);
   /* Fill the row and auto-space the tier items across the full width. */
   justify-content: space-between;
 }
@@ -510,28 +550,10 @@ body {
   background: var(--prospect-3);
 }
 
-/* tier summary cards */
-.tier-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.tier-card {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tier-card-head {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
+/* The .tier-cards / .tier-card cluster that used to sit here declared a fourth
+   column system (repeat(4, 1fr)) and was rendered by no screen. Deleted, so the
+   file offers one grid per block rather than five candidates. .tier-swatch and
+   the .sw-* fills stay: the live tier legend uses them. */
 .tier-swatch {
   width: 12px;
   height: 12px;
@@ -551,54 +573,9 @@ body {
   background: var(--stone);
 }
 
-.tier-card-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  color: #333;
-  white-space: nowrap;
-}
-
-.tier-info {
-  color: var(--ash);
-  display: inline-flex;
-}
-
-.tier-range {
-  margin-left: auto;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  color: var(--grey-text);
-  text-align: right;
-  line-height: 1.15;
-  white-space: nowrap;
-}
-
-.tier-card-value {
-  font-size: 15px;
-  color: var(--grey-text);
-  font-weight: 500;
-}
-.tier-card-value strong {
-  font-size: 30px;
-  font-weight: 700;
-  color: #111;
-  margin-right: 6px;
-}
-
-/* ---------- Actionable insights ---------- */
-.insights-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 26px 44px;
-  padding: 22px 16px;
-}
-
-.insights-col {
-  display: flex;
-  flex-direction: column;
-}
+/* ---------- Actionable insights ----------
+   .insights-body and .insights-col used to declare two more unrendered grids
+   here. The live insights are .cmd-insights, inside the command centre card. */
 
 /* Spacing lives in the insight's own padding (not margins/gaps) so the hover
    highlight fills the whole block. The negative horizontal margin lets that
@@ -606,14 +583,14 @@ body {
 .insight {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 12px;
   padding: 12px;
   margin: 0 -12px;
 }
 
 .insight-num {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   /* Prospects theme — tier-2 plum. */
   background: #7639a1;
   color: #fff;
@@ -635,7 +612,7 @@ body {
 
 .insight-body {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--text-base);
   line-height: 1.55;
   color: var(--grey-text);
 }
@@ -645,18 +622,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 6px 0 18px;
-  gap: 16px;
+  /* One margin, not a 6px top that only ever collapsed into the card above. */
+  margin: 0 0 var(--tight-gap);
+  gap: var(--grid-gutter);
 }
 
+/* Three columns of twelve, so the search box's right edge lands on the same
+   grid line as the first metric tile's. */
 .search-box {
   display: flex;
   align-items: center;
   gap: 10px;
   border: 1px solid var(--stone);
   border-radius: 10px;
-  padding: 11px 16px;
-  width: 360px;
+  padding: 0 16px;
+  width: 23.75%;
+  min-width: 280px;
+  height: var(--control-h);
   color: var(--ash);
 }
 
@@ -675,18 +657,22 @@ body {
 
 .toolbar-actions {
   display: flex;
-  gap: 14px;
+  gap: 12px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 9px;
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--text-lg);
   font-weight: 600;
   border-radius: 10px;
-  padding: 11px 22px;
+  /* One control height across the toolbar — the search box measured ~43px
+     against a button's 47px, which read as two rows rather than one. */
+  height: var(--control-h);
+  padding: 0 20px;
   cursor: pointer;
   border: 1px solid transparent;
 }
