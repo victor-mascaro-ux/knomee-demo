@@ -186,42 +186,48 @@ body {
   margin-bottom: 8px;
 }
 
-/* "powered by knomee" credit, pinned to the right of the tab row (client
-   brand / white-label mode only). Uses knomee's own plum so it reads as a
-   knomee credit even on a client-themed page. */
-.tabs-powered {
-  margin-left: auto;
-  align-self: center;
-  /* The tabs carry 16px of bottom padding for the active underline; matching it
-     here lifts the credit so it centres on the tab *labels*, not on the whole
-     row. */
-  margin-bottom: 16px;
+/* The "powered by knomee" credit, under a client's brand only. It sits in the
+   bottom-left corner of every screen rather than in the tab row, so the three
+   screens that have tabs are not the only ones that carry it. Fixed, because
+   it belongs to the product rather than to the page scrolling behind it. */
+.powered-by {
+  position: fixed;
+  left: var(--page-pad);
+  bottom: 14px;
+  z-index: 30;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  /* A wash rather than a solid, so it reads as a credit over the page instead
+     of a control sitting on it — and stays legible over a card edge. */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
 }
-.tabs-powered-text {
+.powered-by-text {
   font-size: 10px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--grey-text);
-  /* Optical, not geometric. `align-items: center` lines up the two *boxes*, and
-     two offsets then stack against us: the lockup hangs its wordmark ~1.6px
-     below the mark's centre at this size, and an all-caps run with no
-     descenders sits 0.5px above its own line box's centre. Left alone the
-     eyebrow reads ~2px high; this drops its cap band onto the wordmark's
-     mid-line. translate rather than margin so the flex box itself, and with it
-     the credit's alignment to the tab labels, does not move. */
+  /* Optical, not geometric: the lockup hangs its wordmark ~1.6px below the
+     mark's centre at this size, and an all-caps run with no descenders sits
+     0.5px above its own line box's centre. */
   transform: translateY(2px);
 }
-/* The real knomee lockup (mark + wordmark) from the design system, in knomee's
-   plum so it reads as a knomee credit on a client-themed page. */
-.tabs-powered-logo {
+.powered-by-logo {
   display: block;
-  height: 18px;
+  height: 16px;
   width: auto;
+}
+@media (max-width: 720px) {
+  .powered-by {
+    left: 12px;
+    bottom: 10px;
+  }
 }
 
 .tab {

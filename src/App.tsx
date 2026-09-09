@@ -4236,6 +4236,15 @@ export default function App() {
       )}
       <Toast show={toast.show} message={toast.msg} />
       <Confetti ref={confettiRef} />
+      {/* Under a client's brand the product is still knomee's, and the credit
+          says so from every screen rather than only from the tab row of the
+          three that have one. */}
+      {brand && (
+        <span className="powered-by" aria-label="Powered by knomee">
+          <span className="powered-by-text">powered by</span>
+          <img className="powered-by-logo" src="./knomee-logo-plum.svg" alt="knomee" />
+        </span>
+      )}
     </div>
   )
 }
