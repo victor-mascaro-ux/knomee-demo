@@ -586,6 +586,24 @@ export default function ClientProfileScreen({
                         </span>
                       ))}
                     </div>
+                    <div className="pp-attention">
+                      <div>
+                        <span className="pp-fy-label">More attention</span>
+                        {cp.attention.more.map((m) => (
+                          <div className="pp-attn-row pp-attn-more" key={m}>
+                            {m}
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <span className="pp-fy-label">Less attention</span>
+                        {cp.attention.less.map((m) => (
+                          <div className="pp-attn-row pp-attn-less" key={m}>
+                            {m}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </section>
 
                   <section className="pp-card">

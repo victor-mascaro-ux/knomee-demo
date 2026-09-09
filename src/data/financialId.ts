@@ -104,6 +104,14 @@ export const financialId = {
     prompt: 'I want money to help me with',
     chips: ['Enjoying the moment', 'Choice/Freedom', 'Philanthropy and giving'],
   },
+
+  /* The second half of the same adventure: where she wants her attention to
+     go, and where she would rather it did not. It rides in this card rather
+     than a new one — the advisor's Practice Joy carries the same pair. */
+  attention: {
+    more: ['Family time', 'Health and wellbeing', 'Travel and experiences', 'Giving and philanthropy'],
+    less: ['Day-to-day money admin', 'Worrying about the market'],
+  },
   futureYou: {
     where: ['At the beach', 'Abroad'],
     what: ['Relaxing', 'Running a business', 'Helping others', 'Traveling'],

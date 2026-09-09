@@ -221,6 +221,24 @@ export default function ProspectProfileScreen({
                         </span>
                       ))}
                     </div>
+                    <div className="pp-attention">
+                      <div>
+                        <span className="pp-fy-label">More attention</span>
+                        {fi.attention.more.map((m) => (
+                          <div className="pp-attn-row pp-attn-more" key={m}>
+                            {m}
+                          </div>
+                        ))}
+                      </div>
+                      <div>
+                        <span className="pp-fy-label">Less attention</span>
+                        {fi.attention.less.map((m) => (
+                          <div className="pp-attn-row pp-attn-less" key={m}>
+                            {m}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </section>
 
                   <section className="pp-card">

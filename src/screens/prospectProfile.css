@@ -2,12 +2,16 @@
    collides with the dashboards. Colors lean on the app tokens in index.css. */
 
 /* Align horizontally with the header logo (page-pad), but lead tighter at the
-   top since the profile opens with a small breadcrumb rather than a title. */
+   top since the profile opens with a small breadcrumb rather than a title.
+   No bottom inset here, and none on .pp either: the rail is the page's left
+   edge, so its strip and divider have to reach the bottom of the page rather
+   than stopping 88px short of it. The scroll space those two insets provided
+   moves inside .pp-main, which keeps it without cutting the rail off. */
 .content.content-profile {
-  padding: 0 var(--page-pad) 48px;
+  padding: 0 var(--page-pad) 0;
 }
 .pp {
-  padding: 0 0 40px;
+  padding: 0;
   color: #2a2340;
   /* The phone layout answers to this element's width, not the window's, so the
      same rules serve a real phone and the device frame the demo menu opens. */
@@ -32,6 +36,8 @@
    the header bar. */
 .pp-main {
   padding-top: 14px;
+  /* The 40px + 48px that used to sit below the whole layout. */
+  padding-bottom: 88px;
 }
 
 /* The breadcrumb names the whole page, sidebar included, so it is a bar under
@@ -576,6 +582,40 @@
 .pp-gauge {
   line-height: 0;
 }
+
+/* ── More / less attention ──────────────────────────────────────────────
+   The second half of the Joy adventure, on every profile that runs it: the
+   client's Financial Joy and the advisor's Practice Joy carry the same pair.
+   More wears the page's own accent, less stays quiet — the weight says which
+   is which before the label does. */
+.pp-attention {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line, #e7e4ee);
+}
+.pp-attn-row {
+  margin-top: 6px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  color: var(--k-ink-soft, #3d3752);
+  background: var(--k-cloud, #f4f5f7);
+  border-left: 3px solid var(--k-stone, #c9cdd6);
+}
+.pp-attn-more {
+  background: var(--attn-tint, #f3ecfa);
+  border-left-color: var(--purple-bolt, #6b2fa0);
+}
+/* Two narrow columns of text at 393px is two words a line. They stack. */
+@container (max-width: 720px) {
+  .pp-attention {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
 .pp-show,
 .pp-showless {
   display: block;
@@ -749,9 +789,12 @@
     border-bottom: 0;
     border-top: 1px solid var(--line, #e7e4ee);
     margin-top: 8px;
+    /* Last in the column now, so it carries the page's bottom space. */
+    padding-bottom: 40px;
   }
   .pp-main {
     order: 1;
+    padding-bottom: 0;
   }
   /* Grid children default to min-width:auto, so a wide table or a long word
      pushes the track past the screen — which is where the sideways scroll
