@@ -32,8 +32,19 @@
 
   /* ---- Lilac / violet accents ---- */
   --k-lilac:         #b98ddc;  /* KQ tier 3 badge */
-  --k-lilac-soft:    #c9a8dd;  /* prospect tier 3 group header (shipped)
-                                  CONFLICT — token file said #d4b3eb */
+  --k-lilac-soft:    #c9a8dd;  /* pale lilac wash. Was the prospect tier 3
+                                  colour; 2.07:1 on white, which is why it is
+                                  not any more. Kept as a surface tint. */
+  --k-orchid:        #a855d6;  /* prospect tier 3. The ramp reads 17.8:1,
+                                  7.3:1, 2.1:1 on white with the old lilac —
+                                  tier 3 fell off the end of its own scale, and
+                                  it carries white numerals in the tier bar and
+                                  the group band. Same hue as tier 2 (281°),
+                                  one step lighter (59% vs 43%) and a step MORE
+                                  saturated, so it reads as the bright end of
+                                  the ramp rather than a faded version of it.
+                                  4.25:1 on white, and 4.25:1 for the white
+                                  numerals sitting on it. */
   --k-bolt:          #9b51e0;  /* "convert" action / lightning violet */
   --k-bolt-deep:     #7c3aed;  /* bolt hover */
 
@@ -155,7 +166,7 @@
   /* ---- Ramp 2: Prospect group headers (plum family) ---- */
   --prospect-1:      var(--k-plum);
   --prospect-2:      var(--k-grape);
-  --prospect-3:      var(--k-lilac-soft);
+  --prospect-3:      var(--k-orchid);
 
   /* ---- Ramp 3: Client engagement tiers (green→teal family) ----
      CONFLICT — the token file had these in the purple family
