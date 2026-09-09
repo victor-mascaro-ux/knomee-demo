@@ -58,13 +58,13 @@ const moodArt: Record<MoodId, string> = {
 }
 
 /* ── icons, matching the design system's Icon set ── */
-const ClockIcon = () => (
+export const ClockIcon = () => (
   <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5">
     <circle cx="8" cy="8" r="6.2" />
     <path d="M8 4.6V8l2.6 1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const CheckIcon = ({ size = 13 }: { size?: number }) => (
+export const CheckIcon = ({ size = 13 }: { size?: number }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
     <polyline
       points="20 6 9 17 4 12"
@@ -85,12 +85,12 @@ const DotsIcon = () => (
     </g>
   </svg>
 )
-const ArrowRight = ({ size = 15 }: { size?: number }) => (
+export const ArrowRight = ({ size = 15 }: { size?: number }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.7">
     <path d="M3 8h9.2M8.6 4.4 12.2 8l-3.6 3.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-const TabAdventures = () => (
+export const TabAdventures = () => (
   <svg viewBox="0 0 28 28" width="27" height="27" fill="none" aria-hidden>
     <circle
       cx="14"
@@ -111,7 +111,7 @@ const TabAdventures = () => (
     />
   </svg>
 )
-const TabFinId = () => (
+export const TabFinId = () => (
   <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <rect x="1.6" y="2.4" width="28.8" height="21.2" rx="2.6" />
     <circle cx="11" cy="10.6" r="3.2" />
@@ -124,7 +124,7 @@ const TabFinId = () => (
    lower ring, upper outer ring, lower outer ring. From knomee-mark.svg — as
    paths rather than an <img> so the long-press fill and the voice rings can
    animate each stroke and recolour them. */
-const MARK_PARTS = [
+export const MARK_PARTS = [
   'M165.378 198.685C164.99 198.685 164.537 198.685 164.149 198.62C110.711 192.518 93.0496 170.8 87.2917 158.466C78.8167 140.224 83.2159 121.394 98.5487 110.372C112.523 100.333 130.766 101.12 141.895 112.274C146.229 116.605 146.294 123.757 142.024 128.152C137.753 132.548 130.703 132.614 126.367 128.283C122.356 124.281 115.757 125.462 111.358 128.677C108.318 130.843 101.913 137.206 107.347 148.886C110.258 155.119 121.063 169.62 159.815 175.393C180.064 141.34 175.859 123.691 173.012 117.458C170.619 112.34 167.319 109.125 163.179 107.813C159.298 106.632 154.704 107.222 150.951 109.453C145.711 112.602 138.918 110.831 135.813 105.516C132.707 100.202 134.455 93.3125 139.695 90.1632C148.817 84.6517 159.815 83.2739 169.648 86.3577C176.764 88.5885 186.598 94.0998 193.003 107.878C198.761 120.279 204.066 147.836 174.695 193.567C172.624 196.783 169.13 198.685 165.443 198.685H165.378Z',
   'M58.8323 136.393C57.9266 136.393 57.0208 136.262 56.1152 136.066C49.5809 134.556 45.5052 127.93 47.0578 121.303C53.0745 94.861 68.86 72.4218 91.5679 58.0527C114.211 43.6838 141.059 39.1566 167.132 45.2584C202.843 53.6568 231.179 81.0825 241.013 116.972C242.824 123.534 239.072 130.291 232.602 132.128C226.134 133.966 219.47 130.094 217.658 123.599C210.218 96.4357 188.74 75.6367 161.632 69.2724C141.901 64.614 121.586 68.0914 104.378 78.983C87.2334 89.8746 75.2648 106.868 70.6715 126.88C69.3775 132.588 64.3961 136.393 58.8323 136.393Z',
   'M144.457 245.68C137.018 245.68 129.448 244.828 121.944 243.055C82.3504 233.804 52.4614 201.523 45.7331 160.909C44.6333 154.217 49.0973 147.853 55.6961 146.737C62.295 145.622 68.5704 150.149 69.6702 156.841C74.7811 187.614 97.4243 212.021 127.378 219.042C168.136 228.556 208.893 202.704 218.339 161.435C219.826 154.807 226.361 150.674 232.895 152.249C239.429 153.758 243.505 160.385 241.953 167.011C231.278 213.858 190.003 245.68 144.457 245.68Z',
@@ -135,7 +135,7 @@ const MARK_PARTS = [
 /* The tab bar's own top edge, arcing up around the centre mark. Drawn at the
    screen's exact 390px width so the arc is never distorted — chord 82, rise 18,
    a shallow swell the mark sits into rather than a dome around it. */
-const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
+export const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
 
 /* ── keep the whole device on screen ──────────────────────────────────────
    The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
@@ -146,8 +146,8 @@ const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
    full document height (the parent scrolls, not the frame). So `innerHeight`
    here is the content's own height and tells us nothing; the parent's viewport
    is the window that has to hold the phone. Same origin, but guarded anyway. */
-const DEVICE_H = 882
-const DEVICE_W = 428
+export const DEVICE_H = 882
+export const DEVICE_W = 428
 const FIT_PAD = 40
 // The view controls sit under the phone rather than over it, so the height they
 // occupy comes off the space the phone is allowed to fill.
@@ -161,7 +161,7 @@ function parentWindow(): Window | null {
   }
 }
 
-function useFitToWindow() {
+export function useFitToWindow() {
   const [fit, setFit] = useState({ scale: 1, windowH: 0 })
   useEffect(() => {
     const measure = () => {
@@ -208,9 +208,11 @@ function useFitToWindow() {
 const MIN_ZOOM = 0.4
 const MAX_ZOOM = 3
 const ZOOM_STEP = 0.1
-const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z))
+export const ZOOM_CONTROLS_TITLE =
+  'Ctrl/Cmd + wheel or + / \u2212 to zoom \u00b7 Ctrl/Cmd + 0 to reset'
+export const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z))
 
-function useZoom() {
+export function useZoom() {
   const [zoom, setZoom] = useState(1)
   // Back to the fit, and back to the top with it: zooming in scrolls the page
   // (the parent's page, on the live site), and zooming out should return the
@@ -276,7 +278,7 @@ function useZoom() {
 /* ── iPhone frame ──────────────────────────────────────────────────────────
    390 × 844 logical screen (iPhone 14) inside a titanium bezel, with the
    Dynamic Island and side buttons so it reads as a device, not a div. */
-function IPhone({
+export function IPhone({
   children,
   scale = 1,
   dim = false,
@@ -873,7 +875,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
           type="button"
           className="cx-fit-btn"
           onClick={resetZoom}
-          title="Ctrl/Cmd + wheel or + / − to zoom · Ctrl/Cmd + 0 to reset"
+          title={ZOOM_CONTROLS_TITLE}
         >
           <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path

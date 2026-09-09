@@ -90,6 +90,7 @@ import {
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
+import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -3644,6 +3645,7 @@ const ROUTE_VIEWS = [
   'welcome',
   'welcome-b',
   'client-experience',
+  'advisor-flow',
   'admin',
   'settings',
 ] as const
@@ -3702,6 +3704,9 @@ export default function App() {
   // The client-facing mobile app (the Adventures the prospect actually walks
   // through), previewed from the burger menu on its own route.
   const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
+  // The same five adventures pointed at the advisor's own decision — the
+  // Dynasty case, where the person answering is the prospect being recruited.
+  const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
@@ -3730,7 +3735,7 @@ export default function App() {
           : clientExpOpen
             ? 'client-experience'
             : screen
-  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, adminView])
+  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, advisorFlowOpen, adminView])
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
@@ -3744,9 +3749,11 @@ export default function App() {
           ? landingVersion === 'b'
             ? 'welcome-b'
             : 'welcome'
-          : clientExpOpen
-            ? 'client-experience'
-            : (screen as RouteView)
+          : advisorFlowOpen
+            ? 'advisor-flow'
+            : clientExpOpen
+              ? 'client-experience'
+              : (screen as RouteView)
 
   // ── Routing: URL hash ⇄ nav state ──
   useEffect(() => {
@@ -3758,6 +3765,7 @@ export default function App() {
       setAdminView(v === 'admin')
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
+      setAdvisorFlowOpen(v === 'advisor-flow')
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
       if (v === 'welcome') setLandingVersion('a')
@@ -3833,6 +3841,10 @@ export default function App() {
   // back to the advisor side lives in the phone's own menu.
   if (clientExpOpen) {
     return <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+  }
+
+  if (advisorFlowOpen) {
+    return <AdvisorFlowScreen onExit={() => setAdvisorFlowOpen(false)} />
   }
 
   return (
@@ -3925,6 +3937,7 @@ export default function App() {
                     setLandingVersion('a')
                     setSettingsOpen(false)
                     setClientExpOpen(false)
+                    setAdvisorFlowOpen(false)
                     setSegmentationOpen(false)
                     setAdminView(false)
                     setMenuOpen(false)
@@ -3947,6 +3960,21 @@ export default function App() {
                   }}
                 >
                   Client Experience
+                </button>
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setAdvisorFlowOpen(true)
+                    setClientExpOpen(false)
+                    setLandingOpen(false)
+                    setSettingsOpen(false)
+                    setSegmentationOpen(false)
+                    setAdminView(false)
+                    setMenuOpen(false)
+                  }}
+                >
+                  Advisor as Prospect
                 </button>
                 <div className="menu-divider" />
                 <div className="menu-pop-title">Demo controls</div>
