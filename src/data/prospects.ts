@@ -12,6 +12,7 @@ export interface Prospect {
   signUpLabel?: string // overrides the plain sign-up date (e.g. "Last invited:")
   topAction: string
   tier: Tier
+  isNew?: boolean // signed up since the advisor last looked
 }
 
 export interface TierGroup {
@@ -43,6 +44,7 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Call now — “worked since 13, ready for adventures”; lead with Future You vision',
     tier: 'tier1',
+    isNew: true,
   },
   {
     name: 'Emma Rossi',
@@ -55,6 +57,7 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Urgent personal circumstances (caregiving); call to discuss home & estate plan',
     tier: 'tier1',
+    isNew: true,
   },
   {
     name: 'Jorday Ray',
@@ -91,6 +94,7 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Travel urgency but self-directed; send value-add travel planning content',
     tier: 'tier2',
+    isNew: true,
   },
   {
     name: 'Sebastian Watson',
@@ -162,6 +166,7 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Financial reward only; thin Future You; send financial education series',
     tier: 'tier3',
+    isNew: true,
   },
   {
     name: 'Anna Abbot',

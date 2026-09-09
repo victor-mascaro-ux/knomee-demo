@@ -5,7 +5,6 @@ import { BadgeMedallion, Gauge, ReadinessBars } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
-  BulbIcon,
   CalendarIcon,
   CaretIcon,
   CheckIcon,
@@ -15,6 +14,7 @@ import {
   type HighlightIcon,
 } from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
+import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -141,7 +141,7 @@ export default function ProspectProfileScreen({
               <section className="pp-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">
-                    <span className="pp-card-disc"><BulbIcon size={16} /></span>
+                    <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
                 </div>

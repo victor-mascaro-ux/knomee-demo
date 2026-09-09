@@ -7,7 +7,6 @@ import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
 import {
-  BulbIcon,
   CalendarIcon,
   CaretIcon,
   CheckIcon,
@@ -17,6 +16,7 @@ import {
   type HighlightIcon,
 } from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
+import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -291,7 +291,7 @@ export default function ClientProfileScreen({
               <section className="pp-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">
-                    <span className="pp-card-disc"><BulbIcon size={16} /></span>
+                    <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
                   <button className="cp-head-toggle" type="button">

@@ -468,7 +468,10 @@ function ProspectRow({
       </td>
       <td className="col-name">
         <div className="name-cell">
-          <Avatar p={p} />
+          <span className="avatar-wrap">
+            <Avatar p={p} />
+            {p.isNew && <span className="new-tag avatar-new">new</span>}
+          </span>
           <div className="name-block">
             <NameLink name={p.name} onClick={() => onOpenProfile(p)} />
             <span className="email-line">{p.email}</span>
