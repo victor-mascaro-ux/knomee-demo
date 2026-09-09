@@ -4,7 +4,9 @@
    Actionable Metrics dashboard (pulse, the one next action, the call-list, the
    numbered reasoning behind it), the same toolbar, the same tier-grouped
    table. Only the data underneath is the firm's, and only the columns that
-   have no advisor equivalent are new — stage, AUM, team size, route.
+   have no advisor equivalent are new — stage and route. AUM and team size
+   came out: the flow never asks either, so the pipeline was reporting two
+   numbers nobody in it had said.
 
    Everything the dashboard states is computed in `candidates.ts` and
    `candidateInsights.ts`, which the table reads too, so the two halves of the
@@ -42,12 +44,16 @@ const TIER_META = [
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
-const money = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1)}B` : `$${m}M`)
-
 /** The dashboard's help affordance, same glyph and bubble as the advisor's. */
-function HelpTip({ text }: { text: string }) {
+function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
-    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+    <span
+      className={`help-tip tt${side === 'right' ? ' help-tip-right' : ''}`}
+      data-tip={text}
+      tabIndex={0}
+      role="img"
+      aria-label={text}
+    >
       ?
     </span>
   )
@@ -118,7 +124,13 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
           number the page ranks on and the one the tier bar is a split of. */}
       <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
-            <span className="metric-label">AVG EQ SCORE</span>
+            <span className="metric-label">
+              AVG EQ SCORE
+              <HelpTip
+                side="right"
+                text="Enterprise Quotient — how ready an advisor is to move onto a platform, 0–100. The same three dimensions as a client's KQ, asked of a practice: Intent (a live decision or a recurring mood), Clarity (do they know what kind of independence they want) and Receptivity (would they let a platform help). It scores the move, not the book."
+              />
+            </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
                 {candidateStats.avgEQ.toFixed(1)}
@@ -358,8 +370,6 @@ function Row({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
       <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
       <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
       <td className="col-firm-word col-stage">{c.stage ?? '–'}</td>
-      <td className="col-num col-aum">{money(c.aum)}</td>
-      <td className="col-num col-team">{c.team}</td>
       <td className="col-firm-word col-route">{c.route}</td>
       <td className="col-action">
         <div className="top-action">
@@ -421,8 +431,6 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
             <th className="col-num col-clarity">Clarity</th>
             <th className="col-num col-receptivity">Receptivity</th>
             <th className="col-firm-word col-stage">Stage</th>
-            <th className="col-num col-aum">AUM</th>
-            <th className="col-num col-team">Team</th>
             <th className="col-firm-word col-route">Route</th>
             <th className="col-action">Top Action</th>
           </tr>

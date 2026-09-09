@@ -3,7 +3,7 @@ import './prospectProfile.css'
 import { financialId } from '../data/financialId'
 import { prospectPlaybook, prospectReadiness } from '../data/readiness'
 import { PlaybookTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -43,7 +43,6 @@ export default function ProspectProfileScreen({
   onConvert: (p: Prospect) => void
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
-  const initial = prospect.name.charAt(0).toUpperCase()
   const fi = financialId
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
@@ -92,7 +91,7 @@ export default function ProspectProfileScreen({
         <aside className="pp-side">
           <div className="pp-side-inner">
             <div className="pp-avatar">
-              {prospect.avatar ? <img src={prospect.avatar} alt="" /> : <span>{initial}</span>}
+              <RailFace name={prospect.name} fallback={prospect.avatar} />
             </div>
             <h2 className="pp-name">{prospect.name}</h2>
             <div className="pp-meta">

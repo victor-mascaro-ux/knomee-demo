@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './client-experience.css'
+import { RailFace } from './profileParts'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
 import {
   DEVICE_H,
@@ -127,9 +128,7 @@ export default function AdvisorMobileScreen({
                   aria-expanded={menuOpen}
                   onClick={openRail}
                 >
-                  <span className="cxm-rail-initial cxm-rail-photo">
-                    <img src={advisor.photo} alt="" />
-                  </span>
+                  <RailFace name={advisor.name} />
                 </button>
               }
             />

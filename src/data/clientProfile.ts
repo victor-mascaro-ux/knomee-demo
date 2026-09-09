@@ -28,8 +28,18 @@ export interface TeamMember {
 /** Photos are dropped into public/avatars/ by hand; see the README there. A
     person with no file keeps their initial, which is what the design shows for
     the members without a portrait. */
-export const avatarFor = (name: string) =>
-  `./avatars/${name.toLowerCase().replace(/[^a-z]+/g, '-')}.jpg`
+const avatarSlug = (name: string) => name.toLowerCase().replace(/[^a-z]+/g, '-')
+
+/** Where to look for someone's portrait, in order. The README asks for square
+    JPEGs and makes Marcus's cut-out the PNG exception, but whoever drops a file
+    in should not have to remember which. A `fallback` is whatever the record
+    already carried — a stock URL, usually — so adding the real photograph to
+    public/avatars/ is enough to replace it, and removing it puts the old one
+    back rather than breaking the picture. The initial is the last resort. */
+export const avatarSources = (name: string, fallback?: string) => {
+  const slug = avatarSlug(name)
+  return [`./avatars/${slug}.jpg`, `./avatars/${slug}.png`, ...(fallback ? [fallback] : [])]
+}
 
 /** One tile on a vision board: a photograph, or a note the client wrote. */
 export type BoardTile =

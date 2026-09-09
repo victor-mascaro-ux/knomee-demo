@@ -213,12 +213,14 @@ body {
 }
 
 /* The "powered by knomee" credit, under a client's brand only. It sits in the
-   bottom-left corner of every screen rather than in the tab row, so the three
+   bottom-right corner of every screen rather than in the tab row, so the three
    screens that have tabs are not the only ones that carry it. Fixed, because
-   it belongs to the product rather than to the page scrolling behind it. */
+   it belongs to the product rather than to the page scrolling behind it.
+   Right, not left: the left edge is where the page's own content starts, and a
+   credit that reads before the first card reads as part of it. */
 .powered-by {
   position: fixed;
-  left: var(--page-pad);
+  right: var(--page-pad);
   bottom: 14px;
   z-index: 30;
   display: inline-flex;
@@ -249,9 +251,19 @@ body {
   height: 16px;
   width: auto;
 }
+/* The trademark, at the size a trademark is: present, and not competing with
+   the wordmark it belongs to. */
+.powered-by-tm {
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--grey-text);
+  align-self: flex-start;
+  margin: 2px 0 0 -3px;
+}
 @media (max-width: 720px) {
   .powered-by {
-    left: 12px;
+    right: 12px;
     bottom: 10px;
   }
 }
@@ -439,6 +451,11 @@ body {
   font-weight: 600;
   letter-spacing: 0.6px;
   color: var(--grey-text);
+  /* The label can carry a "?" — the score's own definition, since KQ, EQ and KR
+     are three initialisms a room will not know. */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .metric-value {

@@ -6,6 +6,7 @@
    putting it in a 393px screen is enough to trigger it. */
 
 import { useEffect, useRef, useState } from 'react'
+import { RailFace } from './profileParts'
 import './client-experience.css'
 import ClientProfileScreen from './ClientProfileScreen'
 import {
@@ -147,7 +148,7 @@ export default function ClientMobileScreen({
                     setMenuOpen((o) => !o)
                   }}
                 >
-                  <span className="cxm-rail-initial">{EMILY.name.charAt(0)}</span>
+                  <RailFace name={EMILY.name} />
                 </button>
               }
             />

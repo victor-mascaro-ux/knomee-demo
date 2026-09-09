@@ -26,6 +26,7 @@ import icVacation from '../assets/life-events/vacation.svg'
 import icVehiclePurchase from '../assets/life-events/vehicle-purchase.svg'
 import icWidowhood from '../assets/life-events/widowhood.svg'
 import { confidenceAnswers } from '../data/financialId'
+import { avatarSources } from '../data/clientProfile'
 import emptyLifeEvents from '../assets/empty/life-events.svg'
 import emptyQuestions from '../assets/empty/questions.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
@@ -479,5 +480,22 @@ export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => 
     <button className="pp-head-toggle" type="button" aria-expanded={open} onClick={onToggle}>
       {open ? 'Show less' : 'Show more'} <CaretIcon up={open} />
     </button>
+  )
+}
+
+/* The control the phone frames put above the title: the person's own face,
+   falling back to their initial. One component so Emily, Marcus and anyone
+   whose photograph lands later all behave the same — the disc is the same
+   size and the same ring whether it holds a picture or a letter. */
+export function RailFace({ name, fallback }: { name: string; fallback?: string }) {
+  const [attempt, setAttempt] = useState(0)
+  const sources = avatarSources(name, fallback)
+  if (attempt >= sources.length) {
+    return <span className="cxm-rail-initial">{name.charAt(0).toUpperCase()}</span>
+  }
+  return (
+    <span className="cxm-rail-initial cxm-rail-photo">
+      <img src={sources[attempt]} alt="" onError={() => setAttempt((n) => n + 1)} />
+    </span>
   )
 }

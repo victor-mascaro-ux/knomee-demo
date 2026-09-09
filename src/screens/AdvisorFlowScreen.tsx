@@ -11,6 +11,7 @@
 
 import { useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
+import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
 import {
   ActionRow,
@@ -473,9 +474,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
                     aria-expanded={railOpen}
                     onClick={() => setRailOpen((o) => !o)}
                   >
-                    <span className="cxm-rail-initial cxm-rail-photo">
-                      <img src={advisor.photo} alt="" />
-                    </span>
+                    <RailFace name={advisor.name} />
                   </button>
                 }
               />
