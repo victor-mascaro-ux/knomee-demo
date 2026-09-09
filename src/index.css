@@ -1386,11 +1386,13 @@ button.name-link-btn:hover .name-text {
   border-radius: 8px;
   white-space: nowrap;
   /* A tooltip is positioned from `left: 50%`, so shrink-to-fit would offer it
-     only the half-width to its right and any wrapping bubble would come out
-     tall and thin. Sizing to its content instead — and capping the width where
-     it wraps — keeps every bubble wider than it is tall. */
+     only the half-width to its right, and any bubble allowed to wrap would
+     come out tall and thin. Sizing to content instead keeps every bubble
+     wider than it is tall. No cap here on purpose: these are single-line
+     bubbles, and a max-width on a nowrap box makes the text spill out of it —
+     the cap belongs with the rules that let a bubble wrap (.help-tip, and the
+     readiness cards and word pills). */
   width: max-content;
-  max-width: 360px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.14s ease, transform 0.14s ease;
