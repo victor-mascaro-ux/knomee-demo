@@ -1610,8 +1610,10 @@
         } else if (c.kind === 'navToggle') {
           g.appendChild(demoToggleRow(c.label, c.isOn(), v => c.apply(v)));
         } else if (c.kind === 'viewToggle') {
-          g.appendChild(demoSegment(['Mobile', 'Desktop'], c.isOn() ? 0 : 1,
-            i => c.apply(i === 0)));
+          // Desktop first: it is where the page lives, and mobile is the view
+          // you step into and back out of.
+          g.appendChild(demoSegment(['Desktop', 'Mobile'], c.isOn() ? 1 : 0,
+            i => c.apply(i === 1)));
         } else if (c.kind === 'brands') {
           const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
