@@ -2,7 +2,7 @@
    Three things live here, and nothing else: the sidebar's two figures, the
    attention split that rides inside Practice Joy, and the timeline under the
    Goals card. Every tab is the prospect page's own — .pp-* for the
-   Independence ID, the shared .rd-* components for Readiness and the Playbook
+   Advisor ID, the shared .rd-* components for Readiness and the Toolkit
    — so anything that would go here belongs in one of those instead.
 
    Namespaced under .ap where it could otherwise reach another page. Colours,
@@ -68,7 +68,7 @@
 
 /* ── Tab 2: the columns ── */
 
-/* ── Tab 3: the playbook ── */
+/* ── Tab 3: the toolkit ── */
 
 /* The four behavioural tags, one tint each so the same tag reads the same in
    the starters and in the key beneath them. */

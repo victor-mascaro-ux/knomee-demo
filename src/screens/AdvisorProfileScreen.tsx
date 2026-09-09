@@ -4,7 +4,7 @@
    decision: this person is being recruited, not sold to.
 
    All three tabs are the prospect page's own tabs: the Financial ID card for
-   card, and Prospect Readiness / Prospect Playbook rendered from the shared
+   card, and Prospect Readiness / Prospect Toolkit rendered from the shared
    components in `readinessParts.tsx`. Only the content is the advisor's, and
    only four cards are new — route, second seat, book profile and the comp
    clock, which the client version has no slot for. */
@@ -13,16 +13,16 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
-import { advisor, independenceId } from '../data/advisorFlow'
+import { advisor, advisorId } from '../data/advisorFlow'
 import {
   confidenceAnswers,
   kq,
-  playbookTab,
+  toolkitTab,
   readinessTab,
   route,
   tier,
 } from '../data/advisorProfile'
-import { PlaybookTabView, ReadinessTabView } from './readinessParts'
+import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
   BadgeMedallion,
@@ -48,12 +48,12 @@ import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
 
-type ProfileTab = 'id' | 'readiness' | 'playbook'
+type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
 const TAB_LABEL: Record<ProfileTab, string> = {
-  id: 'Independence ID',
+  id: 'Advisor ID',
   readiness: 'Advisor Readiness',
-  playbook: 'Recruiting Playbook',
+  toolkit: 'Recruiting Toolkit',
 }
 
 function CardHead({ icon, title, right }: { icon: string; title: string; right?: string }) {
@@ -76,10 +76,10 @@ export default function AdvisorProfileScreen({
 }: {
   onBack: () => void
   onAdd?: () => void
-  /* Marcus reading his own Independence ID in his own app, rather than a
+  /* Marcus reading his own Advisor ID in his own app, rather than a
      Dynasty rep reading it about him. Same page — it is the one thing the
      eight minutes produced — with the firm's furniture off it: no breadcrumb
-     back to a candidate list, no Readiness or Playbook tabs, and nothing in
+     back to a candidate list, no Readiness or Toolkit tabs, and nothing in
      the rail that is the firm's read on him rather than his own answers. */
   mine?: boolean
   /* The phone frame hands in the control that opens the rail as a drawer — the
@@ -89,7 +89,7 @@ export default function AdvisorProfileScreen({
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const [photoFailed, setPhotoFailed] = useState(false)
-  const d = independenceId
+  const d = advisorId
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
 
   // Open scrolled to the top however far down the table the row sat. On the
@@ -191,7 +191,7 @@ export default function AdvisorProfileScreen({
 
           <div className="pp-title-row">
             <h1 className="pp-title">
-              {tab === 'id' ? `${advisor.name}’s Independence ID` : TAB_LABEL[tab]}
+              {tab === 'id' ? `${advisor.name}’s Advisor ID` : TAB_LABEL[tab]}
             </h1>
             {ownerMenu}
             <button className="btn btn-download active" type="button">
@@ -199,16 +199,16 @@ export default function AdvisorProfileScreen({
             </button>
           </div>
 
-          {tab === 'id' && <IndependenceIdTab stageLevel={stageLevel} />}
+          {tab === 'id' && <AdvisorIdTab stageLevel={stageLevel} />}
           {tab === 'readiness' && <ReadinessTabView d={readinessTab} />}
-          {tab === 'playbook' && <PlaybookTabView d={playbookTab} />}
+          {tab === 'toolkit' && <ToolkitTabView d={toolkitTab} />}
         </main>
       </div>
     </div>
   )
 }
 
-/* ── Tab 1 — Independence ID ─────────────────────────────────────────────
+/* ── Tab 1 — Advisor ID ─────────────────────────────────────────────
    The Financial ID page itself, card for card and rail for rail, carrying the
    advisor's answers instead of the client's: the change he named where the
    goals go, Practice Joy where Financial Joy goes, his six Confidence
@@ -217,8 +217,8 @@ export default function AdvisorProfileScreen({
    advisor reading his own page and a client reading theirs are looking at the
    same instrument. */
 
-function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
-  const d = independenceId
+function AdvisorIdTab({ stageLevel }: { stageLevel: number }) {
+  const d = advisorId
   const [confidence, setConfidence] = useState(false)
   // The change he named, read as a goal at the stage the flow put him in.
   const goals = [{ title: d.move.change, readiness: stageLevel }]
@@ -424,7 +424,7 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
             </div>
             {/* He has asked nobody anything yet — this card is for questions he
                 puts to Dynasty. The three the flow handed HIM are a different
-                thing and live on the Recruiting Playbook. */}
+                thing and live on the Recruiting Toolkit. */}
             <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
           </section>
         </div>

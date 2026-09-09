@@ -1,10 +1,10 @@
-// The advisor-as-prospect flow: welcome → the five adventures → Independence ID.
+// The advisor-as-prospect flow: welcome → the five adventures → Advisor ID.
 //
 // Same device, same chrome, same tab bar as ClientExperienceScreen — the phone
 // frame and the fit/zoom hooks are imported from it rather than copied, so the
 // two mobile demos cannot drift apart. Only the content differs: the person
 // answering is a breakaway advisor, and the artefact at the end is the
-// Independence ID rather than the Financial ID.
+// Advisor ID rather than the Financial ID.
 //
 // Every answer is pre-filled from `data/advisorFlow` so the flow can be clicked
 // through as a walkthrough. Nothing here is a real advisor.
@@ -36,7 +36,7 @@ import {
   advisor,
   advisorAdventures,
   advisorProgress,
-  independenceId,
+  advisorId,
   steps,
   type AdventureId,
   type Step,
@@ -300,7 +300,7 @@ function StepBody({
           <h2 className="af-h1">Congratulations</h2>
           <p className="af-body">You’re taking a meaningful step. Here’s your personalized summary.</p>
           <div className="af-lines">
-            {independenceId.highlights.map((h) => (
+            {advisorId.highlights.map((h) => (
               <div className="af-line" key={h.title}>
                 <span className="af-line-k">{h.title}</span>
                 <span className="af-line-v">{h.text}</span>
@@ -309,7 +309,7 @@ function StepBody({
             <div className="af-line">
               <span className="af-line-k">Readiness stage</span>
               <span className="af-line-v">
-                {independenceId.readiness.stage} · confidence {independenceId.readiness.confidence.toLowerCase()}
+                {advisorId.readiness.stage} · confidence {advisorId.readiness.confidence.toLowerCase()}
               </span>
             </div>
           </div>
@@ -324,7 +324,7 @@ function StepBody({
             Put these to every platform you’re considering. Including this one.
           </p>
           <ol className="af-qs">
-            {independenceId.questions.map((q, i) => (
+            {advisorId.questions.map((q, i) => (
               <li key={q}>
                 <span className="af-getnum">{i + 1}</span>
                 <span>{q}</span>
@@ -332,7 +332,7 @@ function StepBody({
             ))}
           </ol>
           <button className="cx-start af-wide" type="button" onClick={onHome}>
-            View my Independence ID
+            View my Advisor ID
           </button>
           <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
         </div>
@@ -365,7 +365,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
   const step = steps[i]
   const last = i === steps.length - 1
   // Inside an adventure the bottom bar is Back and OK; on the two destinations
-  // — the adventures list and the Independence ID — it is the tab bar. The
+  // — the adventures list and the Advisor ID — it is the tab bar. The
   // welcome screen counts as in-flow: its "Get started" is the same button.
   const inFlow = tab === 'flow' && step.kind !== 'home'
   const cta = useMemo(() => {
@@ -457,7 +457,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
             ref={viewport}
           >
             {tab === 'finid' ? (
-              /* The Independence ID he reads is the Independence ID the firm
+              /* The Advisor ID he reads is the Advisor ID the firm
                  reads — one page, his answers, the same cards. It used to be a
                  second, flatter rendering of the same data that lived only
                  here, so the two drifted every time one of them was touched. */
@@ -493,7 +493,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
               take the tab bar's place rather than stacking above it, so they
               are always on screen however long the question runs. The tab bar
               comes back on the two destinations: the adventures list and the
-              Independence ID. */}
+              Advisor ID. */}
           {inFlow ? (
             <div className="af-foot">
               <div className="af-nav">
@@ -537,7 +537,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
               onClick={() => setTab('finid')}
             >
               <TabFinId />
-              <span className="cx-tab-lbl">Independence ID</span>
+              <span className="cx-tab-lbl">Advisor ID</span>
             </button>
           </nav>
           )}

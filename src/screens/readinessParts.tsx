@@ -1,4 +1,4 @@
-/* The Readiness and Playbook tabs, built once and used by both profiles.
+/* The Readiness and Toolkit tabs, built once and used by both profiles.
  *
  * The prospect page (Sarah) and the candidate page (Marcus) render these same
  * components from the same interfaces in `readiness.ts`, so the two products
@@ -15,7 +15,7 @@ import './readiness.css'
 import type {
   AskedQuestion,
   Driver,
-  PlaybookTab,
+  ToolkitTab,
   ReadinessTab,
   Snapshot,
   Starter,
@@ -306,7 +306,7 @@ export function ReadinessTabView({ d, extras }: { d: ReadinessTab; extras?: Reac
   )
 }
 
-/* ── the playbook ───────────────────────────────────────────────────────── */
+/* ── the toolkit ───────────────────────────────────────────────────────── */
 
 /** Copies a line to the clipboard — the rep's actual next move with it. */
 function CopyLine({ text, label }: { text: string; label: string }) {
@@ -463,7 +463,7 @@ function Word({ w, i }: { w: WordT; i: number }) {
   )
 }
 
-export function CommunicationRail({ d }: { d: PlaybookTab }) {
+export function CommunicationRail({ d }: { d: ToolkitTab }) {
   return (
     <section className="pp-card rd-card rd-comm">
       <Head icon={icCommunication} title="Communication" />
@@ -486,7 +486,7 @@ export function CommunicationRail({ d }: { d: PlaybookTab }) {
   )
 }
 
-export function PlaybookTabView({ d, extras }: { d: PlaybookTab; extras?: React.ReactNode }) {
+export function ToolkitTabView({ d, extras }: { d: ToolkitTab; extras?: React.ReactNode }) {
   return (
     <div className="rd">
       <div className="rd-top-action">
@@ -495,13 +495,13 @@ export function PlaybookTabView({ d, extras }: { d: PlaybookTab; extras?: React.
         <span className="rd-top-text">{d.topAction}</span>
       </div>
 
-      <div className="rd-play-cols">
-        <div className="rd-play-main">
+      <div className="rd-kit-cols">
+        <div className="rd-kit-main">
           <StartersCard starters={d.starters} keyRows={d.key} />
           <QuestionsCard questions={d.questions} note={d.questionsNote} />
           {extras}
         </div>
-        <div className="rd-play-rail">
+        <div className="rd-kit-rail">
           <CommunicationRail d={d} />
         </div>
       </div>

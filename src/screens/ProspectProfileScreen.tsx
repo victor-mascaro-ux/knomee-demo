@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { prospectPlaybook, prospectReadiness } from '../data/readiness'
-import { PlaybookTabView, ReadinessTabView } from './readinessParts'
+import { prospectToolkit, prospectReadiness } from '../data/readiness'
+import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
@@ -32,7 +32,7 @@ const ADVENTURE_ICON: Record<string, string> = {
   Goals: icGoals,
 }
 
-type ProfileTab = 'id' | 'readiness' | 'playbook'
+type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
 export default function ProspectProfileScreen({
   prospect,
@@ -116,7 +116,7 @@ export default function ProspectProfileScreen({
               [
                 ['id', 'Financial ID'],
                 ['readiness', 'Prospect Readiness'],
-                ['playbook', 'Prospect Playbook'],
+                ['toolkit', 'Prospect Toolkit'],
               ] as [ProfileTab, string][]
             ).map(([id, label]) => (
               <button
@@ -139,7 +139,7 @@ export default function ProspectProfileScreen({
                 ? `${prospect.name}’s Financial ID`
                 : tab === 'readiness'
                   ? 'Prospect Readiness'
-                  : 'Prospect Playbook'}
+                  : 'Prospect Toolkit'}
             </h1>
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
@@ -148,8 +148,8 @@ export default function ProspectProfileScreen({
 
           {tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
-          ) : tab === 'playbook' ? (
-            <PlaybookTabView d={prospectPlaybook} />
+          ) : tab === 'toolkit' ? (
+            <ToolkitTabView d={prospectToolkit} />
           ) : (
             <>
               {/* Key Highlights */}

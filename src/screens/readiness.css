@@ -1,4 +1,4 @@
-/* Readiness & Playbook — the two tabs the prospect page and the candidate page
+/* Readiness & Toolkit — the two tabs the prospect page and the candidate page
    share. Namespaced under .rd so it cannot reach anything else, and every
    colour, radius, duration and easing is a token: the four behavioural tags
    come from the --tag-* pairs added to the design system for them, and the
@@ -334,7 +334,7 @@
   vertical-align: 1px;
 }
 
-/* ── the playbook ── */
+/* ── the toolkit ── */
 .rd-top-action {
   display: flex;
   align-items: center;
@@ -354,13 +354,13 @@
   color: var(--text-strong);
 }
 
-.rd-play-cols {
+.rd-kit-cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 372px;
   gap: var(--space-16);
   align-items: start;
 }
-.rd-play-main {
+.rd-kit-main {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
@@ -604,19 +604,19 @@
 @media (prefers-reduced-motion: no-preference) {
   .rd > *,
   .rd-cols > *,
-  .rd-play-main > *,
-  .rd-play-rail > * {
+  .rd-kit-main > *,
+  .rd-kit-rail > * {
     animation: rdRise 0.32s var(--ease-out) both;
   }
   .rd-cols > *:nth-child(2),
-  .rd-play-main > *:nth-child(2) {
+  .rd-kit-main > *:nth-child(2) {
     animation-delay: 0.05s;
   }
   .rd-cols > *:nth-child(3),
-  .rd-play-main > *:nth-child(3) {
+  .rd-kit-main > *:nth-child(3) {
     animation-delay: 0.1s;
   }
-  .rd-play-rail > * {
+  .rd-kit-rail > * {
     animation-delay: 0.08s;
   }
   .rd-dim,
@@ -710,7 +710,7 @@
   .rd-snapshot-body {
     grid-template-columns: 280px minmax(0, 1fr);
   }
-  .rd-play-cols {
+  .rd-kit-cols {
     grid-template-columns: minmax(0, 1fr) 320px;
   }
 }
@@ -725,7 +725,7 @@
   .rd-cols {
     grid-template-columns: 1fr;
   }
-  .rd-play-cols {
+  .rd-kit-cols {
     grid-template-columns: 1fr;
   }
 }
@@ -746,8 +746,8 @@
    are raised too. */
 .rd-card,
 .rd-cols > *,
-.rd-play-main,
-.rd-play-rail,
+.rd-kit-main,
+.rd-kit-rail,
 .rd-dim,
 .rd-word,
 .rd-starter,
@@ -762,7 +762,7 @@
 }
 .rd-card:has(.tt:hover),
 .rd-card:has(.tt:focus-visible),
-.rd-play-main:has(.tt:hover),
-.rd-play-rail:has(.tt:hover) {
+.rd-kit-main:has(.tt:hover),
+.rd-kit-rail:has(.tt:hover) {
   z-index: 40;
 }

@@ -1,10 +1,10 @@
-/* Marcus's Independence ID inside the device frame — the firm-side twin of
+/* Marcus's Advisor ID inside the device frame — the firm-side twin of
    ClientMobileScreen.
 
    The page is not a mobile build any more than Emily's is. It is the same
    AdvisorProfileScreen the desktop renders, and its phone layout answers to a
    container query on .pp, so putting it in a 393px screen is enough. The
-   Independence ID is the Financial ID page card for card, so once it is in the
+   Advisor ID is the Financial ID page card for card, so once it is in the
    frame it folds exactly the way hers does. */
 
 import { useCallback, useEffect, useRef, useState } from 'react'

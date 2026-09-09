@@ -2,8 +2,8 @@
 // after the advisor finishes the flow in `advisorFlow.ts`.
 //
 // Two tabs live here: Advisor Readiness (the Enterprise Quotient, the same
-// three dimensions asked of an advisor) and the Recruiting Playbook. Independence ID needs
-// nothing new — it renders `independenceId` straight out of the flow.
+// three dimensions asked of an advisor) and the Recruiting Toolkit. Advisor ID needs
+// nothing new — it renders `advisorId` straight out of the flow.
 //
 // Everything quotable is read back out of the flow rather than retyped, so the
 // profile and the mobile experience cannot drift apart. Where a figure is a
@@ -12,8 +12,8 @@
 //
 // All figures and answers are invented. No real advisor or firm is represented.
 
-import { advisor, independenceId, steps } from './advisorFlow'
-import { RECOMMENDATIONS_KEY, type PlaybookTab, type ReadinessTab } from './readiness'
+import { advisor, advisorId, steps } from './advisorFlow'
+import { RECOMMENDATIONS_KEY, type ToolkitTab, type ReadinessTab } from './readiness'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
 
@@ -241,7 +241,7 @@ export const route = {
   ] as RouteOption[],
 }
 
-/* ── the Recruiting Playbook ────────────────────────────────────────────── */
+/* ── the Recruiting Toolkit ────────────────────────────────────────────── */
 
 export const topAction = {
   title: 'Answer the attrition question with evidence, in the first ten minutes.',
@@ -296,7 +296,7 @@ export interface AskedQuestion {
     objection. */
 export const questionsTheyAsk: AskedQuestion[] = [
   {
-    q: independenceId.questions[0],
+    q: advisorId.questions[0],
     guidance:
       'He is asking for evidence, not reassurance, and he has already named the shape of it: teams like his, the top relationships, and the two that went worst. Answer with the page, not a figure.',
     points: [
@@ -306,7 +306,7 @@ export const questionsTheyAsk: AskedQuestion[] = [
     ],
   },
   {
-    q: independenceId.questions[1],
+    q: advisorId.questions[1],
     guidance:
       'This is the promise he cannot keep where he is — he has two junior advisors who stayed six years on it. Answer with mechanics rather than intention.',
     points: [
@@ -316,7 +316,7 @@ export const questionsTheyAsk: AskedQuestion[] = [
     ],
   },
   {
-    q: independenceId.questions[2],
+    q: advisorId.questions[2],
     guidance:
       'He named eighteen months of disruption as what makes the move hard, so the honest answer is a dated plan with an owner against each part, not an average.',
     points: [
@@ -349,7 +349,7 @@ export const words = {
 }
 
 /* ── the same two tabs the prospect page renders ─────────────────────────
-   Marcus's answers poured into the Prospect Readiness / Prospect Playbook
+   Marcus's answers poured into the Prospect Readiness / Prospect Toolkit
    shape, so the candidate page IS that page rather than a lookalike. The four
    enterprise-only cards — route, second seat, book, comp clock — are passed to
    the view as extras, since the client version has no slot for them. */
@@ -386,7 +386,7 @@ export const readinessTab: ReadinessTab = {
   apprehensionsAction: columnActions.apprehensions,
 }
 
-export const playbookTab: PlaybookTab = {
+export const toolkitTab: ToolkitTab = {
   topAction: topAction.title,
   starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag] })),
   key: RECOMMENDATIONS_KEY,

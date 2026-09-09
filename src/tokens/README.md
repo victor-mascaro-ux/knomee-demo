@@ -26,9 +26,9 @@ layer that would collide with the shipped rules in `index.css`) and
 Fonts in `app.html`).
 
 Added here rather than synced down: `--k-azure`/`--k-crimson` and their washes,
-the four `--tag-*` pairs the Readiness and Playbook tabs hang their behavioural
+the four `--tag-*` pairs the Readiness and Toolkit tabs hang their behavioural
 tags on, and `--signal-motivator`/`--signal-concern`. The ramp had no blue and
-no concern red; both are sampled from the Prospect Playbook design. Push them up
+no concern red; both are sampled from the Prospect Toolkit design. Push them up
 on the next sync.
 
 To re-sync, read the project with the `DesignSync` tool — the token files are
