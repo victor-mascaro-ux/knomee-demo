@@ -383,6 +383,11 @@ function generate(): Candidate[] {
   const used = new Set<string>([marcus.name.toLowerCase()])
   const out: Candidate[] = []
   let marcusPlaced = false
+  /* Deals that actually went somewhere, counted in order. Two of them go
+     somewhere other than the recommendation — a routing miss is the thing the
+     route-accuracy section exists to catch, so the demo has to contain some. */
+  let deals = 0
+  const MISROUTED = [2, 5]
 
   for (const slot of SLOTS) {
     if (slot.arch === 'wants-waiting' && !marcusPlaced) {
@@ -420,12 +425,14 @@ function generate(): Candidate[] {
       route,
       // Where it actually went. Most deals follow the recommendation; a few do
       // not, which is the whole point of measuring route accuracy in phase 3.
-      routedTo:
-        slot.progress === 'signed' || slot.progress === 'transition'
-          ? rand() < 0.8
-            ? route
-            : pick(rand, ['Connect', 'Investment Bank', 'Optima'] as RouteKey[])
-          : undefined,
+      routedTo: (() => {
+        if (slot.progress !== 'signed' && slot.progress !== 'transition') return undefined
+        deals += 1
+        if (!MISROUTED.includes(deals)) return route
+        // Sent to the wrong destination: a succession play handled as a
+        // breakaway, or a breakaway handed to the succession desk.
+        return route === 'Connect' ? 'Optima' : 'Connect'
+      })(),
       segment: pick(rand, shape.segments),
       source: pick(rand, [
         'Connect',

@@ -1,0 +1,354 @@
+/* The firm's Analytics. Cards, impact grid, sector bar and the tier-hero bars
+   come from the advisor analytics styles in index.css; this file adds the
+   pieces this page needs — the drop readings, the ranked apprehensions, the
+   segment rows and the route block. Colours are tokens only. */
+
+.fa-lead {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--k-plum);
+  font-weight: 600;
+  max-width: 980px;
+}
+
+/* Every section ends in something the firm can build, not something a rep can
+   say. */
+.fa-reading {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--k-plum-050);
+  border-left: 3px solid var(--k-grape);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--k-plum-ink);
+}
+.fa-fix {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--k-plum);
+  color: var(--k-white);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.fa-thin {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--k-amber-ink);
+}
+.fa-thin svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Four KPIs, not the advisor page's three, so the row does not leave one
+   orphan underneath. */
+.impact-grid.fa-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ── the funnel ── */
+.fa-funnel {
+  margin-top: 4px;
+}
+.fa-funnel-legend {
+  margin-bottom: 4px;
+}
+.fa-drops {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.fa-drop {
+  padding: 14px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+}
+.fa-drop-where {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--k-plum);
+}
+.fa-drop-where b {
+  color: var(--k-grape);
+}
+.fa-drop-read {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--k-body);
+}
+
+/* ── the cluster table ── */
+.fa-table-wrap {
+  overflow-x: auto;
+}
+.fa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.fa-table th {
+  text-align: left;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--k-line);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--k-slate);
+  white-space: nowrap;
+}
+.fa-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--k-line);
+  color: var(--k-ink-soft);
+  vertical-align: top;
+}
+.fa-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.fa-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+.fa-table td b {
+  color: var(--k-plum);
+}
+.fa-table td i {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--k-slate);
+}
+.fa-table tr.is-thin td {
+  color: var(--k-muted);
+}
+.fa-cn {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: var(--radius-circle);
+  background: var(--k-grape-light);
+  color: var(--k-plum);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.fa-td-action {
+  min-width: 240px;
+  color: var(--k-body);
+}
+
+/* ── ranked apprehensions ── */
+.fa-appr-card {
+  border-left: 4px solid var(--k-grape-bar);
+}
+.fa-apprs {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.fa-appr {
+  padding: 14px;
+  border: 1px solid var(--k-line);
+  border-radius: var(--radius-xl);
+}
+.fa-appr-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.fa-appr-rank {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-circle);
+  background: var(--k-plum);
+  color: var(--k-white);
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.fa-appr-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--k-plum);
+}
+.fa-appr-count {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--k-slate);
+  white-space: nowrap;
+}
+.fa-appr-track {
+  display: block;
+  margin-top: 10px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--k-pearl);
+  overflow: hidden;
+}
+.fa-appr-bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--k-grape);
+  transition: width var(--dur-bar) var(--ease-standard);
+}
+.fa-appr-conv {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--k-muted);
+}
+.fa-worked {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: var(--radius-xl);
+  background: var(--k-plum);
+}
+.fa-worked p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--k-grape-light);
+}
+.fa-worked p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── segment views ── */
+.fa-seg-block + .fa-seg-block {
+  margin-top: 22px;
+}
+.fa-seg-row {
+  display: grid;
+  grid-template-columns: 190px minmax(120px, 1fr) 340px;
+  gap: 12px;
+  align-items: center;
+  padding: 7px 0;
+}
+.fa-seg-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--k-plum);
+}
+.fa-seg-track {
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--k-pearl);
+  overflow: hidden;
+}
+.fa-seg-bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--k-lilac);
+}
+/* The part of the bar that actually signed. */
+.fa-seg-signed {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--k-plum);
+}
+.fa-seg-meta {
+  font-size: 11.5px;
+  color: var(--k-muted);
+}
+.fa-seg-meta b {
+  color: var(--k-plum);
+}
+.fa-seg-row.is-thin .fa-seg-name,
+.fa-seg-row.is-thin .fa-seg-meta {
+  color: var(--k-slate);
+}
+
+/* ── route accuracy ── */
+.fa-route-top {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.fa-route-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fa-route-row {
+  display: grid;
+  grid-template-columns: 140px minmax(120px, 1fr) 280px;
+  gap: 12px;
+  align-items: center;
+}
+.fa-route-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--k-plum);
+}
+.fa-route-row.is-thin .fa-route-name {
+  color: var(--k-slate);
+}
+.fa-misses {
+  margin-top: 18px;
+}
+.fa-miss {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--k-body);
+}
+.fa-miss b {
+  color: var(--k-plum);
+}
+
+.fa-foot {
+  margin-top: 20px;
+}
+
+@media (max-width: 1380px) {
+  .impact-grid.fa-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fa-drops {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fa-seg-row {
+    grid-template-columns: 160px minmax(90px, 1fr) 300px;
+  }
+  .fa-route-row {
+    grid-template-columns: 120px minmax(90px, 1fr) 240px;
+  }
+}
+@media (max-width: 1100px) {
+  .fa-apprs {
+    grid-template-columns: 1fr;
+  }
+  .fa-route-top {
+    grid-template-columns: 1fr;
+  }
+  .fa-seg-row,
+  .fa-route-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .fa-seg-track,
+  .fa-route-row .thr-track {
+    max-width: 420px;
+  }
+}

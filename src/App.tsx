@@ -95,6 +95,7 @@ import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
+import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
@@ -3809,24 +3810,6 @@ export default function App() {
     return () => document.removeEventListener('click', onDoc)
   }, [menuOpen])
 
-  // Expose the current screen to the commenting overlay so comment pins are
-  // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
-  useEffect(() => {
-    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = firmView
-      ? firmScreen
-      : adminView
-      ? 'admin'
-      : segmentationOpen
-        ? 'segmentation'
-        : landingOpen
-          ? landingVersion === 'b'
-            ? 'welcome-b'
-            : 'welcome-a'
-          : clientExpOpen
-            ? 'client-experience'
-            : screen
-  }, [screen, segmentationOpen, landingOpen, landingVersion, clientExpOpen, advisorFlowOpen, adminView, firmView, firmScreen])
-
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
   const currentView: RouteView = firmView
@@ -3846,6 +3829,50 @@ export default function App() {
             : clientExpOpen
               ? 'client-experience'
               : (screen as RouteView)
+
+  // Expose the current screen to the commenting overlay so comment pins are
+  // scoped per screen (a pin dropped on Prospects doesn't show on Clients).
+  // It is `currentView` itself rather than a second hand-written chain: that
+  // chain had no branch for the advisor flow or settings, so a pin dropped on
+  // either was filed under whichever table screen happened to be behind it.
+  useEffect(() => {
+    ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = currentView
+  }, [currentView])
+
+  // ── Demo layer (the overlay's D panel) ──
+  // The panel lives in the parent frame, outside this app, so it never shows up
+  // in the demo itself. It drives navigation through the hash (below); these two
+  // effects cover the rest: the state it shows, and the state it sets.
+  useEffect(() => {
+    if (!window.parent || window.parent === window) return
+    try {
+      window.parent.postMessage(
+        {
+          type: 'cc-demo-state',
+          view: currentView,
+          empty: emptyMode,
+          brand: brandId,
+          cobrand: cobrandLayout,
+          brands: CLIENT_BRANDS.map((b) => ({ id: b.id, name: b.name })),
+        },
+        '*',
+      )
+    } catch {
+      /* cross-origin parent — ignore */
+    }
+  }, [currentView, emptyMode, brandId, cobrandLayout])
+
+  useEffect(() => {
+    const onDemo = (e: MessageEvent) => {
+      const d = e.data as { type?: string; key?: string; value?: unknown } | null
+      if (!d || d.type !== 'cc-demo-set') return
+      if (d.key === 'empty') setEmptyMode(!!d.value)
+      if (d.key === 'brand') setBrandId(typeof d.value === 'string' ? d.value : null)
+      if (d.key === 'cobrand') setCobrandLayout(d.value === 'centered' ? 'centered' : 'left')
+    }
+    window.addEventListener('message', onDemo)
+    return () => window.removeEventListener('message', onDemo)
+  }, [])
 
   // ── Routing: URL hash ⇄ nav state ──
   useEffect(() => {
@@ -4097,104 +4124,12 @@ export default function App() {
                 >
                   Advisor as Prospect
                 </button>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Enterprise</div>
-                <label className="menu-toggle">
-                  <span>Dynasty view (the firm side)</span>
-                  <span className={`switch ${firmView ? 'on' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={firmView}
-                      onChange={(e) => {
-                        setFirmView(e.target.checked)
-                        setAdminView(false)
-                        setSettingsOpen(false)
-                        setSegmentationOpen(false)
-                        setLandingOpen(false)
-                        setClientExpOpen(false)
-                        setAdvisorFlowOpen(false)
-                      }}
-                    />
-                    <span className="switch-knob" />
-                  </span>
-                </label>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Demo controls</div>
-                <label className="menu-toggle">
-                  <span>Admin view (100 advisors)</span>
-                  <span className={`switch ${adminView ? 'on' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={adminView}
-                      onChange={(e) => {
-                        setAdminView(e.target.checked)
-                        setFirmView(false)
-                        setSettingsOpen(false)
-                        setSegmentationOpen(false)
-                        setLandingOpen(false)
-                        setClientExpOpen(false)
-                      }}
-                    />
-                    <span className="switch-knob" />
-                  </span>
-                </label>
-                <label className="menu-toggle">
-                  <span>Empty dashboards</span>
-                  <span className={`switch ${emptyMode ? 'on' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={emptyMode}
-                      onChange={(e) => setEmptyMode(e.target.checked)}
-                    />
-                    <span className="switch-knob" />
-                  </span>
-                </label>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Client brand</div>
-                <button
-                  className={`menu-item ${!brandId ? 'is-on' : ''}`}
-                  type="button"
-                  onClick={() => {
-                    setBrandId(null)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Knomee (default)
-                </button>
-                {CLIENT_BRANDS.map((b) => (
-                  <button
-                    key={b.id}
-                    className={`menu-item ${brandId === b.id ? 'is-on' : ''}`}
-                    type="button"
-                    onClick={() => {
-                      setBrandId(b.id)
-                      setMenuOpen(false)
-                    }}
-                  >
-                    {b.name}
-                  </button>
-                ))}
-                {brand && (
-                  <>
-                    <div className="menu-pop-title">Logo placement</div>
-                    <button
-                      className={`menu-item ${cobrandLayout === 'left' ? 'is-on' : ''}`}
-                      type="button"
-                      onClick={() => setCobrandLayout('left')}
-                    >
-                      Client left
-                    </button>
-                    <button
-                      className={`menu-item ${cobrandLayout === 'centered' ? 'is-on' : ''}`}
-                      type="button"
-                      onClick={() => setCobrandLayout('centered')}
-                    >
-                      Client centered
-                    </button>
-                  </>
-                )}
+                {/* The scaffolding — persona switches, empty states, the
+                    white-label brand picker — used to live here, in the
+                    product's own menu, where the room saw it every time this
+                    opened. It moved to the overlay's D panel, outside the app. */}
                 <div className="menu-hint">
-                  Press <b>C</b> to leave comments
+                  Press <b>D</b> for demo controls, <b>C</b> for comments
                 </div>
               </div>
             )}
@@ -4250,12 +4185,7 @@ export default function App() {
                 body="Advisors who have joined the platform — Dynasty's Network Partners, and what each one's Independence ID said before they signed."
               />
             )}
-            {firmScreen === 'firm-analytics' && (
-              <FirmSoon
-                title="Analytics"
-                body="The pipeline in aggregate: stage distribution, cluster performance, ranked apprehensions, and whether the recommended route matched where the deal actually went."
-              />
-            )}
+            {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}
           </main>
         )
       ) : profileClient ? (
