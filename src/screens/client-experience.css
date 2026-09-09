@@ -370,6 +370,16 @@
   transform: scale(0.97);
 }
 
+/* a row that is itself the tap target — the advisor demo opens an adventure
+   from anywhere on the row, including the completed and locked ones */
+.cx-adv-tap {
+  cursor: pointer;
+}
+.cx-adv-tap:focus-visible {
+  outline: 2px solid var(--k-grape, #7639a1);
+  outline-offset: 2px;
+}
+
 /* the locked ones */
 .cx-adv-locked {
   background: #f8f8f9;

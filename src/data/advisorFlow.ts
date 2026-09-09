@@ -9,6 +9,10 @@
 //
 // All figures and answers are invented. No real advisor is represented.
 
+// The home-screen rows wear the client experience's own artwork — the same five
+// illustrations, so the two mobile demos cannot drift apart.
+import type { ArtKey } from './experience'
+
 export type StepKind =
   | 'welcome'
   | 'home'
@@ -67,23 +71,68 @@ export const advisor = {
   completedOn: '09.09.2026',
 }
 
-/* ── the adventures list, as the advisor sees it on the home screen ──────── */
+/* ── the adventures list, as the advisor sees it on the home screen ────────
+   Only the five, shown in the three states the design system has for a row:
+   one behind you, one open, the rest still locked. It is a walkthrough, so
+   every row opens its adventure whatever state it wears. */
 
-export const advisorAdventures = [
-  { id: 'practice-joy', title: 'Practice Joy', art: 'financial-joy', minutes: 2 },
-  { id: 'confidence', title: 'Confidence', art: 'confidence', minutes: 1 },
-  { id: 'outlook', title: 'Outlook', art: 'outlook', minutes: 2 },
-  { id: 'future-you', title: 'Future You', art: 'future-you', minutes: 2 },
-  { id: 'the-move', title: 'The Move', art: 'goals', minutes: 3 },
-] as const
+export interface AdvisorAdventure {
+  id: AdventureId
+  title: string
+  art: ArtKey
+  minutes: number
+  blurb: string
+  state: 'done' | 'open' | 'locked'
+}
 
-export const lockedAdvisorAdventures = [
-  'My Team',
-  'Economics',
-  'Transition Risk',
-  'Succession',
-  'Client Book',
+export const advisorAdventures: AdvisorAdventure[] = [
+  {
+    id: 'practice-joy',
+    title: 'Practice Joy',
+    art: 'financial-joy',
+    minutes: 2,
+    blurb: 'Get clear on what you want the practice to give you.',
+    state: 'done',
+  },
+  {
+    id: 'confidence',
+    title: 'Confidence',
+    art: 'confidence',
+    minutes: 1,
+    blurb: 'Check in on your relationship with the practice.',
+    state: 'open',
+  },
+  {
+    id: 'outlook',
+    title: 'Outlook',
+    art: 'outlook',
+    minutes: 2,
+    blurb: 'Say what is on your mind about going independent.',
+    state: 'locked',
+  },
+  {
+    id: 'future-you',
+    title: 'Future You',
+    art: 'future-you',
+    minutes: 2,
+    blurb: 'Picture the practice you are building toward.',
+    state: 'locked',
+  },
+  {
+    id: 'the-move',
+    title: 'The Move',
+    art: 'goals',
+    minutes: 3,
+    blurb: 'Name the change you are weighing and where you stand.',
+    state: 'locked',
+  },
 ]
+
+/** How the progress meter reads on the home screen: one of the five behind him. */
+export const advisorProgress = {
+  done: advisorAdventures.filter((a) => a.state === 'done').length,
+  required: advisorAdventures.length,
+}
 
 /* ── the flow ────────────────────────────────────────────────────────────── */
 

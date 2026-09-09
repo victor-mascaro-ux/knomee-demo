@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
 import {
   MOOD_ANGLES,
@@ -336,7 +342,27 @@ export function IPhone({
 }
 
 /* ── the Adventures home screen ── */
-function ProgressMeter({ done, required }: { done: number; required: number }) {
+
+/* A whole adventure row as one tap target. The client screen leaves `onRow`
+   off and its rows stay inert, exactly as before; the advisor demo passes one
+   so any row — completed or locked — opens its adventure. */
+function rowTap(onRow?: () => void) {
+  if (!onRow) return {}
+  return {
+    role: 'button',
+    tabIndex: 0,
+    onClick: onRow,
+    onKeyDown: (e: ReactKeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onRow()
+      }
+    },
+  }
+}
+const tapClass = (onRow?: () => void) => (onRow ? ' cx-adv-tap' : '')
+
+export function ProgressMeter({ done, required }: { done: number; required: number }) {
   const pct = Math.round((done / required) * 100)
   return (
     <div className="cx-progress">
@@ -366,9 +392,19 @@ function ProgressMeter({ done, required }: { done: number; required: number }) {
   )
 }
 
-function CompletedRow({ title, artKey, on }: { title: string; artKey: ArtKey; on: string }) {
+export function CompletedRow({
+  title,
+  artKey,
+  on,
+  onRow,
+}: {
+  title: string
+  artKey: ArtKey
+  on: string
+  onRow?: () => void
+}) {
   return (
-    <div className="cx-adv cx-adv-done">
+    <div className={`cx-adv cx-adv-done${tapClass(onRow)}`} {...rowTap(onRow)}>
       <span className="cx-adv-art has-img is-open">
         <img src={art[artKey]} alt="" />
       </span>
@@ -386,9 +422,20 @@ function CompletedRow({ title, artKey, on }: { title: string; artKey: ArtKey; on
   )
 }
 
-function ActionRow({ a, onAct }: { a: AdventureAction; onAct?: () => void }) {
+export function ActionRow({
+  a,
+  onAct,
+  onRow,
+}: {
+  a: AdventureAction
+  onAct?: () => void
+  onRow?: () => void
+}) {
   return (
-    <div className={`cx-adv ${a.outline ? 'cx-adv-done' : 'cx-adv-open'}`}>
+    <div
+      className={`cx-adv ${a.outline ? 'cx-adv-done' : 'cx-adv-open'}${tapClass(onRow)}`}
+      {...rowTap(onRow)}
+    >
       <span className="cx-adv-art has-img is-open">
         <img src={art[a.art]} alt="" />
       </span>
@@ -404,7 +451,15 @@ function ActionRow({ a, onAct }: { a: AdventureAction; onAct?: () => void }) {
         <button
           className={`cx-start${a.outline ? ' cx-start-outline' : ''}`}
           type="button"
-          onClick={onAct}
+          onClick={
+            onAct
+              ? (e) => {
+                  // The row may be a tap target too; the pill answers for itself.
+                  e.stopPropagation()
+                  onAct()
+                }
+              : undefined
+          }
         >
           {a.label}
         </button>
@@ -413,10 +468,26 @@ function ActionRow({ a, onAct }: { a: AdventureAction; onAct?: () => void }) {
   )
 }
 
-function LockedRow({ title }: { title: string }) {
+export function LockedRow({
+  title,
+  artKey,
+  onRow,
+}: {
+  title: string
+  artKey?: ArtKey
+  onRow?: () => void
+}) {
   return (
-    <div className="cx-adv cx-adv-locked">
-      <span className="cx-adv-art" />
+    <div className={`cx-adv cx-adv-locked${tapClass(onRow)}`} {...rowTap(onRow)}>
+      {artKey ? (
+        // A locked adventure that has artwork wears it drained of colour, the
+        // treatment `.cx-adv-art.has-img` was written for.
+        <span className="cx-adv-art has-img">
+          <img src={art[artKey]} alt="" />
+        </span>
+      ) : (
+        <span className="cx-adv-art" />
+      )}
       <div className="cx-adv-title">{title}</div>
     </div>
   )
