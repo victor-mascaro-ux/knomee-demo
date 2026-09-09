@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { BadgeMedallion, Gauge, ReadinessBars } from './profileParts'
+import { BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -180,7 +180,7 @@ export default function ProspectProfileScreen({
                               <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>
                             )}
                           </div>
-                          <ReadinessBars level={g.readiness} />
+                          <ReadinessLevel level={g.readiness} />
                           <span className="pp-goal-caret">
                             <RowChevron />
                           </span>

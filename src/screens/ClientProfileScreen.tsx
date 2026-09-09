@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { BadgeMedallion, Gauge, ReadinessBars } from './profileParts'
+import { BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -125,7 +125,7 @@ function GoalRow({ g }: { g: ClientGoal }) {
         <span className="pp-goal-title">{g.title}</span>
         {g.completed && <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>}
       </div>
-      <ReadinessBars level={g.readiness} />
+      <ReadinessLevel level={g.readiness} />
       <span className="pp-goal-caret">
                             <RowChevron />
                           </span>
