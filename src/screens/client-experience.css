@@ -637,6 +637,9 @@
 .cxm-appbar {
   justify-content: flex-start;
 }
+/* The profile goes into the frame without the .content wrapper that carries
+   the page gutter on a desktop, so the screen supplies it — otherwise the cards
+   run into the bezel. The viewport's own 16px is exactly the phone gutter. */
 .cxm-viewport {
-  padding: 0;
+  padding: 0 var(--space-16) 22px;
 }
