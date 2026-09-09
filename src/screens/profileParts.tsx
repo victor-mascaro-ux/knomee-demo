@@ -19,47 +19,60 @@ export function ReadinessBars({ level }: { level: number }) {
   )
 }
 
+/* The three confidence bands, light → deep purple. */
+const GAUGE_BANDS = ['#dcc8f2', '#a878df', '#6f2dc4']
+/* Where each label parks the needle. The demo data only ever says "Strong";
+   anything unrecognised points at the top band rather than off the dial. */
+const GAUGE_LEVEL: Record<string, number> = { Weak: 0, Moderate: 1, Strong: 2 }
+
 export function Gauge({ label }: { label: string }) {
-  // A segmented 180° dial (light → deep purple bands) with a grey teardrop
-  // needle, matching the product's confidence gauge.
+  // A 180° dial of three wedges with a stubby grey needle under a white cap.
+  // The wedges are filled annular sectors — flat radial ends, white gaps
+  // between them — not round-capped strokes, which is what made the old dial
+  // read as one continuous gradient.
   const cx = 60
   const cy = 60
-  const r = 42
-  // Three confidence levels (Weak → Moderate → Strong), light → deep purple.
-  const colors = ['#dcc8f2', '#a878df', '#6f2dc4']
-  const pt = (deg: number) => {
+  const rOuter = 50
+  const rInner = 27
+  const gap = 2.4 // degrees of white between wedges
+  const step = 180 / GAUGE_BANDS.length
+
+  const pt = (deg: number, r: number) => {
     const a = (deg * Math.PI) / 180
-    return [cx + r * Math.cos(a), cy - r * Math.sin(a)] as const
+    return `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy - r * Math.sin(a)).toFixed(2)}`
   }
-  const step = 180 / colors.length
-  const segs = colors.map((c, i) => {
-    const start = 180 - i * step - 3
-    const end = 180 - (i + 1) * step + 3
-    const [x0, y0] = pt(start)
-    const [x1, y1] = pt(end)
+  const wedges = GAUGE_BANDS.map((fill, i) => {
+    const from = 180 - i * step - gap / 2
+    const to = 180 - (i + 1) * step + gap / 2
     return (
       <path
         key={i}
-        d={`M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`}
-        fill="none"
-        stroke={c}
-        strokeWidth="14"
-        strokeLinecap="round"
+        d={
+          `M ${pt(from, rOuter)} A ${rOuter} ${rOuter} 0 0 1 ${pt(to, rOuter)}` +
+          ` L ${pt(to, rInner)} A ${rInner} ${rInner} 0 0 0 ${pt(from, rInner)} Z`
+        }
+        fill={fill}
       />
     )
   })
+
+  // The needle sits at the middle of its band. It is drawn pointing straight
+  // up, so the rotation is measured off 90°.
+  const level = GAUGE_LEVEL[label] ?? GAUGE_BANDS.length - 1
+  const angle = 180 - (level + 0.5) * step
+
   return (
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
       <svg viewBox="0 0 120 70" width="112" height="65">
-        {segs}
-        {/* Needle points into the "Strong" (rightmost) band. */}
-        <g transform="rotate(48 60 60)">
-          <path
-            d="M60 27 C 55 42, 53 51, 53 57 A 7 7 0 1 0 67 57 C 67 51, 65 42, 60 27 Z"
-            fill="#6f6a7c"
-          />
-          <circle cx="60" cy="57" r="2.6" fill="#cfc9d8" />
-        </g>
+        {wedges}
+        <path
+          d="M60 30 C 57 44, 54 52, 54 58 A 6 6 0 1 0 66 58 C 66 52, 63 44, 60 30 Z"
+          fill="#6f6a7c"
+          transform={`rotate(${(90 - angle).toFixed(1)} ${cx} ${cy})`}
+        />
+        {/* The cap covers the needle's bulb, so what shows is a short tapered
+            pointer rising out of a white disc. */}
+        <circle cx={cx} cy={cy} r="8" fill="#fff" stroke="#ece9f2" />
       </svg>
     </span>
   )
