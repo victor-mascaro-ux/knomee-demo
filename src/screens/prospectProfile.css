@@ -837,12 +837,6 @@
   .cp-goal-cols {
     grid-template-columns: 1fr;
   }
-  /* Three tiles across is a postage stamp on a phone. */
-  .cp-board-grid {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 128px;
-  }
-
   /* The two columns become one stream, and the rail's cards — Confidence, Life
      Events, Questions — follow Goals rather than waiting behind Badges and the
      vision board. `display: contents` lets both columns' cards share one order

@@ -169,9 +169,6 @@
 
 /* A score that can show its working: the dimension card carries the answers it
    was computed from on the dashboard's own hover tooltip. */
-.rd-dim.tt {
-  cursor: help;
-}
 .rd-dim.tt::after,
 .rd-word.tt::after {
   white-space: normal;

@@ -643,3 +643,65 @@
 .cxm-viewport {
   padding: 0 var(--space-16) 22px;
 }
+
+/* The rail as a drawer. It lives at the foot of the page on a phone, so the
+   burger lifts it over the content rather than scrolling to it — the same
+   panel, in reach.
+
+   Absolute, not fixed: a fixed element is contained by the nearest transformed
+   ancestor, and the device carries the fit scale, so fixed offsets land against
+   the frame's outer edge. Absolute resolves against .cx-screen — the same
+   containing block the scrim uses — which is the screen exactly, and keeps the
+   drawer still while the page behind it scrolls. */
+.cxm-viewport.is-menu-open .pp-side {
+  position: absolute;
+  /* The screen stacks status bar, app bar, then the scrolling page, so the
+     drawer starts below both — not below the app bar alone. */
+  top: calc(54px + var(--mobile-appbar-h));
+  bottom: 0;
+  left: 0;
+  width: 76%;
+  max-width: 300px;
+  z-index: 40;
+  margin: 0;
+  border-top: 0;
+  border-right: 1px solid var(--line, #e7e4ee);
+  overflow-y: auto;
+  padding: 0 14px;
+  background: #f9fafb;
+  box-shadow: 0 18px 48px rgba(20, 10, 40, 0.28);
+  /* Fades rather than slides. A transform here held its from-state — the rule
+     arrives with the class, not with the element — and left the panel parked
+     one width off screen. Opacity has no such failure mode. */
+  animation: cxmScrimIn 0.18s ease both;
+}
+.cxm-viewport.is-menu-open .pp-side-inner {
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 16px 0;
+}
+.cxm-scrim {
+  position: absolute;
+  inset: calc(54px + var(--mobile-appbar-h)) 0 0 0;
+  border-radius: 0 0 52px 52px;
+  z-index: 39;
+  border: 0;
+  padding: 0;
+  background: rgba(20, 10, 40, 0.34);
+  animation: cxmScrimIn 0.22s ease both;
+}
+@keyframes cxmScrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cxm-viewport.is-menu-open .pp-side,
+  .cxm-scrim {
+    animation: none;
+  }
+}
