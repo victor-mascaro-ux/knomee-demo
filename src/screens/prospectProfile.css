@@ -580,17 +580,42 @@
   object-fit: contain;
   display: block;
 }
-.pp-event-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #8b8598;
+/* The head holds the event's name and nothing else, at the height of the icon
+   disc beside it, so the two centre on each other. Anything that can wrap — the
+   pill, the date — lives below, or a second line pushes the head's centre down
+   and the icon stops lining up with the event. */
+.pp-event-head {
+  display: flex;
+  align-items: center;
+  height: 26px;
 }
+/* The event names itself. The supercategory it was filed under is gone: that
+   was there to help the client find it in a list, not to describe it. */
 .pp-event-kind {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--purple-bolt, #9b51e0);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong, #240446);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Date and provenance share the row's last line. */
+.pp-event-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* Provenance, not a call to action — so it takes the quietest pill in the set.
+   The lilac belongs to "New", which is asking to be looked at. */
+.pp-event-added {
+  font-size: 10px;
+  font-weight: var(--weight-medium, 500);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--pearl, #efeef2);
+  color: var(--text-secondary, #6a6480);
+  white-space: nowrap;
 }
 .pp-event-text {
   font-size: 12.5px;

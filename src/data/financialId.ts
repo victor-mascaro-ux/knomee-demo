@@ -53,10 +53,15 @@ export interface Goal {
 }
 
 export interface LifeEvent {
-  tag: string
+  /* The event the client picked — "Property purchase". The mobile picker files
+     these under supercategories (Purchase / Professional / Personal), but those
+     exist to help someone *find* the event in a long list; once one is chosen
+     the supercategory says nothing the event does not. */
   kind: string
   text: string
   date: string
+  /* Logged by the advisor rather than answered by the client. */
+  advisorAdded?: boolean
 }
 
 export interface ProfileQuestion {
@@ -112,9 +117,16 @@ export const financialId = {
   badges: ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals'],
   confidence: 'Strong',
   lifeEvents: [
-    { tag: 'Purchase', kind: 'Property purchase', text: 'Bought the beach house in Costa Rica', date: '05/03/2025' },
-    { tag: 'Professional', kind: 'Career change', text: 'Laid off in March', date: '05/03/2025' },
-    { tag: 'Personal', kind: 'Separation', text: 'Going through a separation', date: '05/03/2025' },
+    {
+      kind: 'Property purchase',
+      text: 'Bought the beach house in Costa Rica',
+      date: '05/03/2025',
+      advisorAdded: true,
+    },
+    { kind: 'Career change', text: 'Laid off in March', date: '05/03/2025' },
+    { kind: 'Separation', text: 'Going through a separation', date: '05/03/2025' },
+    { kind: 'New baby', text: 'First grandchild due in October', date: '04/02/2025' },
+    { kind: 'Retirement', text: 'Targeting a wind-down from 2028', date: '02/17/2025' },
   ] as LifeEvent[],
   questions: [
     { q: 'Can I afford to go to college?', date: '05/03/2025' },
