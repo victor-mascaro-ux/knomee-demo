@@ -476,6 +476,11 @@ function generate(): Candidate[] {
 
 export const candidates: Candidate[] = generate()
 
+/* One candidate's flow is complete and it is Marcus Hale's, so only his name in
+   the table opens a profile — the same rule the Prospects and Clients tables
+   follow for their one built-out person. */
+export const profileOwner = advisor.name
+
 /* ── pipeline totals, derived ───────────────────────────────────────────── */
 
 const scored = candidates.filter((c) => c.kq !== null)
