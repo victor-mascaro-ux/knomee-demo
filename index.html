@@ -368,10 +368,18 @@
     <iframe id="ccProto" title="Prototype"></iframe>
     <script>
       /* Deep links: open the prototype straight to the page named in the
-         address-bar hash (e.g. #/clients), so every page has its own link. */
+         address-bar hash (e.g. #/clients), so every page has its own link.
+
+         The version is a timestamp rather than a number someone remembers to
+         bump. It sat at v=33 for months: the browser cached that one URL, and
+         the cached copy kept pointing at whichever hashed bundles were current
+         when it was stored — so every ship after it was invisible here, and
+         reloading this page could not help, because the frame's URL never
+         changed. app.html is under a kilobyte and the bundles it names are
+         content-hashed, so re-fetching it each load costs nothing. */
       (function () {
         var f = document.getElementById('ccProto');
-        f.src = './app/app.html?v=33' + (window.location.hash || '');
+        f.src = './app/app.html?v=' + Date.now() + (window.location.hash || '');
       })();
     </script>
     <div class="cc-catcher" id="ccCatcher"></div>
