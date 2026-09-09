@@ -2,7 +2,7 @@
    Three things live here, and nothing else: the sidebar's two figures, the
    attention split that rides inside Practice Joy, and the timeline under the
    Goals card. Every tab is the prospect page's own — .pp-* for the
-   Advisor ID, the shared .rd-* components for Readiness and the Toolkit
+   Business ID, the shared .rd-* components for Readiness and the Toolkit
    — so anything that would go here belongs in one of those instead.
 
    Namespaced under .ap where it could otherwise reach another page. Colours,

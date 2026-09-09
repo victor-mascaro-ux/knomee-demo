@@ -285,10 +285,14 @@
   gap: var(--space-12);
 }
 /* What drives someone and what holds them back, as two opposed signals: a
-   3px bar in the accent, and nothing else competing with the text. */
+   3px bar in the accent, on the same sunken wash the velocity card's list
+   sits on, so the three columns of the toolkit read as one material. The
+   radius is on the right only — the accent bar stays a straight edge. */
 .rd-driver {
-  padding: var(--space-2) 0 var(--space-2) var(--space-12);
+  padding: var(--space-10) var(--space-12);
   border-left: 3px solid var(--border-control);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-sunken);
 }
 .rd-driver-motivator {
   border-left-color: var(--signal-motivator);

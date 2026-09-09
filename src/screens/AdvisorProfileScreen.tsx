@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
-import { advisor, advisorId } from '../data/advisorFlow'
+import { advisor, businessId } from '../data/advisorFlow'
 import {
   confidenceAnswers,
   kq,
@@ -51,7 +51,7 @@ import { scrollPageToTop } from '../reviewBridge'
 type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
 const TAB_LABEL: Record<ProfileTab, string> = {
-  id: 'Advisor ID',
+  id: 'Business ID',
   readiness: 'Advisor Readiness',
   toolkit: 'Recruiting Toolkit',
 }
@@ -76,7 +76,7 @@ export default function AdvisorProfileScreen({
 }: {
   onBack: () => void
   onAdd?: () => void
-  /* Marcus reading his own Advisor ID in his own app, rather than a
+  /* Marcus reading his own Business ID in his own app, rather than a
      Dynasty rep reading it about him. Same page — it is the one thing the
      eight minutes produced — with the firm's furniture off it: no breadcrumb
      back to a candidate list, no Readiness or Toolkit tabs, and nothing in
@@ -89,7 +89,7 @@ export default function AdvisorProfileScreen({
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const [photoFailed, setPhotoFailed] = useState(false)
-  const d = advisorId
+  const d = businessId
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
 
   // Open scrolled to the top however far down the table the row sat. On the
@@ -191,7 +191,7 @@ export default function AdvisorProfileScreen({
 
           <div className="pp-title-row">
             <h1 className="pp-title">
-              {tab === 'id' ? `${advisor.name}’s Advisor ID` : TAB_LABEL[tab]}
+              {tab === 'id' ? `${advisor.name}’s Business ID` : TAB_LABEL[tab]}
             </h1>
             {ownerMenu}
             <button className="btn btn-download active" type="button">
@@ -199,7 +199,7 @@ export default function AdvisorProfileScreen({
             </button>
           </div>
 
-          {tab === 'id' && <AdvisorIdTab stageLevel={stageLevel} />}
+          {tab === 'id' && <BusinessIdTab stageLevel={stageLevel} />}
           {tab === 'readiness' && <ReadinessTabView d={readinessTab} />}
           {tab === 'toolkit' && <ToolkitTabView d={toolkitTab} />}
         </main>
@@ -208,7 +208,7 @@ export default function AdvisorProfileScreen({
   )
 }
 
-/* ── Tab 1 — Advisor ID ─────────────────────────────────────────────
+/* ── Tab 1 — Business ID ─────────────────────────────────────────────
    The Financial ID page itself, card for card and rail for rail, carrying the
    advisor's answers instead of the client's: the change he named where the
    goals go, Practice Joy where Financial Joy goes, his six Confidence
@@ -217,8 +217,8 @@ export default function AdvisorProfileScreen({
    advisor reading his own page and a client reading theirs are looking at the
    same instrument. */
 
-function AdvisorIdTab({ stageLevel }: { stageLevel: number }) {
-  const d = advisorId
+function BusinessIdTab({ stageLevel }: { stageLevel: number }) {
+  const d = businessId
   const [confidence, setConfidence] = useState(false)
   // The change he named, read as a goal at the stage the flow put him in.
   const goals = [{ title: d.move.change, readiness: stageLevel }]
