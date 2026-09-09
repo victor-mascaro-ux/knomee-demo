@@ -42,7 +42,32 @@ function AffirmLogo() {
   )
 }
 
+// "Acme" — the name and nothing else, set in a serif with the letters pushed
+// apart. The other two brands are a mark plus a wordmark in the app's own
+// grotesque; this one is there to prove the bar carries a firm whose whole
+// identity is a typeface, which is most of them.
+function AcmeLogo() {
+  return (
+    <svg className="client-logo" viewBox="0 3 200 34" fill="currentColor" role="img" aria-label="Acme">
+      <text
+        x="0"
+        y="31"
+        fontFamily="Georgia, 'Iowan Old Style', 'Times New Roman', serif"
+        fontSize="30"
+        fontWeight="400"
+        letterSpacing="7"
+      >
+        ACME
+      </text>
+    </svg>
+  )
+}
+
 export const CLIENT_BRANDS: ClientBrand[] = [
   { id: 'affirm', name: 'Affirm Wealth Advisors', primary: '#1aa3c6', accent: '#1590b0', logo: <AffirmLogo /> },
   { id: 'confetti', name: 'Confetti Wealth', primary: '#0093b0', accent: '#007e98', logo: <ConfettiLogo /> },
+  /* A clay red, because the other two are both cyan and a white-label demo
+     that only ever changes shade proves nothing. White on it measures 5.4:1 —
+     the bar carries white text and a white knockout logo. */
+  { id: 'acme', name: 'Acme', primary: '#b5502f', accent: '#9a4225', logo: <AcmeLogo /> },
 ]

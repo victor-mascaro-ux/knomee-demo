@@ -1364,7 +1364,10 @@
     // a switch on the page you are already looking at rather than two entries
     // in a list of destinations — and it only appears where there is a client
     // page to look at.
-    { key: 'mobile', kind: 'navToggle', label: 'Mobile view',
+    // Mobile and desktop are two views of the page you are on, so they read as
+    // two options rather than as a switch that is on or off: a switch makes one
+    // of them the default and the other the deviation, and neither is.
+    { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
       views: ['clients', 'client-mobile', 'firm-candidates', 'advisor-mobile'],
       when: () => MOBILE_OF[canon(demoState.view)] || !!demoState.profile,
       isOn: () => !!BACK_FROM_MOBILE[canon(demoState.view)],
@@ -1377,7 +1380,7 @@
           navigateFrame(mobileBackTo || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
         }
       } },
-    { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS }
+    { key: 'brand', kind: 'brands', label: 'Company', views: SHELL_VIEWS }
     // Logo placement — client left / client centered — was here. It is a choice
     // the white-label deal settles once, not something a presenter flips in
     // front of a room, and it earned a row in the tray on every shell screen.
@@ -1393,10 +1396,12 @@
   // Which persona you are is the one thing no tab offers: the personas replace
   // each other's whole shell, so there is nowhere inside one to stand and pick
   // another.
+  // Which knomee you are. Dynasty is the firm in the story, but the product it
+  // uses is knomee's enterprise side, and the row names the product.
   const PERSONAS = [
     ['advisor', 'Advisor', '#/prospects'],
-    ['firm', 'Dynasty · the firm', '#/firm-candidates'],
-    ['admin', 'Knomee admin', '#/admin']
+    ['firm', 'Enterprise', '#/firm-candidates'],
+    ['admin', 'Admin', '#/admin']
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';
@@ -1411,15 +1416,27 @@
   // menu used. From the standalone ones (the welcome page, either phone, the
   // advisor's flow) this panel is now the only way out, which is one more
   // reason for it to carry them.
+  //
+  // Two rows, not four. Segmentation left because the product now reaches it —
+  // it sits next to Analytics in the advisor's own tab row, where an analysis
+  // of the book belongs. And the two phone apps are one row: which app you
+  // reach is which persona you are, the same way Mobile view is a switch on the
+  // page you are already looking at rather than a list of destinations.
   const SCREENS = [
-    ['segmentation', 'Segmentation', '#/segmentation'],
-    ['welcome', 'Welcome page', '#/welcome'],
-    ['client-experience', 'Client Experience', '#/client-experience'],
-    ['advisor-flow', 'Advisor as Prospect', '#/advisor-flow']
+    ['app', 'App', null],
+    ['welcome', 'Welcome Page (Clients)', '#/welcome']
   ];
+  // The app belonging to the persona in the chair: the client's phone for an
+  // advisor, the advisor's own eight minutes for Dynasty. Knomee admin has no
+  // app of its own, so the row does not show.
+  const APP_OF = {
+    advisor: ['client-experience', '#/client-experience'],
+    firm: ['advisor-flow', '#/advisor-flow']
+  };
   // The welcome page's own A/B switch decides which version, so both count.
   const screenIsOn = (id) => {
     const v = canon(demoState.view);
+    if (id === 'app') return v === 'client-experience' || v === 'advisor-flow';
     return v === id || (id === 'welcome' && v === 'welcome-b');
   };
 
@@ -1445,12 +1462,20 @@
 
   // Only the brands worth showing a prospect. The others stay in the code —
   // they are still real white labels, just not in this menu.
-  const MENU_BRANDS = ['confetti'];
+  const MENU_BRANDS = ['confetti', 'acme'];
+  // The tray says the firm, not the legal name: 'Confetti Wealth' is what the
+  // bar wears, 'Confetti' is what you say out loud picking it.
+  const BRAND_LABEL = { confetti: 'Confetti', acme: 'Acme' };
 
   // Section glyphs, drawn at 13px in the label's own muted colour: a person for
   // who you are, two frames for where you go, a tag for the white label, a bar
   // with a mark in it for where that label's logo sits.
   const ICONS = {
+    mobile:
+      '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+        '<rect x="4.6" y="1.6" width="6.8" height="12.8" rx="1.6" stroke="currentColor" stroke-width="1.5"/>' +
+        '<path d="M6.9 12.2h2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>',
     persona:
       '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
         '<circle cx="8" cy="5.2" r="2.6" stroke="currentColor" stroke-width="1.6"/>' +
@@ -1539,6 +1564,13 @@
           g.appendChild(demoToggleRow(c.label, !!demoState[c.key], v => demoSet(c.key, v)));
         } else if (c.kind === 'navToggle') {
           g.appendChild(demoToggleRow(c.label, c.isOn(), v => c.apply(v)));
+        } else if (c.kind === 'viewToggle') {
+          const on = c.isOn();
+          const h = demoTitle(c.label, ICONS.mobile);
+          h.style.paddingTop = '6px';
+          g.appendChild(h);
+          g.appendChild(demoPick('Mobile', on, () => { if (!on) c.apply(true); }));
+          g.appendChild(demoPick('Desktop', !on, () => { if (on) c.apply(false); }));
         } else if (c.kind === 'brands') {
           const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
@@ -1547,7 +1579,8 @@
           demoState.brands
             .filter(b => MENU_BRANDS.indexOf(b.id) !== -1)
             .forEach(b => {
-              g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
+              g.appendChild(demoPick(BRAND_LABEL[b.id] || b.name, demoState.brand === b.id,
+                () => demoSet('brand', b.id)));
             });
         }
       });
@@ -1559,8 +1592,13 @@
     // dashboards is, so the persona rows stay unmarked rather than claiming a
     // page they aren't on.
     const elsewhere = SCREENS.some(sc => screenIsOn(sc[0]));
-    const mine = personaOf(canon(demoState.view));
-    const gp = demoGroup('Persona', ICONS.persona);
+    const onView = canon(demoState.view);
+    const mine = personaOf(onView);
+    // Standing on one of the apps, the persona rows are unmarked but the App
+    // row still has to know which app it is: the advisor's flow is Dynasty's.
+    const appPersona =
+      onView === 'advisor-flow' ? 'firm' : onView === 'client-experience' ? 'advisor' : mine;
+    const gp = demoGroup('Knomee', ICONS.persona);
     PERSONAS.forEach(p => {
       const on = !elsewhere && p[0] === mine;
       // Picking the persona you are already in would only yank the demo back
@@ -1570,10 +1608,17 @@
     demoBody.appendChild(gp);
 
     // ── the other screens ──
-    const gs = demoGroup('Screens', ICONS.screens);
+    const gs = demoGroup('Pages', ICONS.screens);
     SCREENS.forEach(sc => {
+      // The App row's destination depends on who you are, so it is resolved
+      // here rather than baked into the list. On a standalone screen the
+      // persona is whoever was in the chair when it opened, which is what
+      // `mine` already holds.
+      const app = sc[0] === 'app' ? APP_OF[appPersona] : null;
+      if (sc[0] === 'app' && !app) return;
+      const href = app ? app[1] : sc[2];
       const on = screenIsOn(sc[0]);
-      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(sc[2]); }));
+      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(href); }));
     });
     demoBody.appendChild(gs);
   }

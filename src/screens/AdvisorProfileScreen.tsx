@@ -143,26 +143,28 @@ export default function AdvisorProfileScreen({
                 <CalendarIcon /> Completed {d.header.completed}
               </span>
             </div>
-            {!mine && (
-              <>
-                <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
-                  Add to Network
-                </button>
-                <div className="ap-side-stat">
-                  <span className="ap-side-stat-k">Knomee Quotient</span>
-                  <span className="ap-side-stat-v">
-                    {kq}
-                    <i>
-                      Tier {tier.tier} · {tier.name}
-                    </i>
-                  </span>
-                </div>
-                <div className="ap-side-stat">
-                  <span className="ap-side-stat-k">Route</span>
-                  <span className="ap-side-stat-v ap-side-stat-text">{route.pick}</span>
-                </div>
-              </>
-            )}
+            {/* The rail is the rail, on a desktop and in the drawer a phone
+                lifts it into: same portrait, same two stats, same action. I had
+                stripped the stats and the button in `mine` mode on the argument
+                that they are the firm's read on him rather than his own
+                answers — which left the drawer holding a name and a date and
+                nothing to open it for. One page, one rail. */}
+            <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
+              Add to Network
+            </button>
+            <div className="ap-side-stat">
+              <span className="ap-side-stat-k">Knomee Quotient</span>
+              <span className="ap-side-stat-v">
+                {kq}
+                <i>
+                  Tier {tier.tier} · {tier.name}
+                </i>
+              </span>
+            </div>
+            <div className="ap-side-stat">
+              <span className="ap-side-stat-k">Route</span>
+              <span className="ap-side-stat-v ap-side-stat-text">{route.pick}</span>
+            </div>
           </div>
         </aside>
 
