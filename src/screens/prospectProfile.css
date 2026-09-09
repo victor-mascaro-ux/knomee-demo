@@ -309,18 +309,35 @@
   color: var(--text-strong, #240446);
   font-size: 16px;
 }
+/* Bars and stage name stack: the bars place the stage on the five-step scale,
+   the name says what that step is. */
+.pp-readiness {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+}
+.pp-stage {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1;
+}
 .pp-bars {
   position: relative;
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
   height: 18px;
-  /* Room under the bars for the level marker. */
-  margin-bottom: 5px;
+  /* Room under the bars for the level marker, so it never rides into the stage
+     name beneath. */
+  padding-bottom: 8px;
 }
 .pp-bar-mark {
   position: absolute;
-  bottom: -5px;
+  bottom: 1px;
   width: 0;
   height: 0;
   transform: translateX(-50%);
