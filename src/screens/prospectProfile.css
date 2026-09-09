@@ -317,6 +317,10 @@
   align-items: center;
   gap: 3px;
   flex: none;
+  /* The stage names differ in length — without a fixed column each row centred
+     its own block, so the bars never lined up down the list. Wide enough for
+     "Pre-Contemplation", the longest of the five. */
+  width: 84px;
 }
 .pp-stage {
   font-size: 9px;
@@ -650,6 +654,12 @@
 .pp-card-title > svg {
   flex: none;
   color: var(--plum, #240446);
+}
+.pp-hl-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
 }
 .pp-hl-icon {
   display: inline-flex;

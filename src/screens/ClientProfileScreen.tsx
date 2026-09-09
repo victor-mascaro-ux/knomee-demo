@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -10,10 +10,8 @@ import {
   CalendarIcon,
   CaretIcon,
   CheckIcon,
-  HIGHLIGHT_ICON,
   MailIcon,
   RowChevron,
-  type HighlightIcon,
 } from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -302,12 +300,7 @@ export default function ClientProfileScreen({
                   {cp.keyHighlights.map((h) => (
                     <div className="pp-highlight" key={h.title}>
                       <div className="pp-highlight-title">
-                        <span className="pp-hl-icon">
-                          {(() => {
-                            const Ic = HIGHLIGHT_ICON[h.icon as HighlightIcon]
-                            return Ic ? <Ic /> : null
-                          })()}
-                        </span>
+                        <HighlightIcon source={h.icon} />
                         {h.title}
                       </div>
                       <p className="pp-highlight-text">{h.text}</p>

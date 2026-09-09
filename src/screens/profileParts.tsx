@@ -3,6 +3,9 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
+import icFinancialJoy from '../assets/adventures/financial-joy.svg'
+import icFutureYou from '../assets/adventures/future-you.svg'
+import icOutlook from '../assets/adventures/outlook.svg'
 import bgConfidence from '../assets/badges/confidence.svg'
 import bgFinancialJoy from '../assets/badges/financial-joy.svg'
 import bgFutureYou from '../assets/badges/future-you.svg'
@@ -129,4 +132,19 @@ export function BadgeMedallion({ label }: { label: string; icon?: string }) {
       <img className="pp-badge-art" src={art} alt={`${label} — adventure complete`} />
     </span>
   )
+}
+
+/* Every key highlight is distilled from one adventure, so it wears that
+   adventure's artwork rather than a generic line glyph: values and joy come out
+   of Financial Joy, concerns and hopes out of Outlook, lifestyle and vision out
+   of Future You. Two highlights share an icon where they share a source. */
+const HIGHLIGHT_ART: Record<string, string> = {
+  'financial-joy': icFinancialJoy,
+  outlook: icOutlook,
+  'future-you': icFutureYou,
+}
+
+export function HighlightIcon({ source }: { source: string }) {
+  const art = HIGHLIGHT_ART[source]
+  return <span className="pp-hl-icon">{art ? <img src={art} alt="" /> : null}</span>
 }

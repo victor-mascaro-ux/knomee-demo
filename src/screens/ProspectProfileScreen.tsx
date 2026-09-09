@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -9,9 +9,7 @@ import {
   CaretIcon,
   CheckIcon,
   RowChevron,
-  HIGHLIGHT_ICON,
   MailIcon,
-  type HighlightIcon,
 } from '../components/profileIcons'
 import addIcon from '../assets/adventures/add.svg'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -149,12 +147,7 @@ export default function ProspectProfileScreen({
                   {fi.keyHighlights.map((h) => (
                     <div className="pp-highlight" key={h.title}>
                       <div className="pp-highlight-title">
-                        <span className="pp-hl-icon">
-                          {(() => {
-                            const Ic = HIGHLIGHT_ICON[h.icon as HighlightIcon]
-                            return Ic ? <Ic /> : null
-                          })()}
-                        </span>
+                        <HighlightIcon source={h.icon} />
                         {h.title}
                       </div>
                       <p className="pp-highlight-text">{h.text}</p>
