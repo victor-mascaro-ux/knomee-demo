@@ -22,7 +22,7 @@
   /* Single source of truth for the page inset. The top bar and the
      content share it so logo, tabs and title always line up, and the
      top padding tracks the side padding. Shipped in src/index.css. */
-  --page-pad: 40px;
+  --page-pad: 24px;
   --content-max: 1520px;
 
   /* ---- The page module ----
@@ -127,12 +127,6 @@
    wins is a matter of intent rather than source position. These used
    to live in src/index.css; this file is their only home now.
    ------------------------------------------------------------ */
-@media (max-width: 1200px) {
-  :root {
-    --page-pad: 24px;
-  }
-}
-
 @media (max-width: 700px) {
   :root {
     --page-pad: 16px;

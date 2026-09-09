@@ -191,8 +191,10 @@ body {
 .content {
   max-width: var(--content-max);
   margin: 0 auto;
-  /* Every inset is the page inset; the block rhythm supplies the rest. */
-  padding: var(--page-pad) var(--page-pad) var(--space-40);
+  /* The sides carry the page inset. The top does not: the tabs are a strip of
+     navigation hanging off the bar above them, and a full page inset between
+     the two read as a gap rather than as breathing room. */
+  padding: var(--tight-gap) var(--page-pad) var(--label-gap);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gutter);
@@ -293,7 +295,12 @@ body {
   font-size: var(--text-5xl);
   font-weight: 600;
   color: var(--plum);
-  margin: var(--block-gap) 0 var(--label-gap);
+  /* The title labels the page the tabs just switched to, so it takes the label
+     step, not the block step. And it sets its own leading: `normal` gave a
+     32px word a 48px box, so 16px of the space above and below it was the line
+     box rather than the margin, and no margin token could reach it. */
+  line-height: 1.15;
+  margin: var(--label-gap) 0 var(--label-gap);
   letter-spacing: -0.5px;
 }
 
@@ -423,6 +430,14 @@ body {
   line-height: 1;
 }
 
+/* The KQ average is the number this screen ranks on, so it wears the
+   interactive purple the card icon and the insight numbers already use,
+   rather than the body black the plain count keeps. Compound selector: on one
+   class it would tie with .metric-value and lose on source order. */
+.metric-value.metric-value-kq {
+  color: var(--k-grape);
+}
+
 .metric-tile.distribution {
   gap: 10px;
 }
@@ -506,8 +521,10 @@ body {
   color: #a69fb5;
 }
 /* Incomplete-profiles footnote, moved below the legend. */
+/* The 10px grid gap above this already separates it from the legend; the
+   12px margin was a second gap stacked on the first. */
 .dist-foot {
-  margin: 12px 0 0;
+  margin: 0;
   font-size: 11px;
   font-weight: 600;
   color: #a69fb5;
@@ -842,9 +859,16 @@ body {
   width: 23.75%; /* 3 columns — was 330px, within 4% of the module already */
 }
 .prospects-cols .col-kq,
-.prospects-cols .col-num,
+.prospects-cols .col-num {
+  width: 6.8%; /* 1 column each — was 100 / 80 */
+}
+/* The one column that cannot be a percentage: it holds a dd/mm/yyyy date,
+   which is 76px of text with no break opportunity in it. A module column's
+   content box is 60-74px depending on viewport, so on the module this cell
+   overflowed at every width. Fixed at the width the date actually needs plus
+   the 12px cell gutters. Top Action is `auto` and absorbs the difference. */
 .prospects-cols .col-signup {
-  width: 6.8%; /* 1 column each — was 100 / 80 / 100 */
+  width: 108px;
 }
 .prospects-cols .col-action {
   width: auto; /* the remainder */
@@ -5174,7 +5198,7 @@ button.name-link-btn:hover .name-text {
   padding: 20px var(--card-pad);
   display: flex;
   flex-direction: column;
-  gap: var(--tight-gap);
+  gap: 12px;
 }
 .cmd-pulse {
   margin: 0;

@@ -250,13 +250,17 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
       <div className="cmd-body">
         {/* Layer 0 — the pulse */}
         <div className="metric-tiles cmd-pulse">
+          {/* KQ leads: it is the number the whole screen ranks on, and the one
+              the tier bar beside it is a distribution of. The count follows. */}
+          <div className="metric-tile">
+            <span className="metric-label">AVG KQ SCORE</span>
+            <div className="metric-num">
+              <span className="metric-value metric-value-kq">{prospectStats.avgKQ.toFixed(1)}</span>
+            </div>
+          </div>
           <div className="metric-tile">
             <span className="metric-label">TOTAL PROSPECTS</span>
             <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-label">AVG KQ SCORE</span>
-            <div className="metric-num"><span className="metric-value">{prospectStats.avgKQ.toFixed(1)}</span></div>
           </div>
           <div className="metric-tile distribution">
             <div className="dist-head">
