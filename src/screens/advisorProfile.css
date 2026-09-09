@@ -76,3 +76,84 @@
 /* The attention pair's own narrow case now lives with the rule, in
    prospectProfile.css, as a container query — it has to fire inside the phone
    frame too, and a viewport media query there is answering the wrong box. */
+
+/* ── the rail laid down on a phone ──────────────────────────────────────
+   The shared rule lays the rail on its side: portrait, name and meta on one
+   line, the action at the end of it. That was written for the client rail,
+   which has nothing after the action. This one has two stats as well, and they
+   wrapped into the same flow — the button ended up floating in the middle of a
+   line with the Knomee Quotient beside it and the route stranded underneath.
+
+   Three lines instead, each finishing what it starts: who he is, what the two
+   numbers say, then the one thing to do about it, full width where a thumb
+   expects a primary action. */
+@container (max-width: 720px) {
+  .ap .pp-side-inner {
+    row-gap: 4px;
+  }
+  .ap .ap-side-stat {
+    /* A basis with width to it, so the pair claims a line of its own rather
+       than being squeezed into whatever is left of the one above. */
+    flex: 1 1 40%;
+    min-width: 0;
+  }
+  .ap .ap-side-stat-v {
+    align-items: flex-start;
+  }
+  .ap .pp-convert {
+    order: 1;
+    flex: 1 0 100%;
+    margin: 4px 0 0;
+    width: 100%;
+  }
+}
+
+/* ── His portrait ─────────────────────────────────────────────────────────
+   The photograph is a cut-out on a transparent ground, so the disc behind it
+   does the work: a grey that reads against both the sidebar's near-white and
+   the table's white, with the figure standing on it rather than cropped into
+   it. Only the candidate whose profile is built out has a picture, which is
+   the same rule that decides whose name in the table is a link. */
+.ap-portrait.has-photo {
+  background: var(--k-pearl);
+  /* No tint from the prospect page's lilac: a photograph brings its own
+     colour, and the disc is only there to hold it. */
+  --avatar-bg: var(--k-pearl);
+}
+.ap-portrait img {
+  /* The file is already cropped square to head and shoulders, so the disc only
+     has to round the corners off it. */
+  object-fit: cover;
+}
+
+/* The same portrait at table size. */
+.fc-portrait {
+  background: var(--k-pearl);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.fc-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The phone's rail trigger is his face rather than his letter, on the same
+   grey disc — it lives in client-experience.css's button, so only the disc and
+   the fit belong here. */
+.cxm-rail-photo {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-circle);
+  overflow: hidden;
+  background: var(--k-pearl);
+  display: block;
+}
+.cxm-rail-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

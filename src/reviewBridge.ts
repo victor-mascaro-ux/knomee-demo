@@ -32,6 +32,83 @@ const isDemoCombo = (e: KeyboardEvent) => {
   return false
 }
 
+// ── Sticky rails, inside a frame that cannot scroll ──────────────────────────
+// The overlay sizes this iframe to the full height of the content on purpose,
+// so comment pins (stored as percentages of the frame) anchor to the content
+// and scroll with it. The side effect is that this document never scrolls: the
+// parent does. `position: sticky` measures against the nearest scrollport, and
+// here that scrollport never moves — so a lateral menu that sticks perfectly
+// when the app is opened on its own just rides the page off the top here.
+//
+// Nothing in the app's CSS can see the parent's scroll, so the offset is
+// applied from here instead. Parent and frame are same-origin, so the frame's
+// own box gives us the parent's scroll position for free — no message, and no
+// change to the overlay. Each rail is translated by exactly what `sticky`
+// would have done: hold `top` once the rail would pass it, and stop at the
+// bottom of the column it belongs to.
+const STICKY_RAILS = '.pp-side-inner, .settings-side-inner'
+const STICKY_TOP = 12
+
+function initStickyRails(frame: Element) {
+  const shifts = new WeakMap<HTMLElement, number>()
+
+  const sync = () => {
+    // While the frame is short enough that this document scrolls on its own,
+    // native sticky is doing the work and must not be doubled up on.
+    const root = document.documentElement
+    if (root.scrollHeight > root.clientHeight + 1) return
+
+    const frameTop = frame.getBoundingClientRect().top
+    document.querySelectorAll<HTMLElement>(STICKY_RAILS).forEach((el) => {
+      const container = el.parentElement
+      if (!container) return
+      // Only where the stylesheet actually asked for sticky — the phone layouts
+      // set these back to static and reorder the rail below the content.
+      if (getComputedStyle(el).position !== 'sticky') {
+        if (shifts.get(el)) {
+          shifts.set(el, 0)
+          el.style.transform = ''
+        }
+        return
+      }
+
+      const prev = shifts.get(el) || 0
+      const elRect = el.getBoundingClientRect()
+      const cRect = container.getBoundingClientRect()
+      const naturalTop = elRect.top - prev
+      // Sticky stops at the bottom of its containing block rather than
+      // escaping it.
+      const maxShift = Math.max(0, cRect.bottom - naturalTop - elRect.height)
+      const wanted = STICKY_TOP - (frameTop + naturalTop)
+      const shift = Math.min(Math.max(0, wanted), maxShift)
+
+      if (Math.abs(shift - prev) > 0.5) {
+        shifts.set(el, shift)
+        el.style.transform = shift ? `translateY(${shift}px)` : ''
+      }
+    })
+  }
+
+  // Run on the scroll event itself rather than inside requestAnimationFrame.
+  // rAF only fires when the frame is actually being painted, and this frame
+  // spends plenty of time not being painted — occluded, backgrounded, or in a
+  // headless check — which left the rail frozen at whatever offset it last
+  // computed. Two elements and two rect reads per event is cheap enough to do
+  // straight away, and the listener is passive so scrolling stays smooth.
+  try {
+    window.parent.addEventListener('scroll', sync, { passive: true })
+    window.parent.addEventListener('resize', sync)
+  } catch {
+    return // cross-origin parent: nothing to read, leave the rails alone
+  }
+  window.addEventListener('resize', sync)
+  window.addEventListener('load', sync)
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(sync).observe(document.documentElement)
+  }
+  sync()
+}
+
 export function initReviewBridge() {
   if (window.parent === window) return
   const parent = window.parent
@@ -101,4 +178,7 @@ export function initReviewBridge() {
   // Safety net for late layout shifts (fonts, images, collapsible sections).
   window.setInterval(reportHeight, 1000)
   reportHeight()
+
+  const frame = window.frameElement
+  if (frame) initStickyRails(frame)
 }

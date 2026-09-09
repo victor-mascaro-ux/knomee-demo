@@ -21,6 +21,7 @@ import {
   type Tier,
 } from '../data/candidates'
 import { insights, talkTo } from '../data/candidateInsights'
+import { advisor } from '../data/advisorFlow'
 import {
   CaretDown,
   ChartIcon,
@@ -331,7 +332,15 @@ function Row({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
-            <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
+            {c.name === profileOwner ? (
+              /* Only the candidate whose profile is built out has a picture —
+                 the same rule that decides whose name is a link. */
+              <span className="avatar fc-portrait">
+                <img src={advisor.photo} alt="" />
+              </span>
+            ) : (
+              <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
+            )}
             {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <CandidateName c={c} onOpen={onOpen} />

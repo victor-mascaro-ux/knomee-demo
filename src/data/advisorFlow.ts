@@ -65,6 +65,11 @@ export interface Step {
 export const advisor = {
   name: 'Marcus Hale',
   initial: 'M',
+  /* A cut-out with a transparent ground, so it sits ON a grey disc rather than
+     filling one — and only the people whose profile is built out have a
+     picture, which is the same rule that decides whose name is a link.
+     Dropped into public/avatars/ by hand; see the README there. */
+  photo: './avatars/marcus-hale.png',
   role: 'Lead advisor · team of four',
   book: '$840M',
   firm: 'Wirehouse',
