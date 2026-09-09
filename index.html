@@ -768,8 +768,8 @@
     'client-experience': 'Client Experience',
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
-    'advisor-flow': 'Advisor as Prospect',
-    'advisor-self': 'Advisor as Prospect (answer it yourself)',
+    'advisor-flow': 'Enterprise · Sample',
+    'advisor-self': 'Enterprise Flow (Advisor)',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
     'firm-analytics': 'Dynasty · Analytics',
@@ -1478,11 +1478,13 @@
     /* The advisor's own eight minutes — the same flow a client walks, walked by
        an advisor signing up to knomee. It has no tab and no menu item, so this
        row is the only way in. */
-    ['mobile-advisor', 'Mobile (Advisor)', '#/advisor-flow'],
-    /* The same flow with the answers taken out, so the room can take it. It
-       keeps its own sheet in this browser and builds its own Business ID,
-       readiness and Toolkit — the walkthrough above stays Marcus's. */
-    ['mobile-self', 'Mobile (Answer it yourself)', '#/advisor-self'],
+    /* The enterprise product, twice. The sample is Marcus's, pre-filled and
+       clicked through to show the instrument; the flow under it is the same
+       five adventures with the answers taken out, which is the one an advisor
+       actually takes — it keeps its own sheet and builds its own Business ID,
+       readiness and Toolkit from what they type. */
+    ['mobile-advisor', 'Mobile (Enterprise - Sample)', '#/advisor-flow'],
+    ['mobile-self', 'Enterprise Flow (Advisor)', '#/advisor-self'],
     ['welcome', 'Welcome Page (Client)', '#/welcome']
   ];
   // Only these two take you out of the app shell. The desktop row is where you
