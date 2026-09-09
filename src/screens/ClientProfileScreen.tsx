@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
@@ -143,9 +144,16 @@ type ClientTab = 'id' | 'insights'
 export default function ClientProfileScreen({
   client,
   onBack,
+  clientMenu,
 }: {
   client: Client
   onBack: () => void
+  /* The phone frame hands in the control that opens the rail as a drawer. It
+     belongs above the client's name, next to the person it is about, not in
+     the app bar — the app bar's burger is the advisor's own menu, as it is on
+     a desktop. Nothing renders here on a desktop, where the rail is on screen
+     already. */
+  clientMenu?: ReactNode
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
   const cp = clientProfile
@@ -283,6 +291,8 @@ export default function ClientProfileScreen({
               </button>
             ))}
           </div>
+
+          {clientMenu}
 
           <div className="pp-title-row">
             <h1 className="pp-title">{client.name}’s Financial ID</h1>
