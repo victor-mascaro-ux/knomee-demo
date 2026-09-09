@@ -31,12 +31,15 @@ const reduceMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 
-/** Counts a score up on mount, the way the analytics bars draw themselves. */
+/** Counts a score up on mount, the way the analytics bars draw themselves.
+    A hidden tab does not run animation frames, so the number would otherwise
+    sit frozen part-way up until someone looked at it: when the page is not
+    visible it simply arrives at its value. */
 function useCountUp(target: number, ms = 700) {
   const [n, setN] = useState(() => (reduceMotion() ? target : 0))
   const raf = useRef<number>()
   useEffect(() => {
-    if (reduceMotion()) {
+    if (reduceMotion() || (typeof document !== 'undefined' && document.hidden)) {
       setN(target)
       return
     }
