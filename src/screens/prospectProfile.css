@@ -17,7 +17,7 @@
      breadcrumb, then the tabs, then the rail. Their heights are the offsets
      each one below stacks against, so they live here as numbers rather than
      being repeated in three rules. */
-  --pp-crumb-h: 47px;
+  --pp-crumb-h: 41px;  /* 10px padding either side of a 21px line */
   --pp-tabs-h: 42px;
   /* The phone layout answers to this element's width, not the window's, so the
      same rules serve a real phone and the device frame the demo menu opens. */
@@ -58,7 +58,7 @@
   gap: 8px;
   font-size: 13px;
   color: var(--grey-text, #8b8598);
-  padding: 13px 28px;
+  padding: 10px 28px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   /* Where you are does not scroll away from you. Opaque, or the cards read
      through it as it holds. Offsets start at the top bar's height, since the
@@ -187,6 +187,13 @@
   gap: 10px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   margin-bottom: 20px;
+  /* The room between the breadcrumb and the tabs is padding INSIDE this bar,
+     not a margin above it. As a margin it would be a gap between two sticky
+     bars — the page would scroll through the daylight between them — and it
+     would put the tabs below their own pin, which is the travel they just
+     stopped doing. Inside, the bar stays flush under the breadcrumb and the
+     space is real. */
+  padding-top: 16px;
   /* Under the bar and the breadcrumb, and staying there. */
   position: sticky;
   top: calc(var(--topbar-h) + var(--pp-crumb-h));
