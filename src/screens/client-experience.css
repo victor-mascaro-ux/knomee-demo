@@ -634,8 +634,11 @@
 /* The advisor's bar inside the device frame: the same plum header the desktop
    carries, at the phone's own height, with no burger — the demo's controls sit
    under the phone, not in it. */
+/* Logo left, burger right — the bar's own space-between. I had overridden it
+   to flex-start when the bar had nothing but a logo, which then left the
+   burger tucked against the wordmark. */
 .cxm-appbar {
-  justify-content: flex-start;
+  justify-content: space-between;
 }
 /* The profile goes into the frame without the .content wrapper that carries
    the page gutter on a desktop, so the screen supplies it — otherwise the cards

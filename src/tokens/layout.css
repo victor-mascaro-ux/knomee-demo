@@ -25,6 +25,25 @@
   --page-pad: 40px;
   --content-max: 1520px;
 
+  /* ---- The page module ----
+     Twelve columns and one gutter, inside the --content-max / --page-pad
+     shell that already exists. Blocks snap to spans, not to pixels, so the
+     ratios between them hold at every width instead of one block absorbing
+     all the slack. */
+  --grid-gutter: 24px;
+
+  /* ---- Vertical rhythm ----
+     Three steps, not seven hand-nudged values. A block is separated from the
+     next block by --block-gap; a label from the thing it labels by
+     --label-gap; a control strip from what it controls by --tight-gap. */
+  --block-gap: 32px;
+  --label-gap: 24px;
+  --tight-gap: 16px;
+
+  /* One inset for a card's head AND its body, so the title and the content
+     under it share a left edge. */
+  --card-pad: 24px;
+
   /* ---- Radius ramp (snaps the shipped 4/5/6/7/8/9/10/12/14) ---- */
   --radius-xs:     4px;
   --radius-sm:     6px;   /* absorbs 5 and 7 */
@@ -92,8 +111,32 @@
   --badge-h:       40px;
   --switch-w:      40px;
   --switch-h:      22px;
+  --control-h:     44px;    /* search box and buttons — one height, not 43/47 */
+  --row-h:         64px;    /* prospects table row, flat whether the Top Action
+                               wraps to two lines or not */
+  --band-h:        45px;    /* the tier group band that owns those rows: heavier
+                               than half a row, so it reads as their header */
   --phone-w:       390px;   /* iPhone frame for the client experience demo */
   --phone-h:       844px;
   --mobile-appbar-h: 56px;
   --mobile-tabbar-h: 78px;
+}
+
+/* ------------------------------------------------------------
+   Responsive overrides. Declared max-width descending so which rule
+   wins is a matter of intent rather than source position. These used
+   to live in src/index.css; this file is their only home now.
+   ------------------------------------------------------------ */
+@media (max-width: 1200px) {
+  :root {
+    --page-pad: 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --page-pad: 16px;
+    --grid-gutter: 16px;
+    --block-gap: 24px;
+  }
 }

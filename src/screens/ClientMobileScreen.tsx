@@ -71,9 +71,9 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((o) => !o)}
             >
-              <span />
-              <span />
-              <span />
+              <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
+                <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
+              </svg>
             </button>
           </header>
           {/* The screen scrolls; what scrolls inside it is the desktop page. */}
