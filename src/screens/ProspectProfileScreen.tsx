@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { HighlightIcon, BadgeMedallion, Gauge, ReadinessChip } from './profileParts'
+import { HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -168,11 +168,12 @@ export default function ProspectProfileScreen({
                       {fi.goals.map((g) => (
                         <div className={`pp-goal ${g.completed ? 'is-done' : ''}`} key={g.title}>
                           <div className="pp-goal-main">
-                            <span className="pp-goal-chips">
-                              <ReadinessChip level={g.readiness} completed={g.completed} />
-                            </span>
                             <span className="pp-goal-title">{g.title}</span>
+                            {g.completed && (
+                              <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>
+                            )}
                           </div>
+                          <ReadinessLevel level={g.readiness} />
                           <span className="pp-goal-caret">
                             <RowChevron />
                           </span>

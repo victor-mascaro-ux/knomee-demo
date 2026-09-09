@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
-import { HighlightIcon, BadgeMedallion, Gauge, ReadinessChip } from './profileParts'
+import { HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -111,16 +111,19 @@ function GoalRow({ g }: { g: ClientGoal }) {
   return (
     <div className={`pp-goal ${g.completed ? 'is-done' : ''}`}>
       <div className="pp-goal-main">
-        <span className="pp-goal-chips">
-          <ReadinessChip level={g.readiness} completed={g.completed} />
-          {g.tags?.map((t) => (
-            <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
-              {t}
-            </span>
-          ))}
-        </span>
+        {g.tags && g.tags.length > 0 && (
+          <span className="cp-goal-tags">
+            {g.tags.map((t) => (
+              <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
+                {t}
+              </span>
+            ))}
+          </span>
+        )}
         <span className="pp-goal-title">{g.title}</span>
+        {g.completed && <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>}
       </div>
+      <ReadinessLevel level={g.readiness} />
       <span className="pp-goal-caret">
                             <RowChevron />
                           </span>
@@ -319,6 +322,10 @@ export default function ClientProfileScreen({
                     <div className="cp-goal-cols">
                       {goalCols.map((col, i) => (
                         <div className="cp-goal-col" key={i}>
+                          <div className="cp-goal-col-head">
+                            <span>Goal</span>
+                            <span>Readiness</span>
+                          </div>
                           {col.map((g) => (
                             <GoalRow g={g} key={g.title} />
                           ))}

@@ -295,49 +295,69 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
-/* Tags and the readiness chip share one line above the title, so readiness is a
-   peer of New/Sensitive rather than a column with its own header. */
-.pp-goal-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-}
-/* The stage outranks the tags beside it: it is the one thing on the row the
-   advisor is deciding on. Bigger, heavier, and it leads the line. */
-.pp-stage-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11.5px;
-  font-weight: var(--weight-semibold, 600);
-  padding: 3px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.pp-stage-scale {
-  font-variant-numeric: tabular-nums;
-  opacity: 0.65;
-}
-.pp-stage-chip.is-complete {
-  background: var(--pearl, #efeef2);
-  color: var(--text-secondary, #6a6480);
-}
-/* The goal is what the card is about, so it outweighs the chips above it — but
-   on size and colour, not weight. Bolding it made the row shout. */
 .pp-goal-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-strong, #240446);
 }
-.pp-goal.is-done .pp-goal-title {
-  color: var(--grey-text, #8b8598);
+.pp-goal-done {
+  font-size: 11px;
+  color: #9a94a6;
 }
 .pp-goal-caret {
   color: var(--text-strong, #240446);
   font-size: 16px;
+}
+/* Bars and stage name stack: the bars place the stage on the five-step scale,
+   the name says what that step is. */
+.pp-readiness {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  /* The stage names differ in length — without a fixed column each row centred
+     its own block, so the bars never lined up down the list. Narrow enough to
+     leave the goal its width: "Pre-Contemplation", the one long label, wraps at
+     its own hyphen rather than setting the column for the other four. */
+  width: 62px;
+}
+.pp-stage {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  text-align: center;
+}
+.pp-bars {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 18px;
+  /* Room under the bars for the level marker, so it never rides into the stage
+     name beneath. */
+  padding-bottom: 8px;
+}
+.pp-bar-mark {
+  position: absolute;
+  bottom: 1px;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-bottom: 5px solid var(--k-teal, #3dbdaa);
+}
+.pp-bar {
+  width: 3.5px;
+  /* Square, as drawn — the rounded caps softened the ramp into a blur at this
+     size. */
+  background: #e2def0;
+}
+.pp-bar.on {
+  background: var(--purple-bolt, #9b51e0);
 }
 
 /* Chips */
@@ -655,6 +675,7 @@
   color: var(--plum, #240446);
 }
 /* Rows that pair an icon with a label. */
+.pp-goal-done,
 .pp-q-date,
 .pp-date {
   display: inline-flex;

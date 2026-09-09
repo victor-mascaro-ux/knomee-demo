@@ -6,7 +6,6 @@
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
-import { CheckIcon } from '../components/profileIcons'
 import bgConfidence from '../assets/badges/confidence.svg'
 import bgFinancialJoy from '../assets/badges/financial-joy.svg'
 import bgFutureYou from '../assets/badges/future-you.svg'
@@ -18,42 +17,44 @@ import bgOutlook from '../assets/badges/outlook.svg'
    advisor's table names it too, rather than leaving them to count bars and
    translate. */
 const TTM_STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance']
-/* The stage tints climb with the stage, so a column of chips is legible before
-   a word of it is read. */
-const STAGE_TINT = ['#f3f1f7', '#ede5f8', '#e4d3f6', '#d7bdf3', '#c8a4ef']
-const STAGE_INK = ['#6f6885', '#6b3fb5', '#5c2bab', '#4a1d95', '#3a0f7a']
+/* The bars climb in colour as well as height, deep plum through to violet, so
+   the ramp reads as progress. Unfilled steps keep the pale wash. */
+const BAR_RAMP = ['#240446', '#4c1d95', '#7038c8', '#9b51e0', '#b57ceb']
+const BAR_W = 3.5
+const BAR_GAP = 2
 
-/* One chip carries the whole of a goal's readiness: the stage by name, and
-   where that stage sits on the five. It replaced a five-bar meter under a
-   "Readiness" column header — the header only existed because the bars could
-   not say what they meant, and the bars had to be counted to say where they
-   were. A finished goal shows Completed in the chip's place, and keeps its date
-   on hover. */
-export function ReadinessChip({ level, completed }: { level: number; completed?: string }) {
-  if (completed) {
-    return (
-      <span
-        className="pp-stage-chip is-complete"
-        title={`Completed ${completed}`}
-        aria-label={`Completed ${completed}`}
-      >
-        <CheckIcon size={11} />
-        Completed
-      </span>
-    )
-  }
+export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
-  if (!stage) return null
   return (
     <span
-      className="pp-stage-chip"
-      style={{ background: STAGE_TINT[level - 1], color: STAGE_INK[level - 1] }}
-      aria-label={`Readiness: ${stage}, stage ${level} of 5`}
+      className="pp-readiness"
+      aria-label={stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'}
     >
-      {stage}
-      <span className="pp-stage-scale" aria-hidden>
-        {level}/5
+      <span className="pp-bars" aria-hidden>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className={`pp-bar ${i <= level ? 'on' : ''}`}
+            style={{
+              height: 5 + i * 2.4,
+              ...(i <= level ? { background: BAR_RAMP[i - 1] } : null),
+            }}
+          />
+        ))}
+        {/* Marks the stage actually reached, so its position on the scale is
+            readable without counting. */}
+        {level > 0 && (
+          <span
+            className="pp-bar-mark"
+            style={{ left: (level - 1) * (BAR_W + BAR_GAP) + BAR_W / 2 }}
+          />
+        )}
       </span>
+      {stage && (
+        <span className="pp-stage" style={{ color: BAR_RAMP[level - 1] }} aria-hidden>
+          {stage}
+        </span>
+      )}
     </span>
   )
 }
