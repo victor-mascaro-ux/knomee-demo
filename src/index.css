@@ -1217,9 +1217,14 @@ input[type='checkbox'] {
 .name-line .new-tag {
   align-self: center;
 }
-/* Client names match the prospect table's lighter weight. */
+/* Names are 400 in both tables. In the prospect table only Sarah's was: hers is
+   a <button> to open her profile, and `font: inherit` on that button was
+   quietly overriding .name-line's 600, so the one clickable name was also the
+   one lighter name. */
 .clients-table .name-line,
-.clients-table .name-text {
+.clients-table .name-text,
+.prospects-table .name-line,
+.prospects-table .name-text {
   font-weight: 400;
 }
 /* Clickable name (opens the prospect's profile). */
@@ -1235,6 +1240,15 @@ button.name-link-btn {
 button.name-link-btn:hover .name-text {
   text-decoration: underline;
 }
+/* A name that is a link in the product but has nowhere to go in the prototype:
+   the same cursor and the same underline, so the table does not look like one
+   where a single row is clickable. */
+.name-line-flat {
+  cursor: pointer;
+}
+.name-line-flat:hover .name-text {
+  text-decoration: underline;
+}
 
 .email-line {
   font-size: 12.5px;
@@ -1242,37 +1256,45 @@ button.name-link-btn:hover .name-text {
 }
 
 /* score badges */
+/* The score reads as an outline, not a block. Filled, forty-two of these were
+   forty-two saturated rectangles down the busiest column on the screen, and
+   the number they carry is the thing that matters. The tier colour is now the
+   border and the numeral; the row shows through. One `color` per tier does
+   both, because the border takes currentColor. */
 .score-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 40px;
+  width: var(--badge-w);
+  height: var(--badge-h);
   border-radius: 8px;
-  color: #fff;
+  background: transparent;
+  border: var(--border-thick) solid currentColor;
   font-size: 17px;
   font-weight: 700;
 }
 .score-tier1 {
-  background: var(--prospect-1);
+  color: var(--prospect-1);
 }
 .score-tier2 {
-  background: var(--prospect-2);
+  color: var(--prospect-2);
 }
 .score-tier3 {
-  background: var(--prospect-3);
+  color: var(--prospect-3);
 }
-.score-engaged {
-  background: var(--client-1);
-}
-.score-attention {
-  background: var(--client-2);
-}
+/* One colour for every KR score, the client side's own dark ocean. The tier a
+   client sits in is already the row they are grouped under; colouring the badge
+   by it a second time made the column read as three different measures instead
+   of one number on one scale. */
+.score-engaged,
+.score-attention,
 .score-reconnect {
-  background: var(--client-3);
+  color: var(--k-ocean, #086375);
 }
+/* No score yet. The dash still has to be legible — --stone is a border grey,
+   not a text one. */
 .score-badge.empty {
-  background: var(--pearl);
+  background: transparent;
   color: var(--ash);
 }
 
