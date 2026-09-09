@@ -170,8 +170,12 @@ export default function ProspectProfileScreen({
                       <img className="pp-add" src={addIcon} alt="Add" />
                     </div>
                     <div className="pp-goals">
-                      {goals.shown.map((g) => (
-                        <div className={`pp-goal ${g.completed ? 'is-done' : ''}`} key={g.title}>
+                      {goals.shown.map((g, i) => (
+                        <div
+                          className={`pp-goal ${g.completed ? 'is-done' : ''} ${goals.entering(i) ?? ''}`}
+                          style={goals.delay(i)}
+                          key={g.title}
+                        >
                           <div className="pp-goal-main">
                             <span className="pp-goal-title">{g.title}</span>
                             {g.completed && (
@@ -287,7 +291,7 @@ export default function ProspectProfileScreen({
                     </div>
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
-                        <div className="pp-event" key={i}>
+                        <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                           <span className="pp-event-tag">{e.tag}</span>
                           <span className="pp-event-kind">{e.kind}</span>
                           <span className="pp-event-text">{e.text}</span>
@@ -305,7 +309,7 @@ export default function ProspectProfileScreen({
                     </div>
                     <div className="pp-questions">
                       {questions.shown.map((q, i) => (
-                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
+                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`} style={questions.delay(i)} key={i}>
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
                             {q.resolved ? (

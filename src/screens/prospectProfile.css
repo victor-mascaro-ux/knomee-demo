@@ -785,3 +785,49 @@
      one read as decoration. */
   color: var(--text-strong, #240446);
 }
+
+/* ---------- accordion motion ----------
+   Rows an expand just revealed drop in rather than appearing, staggered off the
+   first of them so a long list arrives as a wave instead of a jump. Rows that
+   were already on screen do not animate — only the new ones carry the class. */
+@keyframes ppRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pp-row-in {
+  animation: ppRowIn 0.26s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+/* The caret turns rather than flips. */
+.pp-show svg,
+.pp-date svg {
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.pp-show {
+  transition: color 0.16s ease, background 0.16s ease;
+  border-radius: 8px;
+}
+.pp-show:hover {
+  color: var(--plum, #240446);
+  background: rgba(36, 4, 70, 0.05);
+}
+/* The date menu opens with the same drop as the rows. */
+.pp-date-pop {
+  animation: ppRowIn 0.16s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-row-in,
+  .pp-date-pop {
+    animation: none;
+  }
+  .pp-show svg,
+  .pp-date svg {
+    transition: none;
+  }
+}

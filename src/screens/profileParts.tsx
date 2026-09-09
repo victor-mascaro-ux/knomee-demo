@@ -211,12 +211,12 @@ export function DateSelect({ dates = CHECKIN_DATES }: { dates?: string[] }) {
   )
 }
 
-/* A goal's order is its progress: the stage it has reached, earliest first, and
-   the finished ones settle at the bottom whatever stage they got to. */
+/* Furthest along first — Maintenance down to Pre-Contemplation — and the
+   finished ones settle at the bottom whatever stage they got to. */
 export function orderGoals<T extends { readiness: number; completed?: string }>(goals: T[]) {
   return [...goals].sort((a, b) => {
     const done = Number(Boolean(a.completed)) - Number(Boolean(b.completed))
-    return done !== 0 ? done : a.readiness - b.readiness
+    return done !== 0 ? done : b.readiness - a.readiness
   })
 }
 
@@ -233,6 +233,12 @@ export function useCollapsed<T>(items: T[], max: number) {
     toggle: () => setOpen((o) => !o),
     /* No control when everything already fits. */
     overflows: items.length > max,
+    /* Rows past this index are the ones an expand just revealed, so they are
+       the ones that animate in. Returns undefined for the rest, which keeps the
+       class attribute clean. */
+    entering: (i: number) => (open && i >= max ? 'pp-row-in' : undefined),
+    /* Staggered off the first revealed row, not off the top of the list. */
+    delay: (i: number) => (open && i >= max ? { animationDelay: `${(i - max) * 45}ms` } : undefined),
   }
 }
 
