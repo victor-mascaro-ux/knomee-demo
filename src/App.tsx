@@ -4068,93 +4068,13 @@ export default function App() {
                   Sign Out
                 </button>
                 <div className="menu-divider" />
-                <div className="menu-pop-title">Analysis</div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setSegmentationOpen(true)
-                    setSettingsOpen(false)
-                    setClientExpOpen(false)
-                    setClientMobileOpen(false)
-                    setLandingOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Segmentation
-                </button>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Prospect view</div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setLandingOpen(true)
-                    setLandingVersion('a')
-                    setSettingsOpen(false)
-                    setClientExpOpen(false)
-                    setClientMobileOpen(false)
-                    setAdvisorFlowOpen(false)
-                    setSegmentationOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Welcome page
-                </button>
-                <div className="menu-divider" />
-                <div className="menu-pop-title">Mobile</div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setClientExpOpen(true)
-                    setLandingOpen(false)
-                    setSettingsOpen(false)
-                    setSegmentationOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Client Experience
-                </button>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setClientMobileOpen(true)
-                    setClientExpOpen(false)
-                    setLandingOpen(false)
-                    setSettingsOpen(false)
-                    setSegmentationOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Client profile on mobile
-                </button>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setAdvisorFlowOpen(true)
-                    setClientExpOpen(false)
-                    setClientMobileOpen(false)
-                    setLandingOpen(false)
-                    setSettingsOpen(false)
-                    setSegmentationOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Advisor as Prospect
-                </button>
+                {/* Segmentation, the welcome page, the phone previews and the
+                    advisor's own flow used to be listed here, grouped under
+                    Analysis / Prospect view / Mobile. None of them is a place a
+                    real advisor navigates to from their account menu — they are
+                    the demo's other screens, and they now live in the D panel
+                    with the rest of the scaffolding. What is left in this menu
+                    is what the product would actually put in it. */}
                 {/* The scaffolding — persona switches, empty states, the
                     white-label brand picker — used to live here, in the
                     product's own menu, where the room saw it every time this
