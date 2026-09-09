@@ -319,9 +319,11 @@
   position: relative;
   display: inline-flex;
   align-items: flex-end;
-  gap: 1.5px;
-  /* Tallest bar (4 + 5x2.8 = 18px) plus the marker's room beneath it. */
-  height: 25px;
+  gap: 2px;
+  /* Tallest bar (4 + 5x4 = 24px) plus the marker's room beneath it. The ramp
+     climbs 8 -> 24 against a 5px bar, so a bar is taller than it is wide from
+     the first step rather than starting as a rounded square. */
+  height: 31px;
   padding-bottom: 7px;
 }
 .pp-bar-mark {
