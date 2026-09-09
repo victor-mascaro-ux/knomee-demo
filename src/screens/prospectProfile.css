@@ -220,6 +220,18 @@
   background: #fff;
   object-fit: contain;
 }
+/* The same white disc for the cards whose icon is an inline SVG rather than
+   artwork, so every card head reads the same. */
+.pp-card-disc {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .pp-add {
   width: 24px;
   height: 24px;
@@ -274,7 +286,8 @@
 .pp-goals {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 14px 16px;
+  align-items: start;
 }
 .pp-goal {
   background: #fff;
@@ -305,7 +318,7 @@
   color: #9a94a6;
 }
 .pp-goal-caret {
-  color: #bdb7c9;
+  color: var(--text-strong, #240446);
   font-size: 16px;
 }
 .pp-bars {
@@ -662,5 +675,7 @@
 .pp-goal-caret {
   display: inline-flex;
   align-items: center;
-  color: var(--ash, #b9b3c6);
+  /* The row is clickable, so its chevron carries the affordance — a pale grey
+     one read as decoration. */
+  color: var(--text-strong, #240446);
 }

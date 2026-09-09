@@ -167,6 +167,17 @@ function parentWindow(): Window | null {
   }
 }
 
+/* Paint the dark ground on the document for as long as a mobile view is on
+   screen, so the window around the phone is never white. Shared by both mobile
+   demos — see `.cx-dark-ground`. */
+export function useDarkGround() {
+  useEffect(() => {
+    const el = document.documentElement
+    el.classList.add('cx-dark-ground')
+    return () => el.classList.remove('cx-dark-ground')
+  }, [])
+}
+
 export function useFitToWindow() {
   const [fit, setFit] = useState({ scale: 1, windowH: 0 })
   useEffect(() => {
@@ -781,6 +792,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
   const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
+  useDarkGround()
   const { scale: fitScale, windowH } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom

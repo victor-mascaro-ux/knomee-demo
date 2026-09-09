@@ -51,9 +51,21 @@ export function initReviewBridge() {
     else window.scrollBy(dx, dy)
   })
 
+  // How tall the content actually is. NOT `documentElement.scrollHeight`: the
+  // shell sizes the iframe to whatever we report, and the iframe's viewport is
+  // then a floor under that number — so a page that grew (zooming the phone in)
+  // could never report its way back down, and the frame kept the extra height
+  // as a white band under the content. The mount node's own box has no such
+  // floor, so it tracks the content down as well as up.
+  const contentHeight = () => {
+    const root = document.getElementById('root')
+    const h = root ? root.getBoundingClientRect().height : document.body.scrollHeight
+    return Math.ceil(h)
+  }
+
   let last = 0
   const reportHeight = () => {
-    const h = Math.ceil(document.documentElement.scrollHeight)
+    const h = contentHeight()
     if (h !== last) {
       last = h
       parent.postMessage({ type: 'cc-frame-height', height: h }, '*')
@@ -63,7 +75,10 @@ export function initReviewBridge() {
   window.addEventListener('load', reportHeight)
   window.addEventListener('resize', reportHeight)
   if ('ResizeObserver' in window) {
-    new ResizeObserver(reportHeight).observe(document.documentElement)
+    const ro = new ResizeObserver(reportHeight)
+    ro.observe(document.documentElement)
+    const root = document.getElementById('root')
+    if (root) ro.observe(root)
   }
   // Safety net for late layout shifts (fonts, images, collapsible sections).
   window.setInterval(reportHeight, 1000)

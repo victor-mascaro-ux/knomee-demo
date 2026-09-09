@@ -323,31 +323,21 @@
 }
 
 /* nav ──────────────────────────────────────────────────────────────────────
-   Back, the primary button and the step meter travel together and stay pinned
-   to the bottom of the screen. Sticky rather than fixed so a short question
-   still leaves them under the content where they belong, while a long one
-   keeps them in reach without scrolling. The negative side margins undo the
-   viewport's own padding so the bar's ground runs edge to edge. */
+   Inside an adventure this bar takes the tab bar's place at the foot of the
+   device: Back, the primary button and the step meter, always on screen
+   however long the question runs. A sibling of the scrolling viewport rather
+   than the last thing inside it, so nothing can push it out of reach. */
 .af-foot {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  margin: 20px -16px 0;
-  padding: 12px 16px 4px;
+  flex: none;
+  padding: 12px 16px 10px;
   background: #fff;
-}
-.af-foot::before {
-  content: '';
-  display: block;
-  height: 14px;
-  margin: -26px -16px 12px;
-  background: linear-gradient(rgba(255, 255, 255, 0), #fff);
-  pointer-events: none;
+  border-top: 1px solid #ededf0;
 }
 .af-nav {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 42px;
 }
 .af-next {
   flex: 1;

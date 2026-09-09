@@ -3651,14 +3651,26 @@ const ROUTE_VIEWS = [
 ] as const
 type RouteView = (typeof ROUTE_VIEWS)[number]
 
-function parseHashView(): RouteView | null {
-  if (typeof window === 'undefined') return null
-  const h = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
-  return (ROUTE_VIEWS as readonly string[]).includes(h) ? (h as RouteView) : null
+/* A profile is addressed by a slug of the person's name, so a link to one
+   survives a refresh: #/prospects/lucas-bauer. */
+const profileSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+
+function parseHash(): { view: RouteView | null; profile: string | null } {
+  if (typeof window === 'undefined') return { view: null, profile: null }
+  const raw = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
+  const [head, tail] = raw.split('/')
+  const view = (ROUTE_VIEWS as readonly string[]).includes(head) ? (head as RouteView) : null
+  return { view, profile: tail || null }
 }
 
 export default function App() {
-  const initialView = parseHashView()
+  const { view: initialView, profile: initialProfile } = parseHash()
   const [screen, setScreen] = useState<Screen>(
     initialView === 'clients' || initialView === 'analytics' ? initialView : 'prospects',
   )
@@ -3667,9 +3679,17 @@ export default function App() {
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
   // When set, a prospect's full "Financial ID" profile page takes over the main
   // area (reached by clicking a prospect's name in the table).
-  const [profileProspect, setProfileProspect] = useState<Prospect | null>(null)
+  const [profileProspect, setProfileProspect] = useState<Prospect | null>(() =>
+    initialView === 'prospects' && initialProfile
+      ? (prospects.find((p) => profileSlug(p.name) === initialProfile) ?? null)
+      : null,
+  )
   // The client counterpart, opened from a client's name in the Clients table.
-  const [profileClient, setProfileClient] = useState<Client | null>(null)
+  const [profileClient, setProfileClient] = useState<Client | null>(() =>
+    initialView === 'clients' && initialProfile
+      ? (baseClients.find((c) => profileSlug(c.name) === initialProfile) ?? null)
+      : null,
+  )
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
   const showToast = (msg: string) => {
     setToast({ show: true, msg })
@@ -3757,11 +3777,19 @@ export default function App() {
 
   // ── Routing: URL hash ⇄ nav state ──
   useEffect(() => {
-    const applyView = (v: RouteView) => {
-      // A profile is a layer over a view, not a view of its own, so any route
-      // change closes it — otherwise #/clients could leave a profile on screen.
-      setProfileProspect(null)
-      setProfileClient(null)
+    const applyView = (v: RouteView, slug: string | null) => {
+      // A profile is a layer over a view, and the route carries which one — so
+      // #/clients on its own still closes whatever profile was open.
+      setProfileProspect(
+        v === 'prospects' && slug
+          ? (prospects.find((p) => profileSlug(p.name) === slug) ?? null)
+          : null,
+      )
+      setProfileClient(
+        v === 'clients' && slug
+          ? (baseClients.find((c) => profileSlug(c.name) === slug) ?? null)
+          : null,
+      )
       setAdminView(v === 'admin')
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
@@ -3773,8 +3801,8 @@ export default function App() {
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
     }
     const syncFromHash = () => {
-      const v = parseHashView()
-      if (v) applyView(v)
+      const { view, profile } = parseHash()
+      if (view) applyView(view, profile)
     }
     // The parent (comment-overlay) frame forwards its address-bar hash here.
     const onMessage = (e: MessageEvent) => {
@@ -3794,7 +3822,13 @@ export default function App() {
   // State → hash, and mirror the route up to the parent window's address bar
   // (the URL people actually copy on the live site).
   useEffect(() => {
-    const hash = `#/${currentView}`
+    const open =
+      currentView === 'prospects' && profileProspect
+        ? profileSlug(profileProspect.name)
+        : currentView === 'clients' && profileClient
+          ? profileSlug(profileClient.name)
+          : null
+    const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
     }
@@ -3805,7 +3839,7 @@ export default function App() {
         /* cross-origin parent — ignore */
       }
     }
-  }, [currentView])
+  }, [currentView, profileProspect, profileClient])
 
   // Esc closes the convert modal.
   useEffect(() => {

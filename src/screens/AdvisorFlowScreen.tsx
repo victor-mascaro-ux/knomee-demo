@@ -26,6 +26,7 @@ import {
   TabFinId,
   ZOOM_CONTROLS_TITLE,
   clampZoom,
+  useDarkGround,
   useFitToWindow,
   useZoom,
 } from './ClientExperienceScreen'
@@ -506,14 +507,17 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
+  useDarkGround()
   const { scale: fitScale, windowH } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom
 
   const step = steps[i]
   const last = i === steps.length - 1
-  // The adventures list has no forward button of its own — you pick a row.
-  const home = step.kind === 'home'
+  // Inside an adventure the bottom bar is Back and OK; on the two destinations
+  // — the adventures list and the Independence ID — it is the tab bar. The
+  // welcome screen counts as in-flow: its "Get started" is the same button.
+  const inFlow = tab === 'flow' && step.kind !== 'home'
   const cta = useMemo(() => {
     if (step.cta) return step.cta
     if (step.kind === 'unlock' || step.kind === 'stage') return 'Submit'
@@ -570,38 +574,36 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
                   onHome={() => setTab('finid')}
                   onAdventure={openAdventure}
                 />
-                {/* Back and OK ride the bottom of the screen rather than the
-                    end of the content — a long question used to push them
-                    below the fold. */}
-                <div className="af-foot">
-                  {!last && (
-                    <div className="af-nav">
-                      {trail.length > 1 && (
-                        <button className="af-back" type="button" onClick={back}>
-                          Back
-                        </button>
-                      )}
-                      {!home && (
-                        <button
-                          className="cx-start af-next"
-                          type="button"
-                          onClick={() => go(i + 1)}
-                        >
-                          {cta}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  <div className="af-progress" aria-hidden>
-                    {steps.map((s, n) => (
-                      <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                    ))}
-                  </div>
-                </div>
               </>
             )}
           </div>
 
+          {/* Inside an adventure the phone's bottom bar IS Back and OK — they
+              take the tab bar's place rather than stacking above it, so they
+              are always on screen however long the question runs. The tab bar
+              comes back on the two destinations: the adventures list and the
+              Independence ID. */}
+          {inFlow ? (
+            <div className="af-foot">
+              <div className="af-nav">
+                {trail.length > 1 && (
+                  <button className="af-back" type="button" onClick={back}>
+                    Back
+                  </button>
+                )}
+                {!last && (
+                  <button className="cx-start af-next" type="button" onClick={() => go(i + 1)}>
+                    {cta}
+                  </button>
+                )}
+              </div>
+              <div className="af-progress" aria-hidden>
+                {steps.map((s, n) => (
+                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                ))}
+              </div>
+            </div>
+          ) : (
           <nav className="cx-tabbar">
             <svg className="cx-tab-edge" viewBox="0 0 390 96" width="390" height="96" aria-hidden>
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
@@ -627,6 +629,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
               <span className="cx-tab-lbl">Independence ID</span>
             </button>
           </nav>
+          )}
 
           <div className="cx-home-bar" />
 
