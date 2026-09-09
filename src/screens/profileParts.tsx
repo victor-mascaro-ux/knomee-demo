@@ -21,7 +21,7 @@ const TTM_STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action
    the ramp reads as progress. Unfilled steps keep the pale wash. */
 const BAR_RAMP = ['#240446', '#4c1d95', '#7038c8', '#9b51e0', '#b57ceb']
 const BAR_W = 5
-const BAR_GAP = 1.5
+const BAR_GAP = 2
 
 export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
@@ -35,7 +35,7 @@ export function ReadinessLevel({ level }: { level: number }) {
             className={`pp-bar ${i <= level ? 'on' : ''}`}
             style={{
               width: BAR_W,
-              height: 4 + i * 2.8,
+              height: 4 + i * 4,
               ...(i <= level ? { background: BAR_RAMP[i - 1] } : null),
             }}
           />
