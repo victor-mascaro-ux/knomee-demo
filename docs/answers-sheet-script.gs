@@ -133,8 +133,9 @@ function alignTabs(wanted) {
     if (dropped.length) report.push(name + ': dropped ' + dropped.reverse().join(', '));
     else report.push(name + ': already aligned');
   });
-  Logger.log(report.join('
-'));
+  report.forEach(function (line) {
+    Logger.log(line);
+  });
   return report;
 }
 
