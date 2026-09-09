@@ -65,14 +65,15 @@ export function Gauge({ label }: { label: string }) {
     <span className="pp-gauge" aria-label={`Confidence: ${label}`}>
       <svg viewBox="0 0 120 70" width="112" height="65">
         {wedges}
-        <path
-          d="M60 30 C 57 44, 54 52, 54 58 A 6 6 0 1 0 66 58 C 66 52, 63 44, 60 30 Z"
-          fill="#6f6a7c"
-          transform={`rotate(${(90 - angle).toFixed(1)} ${cx} ${cy})`}
-        />
-        {/* The cap covers the needle's bulb, so what shows is a short tapered
-            pointer rising out of a white disc. */}
-        <circle cx={cx} cy={cy} r="8" fill="#fff" stroke="#ece9f2" />
+        {/* The original teardrop needle: a long taper off a round bulb, with a
+            pale pivot dot. */}
+        <g transform={`rotate(${(90 - angle).toFixed(1)} ${cx} ${cy})`}>
+          <path
+            d="M60 27 C 55 42, 53 51, 53 57 A 7 7 0 1 0 67 57 C 67 51, 65 42, 60 27 Z"
+            fill="#6f6a7c"
+          />
+          <circle cx="60" cy="57" r="2.6" fill="#cfc9d8" />
+        </g>
       </svg>
     </span>
   )
