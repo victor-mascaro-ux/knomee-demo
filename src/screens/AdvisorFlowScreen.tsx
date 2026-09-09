@@ -537,31 +537,69 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
     toTop()
   }
 
+  // A fresh start rather than another screen on the trail — Back after this
+  // has nowhere behind it to go, which is the point of restarting.
+  const reset = (n: number) => {
+    setTrail([n])
+    toTop()
+  }
+
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
     const at = steps.findIndex((s) => s.adventure === id)
     if (at >= 0) go(at)
   }
 
+  // Closing an adventure returns to the list and ends the trail there.
+  const HOME_AT = steps.findIndex((s) => s.kind === 'home')
+  const closeToList = () => {
+    setTab('flow')
+    reset(HOME_AT)
+  }
+
+  // Inside an adventure the app bar carries its name and a way out, in place
+  // of the wordmark and the burger.
+  const adventure = step.adventure
+    ? advisorAdventures.find((a) => a.id === step.adventure)
+    : undefined
+
   return (
     <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
         <IPhone scale={scale}>
           <header className="cx-appbar">
-            <div className="cx-appbar-brand">
-              <img src="./knomee-logo-white.svg" alt="knomee" />
-            </div>
-            <button
-              className="cx-appbar-burger"
-              type="button"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
-                <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
-              </svg>
-            </button>
+            {adventure && tab === 'flow' ? (
+              <>
+                <div className="af-appbar-title">{adventure.title}</div>
+                <button
+                  className="cx-appbar-burger"
+                  type="button"
+                  aria-label="Close this adventure and go back to My Adventures"
+                  onClick={closeToList}
+                >
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2">
+                    <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="cx-appbar-brand">
+                  <img src="./knomee-logo-white.svg" alt="knomee" />
+                </div>
+                <button
+                  className="cx-appbar-burger"
+                  type="button"
+                  aria-label="Menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
+                >
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
+                    <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </>
+            )}
           </header>
 
           <div className="cx-viewport" ref={viewport}>
@@ -643,7 +681,15 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
                     <i>{advisor.role}</i>
                   </span>
                 </div>
-                <button className="cx-sheet-item" type="button" onClick={() => go(0)}>
+                <button
+                  className="cx-sheet-item"
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setTab('flow')
+                    reset(0)
+                  }}
+                >
                   Restart the flow
                   <ArrowRight />
                 </button>
