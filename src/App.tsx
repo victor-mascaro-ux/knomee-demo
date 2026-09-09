@@ -116,7 +116,21 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 
 // Shared name + chevron (+ optional "new" tag) so the Prospects and Clients
 // tables render the label identically and the arrow stays aligned with the name.
-function NameLink({ name, onClick }: { name: string; onClick?: () => void }) {
+function NameLink({
+  name,
+  onClick,
+  asLink,
+}: {
+  name: string
+  onClick?: () => void
+  /* Every name in the table is a link in the product; only the one or two with
+     a profile built out go anywhere in this prototype. `asLink` gives the rest
+     the affordance without the destination, so the table reads as the real one
+     rather than as a table where one person is special. It stays a span: a
+     button that does nothing is a promise to a screen reader that nothing
+     keeps. */
+  asLink?: boolean
+}) {
   const inner = (
     <span className="name-text">
       {name}
@@ -132,7 +146,7 @@ function NameLink({ name, onClick }: { name: string; onClick?: () => void }) {
       </button>
     )
   }
-  return <span className="name-line">{inner}</span>
+  return <span className={`name-line${asLink ? ' name-line-flat' : ''}`}>{inner}</span>
 }
 
 // Standard card help affordance: a "?" glyph that reveals its hint on hover.
@@ -439,6 +453,7 @@ function ProspectRow({
           <div className="name-block">
             <NameLink
               name={p.name}
+              asLink
               onClick={p.name === financialId.owner ? () => onOpenProfile(p) : undefined}
             />
             <span className="email-line">{p.email}</span>
@@ -851,6 +866,9 @@ function ClientRow({
           </div>
         </div>
       </td>
+      <td className="col-kr">
+        <ClientScoreBadge tier={c.tier} value={c.kr} />
+      </td>
       <td className="col-household">
         {c.household ? (
           /* The household opens the same one built-out profile, so it is a link
@@ -869,9 +887,6 @@ function ClientRow({
         ) : (
           <span className="dash">—</span>
         )}
-      </td>
-      <td className="col-kr">
-        <ClientScoreBadge tier={c.tier} value={c.kr} />
       </td>
       <td className="col-sentiment">
         <SentimentFace value={c.sentiment} warn={c.warn} />
@@ -1325,23 +1340,6 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-household">
-                <button
-                  type="button"
-                  className="th-sort th-sort-btn"
-                  onClick={() => clickSort('household')}
-                  aria-label="Sort by household"
-                >
-                  Household
-                  <span
-                    className={`th-caret ${sort.col === 'household' ? 'is-active' : ''} ${
-                      sort.col === 'household' && sort.dir === 'asc' ? 'is-asc' : ''
-                    }`}
-                  >
-                    <CaretDown />
-                  </span>
-                </button>
-              </th>
               <th className="col-kr">
                 <button
                   type="button"
@@ -1353,6 +1351,23 @@ function ClientsScreen({
                   <span
                     className={`th-caret ${sort.col === 'kr' ? 'is-active' : ''} ${
                       sort.col === 'kr' && sort.dir === 'asc' ? 'is-asc' : ''
+                    }`}
+                  >
+                    <CaretDown />
+                  </span>
+                </button>
+              </th>
+              <th className="col-household">
+                <button
+                  type="button"
+                  className="th-sort th-sort-btn"
+                  onClick={() => clickSort('household')}
+                  aria-label="Sort by household"
+                >
+                  Household
+                  <span
+                    className={`th-caret ${sort.col === 'household' ? 'is-active' : ''} ${
+                      sort.col === 'household' && sort.dir === 'asc' ? 'is-asc' : ''
                     }`}
                   >
                     <CaretDown />
@@ -2271,10 +2286,21 @@ function FunnelHealth() {
   )
 }
 
-function AnalyticsScreen() {
+function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
   return (
     <>
-      <h1 className="page-title">Analytics</h1>
+      {/* Segmentation reads the same book this page does, cut a different way,
+          so its way in is here rather than in a demo panel — and opposite the
+          title rather than in the tab row, because it takes the page over
+          instead of filling the tab body. */}
+      <div className="page-title-row">
+        <h1 className="page-title">Analytics</h1>
+        {onSegmentation && (
+          <button className="btn btn-outline" type="button" onClick={onSegmentation}>
+            Segmentation
+          </button>
+        )}
+      </div>
 
       {/* 1 ── Impact header */}
       <section className="card analytics-card">
@@ -4192,18 +4218,6 @@ export default function App() {
               {t.label}
             </button>
           ))}
-          {/* Segmentation reads the same book Analytics does, cut a different
-              way, so it belongs beside it rather than behind a demo panel. It
-              takes the page over rather than filling the tab body — it has its
-              own back — so it is a button in the row, not a fourth tab, and
-              the underline never has to point at it. */}
-          <button
-            className="tab"
-            type="button"
-            onClick={() => setSegmentationOpen(true)}
-          >
-            Segmentation
-          </button>
         </nav>
 
         {screen === 'prospects' &&
@@ -4229,7 +4243,11 @@ export default function App() {
             />
           ))}
         {screen === 'analytics' &&
-          (emptyMode ? <EmptyScreen variant="analytics" /> : <AnalyticsScreen />)}
+          (emptyMode ? (
+            <EmptyScreen variant="analytics" />
+          ) : (
+            <AnalyticsScreen onSegmentation={() => setSegmentationOpen(true)} />
+          ))}
       </main>
       )}
 

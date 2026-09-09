@@ -41,6 +41,9 @@ import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
+import ClientProfileScreen from './ClientProfileScreen'
+import { clientProfile } from '../data/clientProfile'
+import type { Client } from '../data/clients'
 import './client-experience-quick-access.css'
 
 const art: Record<ArtKey, string> = {
@@ -747,19 +750,18 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
   )
 }
 
-/* ── the Financial ID tab, which the design hasn't reached yet ── */
-function StubScreen() {
-  return (
-    <div className="cx-stub">
-      <div className="cx-stub-badge">Not built yet</div>
-      <h3>Financial ID</h3>
-      <p>
-        The profile the client keeps once the five adventures are done, and the artefact the advisor
-        opens on the desktop side. Not designed yet.
-      </p>
-    </div>
-  )
-}
+/* The page wants the client whose page it is. Hers, as her advisor's table
+   holds it. */
+const EMILY = {
+  name: clientProfile.owner,
+  email: 'emily.watson@email.com',
+  household: clientProfile.household,
+  kr: 82,
+  sentiment: 4,
+  status: 'complete',
+  lastSignIn: '05/03/2025',
+  tier: 'engaged',
+} as Client
 
 /* The in-phone menu. The only way back to the advisor side lives here, so the
    demo is driven entirely from inside the device. */
@@ -787,6 +789,7 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
 export default function ClientExperienceScreen({ onExit }: { onExit: () => void }) {
   const [tab, setTab] = useState<TabId>('adventures')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [pressing, setPressing] = useState(false)
@@ -867,9 +870,45 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
             </button>
           </header>
 
-          <div className="cx-viewport" ref={viewport}>
-            {tab === 'adventures' ? <AdventuresScreen /> : <StubScreen />}
+          <div
+            className={`cx-viewport${tab !== 'adventures' ? ' cx-viewport-id' : ''}${
+              tab !== 'adventures' && railOpen ? ' is-menu-open' : ''
+            }`}
+            ref={viewport}
+          >
+            {tab === 'adventures' ? (
+              <AdventuresScreen />
+            ) : (
+              /* Her Financial ID is the page her advisor opens, carrying her
+                 answers — one artefact, not a second rendering of it. It was a
+                 "not built yet" card here long after the page itself was
+                 built. */
+              <ClientProfileScreen
+                client={EMILY}
+                mine
+                onBack={() => setTab('adventures')}
+                ownerMenu={
+                  <button
+                    className="cxm-rail-btn"
+                    type="button"
+                    aria-label={railOpen ? 'Close my details' : 'My details'}
+                    aria-expanded={railOpen}
+                    onClick={() => setRailOpen((o) => !o)}
+                  >
+                    <span className="cxm-rail-initial">{EMILY.name.charAt(0)}</span>
+                  </button>
+                }
+              />
+            )}
           </div>
+          {tab !== 'adventures' && railOpen && (
+            <button
+              className="cxm-scrim"
+              type="button"
+              aria-label="Close my details"
+              onClick={() => setRailOpen(false)}
+            />
+          )}
 
           {sheet && <KnomeeSheet onClose={() => setSheet(false)} />}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}

@@ -703,6 +703,11 @@
 .cxm-viewport {
   padding: 0 var(--space-16) 22px;
 }
+/* Her own app's Financial ID tab needs the same gutter, and room at the foot
+   for the tab bar the phone keeps on screen. */
+.cx-viewport-id {
+  padding: 0 var(--space-16) 96px;
+}
 
 /* The rail as a drawer. It lives at the foot of the page on a phone, so the
    burger lifts it over the content rather than scrolling to it — the same

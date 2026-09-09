@@ -291,6 +291,25 @@ body {
 }
 
 /* ---------- Page title ---------- */
+/* A page title with an action opposite it. The title keeps its own margins —
+   the 48px box around it is what sets it apart from the tab row — and the row
+   only puts something at the far end of that box. */
+.page-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+  /* The title's own margins move up to the row, or the button centres on a box
+     that includes them and sits high of the word it is opposite. */
+  margin: var(--block-gap) 0 var(--label-gap);
+}
+.page-title-row .page-title {
+  margin: 0;
+}
+.page-title-row .btn {
+  flex: none;
+}
 .page-title {
   font-size: var(--text-5xl);
   font-weight: 600;

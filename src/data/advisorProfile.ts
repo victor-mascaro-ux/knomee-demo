@@ -1,8 +1,8 @@
 // The firm side of Marcus Hale's eight minutes — what a Dynasty rep reads
 // after the advisor finishes the flow in `advisorFlow.ts`.
 //
-// Two tabs live here: Advisor Readiness (the Knomee Quotient, retrained on an
-// advisor's decision) and the Recruiting Playbook. Independence ID needs
+// Two tabs live here: Advisor Readiness (the Enterprise Quotient, the same
+// three dimensions asked of an advisor) and the Recruiting Playbook. Independence ID needs
 // nothing new — it renders `independenceId` straight out of the flow.
 //
 // Everything quotable is read back out of the flow rather than retyped, so the
@@ -35,10 +35,12 @@ export const confidenceAnswers = (step('cf-q')?.statements ?? []).map((s) => ({
   value: Math.round(((s.value - 1) / 4) * 100),
 }))
 
-/* ── the Knomee Quotient, retrained on an advisor ────────────────────────
-   Same three dimensions as the client score; different questions feed them.
-   The three dimension scores are the only authored numbers on the tab — the
-   KQ, the tier and the tier band are all computed from them. */
+/* ── the Enterprise Quotient ─────────────────────────────────────────────
+   Same three dimensions as the client's Knomee Quotient; different questions
+   feed them, because the question is not how close this person is to knomee
+   but how ready they are to move onto a platform. The three dimension scores
+   are the only authored numbers on the tab — the EQ, the tier and the tier
+   band are all computed from them. */
 
 export interface Dimension {
   key: 'Intent' | 'Clarity' | 'Receptivity'
@@ -59,7 +61,7 @@ export interface Dimension {
 
 // Intent is weighted heaviest because it is the dimension that decides whether
 // the other two are worth a meeting this quarter.
-export const KQ_WEIGHTS: Record<Dimension['key'], number> = {
+export const EQ_WEIGHTS: Record<Dimension['key'], number> = {
   Intent: 0.45,
   Clarity: 0.3,
   Receptivity: 0.25,
@@ -107,20 +109,20 @@ export const dimensions: Dimension[] = [
   },
 ]
 
-const weighted = dimensions.reduce((sum, d) => sum + d.score * KQ_WEIGHTS[d.key], 0)
+const weighted = dimensions.reduce((sum, d) => sum + d.score * EQ_WEIGHTS[d.key], 0)
 
 /** The composite score, computed from the three dimensions above. */
 export const kq = Math.round(weighted)
 
 /* Tier bands are the engine's, shared with the retail side: 70–100 ready now,
    40–69 considering, 0–39 nurture. */
-export const KQ_TIERS = [
+export const EQ_TIERS = [
   { tier: 1, name: 'Ready Now', min: 70, max: 100 },
   { tier: 2, name: 'Considering', min: 40, max: 69 },
   { tier: 3, name: 'Nurture', min: 0, max: 39 },
 ] as const
 
-export const tier = KQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
+export const tier = EQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
 
 /** The banner under the ring: the score in a sentence, and what it is not. */
 export const tierBanner = {
@@ -355,6 +357,7 @@ export const words = {
 export const readinessTab: ReadinessTab = {
   snapshot: {
     question: 'How ready is this advisor to move?',
+    score: { name: 'Enterprise Quotient', abbr: 'EQ' },
     kq,
     dimensions: dimensions.map((d) => ({
       key: d.key,

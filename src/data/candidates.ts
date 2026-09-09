@@ -17,8 +17,8 @@
 
 import { advisor } from './advisorFlow'
 import {
-  KQ_WEIGHTS,
-  kq as marcusKQ,
+  EQ_WEIGHTS,
+  kq as marcusEQ,
   route as marcusRoute,
   teamSize as marcusTeam,
   tier as marcusTier,
@@ -113,21 +113,21 @@ export interface TierGroup {
 }
 
 export const tierGroups: TierGroup[] = [
-  { id: 'tier1', title: 'TIER 1 - READY NOW', range: '70-100 KQ' },
-  { id: 'tier2', title: 'TIER 2 - CONSIDERING', range: '40-69 KQ' },
-  { id: 'tier3', title: 'TIER 3 - NURTURE', range: '0-39 KQ' },
+  { id: 'tier1', title: 'TIER 1 - READY NOW', range: '70-100 EQ' },
+  { id: 'tier2', title: 'TIER 2 - CONSIDERING', range: '40-69 EQ' },
+  { id: 'tier3', title: 'TIER 3 - NURTURE', range: '0-39 EQ' },
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
 ]
 
 /* ── the score ──────────────────────────────────────────────────────────────
    The same weights the profile uses, so a row and the profile behind it can
-   never show two different KQs. */
+   never show two different EQs. */
 
 const clamp = (n: number) => Math.max(1, Math.min(100, Math.round(n)))
 
 export function composite(intent: number, clarity: number, receptivity: number) {
   return Math.round(
-    intent * KQ_WEIGHTS.Intent + clarity * KQ_WEIGHTS.Clarity + receptivity * KQ_WEIGHTS.Receptivity,
+    intent * EQ_WEIGHTS.Intent + clarity * EQ_WEIGHTS.Clarity + receptivity * EQ_WEIGHTS.Receptivity,
   )
 }
 
@@ -356,7 +356,7 @@ const span = (rand: () => number, [lo, hi]: [number, number]) => clamp(lo + rand
 const marcus: Candidate = {
   name: advisor.name,
   firm: advisor.firm,
-  kq: marcusKQ,
+  kq: marcusEQ,
   intent: marcusDimensions.find((d) => d.key === 'Intent')!.score,
   clarity: marcusDimensions.find((d) => d.key === 'Clarity')!.score,
   receptivity: marcusDimensions.find((d) => d.key === 'Receptivity')!.score,
@@ -505,7 +505,7 @@ export const STAGES: Stage[] = [
 export const candidateStats = {
   total: candidates.length,
   scored: scored.length,
-  avgKQ: mean(scored.map((c) => c.kq as number)),
+  avgEQ: mean(scored.map((c) => c.kq as number)),
   avgIntent: mean(scored.map((c) => c.intent as number)),
   avgClarity: mean(scored.map((c) => c.clarity as number)),
   avgReceptivity: mean(scored.map((c) => c.receptivity as number)),

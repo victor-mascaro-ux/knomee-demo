@@ -36,9 +36,9 @@ import {
 /* The same three tiers the advisor's dashboard drills into, and the insight
    each one surfaces as its "why". */
 const TIER_META = [
-  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
-  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 EQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 EQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 EQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -114,14 +114,14 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
       bodyClassName="cmd-body"
       defaultOpen
     >
-      {/* Layer 0 — the pulse. KQ leads, as on the advisor's screen: it is the
+      {/* Layer 0 — the pulse. EQ leads, as on the advisor's screen: it is the
           number the page ranks on and the one the tier bar is a split of. */}
       <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
-            <span className="metric-label">AVG KQ SCORE</span>
+            <span className="metric-label">AVG EQ SCORE</span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
-                {candidateStats.avgKQ.toFixed(1)}
+                {candidateStats.avgEQ.toFixed(1)}
               </span>
             </div>
           </div>
@@ -231,7 +231,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
               <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
                 {lead.tier}
               </span>
-              <span className="cmd-lead-kq">KQ {lead.kq}</span>
+              <span className="cmd-lead-kq">EQ {lead.kq}</span>
               <span className="cmd-lead-niche">{lead.niche}</span>
               <span className="cmd-lead-more">
                 {listOpen ? 'Hide' : `See all ${flagged.length}`}
@@ -271,7 +271,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
                       {t.tier}
                     </span>
-                    <span className="talk-kq">KQ {t.kq}</span>
+                    <span className="talk-kq">EQ {t.kq}</span>
                     <span className="talk-niche">{t.niche}</span>
                   </div>
                   <div className="talk-chips">
@@ -405,9 +405,9 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                 type="button"
                 className="th-sort th-sort-btn"
                 onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
-                aria-label="Sort by KQ score"
+                aria-label="Sort by EQ score"
               >
-                KQ Score
+                EQ Score
                 <span
                   className={`th-caret ${sortDir ? 'is-active' : ''} ${
                     sortDir === 'asc' ? 'is-asc' : ''

@@ -31,6 +31,13 @@ export interface KqDimension {
 export interface Snapshot {
   /** "How ready is this prospect to convert?" — the ring's own subtitle. */
   question: string
+  /** What this score is called where it is shown. The retail side scores a
+      prospect's relationship with knomee — the Knomee Quotient. The enterprise
+      side scores an advisor against a platform, which is a different question
+      with a different name: the Enterprise Quotient. Same ring, same three
+      dimensions, so the name travels with the data rather than being hard-coded
+      into the component both tabs share. */
+  score?: { name: string; abbr: string }
   kq: number
   dimensions: KqDimension[]
   tier: {
@@ -154,6 +161,7 @@ const spendsOnJoy = conf('bring me joy')
 export const prospectReadiness: ReadinessTab = {
   snapshot: {
     question: 'How ready is this prospect to convert?',
+    score: { name: 'Knomee Quotient', abbr: 'KQ' },
     kq: 81,
     dimensions: [
       {
