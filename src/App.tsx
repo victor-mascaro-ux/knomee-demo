@@ -4192,6 +4192,18 @@ export default function App() {
               {t.label}
             </button>
           ))}
+          {/* Segmentation reads the same book Analytics does, cut a different
+              way, so it belongs beside it rather than behind a demo panel. It
+              takes the page over rather than filling the tab body — it has its
+              own back — so it is a button in the row, not a fourth tab, and
+              the underline never has to point at it. */}
+          <button
+            className="tab"
+            type="button"
+            onClick={() => setSegmentationOpen(true)}
+          >
+            Segmentation
+          </button>
         </nav>
 
         {screen === 'prospects' &&
