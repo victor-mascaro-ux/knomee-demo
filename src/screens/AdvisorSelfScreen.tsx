@@ -48,12 +48,21 @@ import {
   loadAnswers,
   sampleAnswers,
   saveAnswers,
-  today,
   unlockView,
   type Answers,
   type Derived,
   type Grade,
 } from '../data/advisorAnswers'
+import {
+  downloadCsv,
+  endpoint,
+  ledger,
+  noteSitting,
+  pushSitting,
+  pushUnsent,
+  setEndpoint,
+  type Sitting,
+} from '../data/advisorRecord'
 import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 import './advisor-flow.css'
@@ -332,6 +341,71 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
   )
 }
 
+/** The last screen: the three questions, the two ways on to the artefacts, and
+    what happened to the answers. It is a component rather than a branch of the
+    switch below because it holds one piece of state — whether this sitting has
+    been handed to the spreadsheet yet. */
+function EndQuestions({
+  d,
+  onHome,
+  onReport,
+  onSend,
+  onRecord,
+}: {
+  d: Derived
+  onHome: () => void
+  onReport: () => void
+  onSend: () => void
+  onRecord: () => void
+}) {
+  const [sent, setSent] = useState(false)
+  const wired = !!endpoint()
+  return (
+    <div className="af-unlock">
+      <h2 className="af-h1">Your three questions</h2>
+      <p className="af-body">Put these to every platform you’re considering. Including this one.</p>
+      <ol className="af-qs">
+        {d.id.questions.map((q, i) => (
+          <li key={q}>
+            <span className="af-getnum">{i + 1}</span>
+            <span>{q}</span>
+          </li>
+        ))}
+      </ol>
+      <button className="cx-start af-wide" type="button" onClick={onHome}>
+        View my Business ID
+      </button>
+      {/* The other half of the same eight minutes: the read a platform gets
+          handed. It is the thing the flow is actually for, and hiding it from
+          the person who answered would be the wrong way round. */}
+      <button className="af-secondary" type="button" onClick={onReport}>
+        See my readiness and toolkit
+      </button>
+      {/* What became of the answers. Said plainly, including the part we
+          cannot promise: a post to the spreadsheet comes back opaque, so this
+          claims it was sent and never that it arrived. */}
+      {wired ? (
+        <button
+          className="af-secondary"
+          type="button"
+          disabled={sent}
+          onClick={() => {
+            onSend()
+            setSent(true)
+          }}
+        >
+          {sent ? 'Sent to the spreadsheet' : 'Send my answers to the spreadsheet'}
+        </button>
+      ) : (
+        <button className="af-secondary" type="button" onClick={onRecord}>
+          Where my answers are kept
+        </button>
+      )}
+      <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
+    </div>
+  )
+}
+
 /* ── the step renderer ── */
 
 function StepBody({
@@ -341,6 +415,8 @@ function StepBody({
   d,
   onHome,
   onReport,
+  onRecord,
+  onSend,
   onAdventure,
 }: {
   step: Step
@@ -349,6 +425,8 @@ function StepBody({
   d: Derived
   onHome: () => void
   onReport: () => void
+  onRecord: () => void
+  onSend: () => void
   onAdventure: (id: AdventureId) => void
 }) {
   switch (step.kind) {
@@ -562,30 +640,7 @@ function StepBody({
 
     case 'questions':
       return (
-        <div className="af-unlock">
-          <h2 className="af-h1">Your three questions</h2>
-          <p className="af-body">
-            Put these to every platform you’re considering. Including this one.
-          </p>
-          <ol className="af-qs">
-            {d.id.questions.map((q, i) => (
-              <li key={q}>
-                <span className="af-getnum">{i + 1}</span>
-                <span>{q}</span>
-              </li>
-            ))}
-          </ol>
-          <button className="cx-start af-wide" type="button" onClick={onHome}>
-            View my Business ID
-          </button>
-          {/* The other half of the same eight minutes: the read a platform gets
-              handed. It is the thing the flow is actually for, and hiding it
-              from the person who answered would be the wrong way round. */}
-          <button className="af-secondary" type="button" onClick={onReport}>
-            See my readiness and toolkit
-          </button>
-          <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
-        </div>
+        <EndQuestions d={d} onHome={onHome} onReport={onReport} onSend={onSend} onRecord={onRecord} />
       )
 
     default:
@@ -599,17 +654,37 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
   // The sheet outlives the session: answering eight minutes of questions and
   // losing them to a reload is not a thing to do to anyone.
   const [answers, setAnswers] = useState<Answers>(loadAnswers)
-  const [view, setView] = useState<'flow' | 'report'>('flow')
+  const [view, setView] = useState<'flow' | 'report' | 'record'>('flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
   useEffect(() => saveAnswers(answers), [answers])
+
+  // Two stores, on purpose. `saveAnswers` holds the sheet you are filling in
+  // and a restart wipes it — that is what resets the Business ID. The record
+  // is the other one: every sitting this device has seen, written on every
+  // answer, and a restart adds to it rather than clearing it. So the answers
+  // outlive the ID they built.
+  const answered = !d.empty || Object.keys(answers.text).length > 0 ||
+    Object.keys(answers.choice).length > 0 || !!answers.identity.name.trim()
+  useEffect(() => {
+    if (answered) noteSitting(answers, d, answers.sittingId)
+  }, [answers, d, answered])
 
   const restart = useCallback((next: Answers) => {
     setAnswers(next)
     setView('flow')
   }, [])
 
+  /* Closing a sitting: hand it to the spreadsheet, then start an empty sheet
+     under a new id — a new person, a new Business ID. The row it just sent
+     stays on the record whether or not the post got anywhere. */
+  const close = useCallback(() => {
+    if (answered) void pushSitting(noteSitting(answers, d, answers.sittingId))
+    restart(emptyAnswers())
+  }, [answered, answers, d, restart])
+
   if (view === 'report') return <FlowReport d={d} onBack={() => setView('flow')} />
+  if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
     <FlowPhone
@@ -618,10 +693,15 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
       d={d}
       onExit={onExit}
       onReport={() => setView('report')}
+      onRecord={() => setView('record')}
+      onSend={() => {
+        if (answered) void pushSitting(noteSitting(answers, d, answers.sittingId))
+      }}
+      onRestart={close}
       onSample={() => restart(sampleAnswers())}
-      onClear={() => {
+      onDiscard={() => {
         clearAnswers()
-        restart({ ...emptyAnswers(), completed: today() })
+        restart(emptyAnswers())
       }}
     />
   )
@@ -635,16 +715,24 @@ function FlowPhone({
   d,
   onExit,
   onReport,
+  onRecord,
+  onSend,
+  onRestart,
   onSample,
-  onClear,
+  onDiscard,
 }: {
   answers: Answers
   edit: Edit
   d: Derived
   onExit: () => void
   onReport: () => void
+  onRecord: () => void
+  onSend: () => void
+  /** Close this sitting — record it, then start an empty sheet. */
+  onRestart: () => void
   onSample: () => void
-  onClear: () => void
+  /** Throw this sitting's sheet away. The record keeps the row. */
+  onDiscard: () => void
 }) {
   // Where you have been, not just where you are: tapping a row on the
   // adventures list jumps across the flow, and Back has to mean "the screen I
@@ -655,6 +743,9 @@ function FlowPhone({
   const [tab, setTab] = useState<'flow' | 'finid'>('flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
+  // Read as the sheet opens rather than held in state: the record is written by
+  // the parent on every answer, and a count that lags is worse than no count.
+  const recorded = menuOpen ? ledger().length : 0
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   useDarkGround()
@@ -807,6 +898,8 @@ function FlowPhone({
                 d={d}
                 onHome={() => setTab('finid')}
                 onReport={onReport}
+                onRecord={onRecord}
+                onSend={onSend}
                 onAdventure={openAdventure}
               />
             )}
@@ -911,6 +1004,9 @@ function FlowPhone({
                     <ArrowRight />
                   </button>
                 )}
+                {/* Restarting is how the phone gets handed to the next person:
+                    this sitting goes to the spreadsheet, and the sheet — and so
+                    the Business ID — starts empty. The answers stay recorded. */}
                 <button
                   className="cx-sheet-item"
                   type="button"
@@ -918,9 +1014,25 @@ function FlowPhone({
                     setMenuOpen(false)
                     setTab('flow')
                     reset(0)
+                    onRestart()
                   }}
                 >
-                  Restart the flow
+                  Restart for the next person
+                  <ArrowRight />
+                </button>
+                <div className="cx-sheet-hint">
+                  Records this sitting, then clears the sheet. The Business ID resets; the answers
+                  stay on the spreadsheet.
+                </div>
+                <button
+                  className="cx-sheet-item"
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onRecord()
+                  }}
+                >
+                  Recorded answers{recorded ? ` · ${recorded}` : ''}
                   <ArrowRight />
                 </button>
                 {/* The worked example, one tap away. It is what this flow was
@@ -946,10 +1058,10 @@ function FlowPhone({
                     setMenuOpen(false)
                     setTab('flow')
                     reset(0)
-                    onClear()
+                    onDiscard()
                   }}
                 >
-                  Clear my answers
+                  Discard this sitting
                   <ArrowRight />
                 </button>
                 <button className="cx-sheet-item" type="button" onClick={onExit}>
@@ -1017,6 +1129,141 @@ function FlowReport({ d, onBack }: { d: Derived; onBack: () => void }) {
       </header>
       <main className="content content-profile">
         <AdvisorProfileScreen mine tabs data={d} onBack={onBack} />
+      </main>
+    </div>
+  )
+}
+
+/* ── the record ──────────────────────────────────────────────────────────
+   Where the answers went, and the one thing an operator has to set up for them
+   to reach Drive. It is a plain page rather than another phone screen: this is
+   back-of-house, and the person reading it is running the demo rather than
+   taking it. */
+
+/* The sheet the rows land on. Not a secret — it is a Drive file id, and the
+   file itself is protected by Drive's own permissions — and having it here
+   saves the operator hunting through Drive for it. */
+const SHEET_URL =
+  'https://docs.google.com/spreadsheets/d/1BS4zugcZQQceTAUfBjrVfx6BzweonWHwXppIgNIHBmk/edit'
+
+function RecordScreen({ onBack }: { onBack: () => void }) {
+  const [url, setUrl] = useState(endpoint())
+  const [rows, setRows] = useState<Sitting[]>(ledger)
+  const [note, setNote] = useState('')
+  const waiting = rows.filter((r) => !r.sentAt).length
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  const save = () => {
+    setEndpoint(url)
+    setNote(url ? 'Saved. New sittings will be posted to it.' : 'Cleared. Nothing will be posted.')
+  }
+
+  const send = async () => {
+    setNote('Sending…')
+    const n = await pushUnsent()
+    setRows(ledger())
+    setNote(
+      n === 0
+        ? 'Nothing was sent — check the web-app URL above.'
+        : `${n} sitting${n === 1 ? '' : 's'} posted. Check the spreadsheet: a post from a page like this one comes back blank, so this cannot confirm they landed.`,
+    )
+  }
+
+  return (
+    <div className="page af-report">
+      <header className="af-report-bar">
+        <button className="af-report-back" type="button" onClick={onBack}>
+          ‹ Back to the flow
+        </button>
+        <span className="af-report-note">
+          Where the answers are kept — {rows.length} sitting{rows.length === 1 ? '' : 's'} on this
+          device{waiting ? `, ${waiting} not yet posted` : ''}
+        </span>
+      </header>
+      <main className="content content-profile">
+        <div className="af-record">
+          <h1 className="af-record-h1">Recorded answers</h1>
+          <p className="af-record-body">
+            Every sitting is written here as it is answered, and stays here when the flow is
+            restarted — restarting resets the Business ID, not the record. Each one is posted to a
+            Google Sheet in Drive as a row on its own tab, named after the person who answered.
+          </p>
+
+          <section className="af-record-card">
+            <h2 className="af-record-h2">The spreadsheet</h2>
+            <p className="af-record-body">
+              The rows land in{' '}
+              <a className="af-record-link" href={SHEET_URL} target="_blank" rel="noreferrer">
+                Knomee — Advisor Flow Answers
+              </a>
+              , one tab per person. This page has no server of its own, so it hands each row to an
+              Apps Script web app bound to that sheet: deploy the script in{' '}
+              <code>docs/answers-sheet.md</code>, then paste its <code>/exec</code> URL here. Until
+              then the answers still collect on this device and can be downloaded.
+            </p>
+            <label className="af-label">
+              Apps Script web app URL
+              <input
+                className="af-field"
+                value={url}
+                placeholder="https://script.google.com/macros/s/…/exec"
+                onChange={(e) => setUrl(e.target.value)}
+              />
+            </label>
+            <div className="af-record-actions">
+              <button className="cx-start" type="button" onClick={save}>
+                Save the URL
+              </button>
+              <button className="af-secondary af-record-btn" type="button" onClick={() => void send()}>
+                Post {waiting || 'the'} unsent {waiting === 1 ? 'sitting' : 'sittings'}
+              </button>
+              <button
+                className="af-secondary af-record-btn"
+                type="button"
+                onClick={() => downloadCsv(rows)}
+                disabled={!rows.length}
+              >
+                Download CSV
+              </button>
+            </div>
+            {note && <p className="af-record-note">{note}</p>}
+          </section>
+
+          <section className="af-record-card">
+            <h2 className="af-record-h2">Sittings</h2>
+            {rows.length === 0 ? (
+              <p className="af-record-body">Nothing answered on this device yet.</p>
+            ) : (
+              <table className="af-record-table">
+                <thead>
+                  <tr>
+                    <th>Tab</th>
+                    <th>Answered</th>
+                    <th>EQ</th>
+                    <th>Stage</th>
+                    <th>Posted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...rows].reverse().map((r) => (
+                    <tr key={r.id}>
+                      <td>{r.tab}</td>
+                      <td>{new Date(r.at).toLocaleString()}</td>
+                      <td>{r.values.EQ}</td>
+                      <td>{r.values.Stage}</td>
+                      <td className={r.sentAt ? 'af-record-sent' : 'af-record-waiting'}>
+                        {r.sentAt ? new Date(r.sentAt).toLocaleString() : 'not yet'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   )
