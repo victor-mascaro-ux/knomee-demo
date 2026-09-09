@@ -238,17 +238,15 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
   }
 
   return (
-    <section className="card cmd-card">
-      <header className="card-head">
-        <div className="card-title">
-          <ChartIcon color="#7639a1" />
-          <span>Actionable Metrics</span>
-        </div>
-        <HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />
-      </header>
-
-      <div className="cmd-body">
-        {/* Layer 0 — the pulse */}
+    <CollapsibleCard
+      className="cmd-card"
+      icon={<ChartIcon color="#7639a1" />}
+      title="Actionable Metrics"
+      hint="Your book at a glance, who to talk to, and the reasoning behind it."
+      bodyClassName="cmd-body"
+      defaultOpen
+    >
+      {/* Layer 0 — the pulse */}
         <div className="metric-tiles cmd-pulse">
           {/* KQ leads: it is the number the whole screen ranks on, and the one
               the tier bar beside it is a distribution of. The count follows. */}
@@ -429,8 +427,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
             </div>
           </div>
         </div>
-      </div>
-    </section>
+    </CollapsibleCard>
   )
 }
 

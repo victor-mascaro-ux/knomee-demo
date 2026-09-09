@@ -191,10 +191,10 @@ body {
 .content {
   max-width: var(--content-max);
   margin: 0 auto;
-  /* The sides carry the page inset. The top does not: the tabs are a strip of
-     navigation hanging off the bar above them, and a full page inset between
-     the two read as a gap rather than as breathing room. */
-  padding: var(--tight-gap) var(--page-pad) var(--label-gap);
+  /* Every inset is the page inset. Cutting the top to 16px did close the gap
+     under the bar, but it also pulled the whole page up against it and the
+     screen stopped breathing — the frame is what gives a dense table room. */
+  padding: var(--page-pad) var(--page-pad) var(--space-40);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gutter);
@@ -295,12 +295,11 @@ body {
   font-size: var(--text-5xl);
   font-weight: 600;
   color: var(--plum);
-  /* The title labels the page the tabs just switched to, so it takes the label
-     step, not the block step. And it sets its own leading: `normal` gave a
-     32px word a 48px box, so 16px of the space above and below it was the line
-     box rather than the margin, and no margin token could reach it. */
-  line-height: 1.15;
-  margin: var(--label-gap) 0 var(--label-gap);
+  /* Back to the block step above and the label step below, with the title's
+     own `normal` leading. The 48px box around a 32px word is what sets the
+     title apart from the tabs; 1.15 made it tight enough to read as a
+     subheading of the tab row rather than as the page's name. */
+  margin: var(--block-gap) 0 var(--label-gap);
   letter-spacing: -0.5px;
 }
 
@@ -521,10 +520,8 @@ body {
   color: #a69fb5;
 }
 /* Incomplete-profiles footnote, moved below the legend. */
-/* The 10px grid gap above this already separates it from the legend; the
-   12px margin was a second gap stacked on the first. */
 .dist-foot {
-  margin: 0;
+  margin: 12px 0 0;
   font-size: 11px;
   font-weight: 600;
   color: #a69fb5;
@@ -5198,7 +5195,7 @@ button.name-link-btn:hover .name-text {
   padding: 20px var(--card-pad);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--tight-gap);
 }
 .cmd-pulse {
   margin: 0;
