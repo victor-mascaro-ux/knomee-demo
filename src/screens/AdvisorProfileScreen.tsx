@@ -262,11 +262,11 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
             {/* The second half of the same adventure: where he wants his days to
                 go. It rides in this card rather than a new one, so the page
                 keeps the client page's shape. */}
-            <div className="ap-attention">
+            <div className="pp-attention">
               <div>
                 <span className="pp-fy-label">More attention</span>
                 {d.attention.more.map((m) => (
-                  <div className="ap-attn-row ap-attn-more" key={m}>
+                  <div className="pp-attn-row pp-attn-more" key={m}>
                     {m}
                   </div>
                 ))}
@@ -274,7 +274,7 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
               <div>
                 <span className="pp-fy-label">Less attention</span>
                 {d.attention.less.map((m) => (
-                  <div className="ap-attn-row ap-attn-less" key={m}>
+                  <div className="pp-attn-row pp-attn-less" key={m}>
                     {m}
                   </div>
                 ))}

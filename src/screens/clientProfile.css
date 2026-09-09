@@ -29,6 +29,7 @@
   --dial-1: #d9f2ed;
   --dial-2: #6fd0bf;
   --dial-3: #086375;
+  --attn-tint: var(--k-teal-light, #e6f7f5);
   --avatar-bg: var(--k-teal-light, #e6f7f5);
   --avatar-ink: var(--k-ocean, #086375);
   --add-ink: var(--k-ocean, #086375);
