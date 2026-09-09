@@ -315,7 +315,8 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  /* Tight: the bars and their stage name are one mark, not two stacked ones. */
+  gap: 1px;
   flex: none;
   /* The stage names differ in length — without a fixed column each row centred
      its own block, so the bars never lined up down the list. Narrow enough to
@@ -335,10 +336,11 @@
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
-  height: 18px;
-  /* Room under the bars for the level marker, so it never rides into the stage
-     name beneath. */
-  padding-bottom: 8px;
+  /* Tallest bar (5 + 5x2.4 = 17px) plus the marker's 8px. Under border-box a
+     height of 18 left a 10px content area, so the bars overflowed it upward and
+     sat high in the row. */
+  height: 22px;
+  padding-bottom: 5px;
 }
 .pp-bar-mark {
   position: absolute;
