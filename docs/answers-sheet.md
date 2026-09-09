@@ -132,5 +132,17 @@ Business ID can be rebuilt from it exactly.
 rather than adding a second one, so an operator can post mid-flow and again at
 the end without making a mess.
 
+## When the columns change
+
+Writing only ever *adds* columns, so a tab written under an older shape keeps
+whatever it had. To bring them all into line: in the Apps Script editor, run
+**`alignTabs`**. It deletes any column the prototype no longer posts, taking its
+data with it so the remaining columns stay under their own headers, and logs
+what it dropped from each tab. It only ever deletes — a column still being
+posted is never touched, so it cannot lose an answer.
+
+Anything you added to a tab by hand counts as a leftover, so keep your own notes
+on their own sheet.
+
 Every figure in these sheets is placeholder demo data unless a real person
 typed it.

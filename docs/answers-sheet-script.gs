@@ -95,6 +95,73 @@ function testPayload(where) {
   };
 }
 
+/**
+ * Bring every tab into line with the shape the prototype posts now.
+ *
+ * Writing only ever ADDS columns, so a tab written under an older shape keeps
+ * whatever it had — the score, the tier, the stage and the three questions used
+ * to be columns here before they moved back to being computed from the answers.
+ * This deletes the leftovers, taking their data with them so the remaining
+ * columns stay lined up with their own headers. Nothing else is touched.
+ *
+ * Run it from the editor after the shape changes. It only deletes; a column
+ * the prototype still posts is never removed, so it cannot lose an answer.
+ * Anything YOU added to a tab by hand is a leftover as far as this is
+ * concerned, so move it to its own sheet first.
+ */
+function alignTabs(wanted) {
+  // The current shape, learned from the last row the prototype posted, unless
+  // it is passed in. A tab is aligned against the widest header on the sheet,
+  // which is the newest one.
+  var sheet = book();
+  var keep = wanted || currentShape();
+  var report = [];
+  sheet.getSheets().forEach(function (tab) {
+    var name = tab.getName();
+    if (name === '_test') return;
+    var width = tab.getLastColumn();
+    if (!width) return;
+    var head = tab.getRange(1, 1, 1, width).getValues()[0].map(String);
+    var dropped = [];
+    // Right to left: deleting a column shifts everything after it left.
+    for (var i = head.length - 1; i >= 0; i--) {
+      if (head[i] && keep.indexOf(head[i]) === -1) {
+        dropped.push(head[i]);
+        tab.deleteColumn(i + 1);
+      }
+    }
+    if (dropped.length) report.push(name + ': dropped ' + dropped.reverse().join(', '));
+    else report.push(name + ': already aligned');
+  });
+  Logger.log(report.join('
+'));
+  return report;
+}
+
+var SHAPE_KEY = 'posted-shape';
+
+/**
+ * The columns the prototype is posting now. Every write records its own header
+ * list, so this is remembered rather than guessed. Before the first write under
+ * this version of the script there is nothing to remember, so it falls back to
+ * the narrowest header on the sheet — this change removed columns, so the
+ * newest shape is the smallest one.
+ */
+function currentShape() {
+  var stored = PropertiesService.getScriptProperties().getProperty(SHAPE_KEY);
+  if (stored) return JSON.parse(stored);
+  var narrowest = [];
+  book()
+    .getSheets()
+    .forEach(function (tab) {
+      var width = tab.getLastColumn();
+      if (tab.getName() === '_test' || !width) return;
+      var head = tab.getRange(1, 1, 1, width).getValues()[0].map(String);
+      if (!narrowest.length || head.length < narrowest.length) narrowest = head;
+    });
+  return narrowest;
+}
+
 function record(body) {
   var name = sheetName(body.tab);
   var headers = body.headers || [];
@@ -106,6 +173,11 @@ function record(body) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
+    // What the prototype is posting today, so `alignTabs` never has to guess.
+    // The `_test` payload is its own four columns and is not the shape.
+    if (name !== '_test') {
+      PropertiesService.getScriptProperties().setProperty(SHAPE_KEY, JSON.stringify(headers));
+    }
     var sheet = book();
     var tab = sheet.getSheetByName(name) || createTab(sheet, name, headers);
     var head = headerRow(tab, headers);
