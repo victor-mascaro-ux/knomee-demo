@@ -650,11 +650,13 @@
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease,
     background 0.16s ease;
 }
-/* Goals and questions are openable rows, so they take the dashboard's flat
-   tint rather than lifting off the page — a row and a card should not answer
-   the pointer in two different languages. */
+/* One hover for every white tile in a card: it lifts, casts, and outlines in
+   purple. Goals and questions keep the dashboard's background tint on top of
+   it, since they are rows you open. */
 .pp-highlight:hover,
+.pp-goal:hover,
 .pp-quote:hover,
+.pp-question:hover,
 .pp-event:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(20, 10, 40, 0.09);
