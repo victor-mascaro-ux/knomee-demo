@@ -151,6 +151,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 var(--space-24);
+  align-items: start;
+}
+/* The rows stack in the column itself, so the gap belongs here — the goal cards
+   were sitting flush against each other. */
+.cp-goal-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
 }
 .cp-goal-col-head {
   display: flex;
@@ -158,18 +166,18 @@
   padding: 0 var(--space-12) var(--space-6);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  color: var(--text-link);
+  /* The column labels are purple, not plum — they head the table rather than
+     titling the card. */
+  color: var(--purple-bolt, #9b51e0);
 }
 .cp-goal-tags {
   display: inline-flex;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
-/* One pill for every goal tag. They used to be three different colours at
-   semibold — a green "New", a grape "Sensitive", a teal "Updated" — which read
-   as three unrelated components shouting over the goal title. The design system
-   sets them as one quiet lilac pill in sentence case at medium weight, the way
-   the Life Events tags are set. */
+/* One pill, three states. They share a shape, a size and a medium weight — what
+   separates them is hue, drawn from the design system's own soft pairs rather
+   than the semibold green/grape/teal that shouted over the goal title. */
 .cp-goal-tag {
   font-size: 11px;
   font-weight: var(--weight-medium, 500);
@@ -178,6 +186,20 @@
   border-radius: 999px;
   background: var(--k-grape-light);
   color: var(--k-grape);
+}
+.cp-goal-tag.is-new {
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+}
+.cp-goal-tag.is-updated {
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+}
+/* Neutral on purpose: "Sensitive" is a note to handle the goal carefully, not a
+   badge to draw the eye. */
+.cp-goal-tag.is-sensitive {
+  background: var(--pearl, #efeef2);
+  color: var(--text-secondary, #6a6480);
 }
 /* The disclosure that sits in a card header rather than its footer: compact and
    right-aligned, where .pp-show is full-width and centred. */
