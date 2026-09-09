@@ -4177,7 +4177,8 @@ export default function App() {
                 <button className="menu-item" type="button">
                   Sign Out
                 </button>
-                <div className="menu-divider" />
+                {/* No divider element here: .menu-hint draws its own rule, and
+                    the two of them together read as one line printed twice. */}
                 {/* Segmentation, the welcome page, the phone previews and the
                     advisor's own flow used to be listed here, grouped under
                     Analysis / Prospect view / Mobile. None of them is a place a
