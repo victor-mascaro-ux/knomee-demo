@@ -129,6 +129,16 @@
   font-weight: 700;
   color: var(--avatar-ink, #7639a1);
 }
+/* RailFace wraps its photograph in the small initial badge the phone rail
+   uses, and that badge is an inline span with no box of its own — so
+   `width: 100%` on the image below resolved against the span rather than
+   against this 96px circle, and the photograph came out a fraction of it.
+   The wrapper fills the circle; the image fills the wrapper. */
+.pp-avatar .cxm-rail-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .pp-avatar img {
   width: 100%;
   height: 100%;

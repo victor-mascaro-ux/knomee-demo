@@ -373,7 +373,6 @@ const marcus: Candidate = {
   progress: 'completed',
   topAction: marcusTopAction.title,
   tier: `tier${marcusTier.tier}` as Tier,
-  isNew: true,
 }
 
 /* Marcus takes the first "wants it, hasn't started" slot; the other 39 are
