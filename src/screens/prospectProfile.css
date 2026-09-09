@@ -565,12 +565,13 @@
   border-radius: 10px;
   padding: 10px 14px;
 }
-/* The answer, at the weight of the card title asking for it — it sat a step
-   lighter than the "Confidence" heading beside it and read as a caption. One
-   rule: the prospect, client and advisor pages all render this class. */
+/* The answer, in the page's regular weight. The gauge beside it is what
+   carries the result; bolding the word made two things shout the same thing at
+   each other. One rule: the prospect, client and advisor pages all render this
+   class. */
 .pp-confidence-label {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 400;
 }
 .pp-gauge {
   line-height: 0;
