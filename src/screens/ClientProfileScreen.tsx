@@ -292,10 +292,9 @@ export default function ClientProfileScreen({
             ))}
           </div>
 
-          {clientMenu}
-
           <div className="pp-title-row">
             <h1 className="pp-title">{client.name}’s Financial ID</h1>
+            {clientMenu}
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
             </button>

@@ -641,15 +641,30 @@
 .cxm-appbar {
   justify-content: space-between;
 }
-/* Emily's initial, above her name, opening her rail. Sized against the rail's
-   own portrait — the same disc, small enough to sit in a line of page. */
+/* The title breaks to its own line and the controls share the one under it —
+   the initial and Download PDF, side by side, rather than three stacked rows. */
+.cxm-viewport .pp-title-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.cxm-viewport .pp-title-row .pp-title {
+  flex: 1 0 100%;
+}
+/* Emily's initial, under her name, opening her rail. Sized to the download
+   button beside it so the row reads as one line of controls. */
 .cxm-rail-btn {
+  /* Matched to the download button beside it — 44px there, 40px here, the
+     circle reading a shade lighter than the filled control it shares the row
+     with rather than competing with it. */
   width: 40px;
   height: 40px;
+  flex: none;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  margin: 2px 0 10px;
+  margin: 0;
   padding: 0;
   cursor: pointer;
   background: var(--avatar-bg, #e6f7f5);
@@ -667,7 +682,7 @@
 }
 .cxm-rail-initial {
   font-family: inherit;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1;
 }
