@@ -309,42 +309,25 @@
   color: var(--text-strong, #240446);
   font-size: 16px;
 }
-/* Bars and stage name stack: the bars place the stage on the five-step scale,
-   the name says what that step is. */
+/* Just the meter. The stage name it used to carry is on hover now, which frees
+   the column the name was sizing and puts the bars on the row's centre line. */
 .pp-readiness {
   display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  /* Tight: the bars and their stage name are one mark, not two stacked ones. */
-  gap: 1px;
   flex: none;
-  /* The stage names differ in length — without a fixed column each row centred
-     its own block, so the bars never lined up down the list. Narrow enough to
-     leave the goal its width: "Pre-Contemplation", the one long label, wraps at
-     its own hyphen rather than setting the column for the other four. */
-  width: 62px;
-}
-.pp-stage {
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1.15;
-  text-align: center;
 }
 .pp-bars {
   position: relative;
   display: inline-flex;
   align-items: flex-end;
-  gap: 2px;
-  /* Tallest bar (5 + 5x2.4 = 17px) plus the marker's 8px. Under border-box a
-     height of 18 left a 10px content area, so the bars overflowed it upward and
-     sat high in the row. */
-  height: 22px;
-  padding-bottom: 5px;
+  gap: 1.5px;
+  /* Tallest bar (4 + 5x2.8 = 18px) plus the marker's room beneath it. */
+  height: 25px;
+  padding-bottom: 7px;
 }
 .pp-bar-mark {
   position: absolute;
-  bottom: 1px;
+  /* Sits clear below the bars rather than nosing into them. */
+  bottom: 0;
   width: 0;
   height: 0;
   transform: translateX(-50%);
@@ -353,9 +336,10 @@
   border-bottom: 5px solid var(--k-teal, #3dbdaa);
 }
 .pp-bar {
-  width: 3.5px;
-  /* Square, as drawn — the rounded caps softened the ramp into a blur at this
-     size. */
+  /* Width comes from the component, which needs it to place the marker.
+     Rounded, which the source artwork is not — knomee's design system takes the
+     softer corner, so the bars follow it. */
+  border-radius: 2px;
   background: #e2def0;
 }
 .pp-bar.on {

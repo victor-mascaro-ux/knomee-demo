@@ -20,23 +20,22 @@ const TTM_STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action
 /* The bars climb in colour as well as height, deep plum through to violet, so
    the ramp reads as progress. Unfilled steps keep the pale wash. */
 const BAR_RAMP = ['#240446', '#4c1d95', '#7038c8', '#9b51e0', '#b57ceb']
-const BAR_W = 3.5
-const BAR_GAP = 2
+const BAR_W = 5
+const BAR_GAP = 1.5
 
 export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
+  const label = stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'
   return (
-    <span
-      className="pp-readiness"
-      aria-label={stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'}
-    >
+    <span className="pp-readiness" title={stage ?? undefined} aria-label={label}>
       <span className="pp-bars" aria-hidden>
         {[1, 2, 3, 4, 5].map((i) => (
           <span
             key={i}
             className={`pp-bar ${i <= level ? 'on' : ''}`}
             style={{
-              height: 5 + i * 2.4,
+              width: BAR_W,
+              height: 4 + i * 2.8,
               ...(i <= level ? { background: BAR_RAMP[i - 1] } : null),
             }}
           />
@@ -50,11 +49,6 @@ export function ReadinessLevel({ level }: { level: number }) {
           />
         )}
       </span>
-      {stage && (
-        <span className="pp-stage" style={{ color: BAR_RAMP[level - 1] }} aria-hidden>
-          {stage}
-        </span>
-      )}
     </span>
   )
 }
