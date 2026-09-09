@@ -1,0 +1,22 @@
+<svg width="40" height="38" viewBox="0 0 40 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M22.1937 11.9505H11.9504V25.6082H22.1937V11.9505Z" fill="#FDBA12"/>
+<path d="M1.70721 11.9505V25.6082H11.9504V11.9505H1.70721Z" fill="#FFCE00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M22.1937 11.9505L11.9504 3.41442V11.9505H22.1937Z" fill="#FDBA12"/>
+<path d="M11.9504 3.41442L1.70721 11.9505H11.9504V3.41442Z" fill="#FFCE00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M23.9009 11.0969L11.9504 0V4.26803L22.1937 12.8041L23.9009 11.0969Z" fill="#23272B"/>
+<path d="M11.9504 0L0 11.0969L1.70721 12.8041L11.9504 4.26803V0Z" fill="#414952"/>
+<path d="M1.70721 20.4865H22.1937V25.6082H1.70721V20.4865Z" fill="#FFAA00"/>
+<path d="M8.53603 18.7793H11.9504V25.6082H8.53603V18.7793Z" fill="#636978"/>
+<path d="M11.9504 18.7793H15.3648V25.6082H11.9504V18.7793Z" fill="#414952"/>
+<path d="M3.41441 11.9505H8.53603V17.0721H3.41441V11.9505Z" fill="white"/>
+<path d="M15.3648 11.9505H20.4865V17.0721H15.3648V11.9505Z" fill="white"/>
+<rect y="25.6084" width="39.2657" height="5.12163" fill="#E9EDF5"/>
+<path d="M22.1934 15.3652H30.7294L39.2654 23.9013H22.1934V15.3652Z" fill="#E9EDF5"/>
+<path d="M22.1934 23.9013H39.2654V30.7301H22.1934V23.9013Z" fill="#E9EDF5"/>
+<path d="M24.7549 23.0474V17.9258H29.0229L34.1445 23.0474H24.7549Z" fill="#A3D4FF"/>
+<rect x="35.8521" y="23.9014" width="3.41441" height="3.41442" fill="#FFCE00"/>
+<ellipse cx="7.68208" cy="33.2905" rx="4.26801" ry="4.26803" fill="#636978"/>
+<ellipse cx="29.8764" cy="33.2905" rx="4.26801" ry="4.26803" fill="#636978"/>
+<ellipse cx="7.68283" cy="33.2903" rx="2.13401" ry="2.13401" fill="#414952"/>
+<ellipse cx="29.8757" cy="33.2903" rx="2.13401" ry="2.13401" fill="#414952"/>
+</svg>

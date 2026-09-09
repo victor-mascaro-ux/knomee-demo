@@ -541,15 +541,44 @@
   flex-direction: column;
   gap: 10px;
 }
+/* Icon, then the event. The illustration replaces the uppercase category tag
+   that used to sit above the row: the two said the same thing, and keeping both
+   is what would have made the card clunky. */
 .pp-event {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: flex-start;
+  gap: 10px;
   border: 1px solid var(--line, #e7e4ee);
   border-radius: 10px;
   padding: 11px 13px;
   background: #fff;
+}
+.pp-event-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+/* The white disc is what keeps a wall of multi-coloured illustrations calm: it
+   gives every row the same silhouette however busy the art inside it is. */
+.pp-event-ic {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line, #e7e4ee);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.pp-event-ic img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
 }
 .pp-event-tag {
   font-size: 10px;

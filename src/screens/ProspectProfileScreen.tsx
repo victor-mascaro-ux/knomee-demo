@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
 import { financialId } from '../data/financialId'
-import { COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -299,10 +299,12 @@ export default function ProspectProfileScreen({
                     <div className="pp-events">
                       {events.shown.map((e, i) => (
                         <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
-                          <span className="pp-event-tag">{e.tag}</span>
-                          <span className="pp-event-kind">{e.kind}</span>
-                          <span className="pp-event-text">{e.text}</span>
-                          <span className="pp-event-date">{e.date}</span>
+                          <LifeEventIcon kind={e.kind} text={e.text} />
+                          <span className="pp-event-body">
+                            {e.kind && <span className="pp-event-kind">{e.kind}</span>}
+                            <span className="pp-event-text">{e.text}</span>
+                            <span className="pp-event-date">{e.date}</span>
+                          </span>
                         </div>
                       ))}
                     </div>
