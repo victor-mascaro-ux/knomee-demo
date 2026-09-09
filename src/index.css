@@ -753,9 +753,9 @@ body {
 }
 
 /* The outer edge of the table is 20px; the gutter between cells is 12px.
-   This used to be two !important patches on .col-check / .col-dots, which
-   broke the moment a breakpoint hid the first column. :first-child /
-   :last-child hold whichever column is actually on the edge. */
+   This used to be two !important patches pinned to .col-check / .col-dots.
+   :first-child / :last-child put the inset on the edge itself, so it survives
+   a table that starts with a different column. */
 .prospects-table :where(thead th, tbody td):first-child {
   padding-left: 20px;
 }
@@ -859,6 +859,17 @@ body {
 }
 .prospects-cols tbody td.col-check input {
   margin-top: 0;
+}
+/* Restated at this table's own specificity: the rules above out-weigh the
+   generic :first-child / :last-child edge, so the 20px outer inset has to be
+   claimed back here rather than inherited from it. */
+.prospects-cols thead th:first-child,
+.prospects-cols tbody tr:not(.group-header) td:first-child {
+  padding-left: 20px;
+}
+.prospects-cols thead th:last-child,
+.prospects-cols tbody tr:not(.group-header) td:last-child {
+  padding-right: 20px;
 }
 .col-signup {
   width: 100px;
@@ -4469,6 +4480,12 @@ button.name-link-btn:hover .name-text {
 @media (max-width: 480px) {
   .prospects-cols .col-check {
     display: none;
+  }
+  /* Name is now the column on the edge; :first-child still matches the hidden
+     checkbox cell, which cannot carry the inset. */
+  .prospects-cols thead th.col-name,
+  .prospects-cols tbody tr:not(.group-header) td.col-name {
+    padding-left: 20px;
   }
   .prospects-table:not(.clients-table):not(.prospects-cols) thead th:nth-child(1),
   .prospects-table:not(.clients-table):not(.prospects-cols) tbody tr:not(.group-header) td:nth-child(1),
