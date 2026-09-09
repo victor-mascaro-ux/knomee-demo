@@ -14,13 +14,11 @@ import './prospectProfile.css'
 import './advisorProfile.css'
 import { advisor, independenceId } from '../data/advisorFlow'
 import {
-  bookProfile,
   confidenceAnswers,
   kq,
   playbookTab,
   readinessTab,
   route,
-  secondSeat,
   tier,
 } from '../data/advisorProfile'
 import { PlaybookTabView, ReadinessTabView } from './readinessParts'
@@ -65,16 +63,6 @@ function CardHead({ icon, title, right }: { icon: string; title: string; right?:
       </span>
       {right && <span className="ap-card-note">{right}</span>}
     </div>
-  )
-}
-
-/** Every card that states something has to say what the rep does about it. */
-function Action({ children }: { children: string }) {
-  return (
-    <p className="ap-action">
-      <span className="ap-action-tag">Do</span>
-      {children}
-    </p>
   )
 }
 
@@ -183,9 +171,7 @@ export default function AdvisorProfileScreen({
           </div>
 
           {tab === 'id' && <IndependenceIdTab stageLevel={stageLevel} />}
-          {tab === 'readiness' && (
-            <ReadinessTabView d={readinessTab} extras={<EnterpriseCards />} />
-          )}
+          {tab === 'readiness' && <ReadinessTabView d={readinessTab} />}
           {tab === 'playbook' && <PlaybookTabView d={playbookTab} />}
         </main>
       </div>
@@ -419,63 +405,9 @@ function IndependenceIdTab({ stageLevel }: { stageLevel: number }) {
 }
 
 /* ── Tabs 2 and 3 ────────────────────────────────────────────────────────
-   The prospect page's Readiness and Playbook, rendered from the shared
-   components with Marcus's answers. The only thing this screen adds is the
-   four enterprise-only cards the client version has no slot for — route,
-   second seat, book profile and the comp clock — which ride under the three
-   columns as `extras`. */
-
-function EnterpriseCards() {
-  return (
-    <div className="ap-cols2">
-      <section className="pp-card">
-        <CardHead icon={icTheMove} title="Route" right="One entry point, three destinations" />
-        <div className="ap-routes">
-          {route.options.map((o) => (
-            <div className={`ap-route ${o.matched ? 'is-on' : ''}`} key={o.key}>
-              <span className="ap-route-head">
-                <span className="ap-route-name">{o.name}</span>
-                {o.matched && <span className="ap-route-pick">Recommended</span>}
-              </span>
-              <span className="ap-route-for">{o.forWhom}</span>
-              <span className="ap-route-why">{o.why}</span>
-            </div>
-          ))}
-        </div>
-        <p className="ap-body">{route.why}</p>
-        <Action>{route.action}</Action>
-      </section>
-
-      <section className="pp-card">
-        <CardHead icon={icQuestions} title="Second seat" right="Who else must be convinced" />
-        <div className="ap-seats">
-          {secondSeat.seats.map((s) => (
-            <div className="ap-seat" key={s.order}>
-              <span className="ap-seat-n">{s.order}</span>
-              <span className="ap-seat-body">
-                <span className="ap-seat-who">{s.who}</span>
-                <span className="ap-seat-why">{s.why}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="ap-body">{secondSeat.note}</p>
-        <Action>{secondSeat.action}</Action>
-      </section>
-
-      <section className="pp-card">
-        <CardHead icon={icKeyHighlights} title="Book profile" />
-        <div className="ap-book">
-          {bookProfile.map((b) => (
-            <div className="ap-book-row" key={b.label}>
-              <span className="ap-book-k">{b.label}</span>
-              <span className="ap-book-v">{b.value}</span>
-              <span className="ap-book-d">{b.detail}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-    </div>
-  )
-}
+   Nothing to see here: both are the prospect page's own tabs, rendered from
+   the shared components in `readinessParts.tsx` with the advisor's answers.
+   The enterprise-only cards that used to ride under the three columns —
+   route, second seat, book profile, the comp clock — are gone: they are not
+   in the design, and everything they carried that the flow actually captures
+   already reads somewhere on these two tabs. */

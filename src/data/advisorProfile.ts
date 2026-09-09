@@ -193,7 +193,14 @@ export const columnActions = {
   apprehensions: 'Bring published retention numbers to the first call — including the two worst cases.',
 }
 
-/* ── the enterprise-only fields ─────────────────────────────────────────── */
+/* The flow names the team in words — "team of four" — so the numeral the
+   pipeline's Team column sorts by lives here, once. */
+export const teamSize = 4
+
+/* ── the route ───────────────────────────────────────────────────────────
+   Which of the three destinations the answers point at. The Readiness tab is
+   the design's and has no card for this, so it reads in the sidebar and in
+   the pipeline's Route column. */
 
 export interface RouteOption {
   key: 'connect' | 'ib' | 'optima'
@@ -231,40 +238,6 @@ export const route = {
     },
   ] as RouteOption[],
 }
-
-export const secondSeat = {
-  note: `He named ${independenceId.move.stakeholders} as having a say.`,
-  action:
-    'Convince the juniors first. Bring their equity answer to meeting one; the spouse conversation only lands after they are in.',
-  seats: [
-    {
-      order: 1,
-      who: 'Ana and Dev — the two junior advisors',
-      why: 'Six years on a promise he cannot keep where he is. They are the reason for the move and the fastest yes available.',
-    },
-    {
-      order: 2,
-      who: 'His wife',
-      why: 'Three years of watching him talk about it without moving. What persuades her is a date, not a vision — and she is the last seat, not the first.',
-    },
-  ],
-}
-
-/* The flow names the team in words — "team of four" — so the numeral a firm
-   sorts by lives here, once. */
-export const teamSize = 4
-
-/* The two things the flow actually establishes about the book. A custodian,
-   a deferred-comp balance and a vesting schedule are all things a rep has to
-   ask for — the adventures never do, so they are not on this page. */
-export const bookProfile = [
-  { label: 'AUM', value: advisor.book, detail: 'Self-reported in the flow' },
-  {
-    label: 'Team',
-    value: `${teamSize} advisors`,
-    detail: `“${advisor.role}”, in his own words`,
-  },
-]
 
 /* ── the Recruiting Playbook ────────────────────────────────────────────── */
 
