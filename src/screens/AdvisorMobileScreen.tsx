@@ -39,7 +39,7 @@ export default function AdvisorMobileScreen({
   const scale = fitScale * zoom
   const [, force] = useState(0)
   /* The rail — his portrait, the Knomee Quotient, the route — sits at the foot
-     of the page on a phone. His own initial brings it up as a drawer. */
+     of the page on a phone. His own portrait brings it up as a drawer. */
   const [menuOpen, setMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -118,7 +118,7 @@ export default function AdvisorMobileScreen({
             <AdvisorProfileScreen
               onBack={() => force((n) => n + 1)}
               ownerMenu={
-                /* His initial, under his name, opening his rail — the drawer
+                /* His portrait, under his name, opening his rail — the drawer
                    comes in from the left and the circle sits on the left. */
                 <button
                   className="cxm-rail-btn"
@@ -127,7 +127,9 @@ export default function AdvisorMobileScreen({
                   aria-expanded={menuOpen}
                   onClick={openRail}
                 >
-                  <span className="cxm-rail-initial">{advisor.initial}</span>
+                  <span className="cxm-rail-initial cxm-rail-photo">
+                    <img src={advisor.photo} alt="" />
+                  </span>
                 </button>
               }
             />

@@ -10,6 +10,7 @@
 // through as a walkthrough. Nothing here is a real advisor.
 
 import { useMemo, useRef, useState } from 'react'
+import AdvisorProfileScreen from './AdvisorProfileScreen'
 import { useDragScroll } from './mobileGestures'
 import {
   ActionRow,
@@ -341,147 +342,6 @@ function StepBody({
   }
 }
 
-/* ── the Independence ID tab ── */
-
-function IndependenceIdScreen() {
-  const d = independenceId
-  return (
-    <div className="af-id">
-      <div className="af-id-head">
-        <span className="af-id-avatar">{advisor.initial}</span>
-        <div>
-          <div className="af-id-name">{d.header.name}</div>
-          <div className="af-id-meta">{d.header.meta}</div>
-        </div>
-      </div>
-
-      <div className="af-id-badges">
-        {d.badges.map((b) => (
-          <span key={b} className="af-badge">
-            <CheckIcon size={10} />
-            {b}
-          </span>
-        ))}
-      </div>
-
-      <div className="af-id-readiness">
-        <div>
-          <span className="af-id-k">Readiness</span>
-          <span className="af-id-stage">{d.readiness.stage}</span>
-        </div>
-        <div>
-          <span className="af-id-k">Confidence</span>
-          <span className="af-id-stage">{d.readiness.confidence}</span>
-        </div>
-        <p>{d.readiness.note}</p>
-      </div>
-
-      <h3 className="af-id-h">Key highlights</h3>
-      <div className="af-lines">
-        {d.highlights.map((h) => (
-          <div className="af-line" key={h.title}>
-            <span className="af-line-k">{h.title}</span>
-            <span className="af-line-v">{h.text}</span>
-          </div>
-        ))}
-      </div>
-
-      <h3 className="af-id-h">{d.practiceJoy.prompt}</h3>
-      <div className="af-chips">
-        {d.practiceJoy.chips.map((c) => (
-          <span key={c} className="af-chip">
-            {c}
-          </span>
-        ))}
-      </div>
-
-      <h3 className="af-id-h">Attention</h3>
-      <div className="af-two">
-        <div>
-          <span className="af-id-k">More</span>
-          {d.attention.more.map((m) => (
-            <div key={m} className="af-mini">
-              {m}
-            </div>
-          ))}
-        </div>
-        <div>
-          <span className="af-id-k">Less</span>
-          {d.attention.less.map((m) => (
-            <div key={m} className="af-mini">
-              {m}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <h3 className="af-id-h">Future You</h3>
-      <div className="af-lines">
-        <div className="af-line">
-          <span className="af-line-k">Where</span>
-          <span className="af-line-v">{d.futureYou.where.join(', ')}</span>
-        </div>
-        <div className="af-line">
-          <span className="af-line-k">What</span>
-          <span className="af-line-v">{d.futureYou.what.join(', ')}</span>
-        </div>
-        <div className="af-line">
-          <span className="af-line-k">Who</span>
-          <span className="af-line-v">{d.futureYou.who.join(', ')}</span>
-        </div>
-      </div>
-
-      <h3 className="af-id-h">Outlook</h3>
-      <span className="af-id-k">Concerns</span>
-      {d.outlook.concerns.map((c) => (
-        <div key={c} className="af-quote">
-          {c}
-        </div>
-      ))}
-      <span className="af-id-k">Hopes</span>
-      {d.outlook.hopes.map((c) => (
-        <div key={c} className="af-quote">
-          {c}
-        </div>
-      ))}
-
-      <h3 className="af-id-h">The Move</h3>
-      <div className="af-lines">
-        <div className="af-line">
-          <span className="af-line-k">Change</span>
-          <span className="af-line-v">
-            {d.move.change} · {d.move.when}
-          </span>
-        </div>
-        <div className="af-line">
-          <span className="af-line-k">Worth it because</span>
-          <span className="af-line-v">{d.move.worthIt}</span>
-        </div>
-        <div className="af-line">
-          <span className="af-line-k">Challenging because</span>
-          <span className="af-line-v">{d.move.challenging}</span>
-        </div>
-        <div className="af-line">
-          <span className="af-line-k">Others with a say</span>
-          <span className="af-line-v">
-            {d.move.stakeholders} — hardest: {d.move.hardest}
-          </span>
-        </div>
-      </div>
-
-      <h3 className="af-id-h">My three questions</h3>
-      <ol className="af-qs">
-        {d.questions.map((q, i) => (
-          <li key={q}>
-            <span className="af-getnum">{i + 1}</span>
-            <span>{q}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  )
-}
-
 /* ── the screen ── */
 
 export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
@@ -592,7 +452,11 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
 
           <div className="cx-viewport" ref={viewport}>
             {tab === 'finid' ? (
-              <IndependenceIdScreen />
+              /* The Independence ID he reads is the Independence ID the firm
+                 reads — one page, his answers, the same cards. It used to be a
+                 second, flatter rendering of the same data that lived only
+                 here, so the two drifted every time one of them was touched. */
+              <AdvisorProfileScreen mine onBack={() => setTab('flow')} />
             ) : (
               <>
                 <StepBody

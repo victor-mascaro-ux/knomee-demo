@@ -71,15 +71,23 @@ export default function AdvisorProfileScreen({
   onBack,
   onAdd,
   ownerMenu,
+  mine,
 }: {
   onBack: () => void
   onAdd?: () => void
+  /* Marcus reading his own Independence ID in his own app, rather than a
+     Dynasty rep reading it about him. Same page — it is the one thing the
+     eight minutes produced — with the firm's furniture off it: no breadcrumb
+     back to a candidate list, no Readiness or Playbook tabs, and nothing in
+     the rail that is the firm's read on him rather than his own answers. */
+  mine?: boolean
   /* The phone frame hands in the control that opens the rail as a drawer — the
      same slot the client page has, in the same place. Nothing renders here on a
      desktop, where the rail is on screen already. */
   ownerMenu?: ReactNode
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
+  const [photoFailed, setPhotoFailed] = useState(false)
   const d = independenceId
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
 
@@ -108,20 +116,26 @@ export default function AdvisorProfileScreen({
   }, [])
 
   return (
-    <div className="pp ap">
-      <nav className="pp-crumb">
-        <button type="button" className="pp-crumb-link" onClick={onBack}>
-        My Candidates
-        </button>
-        <span className="pp-crumb-sep">›</span>
-        <span className="pp-crumb-cur">{advisor.name}</span>
-      </nav>
+    <div className={`pp ap ${mine ? 'ap-mine' : ''}`}>
+      {!mine && (
+        <nav className="pp-crumb">
+          <button type="button" className="pp-crumb-link" onClick={onBack}>
+            My Candidates
+          </button>
+          <span className="pp-crumb-sep">›</span>
+          <span className="pp-crumb-cur">{advisor.name}</span>
+        </nav>
+      )}
       <div className="pp-layout">
         {/* Left profile sidebar */}
         <aside className="pp-side">
           <div className="pp-side-inner">
-            <div className="pp-avatar">
-              <span>{advisor.initial}</span>
+            <div className={`pp-avatar ap-portrait${photoFailed ? '' : ' has-photo'}`}>
+              {photoFailed ? (
+                <span>{advisor.initial}</span>
+              ) : (
+                <img src={advisor.photo} alt="" onError={() => setPhotoFailed(true)} />
+              )}
             </div>
             <h2 className="pp-name">{advisor.name}</h2>
             <div className="pp-meta">
@@ -129,27 +143,32 @@ export default function AdvisorProfileScreen({
                 <CalendarIcon /> Completed {d.header.completed}
               </span>
             </div>
-            <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
-              Add to Network
-            </button>
-            <div className="ap-side-stat">
-              <span className="ap-side-stat-k">Knomee Quotient</span>
-              <span className="ap-side-stat-v">
-                {kq}
-                <i>
-                  Tier {tier.tier} · {tier.name}
-                </i>
-              </span>
-            </div>
-            <div className="ap-side-stat">
-              <span className="ap-side-stat-k">Route</span>
-              <span className="ap-side-stat-v ap-side-stat-text">{route.pick}</span>
-            </div>
+            {!mine && (
+              <>
+                <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
+                  Add to Network
+                </button>
+                <div className="ap-side-stat">
+                  <span className="ap-side-stat-k">Knomee Quotient</span>
+                  <span className="ap-side-stat-v">
+                    {kq}
+                    <i>
+                      Tier {tier.tier} · {tier.name}
+                    </i>
+                  </span>
+                </div>
+                <div className="ap-side-stat">
+                  <span className="ap-side-stat-k">Route</span>
+                  <span className="ap-side-stat-v ap-side-stat-text">{route.pick}</span>
+                </div>
+              </>
+            )}
           </div>
         </aside>
 
         {/* Main column */}
         <main className="pp-main">
+          {!mine && (
           <div className="pp-tabs">
             {(Object.keys(TAB_LABEL) as ProfileTab[]).map((id) => (
               <button
@@ -162,6 +181,7 @@ export default function AdvisorProfileScreen({
               </button>
             ))}
           </div>
+          )}
 
           <div className="pp-title-row">
             <h1 className="pp-title">
