@@ -27,7 +27,11 @@ export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
   const label = stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'
   return (
-    <span className="pp-readiness" title={stage ?? undefined} aria-label={label}>
+    <span
+      className={`pp-readiness${stage ? ' tt' : ''}`}
+      data-tip={stage ?? undefined}
+      aria-label={label}
+    >
       <span className="pp-bars" aria-hidden>
         {[1, 2, 3, 4, 5].map((i) => (
           <span
