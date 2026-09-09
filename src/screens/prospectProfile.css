@@ -34,13 +34,17 @@
   padding-top: 14px;
 }
 
+/* The breadcrumb names the whole page, sidebar included, so it is a bar under
+   the top bar rather than a line inside the main column — and it carries the
+   hairline that separates the header from the page. */
 .pp-crumb {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
   color: var(--grey-text, #8b8598);
-  margin-bottom: 12px;
+  padding: 13px 28px;
+  border-bottom: 1px solid var(--line, #e7e4ee);
 }
 .pp-crumb-link {
   border: 0;
@@ -844,6 +848,12 @@
   .pp-cols {
     display: flex;
     flex-direction: column;
+    /* The desktop's `align-items: start` keeps the two columns from stretching
+       to each other's height. In one column it stops meaning that and starts
+       sizing each card to its own content — Confidence and Questions came out
+       narrower than the cards above and below them. Every card owns the width
+       of the screen here. */
+    align-items: stretch;
   }
   .pp-col-main,
   .pp-rail {

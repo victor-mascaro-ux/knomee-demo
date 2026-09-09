@@ -655,6 +655,9 @@
 /* Emily's initial, under her name, opening her rail. Sized to the download
    button beside it so the row reads as one line of controls. */
 .cxm-rail-btn {
+  /* A button does not inherit the page's font on its own — without this the
+     initial came out in the UA's Arial, next to a page set in Poppins. */
+  font-family: inherit;
   /* Matched to the download button beside it — 44px there, 40px here, the
      circle reading a shade lighter than the filled control it shares the row
      with rather than competing with it. */

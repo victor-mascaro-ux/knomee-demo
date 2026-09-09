@@ -80,6 +80,13 @@ export default function ProspectProfileScreen({
 
   return (
     <div className="pp">
+      <nav className="pp-crumb">
+        <button type="button" className="pp-crumb-link" onClick={onBack}>
+        My Prospects
+        </button>
+        <span className="pp-crumb-sep">›</span>
+        <span className="pp-crumb-cur">{prospect.name}</span>
+      </nav>
       <div className="pp-layout">
         {/* Left profile sidebar — a full-height static strip */}
         <aside className="pp-side">
@@ -104,13 +111,6 @@ export default function ProspectProfileScreen({
 
         {/* Main column */}
         <main className="pp-main">
-          <nav className="pp-crumb">
-            <button type="button" className="pp-crumb-link" onClick={onBack}>
-              My Prospects
-            </button>
-            <span className="pp-crumb-sep">›</span>
-            <span className="pp-crumb-cur">{prospect.name}</span>
-          </nav>
           <div className="pp-tabs">
             {(
               [
