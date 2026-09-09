@@ -4,8 +4,8 @@
 // enterprise reading the output is the platform trying to recruit them.
 //
 // Content follows `Knomee Content: Adventures` screen for screen. Every answer
-// below is pre-filled with a single believable respondent so the Independence
-// ID at the end is coherent rather than a set of unrelated demo values.
+// below is pre-filled with a single believable respondent so the Business ID
+// at the end is coherent rather than a set of unrelated demo values.
 //
 // All figures and answers are invented. No real advisor is represented.
 
@@ -653,9 +653,9 @@ export const steps: Step[] = [
   { id: 'end-questions', kind: 'questions' },
 ]
 
-/* ── the Independence ID (the Financial ID, one rung up) ─────────────────── */
+/* ── the Business ID (the Financial ID, one rung up) ─────────────────── */
 
-export const independenceId = {
+export const businessId = {
   header: {
     name: advisor.name,
     meta: `${advisor.role} · ${advisor.book} · ${advisor.firm}`,

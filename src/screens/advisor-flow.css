@@ -1,7 +1,7 @@
 /* Advisor-as-prospect flow — the pieces the client experience doesn't already
    have. Everything structural (device, app bar, tab bar, progress meter,
    adventure rows) comes from client-experience.css unchanged; this file only
-   adds the question screens and the Independence ID. */
+   adds the question screens and the Business ID. */
 
 .af-eyebrow {
   margin-top: var(--space-16, 16px);

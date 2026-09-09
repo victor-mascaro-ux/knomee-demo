@@ -59,12 +59,12 @@
   --k-bolt:          #9b51e0;  /* "convert" action / lightning violet */
   --k-bolt-deep:     #7c3aed;  /* bolt hover */
 
-  /* ---- Coaching-tag families (Prospect Readiness / Playbook) ----
-     The four behavioural tags a playbook hangs on need four colour families
+  /* ---- Coaching-tag families (Prospect Readiness / Toolkit) ----
+     The four behavioural tags a toolkit hangs on need four colour families
      that stay distinct from each other AND from the brand purple, so a tag
      reads the same wherever it lands. Amber and teal already existed; azure
      and crimson are added here because the ramp had no blue and no concern
-     red, and both are sampled from the Prospect Playbook design. */
+     red, and both are sampled from the Prospect Toolkit design. */
   --k-azure:         #2563eb;  /* self-reinforcement tag ink */
   --k-azure-light:   #e8f0fe;  /* its wash */
   --k-crimson:       #d81e4a;  /* concern: apprehension bars, validate tag ink */
@@ -153,8 +153,8 @@
   --status-new:      var(--k-lime);
 
   /* ---- The four coaching tags, as pairs ----
-     Reach for these rather than the base ramps, so the Prospect Playbook and
-     the Recruiting Playbook cannot drift apart. */
+     Reach for these rather than the base ramps, so the Prospect Toolkit and
+     the Recruiting Toolkit cannot drift apart. */
   --tag-positive-bg:   var(--k-amber-light);
   --tag-positive-ink:  var(--k-amber-ink);
   --tag-curiosity-bg:  var(--k-teal-light);

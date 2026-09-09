@@ -4034,7 +4034,7 @@ export default function App() {
 
   // Same for the client's mobile app: the phone is the whole page, and the way
   // back to the advisor side lives in the phone's own menu.
-  // Marcus's Independence ID in the same frame. The firm side has its own
+  // Marcus's Business ID in the same frame. The firm side has its own
   // profile page, so it gets its own phone route rather than sharing hers.
   if (advisorMobileOpen) {
     return (
@@ -4227,7 +4227,7 @@ export default function App() {
             {firmScreen === 'firm-network' && (
               <FirmSoon
                 title="My Network"
-                body="Advisors who have joined the platform — Dynasty's Network Partners, and what each one's Independence ID said before they signed."
+                body="Advisors who have joined the platform — Dynasty's Network Partners, and what each one's Business ID said before they signed."
               />
             )}
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}

@@ -1,4 +1,4 @@
-/* Readiness & Playbook — the two tabs the prospect page and the candidate page
+/* Readiness & Toolkit — the two tabs the prospect page and the candidate page
    share. Namespaced under .rd so it cannot reach anything else, and every
    colour, radius, duration and easing is a token: the four behavioural tags
    come from the --tag-* pairs added to the design system for them, and the
@@ -285,10 +285,14 @@
   gap: var(--space-12);
 }
 /* What drives someone and what holds them back, as two opposed signals: a
-   3px bar in the accent, and nothing else competing with the text. */
+   3px bar in the accent, on the same sunken wash the velocity card's list
+   sits on, so the three columns of the toolkit read as one material. The
+   radius is on the right only — the accent bar stays a straight edge. */
 .rd-driver {
-  padding: var(--space-2) 0 var(--space-2) var(--space-12);
+  padding: var(--space-10) var(--space-12);
   border-left: 3px solid var(--border-control);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-sunken);
 }
 .rd-driver-motivator {
   border-left-color: var(--signal-motivator);
@@ -334,7 +338,7 @@
   vertical-align: 1px;
 }
 
-/* ── the playbook ── */
+/* ── the toolkit ── */
 .rd-top-action {
   display: flex;
   align-items: center;
@@ -354,13 +358,13 @@
   color: var(--text-strong);
 }
 
-.rd-play-cols {
+.rd-kit-cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 372px;
   gap: var(--space-16);
   align-items: start;
 }
-.rd-play-main {
+.rd-kit-main {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
@@ -460,24 +464,25 @@
   flex-direction: column;
   gap: var(--space-14);
 }
+/* The same block as .rd-driver — an accent bar and a line of text — so it
+   takes the same sunken wash. The `background: none` the four tag variants
+   below used to carry went with it. */
 .rd-key-row {
-  padding-left: var(--space-12);
+  padding: var(--space-10) var(--space-12);
   border-left: 3px solid var(--border-control);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-sunken);
 }
 .rd-key-row.rd-tag-positive {
-  background: none;
   border-left-color: var(--tag-positive-ink);
 }
 .rd-key-row.rd-tag-curiosity {
-  background: none;
   border-left-color: var(--tag-curiosity-ink);
 }
 .rd-key-row.rd-tag-self {
-  background: none;
   border-left-color: var(--tag-self-ink);
 }
 .rd-key-row.rd-tag-validate {
-  background: none;
   border-left-color: var(--tag-validate-ink);
 }
 .rd-key-tag {
@@ -522,6 +527,7 @@
   padding: var(--space-12);
   border: var(--border-thin) solid var(--border-default);
   border-radius: var(--radius-xl);
+  background: var(--surface-sunken);
   margin-bottom: var(--space-16);
 }
 .rd-word {
@@ -604,19 +610,19 @@
 @media (prefers-reduced-motion: no-preference) {
   .rd > *,
   .rd-cols > *,
-  .rd-play-main > *,
-  .rd-play-rail > * {
+  .rd-kit-main > *,
+  .rd-kit-rail > * {
     animation: rdRise 0.32s var(--ease-out) both;
   }
   .rd-cols > *:nth-child(2),
-  .rd-play-main > *:nth-child(2) {
+  .rd-kit-main > *:nth-child(2) {
     animation-delay: 0.05s;
   }
   .rd-cols > *:nth-child(3),
-  .rd-play-main > *:nth-child(3) {
+  .rd-kit-main > *:nth-child(3) {
     animation-delay: 0.1s;
   }
-  .rd-play-rail > * {
+  .rd-kit-rail > * {
     animation-delay: 0.08s;
   }
   .rd-dim,
@@ -710,7 +716,7 @@
   .rd-snapshot-body {
     grid-template-columns: 280px minmax(0, 1fr);
   }
-  .rd-play-cols {
+  .rd-kit-cols {
     grid-template-columns: minmax(0, 1fr) 320px;
   }
 }
@@ -725,7 +731,7 @@
   .rd-cols {
     grid-template-columns: 1fr;
   }
-  .rd-play-cols {
+  .rd-kit-cols {
     grid-template-columns: 1fr;
   }
 }
@@ -746,8 +752,8 @@
    are raised too. */
 .rd-card,
 .rd-cols > *,
-.rd-play-main,
-.rd-play-rail,
+.rd-kit-main,
+.rd-kit-rail,
 .rd-dim,
 .rd-word,
 .rd-starter,
@@ -762,7 +768,7 @@
 }
 .rd-card:has(.tt:hover),
 .rd-card:has(.tt:focus-visible),
-.rd-play-main:has(.tt:hover),
-.rd-play-rail:has(.tt:hover) {
+.rd-kit-main:has(.tt:hover),
+.rd-kit-rail:has(.tt:hover) {
   z-index: 40;
 }

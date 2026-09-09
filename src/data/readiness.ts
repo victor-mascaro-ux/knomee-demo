@@ -1,11 +1,11 @@
-/* The Readiness and Playbook tabs, as one shape two products fill in.
+/* The Readiness and Toolkit tabs, as one shape two products fill in.
  *
  * The prospect side (Sarah Mitchell) and the firm side (Marcus Hale) are the
  * same instrument pointed at different decisions, so they are the same
  * components reading the same interfaces — a card added to one appears on the
  * other, and neither can quietly grow a panel the other lacks.
  *
- * Sarah's content is the Prospect Readiness / Prospect Playbook design.
+ * Sarah's content is the Prospect Readiness / Prospect Toolkit design.
  * Marcus's lives in `advisorProfile.ts`, which computes his from the flow.
  *
  * All figures and answers are placeholder demo data.
@@ -105,7 +105,7 @@ export interface Word {
   hint?: string
 }
 
-export interface PlaybookTab {
+export interface ToolkitTab {
   topAction: string
   starters: Starter[]
   key: { tag: TagName; meaning: string }[]
@@ -247,7 +247,7 @@ export const prospectReadiness: ReadinessTab = {
   ],
 }
 
-export const prospectPlaybook: PlaybookTab = {
+export const prospectToolkit: ToolkitTab = {
   topAction: '“Worked since 13, ready for adventures”; lead with Future You vision.',
   starters: [
     {
