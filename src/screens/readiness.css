@@ -176,9 +176,46 @@
 .rd-word.tt::after {
   white-space: normal;
   width: max-content;
-  max-width: 340px;
+  /* Wide enough to read as a paragraph, narrow enough that a bubble centred on
+     the last of three cards cannot hang off the page. */
+  max-width: 300px;
   line-height: 1.45;
   text-align: left;
+}
+
+/* The last of the three score cards sits at the page's right edge, so its
+   bubble hangs from that edge and opens leftward. Centred, it would overhang
+   the page — and the narrower the viewport, the further. */
+.rd-dims .rd-dim:last-child.tt::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+}
+.rd-dims .rd-dim:last-child.tt:hover::after,
+.rd-dims .rd-dim:last-child.tt:focus-visible::after {
+  transform: translateY(0);
+}
+.rd-dims .rd-dim:last-child.tt::before {
+  left: auto;
+  right: 24px;
+  transform: none;
+}
+
+/* Same for the word pills, which live in the right-hand rail. */
+.rd-word.tt::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+  max-width: 260px;
+}
+.rd-word.tt:hover::after,
+.rd-word.tt:focus-visible::after {
+  transform: translateY(0);
+}
+.rd-word.tt::before {
+  left: auto;
+  right: 14px;
+  transform: none;
 }
 
 /* The tier banner takes its tier's colour from the KQ ramp. */
