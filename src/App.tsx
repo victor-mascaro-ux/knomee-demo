@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { clientProfile } from './data/clientProfile'
+import { avatarSources, clientProfile } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
@@ -411,13 +411,21 @@ function ClientScoreBadge({ tier, value }: { tier: ClientTier; value: number | n
 }
 
 function Avatar({ p }: { p: Prospect }) {
-  const [failed, setFailed] = useState(false)
-  if (p.avatar && !failed) {
-    return (
-      <img className="avatar" src={p.avatar} alt="" onError={() => setFailed(true)} />
-    )
+  /* A photograph dropped into public/avatars/ wins over whatever the record
+     carries; the initial is what is left when neither is there. */
+  const [attempt, setAttempt] = useState(0)
+  const sources = avatarSources(p.name, p.avatar)
+  if (attempt >= sources.length) {
+    return <span className="avatar avatar-initial">{initial(p.name)}</span>
   }
-  return <span className="avatar avatar-initial">{initial(p.name)}</span>
+  return (
+    <img
+      className="avatar"
+      src={sources[attempt]}
+      alt=""
+      onError={() => setAttempt((n) => n + 1)}
+    />
+  )
 }
 
 function ProspectRow({
@@ -1106,17 +1114,20 @@ function ClientsMetrics({
     >
       <div className="metric-tiles">
         <div className="metric-tile">
-          <span className="metric-label">TOTAL CLIENTS</span>
+          <span className="metric-label">AVG KR SCORE</span>
           <div className="metric-num">
-            <span className="metric-value tt" data-tip="Clients in your book">{total}</span>
+            <span
+              className="metric-value metric-value-kr tt"
+              data-tip="Average KR across all clients"
+            >
+              {AVG_KR_SCORE}
+            </span>
           </div>
         </div>
         <div className="metric-tile">
-          <span className="metric-label">AVG KR SCORE</span>
+          <span className="metric-label">TOTAL CLIENTS</span>
           <div className="metric-num">
-            <span className="metric-value tt" data-tip="Average KR across all clients">
-              {AVG_KR_SCORE}
-            </span>
+            <span className="metric-value tt" data-tip="Clients in your book">{total}</span>
           </div>
         </div>
         <div className="metric-tile distribution">

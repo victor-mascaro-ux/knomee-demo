@@ -1445,21 +1445,23 @@
   // of the book belongs. And the two phone apps are one row: which app you
   // reach is which persona you are, the same way Mobile view is a switch on the
   // page you are already looking at rather than a list of destinations.
+  // Named by whose screen it is rather than by what the code calls it: the
+  // desktop belongs to the advisor, the phone and the welcome page belong to
+  // the client. Three surfaces, which is what a demo walks through.
   const SCREENS = [
-    ['app', 'App', null],
-    ['welcome', 'Welcome Page (Clients)', '#/welcome']
+    ['desktop', 'Desktop (Advisor)', '#/prospects'],
+    ['mobile', 'Mobile (Client)', '#/client-experience'],
+    ['welcome', 'Welcome Page (Client)', '#/welcome']
   ];
-  // The app belonging to the persona in the chair: the client's phone for an
-  // advisor, the advisor's own eight minutes for Dynasty. Knomee admin has no
-  // app of its own, so the row does not show.
-  const APP_OF = {
-    advisor: ['client-experience', '#/client-experience'],
-    firm: ['advisor-flow', '#/advisor-flow']
-  };
+  // Only these two take you out of the app shell. The desktop row is where you
+  // already are on any advisor page, so it must not count as "somewhere else"
+  // when the persona rows decide whether to mark themselves.
+  const STANDALONE = ['mobile', 'welcome'];
   // The welcome page's own A/B switch decides which version, so both count.
   const screenIsOn = (id) => {
     const v = canon(demoState.view);
-    if (id === 'app') return v === 'client-experience' || v === 'advisor-flow';
+    if (id === 'desktop') return SHELL_VIEWS.indexOf(v) !== -1;
+    if (id === 'mobile') return v === 'client-experience';
     return v === id || (id === 'welcome' && v === 'welcome-b');
   };
 
@@ -1634,13 +1636,9 @@
     // One of the other screens showing means none of the personas' own
     // dashboards is, so the persona rows stay unmarked rather than claiming a
     // page they aren't on.
-    const elsewhere = SCREENS.some(sc => screenIsOn(sc[0]));
+    const elsewhere = STANDALONE.some(id => screenIsOn(id));
     const onView = canon(demoState.view);
     const mine = personaOf(onView);
-    // Standing on one of the apps, the persona rows are unmarked but the App
-    // row still has to know which app it is: the advisor's flow is Dynasty's.
-    const appPersona =
-      onView === 'advisor-flow' ? 'firm' : onView === 'client-experience' ? 'advisor' : mine;
     const gp = demoGroup('Knomee', ICONS.persona);
     PERSONAS.forEach(p => {
       const on = !elsewhere && p[0] === mine;
@@ -1651,17 +1649,10 @@
     demoBody.appendChild(gp);
 
     // ── the other screens ──
-    const gs = demoGroup('Pages', ICONS.screens);
+    const gs = demoGroup('Screens', ICONS.screens);
     SCREENS.forEach(sc => {
-      // The App row's destination depends on who you are, so it is resolved
-      // here rather than baked into the list. On a standalone screen the
-      // persona is whoever was in the chair when it opened, which is what
-      // `mine` already holds.
-      const app = sc[0] === 'app' ? APP_OF[appPersona] : null;
-      if (sc[0] === 'app' && !app) return;
-      const href = app ? app[1] : sc[2];
       const on = screenIsOn(sc[0]);
-      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(href); }));
+      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(sc[2]); }));
     });
     demoBody.appendChild(gs);
   }
