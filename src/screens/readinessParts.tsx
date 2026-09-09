@@ -443,10 +443,18 @@ function QuestionRow({ q, i }: { q: AskedQuestion; i: number }) {
   )
 }
 
-export function QuestionsCard({ questions }: { questions: AskedQuestion[] }) {
+export function QuestionsCard({
+  questions,
+  note,
+}: {
+  questions: AskedQuestion[]
+  note?: string
+}) {
   return (
     <section className="rd-card">
-      <Head icon={<ChatGlyph />} tone="teal" title="Questions They May Ask" />
+      <Head icon={<ChatGlyph />} tone="teal" title="Questions They May Ask">
+        {note && <span className="rd-head-note">{note}</span>}
+      </Head>
       <div className="rd-asks">
         {questions.map((q, i) => (
           <QuestionRow q={q} i={i} key={q.quote} />
@@ -489,12 +497,6 @@ export function CommunicationRail({ d }: { d: PlaybookTab }) {
         ))}
       </div>
 
-      <div className="rd-verbosity">
-        <h4 className="rd-comm-label rd-comm-label-inline">Verbosity Indicator</h4>
-        <span className="rd-verb-pill">{d.verbosity.level}</span>
-        <span className="rd-verb-words">{d.verbosity.words} words</span>
-      </div>
-
       <div className="rd-comm-box">
         <span className="rd-comm-k">Engagement Level</span>
         <p className="rd-comm-v">{d.engagement}</p>
@@ -519,24 +521,7 @@ export function PlaybookTabView({ d, extras }: { d: PlaybookTab; extras?: React.
       <div className="rd-play-cols">
         <div className="rd-play-main">
           <StartersCard starters={d.starters} keyRows={d.key} />
-          <QuestionsCard questions={d.questions} />
-          {d.theirQuestions && (
-            <section className="rd-card rd-theirs">
-              <Head icon={<ChatGlyph />} tone="teal" title="Their Three Questions">
-                <span className="rd-head-note">What the flow told them to ask</span>
-              </Head>
-              <ol className="rd-theirs-list">
-                {d.theirQuestions.items.map((q, i) => (
-                  <li key={q} style={{ animationDelay: `${i * 0.05}s` }}>
-                    <span className="rd-theirs-n">{i + 1}</span>
-                    <span className="rd-theirs-q">{q}</span>
-                    <CopyLine text={q} label="this question" />
-                  </li>
-                ))}
-              </ol>
-              <Action>{d.theirQuestions.note}</Action>
-            </section>
-          )}
+          <QuestionsCard questions={d.questions} note={d.questionsNote} />
           {extras}
         </div>
         <div className="rd-play-rail">

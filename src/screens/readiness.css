@@ -188,8 +188,9 @@
 .rd-dim.tt {
   cursor: help;
 }
-.rd-dim.tt::after {
-  max-width: 320px;
+.rd-dim.tt::after,
+.rd-word.tt::after {
+  max-width: 300px;
   white-space: normal;
   line-height: 1.45;
   text-align: left;
@@ -518,43 +519,6 @@
   color: var(--text-table);
 }
 
-/* Their own three questions — the honest-fit design pointing both ways. */
-.rd-theirs {
-  border-left: 4px solid var(--k-teal);
-}
-.rd-theirs-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-}
-.rd-theirs-list li {
-  position: relative;
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: var(--space-10);
-  padding: var(--space-12) var(--space-14);
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-xl);
-}
-.rd-theirs-n {
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-circle);
-  background: var(--k-teal-light);
-  color: var(--k-ocean);
-  font-size: 11.5px;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-}
-.rd-theirs-q {
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--text-table);
-}
 
 /* ── the communication rail ── */
 .rd-comm-label {
@@ -562,9 +526,6 @@
   font-size: 12.5px;
   font-weight: 700;
   color: var(--k-plum-ink);
-}
-.rd-comm-label-inline {
-  margin: 0;
 }
 .rd-words {
   display: flex;
@@ -593,26 +554,6 @@
   text-decoration-color: var(--k-ash);
 }
 
-.rd-verbosity {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  padding-bottom: var(--space-12);
-}
-.rd-verb-pill {
-  padding: 2px 8px;
-  border-radius: var(--radius-xs);
-  background: var(--k-teal-light);
-  color: var(--signal-motivator);
-  font-size: 10.5px;
-  font-weight: 700;
-}
-.rd-verb-words {
-  margin-left: auto;
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
 .rd-comm-box {
   padding: var(--space-12) var(--space-14);
   border: var(--border-thin) solid var(--border-default);
@@ -662,8 +603,7 @@
   display: block;
 }
 .rd-starter:hover .rd-copy,
-.rd-ask:hover .rd-copy,
-.rd-theirs-list li:hover .rd-copy,
+.rd-ask:hover .rd-copy .rd-copy,
 .rd-copy:focus-visible {
   opacity: 1;
   transform: translateY(0);
@@ -716,8 +656,7 @@
   .rd-points li,
   .rd-starter,
   .rd-ask,
-  .rd-word,
-  .rd-theirs-list li {
+  .rd-word {
     animation: rdRise 0.3s var(--ease-out) both;
   }
 }
@@ -727,7 +666,6 @@
 .rd-dim,
 .rd-starter,
 .rd-ask,
-.rd-theirs-list li,
 .rd-kq {
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
   transition:
@@ -737,8 +675,7 @@
 }
 .rd-dim:hover,
 .rd-starter:hover,
-.rd-ask:hover,
-.rd-theirs-list li:hover {
+.rd-ask:hover {
   transform: translateY(-2px);
   box-shadow: var(--elev-2);
   border-color: var(--k-bolt);
@@ -791,8 +728,7 @@
   .rd-dim:hover,
   .rd-starter:hover,
   .rd-ask:hover,
-  .rd-theirs-list li:hover,
-  .rd-word:hover,
+    .rd-word:hover,
   .rd-starter:hover .rd-tag {
     transform: none;
   }
@@ -832,4 +768,33 @@
   .rd-dim-q {
     min-height: 0;
   }
+}
+
+/* ── tooltip stacking ──────────────────────────────────────────────────────
+   The mount animation leaves a transform on every card and tile (fill-mode
+   both), and a transform makes a stacking context — so a later sibling paints
+   over an earlier one's tooltip however high the bubble's own z-index is. The
+   bubble only clears if the thing being pointed at, and the card holding it,
+   are raised too. */
+.rd-card,
+.rd-cols > *,
+.rd-play-main,
+.rd-play-rail,
+.rd-dim,
+.rd-word,
+.rd-starter,
+.rd-ask {
+  position: relative;
+}
+.rd-dim.tt:hover,
+.rd-dim.tt:focus-visible,
+.rd-word.tt:hover,
+.rd-word.tt:focus-visible {
+  z-index: 40;
+}
+.rd-card:has(.tt:hover),
+.rd-card:has(.tt:focus-visible),
+.rd-play-main:has(.tt:hover),
+.rd-play-rail:has(.tt:hover) {
+  z-index: 40;
 }

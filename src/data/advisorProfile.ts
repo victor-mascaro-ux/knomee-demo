@@ -288,47 +288,42 @@ export interface AskedQuestion {
   points: string[]
 }
 
-/** What he will ask, and what to have ready. An advisor's questions are finite
-    and answerable — unlike a retail prospect's, they can be prepared for. */
+/** What he will ask, because the flow told him to ask it. Each one is his
+    question verbatim, how to answer it, and three things Dynasty could tackle
+    using it — a question a candidate arrives holding is an opening, not an
+    objection. */
 export const questionsTheyAsk: AskedQuestion[] = [
   {
-    q: 'What happens to my deferred comp?',
+    q: independenceId.questions[0],
     guidance:
-      'He named it himself as one of the things that makes the move hard, and the flow does not ask what it is worth — so the first job is getting the number out of him rather than quoting one back.',
+      'He is asking for evidence, not reassurance, and he has already named the shape of it: teams like his, the top relationships, and the two that went worst. Answer with the page, not a figure.',
     points: [
-      'Ask for the balance and the vesting dates. Nothing on this page tells you either.',
-      'Then show the net-of-forfeiture comparison over five years, not the gross payout.',
-      'Name the transition-capital options plainly, including the ones Dynasty does not offer.',
+      'Publish retention by team size and AUM band, and hand him the page rather than quoting a number at him',
+      'Walk the two worst moves honestly — that is what makes the good number believable',
+      'Offer an introduction to a lead advisor who moved a comparable book',
     ],
   },
   {
-    q: 'Do the clients actually come?',
+    q: independenceId.questions[1],
     guidance:
-      'Answer with published evidence for teams his size, including what went wrong in the worst cases. This is the only question on the page that has to be answered with numbers.',
+      'This is the promise he cannot keep where he is — he has two junior advisors who stayed six years on it. Answer with mechanics rather than intention.',
     points: [
-      'Published retention for teams of four at $500M–$1B, not a headline average.',
-      'The two worst outcomes in the last ten moves, and what went wrong in each.',
-      'Who makes the calls in the first thirty days, and what he is expected to do himself.',
+      'Bring the G2 equity terms to the first meeting: grant, vesting, and what it is worth',
+      'Show what Ana and Dev could own at Dynasty that a wirehouse cannot offer them',
+      'Help him plan how and when he tells them — he named telling the team before he is sure as one of the hard parts',
     ],
   },
   {
-    q: 'What does my team get on day one?',
+    q: independenceId.questions[2],
     guidance:
-      'Treat this as the promise he cannot keep where he is. Bring the mechanics, not the intention — and help him work out who tells Ana and Dev, and when.',
+      'He named eighteen months of disruption as what makes the move hard, so the honest answer is a dated plan with an owner against each part, not an average.',
     points: [
-      'The equity mechanics for Ana and Dev — grant, vesting, and what it is worth when, in his words, he is “done with it”.',
-      'What they can own at Dynasty that they provably cannot own at a wirehouse.',
-      'Who tells them, and when. He has not told them yet and is afraid of doing it before he is sure.',
+      'Put a transition calendar in front of him with names against every workstream',
+      'Name who carries operations during the move — his Future You has someone else running ops',
+      'Say plainly what he has to do himself in the first thirty days',
     ],
   },
 ]
-
-/** The three questions the flow handed HIM. The rep should see these before
-    the advisor asks them — the honest-fit design pointing both ways. */
-export const hisQuestions = {
-  items: independenceId.questions,
-  note: 'He left the flow holding these three, and they are on his phone. Have the answers before the first call, or he learns in the first ten minutes that you do not.',
-}
 
 /* ── the communication rail ─────────────────────────────────────────────── */
 
@@ -349,23 +344,6 @@ export const words = {
     { word: 'custodian', why: 'Named nowhere. He has no custodial relationship of his own.' },
     { word: 'comp grid', why: 'The vocabulary of the firm he is leaving.' },
   ],
-}
-
-/* Verbosity is measured off his own answers rather than asserted — every
-   free-text screen in the flow, counted. */
-const textAnswers = steps.filter((s) => s.kind === 'text' && s.answer).map((s) => s.answer as string)
-const wordCount = (t: string) => t.trim().split(/\s+/).length
-const totalWords = textAnswers.reduce((a, t) => a + wordCount(t), 0)
-
-export const verbosity = {
-  level: 'high',
-  answers: textAnswers.length,
-  /** What the Verbosity Indicator counts. */
-  words: totalWords,
-  avgWords: Math.round(totalWords / textAnswers.length),
-  longest: Math.max(...textAnswers.map(wordCount)),
-  reading:
-    'He writes in full paragraphs and volunteers the uncomfortable parts. Do not send him a form — ask him a question and let him talk.',
 }
 
 export const engagementLevel = {
@@ -428,9 +406,8 @@ export const playbookTab: PlaybookTab = {
     use: words.use.map((w) => ({ word: w.word, hint: w.why })),
     avoid: words.avoid.map((w) => ({ word: w.word, hint: w.why })),
   },
-  verbosity: { level: verbosity.level, words: verbosity.words },
   engagement: `${engagementLevel.level} — ${engagementLevel.detail}`,
   takeawayLabel: 'Rep takeaway',
   takeaway: repTakeaway,
-  theirQuestions: { note: hisQuestions.note, items: hisQuestions.items },
+  questionsNote: 'The three the flow told him to ask — they are on his phone',
 }
