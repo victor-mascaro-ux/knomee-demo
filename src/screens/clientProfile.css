@@ -11,7 +11,10 @@
    Drawn from the design system's teal family: --k-forest, --k-ocean, --k-teal,
    --k-mint. */
 .pp.cp {
-  --purple-bolt: var(--k-teal, #3dbdaa);
+  /* Ocean, not teal. --k-teal is a surface colour: at #3dbdaa it sits about
+     2.2:1 on white, so every label drawn in it failed to read. Ocean carries
+     the same family at 7.4:1. */
+  --purple-bolt: var(--k-ocean, #086375);
   --plum: var(--k-forest, #0f4a3a);
   --text-strong: var(--k-forest, #0f4a3a);
   --text-link: var(--k-ocean, #086375);
@@ -26,13 +29,15 @@
   --dial-1: #d9f2ed;
   --dial-2: #6fd0bf;
   --dial-3: #086375;
+  --avatar-bg: var(--k-teal-light, #e6f7f5);
+  --avatar-ink: var(--k-ocean, #086375);
 }
-/* "New" is the one goal tag whose lilac belongs to the purple side; on this
-   page it takes the mint the palette already uses for "Updated". Sensitive
-   keeps its amber — attention is not a brand colour. */
+/* "New" takes the lime the tokens reserve for exactly this, which is also what
+   the Clients dashboard badges it with — one colour for "new" wherever it
+   lands. Sensitive keeps its amber: attention is not a brand colour. */
 .pp.cp .cp-goal-tag.is-new {
-  background: var(--k-teal-light);
-  color: var(--k-ocean);
+  background: var(--k-lime);
+  color: var(--k-plum);
 }
 .pp.cp .cp-goal-tag.is-updated {
   background: var(--k-mint);
@@ -109,8 +114,8 @@
   width: 26px;
   height: 26px;
   border-radius: var(--radius-circle);
-  background: var(--k-grape-light);
-  color: var(--text-strong);
+  background: var(--avatar-bg);
+  color: var(--avatar-ink);
   display: grid;
   place-items: center;
   font-size: var(--text-xs);

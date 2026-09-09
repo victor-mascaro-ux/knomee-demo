@@ -103,7 +103,13 @@ import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate, independenceId } from './data/advisorFlow'
-import { kq as candidateKQ, route as candidateRoute, tier as candidateTier, topAction as candidateTopAction } from './data/advisorProfile'
+import {
+  kq as candidateKQ,
+  route as candidateRoute,
+  teamSize as candidateTeam,
+  tier as candidateTier,
+  topAction as candidateTopAction,
+} from './data/advisorProfile'
 import { useSlideIndicator } from './useSlideIndicator'
 
 type Screen = 'prospects' | 'clients' | 'analytics'
@@ -861,7 +867,7 @@ function FirmCandidatesScreen({ onOpenProfile }: { onOpenProfile: () => void }) 
               </td>
               <td className="col-firm-word">{independenceId.readiness.stage}</td>
               <td className="col-num">{candidate.book}</td>
-              <td className="col-num">4</td>
+              <td className="col-num">{candidateTeam}</td>
               <td className="col-firm-word">{candidateRoute.pick.replace('Dynasty ', '')}</td>
               <td className="col-action">
                 <TopActionCell text={candidateTopAction.title} />

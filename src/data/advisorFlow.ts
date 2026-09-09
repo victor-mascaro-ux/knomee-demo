@@ -656,17 +656,20 @@ export const independenceId = {
     meta: `${advisor.role} · ${advisor.book} · ${advisor.firm}`,
     completed: advisor.completedOn,
   },
+  // `icon` names the ADVENTURE each highlight is distilled from, so the desktop
+  // profile can reuse the shared HighlightIcon: Practice Joy wears the Financial
+  // Joy artwork, concerns and hopes come out of Outlook, the rest Future You.
   highlights: [
-    { icon: 'target', title: 'What the practice is for', text: 'Ownership, control over how I serve, my team’s future' },
+    { icon: 'financial-joy', title: 'What the practice is for', text: 'Ownership, control over how I serve, my team’s future' },
     {
-      icon: 'sparkle',
+      icon: 'financial-joy',
       title: 'What reminded me why',
       text: 'A client of eleven years bringing her daughter in — “because she wanted her to hear it from the person who actually knows the family”',
     },
-    { icon: 'warning', title: 'Biggest concern', text: 'Whether the clients follow. Then what he owes two junior advisors.' },
-    { icon: 'target', title: 'Hopes', text: 'A firm with his name on it, and equity for the team instead of a bonus' },
-    { icon: 'frame', title: 'The practice I want', text: 'Equity I own, a team I built, fewer better clients, someone else running ops' },
-    { icon: 'bolt', title: 'Where I’m heading', text: 'His own firm in 5–10 years, still advising, mentoring the next generation' },
+    { icon: 'outlook', title: 'Biggest concern', text: 'Whether the clients follow. Then what he owes two junior advisors.' },
+    { icon: 'outlook', title: 'Hopes', text: 'A firm with his name on it, and equity for the team instead of a bonus' },
+    { icon: 'future-you', title: 'The practice I want', text: 'Equity I own, a team I built, fewer better clients, someone else running ops' },
+    { icon: 'future-you', title: 'Where I’m heading', text: 'His own firm in 5–10 years, still advising, mentoring the next generation' },
   ],
   readiness: {
     stage: 'Contemplation',

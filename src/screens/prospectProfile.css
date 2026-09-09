@@ -22,6 +22,8 @@
   --dial-1: #e9d9f4;
   --dial-2: #b98ddc;
   --dial-3: #7639a1;
+  --avatar-bg: #e9d9f4;
+  --avatar-ink: #7639a1;
 }
 /* The main column carries the top inset so the sidebar strip runs flush up to
    the header bar. */
@@ -83,12 +85,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--pearl, #efeef2);
+  /* Tinted rather than grey: an initial standing in for a face should still
+     say which side of the product it belongs to. The client page restates
+     these in its own greens. */
+  background: var(--avatar-bg, #e9d9f4);
   border: 3px solid #fff;
   box-shadow: 0 0 0 1.5px var(--line, #e7e4ee);
   font-size: 34px;
   font-weight: 700;
-  color: var(--grey-text, #8b8598);
+  color: var(--avatar-ink, #7639a1);
 }
 .pp-avatar img {
   width: 100%;

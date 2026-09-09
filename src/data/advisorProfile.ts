@@ -1,0 +1,433 @@
+// The firm side of Marcus Hale's eight minutes — what a Dynasty rep reads
+// after the advisor finishes the flow in `advisorFlow.ts`.
+//
+// Two tabs live here: Advisor Readiness (the Knomee Quotient, retrained on an
+// advisor's decision) and the Recruiting Playbook. Independence ID needs
+// nothing new — it renders `independenceId` straight out of the flow.
+//
+// Everything quotable is read back out of the flow rather than retyped, so the
+// profile and the mobile experience cannot drift apart. Where a figure is a
+// score rather than an answer it is authored ONCE here and derived everywhere
+// after that.
+//
+// All figures and answers are invented. No real advisor or firm is represented.
+
+import { advisor, independenceId, steps } from './advisorFlow'
+
+/* ── reading the flow back ──────────────────────────────────────────────── */
+
+const step = (id: string) => steps.find((s) => s.id === id)
+/** The option the advisor picked on a single/multi-choice screen. */
+const picked = (id: string) => (step(id)?.chosen ?? []).join(', ')
+/** A free-text answer, verbatim. */
+const said = (id: string) => step(id)?.answer ?? ''
+/** One statement out of the Confidence set, with where he left the slider. */
+const statement = (i: number) => step('cf-q')?.statements?.[i]
+
+/* ── the Knomee Quotient, retrained on an advisor ────────────────────────
+   Same three dimensions as the client score; different questions feed them.
+   The three dimension scores are the only authored numbers on the tab — the
+   KQ, the tier and the tier band are all computed from them. */
+
+export interface Dimension {
+  key: 'Intent' | 'Clarity' | 'Receptivity'
+  score: number
+  /** What the dimension means for an advisor, not a retail prospect. */
+  measures: string
+  /** Which screens of the flow feed it. */
+  source: string
+  /** The answers behind the score, in his words where he wrote them. */
+  evidence: string[]
+  /** The one-line read. */
+  read: string
+}
+
+// Intent is weighted heaviest because it is the dimension that decides whether
+// the other two are worth a meeting this quarter.
+export const KQ_WEIGHTS: Record<Dimension['key'], number> = {
+  Intent: 0.45,
+  Clarity: 0.3,
+  Receptivity: 0.25,
+}
+
+export const dimensions: Dimension[] = [
+  {
+    key: 'Intent',
+    score: 45,
+    measures: 'Whether this is a live decision or a recurring mood.',
+    source: 'The Move · Q5–Q7 (the readiness stage)',
+    evidence: [
+      `Thought about it: “${picked('mv-q5')}”`,
+      `Knows the steps: “${picked('mv-q6')}”`,
+      `Started acting: “${picked('mv-q7')}”`,
+      `Timeline: ${picked('mv-q2')}`,
+    ],
+    read: 'Three years of weighing it and no step taken. Nothing is in motion.',
+  },
+  {
+    key: 'Clarity',
+    score: 78,
+    measures: 'Whether he knows what kind of independence he wants.',
+    source: 'Future You · the vision and its clarity rating (Q7)',
+    evidence: [
+      `Rated the picture of Future You ${step('fy-clarity')?.scale?.value} of 5 for clarity`,
+      `Where: ${picked('fy-q1')}`,
+      `Practice includes: ${picked('fy-q5')}`,
+    ],
+    read: 'He can name the firm he wants down to who runs operations.',
+  },
+  {
+    key: 'Receptivity',
+    score: 85,
+    measures: 'Whether he would let a platform help, or insists on doing it alone.',
+    source: 'Confidence · item 6, and The Move · Q4',
+    evidence: [
+      `“${statement(5)?.text}” — ${statement(5)?.value} of 5`,
+      `Wants support: “${picked('mv-q4')}”`,
+    ],
+    read: 'Asked for a partner outright. The door is open before anyone knocks.',
+  },
+]
+
+const weighted = dimensions.reduce((sum, d) => sum + d.score * KQ_WEIGHTS[d.key], 0)
+
+/** The composite score, computed from the three dimensions above. */
+export const kq = Math.round(weighted)
+
+/* Tier bands are the engine's, shared with the retail side: 70–100 ready now,
+   40–69 considering, 0–39 nurture. */
+export const KQ_TIERS = [
+  { tier: 1, name: 'Ready Now', min: 70, max: 100 },
+  { tier: 2, name: 'Considering', min: 40, max: 69 },
+  { tier: 3, name: 'Nurture', min: 0, max: 39 },
+] as const
+
+export const tier = KQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
+
+/** The banner under the ring: the score in a sentence, and what it is not. */
+export const tierBanner = {
+  headline: `Tier ${tier.tier} · ${tier.name}`,
+  body: 'Wants it, has not started. High clarity and an open door sitting on top of an intent score that says nothing is moving — the common case, and the one a recruiting pipeline cannot see today.',
+  note: 'Not a Tier 1. Treating him as one is how a rep spends a quarter chasing a meeting that was never going to be scheduled.',
+}
+
+/* ── the three columns ──────────────────────────────────────────────────── */
+
+export const velocity = {
+  read: 'Low velocity, high value.',
+  body: `A ${advisor.book} team that will not move this quarter, and is worth staying with anyway. His own window says ${picked('mv-q2')}, and nothing behind it has started.`,
+  reasons: [
+    {
+      label: 'No steps taken',
+      detail: `“${picked('mv-q7')}” — and “${picked('mv-q6')}” on what the steps even are.`,
+    },
+    {
+      label: 'No timeline',
+      detail: `${picked('mv-q2')} is a range, not a date. Nothing in the flow anchors it.`,
+    },
+    { label: 'The spouse has stopped believing him', detail: said('mv-q10b') },
+  ],
+  action:
+    'Work him on a two-quarter cadence, not a two-week one — and make the first meeting about the attrition question rather than a pitch.',
+}
+
+export interface Ranked {
+  rank: number
+  label: string
+  detail: string
+}
+
+export const motivators: Ranked[] = [
+  {
+    rank: 1,
+    label: 'Ownership',
+    detail: 'Named first in Practice Joy, and again unprompted: “Everything we build belongs to someone else.”',
+  },
+  {
+    rank: 2,
+    label: 'Control over how I serve',
+    detail: 'Wants no committee between him and a client.',
+  },
+  {
+    rank: 3,
+    label: 'His team’s future',
+    detail: 'Hopes to hand Ana and Dev equity instead of a bonus.',
+  },
+  {
+    rank: 4,
+    label: 'Income',
+    detail: 'Ranked fourth — he did not pick it in Practice Joy at all. Leading with payout reads as a misread of him.',
+  },
+]
+
+export const apprehensions: Ranked[] = [
+  { rank: 1, label: 'Client attrition', detail: said('ol-q1') },
+  { rank: 2, label: 'What he owes the two juniors', detail: said('ol-q2') },
+  {
+    rank: 3,
+    label: 'Eighteen months of disruption',
+    detail: 'Named in what makes the move hard — the transition itself, not the destination.',
+  },
+  {
+    rank: 4,
+    label: 'Deferred comp he would walk away from',
+    detail: 'Unvested and dated. See the comp clock.',
+  },
+]
+
+export const columnActions = {
+  motivators: 'Open on ownership and equity. Do not open on payout.',
+  apprehensions: 'Bring published retention numbers to the first call — including the two worst cases.',
+}
+
+/* ── the enterprise-only fields ─────────────────────────────────────────── */
+
+export interface RouteOption {
+  key: 'connect' | 'ib' | 'optima'
+  name: string
+  forWhom: string
+  matched: boolean
+  why: string
+}
+
+export const route = {
+  pick: 'Dynasty Connect',
+  why: 'Future You says his own firm, still advising, mentoring the next generation — he is building, not exiting. Nothing in the flow points at a sale or a succession.',
+  action: 'Route to Connect. Send the breakaway team pack, not the valuation deck.',
+  options: [
+    {
+      key: 'connect',
+      name: 'Dynasty Connect',
+      forWhom: 'Breakaway teams building their own firm',
+      matched: true,
+      why: `“${picked('mv-q1')}” — and, asked whether he wants support: “${picked('mv-q4')}”`,
+    },
+    {
+      key: 'ib',
+      name: 'Investment Bank',
+      forWhom: 'Advisors selling or merging a book',
+      matched: false,
+      why: 'He picked neither “Sell or merge my book” nor an exit in Future You.',
+    },
+    {
+      key: 'optima',
+      name: 'Optima',
+      forWhom: 'Succession and continuity for advisors winding down',
+      matched: false,
+      why: 'A named successor is something he wants to give, not to receive. Not winding down.',
+    },
+  ] as RouteOption[],
+}
+
+export const secondSeat = {
+  note: `He named ${independenceId.move.stakeholders} as having a say.`,
+  action:
+    'Convince the juniors first. Bring their equity answer to meeting one; the spouse conversation only lands after they are in.',
+  seats: [
+    {
+      order: 1,
+      who: 'Ana and Dev — the two junior advisors',
+      why: 'Six years on a promise he cannot keep where he is. They are the reason for the move and the fastest yes available.',
+    },
+    {
+      order: 2,
+      who: 'His wife',
+      why: 'Three years of watching him talk about it without moving. What persuades her is a date, not a vision — and she is the last seat, not the first.',
+    },
+  ],
+}
+
+/* The flow names the team in words — "team of four" — so the numeral a firm
+   sorts by lives here, once. */
+export const teamSize = 4
+
+/* The real timeline on a breakaway is not a readiness score, it is a vesting
+   date. The total is summed from the tranches so the two cannot disagree. */
+export const compTranches = [
+  { amount: 420, vests: '15 Mar 2027' },
+  { amount: 530, vests: '15 Mar 2028' },
+  { amount: 450, vests: '15 Mar 2029' },
+]
+
+const deferredTotal = compTranches.reduce((a, t) => a + t.amount, 0)
+/** "$1.4M" — written once, from the tranches. */
+export const deferredLabel = `$${(deferredTotal / 1000).toFixed(1)}M`
+
+export const bookProfile = [
+  { label: 'AUM', value: advisor.book, detail: 'Self-reported in the flow' },
+  {
+    label: 'Team',
+    value: `${teamSize} advisors · 2 support`,
+    detail: 'Lead advisor, two juniors, one associate',
+  },
+  {
+    label: 'Current custodian',
+    value: `${advisor.firm} platform · self-clearing`,
+    detail: 'No custodial relationship of his own to carry across',
+  },
+  {
+    label: 'Deferred comp exposure',
+    value: `${deferredLabel} unvested`,
+    detail: `${compTranches.length} tranches — see the comp clock`,
+  },
+]
+
+/** The book card still has to change something, or it is trivia. */
+export const bookProfileRead =
+  'No custodial relationship of his own to carry across — one fewer transition workstream than a typical breakaway. Say that out loud in the first meeting; he does not know it counts in his favour.'
+
+export const compClock = {
+  tranches: compTranches,
+  total: deferredTotal,
+  label: deferredLabel,
+  last: compTranches[compTranches.length - 1],
+  reading: `Every month before ${compTranches[compTranches.length - 1].vests} costs him something on the way out, and the last tranche is the biggest of the three. His stated window (${picked('mv-q2')}) contains that date.`,
+  action:
+    'Model the net-of-forfeiture number against that date before the second meeting. He has not done that arithmetic — whoever does it first frames the decision.',
+}
+
+/* ── the Recruiting Playbook ────────────────────────────────────────────── */
+
+export const topAction = {
+  title: 'Answer the attrition question with evidence, in the first ten minutes.',
+  body: `He wrote it himself: “${said('ol-q1')}” Nothing else on this page moves until that is answered, and a rep who opens anywhere else has spent the meeting.`,
+}
+
+export type StarterTag =
+  | 'Positive Talk'
+  | 'Demonstrate Curiosity'
+  | 'Self-Reinforcement'
+  | 'Acknowledge and Validate'
+
+export interface Starter {
+  tag: StarterTag
+  line: string
+  why: string
+}
+
+export const starters: Starter[] = [
+  {
+    tag: 'Acknowledge and Validate',
+    line: 'You said the only question that matters is whether the clients come. Let’s start there, and not move off it until you’re satisfied.',
+    why: 'Uses his own sentence back. It makes the meeting his agenda before it is Dynasty’s.',
+  },
+  {
+    tag: 'Demonstrate Curiosity',
+    line: 'What did Ana and Dev say the last time you talked about equity — or has that conversation not happened yet?',
+    why: 'The second seat is the blocker he has not tested. His answer tells you which meeting you are actually in.',
+  },
+  {
+    tag: 'Self-Reinforcement',
+    line: 'A client of eleven years brought her daughter in to meet you. That relationship isn’t with the letterhead.',
+    why: 'His own evidence against the thing he is most afraid of. He is more persuasive on it than you are.',
+  },
+  {
+    tag: 'Positive Talk',
+    line: 'You already know what you want it to look like — equity you own, a team you built, someone else running ops. Most people at this stage don’t.',
+    why: 'Clarity is his strongest dimension. Naming it moves the conversation off whether and onto when.',
+  },
+]
+
+export const recommendationsKey: { tag: StarterTag; meaning: string }[] = [
+  {
+    tag: 'Positive Talk',
+    meaning: 'Name what is already true and working, in his words, before adding anything of your own.',
+  },
+  {
+    tag: 'Demonstrate Curiosity',
+    meaning: 'Ask about the part he has not resolved. Questions gather what the flow could not, and hand him the floor.',
+  },
+  {
+    tag: 'Self-Reinforcement',
+    meaning: 'Point at evidence he produced himself. He will not argue with his own answer.',
+  },
+  {
+    tag: 'Acknowledge and Validate',
+    meaning: 'Say the hard thing back plainly. Hesitation that goes unnamed hardens.',
+  },
+]
+
+export interface AskedQuestion {
+  q: string
+  points: string[]
+}
+
+/** What he will ask, and what to have ready. An advisor's questions are finite
+    and answerable — unlike a retail prospect's, they can be prepared for. */
+export const questionsTheyAsk: AskedQuestion[] = [
+  {
+    q: 'What happens to my deferred comp?',
+    points: [
+      `${deferredLabel} unvested across ${compTranches.length} tranches, the last on ${compClock.last.vests} — say the number back to him before he says it to you.`,
+      'Show the net-of-forfeiture comparison over five years, not the gross payout.',
+      'Name the transition-capital options plainly, including the ones Dynasty does not offer.',
+    ],
+  },
+  {
+    q: 'Do the clients actually come?',
+    points: [
+      'Published retention for teams of four at $500M–$1B, not a headline average.',
+      'The two worst outcomes in the last ten moves, and what went wrong in each.',
+      'Who makes the calls in the first thirty days, and what he is expected to do himself.',
+    ],
+  },
+  {
+    q: 'What does my team get on day one?',
+    points: [
+      'The equity mechanics for Ana and Dev — grant, vesting, and what it is worth if he sells in ten years.',
+      'What they can own at Dynasty that they provably cannot own at a wirehouse.',
+      'Who tells them, and when. He has not told them yet and is afraid of doing it before he is sure.',
+    ],
+  },
+]
+
+/** The three questions the flow handed HIM. The rep should see these before
+    the advisor asks them — the honest-fit design pointing both ways. */
+export const hisQuestions = {
+  items: independenceId.questions,
+  note: 'He left the flow holding these three, and they are on his phone. Have the answers before the first call, or he learns in the first ten minutes that you do not.',
+}
+
+/* ── the communication rail ─────────────────────────────────────────────── */
+
+export const words = {
+  use: [
+    { word: 'ownership', why: 'His first pick in Practice Joy, and the word he reaches for unprompted.' },
+    { word: 'equity', why: 'What he wants to hand his juniors. The hope, in one word.' },
+    { word: 'control', why: '“Control over how I serve” — his second pick.' },
+    { word: 'your team', why: 'Ana and Dev are in every answer that matters.' },
+    { word: 'what you’d own', why: 'Turns the abstraction into the thing he pictured in Future You.' },
+  ],
+  avoid: [
+    { word: 'payout', why: 'Income ranked fourth. Payout language reads as a misread of him.' },
+    { word: 'platform', why: 'He asked for a partner, not a platform. The noun makes Dynasty the product.' },
+    { word: 'technology', why: 'Named nowhere in eight minutes of answers.' },
+    { word: 'custodian', why: 'Named nowhere. He has no custodial relationship of his own.' },
+    { word: 'comp grid', why: 'The vocabulary of the firm he is leaving.' },
+  ],
+}
+
+/* Verbosity is measured off his own answers rather than asserted — every
+   free-text screen in the flow, counted. */
+const textAnswers = steps.filter((s) => s.kind === 'text' && s.answer).map((s) => s.answer as string)
+const wordCount = (t: string) => t.trim().split(/\s+/).length
+const totalWords = textAnswers.reduce((a, t) => a + wordCount(t), 0)
+
+export const verbosity = {
+  level: 'High',
+  answers: textAnswers.length,
+  avgWords: Math.round(totalWords / textAnswers.length),
+  longest: Math.max(...textAnswers.map(wordCount)),
+  reading:
+    'He writes in full paragraphs and volunteers the uncomfortable parts. Do not send him a form — ask him a question and let him talk.',
+}
+
+export const engagementLevel = {
+  level: 'High',
+  detail: `All ${independenceId.badges.length} adventures completed, finished ${independenceId.header.completed}.`,
+  reading:
+    'Nobody made him do this. He answered a question about his marriage honestly, on a screen belonging to a firm that is recruiting him.',
+}
+
+export const repTakeaway =
+  'He is not shopping, he is deciding — and he has been deciding for three years. Answer the attrition question with numbers and bring an equity answer for two junior advisors, and the deciding ends. Lead with payout and it does not.'
