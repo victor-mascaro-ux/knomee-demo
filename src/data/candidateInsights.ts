@@ -197,6 +197,6 @@ const best = [...clusters]
   .filter((c) => !c.thin && c.conv !== null)
   .sort((a, b) => (b.conv as number) - (a.conv as number))[0]
 
-export const clusterLead = `${largest.size} of ${candidateStats.scored} advisors — ${largest.share}% of the pipeline — are “${largest.name.toLowerCase()}”. ${
-  best ? `“${best.name}” converts best at ${best.conv}%.` : ''
+export const clusterLead = `${largest.size} of ${candidateStats.scored} advisors — the largest group in the pipeline — can describe the firm they want and have taken no step toward it.${
+  best ? ` The group that actually converts is “${best.name}”: ${best.signed} of ${best.size}.` : ''
 } Two different conversations, and today they get the same one.`
