@@ -471,3 +471,13 @@ export function AddButton({ muted }: { muted?: boolean } = {}) {
     </span>
   )
 }
+
+/* The disclosure that sits in a card's header rather than its footer: compact
+   and right-aligned, where ShowToggle is full-width and centred. */
+export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  return (
+    <button className="pp-head-toggle" type="button" aria-expanded={open} onClick={onToggle}>
+      {open ? 'Show less' : 'Show more'} <CaretIcon up={open} />
+    </button>
+  )
+}

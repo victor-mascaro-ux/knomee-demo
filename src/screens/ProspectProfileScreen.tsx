@@ -3,7 +3,7 @@ import './prospectProfile.css'
 import { financialId } from '../data/financialId'
 import { prospectPlaybook, prospectReadiness } from '../data/readiness'
 import { PlaybookTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyState, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -48,6 +48,7 @@ export default function ProspectProfileScreen({
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
   const [confidence, setConfidence] = useState(false)
+  const highlights = useCollapsed(fi.keyHighlights, COLLAPSED_ROWS)
   const goals = useCollapsed(orderGoals(fi.goals), COLLAPSED_GOALS)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
@@ -155,10 +156,17 @@ export default function ProspectProfileScreen({
                     <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
+                  {highlights.overflows && (
+                    <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
+                  )}
                 </div>
                 <div className="pp-highlights">
-                  {fi.keyHighlights.map((h) => (
-                    <div className="pp-highlight" key={h.title}>
+                  {highlights.shown.map((h, i) => (
+                    <div
+                      className={`pp-highlight ${highlights.entering(i) ?? ''}`}
+                      style={highlights.delay(i)}
+                      key={h.title}
+                    >
                       <div className="pp-highlight-title">
                         <HighlightIcon source={h.icon} />
                         {h.title}

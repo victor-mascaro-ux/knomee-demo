@@ -1385,6 +1385,12 @@ button.name-link-btn:hover .name-text {
   padding: 6px 9px;
   border-radius: 8px;
   white-space: nowrap;
+  /* A tooltip is positioned from `left: 50%`, so shrink-to-fit would offer it
+     only the half-width to its right and any wrapping bubble would come out
+     tall and thin. Sizing to its content instead — and capping the width where
+     it wraps — keeps every bubble wider than it is tall. */
+  width: max-content;
+  max-width: 360px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.14s ease, transform 0.14s ease;
@@ -1410,6 +1416,26 @@ button.name-link-btn:hover .name-text {
 }
 .tt:hover::before {
   opacity: 1;
+}
+
+/* Upward variant: the bubble sits above its host with the wedge underneath.
+   For a tall host — a score card, a pill in a rail — where opening downward
+   drops the bubble across the next card; and since the cursor is inside the
+   host, a bubble above it never lands under the pointer. */
+.tt-up::after {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-3px);
+}
+.tt-up:hover::after,
+.tt-up:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
+.tt-up::before {
+  top: auto;
+  bottom: calc(100% + 3px);
+  border-bottom-color: transparent;
+  border-top-color: #240446;
 }
 
 /* Card help tips open to the LEFT of the "?" and are vertically centred on it,
