@@ -32,13 +32,17 @@
   cursor: default;
   color: var(--text-link);
 }
-.cp-side-caret {
-  color: var(--text-secondary);
-}
+/* The count sits with the name it counts; the chevron goes to the end, where
+   every row beneath this one keeps its own. Same RowChevron at the same size,
+   so the head and the rows read as one list. */
 .cp-side-count {
-  margin-left: auto;
   font-weight: var(--weight-regular);
   color: var(--text-secondary);
+}
+.cp-side-head svg {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-placeholder);
 }
 
 .cp-person {
@@ -48,6 +52,14 @@
   padding: var(--space-6) 0;
   border-radius: var(--radius-md);
   transition: background var(--dur-base) var(--ease-out);
+}
+/* The chevron belongs to the name, not to the pair of lines — centred on the
+   row it floated between the name and the role. Pinned to the top and nudged
+   by half the difference between the name's line and its own 14px, it sits on
+   the name. */
+.cp-person > svg {
+  align-self: flex-start;
+  margin-top: calc((18px - 14px) / 2);
 }
 .cp-person.is-current {
   /* the member whose page this is */
@@ -76,6 +88,8 @@
 }
 .cp-person-main b {
   font-size: var(--text-sm);
+  /* Stated, because the chevron's offset is measured against it. */
+  line-height: 18px;
   font-weight: var(--weight-semibold);
   color: var(--text-body);
   white-space: nowrap;
