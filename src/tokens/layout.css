@@ -77,6 +77,14 @@
                                commanding one and knomee read as the smaller
                                brand in its own product. Both now carry the
                                same weight in the bar. */
+
+  /* The persona word (ADVISOR / ENTERPRISE / ADMIN) is set to the same
+     optical size the outlined ADVISOR lockup used: its cap height is
+     0.569 x the knomee mark, and Poppins' cap height is 0.7em, so the
+     type size is 0.813 x the mark. The gap is measured off the same
+     lockup (0.359 x the mark), so every persona wears one wordmark. */
+  --brand-sub-size: calc(var(--brand-logo-h) * 0.813);
+  --brand-sub-gap:  calc(var(--brand-logo-h) * 0.359);
   --client-logo-h: 34px;    /* client logo when it leads the bar */
   --avatar-size:   38px;
   --bolt-size:     38px;

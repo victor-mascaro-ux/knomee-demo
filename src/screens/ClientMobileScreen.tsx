@@ -49,6 +49,14 @@ export default function ClientMobileScreen({ onExit }: { onExit: () => void }) {
           the scaled height and the page never grows a phantom scrollbar. */}
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
         <IPhone scale={scale}>
+          {/* The advisor's own bar. The page inside the frame is the advisor's
+              product, not the client's app, so it keeps the plum header it has
+              on a desktop rather than opening straight onto a white page. */}
+          <header className="cx-appbar cxm-appbar">
+            <div className="cx-appbar-brand">
+              <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
+            </div>
+          </header>
           {/* The screen scrolls; what scrolls inside it is the desktop page. */}
           <div className="cx-viewport cxm-viewport">
             <ClientProfileScreen client={EMILY} onBack={() => force((n) => n + 1)} />

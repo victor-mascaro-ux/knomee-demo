@@ -86,7 +86,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--brand-sub-gap);
   color: #fff;
 }
 
@@ -135,24 +135,21 @@ body {
   display: block;
 }
 
-.brand-lockup {
-  height: var(--brand-logo-h);
-  width: auto;
-  display: block;
-}
-
 .brand-name {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.2px;
 }
 
+/* Traced off the outlined ADVISOR lockup: Poppins SemiBold, no tracking,
+   full-strength white, sitting on the knomee mark's own baseline rather
+   than its optical centre. */
 .brand-sub {
-  font-size: 13px;
+  font-size: var(--brand-sub-size);
   font-weight: 600;
-  letter-spacing: 1.5px;
-  opacity: 0.9;
-  margin-left: 2px;
+  letter-spacing: 0;
+  line-height: 1;
+  align-self: flex-end;
 }
 
 .menu-btn {
@@ -1601,8 +1598,9 @@ button.name-link-btn:hover .name-text {
 
 /* ---------- Clients screen ---------- */
 .brand-logo {
-  /* The knomee mark on the enterprise / admin bars — same height as the
-     advisor lockup, so no persona wears a smaller knomee than another. */
+  /* The knomee mark on every persona's bar — advisor, enterprise and admin
+     all pair it with a .brand-sub word, so no persona wears a smaller
+     knomee than another. */
   height: var(--brand-logo-h);
   width: auto;
   display: block;
@@ -4290,11 +4288,8 @@ button.name-link-btn:hover .name-text {
 
 /* Phone: stack the toolbar (converting flow behavior) */
 @media (max-width: 640px) {
-  .brand-logo {
-    height: 22px;
-  }
-  .brand-sub {
-    font-size: 11px;
+  :root {
+    --brand-logo-h: 22px;
   }
   .content {
     padding-bottom: 40px;
