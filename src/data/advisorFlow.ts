@@ -655,7 +655,6 @@ export const independenceId = {
     name: advisor.name,
     meta: `${advisor.role} · ${advisor.book} · ${advisor.firm}`,
     completed: advisor.completedOn,
-    privacy: 'Dynasty sees a summary of this. You see all of it. Nothing here is shared with your current firm.',
   },
   highlights: [
     { icon: 'target', title: 'What the practice is for', text: 'Ownership, control over how I serve, my team’s future' },
