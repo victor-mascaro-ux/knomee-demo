@@ -32,16 +32,16 @@
   cursor: default;
   color: var(--text-link);
 }
-/* The count sits with the name it counts; the chevron goes to the end, where
-   every row beneath this one keeps its own. Same RowChevron at the same size,
-   so the head and the rows read as one list. */
+/* Count and chevron travel together at the end of the row, above the chevrons
+   of the rows they head. Same RowChevron at the same size, so the head and its
+   rows read as one list. */
 .cp-side-count {
+  margin-left: auto;
   font-weight: var(--weight-regular);
   color: var(--text-secondary);
 }
 .cp-side-head svg {
   flex: none;
-  margin-left: auto;
   color: var(--text-placeholder);
 }
 
