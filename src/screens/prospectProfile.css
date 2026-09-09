@@ -544,9 +544,12 @@
   border-radius: 10px;
   padding: 10px 14px;
 }
+/* The answer, at the weight of the card title asking for it — it sat a step
+   lighter than the "Confidence" heading beside it and read as a caption. One
+   rule: the prospect, client and advisor pages all render this class. */
 .pp-confidence-label {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 .pp-gauge {
   line-height: 0;
