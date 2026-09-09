@@ -511,33 +511,3 @@
   line-height: 1.55;
   color: #3f3c49;
 }
-.af-snapshot {
-  margin-top: 12px;
-  border: 1px solid #e6e4ea;
-  border-top: 3px solid var(--k-ocean, #086375);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.af-snap-row {
-  display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 10px;
-  padding: 10px 13px;
-  border-bottom: 1px solid #efeef2;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.af-snap-row:last-child {
-  border-bottom: none;
-}
-.af-snap-row span:first-child {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #8a8792;
-  padding-top: 2px;
-}
-.af-snap-row span:last-child {
-  color: #3f3c49;
-}
