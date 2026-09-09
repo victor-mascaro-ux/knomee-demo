@@ -318,16 +318,17 @@
   gap: 3px;
   flex: none;
   /* The stage names differ in length — without a fixed column each row centred
-     its own block, so the bars never lined up down the list. Wide enough for
-     "Pre-Contemplation", the longest of the five. */
-  width: 84px;
+     its own block, so the bars never lined up down the list. Narrow enough to
+     leave the goal its width: "Pre-Contemplation", the one long label, wraps at
+     its own hyphen rather than setting the column for the other four. */
+  width: 62px;
 }
 .pp-stage {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  line-height: 1;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  text-align: center;
 }
 .pp-bars {
   position: relative;
