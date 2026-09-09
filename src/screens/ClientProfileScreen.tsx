@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarFor, clientProfile } from '../data/clientProfile'
@@ -74,11 +74,13 @@ function BoardPhoto({
   alt,
   tall,
   wide,
+  style,
 }: {
   src: string
   alt: string
   tall?: boolean
   wide?: boolean
+  style?: CSSProperties
 }) {
   const [failed, setFailed] = useState(false)
   /* A landscape photograph never takes the tall cell. The tile cannot know the
@@ -89,6 +91,7 @@ function BoardPhoto({
   const isTall = tall && !landscape
   return (
     <div
+      style={style}
       className={`cp-tile cp-tile-photo ${isTall ? 'is-tall' : ''} ${wide ? 'is-wide' : ''} ${
         failed ? 'is-missing' : ''
       }`}
@@ -121,7 +124,17 @@ function noteGrowth(tile: Extract<BoardTile, { kind: 'note' }>) {
   return Math.abs(h) % 2 === 0 ? 'is-tall' : 'is-wide'
 }
 
-function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
+function BoardNote({
+  tile,
+  style,
+  onSpan,
+}: {
+  tile: Extract<BoardTile, { kind: 'note' }>
+  style?: CSSProperties
+  /* The board has to re-measure when a note claims a second cell, and a note's
+     own state change does not re-render its parent. It says so instead. */
+  onSpan?: () => void
+}) {
   const box = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
   /* A note takes one cell if its words fit in one. If they do not it takes a
@@ -146,6 +159,10 @@ function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
     setMeasuring(false)
   }, [measuring, tile])
 
+  useEffect(() => {
+    if (!measuring) onSpan?.()
+  }, [span, measuring, onSpan])
+
   /* The cell changes size between the desktop's three columns and the phone's
      two, and the answer changes with it. Width only — the note's own height
      moves when the span lands, and watching that would chase its own tail. */
@@ -165,6 +182,7 @@ function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
   return (
     <div
       ref={box}
+      style={style}
       className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''} ${
         measuring ? '' : span
       }`}
@@ -184,17 +202,117 @@ function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
   )
 }
 
+/* Where the grid's own placement leaves a gap, and how wide it is.
+
+   `grid-auto-flow: dense` already backfills a hole beside a tall or wide tile
+   with the next tile that fits. What it cannot fix is the end: when the tiles
+   do not add up to whole rows, the final row runs out part-way and the board
+   finishes on a blank square. Nothing follows it to pull forward, so the tile
+   that is there stretches into it instead. */
+function trailingGap(grid: HTMLDivElement) {
+  const cs = getComputedStyle(grid)
+  const tracks = cs.gridTemplateColumns.split(' ').map(parseFloat)
+  const cols = tracks.length
+  if (!cols || Number.isNaN(tracks[0])) return null
+  const gap = parseFloat(cs.rowGap) || 0
+  const rowH = parseFloat(cs.gridAutoRows) || 0
+  const box = grid.getBoundingClientRect()
+  /* The board can be inside the scaled phone frame, where painted pixels and
+     CSS pixels are not the same length. One ratio recovers the scale. */
+  const laid = tracks.reduce((a, b) => a + b, 0) + gap * (cols - 1)
+  const k = laid > 0 ? box.width / laid : 1
+  const colStep = (tracks[0] + gap) * k
+  const rowStep = (rowH + gap) * k
+  if (!(colStep > 0) || !(rowStep > 0)) return null
+
+  const cells = new Set<string>()
+  let lastRow = 0
+  const placed = [...grid.children].map((el, i) => {
+    const b = el.getBoundingClientRect()
+    const col = Math.round((b.left - box.left) / colStep)
+    const row = Math.round((b.top - box.top) / rowStep)
+    const colSpan = Math.max(1, Math.round((b.width + gap * k) / colStep))
+    const rowSpan = Math.max(1, Math.round((b.height + gap * k) / rowStep))
+    for (let r = row; r < row + rowSpan; r += 1) {
+      for (let c = col; c < col + colSpan; c += 1) cells.add(`${r},${c}`)
+      lastRow = Math.max(lastRow, r)
+    }
+    return { i, row, col, colSpan, rowSpan }
+  })
+
+  /* Only the final row is ours to close — a hole anywhere above it means the
+     measurement is off, and stretching a tile into it would be a guess. */
+  for (let r = 0; r < lastRow; r += 1) {
+    for (let c = 0; c < cols; c += 1) if (!cells.has(`${r},${c}`)) return null
+  }
+  const empty = []
+  for (let c = 0; c < cols; c += 1) if (!cells.has(`${lastRow},${c}`)) empty.push(c)
+  if (!empty.length) return null
+
+  /* The tile to stretch is the one on that row that the gap sits beside. */
+  const first = Math.min(...empty)
+  const neighbour = placed.find(
+    (p) => p.row === lastRow && p.rowSpan === 1 && p.col + p.colSpan === first,
+  )
+  if (!neighbour) return null
+  return { i: neighbour.i, span: neighbour.colSpan + empty.length }
+}
+
 function Board({ board }: { board: VisionBoard }) {
+  const grid = useRef<HTMLDivElement>(null)
+  const [fill, setFill] = useState<{ i: number; span: number } | null>(null)
+  const [, bump] = useState(0)
+  const remeasure = useCallback(() => bump((n) => n + 1), [])
+
+  /* After every commit, because the answer depends on where the tiles landed
+     and the notes decide their own size a commit later. The measurement is
+     taken with the stretch stripped off, so it is always asking about the
+     board's natural layout rather than the one it produced last time — which
+     is what lets it settle instead of arguing with itself. */
+  useLayoutEffect(() => {
+    const g = grid.current
+    if (!g) return
+    const stretched = fill ? (g.children[fill.i] as HTMLElement | undefined) : undefined
+    if (stretched) stretched.style.gridColumn = ''
+    const next = trailingGap(g)
+    if (stretched && fill) stretched.style.gridColumn = `span ${fill.span}`
+    const settled = next && fill ? next.i === fill.i && next.span === fill.span : !next && !fill
+    if (!settled) setFill(next)
+  })
+
+  /* The column count changes between the desktop's three and the phone's two
+     without React hearing about it — that is a container query, not a prop. A
+     ResizeObserver is the only thing that sees it, but it is delivered with the
+     frame, so a tab that is not painting never hears from it. It is the belt;
+     the notes calling back are the braces. */
+  useEffect(() => {
+    const g = grid.current
+    if (!g) return
+    const ro = new ResizeObserver(remeasure)
+    ro.observe(g)
+    return () => ro.disconnect()
+  }, [remeasure])
+
+  const spanOf = (i: number) =>
+    fill && fill.i === i ? { gridColumn: `span ${fill.span}` } : undefined
+
   return (
     <div className="cp-board">
       <h4 className="cp-board-title">{board.title}</h4>
       <p className="cp-board-blurb">{board.blurb}</p>
-      <div className="cp-board-grid">
+      <div className="cp-board-grid" ref={grid}>
         {board.tiles.map((t, i) =>
           t.kind === 'photo' ? (
-            <BoardPhoto key={i} src={t.src} alt={t.alt} tall={t.tall} wide={t.wide} />
+            <BoardPhoto
+              key={i}
+              src={t.src}
+              alt={t.alt}
+              tall={t.tall}
+              wide={t.wide}
+              style={spanOf(i)}
+            />
           ) : (
-            <BoardNote key={i} tile={t} />
+            <BoardNote key={i} tile={t} style={spanOf(i)} onSpan={remeasure} />
           ),
         )}
       </div>
