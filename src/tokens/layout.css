@@ -36,8 +36,8 @@
      Three steps, not seven hand-nudged values. A block is separated from the
      next block by --block-gap; a label from the thing it labels by
      --label-gap; a control strip from what it controls by --tight-gap. */
-  --block-gap: 32px;
-  --label-gap: 24px;
+  --block-gap: 24px;
+  --label-gap: 16px;
   --tight-gap: 16px;
 
   /* One inset for a card's head AND its body, so the title and the content
@@ -137,6 +137,6 @@
   :root {
     --page-pad: 16px;
     --grid-gutter: 16px;
-    --block-gap: 24px;
+    --block-gap: 20px;
   }
 }

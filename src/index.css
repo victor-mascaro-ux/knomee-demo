@@ -313,7 +313,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px var(--card-pad);
+  padding: 8px var(--card-pad);
   background: #fafafa;
   border-bottom: 1px solid var(--line);
 }
@@ -364,13 +364,17 @@ body {
 
 /* ---------- Top line metrics ---------- */
 .metrics-body {
-  padding: var(--card-pad);
+  padding: 20px var(--card-pad);
 }
 
 /* Spans, not pixels. The two number tiles were pinned at 200px from 1024px
    upward, so every pixel gained above that width went to the distribution
-   tile — 200 / 200 / 934 at a full column, a 4.7:1 ratio nobody chose.
-   3 / 3 / 6 of twelve holds 2.07:1 at every width. */
+   tile — a ratio that changed at every viewport because nobody had chosen one.
+   The fix is the span, not the proportion: 3 / 3 / 6 gave a four-character
+   numeral 330px it had no use for and took 250px off the tier bar, which is
+   the only tile on the row carrying more than one number. 2 / 2 / 8 sizes each
+   tile to what is in it and still holds one ratio at every width. The tiles
+   widen to 3 / 3 / 6 at 1200, where two columns stop fitting the label. */
 .metric-tiles {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -378,19 +382,19 @@ body {
   row-gap: var(--grid-gutter);
 }
 .metric-tiles > .metric-tile {
-  grid-column: span 3;
+  grid-column: span 2;
 }
 .metric-tiles > .metric-tile.distribution {
-  grid-column: span 6;
+  grid-column: span 8;
 }
 
 .metric-tile {
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Total Prospects / Avg KQ tiles: label stays top-left, number centered in
@@ -420,7 +424,7 @@ body {
 }
 
 .metric-tile.distribution {
-  gap: 12px;
+  gap: 10px;
 }
 
 .dist-bar {
@@ -4295,6 +4299,17 @@ button.name-link-btn:hover .name-text {
    Tables never scroll horizontally; instead columns are dropped
    progressively at each breakpoint, so the tier subheaders always fit. */
 
+/* The number tiles take a third column before the row stacks: below ~1200 two
+   columns no longer hold "TOTAL PROSPECTS" on one line. */
+@media (max-width: 1200px) {
+  .metric-tiles > .metric-tile {
+    grid-column: span 3;
+  }
+  .metric-tiles > .metric-tile.distribution {
+    grid-column: span 6;
+  }
+}
+
 /* Tablet: reflow cards + drop the least-critical columns.
    The Prospects table drops columns by NAME. The nth-child rules below still
    serve the tables that carry no column classes (admin, segmentation), where
@@ -5156,10 +5171,10 @@ button.name-link-btn:hover .name-text {
 
 /* ---------- Command Center: single layered Prospects dashboard ---------- */
 .cmd-body {
-  padding: var(--card-pad);
+  padding: 20px var(--card-pad);
   display: flex;
   flex-direction: column;
-  gap: var(--card-pad);
+  gap: var(--tight-gap);
 }
 .cmd-pulse {
   margin: 0;
