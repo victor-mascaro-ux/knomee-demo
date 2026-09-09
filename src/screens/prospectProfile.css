@@ -895,7 +895,8 @@
 .pp-goal,
 .pp-quote,
 .pp-question,
-.pp-event {
+.pp-event,
+.pp-confidence {
   box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
   /* background is in the list because the openable rows tint rather than lift,
      and this rule would otherwise drop it from their transition. */
@@ -909,7 +910,8 @@
 .pp-goal:hover,
 .pp-quote:hover,
 .pp-question:hover,
-.pp-event:hover {
+.pp-event:hover,
+.pp-confidence:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(20, 10, 40, 0.09);
 }
@@ -920,7 +922,8 @@
 .pp-goal:hover,
 .pp-quote:hover,
 .pp-question:hover,
-.pp-event:hover {
+.pp-event:hover,
+.pp-confidence:hover {
   border-color: var(--purple-bolt, #9b51e0);
 }
 

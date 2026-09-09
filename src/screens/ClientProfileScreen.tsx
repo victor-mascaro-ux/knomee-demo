@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
@@ -110,18 +110,76 @@ function BoardPhoto({
   )
 }
 
+/* Which way a note grows when one cell is not enough. Read off the note's own
+   words rather than its position, so the same note always takes the same shape
+   and the board's mix of talls and wides is stable between renders — random to
+   look at, settled in fact. */
+function noteGrowth(tile: Extract<BoardTile, { kind: 'note' }>) {
+  const words = `${tile.title ?? ''}${tile.text ?? ''}${tile.items?.join('') ?? ''}`
+  let h = 0
+  for (let i = 0; i < words.length; i += 1) h = (h * 31 + words.charCodeAt(i)) | 0
+  return Math.abs(h) % 2 === 0 ? 'is-tall' : 'is-wide'
+}
+
 function BoardNote({ tile }: { tile: Extract<BoardTile, { kind: 'note' }> }) {
+  const box = useRef<HTMLDivElement>(null)
+  const inner = useRef<HTMLDivElement>(null)
+  /* A note takes one cell if its words fit in one. If they do not it takes a
+     second — down or across, whichever its own text picks — rather than being
+     clipped mid-sentence. Nothing grows past two cells: a vision board is
+     pictures with a few words on it, not a page of text. */
+  const [span, setSpan] = useState('')
+  const [measuring, setMeasuring] = useState(true)
+  const lastWidth = useRef(0)
+
+  useLayoutEffect(() => {
+    if (!measuring) return
+    const el = box.current
+    const inn = inner.current
+    if (!el || !inn) return
+    /* Measured with no span applied, so the question is always the same one:
+       do these words fit the single cell? */
+    const pad = getComputedStyle(el)
+    const room =
+      el.clientHeight - parseFloat(pad.paddingTop || '0') - parseFloat(pad.paddingBottom || '0')
+    setSpan(inn.scrollHeight <= room + 1 ? '' : noteGrowth(tile))
+    setMeasuring(false)
+  }, [measuring, tile])
+
+  /* The cell changes size between the desktop's three columns and the phone's
+     two, and the answer changes with it. Width only — the note's own height
+     moves when the span lands, and watching that would chase its own tail. */
+  useEffect(() => {
+    const grid = box.current?.parentElement
+    if (!grid) return
+    lastWidth.current = grid.clientWidth
+    const ro = new ResizeObserver(() => {
+      if (grid.clientWidth === lastWidth.current) return
+      lastWidth.current = grid.clientWidth
+      setMeasuring(true)
+    })
+    ro.observe(grid)
+    return () => ro.disconnect()
+  }, [])
+
   return (
-    <div className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''}`}>
-      {tile.title && <span className="cp-note-title">{tile.title}</span>}
-      {tile.text && <p className="cp-note-text">{tile.text}</p>}
-      {tile.items && (
-        <ul className="cp-note-list">
-          {tile.items.map((i) => (
-            <li key={i}>{i}</li>
-          ))}
-        </ul>
-      )}
+    <div
+      ref={box}
+      className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''} ${
+        measuring ? '' : span
+      }`}
+    >
+      <div className="cp-note-inner" ref={inner}>
+        {tile.title && <span className="cp-note-title">{tile.title}</span>}
+        {tile.text && <p className="cp-note-text">{tile.text}</p>}
+        {tile.items && (
+          <ul className="cp-note-list">
+            {tile.items.map((i) => (
+              <li key={i}>{i}</li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
