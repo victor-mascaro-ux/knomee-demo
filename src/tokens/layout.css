@@ -71,9 +71,12 @@
 
   /* ---- Fixed component metrics that behave as tokens ---- */
   --topbar-h:      64px;
-  --brand-logo-h:  19.5px;  /* knomee lockup AND any white-label client logo
-                               render at this height so a co-branded bar
-                               keeps both marks visually equal */
+  --brand-logo-h:  28px;    /* the knomee lockup. It sat at 19.5px against a
+                               client logo's 34px, so switching to a white
+                               label made the bar jump from a modest mark to a
+                               commanding one and knomee read as the smaller
+                               brand in its own product. Both now carry the
+                               same weight in the bar. */
   --client-logo-h: 34px;    /* client logo when it leads the bar */
   --avatar-size:   38px;
   --bolt-size:     38px;
