@@ -68,9 +68,16 @@ export function initReviewBridge() {
   // could never report its way back down, and the frame kept the extra height
   // as a white band under the content. The mount node's own box has no such
   // floor, so it tracks the content down as well as up.
+  // A fixed-layout page (the welcome page, the phone) is sized BY the viewport
+  // rather than sizing it: everything inside is `position: fixed`, so the mount
+  // node's own box measures ~0. Reporting that collapsed the frame to nothing,
+  // which left the page no viewport to fill — so it measured ~0 again and could
+  // never recover. 0 is the signal for "one viewport tall"; the shell knows how
+  // tall a viewport is, and this frame (already collapsed) no longer does.
   const contentHeight = () => {
     const root = document.getElementById('root')
     const h = root ? root.getBoundingClientRect().height : document.body.scrollHeight
+    if (h < 2) return 0
     return Math.ceil(h)
   }
 

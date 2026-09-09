@@ -357,6 +357,95 @@
   .cc-frame iframe { height: 100vh; } /* fallback until JS reports content height */
   .cc-rail { position: fixed; }
   .cc-esc  { position: fixed; }
+
+  /* 3) A comment card names the page it was left on, and clicking it goes
+        there. Cards for other pages get the jump glyph. */
+  .cc-card-page {
+    flex: 1; min-width: 0; font-size: 11px; font-weight: 700; color: var(--cc-faint);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cc-card-page.cc-elsewhere { color: var(--cc-text); }
+  .cc-stage[data-cc-theme="branded-frost"] .cc-card-page.cc-elsewhere { color: var(--cc-purple); }
+  .cc-card-page .cc-jump { font-weight: 800; }
+  .cc-time { flex: none; }
+  /* A note about another page is a note you can't see the subject of: the card
+     reads as a link away from here — no card fill, a dashed edge, quieter text
+     — while a note on this page keeps the solid card of something present. */
+  .cc-card.cc-elsewhere { background: none; border-style: dashed; }
+  .cc-card.cc-elsewhere .cc-snippet { color: var(--cc-muted); }
+  .cc-card.cc-elsewhere:hover { background: var(--cc-card); border-style: solid; }
+
+  /* ════════════════════════════════════════════════════════
+     Demo panel — the D layer. A separate right-edge tray for the
+     scaffolding that used to sit in the prototype's own burger menu
+     (personas, empty states, white-label brand). It lives out here, in
+     the shell, so it is never part of the thing being demoed: nothing
+     shows until D is pressed, and Esc or D again clears it completely.
+     Controls are contextual — a page only offers what it can actually
+     change (see CONTROLS in the script).
+     ════════════════════════════════════════════════════════ */
+  .cc-demo {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 246px; z-index: 56;
+    display: none; flex-direction: column; overflow: hidden;
+    border-top: 0; border-right: 0; border-bottom: 0;
+  }
+  .cc-stage.cc-demo-armed .cc-demo { display: flex; }
+  .cc-demo-head {
+    padding: 13px 10px 12px 15px; border-bottom: 1px solid var(--cc-hairline);
+    display: flex; align-items: center; gap: 9px; flex: none;
+  }
+  .cc-demo-head h2 {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cc-muted); white-space: nowrap;
+  }
+  .cc-demo-here {
+    flex: 1; min-width: 0; font-size: 11px; font-weight: 600; color: var(--cc-faint);
+    text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cc-demo-body {
+    flex: 1; overflow-y: auto; padding: 12px 10px 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .cc-demo-body::-webkit-scrollbar { width: 8px; }
+  .cc-demo-body::-webkit-scrollbar-thumb { background: rgba(20,10,40,0.16); border-radius: 8px; }
+  .cc-demo-group { display: flex; flex-direction: column; gap: 3px; }
+  .cc-demo-title {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--cc-faint); padding: 0 6px 5px;
+  }
+  .cc-demo-row, .cc-demo-btn {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+    padding: 7px 8px; border: 0; border-radius: 9px; background: transparent;
+    font-size: 12.5px; color: var(--cc-text); cursor: pointer;
+    transition: background 0.13s;
+  }
+  .cc-demo-row > span:first-child, .cc-demo-btn > span:first-child {
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cc-demo-row:hover, .cc-demo-btn:hover { background: var(--cc-hairline); }
+  .cc-demo-btn.cc-on { background: rgba(45,210,176,0.18); font-weight: 700; }
+  .cc-demo-btn .cc-demo-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--cc-knomee-teal); flex: none;
+    opacity: 0;
+  }
+  .cc-demo-btn.cc-on .cc-demo-dot { opacity: 1; }
+  /* the toggle switch — same shape language as the prototype's own */
+  .cc-switch {
+    position: relative; width: 32px; height: 18px; border-radius: 999px; flex: none;
+    background: rgba(20,10,40,0.2); transition: background 0.15s;
+  }
+  .cc-stage[data-cc-theme="smoke-tray"] .cc-switch { background: rgba(255,255,255,0.22); }
+  .cc-switch.cc-on { background: var(--cc-knomee-teal); }
+  .cc-switch i {
+    position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(20,10,40,0.3); transition: transform 0.15s;
+  }
+  .cc-switch.cc-on i { transform: translateX(14px); }
+  .cc-demo-foot {
+    padding: 10px 15px; border-top: 1px solid var(--cc-hairline); flex: none;
+    font-size: 11px; line-height: 1.5; color: var(--cc-faint);
+  }
+  .cc-demo-foot b { color: var(--cc-muted); }
 </style>
 </head>
 <body style="margin:0">
@@ -405,11 +494,22 @@
         <button class="cc-ghost-btn" id="ccCloseMode" title="Exit comment mode" aria-label="Exit comment mode">×</button>
       </div>
       <div class="cc-rail-subrow">
-        <span class="cc-rail-sub">Click a card to open it.</span>
+        <span class="cc-rail-sub">Click a card to go to its page.</span>
         <button class="cc-clear-btn" id="ccClearAll" disabled>Clear all</button>
       </div>
     </div>
     <div class="cc-list" id="ccList"></div>
+  </aside>
+
+  <!-- demo panel (right edge, summoned with D — see the CSS note above) -->
+  <aside class="cc-demo cc-frost cc-chrome" id="ccDemo" aria-label="Demo controls">
+    <div class="cc-demo-head">
+      <h2>Demo</h2>
+      <span class="cc-demo-here" id="ccDemoHere"></span>
+      <button class="cc-ghost-btn" id="ccDemoClose" title="Hide demo controls" aria-label="Hide demo controls">×</button>
+    </div>
+    <div class="cc-demo-body" id="ccDemoBody"></div>
+    <div class="cc-demo-foot"><b>D</b> hides this · <b>C</b> for comments</div>
   </aside>
 
   <!-- 6. esc pill -->
@@ -450,6 +550,10 @@
   const clearBtn = document.getElementById('ccClearAll');
   const rail     = document.getElementById('ccRail');
   const collapseBtn = document.getElementById('ccCollapse');
+  const demoEl   = document.getElementById('ccDemo');
+  const demoBody = document.getElementById('ccDemoBody');
+  const demoHere = document.getElementById('ccDemoHere');
+  const demoClose = document.getElementById('ccDemoClose');
   const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed';
 
   stage.dataset.ccTheme = THEME;
@@ -462,6 +566,10 @@
   let popoverEl = null;
   let commentMode = false;
   let currentScreen = 'default';
+  // The prototype's own route (e.g. "#/clients/jane-doe"), mirrored up by the
+  // frame. A thread records the route it was left on, so a card can take you
+  // back to the exact page — profile and all — not just the screen.
+  let currentRoute = window.location.hash || '';
 
   // ── Shared storage (Firestore) ──────────────────────────
   // Deliberate deviation from the design spec's localStorage-only
@@ -492,6 +600,9 @@
     return {
       id: raw.id,
       screen: (typeof raw.screen === 'string') ? raw.screen : null,
+      // Threads written before routes were recorded have none; threadRoute()
+      // falls back to the screen id, which is a route in every case but one.
+      route: (typeof raw.route === 'string' && raw.route) ? raw.route : null,
       x: raw.x, y: raw.y,
       img: raw.img || null,
       createdAt: raw.createdAt || Date.now(),
@@ -590,6 +701,49 @@
   // screen id without requiring integration: a prototype can expose
   // window.__ccScreenId, or use the .screen.active convention (like the
   // dummy). Falls back to a single 'default' screen.
+  // The prototype used to report the welcome page as "welcome-a" while its
+  // route called it "welcome". Old pins carry the old id, so the two names are
+  // one screen everywhere they're compared.
+  // ("landing" is older still — what the welcome page was called when the
+  // comments now sitting on it were written.)
+  const SCREEN_ALIAS = { 'welcome-a': 'welcome', 'landing': 'welcome' };
+  const canon = (s) => (s == null ? null : (SCREEN_ALIAS[s] || s));
+
+  // What a reviewer calls each screen — the label on a comment card.
+  const SCREEN_LABELS = {
+    prospects: 'My Prospects',
+    clients: 'My Clients',
+    analytics: 'Analytics',
+    segmentation: 'Segmentation',
+    settings: 'Account Settings',
+    admin: 'Admin overview',
+    welcome: 'Welcome page (A)',
+    'welcome-b': 'Welcome page (B)',
+    'client-experience': 'Client Experience',
+    'advisor-flow': 'Advisor as Prospect',
+    'firm-candidates': 'Dynasty · My Candidates',
+    'firm-network': 'Dynasty · Network',
+    'firm-analytics': 'Dynasty · Analytics',
+    default: 'Prototype'
+  };
+  const prettySlug = (s) =>
+    s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  // Where a thread lives, and what to call it.
+  function threadRoute(t) {
+    if (t.route) return t.route;
+    const s = canon(t.screen);
+    return (s && s !== 'default') ? '#/' + s : null;
+  }
+  function threadLabel(t) {
+    const s = canon(t.screen);
+    if (!s) return 'Every page';
+    let label = SCREEN_LABELS[s] || prettySlug(s);
+    const m = (t.route || '').match(/^#\/[^/]+\/(.+)$/);
+    if (m) label += ' · ' + prettySlug(m[1]);
+    return label;
+  }
+
   function getScreenId() {
     try {
       const w = proto.contentWindow;
@@ -630,9 +784,27 @@
   // show everywhere), in creation order — their index is the pin number.
   function visibleThreads() {
     const list = store.threads.filter(t =>
-      !t.resolved && (t.screen === null || t.screen === currentScreen));
+      !t.resolved && (canon(t.screen) === null || canon(t.screen) === canon(currentScreen)));
     if (draft) list.push(draft);
     return list.sort((a, b) => a.createdAt - b.createdAt);
+  }
+
+  // Every open thread, wherever it was left — what the rail lists. Scoping the
+  // rail to the current screen (as the pins are) meant a comment left on
+  // another page was invisible until you happened to walk back onto it.
+  function allThreads() {
+    return store.threads.filter(t => !t.resolved)
+      .sort((a, b) => b.createdAt - a.createdAt);   // newest first
+  }
+
+  // A thread's pin number, which is its index among the pins on ITS screen —
+  // so the number on a card matches the pin you'll find when you land there.
+  function pinNumber(t) {
+    const s = canon(t.screen) || canon(currentScreen);
+    const group = store.threads
+      .filter(x => !x.resolved && (canon(x.screen) === null || canon(x.screen) === s))
+      .sort((a, b) => a.createdAt - b.createdAt);
+    return group.findIndex(x => x.id === t.id) + 1;
   }
 
   // ── Capture (rail thumbnails) ────────────────────────────
@@ -667,8 +839,7 @@
   }
 
   function renderRail() {
-    const visible = visibleThreads().filter(t => t !== draft);
-    const numbers = new Map(visibleThreads().map((t, i) => [t.id, i + 1]));
+    const visible = allThreads();
     countEl.textContent = String(visible.length);
     clearBtn.disabled = store.threads.length === 0;
     listEl.innerHTML = '';
@@ -687,10 +858,14 @@
       return;
     }
 
-    // newest first
-    visible.slice().sort((a, b) => b.createdAt - a.createdAt).forEach(t => {
+    visible.forEach(t => {
+      const elsewhere = canon(t.screen) && canon(t.screen) !== canon(currentScreen);
       const card = document.createElement('button');
-      card.className = 'cc-card' + (t.id === activeId ? ' cc-active' : '');
+      card.className = 'cc-card' + (t.id === activeId ? ' cc-active' : '')
+        + (elsewhere ? ' cc-elsewhere' : '');
+      card.title = elsewhere
+        ? 'Go to ' + threadLabel(t) + ' and open this comment'
+        : threadLabel(t);
 
       const thumb = document.createElement('div');
       thumb.className = 'cc-thumb';
@@ -708,7 +883,19 @@
       body.className = 'cc-card-body';
       const meta = document.createElement('div');
       meta.className = 'cc-card-meta';
-      meta.innerHTML = '<div class="cc-token"><span>' + (numbers.get(t.id) || '') + '</span></div>';
+      meta.innerHTML = '<div class="cc-token"><span>' + (pinNumber(t) || '') + '</span></div>';
+      // The page the note is about — the thing a card never said. Cards for
+      // another page carry the jump glyph, because clicking one goes there.
+      const page = document.createElement('span');
+      page.className = 'cc-card-page' + (elsewhere ? ' cc-elsewhere' : '');
+      page.textContent = threadLabel(t);
+      if (elsewhere) {
+        const jump = document.createElement('span');
+        jump.className = 'cc-jump';
+        jump.textContent = ' ↗';
+        page.appendChild(jump);
+      }
+      meta.appendChild(page);
       const time = document.createElement('span');
       time.className = 'cc-time';
       time.textContent = relTime(t.createdAt);
@@ -721,7 +908,7 @@
 
       card.appendChild(thumb);
       card.appendChild(body);
-      card.addEventListener('click', (e) => { e.stopPropagation(); openThread(t.id); });
+      card.addEventListener('click', (e) => { e.stopPropagation(); jumpToThread(t.id); });
       listEl.appendChild(card);
     });
   }
@@ -887,6 +1074,66 @@
     renderAll();
   }
 
+  // ── Going to a comment ───────────────────────────────────
+  // Opening a thread used to mean "show its popover", which told you nothing
+  // when the pin sat three screens down — or on another page entirely. A card
+  // now navigates the prototype to the route the note was left on and brings
+  // the pin into view, so you always read a comment next to what it's about.
+  function navigateFrame(hash) {
+    if (proto.contentWindow) {
+      proto.contentWindow.postMessage({ type: 'cc-nav', hash: hash }, '*');
+    }
+  }
+
+  function scrollPinIntoView(t) {
+    if (!t) return;
+    const top = frame.getBoundingClientRect().top + window.scrollY
+      + (t.y / 100) * frame.clientHeight;
+    window.scrollTo({ top: Math.max(0, top - window.innerHeight * 0.45), behavior: 'smooth' });
+  }
+
+  let jumpTimer = null;
+  function jumpToThread(id) {
+    const t = findThread(id);
+    if (!t) return;
+    const target = threadRoute(t);
+    if (!target || target === currentRoute) {   // already here
+      openThread(id);
+      scrollPinIntoView(t);
+      return;
+    }
+    const want = canon(t.screen);
+    navigateFrame(target);
+    if (jumpTimer) clearInterval(jumpTimer);
+    // Wait for the frame to actually land before opening: the pin layer is
+    // rebuilt per screen, and the frame's height (which the pin's % is
+    // measured against) is reported a beat after the route changes.
+    const deadline = Date.now() + 2500;
+    const land = () => {
+      if (jumpTimer) { clearInterval(jumpTimer); jumpTimer = null; }
+      currentScreen = getScreenId();
+      renderAll();
+      // Both the pin's position and the popover's are percentages of the
+      // frame's height, and the new page reports its height a beat after it
+      // renders. Opening before that settles put the card hundreds of pixels
+      // from its own pin — so wait for two identical readings.
+      const settle = (n, prev) => {
+        const h = proto.style.height;
+        if ((n > 0 && h === prev) || n > 10) {
+          openThread(id);
+          scrollPinIntoView(findThread(id));
+          return;
+        }
+        setTimeout(() => settle(n + 1, h), 110);
+      };
+      setTimeout(() => settle(0, proto.style.height), 120);
+    };
+    jumpTimer = setInterval(() => {
+      if (!want || canon(getScreenId()) === want) land();
+      else if (Date.now() > deadline) land();       // open it anyway
+    }, 60);
+  }
+
   // ── Comment mode ─────────────────────────────────────────
   function setMode(on) {
     commentMode = on;
@@ -924,8 +1171,16 @@
     }
     return false;
   }
+  // "d" summons the demo panel, on the same terms.
+  function isDemoCombo(e) {
+    if ((e.key === 'd' || e.key === 'D') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      return !isEditableTarget(e.target);
+    }
+    return false;
+  }
   window.addEventListener('keydown', (e) => {
     if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
+    else if (isDemoCombo(e)) { e.preventDefault(); toggleDemo(); }
   });
 
   // Messages from the prototype iframe: the activation key forwarded from
@@ -937,13 +1192,22 @@
     if (d.type === 'cc-activate') {
       toggleArmed();
     } else if (d.type === 'cc-frame-height' && typeof d.height === 'number') {
-      proto.style.height = Math.max(d.height, 1) + 'px';
+      // 0 means "a fixed-layout page — one viewport tall" (see reviewBridge).
+      proto.style.height = (d.height > 1 ? d.height : window.innerHeight) + 'px';
     } else if (d.type === 'cc-route' && typeof d.hash === 'string') {
       // Mirror the prototype's current page into our address bar so the URL
       // people copy always points at the page they're looking at.
+      currentRoute = d.hash;
       if (window.location.hash !== d.hash) {
         history.replaceState(null, '', d.hash || location.pathname + location.search);
       }
+      // A profile opening doesn't change the view, so the demo panel tracks the
+      // route as well — that's what marks the scene you're actually on.
+      if (demoArmed) renderDemo();
+    } else if (d.type === 'cc-demo-state') {
+      applyDemoState(d);
+    } else if (d.type === 'cc-demo-activate') {
+      toggleDemo();
     }
   });
 
@@ -993,6 +1257,7 @@
     const t = {
       id: 'c' + Date.now() + Math.random().toString(36).slice(2, 7),
       screen: currentScreen,
+      route: currentRoute || null,
       x: xPct, y: yPct,
       img: null,
       createdAt: Date.now(),
@@ -1028,12 +1293,192 @@
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     const menuOpen = !rail.classList.contains('cc-collapsed');
-    if (!activeId && !commentMode && !menuOpen && !armed) return;
+    if (!activeId && !commentMode && !menuOpen && !armed && !demoArmed) return;
     e.preventDefault();
     e.stopPropagation();
     if (activeId) closeThread();       // dismiss any open card first
     setArmed(false);                   // full retreat: hide the overlay entirely
+    setDemoArmed(false);               // …the demo panel included
   }, true);
+
+  // ════════ Demo panel — the D layer ════════
+  // The scaffolding a presenter needs (personas, empty states, white label)
+  // used to sit in the prototype's own burger menu, where every demo audience
+  // saw it. It lives out here now: nothing shows until D, and the panel is
+  // part of the shell, not the product.
+  //
+  // Two things cross the frame boundary — the state the panel displays
+  // (cc-demo-state, posted by the app whenever it changes) and the state it
+  // sets (cc-demo-set). Everything else is navigation, which the route
+  // already handles.
+  let demoArmed = false;
+  let demoState = { view: 'prospects', empty: false, brand: null, cobrand: 'left', brands: [] };
+
+  // Which controls each page offers. A control that isn't listed for a page is
+  // one that would do nothing there — the panel never shows a dead switch.
+  // Every view that renders inside the app shell — the ones with the branded
+  // top bar. The prospect-facing screens (welcome, the phone, the advisor's own
+  // flow) are standalone pages that ignore the brand, so they offer nothing.
+  const SHELL_VIEWS = [
+    'prospects', 'clients', 'analytics', 'segmentation', 'settings',
+    'admin', 'firm-candidates', 'firm-network', 'firm-analytics'
+  ];
+  const CONTROLS = [
+    { key: 'empty', kind: 'toggle', label: 'Empty state',
+      views: ['prospects', 'clients', 'analytics'] },
+    { key: 'brand', kind: 'brands', label: 'White label', views: SHELL_VIEWS },
+    { key: 'cobrand', kind: 'cobrand', label: 'Logo placement', views: SHELL_VIEWS,
+      when: () => !!demoState.brand }
+  ];
+
+  // The scenes worth jumping to mid-demo, in the order a demo walks them.
+  const SCENES = [
+    { title: 'Advisor', items: [
+      ['#/prospects', 'My Prospects'],
+      ['#/clients', 'My Clients'],
+      ['#/analytics', 'Analytics'],
+      ['#/segmentation', 'Segmentation'],
+      ['#/settings', 'Account Settings']
+    ] },
+    { title: 'Dynasty · the firm', items: [
+      ['#/firm-candidates', 'My Candidates'],
+      ['#/firm-candidates/marcus-hale', 'Marcus Hale'],
+      ['#/firm-network', 'Network'],
+      ['#/firm-analytics', 'Analytics']
+    ] },
+    { title: 'Knomee admin', items: [
+      ['#/admin', '100-advisor overview']
+    ] },
+    { title: 'What the prospect sees', items: [
+      ['#/welcome', 'Welcome page (A)'],
+      ['#/welcome-b', 'Welcome page (B)'],
+      ['#/client-experience', 'Client Experience'],
+      ['#/advisor-flow', 'Advisor as Prospect']
+    ] }
+  ];
+
+  function demoSet(key, value) {
+    demoState[key] = value;                 // optimistic; the app echoes back
+    if (proto.contentWindow) {
+      proto.contentWindow.postMessage({ type: 'cc-demo-set', key: key, value: value }, '*');
+    }
+    renderDemo();
+  }
+
+  function applyDemoState(d) {
+    demoState = {
+      view: d.view || demoState.view,
+      empty: !!d.empty,
+      brand: (typeof d.brand === 'string') ? d.brand : null,
+      cobrand: d.cobrand === 'centered' ? 'centered' : 'left',
+      brands: Array.isArray(d.brands) ? d.brands : demoState.brands
+    };
+    if (demoArmed) renderDemo();
+  }
+
+  // Is this the page we're on? An exact route match wins, so a profile marks
+  // its own entry rather than the table behind it.
+  function sceneIsOn(hash) {
+    if (currentRoute === hash) return true;
+    const exact = SCENES.some(g => g.items.some(it => it[0] === currentRoute));
+    return !exact && hash === '#/' + demoState.view;
+  }
+
+  function demoGroup(title) {
+    const g = document.createElement('div');
+    g.className = 'cc-demo-group';
+    const h = document.createElement('div');
+    h.className = 'cc-demo-title';
+    h.textContent = title;
+    g.appendChild(h);
+    return g;
+  }
+
+  function demoToggleRow(label, on, onChange) {
+    const row = document.createElement('button');
+    row.className = 'cc-demo-row';
+    row.type = 'button';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const sw = document.createElement('span');
+    sw.className = 'cc-switch' + (on ? ' cc-on' : '');
+    sw.innerHTML = '<i></i>';
+    row.appendChild(name);
+    row.appendChild(sw);
+    row.setAttribute('aria-pressed', on ? 'true' : 'false');
+    row.addEventListener('click', (e) => { e.stopPropagation(); onChange(!on); });
+    return row;
+  }
+
+  function demoPick(label, on, onPick) {
+    const b = document.createElement('button');
+    b.className = 'cc-demo-btn' + (on ? ' cc-on' : '');
+    b.type = 'button';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const dot = document.createElement('span');
+    dot.className = 'cc-demo-dot';
+    b.appendChild(name);
+    b.appendChild(dot);
+    b.addEventListener('click', (e) => { e.stopPropagation(); onPick(); });
+    return b;
+  }
+
+  function renderDemo() {
+    demoHere.textContent = SCREEN_LABELS[canon(demoState.view)] || demoState.view;
+    demoBody.innerHTML = '';
+
+    // ── this page ──
+    const here = CONTROLS.filter(c =>
+      c.views.indexOf(canon(demoState.view)) !== -1 && (!c.when || c.when()));
+    if (here.length) {
+      const g = demoGroup('This page');
+      here.forEach(c => {
+        if (c.kind === 'toggle') {
+          g.appendChild(demoToggleRow(c.label, !!demoState[c.key], v => demoSet(c.key, v)));
+        } else if (c.kind === 'brands') {
+          const h = document.createElement('div');
+          h.className = 'cc-demo-title';
+          h.style.paddingTop = '6px';
+          h.textContent = c.label;
+          g.appendChild(h);
+          g.appendChild(demoPick('Knomee', !demoState.brand, () => demoSet('brand', null)));
+          demoState.brands.forEach(b => {
+            g.appendChild(demoPick(b.name, demoState.brand === b.id, () => demoSet('brand', b.id)));
+          });
+        } else if (c.kind === 'cobrand') {
+          const h = document.createElement('div');
+          h.className = 'cc-demo-title';
+          h.style.paddingTop = '6px';
+          h.textContent = c.label;
+          g.appendChild(h);
+          g.appendChild(demoPick('Client left', demoState.cobrand === 'left',
+            () => demoSet('cobrand', 'left')));
+          g.appendChild(demoPick('Client centered', demoState.cobrand === 'centered',
+            () => demoSet('cobrand', 'centered')));
+        }
+      });
+      demoBody.appendChild(g);
+    }
+
+    // ── go to ──
+    SCENES.forEach(group => {
+      const g = demoGroup(group.title);
+      group.items.forEach(it => {
+        g.appendChild(demoPick(it[1], sceneIsOn(it[0]), () => navigateFrame(it[0])));
+      });
+      demoBody.appendChild(g);
+    });
+  }
+
+  function setDemoArmed(on) {
+    demoArmed = on;
+    stage.classList.toggle('cc-demo-armed', on);
+    if (on) renderDemo();
+  }
+  function toggleDemo() { setDemoArmed(!demoArmed); }
+  demoClose.addEventListener('click', (e) => { e.stopPropagation(); setDemoArmed(false); });
+  demoEl.addEventListener('click', (e) => e.stopPropagation());
 
   // ── Clear all ────────────────────────────────────────────
   clearBtn.addEventListener('click', (e) => {
