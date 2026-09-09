@@ -310,14 +310,28 @@
   font-size: 16px;
 }
 .pp-bars {
+  position: relative;
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
   height: 18px;
+  /* Room under the bars for the level marker. */
+  margin-bottom: 5px;
+}
+.pp-bar-mark {
+  position: absolute;
+  bottom: -5px;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-bottom: 5px solid var(--k-teal, #3dbdaa);
 }
 .pp-bar {
   width: 3.5px;
-  border-radius: 2px;
+  /* Square, as drawn — the rounded caps softened the ramp into a blur at this
+     size. */
   background: #e2def0;
 }
 .pp-bar.on {
