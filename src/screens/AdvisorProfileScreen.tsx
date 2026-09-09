@@ -10,6 +10,7 @@
    clock, which the client version has no slot for. */
 
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
 import { advisor, independenceId } from '../data/advisorFlow'
@@ -69,9 +70,14 @@ function CardHead({ icon, title, right }: { icon: string; title: string; right?:
 export default function AdvisorProfileScreen({
   onBack,
   onAdd,
+  ownerMenu,
 }: {
   onBack: () => void
   onAdd?: () => void
+  /* The phone frame hands in the control that opens the rail as a drawer — the
+     same slot the client page has, in the same place. Nothing renders here on a
+     desktop, where the rail is on screen already. */
+  ownerMenu?: ReactNode
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const d = independenceId
@@ -161,6 +167,7 @@ export default function AdvisorProfileScreen({
             <h1 className="pp-title">
               {tab === 'id' ? `${advisor.name}’s Independence ID` : TAB_LABEL[tab]}
             </h1>
+            {ownerMenu}
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
             </button>

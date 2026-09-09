@@ -1,13 +1,15 @@
-/* Emily's Financial ID inside the device frame, for showing what an advisor's
-   client page looks like on a phone without asking anyone to resize a window.
+/* Marcus's Independence ID inside the device frame — the firm-side twin of
+   ClientMobileScreen.
 
-   The page itself is not a mobile build — it is the same ClientProfileScreen
-   the desktop renders. Its phone layout answers to a container query on .pp, so
-   putting it in a 393px screen is enough to trigger it. */
+   The page is not a mobile build any more than Emily's is. It is the same
+   AdvisorProfileScreen the desktop renders, and its phone layout answers to a
+   container query on .pp, so putting it in a 393px screen is enough. The
+   Independence ID is the Financial ID page card for card, so once it is in the
+   frame it folds exactly the way hers does. */
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './client-experience.css'
-import ClientProfileScreen from './ClientProfileScreen'
+import AdvisorProfileScreen from './AdvisorProfileScreen'
 import {
   DEVICE_H,
   DEVICE_W,
@@ -20,25 +22,11 @@ import {
 } from './ClientExperienceScreen'
 import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
-import { clientProfile } from '../data/clientProfile'
-import type { Client } from '../data/clients'
+import { advisor } from '../data/advisorFlow'
 
 const ZOOM_STEP = 0.1
 
-/* The profile expects the client whose page it is; the sidebar and breadcrumb
-   read the name off it. */
-const EMILY = {
-  name: clientProfile.owner,
-  email: 'emily.watson@email.com',
-  household: clientProfile.household,
-  kr: 82,
-  sentiment: 4,
-  status: 'complete',
-  lastSignIn: '05/03/2025',
-  tier: 'engaged',
-} as Client
-
-export default function ClientMobileScreen({
+export default function AdvisorMobileScreen({
   onExit,
   onAccountSettings,
 }: {
@@ -50,15 +38,14 @@ export default function ClientMobileScreen({
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom
   const [, force] = useState(0)
-  /* The rail — portrait, household, advisory team — sits at the foot of the
-     page on a phone. The burger brings it up as a drawer so it is a tap away
-     rather than a long scroll. */
+  /* The rail — his portrait, the Knomee Quotient, the route — sits at the foot
+     of the page on a phone. His own initial brings it up as a drawer. */
   const [menuOpen, setMenuOpen] = useState(false)
-  /* The advisor's account menu is a separate thing from the client's rail, so
-     it gets its own control on its own side of the bar. */
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<HTMLDivElement>(null)
+  useDragScroll(viewport)
+
   useEffect(() => {
     if (!accountOpen) return
     const away = (e: MouseEvent) => {
@@ -67,25 +54,24 @@ export default function ClientMobileScreen({
     document.addEventListener('click', away)
     return () => document.removeEventListener('click', away)
   }, [accountOpen])
-  /* Drag to scroll, as a finger would. */
-  useDragScroll(viewport)
+
+  const openRail = useCallback(() => {
+    setAccountOpen(false)
+    setMenuOpen((o) => !o)
+  }, [])
 
   return (
     <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
-      {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
-          the scaled height and the page never grows a phantom scrollbar. */}
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
         <IPhone scale={scale}>
-          {/* The advisor's own bar. The page inside the frame is the advisor's
-              product, not the client's app, so it keeps the plum header it has
-              on a desktop rather than opening straight onto a white page. */}
+          {/* The firm's own bar. The page inside the frame is the Dynasty rep's
+              product, not Marcus's app, so it keeps the header it has on a
+              desktop — and the burger in it is the account menu, as it is
+              everywhere else. */}
           <header className="cx-appbar cxm-appbar">
             <div className="cx-appbar-brand">
               <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
             </div>
-            {/* The burger is the account menu, the same one the desktop top bar
-                opens — same glyph, same items, same right-hand corner, so it
-                drops from the edge it sits on. */}
             <div className="menu-wrap cxm-account" ref={accountRef}>
               <button
                 className="cx-appbar-burger"
@@ -125,29 +111,23 @@ export default function ClientMobileScreen({
               )}
             </div>
           </header>
-          {/* The screen scrolls; what scrolls inside it is the desktop page. */}
           <div
             className={`cx-viewport cxm-viewport${menuOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            <ClientProfileScreen
-              client={EMILY}
+            <AdvisorProfileScreen
               onBack={() => force((n) => n + 1)}
               ownerMenu={
-                /* Emily's own initial, above her name, opening her rail. The
-                   drawer comes in from the left and the circle sits on the
-                   left, so the panel arrives where the tap was. */
+                /* His initial, under his name, opening his rail — the drawer
+                   comes in from the left and the circle sits on the left. */
                 <button
                   className="cxm-rail-btn"
                   type="button"
-                  aria-label={menuOpen ? 'Close client menu' : 'Client menu'}
+                  aria-label={menuOpen ? 'Close candidate menu' : 'Candidate menu'}
                   aria-expanded={menuOpen}
-                  onClick={() => {
-                    setAccountOpen(false)
-                    setMenuOpen((o) => !o)
-                  }}
+                  onClick={openRail}
                 >
-                  <span className="cxm-rail-initial">{EMILY.name.charAt(0)}</span>
+                  <span className="cxm-rail-initial">{advisor.initial}</span>
                 </button>
               }
             />
@@ -201,7 +181,7 @@ export default function ClientMobileScreen({
           Fit to screen
         </button>
         <button type="button" className="cx-fit-btn" onClick={onExit}>
-          Back to the advisor
+          Back to the desktop
         </button>
       </div>
     </div>
