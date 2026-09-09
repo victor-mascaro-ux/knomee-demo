@@ -4191,16 +4191,6 @@ export default function App() {
               {t.label}
             </button>
           ))}
-          {brand && (
-            <span className="tabs-powered">
-              <span className="tabs-powered-text">powered by</span>
-              <img
-                className="tabs-powered-logo"
-                src="./knomee-logo-plum.svg"
-                alt="knomee"
-              />
-            </span>
-          )}
         </nav>
 
         {screen === 'prospects' &&
