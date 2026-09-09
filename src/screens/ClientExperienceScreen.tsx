@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
+import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
   MOOD_ARC,
@@ -895,7 +896,7 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
                     aria-expanded={railOpen}
                     onClick={() => setRailOpen((o) => !o)}
                   >
-                    <span className="cxm-rail-initial">{EMILY.name.charAt(0)}</span>
+                    <RailFace name={EMILY.name} />
                   </button>
                 }
               />

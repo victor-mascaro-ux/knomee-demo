@@ -153,6 +153,21 @@ function NameLink({
 // The bubble opens to the LEFT by default (the "?" usually sits at a card's
 // right edge); pass side="right" where the glyph sits at the left instead, so
 // the bubble doesn't overflow off-screen.
+/* The credit, wherever a client's brand is on. It is fixed to the window, so it
+   rides over whatever the screen happens to be — the shell, a phone frame, the
+   welcome page — rather than belonging to any one of them. */
+function PoweredBy() {
+  return (
+    <span className="powered-by" aria-label="Powered by knomee">
+      <span className="powered-by-text">powered by</span>
+      <img className="powered-by-logo" src="./knomee-logo-plum.svg" alt="knomee" />
+      <span className="powered-by-tm" aria-hidden>
+        ™
+      </span>
+    </span>
+  )
+}
+
 function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
     <span
@@ -220,7 +235,13 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
           {/* KQ leads: it is the number the whole screen ranks on, and the one
               the tier bar beside it is a distribution of. The count follows. */}
           <div className="metric-tile">
-            <span className="metric-label">AVG KQ SCORE</span>
+            <span className="metric-label">
+              AVG KQ SCORE
+              <HelpTip
+                side="right"
+                text="Knomee Quotient — how ready a prospect is to convert, 0–100. Built from three answers the Adventures give: Intent (are they working toward a goal), Clarity (do they know what they want) and Receptivity (would they take advice). It scores readiness, not wealth."
+              />
+            </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">{prospectStats.avgKQ.toFixed(1)}</span>
             </div>
@@ -1114,7 +1135,13 @@ function ClientsMetrics({
     >
       <div className="metric-tiles">
         <div className="metric-tile">
-          <span className="metric-label">AVG KR SCORE</span>
+          <span className="metric-label">
+            AVG KR SCORE
+            <HelpTip
+              side="right"
+              text="Knomee Relationship — the health of a client relationship, 0–100. It moves with what they tell you: how recently they checked in, how their confidence is tracking, and how much of their Financial ID is still current. It measures the relationship, not the portfolio."
+            />
+          </span>
           <div className="metric-num">
             <span
               className="metric-value metric-value-kr tt"
@@ -3992,7 +4019,12 @@ export default function App() {
   // The prospect welcome page is a standalone full-screen page — it takes over
   // the whole viewport with its own header, not embedded in the advisor shell.
   if (landingOpen) {
-    return <LandingScreen version={landingVersion} onSwitch={setLandingVersion} />
+    return (
+      <>
+        <LandingScreen version={landingVersion} onSwitch={setLandingVersion} />
+        {brand && <PoweredBy />}
+      </>
+    )
   }
 
   // Same for the client's mobile app: the phone is the whole page, and the way
@@ -4001,34 +4033,50 @@ export default function App() {
   // profile page, so it gets its own phone route rather than sharing hers.
   if (advisorMobileOpen) {
     return (
-      <AdvisorMobileScreen
-        onExit={() => setAdvisorMobileOpen(false)}
-        onAccountSettings={() => {
-          setAdvisorMobileOpen(false)
-          setSettingsOpen(true)
-        }}
-      />
+      <>
+        <AdvisorMobileScreen
+          onExit={() => setAdvisorMobileOpen(false)}
+          onAccountSettings={() => {
+            setAdvisorMobileOpen(false)
+            setSettingsOpen(true)
+          }}
+        />
+        {brand && <PoweredBy />}
+      </>
     )
   }
 
   if (clientMobileOpen) {
     return (
-      <ClientMobileScreen
-        onExit={() => setClientMobileOpen(false)}
-        onAccountSettings={() => {
-          setClientMobileOpen(false)
-          setSettingsOpen(true)
-        }}
-      />
+      <>
+        <ClientMobileScreen
+          onExit={() => setClientMobileOpen(false)}
+          onAccountSettings={() => {
+            setClientMobileOpen(false)
+            setSettingsOpen(true)
+          }}
+        />
+        {brand && <PoweredBy />}
+      </>
     )
   }
 
   if (clientExpOpen) {
-    return <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+    return (
+      <>
+        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+        {brand && <PoweredBy />}
+      </>
+    )
   }
 
   if (advisorFlowOpen) {
-    return <AdvisorFlowScreen onExit={() => setAdvisorFlowOpen(false)} />
+    return (
+      <>
+        <AdvisorFlowScreen onExit={() => setAdvisorFlowOpen(false)} />
+        {brand && <PoweredBy />}
+      </>
+    )
   }
 
   return (
@@ -4281,12 +4329,7 @@ export default function App() {
       {/* Under a client's brand the product is still knomee's, and the credit
           says so from every screen rather than only from the tab row of the
           three that have one. */}
-      {brand && (
-        <span className="powered-by" aria-label="Powered by knomee">
-          <span className="powered-by-text">powered by</span>
-          <img className="powered-by-logo" src="./knomee-logo-plum.svg" alt="knomee" />
-        </span>
-      )}
+      {brand && <PoweredBy />}
     </div>
   )
 }

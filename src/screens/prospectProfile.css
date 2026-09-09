@@ -13,6 +13,12 @@
 .pp {
   padding: 0;
   color: #2a2340;
+  /* The page's own chrome stays put while the cards move under it: the
+     breadcrumb, then the tabs, then the rail. Their heights are the offsets
+     each one below stacks against, so they live here as numbers rather than
+     being repeated in three rules. */
+  --pp-crumb-h: 47px;
+  --pp-tabs-h: 42px;
   /* The phone layout answers to this element's width, not the window's, so the
      same rules serve a real phone and the device frame the demo menu opens. */
   container-type: inline-size;
@@ -51,6 +57,12 @@
   color: var(--grey-text, #8b8598);
   padding: 13px 28px;
   border-bottom: 1px solid var(--line, #e7e4ee);
+  /* Where you are does not scroll away from you. Opaque, or the cards read
+     through it as it holds. */
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: #fff;
 }
 .pp-crumb-link {
   border: 0;
@@ -83,7 +95,10 @@
 }
 .pp-side-inner {
   position: sticky;
-  top: 12px;
+  /* Under both bars. It used to pin at 12px from the top of the window, which
+     is behind them — the rail stopped while everything around it kept moving,
+     and the whole column looked like it had come loose. */
+  top: calc(var(--pp-crumb-h) + var(--pp-tabs-h) + 12px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -156,6 +171,11 @@
   gap: 10px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   margin-bottom: 20px;
+  /* Under the breadcrumb, and staying there. */
+  position: sticky;
+  top: var(--pp-crumb-h);
+  z-index: 5;
+  background: #fff;
 }
 .pp-tab {
   position: relative;

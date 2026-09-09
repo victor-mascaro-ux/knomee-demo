@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
-import { avatarFor, clientProfile } from '../data/clientProfile'
+import { avatarSources, clientProfile } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
@@ -44,10 +44,12 @@ const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 
 /* A person's portrait, or their initial while there is no file for them. */
 function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
-  const [failed, setFailed] = useState(false)
+  /* Walk the spellings, then give up and show the letter. */
+  const [attempt, setAttempt] = useState(0)
+  const sources = avatarSources(name)
   const initial = name.charAt(0).toUpperCase()
   const cls = size === 'lg' ? 'pp-avatar' : 'cp-person-av'
-  if (failed) {
+  if (attempt >= sources.length) {
     return (
       <span className={cls}>
         {size === 'lg' ? <span className="pp-avatar-initial">{initial}</span> : initial}
@@ -56,7 +58,7 @@ function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
   }
   return (
     <span className={cls}>
-      <img src={avatarFor(name)} alt="" onError={() => setFailed(true)} />
+      <img src={sources[attempt]} alt="" onError={() => setAttempt((n) => n + 1)} />
     </span>
   )
 }
