@@ -271,6 +271,11 @@
   grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 104px;
   gap: var(--space-10);
+  /* A tall or wide tile leaves a hole beside it that row-major placement walks
+     straight past. Dense backfills it with the next tile that fits — a note
+     usually, a single-cell photograph otherwise — so the board has no gaps in
+     it. A vision board with holes reads as unfinished. */
+  grid-auto-flow: row dense;
 }
 .cp-tile {
   overflow: hidden;
@@ -335,8 +340,14 @@
   padding: var(--space-12) var(--space-14);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
   justify-content: center;
+}
+/* The words in their own box, so the tile can ask how tall they actually are —
+   a flex column that centres its children reports no overflow of its own. */
+.cp-note-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 .cp-tile-note.is-mint {
   background: var(--k-teal-light);
