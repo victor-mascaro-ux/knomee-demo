@@ -355,7 +355,6 @@ function IndependenceIdScreen() {
           <div className="af-id-meta">{d.header.meta}</div>
         </div>
       </div>
-      <div className="af-id-privacy">{d.header.privacy}</div>
 
       <div className="af-id-badges">
         {d.badges.map((b) => (

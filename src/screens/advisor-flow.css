@@ -416,14 +416,6 @@
   font-size: 13px;
   color: #6d6a76;
 }
-.af-id-privacy {
-  margin-top: 12px;
-  padding-left: 11px;
-  border-left: 2px solid var(--k-grape, #7639a1);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: #6d6a76;
-}
 .af-id-badges {
   display: flex;
   flex-wrap: wrap;
