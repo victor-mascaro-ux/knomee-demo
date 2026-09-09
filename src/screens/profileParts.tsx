@@ -3,6 +3,8 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
+import { useEffect, useRef, useState } from 'react'
+import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -145,4 +147,66 @@ const HIGHLIGHT_ART: Record<string, string> = {
 export function HighlightIcon({ source }: { source: string }) {
   const art = HIGHLIGHT_ART[source]
   return <span className="pp-hl-icon">{art ? <img src={art} alt="" /> : null}</span>
+}
+
+/* Every adventure card is a snapshot, and the client has taken each of them
+   more than once. The date in a card's header picks which sitting you are
+   looking at — most recent first. */
+export const CHECKIN_DATES = ['05/03/2025', '08/14/2024', '06/23/2022']
+
+export function DateSelect({ dates = CHECKIN_DATES }: { dates?: string[] }) {
+  const [open, setOpen] = useState(false)
+  const [picked, setPicked] = useState(dates[0])
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <span className="pp-dateselect" ref={ref}>
+      <button
+        type="button"
+        className="pp-date"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {picked}
+        <CaretIcon up={open} />
+      </button>
+      {open && (
+        <span className="pp-date-pop" role="listbox">
+          {dates.map((d) => (
+            <button
+              key={d}
+              type="button"
+              role="option"
+              aria-selected={d === picked}
+              className={`pp-date-item ${d === picked ? 'is-on' : ''}`}
+              onClick={() => {
+                setPicked(d)
+                setOpen(false)
+              }}
+            >
+              <span className="pp-date-check">{d === picked && <CheckIcon size={12} />}</span>
+              {d}
+            </button>
+          ))}
+        </span>
+      )}
+    </span>
+  )
 }
