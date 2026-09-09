@@ -91,6 +91,18 @@
   .ap .pp-side-inner {
     row-gap: 4px;
   }
+  /* The date belongs under the name, not beside it: they are one block of who
+     he is, and side by side they read as two unrelated facts. It takes a line
+     of its own and starts where the name starts — the avatar's width and the
+     row gap — so the two line up as a stack. */
+  .ap .pp-name {
+    flex: 1 1 auto;
+  }
+  .ap .pp-meta {
+    /* The portrait's 52px and the row's 12px gap — where the name starts. */
+    flex: 1 1 calc(100% - 64px);
+    margin-left: 64px;
+  }
   .ap .ap-side-stat {
     /* A basis with width to it, so the pair claims a line of its own rather
        than being squeezed into whatever is left of the one above. */
@@ -100,11 +112,14 @@
   .ap .ap-side-stat-v {
     align-items: flex-start;
   }
+  /* Sized to its words and centred under them, with air above it: it is the
+     one thing to do on this rail, and a button stretched wall to wall reads as
+     a bar rather than as a choice. */
   .ap .pp-convert {
     order: 1;
-    flex: 1 0 100%;
-    margin: 4px 0 0;
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
+    margin: 20px auto 4px;
   }
 }
 
