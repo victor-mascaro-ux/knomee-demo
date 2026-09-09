@@ -163,11 +163,13 @@
 /* One pill, three states. They share a shape, a size and a medium weight — what
    separates them is hue, drawn from the design system's own soft pairs rather
    than the semibold green/grape/teal that shouted over the goal title. */
+/* Secondary to the stage chip: smaller and lighter, so the line reads
+   stage-then-annotations rather than a wall of equal badges. */
 .cp-goal-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: var(--weight-medium, 500);
   letter-spacing: 0;
-  padding: 2px 9px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--k-grape-light);
   color: var(--k-grape);

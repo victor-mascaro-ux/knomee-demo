@@ -305,13 +305,15 @@
   align-items: center;
   gap: 5px;
 }
+/* The stage outranks the tags beside it: it is the one thing on the row the
+   advisor is deciding on. Bigger, heavier, and it leads the line. */
 .pp-stage-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  font-weight: var(--weight-medium, 500);
-  padding: 2px 9px;
+  font-size: 11.5px;
+  font-weight: var(--weight-semibold, 600);
+  padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -323,9 +325,15 @@
   background: var(--pearl, #efeef2);
   color: var(--text-secondary, #6a6480);
 }
+/* The goal is what the card is about, so it outweighs the chips above it — but
+   on size and colour, not weight. Bolding it made the row shout. */
 .pp-goal-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
+  color: var(--text-strong, #240446);
+}
+.pp-goal.is-done .pp-goal-title {
+  color: var(--grey-text, #8b8598);
 }
 .pp-goal-caret {
   color: var(--text-strong, #240446);

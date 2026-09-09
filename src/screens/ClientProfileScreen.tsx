@@ -112,12 +112,12 @@ function GoalRow({ g }: { g: ClientGoal }) {
     <div className={`pp-goal ${g.completed ? 'is-done' : ''}`}>
       <div className="pp-goal-main">
         <span className="pp-goal-chips">
+          <ReadinessChip level={g.readiness} completed={g.completed} />
           {g.tags?.map((t) => (
             <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
               {t}
             </span>
           ))}
-          <ReadinessChip level={g.readiness} completed={g.completed} />
         </span>
         <span className="pp-goal-title">{g.title}</span>
       </div>
