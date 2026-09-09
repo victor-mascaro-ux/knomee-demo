@@ -19,6 +19,7 @@ import {
   useZoom,
 } from './ClientExperienceScreen'
 import { useDragScroll } from './mobileGestures'
+import { BurgerMenu } from '../components/icons'
 import { clientProfile } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 
@@ -79,36 +80,17 @@ export default function ClientMobileScreen({
               product, not the client's app, so it keeps the plum header it has
               on a desktop rather than opening straight onto a white page. */}
           <header className="cx-appbar cxm-appbar">
-            {/* Burger on the left, because the drawer it opens comes in from
-                the left. A control on one edge that throws a panel onto the
-                other edge makes the eye chase the screen, and it stops the
-                control being the way back out. */}
-            <button
-              className="cx-appbar-burger"
-              type="button"
-              aria-label={menuOpen ? 'Close menu' : 'Menu'}
-              aria-expanded={menuOpen}
-              onClick={() => {
-                setAccountOpen(false)
-                setMenuOpen((o) => !o)
-              }}
-            >
-              <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
-                <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
-              </svg>
-            </button>
             <div className="cx-appbar-brand">
               <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
             </div>
-            {/* And the advisor's own menu on the right, where its popover
-                opens — the same account block the desktop top bar carries.
-                Without it the phone had no way to reach Alex Advisor's
-                settings at all. */}
+            {/* The burger is the account menu, the same one the desktop top bar
+                opens — same glyph, same items, same right-hand corner, so it
+                drops from the edge it sits on. */}
             <div className="menu-wrap cxm-account" ref={accountRef}>
               <button
-                className="cxm-account-btn"
+                className="cx-appbar-burger"
                 type="button"
-                aria-label="Account"
+                aria-label="Menu"
                 aria-haspopup="menu"
                 aria-expanded={accountOpen}
                 onClick={(e) => {
@@ -117,7 +99,7 @@ export default function ClientMobileScreen({
                   setAccountOpen((o) => !o)
                 }}
               >
-                A
+                <BurgerMenu />
               </button>
               {accountOpen && (
                 <div className="menu-pop cxm-menu-pop" role="menu">
@@ -148,7 +130,27 @@ export default function ClientMobileScreen({
             className={`cx-viewport cxm-viewport${menuOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            <ClientProfileScreen client={EMILY} onBack={() => force((n) => n + 1)} />
+            <ClientProfileScreen
+              client={EMILY}
+              onBack={() => force((n) => n + 1)}
+              clientMenu={
+                /* Emily's own initial, above her name, opening her rail. The
+                   drawer comes in from the left and the circle sits on the
+                   left, so the panel arrives where the tap was. */
+                <button
+                  className="cxm-rail-btn"
+                  type="button"
+                  aria-label={menuOpen ? 'Close client menu' : 'Client menu'}
+                  aria-expanded={menuOpen}
+                  onClick={() => {
+                    setAccountOpen(false)
+                    setMenuOpen((o) => !o)
+                  }}
+                >
+                  <span className="cxm-rail-initial">{EMILY.name.charAt(0)}</span>
+                </button>
+              }
+            />
           </div>
           {menuOpen && (
             <button

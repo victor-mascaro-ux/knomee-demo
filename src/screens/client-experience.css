@@ -634,40 +634,42 @@
 /* The advisor's bar inside the device frame: the same plum header the desktop
    carries, at the phone's own height, with no burger — the demo's controls sit
    under the phone, not in it. */
-/* Burger, wordmark, account — in that order, left to right. The burger opens
-   the rail, which comes in from the left, so the burger belongs on the left;
-   the account menu drops from the right, so its control sits on the right. A
-   trigger has to be on the same edge as the thing it opens. */
+/* The wordmark and the burger. The burger is the advisor's account menu, the
+   same one the desktop top bar carries — same glyph, same items, same
+   right-hand corner — so it drops its popover from the edge it sits on. The
+   rail has its own control inside the page, on Emily's own initial. */
 .cxm-appbar {
-  justify-content: flex-start;
-  gap: 12px;
+  justify-content: space-between;
 }
-.cxm-appbar .cx-appbar-burger {
-  margin-right: 0;
-  margin-left: -4px;
-}
-.cxm-account {
-  margin-left: auto;
-  margin-right: -2px;
-}
-/* The same initial the desktop menu shows, at a size a thumb can hit. */
-.cxm-account-btn {
-  width: 30px;
-  height: 30px;
+/* Emily's initial, above her name, opening her rail. Sized against the rail's
+   own portrait — the same disc, small enough to sit in a line of page. */
+.cxm-rail-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
   display: grid;
   place-items: center;
+  margin: 2px 0 10px;
+  padding: 0;
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out);
+  background: var(--avatar-bg, #e6f7f5);
+  color: var(--avatar-ink, #086375);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--line, #e7e4ee);
+  transition: box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
-.cxm-account-btn:hover {
-  background: rgba(255, 255, 255, 0.26);
+.cxm-rail-btn:hover,
+.cxm-rail-btn[aria-expanded='true'] {
+  box-shadow: 0 0 0 2px var(--avatar-ink, #086375);
+}
+.cxm-rail-btn:active {
+  transform: scale(0.94);
+}
+.cxm-rail-initial {
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
 }
 /* Inside a 393px screen the desktop popover's 232px is still comfortable; it
    only needs to stay clear of the bezel. */
@@ -676,6 +678,7 @@
   right: -2px;
   top: calc(100% + 8px);
 }
+
 /* The profile goes into the frame without the .content wrapper that carries
    the page gutter on a desktop, so the screen supplies it — otherwise the cards
    run into the bezel. The viewport's own 16px is exactly the phone gutter. */
