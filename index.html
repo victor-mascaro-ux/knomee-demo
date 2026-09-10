@@ -1474,15 +1474,16 @@
   // Which phone route belongs to the page you are on, and the way back out of
   // it. The client's Financial ID and the candidate's Business ID are the
   // same page carrying different answers, so each has its own frame.
+  /* The client page is the only one with a phone rendering worth showing. The
+     candidate's (#/advisor-mobile) is off the map: the toggle greys out on the
+     recruitment side rather than offering a view that does not hold up. The
+     route still exists; nothing points at it. */
   const MOBILE_OF = {
     'clients': '#/client-mobile',
-    'client-mobile': '#/client-mobile',
-    'firm-candidates': '#/advisor-mobile',
-    'advisor-mobile': '#/advisor-mobile'
+    'client-mobile': '#/client-mobile'
   };
   const BACK_FROM_MOBILE = {
-    'client-mobile': '#/clients/emily-watson',
-    'advisor-mobile': '#/firm-candidates/marcus-hale'
+    'client-mobile': '#/clients/emily-watson'
   };
   const CONTROLS = [
     { key: 'empty', kind: 'toggle', label: 'Empty state',
