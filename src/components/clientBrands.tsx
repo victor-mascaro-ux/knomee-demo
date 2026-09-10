@@ -66,8 +66,11 @@ function AcmeLogo() {
 export const CLIENT_BRANDS: ClientBrand[] = [
   { id: 'affirm', name: 'Affirm Wealth Advisors', primary: '#1aa3c6', accent: '#1590b0', logo: <AffirmLogo /> },
   { id: 'confetti', name: 'Confetti Wealth', primary: '#0093b0', accent: '#007e98', logo: <ConfettiLogo /> },
-  /* A clay red, because the other two are both cyan and a white-label demo
-     that only ever changes shade proves nothing. White on it measures 5.4:1 —
-     the bar carries white text and a white knockout logo. */
-  { id: 'acme', name: 'Acme', primary: '#b5502f', accent: '#9a4225', logo: <AcmeLogo /> },
+  /* A burgundy, because the other two are both cyan and a white-label demo that
+     only ever changes shade proves nothing. It was a clay red, which held the
+     same argument but sat at 45% lightness with 59% saturation — mid-tone and
+     low-chroma at once, which is the recipe for muddy across a full-bleed bar.
+     Same warm side of the wheel, 14 points darker and cleaner. White on it
+     measures 9.75:1, the strongest of the three brands. */
+  { id: 'acme', name: 'Acme', primary: '#7a2440', accent: '#631c34', logo: <AcmeLogo /> },
 ]
