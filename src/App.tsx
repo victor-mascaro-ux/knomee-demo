@@ -4038,7 +4038,16 @@ export default function App() {
   if (advisorFlowOpen) {
     return (
       <>
-        <AdvisorFlowScreen onExit={() => setAdvisorFlowOpen(false)} />
+        <AdvisorFlowScreen
+          onExit={() => {
+            /* Out of the flow and into the dashboard that reads it, rather
+               than back to the advisor product, which has nothing to do with
+               the eight minutes you just walked. */
+            setAdvisorFlowOpen(false)
+            setFirmView(true)
+            setFirmScreen('firm-candidates')
+          }}
+        />
         {brand && <PoweredBy />}
       </>
     )
