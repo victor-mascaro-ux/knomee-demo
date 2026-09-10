@@ -142,6 +142,40 @@
   .cc-rail.cc-collapsed .cc-list { display: none; }
   .cc-rail.cc-collapsed .cc-collapse-btn svg { transform: rotate(180deg); }
 
+  /* The rail's two headings: this page, then everywhere else. Sticky, so the
+     one you are reading under stays named while you scroll the list. */
+  .cc-group {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 4px 6px;
+    /* The rail is glass, so the heading borrows the same treatment rather than
+       a flat colour — a solid strip would read as a hole in the panel. */
+    background: var(--cc-glass);
+    backdrop-filter: blur(10px);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a8792;
+  }
+  .cc-group span { white-space: nowrap; }
+  /* The page name gives way rather than wrapping the heading onto two lines. */
+  .cc-group i {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #b3b0bb;
+  }
   .cc-card {
     position: relative; display: flex; gap: 10px; padding: 10px; border-radius: 12px;
     background: var(--cc-card); border: 1px solid var(--cc-hairline);
@@ -786,7 +820,9 @@
   }
   function threadLabel(t) {
     const s = canon(t.screen);
-    if (!s) return 'Every page';
+    // Left before the overlay recorded which page a note was about. Saying so
+    // beats "Every page", which was a description of the old bug.
+    if (!s) return 'Screen not recorded';
     let label = SCREEN_LABELS[s] || prettySlug(s);
     const m = (t.route || '').match(/^#\/[^/]+\/(.+)$/);
     if (m) label += ' · ' + prettySlug(m[1]);
@@ -829,11 +865,18 @@
     return store.threads.find(t => t.id === id) || null;
   }
 
-  // Unresolved threads on the current screen (legacy null-screen threads
-  // show everywhere), in creation order — their index is the pin number.
+  // Unresolved threads on the current screen, in creation order — their index
+  // is the pin number.
+  //
+  // A thread with no screen recorded used to pin on EVERY page, on the theory
+  // that a comment from before scoping existed was better shown too often than
+  // not at all. In practice it means old notes follow you around every screen
+  // and each one looks like it was left where you are standing. They are not
+  // lost by being dropped from here: the rail lists every open thread whatever
+  // page it belongs to, and a card still opens and reads.
   function visibleThreads() {
-    const list = store.threads.filter(t =>
-      !t.resolved && (canon(t.screen) === null || canon(t.screen) === canon(currentScreen)));
+    const here = canon(currentScreen);
+    const list = store.threads.filter(t => !t.resolved && canon(t.screen) === here);
     if (draft) list.push(draft);
     return list.sort((a, b) => a.createdAt - b.createdAt);
   }
@@ -848,10 +891,12 @@
 
   // A thread's pin number, which is its index among the pins on ITS screen —
   // so the number on a card matches the pin you'll find when you land there.
+  // A thread with no screen has no pin anywhere, so it has no number either.
   function pinNumber(t) {
-    const s = canon(t.screen) || canon(currentScreen);
+    const s = canon(t.screen);
+    if (!s) return 0;
     const group = store.threads
-      .filter(x => !x.resolved && (canon(x.screen) === null || canon(x.screen) === s))
+      .filter(x => !x.resolved && canon(x.screen) === s)
       .sort((a, b) => a.createdAt - b.createdAt);
     return group.findIndex(x => x.id === t.id) + 1;
   }
@@ -893,6 +938,14 @@
     clearBtn.disabled = store.threads.length === 0;
     listEl.innerHTML = '';
 
+    // The rail lists every open thread, which is what makes a comment left on
+    // another page findable at all — but an undivided list reads as if all of
+    // them were left here. So it comes in two parts, under their own headings:
+    // this page first, then everywhere else.
+    const here = canon(currentScreen);
+    const onThisPage = visible.filter(t => canon(t.screen) === here);
+    const otherPages = visible.filter(t => canon(t.screen) !== here);
+
     if (!visible.length) {
       const empty = document.createElement('div');
       empty.className = 'cc-empty';
@@ -907,14 +960,27 @@
       return;
     }
 
-    visible.forEach(t => {
+    const groupHead = (text, note) => {
+      const h = document.createElement('div');
+      h.className = 'cc-group';
+      h.innerHTML = '<span>' + text + '</span>' + (note ? '<i>' + note + '</i>' : '');
+      listEl.appendChild(h);
+    };
+
+    const renderCard = (t) => {
       const elsewhere = canon(t.screen) && canon(t.screen) !== canon(currentScreen);
+      // No screen recorded is not the same as belonging here: the card reads
+      // muted like an elsewhere card, but there is nowhere to send you, so it
+      // does not offer to go there.
+      const homeless = !canon(t.screen);
       const card = document.createElement('button');
       card.className = 'cc-card' + (t.id === activeId ? ' cc-active' : '')
-        + (elsewhere ? ' cc-elsewhere' : '');
+        + (elsewhere || homeless ? ' cc-elsewhere' : '');
       card.title = elsewhere
         ? 'Go to ' + threadLabel(t) + ' and open this comment'
-        : threadLabel(t);
+        : homeless
+          ? 'This comment was left before the overlay recorded which page a note was about'
+          : threadLabel(t);
 
       const thumb = document.createElement('div');
       thumb.className = 'cc-thumb';
@@ -936,7 +1002,7 @@
       // The page the note is about — the thing a card never said. Cards for
       // another page carry the jump glyph, because clicking one goes there.
       const page = document.createElement('span');
-      page.className = 'cc-card-page' + (elsewhere ? ' cc-elsewhere' : '');
+      page.className = 'cc-card-page' + (elsewhere || homeless ? ' cc-elsewhere' : '');
       page.textContent = threadLabel(t);
       if (elsewhere) {
         const jump = document.createElement('span');
@@ -959,7 +1025,18 @@
       card.appendChild(body);
       card.addEventListener('click', (e) => { e.stopPropagation(); jumpToThread(t.id); });
       listEl.appendChild(card);
-    });
+    };
+
+    if (onThisPage.length) {
+      groupHead('On this page', SCREEN_LABELS[here] || prettySlug(here));
+      onThisPage.forEach(renderCard);
+    } else {
+      groupHead('On this page', 'nothing yet');
+    }
+    if (otherPages.length) {
+      groupHead('On other pages', String(otherPages.length));
+      otherPages.forEach(renderCard);
+    }
   }
 
   // ── Thread popover ───────────────────────────────────────
