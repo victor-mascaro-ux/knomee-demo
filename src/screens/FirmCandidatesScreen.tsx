@@ -14,6 +14,7 @@
 
 import { Fragment, useState } from 'react'
 import CollapsibleCard from '../components/CollapsibleCard'
+import RowMenu from '../components/RowMenu'
 import './firmCandidates.css'
 import {
   candidates,
@@ -31,6 +32,7 @@ import {
   ChevronDown,
   ChevronRight,
   DownloadIcon,
+  LightningIcon,
   PlusIcon,
   SearchIcon,
 } from '../components/icons'
@@ -338,10 +340,30 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
 
 /* ── the table ──────────────────────────────────────────────────────────── */
 
-function Row({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
+function Row({
+  c,
+  onOpen,
+  onAdd,
+  checked,
+  onToggle,
+}: {
+  c: Candidate
+  onOpen: (c: Candidate) => void
+  onAdd: (c: Candidate) => void
+  checked: boolean
+  onToggle: () => void
+}) {
   const incomplete = c.tier === 'incomplete'
   return (
     <tr className={incomplete ? 'row-incomplete' : undefined}>
+      <td className="col-check">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          aria-label={`Select ${c.name}`}
+        />
+      </td>
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
@@ -375,11 +397,61 @@ function Row({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
           <div className="top-action-pop">{c.topAction}</div>
         </div>
       </td>
+      {/* The advisor's bolt converts a prospect; this one adds an advisor to
+          the network. Same control, same place, because it is the same move —
+          the row's one action, taken without opening the profile. */}
+      <td className="col-bolt">
+        <button
+          className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${c.tier}`}`}
+          type="button"
+          title={incomplete ? undefined : 'Add to Network'}
+          aria-label={incomplete ? undefined : 'Add to Network'}
+          onClick={() => {
+            if (!incomplete) onAdd(c)
+          }}
+        >
+          <LightningIcon
+            color={incomplete ? '#c9c9c9' : c.tier === 'tier3' ? '#240446' : '#ffffff'}
+          />
+        </button>
+      </td>
+      <td className="col-dots">
+        <RowMenu
+          items={
+            incomplete
+              ? [{ label: 'View profile', disabled: true }]
+              : [
+                  { label: 'Add to Network', onClick: () => onAdd(c) },
+                  {
+                    label: 'View profile',
+                    disabled: c.name !== profileOwner,
+                    onClick: c.name === profileOwner ? () => onOpen(c) : undefined,
+                  },
+                ]
+          }
+        />
+      </td>
     </tr>
   )
 }
 
-function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => void }) {
+function Table({
+  rows,
+  onOpen,
+  onAdd,
+  selected,
+  onToggle,
+  allChecked,
+  onToggleAll,
+}: {
+  rows: Candidate[]
+  onOpen: (c: Candidate) => void
+  onAdd: (c: Candidate) => void
+  selected: Set<string>
+  onToggle: (name: string) => void
+  allChecked: boolean
+  onToggleAll: () => void
+}) {
   const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null)
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const toggleGroup = (id: string) =>
@@ -407,6 +479,14 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
       <table className="prospects-table fc-table">
         <thead>
           <tr>
+            <th className="col-check">
+              <input
+                type="checkbox"
+                checked={allChecked}
+                onChange={onToggleAll}
+                aria-label="Select all candidates"
+              />
+            </th>
             <th className="col-name">Name / firm</th>
             <th className="col-kq">
               <button
@@ -429,6 +509,8 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
             <th className="col-num col-clarity">Clarity</th>
             <th className="col-num col-receptivity">Receptivity</th>
             <th className="col-action">Top Action</th>
+            <th className="col-bolt" />
+            <th className="col-dots" />
           </tr>
         </thead>
         <tbody>
@@ -442,11 +524,10 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                   className={`group-header group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
                   onClick={() => toggleGroup(group.id)}
                 >
-                  {/* Six columns, and the band has to say six: under
-                      table-layout: fixed a colSpan larger than the table
-                      reserves width for columns that do not exist, which is
-                      where Top Action's missing 460px went. */}
-                  <td colSpan={6}>
+                  {/* Nine columns, and the band has to say nine: under
+                      table-layout: fixed a colSpan that disagrees with the
+                      table reserves width for columns that do not exist. */}
+                  <td colSpan={9}>
                     <div className="group-header-inner">
                       <button
                         type="button"
@@ -469,7 +550,16 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                   </td>
                 </tr>
                 {!isCollapsed &&
-                  sortRows(inGroup).map((c) => <Row c={c} key={c.name} onOpen={onOpen} />)}
+                  sortRows(inGroup).map((c) => (
+                    <Row
+                      c={c}
+                      key={c.name}
+                      onOpen={onOpen}
+                      onAdd={onAdd}
+                      checked={selected.has(c.name)}
+                      onToggle={() => onToggle(c.name)}
+                    />
+                  ))}
               </Fragment>
             )
           })}
@@ -488,16 +578,29 @@ export default function FirmCandidatesScreen({
   onOpenProfile,
   onDownload,
   onInvite,
+  onAdd,
 }: {
   onOpenProfile: (c: Candidate) => void
   onDownload: () => void
   onInvite: () => void
+  onAdd: (c: Candidate) => void
 }) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const rows = candidates.filter(
     (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
   )
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const toggle = (name: string) =>
+    setSelected((s) => {
+      const n = new Set(s)
+      if (n.has(name)) n.delete(name)
+      else n.add(name)
+      return n
+    })
+  const allNames = rows.map((c) => c.name)
+  const allChecked = selected.size === allNames.length && allNames.length > 0
+  const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
 
   return (
     <>
@@ -515,7 +618,13 @@ export default function FirmCandidatesScreen({
           />
         </div>
         <div className="toolbar-actions">
-          <button className="btn btn-download active" type="button" onClick={onDownload}>
+          {/* Download waits for a selection, the way the advisor's does. */}
+          <button
+            className={`btn btn-download ${selected.size > 0 ? 'active' : ''}`}
+            type="button"
+            aria-disabled={selected.size === 0}
+            onClick={() => selected.size > 0 && onDownload()}
+          >
             <DownloadIcon /> Download
           </button>
           <button className="btn btn-primary" type="button" onClick={onInvite}>
@@ -524,7 +633,15 @@ export default function FirmCandidatesScreen({
         </div>
       </div>
 
-      <Table rows={rows} onOpen={onOpenProfile} />
+      <Table
+        rows={rows}
+        onOpen={onOpenProfile}
+        onAdd={onAdd}
+        selected={selected}
+        onToggle={toggle}
+        allChecked={allChecked}
+        onToggleAll={toggleAll}
+      />
     </>
   )
 }

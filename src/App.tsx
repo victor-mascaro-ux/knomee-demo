@@ -76,7 +76,6 @@ import {
   DownloadIcon,
   PlusIcon,
   LightningIcon,
-  DotsIcon,
   CaretDown,
   BurgerMenu,
   WarnIcon,
@@ -100,6 +99,7 @@ import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import CollapsibleCard from './components/CollapsibleCard'
+import RowMenu from './components/RowMenu'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import moodWorried from './assets/moods/worried.svg'
@@ -558,58 +558,6 @@ function TopActionCell({ text }: { text: string }) {
   )
 }
 
-interface MenuItem {
-  label: string
-  onClick?: () => void
-  disabled?: boolean
-}
-
-function RowMenu({ items }: { items: MenuItem[] }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('click', onDoc)
-    return () => document.removeEventListener('click', onDoc)
-  }, [open])
-  return (
-    <div className="row-menu" ref={ref}>
-      <button
-        className="dots-btn"
-        type="button"
-        aria-label="Row actions"
-        onClick={(e) => {
-          e.stopPropagation()
-          setOpen((v) => !v)
-        }}
-      >
-        <DotsIcon />
-      </button>
-      {open && (
-        <div className="row-menu-pop">
-          {items.map((it) => (
-            <button
-              key={it.label}
-              type="button"
-              className="row-menu-item"
-              disabled={it.disabled}
-              onClick={(e) => {
-                e.stopPropagation()
-                setOpen(false)
-                it.onClick?.()
-              }}
-            >
-              {it.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 function ProspectsTable({
   onConvert,
@@ -4244,6 +4192,7 @@ export default function App() {
                 onOpenProfile={() => setCandidateOpen(true)}
                 onDownload={() => showToast('CSV downloaded')}
                 onInvite={() => setInviteKind('prospect')}
+                onAdd={() => showToast('Added to Network')}
               />
             )}
             {firmScreen === 'firm-network' && (

@@ -48,16 +48,14 @@
 }
 
 /* ── Columns go by name ──
-   This table was being dropped by position, by the generic nth-child rules
-   written for the advisor's nine columns. It has ten and a different order, so
-   at 1024 it lost Stage and AUM rather than the readings, and at 480 the rule
-   for the advisor's checkbox took out Name — the one column the row is. KQ
-   stays to the last breakpoint: it is what the screen ranks on. */
-@media (max-width: 1200px) {
-  .fc-table .col-team {
-    display: none;
-  }
-}
+   This table used to be dropped by position, by the generic nth-child rules
+   written for the advisor's columns, which cut the wrong ones — at 480 the
+   rule aimed at the advisor's checkbox took out Name, the one column the row
+   is. By name it drops what it means to, in the same order the advisor's does:
+   the three readings, then Top Action, then the checkbox. EQ, the name and the
+   row's own actions survive to the last breakpoint, because a row you cannot
+   rank or act on is not worth showing. The Team and AUM rules that used to sit
+   here went with those columns. */
 @media (max-width: 1024px) {
   .fc-table .col-intent,
   .fc-table .col-clarity,
@@ -66,13 +64,18 @@
   }
 }
 @media (max-width: 700px) {
-  .fc-table .col-aum {
+  .fc-table .col-action {
     display: none;
   }
 }
 @media (max-width: 480px) {
-  .fc-table .col-action {
+  .fc-table .col-check {
     display: none;
+  }
+  /* Name is the column on the edge once the checkbox goes. */
+  .fc-table thead th.col-name,
+  .fc-table tbody tr:not(.group-header) td.col-name {
+    padding-left: 20px;
   }
 }
 
