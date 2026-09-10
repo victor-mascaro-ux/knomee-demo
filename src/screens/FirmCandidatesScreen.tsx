@@ -442,7 +442,11 @@ function Table({ rows, onOpen }: { rows: Candidate[]; onOpen: (c: Candidate) => 
                   className={`group-header group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
                   onClick={() => toggleGroup(group.id)}
                 >
-                  <td colSpan={8}>
+                  {/* Six columns, and the band has to say six: under
+                      table-layout: fixed a colSpan larger than the table
+                      reserves width for columns that do not exist, which is
+                      where Top Action's missing 460px went. */}
+                  <td colSpan={6}>
                     <div className="group-header-inner">
                       <button
                         type="button"
