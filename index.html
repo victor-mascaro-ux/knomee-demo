@@ -802,7 +802,7 @@
     'client-experience': 'Client Experience',
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
-    'advisor-flow': 'Enterprise · Sample',
+    'advisor-flow': 'Advisor Recruitment · Sample',
     'advisor-self': 'Enterprise Flow (Advisor)',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
@@ -1524,7 +1524,7 @@
   // uses is knomee's enterprise side, and the row names the product.
   const PERSONAS = [
     ['advisor', 'Advisor', '#/prospects'],
-    ['firm', 'Enterprise', '#/firm-candidates'],
+    ['firm', 'Advisor Recruitment', '#/firm-candidates'],
     ['admin', 'Admin', '#/admin']
   ];
   const personaOf = (view) => {
@@ -1555,26 +1555,23 @@
     /* The advisor's own eight minutes — the same flow a client walks, walked by
        an advisor signing up to knomee. It has no tab and no menu item, so this
        row is the only way in. */
-    /* The enterprise product, twice. The sample is Marcus's, pre-filled and
-       clicked through to show the instrument; the flow under it is the same
-       five adventures with the answers taken out, which is the one an advisor
-       actually takes — it keeps its own sheet and builds its own Business ID,
-       readiness and Toolkit from what they type. */
-    ['mobile-advisor', 'Mobile (Enterprise - Sample)', '#/advisor-flow'],
-    ['mobile-self', 'Enterprise Flow (Advisor)', '#/advisor-self'],
+    /* Marcus's, pre-filled and clicked through, which is what shows the
+       instrument. The live version an advisor actually takes — same five
+       adventures with the answers taken out — is still at #/advisor-self; it
+       is not offered here. */
+    ['mobile-advisor', 'Mobile (Advisor)', '#/advisor-flow'],
     ['welcome', 'Welcome Page (Client)', '#/welcome']
   ];
   // Only these two take you out of the app shell. The desktop row is where you
   // already are on any advisor page, so it must not count as "somewhere else"
   // when the persona rows decide whether to mark themselves.
-  const STANDALONE = ['mobile', 'mobile-advisor', 'mobile-self', 'welcome'];
+  const STANDALONE = ['mobile', 'mobile-advisor', 'welcome'];
   // The welcome page's own A/B switch decides which version, so both count.
   const screenIsOn = (id) => {
     const v = canon(demoState.view);
     if (id === 'desktop') return SHELL_VIEWS.indexOf(v) !== -1;
     if (id === 'mobile') return v === 'client-experience';
     if (id === 'mobile-advisor') return v === 'advisor-flow';
-    if (id === 'mobile-self') return v === 'advisor-self';
     return v === id || (id === 'welcome' && v === 'welcome-b');
   };
 

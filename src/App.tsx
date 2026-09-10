@@ -4122,7 +4122,7 @@ export default function App() {
             ) : firmView ? (
               <>
                 <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-                <span className="brand-sub">ENTERPRISE</span>
+                <span className="brand-sub">ADVISOR RECRUITMENT</span>
               </>
             ) : adminView ? (
               <>
