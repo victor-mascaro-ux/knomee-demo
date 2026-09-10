@@ -358,9 +358,9 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   useDarkGround()
-  const { scale: fitScale, windowH } = useFitToWindow()
+  const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
-  const scale = fitScale * zoom
+  const scale = bare ? 1 : fitScale * zoom
 
   const step = steps[i]
   const last = i === steps.length - 1
@@ -414,9 +414,15 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
     : undefined
 
   return (
-    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
-      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale}>
+    <div
+      className={`cx-page${bare ? ' is-bare' : ''}`}
+      style={windowH ? { minHeight: windowH } : undefined}
+    >
+      <div
+        className="cx-fit"
+        style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
+      >
+        <IPhone scale={scale} bare={bare}>
           <header className="cx-appbar">
             {adventure && tab === 'flow' ? (
               <>
