@@ -931,6 +931,23 @@ body {
   width: auto; /* the remainder */
 }
 
+/* The readings are centred and whatever follows them is left-aligned, so the
+   join reads tighter than the 12px gutter actually is: the last number sits
+   half a column in from its own right edge, then the next value starts hard
+   against the cell wall. The first left-aligned cell after the scores takes a
+   wider left inset so the two read as separated. Header and body together, or
+   the column label stops lining up with its own data.
+   Written at the row rules' own specificity — those set `padding` outright and
+   would otherwise win. */
+.prospects-cols thead th.col-signup,
+.prospects-cols tbody tr:not(.group-header) td.col-signup,
+.fc-table thead th.col-action,
+.fc-table tbody tr:not(.group-header) td.col-action,
+.clients-table thead th.col-household,
+.clients-table tbody tr:not(.group-header) td.col-household {
+  padding-left: 24px;
+}
+
 /* A flat row, whether the Top Action wraps to two lines or one: rows ran
    69px against ~48px, so a tier group scanned as a ragged column. */
 .prospects-cols thead th {

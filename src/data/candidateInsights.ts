@@ -278,7 +278,17 @@ const flaggedCandidates: Candidate[] = [
   ...topOf('wants-waiting', aumOf, 3),
 ]
 
-export const talkTo: FirmTalkTo[] = flaggedCandidates
+/* Marcus is on the list whatever his score, and he leads it. He is the one
+   candidate whose profile is built out, so he is the only name "start with"
+   can actually open — and in a demo the first row is the row somebody clicks.
+   Everyone behind him is still ordered by score. */
+const marcus = candidates.find((c) => c.name === MARCUS)
+const flaggedWithMarcus =
+  marcus && !flaggedCandidates.some((c) => c.name === MARCUS)
+    ? [marcus, ...flaggedCandidates]
+    : flaggedCandidates
+
+export const talkTo: FirmTalkTo[] = flaggedWithMarcus
   .filter((c, i, xs) => xs.findIndex((x) => x.name === c.name) === i)
   .map((c) => ({
     name: c.name,
@@ -287,7 +297,7 @@ export const talkTo: FirmTalkTo[] = flaggedCandidates
     niche: clusters.find((cl) => cl.key === clusterOf(c))?.name ?? '',
     said: c.name === MARCUS ? MARCUS_CHIPS : chips(c),
   }))
-  .sort((a, b) => b.kq - a.kq)
+  .sort((a, b) => (a.name === MARCUS ? -1 : b.name === MARCUS ? 1 : b.kq - a.kq))
 
 export interface Insight {
   n: number

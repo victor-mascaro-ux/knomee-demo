@@ -582,10 +582,12 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
                   <ArrowRight />
                 </button>
                 <button className="cx-sheet-item" type="button" onClick={onExit}>
-                  Advisor Experience
+                  Recruitment Dashboard
                   <ArrowRight />
                 </button>
-                <div className="cx-sheet-hint">Switches back to the advisor demo.</div>
+                <div className="cx-sheet-hint">
+                  The firm's side of this: where Marcus's answers land.
+                </div>
               </div>
             </div>
           )}
