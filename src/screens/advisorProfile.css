@@ -157,10 +157,16 @@
 
 /* The phone's rail trigger is his face rather than his letter, on the same
    grey disc — it lives in client-experience.css's button, so only the disc and
-   the fit belong here. */
+   the fit belong here.
+
+   It fills its circle rather than carrying a size of its own. At a fixed 26px
+   it sat inside a 40px button as a small face in a ring of empty tint, and the
+   same span is reused at 96px on the desktop rail, where the mismatch was
+   worse. The container decides how big the portrait is; this only says it is
+   round and that the image covers it. */
 .cxm-rail-photo {
-  width: 26px;
-  height: 26px;
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-circle);
   overflow: hidden;
   background: var(--k-pearl);
