@@ -48,6 +48,11 @@ const isDemoCombo = (e: KeyboardEvent) => {
 // bottom of the column it belongs to.
 const STICKY_RAILS =
   '.topbar, .pp-crumb, .pp-tabs, .pp-side-inner, .settings-side-inner'
+/* The same fault from the other end. `position: fixed` also resolves against
+   this frame's viewport, and this frame's viewport IS the whole document — so
+   a credit pinned 14px off the bottom lands 14px off the bottom of a 3,700px
+   page and is never on screen. It rides the parent's window instead. */
+const FIXED_FOOT = '.powered-by'
 
 function initStickyRails(frame: Element) {
   const shifts = new WeakMap<HTMLElement, number>()
@@ -88,6 +93,24 @@ function initStickyRails(frame: Element) {
       if (Math.abs(shift - prev) > 0.5) {
         shifts.set(el, shift)
         el.style.transform = shift ? `translateY(${shift}px)` : ''
+      }
+    })
+
+    // Bottom-anchored, so the target is the parent window's bottom rather than
+    // a `top` offset: put the element's own bottom `bottom`px above it.
+    const view = frame.ownerDocument.defaultView
+    const viewportH = view ? view.innerHeight : 0
+    if (!viewportH) return
+    document.querySelectorAll<HTMLElement>(FIXED_FOOT).forEach((el) => {
+      if (getComputedStyle(el).position !== 'fixed') return
+      const prev = shifts.get(el) || 0
+      const r = el.getBoundingClientRect()
+      const naturalTop = r.top - prev
+      const inset = parseFloat(getComputedStyle(el).bottom) || 0
+      const wanted = viewportH - inset - r.height - frameTop - naturalTop
+      if (Math.abs(wanted - prev) > 0.5) {
+        shifts.set(el, wanted)
+        el.style.transform = `translateY(${wanted}px)`
       }
     })
   }

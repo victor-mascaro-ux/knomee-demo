@@ -76,11 +76,10 @@ body {
      another; drawn along the foot of a plum bar it reads as a white stripe on
      the dark. The bar's own colour is the boundary. */
 }
-/* The bar runs the full width of the screen and so do its contents: the burger
-   stays at the screen's edge rather than at the edge of a 1520px column the
-   profile pages do not use. The logo, though, is offset onto the content
-   column, so above 1600px it still lands on the same edge as the first tab and
-   the page title instead of drifting (vw − 1520) / 2 to their left.
+/* The bar runs the full width of the screen; its two ends sit on the content
+   column. The logo lands on the same edge as the first tab and the page title,
+   and the burger mirrors it on the right, so above 1600px the bar frames the
+   page rather than floating wider than it.
    The offset is measured off this element with a container query rather than
    100vw, because 100vw includes the scrollbar and would put the logo ~7px past
    the title — which is the one misalignment this is here to prevent. */
@@ -2117,6 +2116,11 @@ button.name-link-btn:hover .name-text {
 .menu-wrap {
   position: relative;
   display: inline-flex;
+  /* The mirror of .brand's offset: same measurement, other end. */
+  margin-right: max(
+    0px,
+    calc((100cqi + var(--page-pad) * 2 - var(--content-max)) / 2)
+  );
 }
 .menu-pop {
   position: absolute;
