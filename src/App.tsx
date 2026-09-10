@@ -3902,7 +3902,9 @@ export default function App() {
           empty: emptyMode,
           brand: brandId,
           cobrand: cobrandLayout,
-          brands: CLIENT_BRANDS.map((b) => ({ id: b.id, name: b.name })),
+          /* `primary` too: the panel tints its brand toggle with the colour
+             this app actually paints the bar with, so the two cannot drift. */
+          brands: CLIENT_BRANDS.map((b) => ({ id: b.id, name: b.name, primary: b.primary })),
           // Whose page is open over the table, if anyone's. The panel offers
           // the phone rendering as a view of THIS page, so it has to know
           // there is one — and it hides the controls a profile covers up.
@@ -4122,7 +4124,7 @@ export default function App() {
             ) : firmView ? (
               <>
                 <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-                <span className="brand-sub">ENTERPRISE</span>
+                <span className="brand-sub">ADVISOR RECRUITMENT</span>
               </>
             ) : adminView ? (
               <>

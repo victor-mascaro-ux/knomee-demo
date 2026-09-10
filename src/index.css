@@ -226,7 +226,7 @@ body {
    credit that reads before the first card reads as part of it. */
 .powered-by {
   position: fixed;
-  right: var(--page-pad);
+  left: var(--page-pad);
   bottom: 14px;
   z-index: 30;
   display: inline-flex;

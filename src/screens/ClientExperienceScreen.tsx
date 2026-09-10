@@ -162,6 +162,10 @@ const FIT_PAD = 40
 // The view controls sit under the phone rather than over it, so the height they
 // occupy comes off the space the phone is allowed to fill.
 const CONTROLS_H = 46
+/* Below this the window IS a phone, and drawing a phone inside it is a picture
+   of a picture: the rail, the bezel, the notch and the 9:41 all become clutter
+   over the real ones. The frame drops away and the screen takes the window. */
+const BARE_MAX = 640
 
 function parentWindow(): Window | null {
   try {
@@ -183,7 +187,7 @@ export function useDarkGround() {
 }
 
 export function useFitToWindow() {
-  const [fit, setFit] = useState({ scale: 1, windowH: 0 })
+  const [fit, setFit] = useState({ scale: 1, windowH: 0, bare: false })
   useEffect(() => {
     const measure = () => {
       const p = parentWindow()
@@ -197,9 +201,13 @@ export function useFitToWindow() {
       } catch {
         /* cross-origin — keep our own */
       }
+      const bare = w <= BARE_MAX
       setFit({
-        scale: Math.min(1, (h - FIT_PAD - CONTROLS_H) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
+        scale: bare
+          ? 1
+          : Math.min(1, (h - FIT_PAD - CONTROLS_H) / DEVICE_H, (w - FIT_PAD) / DEVICE_W),
         windowH: h,
+        bare,
       })
     }
     measure()
@@ -303,11 +311,26 @@ export function IPhone({
   children,
   scale = 1,
   dim = false,
+  bare = false,
 }: {
   children: ReactNode
   scale?: number
   dim?: boolean
+  /* No rail, no bezel, no notch — the screen is the window. See BARE_MAX. */
+  bare?: boolean
 }) {
+  if (bare) {
+    /* No measured height here. The screen stretches to the page, which is the
+       window — a number measured once can go stale, and a stale one is a
+       screen that is not the size of the thing it is filling. */
+    return (
+      <div className="cx-device is-bare">
+        <div className="cx-bezel">
+          <div className={`cx-screen ${dim ? 'has-sheet' : ''}`}>{children}</div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="cx-device" style={scale === 1 ? undefined : { transform: `scale(${scale})` }}>
       <span className="cx-key cx-key-silent" />

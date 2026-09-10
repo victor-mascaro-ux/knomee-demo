@@ -509,6 +509,13 @@
   .cc-demo-seg-btn.cc-on {
     background: rgba(45,210,176,0.28); color: var(--cc-text); font-weight: 500;
   }
+  /* A brand's segment wears the brand. The tint is set inline from the same hex
+     the prototype paints its bar with, so the panel cannot drift from it. */
+  .cc-demo-seg-btn.cc-on[data-tint] { color: #fff; }
+  /* Present but inert: the control keeps its place on every page, so the panel
+     is the same shape wherever you are, and says so where it cannot act. */
+  .cc-demo-seg.is-off { opacity: 0.4; }
+  .cc-demo-seg.is-off .cc-demo-seg-btn { cursor: default; pointer-events: none; }
   /* the toggle switch — same shape language as the prototype's own */
   .cc-switch {
     position: relative; width: 32px; height: 18px; border-radius: 999px; flex: none;
@@ -802,7 +809,7 @@
     'client-experience': 'Client Experience',
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
-    'advisor-flow': 'Enterprise · Sample',
+    'advisor-flow': 'Advisor Recruitment · Sample',
     'advisor-self': 'Enterprise Flow (Advisor)',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-network': 'Dynasty · Network',
@@ -1491,9 +1498,16 @@
     // Mobile and desktop are two views of the page you are on, so they read as
     // two options rather than as a switch that is on or off: a switch makes one
     // of them the default and the other the deviation, and neither is.
+    // It sits on every shell page rather than appearing and disappearing: a
+    // control that moves is harder to find than one that is sometimes greyed,
+    // and its absence read as "this page has no mobile view" only if you
+    // already knew the control existed. Pages without a phone show it inert.
     { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
-      views: ['clients', 'client-mobile', 'firm-candidates', 'advisor-mobile'],
-      when: () => MOBILE_OF[canon(demoState.view)] || !!demoState.profile,
+      views: SHELL_VIEWS,
+      // Strictly whether THIS page has a phone. The old guard also let any
+      // open profile through, which on a prospect meant the toggle offered a
+      // mobile view that fell back to Emily's — a different person's page.
+      hasMobile: () => !!MOBILE_OF[canon(demoState.view)],
       isOn: () => !!BACK_FROM_MOBILE[canon(demoState.view)],
       apply: (on) => {
         const here = canon(demoState.view);
@@ -1522,10 +1536,21 @@
   // another.
   // Which knomee you are. Dynasty is the firm in the story, but the product it
   // uses is knomee's enterprise side, and the row names the product.
+  /* One list, because they are one question: which knomee are you looking at?
+     The three dashboards are the products; the two "as Prospect" rows are the
+     same products from the other side of the table — the person being asked
+     rather than the person reading the answers. Each row carries its own test
+     for whether you are already on it. */
   const PERSONAS = [
-    ['advisor', 'Advisor', '#/prospects'],
-    ['firm', 'Enterprise', '#/firm-candidates'],
-    ['admin', 'Admin', '#/admin']
+    ['advisor', 'Advisor Dashboard', '#/prospects',
+      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'advisor'],
+    ['firm', 'Recruitment Dashboard', '#/firm-candidates',
+      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm'],
+    ['admin', 'Admin Dashboard', '#/admin', v => v === 'admin'],
+    ['client-exp', 'Client as Prospect', '#/client-experience',
+      v => v === 'client-experience'],
+    ['advisor-exp', 'Advisor as Prospect', '#/advisor-flow',
+      v => v === 'advisor-flow']
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';
@@ -1541,43 +1566,6 @@
   // advisor's flow) this panel is now the only way out, which is one more
   // reason for it to carry them.
   //
-  // Two rows, not four. Segmentation left because the product now reaches it —
-  // it sits next to Analytics in the advisor's own tab row, where an analysis
-  // of the book belongs. And the two phone apps are one row: which app you
-  // reach is which persona you are, the same way Mobile view is a switch on the
-  // page you are already looking at rather than a list of destinations.
-  // Named by whose screen it is rather than by what the code calls it: the
-  // desktop belongs to the advisor, the phone and the welcome page belong to
-  // the client. Three surfaces, which is what a demo walks through.
-  const SCREENS = [
-    ['desktop', 'Desktop (Advisor)', '#/prospects'],
-    ['mobile', 'Mobile (Client)', '#/client-experience'],
-    /* The advisor's own eight minutes — the same flow a client walks, walked by
-       an advisor signing up to knomee. It has no tab and no menu item, so this
-       row is the only way in. */
-    /* The enterprise product, twice. The sample is Marcus's, pre-filled and
-       clicked through to show the instrument; the flow under it is the same
-       five adventures with the answers taken out, which is the one an advisor
-       actually takes — it keeps its own sheet and builds its own Business ID,
-       readiness and Toolkit from what they type. */
-    ['mobile-advisor', 'Mobile (Enterprise - Sample)', '#/advisor-flow'],
-    ['mobile-self', 'Enterprise Flow (Advisor)', '#/advisor-self'],
-    ['welcome', 'Welcome Page (Client)', '#/welcome']
-  ];
-  // Only these two take you out of the app shell. The desktop row is where you
-  // already are on any advisor page, so it must not count as "somewhere else"
-  // when the persona rows decide whether to mark themselves.
-  const STANDALONE = ['mobile', 'mobile-advisor', 'mobile-self', 'welcome'];
-  // The welcome page's own A/B switch decides which version, so both count.
-  const screenIsOn = (id) => {
-    const v = canon(demoState.view);
-    if (id === 'desktop') return SHELL_VIEWS.indexOf(v) !== -1;
-    if (id === 'mobile') return v === 'client-experience';
-    if (id === 'mobile-advisor') return v === 'advisor-flow';
-    if (id === 'mobile-self') return v === 'advisor-self';
-    return v === id || (id === 'welcome' && v === 'welcome-b');
-  };
-
   function demoSet(key, value) {
     demoState[key] = value;                 // optimistic; the app echoes back
     if (proto.contentWindow) {
@@ -1601,6 +1589,7 @@
   // Only the brands worth showing a prospect. The others stay in the code —
   // they are still real white labels, just not in this menu.
   const MENU_BRANDS = ['acme'];
+  const KNOMEE_PLUM = '#240446';
   // The tray says the firm, not the legal name: 'Confetti Wealth' is what the
   // bar wears, 'Confetti' is what you say out loud picking it.
   const BRAND_LABEL = { confetti: 'Confetti', acme: 'Acme' };
@@ -1681,19 +1670,26 @@
   // A two-state toggle that names both states, rather than a switch that names
   // one and leaves the other implied. Mobile and desktop are two views of the
   // page you are on; neither is the deviation from the other.
-  function demoSegment(labels, activeIndex, onPick) {
+  function demoSegment(labels, activeIndex, onPick, opts) {
+    const o = opts || {};
     const row = document.createElement('div');
-    row.className = 'cc-demo-seg';
+    row.className = 'cc-demo-seg' + (o.disabled ? ' is-off' : '');
     row.setAttribute('role', 'group');
     labels.forEach((label, i) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'cc-demo-seg-btn' + (i === activeIndex ? ' cc-on' : '');
       b.setAttribute('aria-pressed', i === activeIndex ? 'true' : 'false');
+      if (o.disabled) b.disabled = true;
+      const tint = o.tints && o.tints[i];
+      if (tint) {
+        b.setAttribute('data-tint', '');
+        if (i === activeIndex) b.style.background = tint;
+      }
       b.textContent = label;
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (i !== activeIndex) onPick(i);
+        if (!o.disabled && i !== activeIndex) onPick(i);
       });
       row.appendChild(b);
     });
@@ -1728,18 +1724,22 @@
           // Desktop first: it is where the page lives, and mobile is the view
           // you step into and back out of.
           g.appendChild(demoSegment(['Desktop', 'Mobile'], c.isOn() ? 1 : 0,
-            i => c.apply(i === 1)));
+            i => c.apply(i === 1), { disabled: !c.hasMobile() }));
         } else if (c.kind === 'brands') {
           const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
           g.appendChild(h);
-          g.appendChild(demoPick('Knomee', !demoState.brand, () => demoSet('brand', null)));
-          demoState.brands
-            .filter(b => MENU_BRANDS.indexOf(b.id) !== -1)
-            .forEach(b => {
-              g.appendChild(demoPick(BRAND_LABEL[b.id] || b.name, demoState.brand === b.id,
-                () => demoSet('brand', b.id)));
-            });
+          // Two options, not a list: knomee's own bar or the white label, each
+          // segment tinted with the colour the prototype actually paints.
+          const offered = demoState.brands.filter(b => MENU_BRANDS.indexOf(b.id) !== -1);
+          const labels = ['Knomee'].concat(offered.map(b => BRAND_LABEL[b.id] || b.name));
+          const tints = [KNOMEE_PLUM].concat(offered.map(b => b.primary));
+          const active = demoState.brand
+            ? 1 + offered.findIndex(b => b.id === demoState.brand)
+            : 0;
+          g.appendChild(demoSegment(labels, active < 0 ? 0 : active,
+            i => demoSet('brand', i === 0 ? null : offered[i - 1].id),
+            { tints: tints }));
         }
       });
       demoBody.appendChild(g);
@@ -1749,25 +1749,15 @@
     // One of the other screens showing means none of the personas' own
     // dashboards is, so the persona rows stay unmarked rather than claiming a
     // page they aren't on.
-    const elsewhere = STANDALONE.some(id => screenIsOn(id));
     const onView = canon(demoState.view);
-    const mine = personaOf(onView);
     const gp = demoGroup('Knomee', ICONS.persona);
     PERSONAS.forEach(p => {
-      const on = !elsewhere && p[0] === mine;
-      // Picking the persona you are already in would only yank the demo back
-      // to that persona's first screen.
+      const on = p[3](onView);
+      // Picking the one you are already on would only yank the demo back to
+      // that product's first screen.
       gp.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
     });
     demoBody.appendChild(gp);
-
-    // ── the other screens ──
-    const gs = demoGroup('Screens', ICONS.screens);
-    SCREENS.forEach(sc => {
-      const on = screenIsOn(sc[0]);
-      gs.appendChild(demoPick(sc[1], on, () => { if (!on) navigateFrame(sc[2]); }));
-    });
-    demoBody.appendChild(gs);
   }
 
   function setDemoArmed(on) {

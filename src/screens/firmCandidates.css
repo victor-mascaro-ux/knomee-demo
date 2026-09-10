@@ -4,15 +4,6 @@
    toolbar and the table. What is left here is the four columns the firm's table
    has and the advisor's does not. Colours are tokens only. */
 
-/* Stage and Route are words, not numbers, so they read as table text and never
-   wrap mid-phrase. */
-.prospects-table th.col-firm-word,
-.prospects-table td.col-firm-word {
-  white-space: nowrap;
-  font-size: 12.5px;
-  color: var(--k-ink-soft);
-}
-
 /* Ten columns instead of nine, on the same module the advisor's table uses:
    Name three columns, every reading one, and Top Action the remainder. */
 .prospects-table.fc-table {
@@ -22,8 +13,7 @@
   width: 23.75%; /* 3 columns — the same Name width the advisor's table has */
 }
 .fc-table .col-kq,
-.fc-table .col-num,
-.fc-table .col-firm-word {
+.fc-table .col-num {
   width: 6.8%; /* 1 column each */
 }
 .fc-table .col-action {
@@ -75,13 +65,7 @@
     display: none;
   }
 }
-@media (max-width: 900px) {
-  .fc-table .col-route {
-    display: none;
-  }
-}
 @media (max-width: 700px) {
-  .fc-table .col-stage,
   .fc-table .col-aum {
     display: none;
   }

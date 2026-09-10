@@ -521,6 +521,55 @@
   }
 }
 
+/* ---------- bare mode: the window IS the phone ----------
+   Below 640px the frame is a picture of the device you are already holding, so
+   every part of it that exists to say "this is a handset" comes off: the rail,
+   the bezel inset, the corner radius, the side keys, the Dynamic Island, the
+   drawn status bar and the home indicator. What is left is the screen, filling
+   the window. The screen's own height comes in as an inline value measured
+   from the parent window — `100vh` would be the document's height inside the
+   review frame, not the window's. */
+.cx-page.is-bare {
+  padding: 0;
+  min-height: 0;
+  background: var(--surface-card);
+}
+/* One flex chain from the page to the screen, so the screen is exactly as tall
+   as the window without anybody measuring it. */
+.cx-page.is-bare .cx-fit {
+  width: 100%;
+  flex: 1;
+  display: flex;
+}
+.cx-device.is-bare {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+.cx-device.is-bare .cx-bezel {
+  flex: 1;
+  display: flex;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+.cx-device.is-bare .cx-screen {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  border-radius: 0;
+}
+.cx-device.is-bare .cx-island,
+.cx-device.is-bare .cx-statusbar,
+.cx-device.is-bare .cx-home-bar {
+  display: none;
+}
+
 /* ============================================================
    DEMO HARNESS — this app, not the design system
    The page the device stands on, the fit-to-window scaling and
