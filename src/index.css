@@ -257,16 +257,6 @@ body {
   height: 16px;
   width: auto;
 }
-/* The trademark, at the size a trademark is: present, and not competing with
-   the wordmark it belongs to. */
-.powered-by-tm {
-  font-size: 8px;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--grey-text);
-  align-self: flex-start;
-  margin: 2px 0 0 -3px;
-}
 @media (max-width: 720px) {
   .powered-by {
     right: 12px;
