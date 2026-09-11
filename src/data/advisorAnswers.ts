@@ -525,7 +525,7 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
   if (said('pj-q3', a))
     highlights.push({
       icon: 'financial-joy',
-      title: 'What reminded me why',
+      title: 'My business “why”',
       text: trim(firstSentence(said('pj-q3', a), 200), 200),
     })
   if (concerns.length)
