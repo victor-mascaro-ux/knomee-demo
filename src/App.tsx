@@ -167,10 +167,9 @@ function PoweredBy() {
   return (
     <span className="powered-by" aria-label="Powered by knomee">
       <span className="powered-by-text">powered by</span>
+      {/* No ™ beside it: the wordmark carries its own ® already, and two marks
+          on one logo is one too many. */}
       <img className="powered-by-logo" src="./knomee-logo-plum.svg" alt="knomee" />
-      <span className="powered-by-tm" aria-hidden>
-        ™
-      </span>
     </span>
   )
 }
