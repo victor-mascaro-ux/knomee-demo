@@ -675,7 +675,7 @@ export const businessId = {
     { icon: 'financial-joy', title: 'What the practice is for', text: 'Ownership, control over how I serve, my team’s future' },
     {
       icon: 'financial-joy',
-      title: 'What reminded me why',
+      title: 'My business “why”',
       text: 'A client of eleven years bringing her daughter in — “because she wanted her to hear it from the person who actually knows the family”',
     },
     { icon: 'outlook', title: 'Biggest concern', text: 'Whether the clients follow. Then what he owes two junior advisors.' },
