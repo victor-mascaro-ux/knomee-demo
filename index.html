@@ -1572,10 +1572,16 @@
     ['firm', 'Advisor Recruit', '#/firm-candidates',
       v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm']
   ];
+  /* Named for who takes the journey AND what it produces. "Advisor" on its own
+     would read as the Advisor dashboard two rows up; the artefact says which
+     advisor is meant — the one answering, not the one reading answers — and it
+     is the demo's own vocabulary rather than a label invented for this panel.
+     "Prospect as Client" said the opposite of itself: a prospect is precisely
+     somebody who is not a client yet. */
   const JOURNEYS = [
-    ['client-exp', 'Prospect as Client', '#/client-experience',
+    ['client-exp', 'Client · Financial ID', '#/client-experience',
       v => v === 'client-experience'],
-    ['advisor-exp', 'Advisor as Client', '#/advisor-flow',
+    ['advisor-exp', 'Advisor · Business ID', '#/advisor-flow',
       v => v === 'advisor-flow']
   ];
   const personaOf = (view) => {
