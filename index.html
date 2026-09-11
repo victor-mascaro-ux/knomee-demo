@@ -1560,15 +1560,22 @@
      same products from the other side of the table — the person being asked
      rather than the person reading the answers. Each row carries its own test
      for whether you are already on it. */
-  const PERSONAS = [
-    ['advisor', 'Advisor Dashboard', '#/prospects',
+  /* Two questions, so two lists. A dashboard is a product somebody works IN —
+     an advisor's book, the platform's recruiting pipeline, the admin's
+     overview. A journey is the same product from the other side of the table:
+     the person being asked, walking the adventures on their phone. Each row
+     carries its own test for whether you are already on it. */
+  const DASHBOARDS = [
+    ['advisor', 'Advisor Prospects & Clients', '#/prospects',
       v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'advisor'],
-    ['firm', 'Recruitment Dashboard', '#/firm-candidates',
-      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm'],
-    ['admin', 'Admin Dashboard', '#/admin', v => v === 'admin'],
-    ['client-exp', 'Client as Prospect', '#/client-experience',
+    ['admin', 'Admin', '#/admin', v => v === 'admin'],
+    ['firm', 'Advisor Recruit', '#/firm-candidates',
+      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm']
+  ];
+  const JOURNEYS = [
+    ['client-exp', 'Prospect as Client', '#/client-experience',
       v => v === 'client-experience'],
-    ['advisor-exp', 'Advisor as Prospect', '#/advisor-flow',
+    ['advisor-exp', 'Advisor as Client', '#/advisor-flow',
       v => v === 'advisor-flow']
   ];
   const personaOf = (view) => {
@@ -1766,19 +1773,23 @@
       demoBody.appendChild(g);
     }
 
-    // ── persona ──
-    // One of the other screens showing means none of the personas' own
-    // dashboards is, so the persona rows stay unmarked rather than claiming a
-    // page they aren't on.
+    // ── where to go ──
+    // One of the other screens showing means none of the dashboards is, so a
+    // row stays unmarked rather than claiming a page it is not on. Each row's
+    // own test decides that.
     const onView = canon(demoState.view);
-    const gp = demoGroup('Knomee', ICONS.persona);
-    PERSONAS.forEach(p => {
-      const on = p[3](onView);
-      // Picking the one you are already on would only yank the demo back to
-      // that product's first screen.
-      gp.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
-    });
-    demoBody.appendChild(gp);
+    const rows = (title, icon, list) => {
+      const g = demoGroup(title, icon);
+      list.forEach(p => {
+        const on = p[3](onView);
+        // Picking the one you are already on would only yank the demo back to
+        // that product's first screen.
+        g.appendChild(demoPick(p[1], on, () => { if (!on) navigateFrame(p[2]); }));
+      });
+      demoBody.appendChild(g);
+    };
+    rows('Dashboards', ICONS.persona, DASHBOARDS);
+    rows('Client Journeys', ICONS.screens, JOURNEYS);
   }
 
   function setDemoArmed(on) {
