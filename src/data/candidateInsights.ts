@@ -115,8 +115,8 @@ const COPY: Copy[] = [
     n: 4,
     name: 'Succession-shaped, not independence-shaped',
     spine: 'Future You is winding down or out of the business, or the named change is a sale or a successor.',
-    action: 'Route to the investment bank and Optima, not to Connect.',
-    why: 'Sending these to Connect is the most expensive routing error available: a quarter of rep time on a firm they never intended to build.',
+    action: 'Answer the valuation and succession questions, not the build-your-own-firm ones.',
+    why: 'Pitching a firm they never intended to build is the most expensive mistake available: a quarter of rep time answering a question they did not ask.',
   },
   {
     key: 'team-blocked',
@@ -143,7 +143,7 @@ export interface Cluster extends Copy {
   size: number
   /** Share of the scored pipeline. */
   share: number
-  avgEQ: number
+  avgRQ: number
   avgAUM: number
   /** The apprehension the most members named, and how many. */
   apprehension: { label: string; count: number; share: number }
@@ -176,7 +176,7 @@ export const clusters: Cluster[] = COPY.map((copy) => {
     members,
     size: members.length,
     share: Math.round((members.length / candidateStats.scored) * 100),
-    avgEQ: mean(members.map((m) => m.kq as number)),
+    avgRQ: mean(members.map((m) => m.kq as number)),
     avgAUM: Math.round(members.reduce((a, m) => a + m.aum, 0) / (members.length || 1)),
     apprehension: modeApprehension(members),
     signed,
@@ -330,7 +330,7 @@ export const insights: Insight[] = [
   {
     n: 1,
     title: `${share(t1)}% Actionable Now`,
-    body: `${t1} of ${S} scored candidates (${share(t1)}%) fall in Tier 1 (EQ 70–100). ${ready.size} of them are “${ready.name.toLowerCase()}” — high intent, high clarity, one blocker left — and they convert at ${ready.conv}%. Answer that one blocker with evidence and book the meeting; this is where the quarter is won.`,
+    body: `${t1} of ${S} scored candidates (${share(t1)}%) fall in Tier 1 (RQ 70–100). ${ready.size} of them are “${ready.name.toLowerCase()}” — high intent, high clarity, one blocker left — and they convert at ${ready.conv}%. Answer that one blocker with evidence and book the meeting; this is where the quarter is won.`,
   },
   {
     n: 2,
@@ -345,17 +345,17 @@ export const insights: Insight[] = [
   {
     n: 4,
     title: `${waiting.size} Want It and Haven’t Started`,
-    body: `The largest group at ${waiting.share}% of the pipeline, avg EQ ${waiting.avgEQ}, converting at ${waiting.conv}%. ${waiting.apprehension.count} of ${waiting.size} name ${waiting.apprehension.label.toLowerCase()} as the blocker. ${waiting.action} These are lost to inertia, not to a competitor.`,
+    body: `The largest group at ${waiting.share}% of the pipeline, avg RQ ${waiting.avgRQ}, converting at ${waiting.conv}%. ${waiting.apprehension.count} of ${waiting.size} name ${waiting.apprehension.label.toLowerCase()} as the blocker. ${waiting.action} These are lost to inertia, not to a competitor.`,
   },
   {
     n: 5,
     title: `${succession.size} Are Succession-Shaped, Not Independence-Shaped`,
-    body: `Future You says winding down or an exit, or the named change is a sale or a successor. ${succession.action} Sending these to Connect is the most expensive routing error available — a quarter of rep time on a firm they never intended to build.`,
+    body: `Future You says winding down or an exit, or the named change is a sale or a successor. ${succession.action} Pitching a firm they never intended to build is the most expensive mistake available — a quarter of rep time answering a question they did not ask.`,
   },
   {
     n: 6,
     title: `${team.size} Are Blocked on the Second Seat`,
-    body: `Their own readiness is high — avg EQ ${team.avgEQ} — and the G2 advisors are not aligned. ${team.action} The blocker is a conversation the advisor has not had yet, usually because they cannot answer it.`,
+    body: `Their own readiness is high — avg RQ ${team.avgRQ} — and the G2 advisors are not aligned. ${team.action} The blocker is a conversation the advisor has not had yet, usually because they cannot answer it.`,
   },
   {
     n: 7,

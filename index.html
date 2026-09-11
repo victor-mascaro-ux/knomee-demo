@@ -812,7 +812,6 @@
     'advisor-flow': 'Advisor Recruitment · Sample',
     'advisor-self': 'Enterprise Flow (Advisor)',
     'firm-candidates': 'Dynasty · My Candidates',
-    'firm-network': 'Dynasty · Network',
     'firm-analytics': 'Dynasty · Analytics',
     default: 'Prototype'
   };
@@ -1284,8 +1283,18 @@
   // The last height the prototype reported, and the rule for when it is used.
   let lastFrameHeight = 0;
   function applyFrameHeight() {
-    if (!armed) { proto.style.height = ''; return; }
-    proto.style.height = (lastFrameHeight > 1 ? lastFrameHeight : window.innerHeight) + 'px';
+    if (!armed) { proto.style.height = ''; }
+    else { proto.style.height = (lastFrameHeight > 1 ? lastFrameHeight : window.innerHeight) + 'px'; }
+    // Tell the frame its viewport just changed. It keeps its own sticky rails
+    // aligned while this document is the one scrolling, and has to let go of
+    // them the moment the frame is short enough to scroll by itself — but a
+    // resized iframe does not reliably fire `resize` OR `visualViewport`
+    // resize inside itself, and when it does the box has not been laid out
+    // yet. This message is the one signal that is certain, because it comes
+    // from the side that did the resizing.
+    if (proto.contentWindow) {
+      proto.contentWindow.postMessage({ type: 'cc-frame-sized' }, '*');
+    }
   }
   function setArmed(on) {
     armed = on;
@@ -1329,7 +1338,12 @@
   window.addEventListener('message', (e) => {
     const d = e.data;
     if (!d || typeof d !== 'object') return;
-    if (d.type === 'cc-activate') {
+    if (d.type === 'cc-escape') {
+      // Esc pressed with focus inside the frame, which is where focus normally
+      // sits — the listener above never sees it, so the panel would stay open
+      // however many times you pressed it.
+      retreat();
+    } else if (d.type === 'cc-activate') {
       toggleArmed();
     } else if (d.type === 'cc-frame-height' && typeof d.height === 'number') {
       // 0 means "a fixed-layout page — one viewport tall" (see reviewBridge).
@@ -1434,15 +1448,19 @@
   // sits (reply input, a pin, the body). One Esc is a full retreat: it
   // dismisses any open card, exits comment mode, AND tucks the persistent
   // menu back to its slim tab — the prototype is left clean in one press.
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
+  function retreat() {
     const menuOpen = !rail.classList.contains('cc-collapsed');
-    if (!activeId && !commentMode && !menuOpen && !armed && !demoArmed) return;
-    e.preventDefault();
-    e.stopPropagation();
+    if (!activeId && !commentMode && !menuOpen && !armed && !demoArmed) return false;
     if (activeId) closeThread();       // dismiss any open card first
     setArmed(false);                   // full retreat: hide the overlay entirely
     setDemoArmed(false);               // …the demo panel included
+    return true;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!retreat()) return;
+    e.preventDefault();
+    e.stopPropagation();
   }, true);
 
   // ════════ Demo panel — the D layer ════════
@@ -1465,7 +1483,7 @@
   // flow) are standalone pages that ignore the brand, so they offer nothing.
   const SHELL_VIEWS = [
     'prospects', 'clients', 'analytics', 'segmentation', 'settings',
-    'admin', 'firm-candidates', 'firm-network', 'firm-analytics'
+    'admin', 'firm-candidates', 'firm-analytics'
   ];
   // Where the phone rendering sends you back to. The mobile client page is one
   // screen (Emily's), so without this, turning the view off from it would have
@@ -1730,16 +1748,18 @@
           const h = demoTitle(c.label, ICONS.brand);
           h.style.paddingTop = '6px';
           g.appendChild(h);
-          // Two options, not a list: knomee's own bar or the white label, each
-          // segment tinted with the colour the prototype actually paints.
+          // Two options, not a list: the white label or knomee's own bar, each
+          // segment tinted with the colour the prototype actually paints. The
+          // brand leads, because that is what the demo opens as and a segmented
+          // control reads left to right as "here, then the alternative".
           const offered = demoState.brands.filter(b => MENU_BRANDS.indexOf(b.id) !== -1);
-          const labels = ['Knomee'].concat(offered.map(b => BRAND_LABEL[b.id] || b.name));
-          const tints = [KNOMEE_PLUM].concat(offered.map(b => b.primary));
+          const labels = offered.map(b => BRAND_LABEL[b.id] || b.name).concat(['Knomee']);
+          const tints = offered.map(b => b.primary).concat([KNOMEE_PLUM]);
           const active = demoState.brand
-            ? 1 + offered.findIndex(b => b.id === demoState.brand)
-            : 0;
-          g.appendChild(demoSegment(labels, active < 0 ? 0 : active,
-            i => demoSet('brand', i === 0 ? null : offered[i - 1].id),
+            ? offered.findIndex(b => b.id === demoState.brand)
+            : offered.length;
+          g.appendChild(demoSegment(labels, active < 0 ? offered.length : active,
+            i => demoSet('brand', i === offered.length ? null : offered[i].id),
             { tints: tints }));
         }
       });

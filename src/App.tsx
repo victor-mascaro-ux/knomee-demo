@@ -112,6 +112,11 @@ import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
 
+/* Under this share, a bar is narrower than the label it would have to hold,
+   so the label steps outside it instead of going white on a pale track. */
+const THR_INSIDE = 18
+
+
 type Screen = 'prospects' | 'clients' | 'analytics'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
@@ -241,7 +246,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               AVG KQ SCORE
               <HelpTip
                 side="right"
-                text="Knomee Quotient — how ready a prospect is to convert, 0–100. Built from three answers the Adventures give: Intent (are they working toward a goal), Clarity (do they know what they want) and Receptivity (would they take advice). It scores readiness, not wealth."
+                text="KQ — the Knomee Quotient. How ready a prospect is to convert, 0–100. Built from three answers the Adventures give: Intent (are they working toward a goal), Clarity (do they know what they want) and Receptivity (would they take advice). It scores readiness, not wealth."
               />
             </span>
             <div className="metric-num">
@@ -615,7 +620,7 @@ function ProspectsTable({
               />
             </th>
             <th className="col-name">Name</th>
-            <th className="col-kq">
+            <th className="col-kq tt" data-tip="KQ — the Knomee Quotient">
               <button
                 type="button"
                 className="th-sort th-sort-btn"
@@ -755,17 +760,6 @@ function ProspectsScreen({
         allChecked={allChecked}
         onToggleAll={toggleAll}
       />
-    </>
-  )
-}
-
-/* A firm tab that has not landed yet. It says what will be there rather than
-   pretending to be empty. */
-function FirmSoon({ title, body }: { title: string; body: string }) {
-  return (
-    <>
-      <h1 className="page-title">{title}</h1>
-      <div className="pp-placeholder firm-soon">{body}</div>
     </>
   )
 }
@@ -1093,7 +1087,7 @@ function ClientsMetrics({
             AVG KR SCORE
             <HelpTip
               side="right"
-              text="Knomee Relationship — the health of a client relationship, 0–100. It moves with what they tell you: how recently they checked in, how their confidence is tracking, and how much of their Financial ID is still current. It measures the relationship, not the portfolio."
+              text="KR — the Knomee Relationship score. The health of a client relationship, 0–100. It moves with what they tell you: how recently they checked in, how their confidence is tracking, and how much of their Financial ID is still current. It measures the relationship, not the portfolio."
             />
           </span>
           <div className="metric-num">
@@ -1332,7 +1326,7 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-kr">
+              <th className="col-kr tt" data-tip="KR — the Knomee Relationship score">
                 <button
                   type="button"
                   className="th-sort th-sort-btn"
@@ -2352,9 +2346,9 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
                     <i className="swatch" style={{ background: t.color }} />
                     {t.tier} · {t.name}
                   </span>
-                  <span className="thr-track">
+                  <span className="thr-track" style={{ ['--thr-w' as string]: `${conv}%` }}>
                     <span className="thr-fill" style={{ width: `${conv}%`, background: t.color }} />
-                    <b className="thr-conv">{t.conv}</b>
+                    <b className={`thr-conv ${conv < THR_INSIDE ? 'is-outside' : ''}`}>{t.conv}</b>
                   </span>
                   <span className="thr-meta">
                     <b>n={t.count}</b> · avg KQ {t.avgKQ} · KQ {t.range}
@@ -3656,11 +3650,10 @@ const tabs: { id: Screen; label: string }[] = [
    prospects, and an advisor never sees Dynasty's recruiting pipeline. So the
    firm view REPLACES the tab bar while it is active, wears its own top-bar
    label, and owns its own routes. */
-type FirmScreen = 'firm-candidates' | 'firm-network' | 'firm-analytics'
+type FirmScreen = 'firm-candidates' | 'firm-analytics'
 
 const firmTabs: { id: FirmScreen; label: string }[] = [
   { id: 'firm-candidates', label: 'My Candidates' },
-  { id: 'firm-network', label: 'My Network' },
   { id: 'firm-analytics', label: 'Analytics' },
 ]
 
@@ -3684,7 +3677,6 @@ const ROUTE_VIEWS = [
   'admin',
   'settings',
   'firm-candidates',
-  'firm-network',
   'firm-analytics',
 ] as const
 type RouteView = (typeof ROUTE_VIEWS)[number]
@@ -3738,7 +3730,10 @@ export default function App() {
   // reads as the populated demo; toggled from the top-right menu.
   const [emptyMode, setEmptyMode] = useState(false)
   // White-label demo: null = knomee, otherwise a client brand id.
-  const [brandId, setBrandId] = useState<string | null>(null)
+  /* The demo opens co-branded: Acme is what a room is being shown, and knomee's
+     own bar is the variant you switch TO. Null is still "knomee", so nothing
+     downstream has to know which way round the default sits. */
+  const [brandId, setBrandId] = useState<string | null>('acme')
   const brand = CLIENT_BRANDS.find((b) => b.id === brandId) ?? null
   // Co-brand credit placement: 'centered' (client centered) or 'left' (client
   // leads the left). knomee always renders small + subordinate beneath it.
@@ -3779,7 +3774,7 @@ export default function App() {
   // The firm (Dynasty) persona — see the note above `firmTabs`. Its screens
   // replace the advisor's entirely while it is on.
   const isFirmRoute = (v: RouteView | null): v is FirmScreen =>
-    v === 'firm-candidates' || v === 'firm-network' || v === 'firm-analytics'
+    v === 'firm-candidates' || v === 'firm-analytics'
   const [firmView, setFirmView] = useState(isFirmRoute(initialView))
   const [firmScreen, setFirmScreen] = useState<FirmScreen>(
     isFirmRoute(initialView) ? initialView : 'firm-candidates',
@@ -4202,12 +4197,6 @@ export default function App() {
                 onDownload={() => showToast('CSV downloaded')}
                 onInvite={() => setInviteKind('prospect')}
                 onAdd={() => showToast('Added to Network')}
-              />
-            )}
-            {firmScreen === 'firm-network' && (
-              <FirmSoon
-                title="My Network"
-                body="Advisors who have joined the platform — Dynasty's Network Partners, and what each one's Business ID said before they signed."
               />
             )}
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}

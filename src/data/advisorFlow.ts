@@ -744,5 +744,4 @@ export const conversionSnapshot = [
   { k: 'Open with', v: '“You said the only question that matters is whether the clients come. Let’s start there.”' },
   { k: 'Avoid', v: 'Technology, custodians, the desktop. He named none of them.' },
   { k: 'Second seat', v: 'The two juniors. Bring an answer on their equity to the first meeting.' },
-  { k: 'Route', v: 'Dynasty Connect. Not the investment bank.' },
 ]

@@ -34,7 +34,7 @@ export interface Snapshot {
   /** What this score is called where it is shown. The retail side scores a
       prospect's relationship with knomee — the Knomee Quotient. The enterprise
       side scores an advisor against a platform, which is a different question
-      with a different name: the Enterprise Quotient. Same ring, same three
+      with a different name: the Recruitment Quotient. Same ring, same three
       dimensions, so the name travels with the data rather than being hard-coded
       into the component both tabs share. */
   score?: { name: string; abbr: string }

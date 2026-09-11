@@ -352,3 +352,17 @@
     max-width: 420px;
   }
 }
+
+/* ── the stage bars ─────────────────────────────────────────────────────────
+   The five stages of change, climbing in colour as they climb in commitment —
+   the same deep-plum-to-violet ramp the readiness bars use on a profile, so a
+   stage reads the same wherever it is drawn.
+
+   These bars had no fill colour at all: `.thr-fill` carries its background
+   inline on the client side and nothing set one here, so every bar was
+   invisible and every label was white on the pale track. */
+.fa-stages .tier-hero-row:nth-child(1) .thr-fill { background: #4c1d95; }
+.fa-stages .tier-hero-row:nth-child(2) .thr-fill { background: #6d28c9; }
+.fa-stages .tier-hero-row:nth-child(3) .thr-fill { background: #7038c8; }
+.fa-stages .tier-hero-row:nth-child(4) .thr-fill { background: #9b51e0; }
+.fa-stages .tier-hero-row:nth-child(5) .thr-fill { background: #b57ceb; }

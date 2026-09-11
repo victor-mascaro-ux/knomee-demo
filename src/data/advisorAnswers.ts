@@ -463,7 +463,7 @@ function receptivityScore(a: Answers) {
   return Math.round(believes * 0.5 + asks * 0.5)
 }
 
-export const EQ_WEIGHTS = { Intent: 0.45, Clarity: 0.3, Receptivity: 0.25 }
+export const RQ_WEIGHTS = { Intent: 0.45, Clarity: 0.3, Receptivity: 0.25 }
 
 /* The engine's own bands, shared with the retail side: 70–100 ready now,
    40–69 considering, 0–39 nurture. */
@@ -508,34 +508,6 @@ function confidenceBand(a: Answers) {
   if (!set.length) return 'Balanced'
   const avg = set.reduce((s, n) => s + n, 0) / set.length
   return avg < 2.5 ? 'Weak' : avg < 3.75 ? 'Balanced' : 'Strong'
-}
-
-/* ── the route ───────────────────────────────────────────────────────────
-   Which of the platform's three destinations the answers point at. */
-
-function routeOf(a: Answers) {
-  const change = (a.choice['mv-q1'] ?? [])[0] ?? ''
-  const where = (a.choice['fy-q1'] ?? [])[0] ?? ''
-  const doing = (a.choice['fy-q2'] ?? []).join(' ')
-  if (/sell or merge/i.test(change))
-    return {
-      pick: 'Investment Bank',
-      why: 'They named selling or merging the book as the change they are weighing.',
-    }
-  if (/successor/i.test(change) || /winding down/i.test(doing) || /out of the business|semi-retired/i.test(where))
-    return {
-      pick: 'Optima',
-      why: 'Succession rather than a build: what Future You describes is a practice being handed on.',
-    }
-  if (/change nothing/i.test(change))
-    return {
-      pick: 'Hold — no move named',
-      why: 'They chose to fix what does not work rather than leave. Nothing on the sheet points at a transition.',
-    }
-  return {
-    pick: 'Dynasty Connect',
-    why: 'A build rather than an exit: their own firm, still advising, with a team around them.',
-  }
 }
 
 /* ── the Business ID ────────────────────────────────────────────────────── */
@@ -843,11 +815,10 @@ export function derive(a: Answers): Derived {
   const clarity = clarityScore(a)
   const receptivity = receptivityScore(a)
   const kq = Math.round(
-    intent * EQ_WEIGHTS.Intent + clarity * EQ_WEIGHTS.Clarity + receptivity * EQ_WEIGHTS.Receptivity,
+    intent * RQ_WEIGHTS.Intent + clarity * RQ_WEIGHTS.Clarity + receptivity * RQ_WEIGHTS.Receptivity,
   )
   const tier = TIERS.find((t) => kq >= t.min)!
   const id = buildBusinessId(a, themes)
-  const route = routeOf(a)
   const stage = stageOf(a)
   const done = advisorAdventures.filter((r) => adventureDone(r.id, a)).length
 
@@ -863,7 +834,7 @@ export function derive(a: Answers): Derived {
   const readiness: ReadinessTab = {
     snapshot: {
       question: 'How ready is this advisor to move?',
-      score: { name: 'Enterprise Quotient', abbr: 'EQ' },
+      score: { name: 'Recruitment Quotient', abbr: 'RQ' },
       kq,
       dimensions: [
         {
@@ -945,8 +916,6 @@ export function derive(a: Answers): Derived {
     confidence,
     kq,
     tier: { tier: tier.tier, name: tier.name },
-    routePick: route.pick,
-    routeWhy: route.why,
     readiness,
     toolkit: buildToolkit(a, themes, clarity),
     progress: { done, required: advisorAdventures.length },

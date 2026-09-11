@@ -39,7 +39,7 @@ export default function AdvisorMobileScreen({
   const { zoom, setZoom, reset: resetZoom } = useZoom()
   const scale = fitScale * zoom
   const [, force] = useState(0)
-  /* The rail — his portrait, the Enterprise Quotient, the route — sits at the foot
+  /* The rail — his portrait, the Recruitment Quotient, the route — sits at the foot
      of the page on a phone. His own portrait brings it up as a drawer. */
   const [menuOpen, setMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)

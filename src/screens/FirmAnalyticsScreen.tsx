@@ -21,9 +21,6 @@ import {
   funnel,
   kpis,
   MIN_SAMPLE,
-  routeAccuracy,
-  routeOverall,
-  routeReading,
   segmentReadings,
   stageReading,
   byStage,
@@ -31,7 +28,6 @@ import {
 } from '../data/firmAnalytics'
 import { candidateStats } from '../data/candidates'
 import {
-  BoltIcon,
   ChartIcon,
   FunnelIcon,
   MegaphoneIcon,
@@ -39,6 +35,10 @@ import {
   TierBarsIcon,
   WarnIcon,
 } from '../components/icons'
+
+/* Under this share, a bar is narrower than the label it would have to hold,
+   so the label steps outside it instead of going white on a pale track. */
+const THR_INSIDE = 18
 
 /** A rate on five or fewer people is a direction, not a finding. */
 function Thin({ n }: { n: number }) {
@@ -164,39 +164,7 @@ export default function FirmAnalyticsScreen() {
         </div>
       </section>
 
-      {/* 3 ── stage distribution */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <TierBarsIcon />
-            <span>Where the Pipeline Actually Stands</span>
-          </div>
-        </header>
-        <div className="analytics-body">
-          <div className="tier-hero">
-            {byStage.map((s) => (
-              <div className={`tier-hero-row ${s.thin ? 'thin' : ''}`} key={s.stage}>
-                <span className="thr-name">{s.stage}</span>
-                <span className="thr-track">
-                  <span className="thr-fill" style={{ width: `${s.share}%` }} />
-                  <b className="thr-conv">{s.share}%</b>
-                </span>
-                <span className="thr-meta">
-                  <b>n={s.count}</b> · {s.signed} signed · converts {s.conv}%
-                </span>
-                {s.thin && <Thin n={s.count} />}
-              </div>
-            ))}
-          </div>
-          <p className="fa-lead">{stageReading}</p>
-          <p className="analytics-note">
-            Shares are of the {candidateStats.scored} advisors who completed the flow. The{' '}
-            {candidateStats.byTier.incomplete} incomplete profiles have no stage and are excluded.
-          </p>
-        </div>
-      </section>
-
-      {/* 4 ── cluster performance */}
+      {/* 3 ── cluster performance */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
@@ -247,7 +215,7 @@ export default function FirmAnalyticsScreen() {
         </div>
       </section>
 
-      {/* 5 ── the apprehensions. The section that is an argument for selling to
+      {/* 4 ── the apprehensions. The section that is an argument for selling to
               the firm rather than to advisors one at a time. */}
       <section className="card analytics-card fa-appr-card">
         <header className="card-head">
@@ -289,7 +257,7 @@ export default function FirmAnalyticsScreen() {
         </div>
       </section>
 
-      {/* 6 ── segments */}
+      {/* 5 ── segments */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
@@ -309,50 +277,37 @@ export default function FirmAnalyticsScreen() {
         </div>
       </section>
 
-      {/* 7 ── route accuracy */}
+      {/* 6 ── stage distribution */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
-            <BoltIcon />
-            <span>Did the Lead Reach the Right Destination?</span>
+            <TierBarsIcon />
+            <span>Where the Pipeline Actually Stands</span>
           </div>
         </header>
         <div className="analytics-body">
-          <div className="fa-route-top">
-            <div className="fa-route-num">
-              <div className="analytics-lbl">Route accuracy</div>
-              <div className="impact-num">{routeOverall.accuracy}%</div>
-              <div className="impact-compare">
-                {routeOverall.matched} of {routeOverall.scored} deals that went somewhere
+          <div className="tier-hero fa-stages">
+            {byStage.map((s) => (
+              <div className={`tier-hero-row ${s.thin ? 'thin' : ''}`} key={s.stage}>
+                <span className="thr-name">{s.stage}</span>
+                <span className="thr-track" style={{ ['--thr-w' as string]: `${s.share}%` }}>
+                  <span className="thr-fill" style={{ width: `${s.share}%` }} />
+                  <b className={`thr-conv ${s.share < THR_INSIDE ? 'is-outside' : ''}`}>
+                    {s.share}%
+                  </b>
+                </span>
+                <span className="thr-meta">
+                  <b>n={s.count}</b> · {s.signed} signed · converts {s.conv}%
+                </span>
+                {s.thin && <Thin n={s.count} />}
               </div>
-              {routeOverall.thin && <Thin n={routeOverall.scored} />}
-            </div>
-            <div className="fa-route-rows">
-              {routeAccuracy.map((r) => (
-                <div className={`fa-route-row ${r.thin ? 'is-thin' : ''}`} key={r.route}>
-                  <span className="fa-route-name">{r.route}</span>
-                  <span className="thr-track">
-                    <span className="thr-fill" style={{ width: `${r.accuracy}%` }} />
-                    <b className="thr-conv">{r.recommended ? `${r.accuracy}%` : '–'}</b>
-                  </span>
-                  <span className="thr-meta">
-                    {r.matched}/{r.recommended} recommended and landed there
-                  </span>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
-          {routeOverall.misses.length > 0 && (
-            <div className="fa-misses">
-              <div className="analytics-sub-head">The misses</div>
-              {routeOverall.misses.map((m) => (
-                <p className="fa-miss" key={m.name}>
-                  <b>{m.name}</b> was routed to {m.from} and the deal went to {m.to}.
-                </p>
-              ))}
-            </div>
-          )}
-          <Reading>{routeReading}</Reading>
+          <p className="fa-lead">{stageReading}</p>
+          <p className="analytics-note">
+            Shares are of the {candidateStats.scored} advisors who completed the flow. The{' '}
+            {candidateStats.byTier.incomplete} incomplete profiles have no stage and are excluded.
+          </p>
         </div>
       </section>
 

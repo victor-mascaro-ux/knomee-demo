@@ -1,7 +1,7 @@
 // The firm side of Marcus Hale's eight minutes — what a Dynasty rep reads
 // after the advisor finishes the flow in `advisorFlow.ts`.
 //
-// Two tabs live here: Advisor Readiness (the Enterprise Quotient, the same
+// Two tabs live here: Advisor Readiness (the Recruitment Quotient, the same
 // three dimensions asked of an advisor) and the Recruiting Toolkit. Business ID needs
 // nothing new — it renders `businessId` straight out of the flow.
 //
@@ -35,11 +35,11 @@ export const confidenceAnswers = (step('cf-q')?.statements ?? []).map((s) => ({
   value: Math.round(((s.value - 1) / 4) * 100),
 }))
 
-/* ── the Enterprise Quotient ─────────────────────────────────────────────
+/* ── the Recruitment Quotient ─────────────────────────────────────────────
    Same three dimensions as the client's Knomee Quotient; different questions
    feed them, because the question is not how close this person is to knomee
    but how ready they are to move onto a platform. The three dimension scores
-   are the only authored numbers on the tab — the EQ, the tier and the tier
+   are the only authored numbers on the tab — the RQ, the tier and the tier
    band are all computed from them. */
 
 export interface Dimension {
@@ -61,7 +61,7 @@ export interface Dimension {
 
 // Intent is weighted heaviest because it is the dimension that decides whether
 // the other two are worth a meeting this quarter.
-export const EQ_WEIGHTS: Record<Dimension['key'], number> = {
+export const RQ_WEIGHTS: Record<Dimension['key'], number> = {
   Intent: 0.45,
   Clarity: 0.3,
   Receptivity: 0.25,
@@ -109,20 +109,20 @@ export const dimensions: Dimension[] = [
   },
 ]
 
-const weighted = dimensions.reduce((sum, d) => sum + d.score * EQ_WEIGHTS[d.key], 0)
+const weighted = dimensions.reduce((sum, d) => sum + d.score * RQ_WEIGHTS[d.key], 0)
 
 /** The composite score, computed from the three dimensions above. */
 export const kq = Math.round(weighted)
 
 /* Tier bands are the engine's, shared with the retail side: 70–100 ready now,
    40–69 considering, 0–39 nurture. */
-export const EQ_TIERS = [
+export const RQ_TIERS = [
   { tier: 1, name: 'Ready Now', min: 70, max: 100 },
   { tier: 2, name: 'Considering', min: 40, max: 69 },
   { tier: 3, name: 'Nurture', min: 0, max: 39 },
 ] as const
 
-export const tier = EQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
+export const tier = RQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
 
 /** The banner under the ring: the score in a sentence, and what it is not. */
 export const tierBanner = {
@@ -197,48 +197,6 @@ export const columnActions = {
 /* The flow names the team in words — "team of four" — so the numeral the
    pipeline's Team column sorts by lives here, once. */
 export const teamSize = 4
-
-/* ── the route ───────────────────────────────────────────────────────────
-   Which of the three destinations the answers point at. The Readiness tab is
-   the design's and has no card for this, so it reads in the sidebar and in
-   the pipeline's Route column. */
-
-export interface RouteOption {
-  key: 'connect' | 'ib' | 'optima'
-  name: string
-  forWhom: string
-  matched: boolean
-  why: string
-}
-
-export const route = {
-  pick: 'Dynasty Connect',
-  why: 'Future You says his own firm, still advising, mentoring the next generation — he is building, not exiting. Nothing in the flow points at a sale or a succession.',
-  action: 'Route to Connect. Send the breakaway team pack, not the valuation deck.',
-  options: [
-    {
-      key: 'connect',
-      name: 'Dynasty Connect',
-      forWhom: 'Breakaway teams building their own firm',
-      matched: true,
-      why: `“${picked('mv-q1')}” — and, asked whether he wants support: “${picked('mv-q4')}”`,
-    },
-    {
-      key: 'ib',
-      name: 'Investment Bank',
-      forWhom: 'Advisors selling or merging a book',
-      matched: false,
-      why: 'He picked neither “Sell or merge my book” nor an exit in Future You.',
-    },
-    {
-      key: 'optima',
-      name: 'Optima',
-      forWhom: 'Succession and continuity for advisors winding down',
-      matched: false,
-      why: 'A named successor is something he wants to give, not to receive. Not winding down.',
-    },
-  ] as RouteOption[],
-}
 
 /* ── the Recruiting Toolkit ────────────────────────────────────────────── */
 
@@ -356,7 +314,7 @@ export const words = {
 export const readinessTab: ReadinessTab = {
   snapshot: {
     question: 'How ready is this advisor to move?',
-    score: { name: 'Enterprise Quotient', abbr: 'EQ' },
+    score: { name: 'Recruitment Quotient', abbr: 'RQ' },
     kq,
     dimensions: dimensions.map((d) => ({
       key: d.key,
@@ -414,8 +372,6 @@ export interface AdvisorProfileData {
   confidence: { statement: string; low: string; high: string; value: number }[]
   kq: number
   tier: { tier: number; name: string }
-  routePick: string
-  routeWhy: string
   readiness: ReadinessTab
   toolkit: ToolkitTab
 }
@@ -426,8 +382,6 @@ export const marcusProfile: AdvisorProfileData = {
   confidence: confidenceAnswers,
   kq,
   tier: { tier: tier.tier, name: tier.name },
-  routePick: route.pick,
-  routeWhy: route.why,
   readiness: readinessTab,
   toolkit: toolkitTab,
 }

@@ -158,7 +158,7 @@ export default function AdvisorProfileScreen({
               Add to Network
             </button>
             <div className="ap-side-stat">
-              <span className="ap-side-stat-k">Enterprise Quotient</span>
+              <span className="ap-side-stat-k">Recruitment Quotient</span>
               <span className="ap-side-stat-v">
                 {data.kq}
                 <i>
@@ -166,18 +166,6 @@ export default function AdvisorProfileScreen({
                 </i>
               </span>
             </div>
-            {/* Route is the firm's read on where a candidate should be sent,
-                and the advisor's own flow has no such thing — there is no
-                Dynasty on the other side of it deciding anything. It stays on
-                a candidate's profile, where somebody is doing the routing. */}
-            {!mine && (
-              <div className="ap-side-stat">
-                <span className="ap-side-stat-k">Route</span>
-                <span className="ap-side-stat-v ap-side-stat-text" title={data.routeWhy}>
-                  {data.routePick}
-                </span>
-              </div>
-            )}
           </div>
         </aside>
 

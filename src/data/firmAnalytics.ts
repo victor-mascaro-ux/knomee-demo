@@ -15,10 +15,9 @@ import {
   STAGES,
   type Apprehension,
   type Candidate,
-  type RouteKey,
   type Stage,
 } from './candidates'
-import { clusterOf, clusters } from './candidateInsights'
+import { clusters } from './candidateInsights'
 import { MIN_SAMPLE } from './analytics'
 
 const pct = (n: number, d: number) => (d ? Math.round((n / d) * 100) : 0)
@@ -356,50 +355,6 @@ export const segmentReadings = [
   topSource
     ? `${topSource.name} converts at ${topSource.conv}% — ${topSource.signed} of ${topSource.invited}. Spend the marketing budget where the completions already are.`
     : 'No source has enough volume yet to rank. Keep every channel on until one does.',
-  `Succession-shaped advisors are ${bySegment.find((s) => s.name === 'Succession')?.invited ?? 0} of the pipeline. They are not a Connect audience, and counting them as one flatters the funnel.`,
 ]
-
-/* ── 6. route accuracy ──────────────────────────────────────────────────── */
-
-/* Three destinations and no current way to check whether a lead reached the
-   right one. Only deals that actually went somewhere can be scored. */
-const routed = candidates.filter((c) => c.routedTo)
-
-export interface RouteRow {
-  route: RouteKey
-  recommended: number
-  matched: number
-  accuracy: number
-  thin: boolean
-}
-
-export const routeAccuracy: RouteRow[] = (['Connect', 'Investment Bank', 'Optima'] as RouteKey[]).map(
-  (route) => {
-    const rows = routed.filter((c) => c.route === route)
-    const matched = rows.filter((c) => c.routedTo === route).length
-    return {
-      route,
-      recommended: rows.length,
-      matched,
-      accuracy: pct(matched, rows.length),
-      thin: rows.length <= MIN_SAMPLE,
-    }
-  },
-)
-
-export const routeOverall = {
-  scored: routed.length,
-  matched: routed.filter((c) => c.routedTo === c.route).length,
-  accuracy: pct(routed.filter((c) => c.routedTo === c.route).length, routed.length),
-  thin: routed.length <= MIN_SAMPLE,
-  /** The ones that went somewhere other than the recommendation. */
-  misses: routed
-    .filter((c) => c.routedTo !== c.route)
-    .map((c) => ({ name: c.name, from: c.route, to: c.routedTo as RouteKey, cluster: clusterOf(c) })),
-}
-
-export const routeReading = `${routeOverall.matched} of ${routeOverall.scored} deals went where the answers said they should${
-  routeOverall.thin ? ', which is too few to call an accuracy rate yet' : ''
-}. Every miss is a quarter of rep time spent in the wrong product — score this monthly from the day there are twenty deals, not from the day someone complains.`
 
 export { MIN_SAMPLE }
