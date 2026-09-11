@@ -231,9 +231,12 @@
   background: var(--k-grape-light);
   color: var(--k-grape);
 }
+/* "New" on the purple side, the bright violet the Prospects and Candidates
+   tables badge a fresh row with — one colour for "new" wherever it lands, and
+   one that does not disappear into the lilac chips around it. */
 .cp-goal-tag.is-new {
-  background: var(--k-grape-light);
-  color: var(--k-grape);
+  background: var(--k-violet-new);
+  color: var(--k-plum);
 }
 .cp-goal-tag.is-updated {
   background: var(--k-mint);

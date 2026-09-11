@@ -1940,15 +1940,18 @@ button.name-link-btn:hover .name-text {
 }
 
 /* The badge takes its side's colour, the way the "New" goal tag does on each
-   profile: lilac among the prospects, lime among the clients. */
+   profile: bright violet among the prospects and candidates, lime among the
+   clients. Both are a tint standing clear of the avatar disc beside them —
+   which is exactly what the old --k-grape-light fill was not, being the disc's
+   own colour. */
 .new-tag {
   display: inline-flex;
   align-items: center;
   height: 16px;
   padding: 0 9px;
   border-radius: 999px;
-  background: var(--k-grape-light);
-  color: var(--k-grape);
+  background: var(--k-violet-new);
+  color: var(--k-plum);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0;
