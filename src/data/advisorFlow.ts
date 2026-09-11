@@ -153,7 +153,7 @@ export const steps: Step[] = [
     id: 'welcome',
     kind: 'welcome',
     title: 'Welcome',
-    body: 'Going independent is a business decision that is mostly an emotional one.\n\nTake a few minutes to get clear on what you actually want from your practice — and what would have to be true for you to change anything.',
+    body: 'Finding the right partner is an emotional business decision.\n\nTake a few minutes to get clear on what you actually want from your practice — and what would have to be true for you to change anything.',
     lines: [
       { label: '1', value: 'Discover what matters most. A guided experience that clarifies what you want the practice to give you.' },
       { label: '2', value: 'See your personal insights. A personalized summary of what is driving your thinking.' },
