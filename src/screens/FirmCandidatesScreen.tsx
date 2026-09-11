@@ -130,7 +130,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
               AVG RQ SCORE
               <HelpTip
                 side="right"
-                text="RQ — the Recruitment Quotient. How ready an advisor is to move onto a platform, 0–100. The same three dimensions as a client's KQ (Knomee Quotient), asked of a practice: Intent (a live decision or a recurring mood), Clarity (do they know what kind of independence they want) and Receptivity (would they let a platform help). It scores the move, not the book."
+                text="Recruitment Quotient — how ready this advisor is to move, 0–100. It scores the move, not the book."
               />
             </span>
             <div className="metric-num">
@@ -488,7 +488,7 @@ function Table({
               />
             </th>
             <th className="col-name">Name / firm</th>
-            <th className="col-kq tt" data-tip="RQ — the Recruitment Quotient">
+            <th className="col-kq tt" data-tip="Recruitment Quotient — how ready this advisor is to move">
               <button
                 type="button"
                 className="th-sort th-sort-btn"

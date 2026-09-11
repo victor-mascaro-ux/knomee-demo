@@ -1690,7 +1690,13 @@ button.name-link-btn:hover .name-text {
 }
 /* Help hints can be full sentences — let them wrap instead of forcing a
    viewport-wide single line like the compact number tooltips, and set ragged-
-   right so a two-line caption reads as prose. */
+   right so a two-line caption reads as prose.
+
+   Keep them to about two lines. The bubble is centred on its glyph and grows
+   in both directions, and a card clips (`.card` is overflow:hidden, for its
+   rounded corners) — so a hint long enough to outgrow the space above the
+   glyph loses its opening words with no warning. A hover hint that needs four
+   sentences is a hint that needs rewriting. */
 .help-tip.tt::after {
   white-space: normal;
   width: max-content;

@@ -246,7 +246,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               AVG KQ SCORE
               <HelpTip
                 side="right"
-                text="KQ — the Knomee Quotient. How ready a prospect is to convert, 0–100. Built from three answers the Adventures give: Intent (are they working toward a goal), Clarity (do they know what they want) and Receptivity (would they take advice). It scores readiness, not wealth."
+                text="Knomee Quotient — how ready this prospect is to convert, 0–100. It scores readiness, not wealth."
               />
             </span>
             <div className="metric-num">
@@ -620,7 +620,7 @@ function ProspectsTable({
               />
             </th>
             <th className="col-name">Name</th>
-            <th className="col-kq tt" data-tip="KQ — the Knomee Quotient">
+            <th className="col-kq tt" data-tip="Knomee Quotient — how ready this prospect is to convert">
               <button
                 type="button"
                 className="th-sort th-sort-btn"
@@ -1087,7 +1087,7 @@ function ClientsMetrics({
             AVG KR SCORE
             <HelpTip
               side="right"
-              text="KR — the Knomee Relationship score. The health of a client relationship, 0–100. It moves with what they tell you: how recently they checked in, how their confidence is tracking, and how much of their Financial ID is still current. It measures the relationship, not the portfolio."
+              text="Knomee Relationship — the health of this client relationship, 0–100. It scores the relationship, not the portfolio."
             />
           </span>
           <div className="metric-num">
@@ -1326,7 +1326,7 @@ function ClientsScreen({
                 />
               </th>
               <th className="col-name">Name</th>
-              <th className="col-kr tt" data-tip="KR — the Knomee Relationship score">
+              <th className="col-kr tt" data-tip="Knomee Relationship — the health of this client relationship">
                 <button
                   type="button"
                   className="th-sort th-sort-btn"
