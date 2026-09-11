@@ -72,7 +72,14 @@
 
   /* ---- Signal / status ---- */
   --k-tangerine:     #ff9525;  /* energy accent — lightning icon, timers */
-  --k-lime:          #affc41;  /* "new" tag, sparkle accent */
+  --k-lime:          #affc41;  /* "new" tag on the client (green) side */
+  /* The same badge on the purple side. It used to wear --k-grape-light, which
+     is also what an avatar disc is filled with, so a "new" pill sitting beside
+     one read as part of it. Lime works on the green side because it is a bright
+     tint standing well clear of the teal wash around it; this is that distance
+     in purple — 99 units from --k-grape-light against lime's 188 from the teal,
+     and 6.6:1 under the plum text it carries. */
+  --k-violet-new:    #c77dff;  /* "new" tag on the advisor/prospect side */
   --k-amber:         #f59e0b;  /* warning triangle */
   --k-amber-light:   #fef3c7;  /* amber wash surface — attention pills */
   --k-amber-ink:     #b45309;  /* warning text */
