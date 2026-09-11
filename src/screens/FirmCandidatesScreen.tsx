@@ -40,9 +40,9 @@ import {
 /* The same three tiers the advisor's dashboard drills into, and the insight
    each one surfaces as its "why". */
 const TIER_META = [
-  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 EQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 EQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
-  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 EQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 RQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 RQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 RQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -122,20 +122,20 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
       bodyClassName="cmd-body"
       defaultOpen
     >
-      {/* Layer 0 — the pulse. EQ leads, as on the advisor's screen: it is the
+      {/* Layer 0 — the pulse. RQ leads, as on the advisor's screen: it is the
           number the page ranks on and the one the tier bar is a split of. */}
       <div className="metric-tiles cmd-pulse">
           <div className="metric-tile">
             <span className="metric-label">
-              AVG EQ SCORE
+              AVG RQ SCORE
               <HelpTip
                 side="right"
-                text="Enterprise Quotient — how ready an advisor is to move onto a platform, 0–100. The same three dimensions as a client's KQ, asked of a practice: Intent (a live decision or a recurring mood), Clarity (do they know what kind of independence they want) and Receptivity (would they let a platform help). It scores the move, not the book."
+                text="RQ — the Recruitment Quotient. How ready an advisor is to move onto a platform, 0–100. The same three dimensions as a client's KQ (Knomee Quotient), asked of a practice: Intent (a live decision or a recurring mood), Clarity (do they know what kind of independence they want) and Receptivity (would they let a platform help). It scores the move, not the book."
               />
             </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
-                {candidateStats.avgEQ.toFixed(1)}
+                {candidateStats.avgRQ.toFixed(1)}
               </span>
             </div>
           </div>
@@ -245,7 +245,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
               <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
                 {lead.tier}
               </span>
-              <span className="cmd-lead-kq">EQ {lead.kq}</span>
+              <span className="cmd-lead-kq">RQ {lead.kq}</span>
               <span className="cmd-lead-niche">{lead.niche}</span>
               <span className="cmd-lead-more">
                 {listOpen ? 'Hide' : `See all ${flagged.length}`}
@@ -285,7 +285,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
                       {t.tier}
                     </span>
-                    <span className="talk-kq">EQ {t.kq}</span>
+                    <span className="talk-kq">RQ {t.kq}</span>
                     <span className="talk-niche">{t.niche}</span>
                   </div>
                   <div className="talk-chips">
@@ -488,14 +488,14 @@ function Table({
               />
             </th>
             <th className="col-name">Name / firm</th>
-            <th className="col-kq">
+            <th className="col-kq tt" data-tip="RQ — the Recruitment Quotient">
               <button
                 type="button"
                 className="th-sort th-sort-btn"
                 onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
-                aria-label="Sort by EQ score"
+                aria-label="Sort by RQ score"
               >
-                EQ Score
+                RQ Score
                 <span
                   className={`th-caret ${sortDir ? 'is-active' : ''} ${
                     sortDir === 'asc' ? 'is-asc' : ''

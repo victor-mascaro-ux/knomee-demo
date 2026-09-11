@@ -57,11 +57,29 @@ const FIXED_FOOT = '.powered-by'
 function initStickyRails(frame: Element) {
   const shifts = new WeakMap<HTMLElement, number>()
 
+  /* Put every rail back where the stylesheet had it. */
+  const release = () => {
+    document.querySelectorAll<HTMLElement>(`${STICKY_RAILS}, ${FIXED_FOOT}`).forEach((el) => {
+      if (!shifts.get(el)) return
+      shifts.set(el, 0)
+      el.style.transform = ''
+    })
+  }
+
   const sync = () => {
     // While the frame is short enough that this document scrolls on its own,
     // native sticky is doing the work and must not be doubled up on.
+    //
+    // Letting go has to be deliberate: leaving comment mode shortens the frame
+    // back to one viewport, and simply returning here left every rail wearing
+    // the offset from the last time the parent scrolled — a top bar stranded
+    // a third of the way down the page, painting over the title, until a
+    // reload. The transforms are ours, so we clear them.
     const root = document.documentElement
-    if (root.scrollHeight > root.clientHeight + 1) return
+    if (root.scrollHeight > root.clientHeight + 1) {
+      release()
+      return
+    }
 
     const frameTop = frame.getBoundingClientRect().top
     document.querySelectorAll<HTMLElement>(STICKY_RAILS).forEach((el) => {
@@ -132,6 +150,23 @@ function initStickyRails(frame: Element) {
   if ('ResizeObserver' in window) {
     new ResizeObserver(sync).observe(document.documentElement)
   }
+  /* The one event that actually fires when the overlay resizes this frame.
+     `window.resize` is supposed to, and does not reliably for an iframe the
+     parent has restyled; the ResizeObserver above watches the html element's
+     own box, which is content-driven and does not move when the VIEWPORT
+     around it changes. The visual viewport is precisely the thing that just
+     changed — and it is the difference between the rails letting go when you
+     leave comment mode and a top bar stranded over the page until reload. */
+  window.visualViewport?.addEventListener('resize', sync)
+  /* And the signal that is actually certain: the overlay, saying it has just
+     resized this frame. A resized iframe does not reliably fire `resize`
+     inside itself, and when it does the new box is not laid out yet — so this
+     runs on the next frame, and again shortly after, rather than immediately. */
+  window.addEventListener('message', (e) => {
+    if ((e.data as { type?: string } | null)?.type !== 'cc-frame-sized') return
+    requestAnimationFrame(sync)
+    window.setTimeout(sync, 80)
+  })
   sync()
 }
 
@@ -146,6 +181,13 @@ export function initReviewBridge() {
     } else if (isDemoCombo(e)) {
       e.preventDefault()
       parent.postMessage({ type: 'cc-demo-activate' }, '*')
+    } else if (e.key === 'Escape') {
+      // Esc is the way out of the overlay's own layers, and its listener lives
+      // in the parent document — which never sees a key pressed in here, where
+      // focus sits the moment anybody clicks the prototype. Forwarded rather
+      // than swallowed: this page has its own things Esc closes, and the
+      // overlay only acts if one of ITS layers is open.
+      parent.postMessage({ type: 'cc-escape' }, '*')
     }
   })
 

@@ -3207,6 +3207,11 @@ button.name-link-btn:hover .name-text {
   border-radius: 7px;
   transition: width 0.3s ease;
 }
+/* The number rides inside its own bar, in white on the fill. A short bar has
+   no room for it — white on the pale track is the one place this pattern goes
+   unreadable — so below the threshold the label steps outside and takes the
+   page's ink instead. `--thr-w` is the fill's width, so it follows the end of
+   the bar rather than guessing. */
 .thr-conv {
   position: absolute;
   top: 50%;
@@ -3216,6 +3221,11 @@ button.name-link-btn:hover .name-text {
   font-weight: 800;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.thr-conv.is-outside {
+  left: calc(var(--thr-w, 0%) + 8px);
+  color: #201a2e;
+  text-shadow: none;
 }
 .thr-meta {
   font-size: 11.5px;

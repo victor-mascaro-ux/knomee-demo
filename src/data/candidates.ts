@@ -17,9 +17,8 @@
 
 import { advisor } from './advisorFlow'
 import {
-  EQ_WEIGHTS,
+  RQ_WEIGHTS,
   kq as marcusEQ,
-  route as marcusRoute,
   teamSize as marcusTeam,
   tier as marcusTier,
   topAction as marcusTopAction,
@@ -36,7 +35,6 @@ export type Stage =
   | 'Maintenance'
 
 /** One entry point, three destinations. */
-export type RouteKey = 'Connect' | 'Investment Bank' | 'Optima'
 
 /** The dominant thing standing in the way, in the firm's words. */
 export type Apprehension =
@@ -91,9 +89,7 @@ export interface Candidate {
   aum: number // $M
   team: number
   /** Where the answers say this should go. */
-  route: RouteKey
   /** Where it actually went, once there is a deal to compare — phase 3. */
-  routedTo?: RouteKey
   segment: Segment
   source: Source
   apprehension: Apprehension
@@ -113,9 +109,9 @@ export interface TierGroup {
 }
 
 export const tierGroups: TierGroup[] = [
-  { id: 'tier1', title: 'TIER 1 - READY NOW', range: '70-100 EQ' },
-  { id: 'tier2', title: 'TIER 2 - CONSIDERING', range: '40-69 EQ' },
-  { id: 'tier3', title: 'TIER 3 - NURTURE', range: '0-39 EQ' },
+  { id: 'tier1', title: 'TIER 1 - READY NOW', range: '70-100 RQ' },
+  { id: 'tier2', title: 'TIER 2 - CONSIDERING', range: '40-69 RQ' },
+  { id: 'tier3', title: 'TIER 3 - NURTURE', range: '0-39 RQ' },
   { id: 'incomplete', title: 'INCOMPLETE PROFILES' },
 ]
 
@@ -127,7 +123,7 @@ const clamp = (n: number) => Math.max(1, Math.min(100, Math.round(n)))
 
 export function composite(intent: number, clarity: number, receptivity: number) {
   return Math.round(
-    intent * EQ_WEIGHTS.Intent + clarity * EQ_WEIGHTS.Clarity + receptivity * EQ_WEIGHTS.Receptivity,
+    intent * RQ_WEIGHTS.Intent + clarity * RQ_WEIGHTS.Clarity + receptivity * RQ_WEIGHTS.Receptivity,
   )
 }
 
@@ -212,7 +208,6 @@ interface Shape {
   secondSeats: SecondSeat[]
   changes: Change[]
   visions: Vision[]
-  routes: RouteKey[]
   segments: Segment[]
   actions: string[]
 }
@@ -226,7 +221,6 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['Aligned', 'Nobody but me'],
     changes: ['Go independent with my team', 'Join an existing RIA'],
     visions: ['Own firm', 'Bigger platform'],
-    routes: ['Connect'],
     segments: ['Breakaway', 'Existing RIA'],
     actions: [
       'Answer the one blocker with evidence this week — retention data, not reassurance',
@@ -242,7 +236,6 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['Spouse', 'Aligned', 'G2 not aligned'],
     changes: ['Go independent with my team'],
     visions: ['Own firm'],
-    routes: ['Connect'],
     segments: ['Breakaway'],
     actions: [
       'Shorten the perceived transition — a dated timeline with names on it, not a pitch',
@@ -258,7 +251,6 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['Nobody but me', 'Partner'],
     changes: ['Join an existing RIA', 'Buy another practice', 'Go independent with my team'],
     visions: ['Unclear'],
-    routes: ['Connect'],
     segments: ['Breakaway', 'Existing RIA'],
     actions: [
       'Diagnostic conversation, not a platform conversation — find out what is actually wrong',
@@ -274,10 +266,9 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['Partner', 'Aligned'],
     changes: ['Sell or merge my book', 'Bring in a successor'],
     visions: ['Winding down', 'Exit'],
-    routes: ['Investment Bank', 'Optima'],
     segments: ['Succession'],
     actions: [
-      'Route to the investment bank — this is a sale, and Connect would waste the quarter',
+      'Open on the valuation — this is a sale, and a build-your-own-firm pitch would waste the quarter',
       'Optima: they want continuity for the clients, not a firm of their own',
       'Valuation conversation first. They named an exit, not independence',
     ],
@@ -292,7 +283,6 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['G2 not aligned'],
     changes: ['Go independent with my team'],
     visions: ['Own firm'],
-    routes: ['Connect'],
     segments: ['Breakaway'],
     actions: [
       'Bring the G2 equity answer to the first meeting — the blocker is the second seat',
@@ -308,7 +298,6 @@ const SHAPES: Record<Archetype, Shape> = {
     secondSeats: ['Nobody but me', 'Partner'],
     changes: ['Change nothing, but fix the parts that don’t work'],
     visions: ['Bigger platform', 'Unclear'],
-    routes: ['Connect'],
     segments: ['Existing RIA', 'Breakaway'],
     actions: [
       'Low-touch nurture. They chose to change nothing, and said so plainly',
@@ -363,7 +352,6 @@ const marcus: Candidate = {
   stage: 'Contemplation',
   aum: 840,
   team: marcusTeam,
-  route: marcusRoute.pick.replace('Dynasty ', '') as RouteKey,
   segment: 'Breakaway',
   source: 'Go Independent link',
   apprehension: 'Client attrition',
@@ -382,12 +370,7 @@ function generate(): Candidate[] {
   const used = new Set<string>([marcus.name.toLowerCase()])
   const out: Candidate[] = []
   let marcusPlaced = false
-  /* Deals that actually went somewhere, counted in order. Two of them go
-     somewhere other than the recommendation — a routing miss is the thing the
-     route-accuracy section exists to catch, so the demo has to contain some. */
-  let deals = 0
-  const MISROUTED = [2, 5]
-
+  
   for (const slot of SLOTS) {
     if (slot.arch === 'wants-waiting' && !marcusPlaced) {
       marcusPlaced = true
@@ -405,7 +388,6 @@ function generate(): Candidate[] {
     const clarity = span(rand, shape.clarity)
     const receptivity = span(rand, shape.receptivity)
     const kq = composite(intent, clarity, receptivity)
-    const route = pick(rand, shape.routes)
     // Books run from a single-advisor practice to a small team. AUM tracks the
     // team roughly, the way it does in life.
     const team = 1 + Math.floor(rand() * 6)
@@ -421,17 +403,6 @@ function generate(): Candidate[] {
       stage: slot.stage,
       aum,
       team,
-      route,
-      // Where it actually went. Most deals follow the recommendation; a few do
-      // not, which is the whole point of measuring route accuracy in phase 3.
-      routedTo: (() => {
-        if (slot.progress !== 'signed' && slot.progress !== 'transition') return undefined
-        deals += 1
-        if (!MISROUTED.includes(deals)) return route
-        // Sent to the wrong destination: a succession play handled as a
-        // breakaway, or a breakaway handed to the succession desk.
-        return route === 'Connect' ? 'Optima' : 'Connect'
-      })(),
       segment: pick(rand, shape.segments),
       source: pick(rand, [
         'Connect',
@@ -464,7 +435,6 @@ function generate(): Candidate[] {
       stage: null,
       aum: [1200, 310, 640, 95][i],
       team: [7, 2, 4, 1][i],
-      route: 'Connect',
       segment: 'Breakaway',
       source: (['Conference', 'Outbound', 'Referral', 'Outbound'] as Source[])[i],
       apprehension: 'Nothing named',
@@ -504,7 +474,7 @@ export const STAGES: Stage[] = [
 export const candidateStats = {
   total: candidates.length,
   scored: scored.length,
-  avgEQ: mean(scored.map((c) => c.kq as number)),
+  avgRQ: mean(scored.map((c) => c.kq as number)),
   avgIntent: mean(scored.map((c) => c.intent as number)),
   avgClarity: mean(scored.map((c) => c.clarity as number)),
   avgReceptivity: mean(scored.map((c) => c.receptivity as number)),
@@ -519,10 +489,6 @@ export const candidateStats = {
     stage: s,
     count: scored.filter((c) => c.stage === s).length,
     share: Math.round((scored.filter((c) => c.stage === s).length / scored.length) * 100),
-  })),
-  byRoute: (['Connect', 'Investment Bank', 'Optima'] as RouteKey[]).map((r) => ({
-    route: r,
-    count: candidates.filter((c) => c.kq !== null && c.route === r).length,
   })),
   signed: candidates.filter((c) => c.progress === 'signed').length,
 }
