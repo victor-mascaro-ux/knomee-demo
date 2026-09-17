@@ -66,11 +66,21 @@ function AcmeLogo() {
 export const CLIENT_BRANDS: ClientBrand[] = [
   { id: 'affirm', name: 'Affirm Wealth Advisors', primary: '#1aa3c6', accent: '#1590b0', logo: <AffirmLogo /> },
   { id: 'confetti', name: 'Confetti Wealth', primary: '#0093b0', accent: '#007e98', logo: <ConfettiLogo /> },
-  /* A burgundy, because the other two are both cyan and a white-label demo that
-     only ever changes shade proves nothing. It was a clay red, which held the
-     same argument but sat at 45% lightness with 59% saturation — mid-tone and
-     low-chroma at once, which is the recipe for muddy across a full-bleed bar.
-     Same warm side of the wheel, 14 points darker and cleaner. White on it
-     measures 9.75:1, the strongest of the three brands. */
-  { id: 'acme', name: 'Acme', primary: '#7a2440', accent: '#631c34', logo: <AcmeLogo /> },
+  /* Not cyan, because the other two are and a white-label demo that only ever
+     changes shade proves nothing — but not the burgundy it was either. That sat
+     at hue 340, six degrees off --k-crimson and sixty-five off the plum it
+     shares a screen with: two dark purple-reds that are not the same colour,
+     which reads as a mistake rather than as another firm. And on the phone it
+     had to hold a bar above a lime adventure card and a teal progress fill,
+     which is a warm colour against two cool ones.
+
+     Navy instead. Hue 214 is the widest gap the knomee ramp leaves open: 61
+     degrees off the plum, 22 off --k-ocean, and the only token near it,
+     --k-azure, is a bright tag ink at 53% lightness that never appears on
+     these screens. It sits under plum headlines without arguing with them and
+     goes with the lime and the teal rather than at them. 59% saturation at 27%
+     lightness, so it reads as a colour and not as near-black — the fault the
+     clay red before the burgundy had. White on it measures 10.58:1, still the
+     strongest of the three brands. */
+  { id: 'acme', name: 'Acme', primary: '#1c3f6e', accent: '#163258', logo: <AcmeLogo /> },
 ]
