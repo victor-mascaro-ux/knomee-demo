@@ -27,6 +27,9 @@ import {
   TabAdventures,
   TabFinId,
   ZOOM_CONTROLS_TITLE,
+  AppbarBrand,
+  brandVars,
+  type FlowBrand,
   clampZoom,
   useDarkGround,
   useFitToWindow,
@@ -345,7 +348,13 @@ function StepBody({
 
 /* ── the screen ── */
 
-export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
+export default function AdvisorFlowScreen({
+  onExit,
+  brand,
+}: {
+  onExit: () => void
+  brand?: FlowBrand | null
+}) {
   // Where you have been, not just where you are: tapping a row on the
   // adventures list jumps across the flow, and Back has to mean "the screen I
   // came from" rather than "the step before this one" — otherwise Back out of
@@ -416,7 +425,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
   return (
     <div
       className={`cx-page${bare ? ' is-bare' : ''}`}
-      style={windowH ? { minHeight: windowH } : undefined}
+      style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}
     >
       <div
         className="cx-fit"
@@ -440,9 +449,7 @@ export default function AdvisorFlowScreen({ onExit }: { onExit: () => void }) {
               </>
             ) : (
               <>
-                <div className="cx-appbar-brand">
-                  <img src="./knomee-logo-white.svg" alt="knomee" />
-                </div>
+                <AppbarBrand brand={brand} />
                 <button
                   className="cx-appbar-burger"
                   type="button"

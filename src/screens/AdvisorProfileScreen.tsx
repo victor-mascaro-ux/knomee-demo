@@ -95,6 +95,16 @@ export default function AdvisorProfileScreen({
   const who = data.who
   const showTabs = !mine || tabs
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
+  /* Whatever of the three the page happens to know. Marcus's are in the flow;
+     a rail built from answers somebody just typed has none of them yet, and
+     each one simply drops out rather than standing there empty. */
+  const practice = (
+    [
+      ['Book', who.book],
+      ['Role', who.role],
+      ['Where I am today', who.firm],
+    ] as [string, string | undefined][]
+  ).filter((f): f is [string, string] => !!f[1])
 
   // Open scrolled to the top however far down the table the row sat. On the
   // live site the app runs in an iframe and the PARENT page scrolls, so reset
@@ -148,24 +158,42 @@ export default function AdvisorProfileScreen({
                 <CalendarIcon /> Completed {d.header.completed}
               </span>
             </div>
-            {/* The rail is the rail, on a desktop and in the drawer a phone
-                lifts it into: same portrait, same two stats, same action. I had
-                stripped the stats and the button in `mine` mode on the argument
-                that they are the firm's read on him rather than his own
-                answers — which left the drawer holding a name and a date and
-                nothing to open it for. One page, one rail. */}
-            <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
-              Add to Network
-            </button>
-            <div className="ap-side-stat">
-              <span className="ap-side-stat-k">Recruitment Quotient</span>
-              <span className="ap-side-stat-v">
-                {data.kq}
-                <i>
-                  Tier {data.tier.tier} · {data.tier.name}
-                </i>
-              </span>
-            </div>
+            {/* One page, one rail — but whose rail decides what hangs under the
+                portrait. A Dynasty rep needs the recruiting read and the one
+                action it leads to. The advisor reading his own page is not
+                being scored by his own app and has nothing to add himself to,
+                so his rail carries what a client's carries in the same place:
+                who he is, and the practice he spent the eight minutes
+                answering about. Stripping the two and putting nothing back is
+                what left this a name and a date last time. */}
+            {mine ? (
+              practice.length > 0 && (
+                <div className="ap-side-block">
+                  <span className="ap-side-head">My Practice</span>
+                  {practice.map(([label, value]) => (
+                    <div className="ap-side-fact" key={label}>
+                      <b>{value}</b>
+                      <i>{label}</i>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              <>
+                <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
+                  Add to Network
+                </button>
+                <div className="ap-side-stat">
+                  <span className="ap-side-stat-k">Recruitment Quotient</span>
+                  <span className="ap-side-stat-v">
+                    {data.kq}
+                    <i>
+                      Tier {data.tier.tier} · {data.tier.name}
+                    </i>
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </aside>
 
@@ -205,6 +233,41 @@ export default function AdvisorProfileScreen({
         </main>
       </div>
     </div>
+  )
+}
+
+/* A card that opens rather than one that is always open. Written here rather
+   than reaching for `CollapsibleCard`, which is the dashboard's `.card` with
+   the dashboard's SHOW MORE bar — this is a `.pp-card`, and the control it
+   wants is the caret the profile pages already use. */
+function FoldCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: string
+  title: string
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <section className={`pp-card ap-fold${open ? " is-open" : ""}`}>
+      <button
+        className="pp-card-head ap-fold-head"
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="pp-card-title">
+          <img className="pp-card-ic" src={icon} alt="" />
+          {title}
+        </span>
+        <span className="ap-fold-caret">
+          <CaretIcon up={open} />
+        </span>
+      </button>
+      {open && <div className="ap-fold-body">{children}</div>}
+    </section>
   )
 }
 
@@ -273,7 +336,6 @@ function BusinessIdTab({
                 </div>
               ))}
             </div>
-            <p className="ap-goal-when">Timeline: {d.move.when}</p>
           </section>
 
           <section className="pp-card">
@@ -380,6 +442,26 @@ function BusinessIdTab({
               ))}
             </div>
           </section>
+
+          {/* The two cards nobody arrives for. They used to ride in the rail,
+              level with Confidence, which gave two empty trays the same weight
+              as the dial — so they come last, and folded, and open when you
+              have something to put in them. */}
+          <FoldCard icon={icLifeEvents} title="Life Events">
+            {/* The advisor adventures do not ask for these yet, and inventing
+                them would put words in his mouth — so the card wears the empty
+                tray a client's would, and the tray invites you to add one. */}
+            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
+          </FoldCard>
+
+          <FoldCard icon={icQuestions} title="Questions">
+            {/* He has asked nobody anything yet — this card is for questions he
+                puts to Dynasty. The three the flow handed HIM are a different
+                thing and live on the Recruiting Toolkit. An empty tray that
+                only reports its own emptiness is a dead end: this one is the
+                way in, the same way the Life Events tray above it is. */}
+            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+          </FoldCard>
         </div>
 
         {/* Right rail */}
@@ -405,34 +487,6 @@ function BusinessIdTab({
             >
               {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
             </button>
-          </section>
-
-          <section className="pp-card">
-            <div className="pp-card-head">
-              <span className="pp-card-title">
-                <img className="pp-card-ic" src={icLifeEvents} alt="" />
-                Life Events
-              </span>
-              <AddButton />
-            </div>
-            {/* The advisor adventures do not ask for these yet, and inventing
-                them would put words in his mouth — so the card wears the empty
-                tray a client's would, and the tray invites the rep to add one. */}
-            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
-          </section>
-
-          <section className="pp-card">
-            <div className="pp-card-head">
-              <span className="pp-card-title">
-                <img className="pp-card-ic" src={icQuestions} alt="" />
-                Questions
-              </span>
-              <AddButton muted />
-            </div>
-            {/* He has asked nobody anything yet — this card is for questions he
-                puts to Dynasty. The three the flow handed HIM are a different
-                thing and live on the Recruiting Toolkit. */}
-            <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
           </section>
         </div>
       </div>
