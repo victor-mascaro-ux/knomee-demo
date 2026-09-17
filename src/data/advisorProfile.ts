@@ -366,7 +366,17 @@ export const toolkitTab: ToolkitTab = {
    second, flatter rendering of the same page from growing beside this one. */
 
 export interface AdvisorProfileData {
-  who: { name: string; initial: string; photo?: string }
+  /** Who the page is headed with. The last three are the rail's own facts on
+      his page; a rail built from a sheet somebody just filled in has none of
+      them, so each is optional and drops out on its own. */
+  who: {
+    name: string
+    initial: string
+    photo?: string
+    book?: string
+    role?: string
+    firm?: string
+  }
   id: BusinessId
   /** The six Confidence statements on the 0-100 track the dial draws. */
   confidence: { statement: string; low: string; high: string; value: number }[]
@@ -377,7 +387,14 @@ export interface AdvisorProfileData {
 }
 
 export const marcusProfile: AdvisorProfileData = {
-  who: { name: advisor.name, initial: advisor.initial, photo: advisor.photo },
+  who: {
+    name: advisor.name,
+    initial: advisor.initial,
+    photo: advisor.photo,
+    book: advisor.book,
+    role: advisor.role,
+    firm: advisor.firm,
+  },
   id: businessId,
   confidence: confidenceAnswers,
   kq,

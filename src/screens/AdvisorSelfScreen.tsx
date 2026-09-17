@@ -32,6 +32,9 @@ import {
   TabAdventures,
   TabFinId,
   ZOOM_CONTROLS_TITLE,
+  AppbarBrand,
+  brandVars,
+  type FlowBrand,
   clampZoom,
   useDarkGround,
   useFitToWindow,
@@ -652,7 +655,13 @@ function StepBody({
 
 /* ── the screen ── */
 
-export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
+export default function AdvisorSelfScreen({
+  onExit,
+  brand,
+}: {
+  onExit: () => void
+  brand?: FlowBrand | null
+}) {
   // The sheet outlives the session: answering eight minutes of questions and
   // losing them to a reload is not a thing to do to anyone.
   const [answers, setAnswers] = useState<Answers>(loadAnswers)
@@ -693,6 +702,7 @@ export default function AdvisorSelfScreen({ onExit }: { onExit: () => void }) {
       answers={answers}
       edit={edit}
       d={d}
+      brand={brand}
       onExit={onExit}
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
@@ -722,10 +732,12 @@ function FlowPhone({
   onRestart,
   onSample,
   onDiscard,
+  brand,
 }: {
   answers: Answers
   edit: Edit
   d: Derived
+  brand?: FlowBrand | null
   onExit: () => void
   onReport: () => void
   onRecord: () => void
@@ -812,7 +824,7 @@ function FlowPhone({
     : undefined
 
   return (
-    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
+    <div className="cx-page" style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}>
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
         <IPhone scale={scale}>
           <header className="cx-appbar">
@@ -832,9 +844,7 @@ function FlowPhone({
               </>
             ) : (
               <>
-                <div className="cx-appbar-brand">
-                  <img src="./knomee-logo-white.svg" alt="knomee" />
-                </div>
+                <AppbarBrand brand={brand} />
                 <button
                   className="cx-appbar-burger"
                   type="button"

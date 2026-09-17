@@ -4023,7 +4023,7 @@ export default function App() {
   if (clientExpOpen) {
     return (
       <>
-        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} brand={brand} />
         {brand && <PoweredBy />}
       </>
     )
@@ -4033,6 +4033,7 @@ export default function App() {
     return (
       <>
         <AdvisorFlowScreen
+          brand={brand}
           onExit={() => {
             /* Out of the flow and into the dashboard that reads it, rather
                than back to the advisor product, which has nothing to do with
@@ -4050,7 +4051,7 @@ export default function App() {
   if (advisorSelfOpen) {
     return (
       <>
-        <AdvisorSelfScreen onExit={() => setAdvisorSelfOpen(false)} />
+        <AdvisorSelfScreen onExit={() => setAdvisorSelfOpen(false)} brand={brand} />
         {brand && <PoweredBy />}
       </>
     )

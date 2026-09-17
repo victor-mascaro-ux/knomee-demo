@@ -115,6 +115,17 @@
   width: auto;
   display: block;
 }
+/* A firm's mark in the same slot, at the same optical size. The shell sets
+   these logos at 34px on a 64px bar; this bar is half that, and the mark is
+   a white knockout that takes the bar's own ink. */
+.cx-appbar-brand {
+  color: var(--text-inverse);
+  display: flex;
+  align-items: center;
+}
+.cx-appbar-brand .client-logo {
+  height: 21px;
+}
 .cx-appbar-burger {
   background: none;
   border: none;
@@ -364,7 +375,10 @@
   transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 .cx-start:hover {
-  background: #3a1268;
+  /* The token, not the plum it used to be spelled out as: under a firm's
+     colours a hardcoded hover threw the button back to knomee's purple on the
+     way to being pressed. */
+  background: var(--action-primary-hover);
 }
 .cx-start:active {
   transform: scale(0.97);

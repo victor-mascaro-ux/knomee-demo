@@ -2,6 +2,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react'
@@ -302,6 +303,43 @@ export function useZoom() {
     }
   }, [])
   return { zoom, setZoom, reset }
+}
+
+/* ── the firm's colours, inside the phone ──────────────────────────
+   A journey is the client's or the advisor's first sight of the firm, so the
+   phone wears the same white label the desktop shell does rather than knomee's
+   plum. Only what the deal actually recolours: the bar, and the plum and grape
+   the screens paint buttons and accents with. `--text-strong` resolves at
+   :root, so headlines stay the app's own dark whatever brand is on — which is
+   the rule the shell already follows. */
+export interface FlowBrand {
+  primary: string
+  accent: string
+  logo: ReactNode
+}
+
+export function brandVars(brand?: FlowBrand | null): CSSProperties {
+  if (!brand) return {}
+  return {
+    '--surface-brand': brand.primary,
+    '--action-primary': brand.primary,
+    '--action-primary-hover': brand.accent,
+    '--border-strong': brand.primary,
+    '--k-plum': brand.primary,
+    '--plum': brand.primary,
+    '--k-grape': brand.accent,
+    '--purple-bolt': brand.accent,
+  } as CSSProperties
+}
+
+/** What sits at the left of every phone app bar: the firm's mark if the demo
+    is co-branded, knomee's wordmark if it is not. */
+export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
+  return (
+    <div className="cx-appbar-brand">
+      {brand ? brand.logo : <img src="./knomee-logo-white.svg" alt="knomee" />}
+    </div>
+  )
 }
 
 /* ── iPhone frame ──────────────────────────────────────────────────────────
@@ -810,7 +848,13 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
   )
 }
 
-export default function ClientExperienceScreen({ onExit }: { onExit: () => void }) {
+export default function ClientExperienceScreen({
+  onExit,
+  brand,
+}: {
+  onExit: () => void
+  brand?: FlowBrand | null
+}) {
   const [tab, setTab] = useState<TabId>('adventures')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
@@ -872,15 +916,13 @@ export default function ClientExperienceScreen({ onExit }: { onExit: () => void 
     // be wrong here: inside the review iframe, which is sized to the document,
     // it grows every time the content does and never comes back down — leaving
     // the controls stranded below the fold after a zoom out.
-    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
+    <div className="cx-page" style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}>
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
           the scaled height and the page never grows a phantom scrollbar. */}
       <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
         <IPhone scale={scale} dim={sheet || voiceOpen}>
           <header className="cx-appbar">
-            <div className="cx-appbar-brand">
-              <img src="./knomee-logo-white.svg" alt="knomee" />
-            </div>
+            <AppbarBrand brand={brand} />
             <button
               className="cx-appbar-burger"
               type="button"
