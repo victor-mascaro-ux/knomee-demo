@@ -118,6 +118,22 @@
   .cc-collapse-btn svg { transition: transform 0.18s ease; }
   .cc-rail-subrow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 6px; padding-left: 2px; white-space: nowrap; }
   .cc-rail-sub { font-size: 12px; color: var(--cc-faint); }
+  /* Who you are commenting as. Stated rather than hidden in a menu, because a
+     reviewer who does not notice it signs someone else's name to their notes
+     on a shared browser. */
+  .cc-rail-who { display: flex; align-items: baseline; gap: 5px; margin-top: 8px; padding-left: 2px; font-size: 11.5px; color: var(--cc-faint); }
+  .cc-who-btn {
+    border: 0; background: transparent; padding: 0; font: inherit; cursor: pointer;
+    font-weight: 600; color: var(--cc-ink);
+    text-decoration: underline; text-decoration-color: var(--cc-hairline); text-underline-offset: 3px;
+  }
+  .cc-who-btn:hover { text-decoration-color: currentColor; }
+  .cc-who-input {
+    font: inherit; font-weight: 600; color: var(--cc-ink); width: 150px;
+    padding: 2px 7px; border-radius: 7px; border: 1px solid var(--cc-hairline);
+    background: var(--cc-input-bg); outline: none;
+  }
+  .cc-who-input::placeholder { color: var(--cc-faint); font-weight: 500; }
   .cc-clear-btn {
     background: none; border: 0; color: var(--cc-muted); font-size: 12px; font-weight: 600;
     text-decoration: underline; cursor: pointer; padding: 2px; flex: none;
@@ -139,6 +155,7 @@
   .cc-rail.cc-collapsed .cc-rail-spacer,
   .cc-rail.cc-collapsed #ccCloseMode,
   .cc-rail.cc-collapsed .cc-rail-subrow,
+  .cc-rail.cc-collapsed .cc-rail-who,
   .cc-rail.cc-collapsed .cc-list { display: none; }
   .cc-rail.cc-collapsed .cc-collapse-btn svg { transform: rotate(180deg); }
 
@@ -200,6 +217,9 @@
   .cc-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; justify-content: center; }
   .cc-card-meta { display: flex; align-items: center; gap: 7px; }
   .cc-time { font-size: 11px; color: var(--cc-faint); font-weight: 500; font-variant-numeric: tabular-nums; }
+  /* Who opened the thread, under the meta row rather than in it — the row is
+     already carrying a pin number, a page name and a time. */
+  .cc-card-who { font-size: 11px; font-weight: 600; color: var(--cc-text); margin-top: 3px; }
   .cc-snippet {
     font-size: 12.5px; color: var(--cc-text); line-height: 1.4;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -260,7 +280,7 @@
   .cc-stage.cc-mode .cc-catcher { display: block; }
 
   /* ════════ Thread popover ════════
-     No avatars, no author names — timestamp + delete only. */
+     No avatars — a name over each note, timestamp + delete in the head. */
   .cc-popover {
     position: absolute; width: 300px; z-index: 70;
     border-radius: var(--cc-radius);
@@ -288,8 +308,21 @@
   .cc-icon-btn:hover { background: var(--cc-hairline); color: var(--cc-ink); }
   .cc-msgs { padding: 2px 14px 6px; display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; }
   .cc-msg + .cc-msg { border-top: 1px solid var(--cc-hairline); padding-top: 10px; }
-  .cc-msg-time { font-size: 11px; color: var(--cc-faint); font-variant-numeric: tabular-nums; margin-bottom: 2px; }
+  /* The byline over a note: who wrote it, and — on a reply — when. Notes
+     written before the overlay asked for a name have neither and keep their
+     old, nameless look. */
+  .cc-msg-who { font-size: 11px; font-weight: 600; color: var(--cc-text); margin-bottom: 2px; }
+  .cc-msg-who .cc-msg-when { font-weight: 500; color: var(--cc-faint); font-variant-numeric: tabular-nums; }
   .cc-msg-text { font-size: 13px; color: var(--cc-text); line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
+  /* Asked in the composer, and only while there is no name to sign with —
+     the moment one is set this row is gone for good. */
+  .cc-pop-who { padding: 0 12px 2px; }
+  .cc-pop-who input {
+    width: 100%; box-sizing: border-box; border-radius: 12px;
+    border: 1px solid var(--cc-hairline); background: var(--cc-input-bg);
+    padding: 8px 12px; font-size: 12.5px; color: var(--cc-text); outline: none;
+  }
+  .cc-pop-who input::placeholder { color: var(--cc-faint); }
   .cc-pop-foot { display: flex; gap: 8px; padding: 8px 12px 12px; align-items: flex-end; }
   .cc-reply {
     flex: 1; resize: none; min-height: 40px; max-height: 140px; overflow-y: auto;
@@ -584,6 +617,10 @@
         <span class="cc-rail-sub">Click a card to go to its page.</span>
         <button class="cc-clear-btn" id="ccClearAll" disabled>Clear all</button>
       </div>
+      <div class="cc-rail-who">
+        <span>Commenting as</span>
+        <button class="cc-who-btn" id="ccWho" title="Change the name on your comments"></button>
+      </div>
     </div>
     <div class="cc-list" id="ccList"></div>
   </aside>
@@ -641,7 +678,13 @@
   const demoBody = document.getElementById('ccDemoBody');
   const demoHere = document.getElementById('ccDemoHere');
   const demoClose = document.getElementById('ccDemoClose');
+  const whoBtn   = document.getElementById('ccWho');
   const RAIL_COLLAPSED_KEY = 'knomee-cc-rail-collapsed';
+  // Who this reviewer is. Deliberately per-browser rather than per-project:
+  // you say your name once and it signs your notes on every prototype you
+  // open. It is only ever stamped onto notes as they are written, so renaming
+  // yourself never rewrites what you already said.
+  const WHO_KEY = 'knomee-cc-who';
 
   stage.dataset.ccTheme = THEME;
 
@@ -652,6 +695,7 @@
   let activeId = null;
   let popoverEl = null;
   let commentMode = false;
+  let who = '';
   let currentScreen = 'default';
   // The prototype's own route (e.g. "#/clients/jane-doe"), mirrored up by the
   // frame. A thread records the route it was left on, so a card can take you
@@ -716,6 +760,52 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify({ threads: store.threads })); }
     catch (e) { /* best-effort only */ }
   }
+
+  // ── Who is commenting ───────────────────────────────────
+  function loadWho() {
+    try { who = (localStorage.getItem(WHO_KEY) || '').trim(); }
+    catch (e) { who = ''; }
+  }
+  function renderWho() {
+    whoBtn.textContent = who || 'Set your name';
+  }
+  function setWho(name) {
+    who = (name || '').trim().slice(0, 40);
+    try {
+      if (who) localStorage.setItem(WHO_KEY, who);
+      else localStorage.removeItem(WHO_KEY);
+    } catch (e) { /* the name still holds for this session */ }
+    renderWho();
+  }
+  // Renaming happens in place, not in a prompt(): the overlay runs inside
+  // whatever is previewing the prototype, and not every embedder allows a
+  // modal — one that silently never opens would leave the name unsettable.
+  let whoInput = null;
+  function startWhoEdit() {
+    if (whoInput) { whoInput.focus(); return; }
+    const input = document.createElement('input');
+    whoInput = input;
+    input.className = 'cc-who-input';
+    input.value = who;
+    input.placeholder = 'Your name';
+    input.maxLength = 40;
+    function done(commit) {
+      if (!whoInput) return;
+      whoInput = null;
+      if (commit) setWho(input.value);
+      input.replaceWith(whoBtn);
+      renderWho();
+    }
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); done(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); done(false); }
+    });
+    input.addEventListener('blur', () => done(true));
+    whoBtn.replaceWith(input);
+    input.focus();
+    input.select();
+  }
+  whoBtn.addEventListener('click', startWhoEdit);
 
   function initSync() {
     if (SEED_DEMO) return;
@@ -1025,6 +1115,15 @@
       snippet.className = 'cc-snippet';
       snippet.textContent = t.messages.length ? t.messages[0].text : '…';
       body.appendChild(meta);
+      // Who opened the thread — the rail's whole job is telling you which
+      // notes are worth walking to, and whose they are is half of that.
+      const openedBy = t.messages.length ? t.messages[0].author : null;
+      if (openedBy) {
+        const byline = document.createElement('div');
+        byline.className = 'cc-card-who';
+        byline.textContent = openedBy;
+        body.appendChild(byline);
+      }
       body.appendChild(snippet);
 
       card.appendChild(thumb);
@@ -1069,11 +1168,19 @@
     t.messages.forEach((m, i) => {
       const msg = document.createElement('div');
       msg.className = 'cc-msg';
-      if (i > 0) {
-        const mt = document.createElement('div');
-        mt.className = 'cc-msg-time';
-        mt.textContent = relTime(m.createdAt);
-        msg.appendChild(mt);
+      // The thread's own time is already in the head, so the opening note
+      // carries a name alone and only replies repeat the clock.
+      if (m.author || i > 0) {
+        const by = document.createElement('div');
+        by.className = 'cc-msg-who';
+        if (m.author) by.textContent = m.author;
+        if (i > 0) {
+          const when = document.createElement('span');
+          when.className = 'cc-msg-when';
+          when.textContent = (m.author ? ' · ' : '') + relTime(m.createdAt);
+          by.appendChild(when);
+        }
+        msg.appendChild(by);
       }
       const txt = document.createElement('div');
       txt.className = 'cc-msg-text';
@@ -1154,10 +1261,30 @@
     send.title = 'Send'; send.setAttribute('aria-label', 'Send');
     send.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+    // A name to sign with, asked above the note rather than below it — you
+    // decide who you are before you write, not after. It appears only while
+    // there is no name set, and never again once there is.
+    let nameInput = null;
+    if (!who) {
+      const whoRow = document.createElement('div');
+      whoRow.className = 'cc-pop-who';
+      nameInput = document.createElement('input');
+      nameInput.placeholder = 'Your name';
+      nameInput.maxLength = 40;
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); input.focus(); }
+      });
+      whoRow.appendChild(nameInput);
+      pop.appendChild(whoRow);
+    }
+
     function doSend() {
       const text = input.value.trim();
       if (!text) { input.focus(); return; }
-      t.messages.push({ text: text, createdAt: Date.now() });
+      // Whatever is in the name field is theirs from now on, so they are asked
+      // once per browser and not once per note.
+      if (nameInput && nameInput.value.trim()) setWho(nameInput.value);
+      t.messages.push({ text: text, author: who || null, createdAt: Date.now() });
       // Replace-by-id rather than plain push: a Firestore snapshot may have
       // swapped store.threads for fresh objects since this popover opened,
       // leaving `t` a stale reference that findThread would no longer see.
@@ -1458,6 +1585,9 @@
   }
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    // While a name is being typed, Esc cancels that edit and nothing else —
+    // a mistyped name should not also tear the overlay down.
+    if (whoInput && e.target === whoInput) return;
     if (!retreat()) return;
     e.preventDefault();
     e.stopPropagation();
@@ -1837,12 +1967,13 @@
     const mk = (x, y, mins, msgs) => ({
       id: 'demo' + x + y, screen: null, x: x, y: y, img: null,
       createdAt: now - mins * 60000, resolved: false,
-      messages: msgs.map((m, i) => ({ text: m, createdAt: now - mins * 60000 + i * 90000 }))
+      // Each note is [who, what], so the preview shows the byline too.
+      messages: msgs.map((m, i) => ({ author: m[0], text: m[1], createdAt: now - mins * 60000 + i * 90000 }))
     });
     store.threads = [
-      mk(38, 30, 42, ['The headline feels one size too small at this width.']),
-      mk(62, 52, 18, ['Can this field validate on blur instead of on submit?', 'Agreed — on-submit-only feels laggy here.']),
-      mk(50, 74, 6,  ['Love the button treatment. Ship it.'])
+      mk(38, 30, 42, [['Priya', 'The headline feels one size too small at this width.']]),
+      mk(62, 52, 18, [['Sam', 'Can this field validate on blur instead of on submit?'], ['Priya', 'Agreed — on-submit-only feels laggy here.']]),
+      mk(50, 74, 6,  [['Sam', 'Love the button treatment. Ship it.']])
     ];
     setMode(true);
     renderAll();
@@ -1855,6 +1986,8 @@
   // explicit '0' (the reviewer expanded it before) keeps it open on load.
   try { setRailCollapsed(localStorage.getItem(RAIL_COLLAPSED_KEY) !== '0'); }
   catch (e) { setRailCollapsed(true); }
+  loadWho();
+  renderWho();
   loadLocalFallback();
   renderAll();
   initSync();
