@@ -24,6 +24,7 @@ import {
   IPhone,
   LockedRow,
   ProgressMeter,
+  SheetCredit,
   TabAdventures,
   TabFinId,
   ZOOM_CONTROLS_TITLE,
@@ -569,6 +570,7 @@ export default function AdvisorFlowScreen({
           {menuOpen && (
             <div className="cx-sheet" onClick={() => setMenuOpen(false)}>
               <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
+                <SheetCredit />
                 <div className="cx-sheet-account">
                   <span className="cx-sheet-avatar">{advisor.initial}</span>
                   <span>

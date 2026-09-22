@@ -438,6 +438,22 @@ function rowTap(onRow?: () => void) {
 }
 const tapClass = (onRow?: () => void) => (onRow ? ' cx-adv-tap' : '')
 
+/* Whose product this is, at the top of the menu.
+ *
+ * The page-level credit is fixed to the window, so on a phone rendering it sits
+ * over the device frame rather than inside the product. The menu is where
+ * somebody actually looks to find out whose app they are holding, so the credit
+ * goes there too — top of the panel, to the right, so it reads as a mark ON the
+ * sheet rather than as the sheet's first item. */
+export function SheetCredit() {
+  return (
+    <div className="cx-sheet-credit" aria-label="Powered by knomee">
+      <span aria-hidden>powered by</span>
+      <img src="./knomee-logo-plum.svg" alt="knomee" />
+    </div>
+  )
+}
+
 export function ProgressMeter({ done, required }: { done: number; required: number }) {
   const pct = Math.round((done / required) * 100)
   return (
@@ -831,6 +847,7 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
   return (
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
+        <SheetCredit />
         <div className="cx-sheet-account">
           <span className="cx-sheet-avatar">{clientInitial}</span>
           <span>
