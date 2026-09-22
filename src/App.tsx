@@ -833,12 +833,13 @@ function ClientRow({
      to; until the advisor has made that family, the cell has nothing to say. */
   familyName?: string | null
 }) {
-  /* Other households are other people's and stand as they are. The one this
-     demo builds — the family the flow creates — is not named until it exists,
-     and only it is a link, because only it has a page. */
-  const pending = c.household === clientProfile.household && !familyName
-  const household = pending ? null : (c.household ?? null)
-  const linked = Boolean(onOpenHousehold && household && household === familyName)
+  /* Every row names the family it belongs to, whether or not that family has
+     been set up on knomee yet — the household is a fact about the person, not
+     about the product. Where it goes depends on whether it exists: to the
+     family's own page once it does, and to the member's profile before that,
+     which is the only place a family can be made. */
+  const household = c.household ?? null
+  const madeUp = Boolean(household && household === familyName)
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
       <td className="col-check">
@@ -878,20 +879,13 @@ function ClientRow({
       </td>
       <td className="col-household">
         {household ? (
-          /* The household opens the family's own page, on every row in that
-             family rather than only on the one whose personal profile is built
-             out. */
-          linked ? (
-            <button
-              type="button"
-              className="household-link name-link-btn"
-              onClick={onOpenHousehold}
-            >
-              {household}
-            </button>
-          ) : (
-            <span className="household-link is-static">{household}</span>
-          )
+          <button
+            type="button"
+            className="household-link name-link-btn"
+            onClick={madeUp ? onOpenHousehold : () => onOpenProfile?.(c)}
+          >
+            {household}
+          </button>
         ) : (
           <span className="dash">—</span>
         )}
