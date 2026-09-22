@@ -1,0 +1,263 @@
+/* Who has answered the advisor flow. The page shell, the card and the title row
+   all come from index.css — what is here is the one table this screen has and
+   the invite panel above it. Colours are tokens only. */
+
+.adir-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+
+.adir-btn {
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: var(--border-thin) solid var(--k-grape-light);
+  background: var(--surface-card);
+  color: var(--k-grape);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.adir-btn:hover:not(:disabled) {
+  background: var(--k-plum-wash);
+}
+.adir-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+/* The one thing on the page that starts something. */
+.adir-btn-go {
+  background: var(--k-plum);
+  border-color: var(--k-plum);
+  color: var(--text-inverse);
+}
+.adir-btn-go:hover:not(:disabled) {
+  background: var(--k-plum-hover);
+}
+
+/* ── the invite panel ──
+   A panel above the list rather than a modal over it: making a link is a step
+   in reading this page, and the list is the thing you check afterwards to see
+   the new row. */
+.adir-invite {
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--k-grape-light);
+  border-radius: 14px;
+  padding: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+/* Once the link exists the panel is holding something worth not losing, so it
+   says so with the accent rather than by moving. */
+.adir-invite.is-made {
+  border-color: var(--k-grape);
+  background: var(--k-plum-wash);
+}
+.adir-invite-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--space-12);
+}
+.adir-invite-head b {
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+}
+.adir-invite-head span {
+  font-size: var(--text-sm);
+  color: var(--grey-text);
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+.adir-link-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  flex-wrap: wrap;
+}
+.adir-name,
+.adir-link {
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: var(--border-thin) solid var(--k-grape-light);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  outline: none;
+}
+.adir-name {
+  width: 260px;
+}
+.adir-name:focus,
+.adir-link:focus {
+  border-color: var(--k-grape);
+}
+/* The link is long and the point of it is to be copied whole, so it gets the
+   room and a face that reads as a value rather than a field to fill in. */
+.adir-link {
+  flex: 1;
+  min-width: 280px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs);
+  color: var(--k-grape);
+}
+
+.adir-invite-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-12);
+}
+.adir-open {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--k-grape);
+  text-decoration: none;
+}
+.adir-open:hover {
+  text-decoration: underline;
+}
+
+/* ── the list ── */
+
+.adir-count {
+  font-size: var(--text-sm);
+  color: var(--grey-text);
+}
+
+.adir-empty {
+  padding: 28px var(--space-16);
+  font-size: var(--text-sm);
+  color: var(--grey-text);
+  line-height: 1.5;
+}
+.adir-empty b {
+  color: var(--text-strong);
+}
+
+.adir-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.adir-table thead th {
+  text-align: left;
+  padding: var(--space-12);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--grey-text);
+  border-bottom: var(--border-thin) solid var(--k-grape-light);
+  white-space: nowrap;
+}
+.adir-table td {
+  padding: var(--space-12);
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  border-bottom: var(--border-thin) solid var(--k-plum-050);
+  vertical-align: middle;
+}
+.adir-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+/* Somebody who has not started is on the list to be chased, not read. */
+.adir-table tr.is-waiting td {
+  color: var(--grey-text);
+}
+
+.adir-name-btn {
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--k-grape);
+  cursor: pointer;
+  text-align: left;
+}
+.adir-name-btn:hover {
+  text-decoration: underline;
+}
+.adir-name-flat {
+  font-weight: var(--weight-semibold);
+}
+
+.adir-meta,
+.adir-when {
+  color: var(--grey-text);
+  font-size: var(--text-xs);
+}
+.adir-when {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.adir-prog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.adir-prog-track {
+  display: block;
+  width: 72px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--k-grape-light);
+  overflow: hidden;
+}
+.adir-prog-track i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--k-grape);
+}
+.adir-prog-n {
+  font-size: var(--text-xs);
+  color: var(--grey-text);
+  font-variant-numeric: tabular-nums;
+}
+.adir-state {
+  font-size: var(--text-xs);
+  color: var(--grey-text);
+}
+
+.adir-copy {
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: var(--border-thin) solid var(--k-grape-light);
+  background: none;
+  color: var(--k-grape);
+  cursor: pointer;
+}
+.adir-copy:hover {
+  background: var(--k-plum-wash);
+}
+
+/* ── when the directory cannot be reached ──
+   Said once, above the list, and the list still shows whatever it has. A screen
+   that replaced itself with an error would throw away rows that did load. */
+.adir-trouble {
+  padding: 10px var(--space-14);
+  margin-bottom: var(--space-16);
+  border-radius: 10px;
+  border: var(--border-thin) solid var(--k-crimson);
+  background: var(--k-crimson-light);
+  color: var(--k-crimson);
+  font-size: var(--text-sm);
+}
+
+.adir-note {
+  margin-top: var(--space-14);
+  font-size: var(--text-xs);
+  color: var(--grey-text);
+  line-height: 1.5;
+  max-width: 78ch;
+}
