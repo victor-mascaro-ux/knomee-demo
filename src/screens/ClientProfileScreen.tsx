@@ -44,8 +44,10 @@ const ADVENTURE_ICON: Record<string, string> = {
 // their phone is the very same face the advisor sees here.
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 
-/* A person's portrait, or their initial while there is no file for them. */
-function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
+/* A person's portrait, or their initial while there is no file for them.
+   Exported because the family page draws the same household in the same
+   rail. */
+export function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
   /* Walk the spellings, then give up and show the letter. */
   const [attempt, setAttempt] = useState(0)
   const sources = avatarSources(name)
@@ -362,6 +364,7 @@ export default function ClientProfileScreen({
   client,
   onBack,
   ownerMenu,
+  onOpenHousehold,
   mine,
 }: {
   client: Client
@@ -372,6 +375,10 @@ export default function ClientProfileScreen({
      a desktop. Nothing renders here on a desktop, where the rail is on screen
      already. */
   ownerMenu?: ReactNode
+  /* Opens the family page. The breadcrumb's middle step and the household at
+     the top of the rail both go there — they name the family, and naming
+     something that goes nowhere is the same as not naming it. */
+  onOpenHousehold?: () => void
   /* Emily reading her own Financial ID in her own app, rather than her advisor
      reading it about her. Same page — it is the artefact the five adventures
      produce — without the two things that only make sense from a client list:
@@ -425,7 +432,11 @@ export default function ClientProfileScreen({
             My Clients
           </button>
           <span className="pp-crumb-sep">›</span>
-          <button type="button" className="pp-crumb-link" onClick={onBack}>
+          <button
+            type="button"
+            className="pp-crumb-link"
+            onClick={onOpenHousehold ?? onBack}
+          >
             {cp.household}
           </button>
           <span className="pp-crumb-sep">›</span>
@@ -466,7 +477,7 @@ export default function ClientProfileScreen({
             </div>
 
             <div className="cp-side-block">
-              <button className="cp-side-head" type="button">
+              <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
                 {cp.household}
                 <span className="cp-side-count">{cp.members.length}</span>
                 <RowChevron />

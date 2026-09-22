@@ -1,0 +1,103 @@
+/* The family page — only what a household adds to the client page it is built
+   from. The shell, the rail, the tabs, the cards and the palette all come from
+   prospectProfile.css and clientProfile.css. Scoped to .hh-* under .hh, and
+   every value is a design-system token. */
+
+/* A household has no face, so the disc its members' portraits would take holds
+   the family's initial instead. */
+.hh-monogram {
+  font-size: 38px;
+  font-weight: var(--weight-bold);
+  color: var(--avatar-ink);
+  background: var(--avatar-bg);
+}
+
+/* ---------- the member list ---------- */
+.hh-members {
+  display: flex;
+  flex-direction: column;
+}
+/* Portrait, who they are, the two readings, and the row's own menu. The name
+   and its meta take the middle and everything else holds its width, so the
+   pills line up down the list however long a name is. */
+.hh-member {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: var(--space-14);
+  padding: var(--space-14) var(--space-4);
+}
+.hh-member + .hh-member {
+  border-top: var(--border-thin) solid var(--border-default);
+}
+.hh-member-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.hh-member-name {
+  align-self: start;
+  border: 0;
+  padding: 0;
+  background: none;
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-link);
+  cursor: pointer;
+  text-align: left;
+}
+.hh-member-name:hover {
+  text-decoration: underline;
+}
+.hh-member-meta {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* The two readings a member carries: whether they are live on knomee, and
+   whether their Financial ID is finished. Live is a state worth seeing across
+   the room; the second is a fact you read when you get to it, so it is outlined
+   rather than filled. */
+.hh-pill {
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  border: var(--border-thin) solid transparent;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+.hh-pill.is-active {
+  background: var(--k-mint);
+  color: var(--k-emerald);
+}
+.hh-pill.is-pending {
+  background: var(--k-amber-light);
+  color: var(--k-amber-ink);
+}
+.hh-pill.is-quiet {
+  border-color: var(--border-control);
+  color: var(--text-secondary);
+}
+.hh-pill.is-quiet.is-done {
+  border-color: var(--k-teal);
+  color: var(--k-ocean);
+}
+
+/* The two controls beside the title, which the client page's row does not
+   carry — its one button is a download. */
+.hh .pp-title-row .btn {
+  flex: none;
+}
+
+@media (max-width: 720px) {
+  /* The pills drop under the name rather than squeezing the name to nothing. */
+  .hh-member {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: var(--space-8);
+  }
+  .hh-pill {
+    grid-column: 2;
+  }
+}
