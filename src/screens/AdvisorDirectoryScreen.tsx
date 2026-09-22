@@ -332,7 +332,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
 
       {inviting && <InvitePanel onDone={load} onTrouble={setTrouble} />}
 
-      <section className="card">
+      <section className="card adir-card">
         <header className="card-head">
           <div className="card-title">
             <span>Everyone who has opened the flow</span>
