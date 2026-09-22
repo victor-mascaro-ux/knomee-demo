@@ -967,6 +967,35 @@ const CONFIDENCE_TITLE: Record<string, string> = {
   Strong: 'Your relationship with your practice is strong.',
 }
 
+/* The three bands read as one set, the way the client's three do: what this
+   band means, then the same closing line whichever band you land in, because
+   the insight is having the reading at all rather than which one it is.
+
+   All three titles existed; only the balanced body and footnote did. Anybody
+   who answered their way to Weak or Strong was being told they were balanced
+   in the two lines under a headline that said otherwise. */
+const CONFIDENCE_CLOSE = 'Knowing your current level of confidence is a powerful insight.'
+
+const CONFIDENCE_BODY: Record<string, string> = {
+  Weak: `The practice may be taking more out of you than it is giving back right now. Plenty of advisors are in the same boat.
+
+${CONFIDENCE_CLOSE}`,
+  Balanced: `It creates some strain, and you find resilience.
+
+${CONFIDENCE_CLOSE}`,
+  Strong: `Confidence in what you are able to build supports the decisions in front of you.
+
+${CONFIDENCE_CLOSE}`,
+}
+
+const CONFIDENCE_STAT: Record<string, string> = {
+  Weak: 'Did you know? 1 in 10 advisors feel the same way about their practice right now. You are not alone in this.',
+  Balanced:
+    'Did you know? Nearly 1 in 2 share a similar mix of confidence and uncertainty about their business.',
+  Strong:
+    'Did you know? Fewer than half of advisors feel as confident about their practice as you do. That is a strong foundation for a decision this size.',
+}
+
 export interface UnlockView {
   title?: string
   body?: string
@@ -1005,6 +1034,8 @@ export function unlockView(id: string, a: Answers): UnlockView {
       )
       return {
         title: CONFIDENCE_TITLE[band],
+        body: CONFIDENCE_BODY[band],
+        stat: CONFIDENCE_STAT[band],
         lines: [
           { label: 'Highest', value: high ? statements[high.i]?.text ?? DASH : DASH },
           { label: 'Lowest', value: low ? statements[low.i]?.text ?? DASH : DASH },
