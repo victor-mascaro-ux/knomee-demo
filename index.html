@@ -908,8 +908,8 @@
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
     'advisor-flow': 'Advisor Recruit · Sample',
-    'advisor-self': 'Advisor Recruit · Your answers',
-    advisors: 'Advisor Flow · Who answered',
+    'advisor-self': 'Advisor Recruit · Business ID',
+    advisors: 'Advisor Recruit (Testing Entries)',
     flow: 'Advisor Flow · An invited advisor',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-analytics': 'Dynasty · Analytics',
@@ -1722,8 +1722,10 @@
       v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm'],
     /* Who has answered the advisor flow, and where invite links are made. A
        dashboard rather than a journey: it is a list somebody works from, not a
-       page anybody is asked questions on. */
-    ['advisors', 'Advisor Flow · Who answered', '#/advisors',
+       page anybody is asked questions on. It sits under Advisor Recruit because
+       it is the same product — the pipeline, and the entries being tested
+       against it. */
+    ['advisors', 'Advisor Recruit (Testing Entries)', '#/advisors',
       v => v === 'advisors']
   ];
   /* Named for who takes the journey AND what it produces. "Advisor" on its own
@@ -1732,18 +1734,16 @@
      is the demo's own vocabulary rather than a label invented for this panel.
      "Prospect as Client" said the opposite of itself: a prospect is precisely
      somebody who is not a client yet. */
-  /* Two advisor rows, because the flow is worth showing from both ends: the
-     sample is Marcus's, answered, and what a room is walked through; the other
-     is the same adventures with the answers taken out, which is the one to hand
-     somebody when they ask what it feels like to be asked. It was unlisted for
-     a while — the route never went away, so nothing needed rebuilding to bring
-     it back, only a way in. */
+  /* One advisor row. It was two — Marcus's answered walkthrough beside the same
+     adventures with the answers taken out — and the pair needed a qualifier on
+     one of them to tell them apart, which made the row you actually hand
+     somebody the longer-named of the two. The flow you answer yourself is the
+     Advisor · Business ID now. The walkthrough is still at #/advisor-flow and
+     still works; it is simply not listed, so this panel is no longer a way in. */
   const JOURNEYS = [
     ['client-exp', 'Client · Financial ID', '#/client-experience',
       v => v === 'client-experience'],
-    ['advisor-exp', 'Advisor · Business ID', '#/advisor-flow',
-      v => v === 'advisor-flow'],
-    ['advisor-self', 'Advisor · Business ID, your answers', '#/advisor-self',
+    ['advisor-self', 'Advisor · Business ID', '#/advisor-self',
       v => v === 'advisor-self']
   ];
   const personaOf = (view) => {
