@@ -329,29 +329,32 @@ export function ConfidenceResults({
   open: boolean
   answers?: { statement: string; value: number; low: string; high: string }[]
 }) {
-  if (!open) return null
   return (
-    <div className="pp-conf-results">
-      {answers.map((a, i) => (
-        <div
-          className="pp-conf-answer pp-row-in"
-          key={a.statement}
-          style={{ animationDelay: `${i * 45}ms` }}
-        >
-          <p className="pp-conf-statement">{a.statement}</p>
-          <div
-            className="pp-conf-track"
-            role="img"
-            aria-label={`${a.statement} — ${a.value} out of 100, between "${a.low}" and "${a.high}"`}
-          >
-            <span className="pp-conf-dot" style={{ left: `${a.value}%` }} />
-          </div>
-          <div className="pp-conf-ends">
-            <span>{a.low}</span>
-            <span>{a.high}</span>
-          </div>
+    <div className={`collapse ${open ? 'open' : ''}`}>
+      <div className="collapse-inner">
+        <div className="pp-conf-results">
+          {answers.map((a, i) => (
+            <div
+              className={`pp-conf-answer ${open ? 'pp-row-in' : ''}`}
+              key={a.statement}
+              style={{ animationDelay: `${i * 45}ms` }}
+            >
+              <p className="pp-conf-statement">{a.statement}</p>
+              <div
+                className="pp-conf-track"
+                role="img"
+                aria-label={`${a.statement} — ${a.value} out of 100, between "${a.low}" and "${a.high}"`}
+              >
+                <span className="pp-conf-dot" style={{ left: `${a.value}%` }} />
+              </div>
+              <div className="pp-conf-ends">
+                <span>{a.low}</span>
+                <span>{a.high}</span>
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   )
 }
