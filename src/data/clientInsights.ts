@@ -238,41 +238,45 @@ export const clientToolkit: ToolkitTab = {
 
 /* ── suggested adventures ───────────────────────────────────────────────── */
 
-/** An adventure the advisor can put in front of this client next. `tone` is
-    what it asks of her — one adds something to the plan, the other takes
-    something away — and the rail's glyph reads off it. */
+/** An adventure the advisor can put in front of this client next. `art` names
+    the file in ../assets/adventures; the screen maps it, the way every other
+    page carrying this artwork does, so the data stays free of imports. */
 export interface SuggestedAdventure {
   name: string
   blurb: string
-  tone: 'add' | 'subtract'
+  art: string
 }
 
 export const suggestedAdventures: SuggestedAdventure[] = [
   {
     name: 'Angel Investing',
     blurb: 'Consider the risks and rewards of funding innovation.',
-    tone: 'add',
+    art: 'angel-investing',
   },
   {
     name: 'Subtracting',
     blurb: 'Focus on less to create space for what truly matters.',
-    tone: 'subtract',
+    art: 'subtracting',
   },
 ]
 
 /** What is left to choose from in the picker under the list. */
 export const moreAdventures: SuggestedAdventure[] = [
-  { name: 'Legacy', blurb: 'What you want to leave, and to whom.', tone: 'add' },
-  { name: 'Giving', blurb: 'Make generosity part of the plan, not an afterthought.', tone: 'add' },
+  { name: 'Legacy', blurb: 'What you want to leave, and to whom.', art: 'legacy' },
+  {
+    name: 'Giving',
+    blurb: 'Make generosity part of the plan, not an afterthought.',
+    art: 'giving',
+  },
   {
     name: 'Care',
     blurb: 'Plan for the people who may come to depend on you.',
-    tone: 'add',
+    art: 'care',
   },
   {
     name: 'Simplifying',
     blurb: 'Fewer accounts, fewer decisions, less to hold in your head.',
-    tone: 'subtract',
+    art: 'simplifying',
   },
 ]
 

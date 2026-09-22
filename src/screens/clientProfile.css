@@ -149,20 +149,28 @@
    The mood the client last tapped in the mobile app, carried across to the
    advisor. Ocean → teal, the consumer side's own colours, so it reads as
    something the client said rather than something the practice measured. */
+/* The check-in card, in the rail under her contact details. It was a band
+   across the top of the page, where it sat over whichever tab was open and read
+   as a property of the page; it is a property of her. The rail is ~200px, so
+   the face and the mood take the first row and the date takes the second,
+   rather than the one wide line the band had room for. */
 .cp-checkin {
-  display: flex;
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-14);
-  padding: var(--space-14) var(--space-20);
-  margin-bottom: var(--space-20);
+  gap: var(--space-4) var(--space-10);
+  margin-top: var(--space-4);
+  padding: var(--space-12);
   border-radius: var(--radius-xl);
   background: linear-gradient(100deg, var(--k-ocean), var(--k-teal));
   color: var(--text-inverse);
+  text-align: left;
 }
 .cp-checkin-face {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-circle);
   background: var(--k-grape-vivid);
   display: grid;
@@ -193,12 +201,11 @@
   background: var(--k-lime);
 }
 .cp-checkin-mood {
-  font-size: var(--text-2xl);
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
 }
 .cp-checkin-date {
-  margin-left: auto;
-  align-self: flex-end;
+  grid-column: 1 / -1;
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.8);
 }
@@ -384,6 +391,11 @@
   }
   .cp-checkin-date {
     display: none;
+  }
+  /* The rail runs as a row at this width, so the card sizes to itself rather
+     than stretching across the whole of it. */
+  .cp-checkin {
+    align-self: auto;
   }
 }
 /* Three tiles across is a postage stamp on a phone. This lives here rather

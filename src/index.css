@@ -1218,7 +1218,11 @@ input[type='checkbox'] {
   flex: none;
   display: inline-flex;
 }
-/* Small badge on the avatar's bottom-right marking clients in a household. */
+/* Small badge on the avatar's bottom-right marking clients in a household.
+   It only ever appears in the Clients table, which is the green side of the
+   book — so it wears the teal the avatar discs beside it do, not the plum it
+   used to, which made the one client in a household the one purple mark on a
+   green table. */
 .household-badge {
   position: absolute;
   right: -3px;
@@ -1229,8 +1233,8 @@ input[type='checkbox'] {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e9d9f7;
-  color: var(--plum);
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
   box-shadow: 0 0 0 2px #fff;
   z-index: 3;
 }

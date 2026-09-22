@@ -58,7 +58,10 @@
   gap: 8px;
   font-size: 13px;
   color: var(--grey-text, #8b8598);
-  padding: 10px 28px;
+  /* A quarter of the 28px it used to hold: the trail sits close to the window's
+     own edge rather than lining up with the page's cards. The vertical 10px is
+     what --pp-crumb-h is measured from and stays. */
+  padding: 10px 7px;
   border-bottom: 1px solid var(--line, #e7e4ee);
   /* Where you are does not scroll away from you. Opaque, or the cards read
      through it as it holds. Offsets start at the top bar's height, since the

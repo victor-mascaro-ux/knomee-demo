@@ -29,7 +29,7 @@ import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodWorried from '../assets/moods/worried.svg'
-import ClientInsightsTab from './ClientInsightsTab'
+import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import { scrollPageToTop } from '../reviewBridge'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -356,7 +356,7 @@ function GoalRow({
   )
 }
 
-type ClientTab = 'id' | 'insights'
+type ClientTab = 'id' | 'insights' | 'toolkit'
 
 export default function ClientProfileScreen({
   client,
@@ -446,6 +446,25 @@ export default function ClientProfileScreen({
               </span>
             </div>
 
+            {/* How she last said she felt, tapped on her phone. It reads as part of
+                who she is rather than as a banner over whichever tab is open —
+                which is why it sits with her name and her email, not above the
+                page. */}
+            <div className="cp-checkin">
+              <span className="cp-checkin-face">
+                <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
+              </span>
+              <span className="cp-checkin-main">
+                <span className="cp-checkin-dots" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
+                  ))}
+                </span>
+                <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
+              </span>
+              <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
+            </div>
+
             <div className="cp-side-block">
               <button className="cp-side-head" type="button">
                 {cp.household}
@@ -491,6 +510,7 @@ export default function ClientProfileScreen({
                 [
                   ['id', 'Financial ID'],
                   ['insights', 'Client Insights'],
+                  ['toolkit', 'Client Toolkit'],
                 ] as [ClientTab, string][]
               ).map(([id, label]) => (
                 <button
@@ -508,28 +528,13 @@ export default function ClientProfileScreen({
             </div>
           )}
 
-          {/* The check-in band: the mood the client last tapped on their phone. */}
-          <div className="cp-checkin">
-            <span className="cp-checkin-face">
-              <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
-            </span>
-            <span className="cp-checkin-main">
-              <span className="cp-checkin-dots" aria-hidden>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
-                ))}
-              </span>
-              <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
-            </span>
-            <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
-          </div>
-
           <div className="pp-title-row">
             {/* The page is named after the tab it is showing: her Financial ID
                 is the artefact the adventures produce, her Insights are the
                 advisor's read on it. */}
             <h1 className="pp-title">
-              {client.name}’s {tab === 'id' ? 'Financial ID' : 'Insights'}
+              {client.name}’s{' '}
+              {tab === 'id' ? 'Financial ID' : tab === 'insights' ? 'Insights' : 'Toolkit'}
             </h1>
             {ownerMenu}
             {/* The PDF is of the Financial ID — there is no insights document to
@@ -541,8 +546,10 @@ export default function ClientProfileScreen({
             )}
           </div>
 
-          {tab !== 'id' ? (
+          {tab === 'insights' ? (
             <ClientInsightsTab />
+          ) : tab === 'toolkit' ? (
+            <ClientToolkitTab />
           ) : (
             <>
               <section className="pp-card">
