@@ -861,13 +861,13 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
   return (
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
-        <SheetCredit />
         <div className="cx-sheet-account">
           <span className="cx-sheet-avatar">{clientInitial}</span>
           <span>
             <b>Client</b>
             <i>All five adventures complete</i>
           </span>
+          <SheetCredit />
         </div>
         <button className="cx-sheet-item" type="button" onClick={onExit}>
           Advisor Experience

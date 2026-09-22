@@ -1133,7 +1133,6 @@ function FlowPhone({
           {menuOpen && (
             <div className="cx-sheet" onClick={() => setMenuOpen(false)}>
               <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
-                <SheetCredit />
                 <div className="cx-sheet-account">
                   <span className="cx-sheet-avatar">{d.who.initial}</span>
                   <span>
@@ -1145,6 +1144,7 @@ function FlowPhone({
                           : 'Your answers, on this device')}
                     </i>
                   </span>
+                  <SheetCredit />
                 </div>
                 {/* Nothing to read until something is answered — an empty
                     report is worse than no way to it. */}

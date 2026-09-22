@@ -580,13 +580,13 @@ export default function AdvisorFlowScreen({
           {menuOpen && (
             <div className="cx-sheet" onClick={() => setMenuOpen(false)}>
               <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
-                <SheetCredit />
                 <div className="cx-sheet-account">
                   <span className="cx-sheet-avatar">{advisor.initial}</span>
                   <span>
                     <b>{advisor.name}</b>
                     <i>{advisor.role}</i>
                   </span>
+                  <SheetCredit />
                 </div>
                 <button
                   className="cx-sheet-item"
