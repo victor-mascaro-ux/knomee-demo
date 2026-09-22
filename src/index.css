@@ -211,11 +211,29 @@ body {
 }
 
 /* ---------- Tabs ---------- */
+/* The nav stays under the bar that carries it. Which screen you are on is not
+   worth scrolling away from either — and the bar above it already holds its
+   place, so a tab row that slid out from under it left the product's two fixed
+   points disagreeing. Opaque, or the table reads through it as it holds; z-index
+   sits under the bar's 100 and over the page's own layers (a row's hover card
+   is 50), and well under the modals at 200. */
 .tabs {
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: 90;
+  background: var(--surface-page);
   display: flex;
   gap: 10px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 0;
+}
+/* .slide-nav sets position: relative, for the indicator that slides between the
+   tabs, and every switch in the app wears it — so the sticky is re-stated for
+   the one that is a page nav rather than dropped on all of them. Sticky is a
+   positioned element too: the indicator still has its containing block. */
+.tabs.slide-nav {
+  position: sticky;
+  top: var(--topbar-h);
 }
 
 /* The "powered by knomee" credit, under a client's brand only. It sits in the
