@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
-import { avatarSources, clientProfile } from '../data/clientProfile'
+import { avatarSources } from '../data/clientProfile'
+import { profileFor } from '../data/memberProfiles'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -397,7 +398,9 @@ export default function ClientProfileScreen({
   mine?: boolean
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
-  const cp = clientProfile
+  /* Whose answers this page shows. Emily and Sebastian have their own; anyone
+     else opens the built-out one, as the page always did. */
+  const cp = profileFor(client.name)
 
   // Open the profile scrolled to the top, regardless of where the client's row
   // sat in the table. On the live site the app runs in a full-height iframe and
