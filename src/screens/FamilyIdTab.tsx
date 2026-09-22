@@ -34,7 +34,7 @@ import {
   orderGoals,
   useCollapsed,
 } from './profileParts'
-import { Portrait } from './ClientProfileScreen'
+import { Board, Portrait } from './ClientProfileScreen'
 import { CaretIcon, CheckIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icGoals from '../assets/adventures/goals.svg'
@@ -45,6 +45,7 @@ import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
+import icVision from '../assets/adventures/vision.png'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -69,6 +70,7 @@ const blank = (m: HouseholdMember): FamilyMemberId => ({
   futureYou: { where: [], what: [], who: [] },
   outlook: { concerns: [], hopes: [] },
   badges: [],
+  boards: [],
 })
 
 /* Whose column this is. Every column in every card is headed by it, so a row
@@ -436,6 +438,26 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             ))}
           </>
         )}
+      />
+
+      {/* The board is the one card whose answer is a made thing rather than a
+          list, so a member who has not made one gets the same tray Life Events
+          and Questions use — the way in, not a notice that there is nothing. */}
+      <FamilyCard
+        members={members}
+        icon={icVision}
+        title="Future Vision Board"
+        render={(m) =>
+          m.boards.length === 0 ? (
+            <EmptyState art={EMPTY_ART.visionBoard} label="Add a Vision Board" cta />
+          ) : (
+            <div className="cp-boards">
+              {m.boards.map((b) => (
+                <Board board={b} key={b.title} />
+              ))}
+            </div>
+          )
+        }
       />
 
       <FamilyCard

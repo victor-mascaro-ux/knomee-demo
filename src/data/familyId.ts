@@ -14,6 +14,7 @@
 
 import { clientProfile } from './clientProfile'
 import type { ClientGoal } from './clientProfile'
+import type { VisionBoard } from './clientProfile'
 import type { LifeEvent, ProfileQuestion } from './financialId'
 
 export interface FamilyMemberId {
@@ -32,6 +33,8 @@ export interface FamilyMemberId {
   futureYou: { where: string[]; what: string[]; who: string[] }
   outlook: { concerns: string[]; hopes: string[] }
   badges: string[]
+  /* The one card a member can have several of, or none. */
+  boards: VisionBoard[]
 }
 
 /* ── Emily, off her own page ─────────────────────────────────────────────── */
@@ -49,6 +52,7 @@ const emily: FamilyMemberId = {
   futureYou: clientProfile.futureYou,
   outlook: clientProfile.outlook,
   badges: clientProfile.badges,
+  boards: clientProfile.boards,
 }
 
 /* ── Sebastian, the second seat ──────────────────────────────────────────── */
@@ -96,6 +100,9 @@ const sebastian: FamilyMemberId = {
     ],
   },
   badges: ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals'],
+  /* He has not made one. The card says so in his column rather than showing
+     hers twice. */
+  boards: [],
 }
 
 export const familyId = {
