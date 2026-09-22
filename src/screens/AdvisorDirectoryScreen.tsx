@@ -330,7 +330,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
   return (
     <>
       <div className="page-title-row">
-        <h1 className="page-title">Recruiting Advisor (Testing Entries)</h1>
+        <h1 className="page-title">Advisor Recruit (Testing Entries)</h1>
         <div className="adir-actions">
           <button className="btn btn-outline" type="button" onClick={load} disabled={loading}>
             {loading ? 'Loading…' : 'Refresh'}
