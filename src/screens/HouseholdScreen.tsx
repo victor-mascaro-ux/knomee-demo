@@ -128,23 +128,27 @@ export default function HouseholdScreen({
             <>
               <div className="pp-title-row">
                 <h1 className="pp-title">Manage Household Members</h1>
-                <button
-                  className="btn btn-outline"
-                  type="button"
-                  onClick={() => onAction('Edit family')}
-                >
-                  Edit Family
-                </button>
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={() => onAction('Invite sent')}
-                >
-                  Add Family Member
-                </button>
+                {/* The two controls are one cluster at the title's right, not
+                    two things the row spaces out between themselves. */}
+                <div className="hh-actions">
+                  <button
+                    className="btn btn-outline"
+                    type="button"
+                    onClick={() => onAction('Edit family')}
+                  >
+                    Edit Family
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={() => onAction('Invite sent')}
+                  >
+                    Add Family Member
+                  </button>
+                </div>
               </div>
 
-              <section className="pp-card">
+              <section className="pp-card hh-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">Members</span>
                 </div>
@@ -159,7 +163,9 @@ export default function HouseholdScreen({
                     const profile = row?.status === 'complete' ? 'complete' : 'incomplete'
                     return (
                       <div className="hh-member" key={m.name}>
-                        <Portrait name={m.name} size="sm" />
+                        <span className="hh-member-face">
+                          <Portrait name={m.name} size="sm" />
+                        </span>
                         <div className="hh-member-main">
                           <button
                             type="button"
@@ -172,7 +178,7 @@ export default function HouseholdScreen({
                             </span>
                           </button>
                           <span className="hh-member-meta">
-                            {m.role} · Joined {m.joined}
+                            {m.role} • Joined {m.joined}
                           </span>
                         </div>
                         <span className={`hh-pill ${pending ? 'is-pending' : 'is-active'}`}>
