@@ -115,18 +115,6 @@ export interface Word {
   hint?: string
 }
 
-/** How much the person actually wrote, and what that says about how to talk to
-    them. The client side carries it under the word lists; the prospect and firm
-    sides leave it out and the rail renders without it. */
-export interface Verbosity {
-  /** 'high' · 'moderate' · 'low' — the pill beside the heading. */
-  level: string
-  /** Words across their written answers. */
-  words: number
-  engagement: string
-  takeaway: string
-}
-
 export interface ToolkitTab {
   topAction: string
   starters: Starter[]
@@ -136,8 +124,6 @@ export interface ToolkitTab {
   /** Sits under the Questions head. The firm side uses it to say the three are
       the ones the flow handed the candidate, so a rep knows they are coming. */
   questionsNote?: string
-  /** Client side only. */
-  verbosity?: Verbosity
 }
 
 /* The four tags are conversation technique rather than domain knowledge, so

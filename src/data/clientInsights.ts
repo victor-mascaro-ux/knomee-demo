@@ -227,13 +227,6 @@ export const clientToolkit: ToolkitTab = {
       { word: 'Pressure', hint: 'She is already holding college, health and a separation at once' },
     ],
   },
-
-  verbosity: {
-    level: 'high',
-    words: 248,
-    engagement: 'Moderately expressive respondent',
-    takeaway: 'A direct, purposeful communication style will likely resonate with her',
-  },
 }
 
 /* ── suggested adventures ───────────────────────────────────────────────── */

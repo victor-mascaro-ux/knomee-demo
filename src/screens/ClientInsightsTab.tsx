@@ -47,8 +47,10 @@ const ADVENTURE_ART: Record<string, string> = {
 }
 
 /* One adventure, as a row you could send: its symbol, its name, and the line
-   that says what it asks of her. */
-function AdventureRow({ a }: { a: SuggestedAdventure }) {
+   that says what it asks of her. The ✕ appears on hover, the way the copy
+   affordance does on a conversation starter — it is a row you act on, not a
+   row with a button parked on it. */
+function AdventureRow({ a, onRemove }: { a: SuggestedAdventure; onRemove: () => void }) {
   return (
     <div className="ci-adv">
       <img className="ci-adv-ic" src={ADVENTURE_ART[a.art]} alt="" />
@@ -56,17 +58,43 @@ function AdventureRow({ a }: { a: SuggestedAdventure }) {
         <b>{a.name}</b>
         <i>{a.blurb}</i>
       </span>
+      <button
+        type="button"
+        className="ci-adv-x"
+        onClick={onRemove}
+        aria-label={`Remove ${a.name} from the suggestions`}
+      >
+        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden>
+          <path
+            d="M4 4l8 8M12 4l-8 8"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
     </div>
   )
 }
 
+/* Every adventure this client could be sent, suggested or not. Which of them
+   are on the list is the only thing that changes. */
+const ALL_ADVENTURES: SuggestedAdventure[] = [
+  ...clientInsights.adventures,
+  ...clientInsights.moreAdventures,
+]
+
 function AdventuresCard() {
-  /* Choosing one puts it on the list, where it reads exactly like the two that
-     were suggested — an advisor adding an adventure is the same act as knomee
-     suggesting one. */
-  const [added, setAdded] = useState<SuggestedAdventure[]>([])
-  const rows = [...clientInsights.adventures, ...added]
-  const left = clientInsights.moreAdventures.filter((m) => !added.some((a) => a.name === m.name))
+  /* The card holds names rather than adventures, because an adventure taken off
+     the list has to be offered back in the picker — one list, read two ways,
+     cannot fall out of step with itself. Adding and removing are the same act
+     from either side: what knomee suggested and what the advisor chose read
+     identically on the list. */
+  const [shown, setShown] = useState<string[]>(clientInsights.adventures.map((a) => a.name))
+  const rows = shown
+    .map((n) => ALL_ADVENTURES.find((a) => a.name === n))
+    .filter((a): a is SuggestedAdventure => Boolean(a))
+  const left = ALL_ADVENTURES.filter((a) => !shown.includes(a.name))
 
   return (
     <section className="pp-card rd-card ci-adv-card">
@@ -77,9 +105,17 @@ function AdventuresCard() {
         </span>
       </div>
       <div className="ci-advs">
-        {rows.map((a) => (
-          <AdventureRow a={a} key={a.name} />
-        ))}
+        {rows.length ? (
+          rows.map((a) => (
+            <AdventureRow
+              a={a}
+              key={a.name}
+              onRemove={() => setShown((list) => list.filter((n) => n !== a.name))}
+            />
+          ))
+        ) : (
+          <p className="ci-adv-empty">No adventures suggested. Add one below.</p>
+        )}
       </div>
       <label className="ci-adv-pick">
         Add an adventure:
@@ -89,7 +125,7 @@ function AdventuresCard() {
           disabled={left.length === 0}
           onChange={(e) => {
             const pick = left.find((m) => m.name === e.target.value)
-            if (pick) setAdded((list) => [...list, pick])
+            if (pick) setShown((list) => [...list, pick.name])
           }}
         >
           <option value="">

@@ -48,12 +48,13 @@
   gap: var(--space-10);
 }
 .ci-adv {
+  position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   gap: var(--space-12);
-  /* Symbol centred on the two lines beside it, the way an adventure row reads
-     everywhere else — not hung off the first one. */
-  align-items: center;
+  /* Symbol level with the name it belongs to. A row whose blurb runs to two
+     lines would otherwise float its icon down between them. */
+  align-items: start;
   padding: var(--space-12);
   border: var(--border-thin) solid var(--border-default);
   border-radius: var(--radius-xl);
@@ -85,6 +86,10 @@
   gap: var(--space-2);
   min-width: 0;
 }
+/* Room for the ✕, so a two-line blurb does not run under it. */
+.ci-adv-body {
+  padding-right: var(--space-16);
+}
 .ci-adv-body b {
   font-size: 13px;
   font-weight: 700;
@@ -95,6 +100,51 @@
   font-size: 12px;
   line-height: 1.45;
   color: var(--text-table);
+}
+
+/* Take one off the list. Hidden until the row is pointed at or the button is
+   tabbed to — the same affordance, and the same manners, as .rd-copy on a
+   conversation starter. */
+.ci-adv-x {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-circle);
+  background: none;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+.ci-adv:hover .ci-adv-x,
+.ci-adv-x:focus-visible {
+  opacity: 1;
+}
+.ci-adv-x:hover {
+  background: var(--k-crimson-light);
+  color: var(--k-crimson);
+}
+.ci-adv-x svg {
+  display: block;
+}
+
+/* Nothing on the list is a state the advisor put it in, so it reads as a
+   sentence rather than as artwork. */
+.ci-adv-empty {
+  margin: 0;
+  padding: var(--space-12) 0 var(--space-4);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 .ci-adv-pick {
