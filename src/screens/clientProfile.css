@@ -120,7 +120,8 @@
   color: var(--avatar-ink);
   display: grid;
   place-items: center;
-  font-size: var(--text-xs);
+  /* 0.45 of the 26px disc, the dashboards' proportion. */
+  font-size: 12px;
   font-weight: var(--weight-semibold);
 }
 .cp-person-main {

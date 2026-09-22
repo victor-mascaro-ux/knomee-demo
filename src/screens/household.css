@@ -6,8 +6,8 @@
 /* A household has no face, so the disc its members' portraits would take holds
    the family's initial instead. */
 .hh-monogram {
-  font-size: 38px;
-  font-weight: var(--weight-bold);
+  /* Size and weight come from .pp-avatar, which a person's initial in the same
+     disc already takes — the family's letter is not a different letter. */
   color: var(--avatar-ink);
   background: var(--avatar-bg);
 }
@@ -50,7 +50,8 @@
 .hh-member-face .cp-person-av {
   width: 44px;
   height: 44px;
-  font-size: var(--text-xl);
+  /* 0.45 of the disc, as on the dashboards. */
+  font-size: 20px;
 }
 .hh-member-main {
   display: flex;

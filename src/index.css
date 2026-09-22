@@ -1262,12 +1262,16 @@ input[type='checkbox'] {
   height: 11px;
 }
 
+/* THE letter disc. Purple on the prospect side, green on the client side — the
+   table says which book you are in before you have read a name — and the letter
+   is 0.45 of the disc at 600, which is the proportion every other initial in
+   the app is set from: 38 → 17 here, 26 → 12 in a rail, 44 → 20 in the family's
+   member list, 96 → 42 on a portrait. Discs differ in size by where they are;
+   they should not differ in how much of them the letter fills. */
 .avatar-initial {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Purple on the prospect side, green on the client side — the table says
-     which book you are in before you have read a name. */
   background: var(--k-grape-light);
   color: var(--k-grape);
   font-size: 17px;
@@ -3987,11 +3991,11 @@ button.name-link-btn:hover .name-text {
   overflow: clip;
   min-height: 520px;
 }
-/* A lateral menu stays put while the column beside it scrolls. The strip and
-   its divider stay full height; the block inside it is what sticks. */
+/* A lateral menu stays put while the column beside it scrolls; the block inside
+   it is what sticks. Its tint is its own boundary — no rule down the edge, as
+   on every other lateral menu in the app. */
 .settings-side {
   background: #fafafa;
-  border-right: 1px solid var(--line);
 }
 .settings-side-inner {
   position: sticky;
