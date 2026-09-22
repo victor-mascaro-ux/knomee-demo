@@ -85,29 +85,6 @@ const ZOOM_STEP = 0.1
 const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
 const OTHER = 'Other'
 
-/* The walkthrough opens on Welcome and goes straight to the adventures list.
-   Answering it yourself needs one screen in between: who the Business ID is
-   headed with. It is inserted here rather than in the flow data, because the
-   walkthrough is somebody whose name the demo already knows. */
-const IDENTITY: Step = {
-  id: 'you',
-  kind: 'identity',
-  title: 'Who’s answering?',
-  body: `Your Business ID is headed with this. Leave a field blank and it simply drops out of the line.
-
-Nothing is sent anywhere — the answers stay in this browser.`,
-  cta: 'Continue',
-}
-
-/* An invited advisor is greeted by name on the first screen — the link was made
-   for them, and a page that opens "Welcome" to somebody who was sent it reads
-   like a page that does not know who asked. Everywhere else the flow opens as
-   it always has. */
-function stepsFor(hello?: string | null): Step[] {
-  const welcome = hello ? { ...flowSteps[0], title: hello } : flowSteps[0]
-  return [welcome, IDENTITY, ...flowSteps.slice(1)]
-}
-
 /* What this screen is being used for. `demo` is the flow as it has always been,
    opened from the menu and handed round a room. `invited` is one advisor's own
    link: their own sheet, their name on the first screen, and none of the
@@ -115,6 +92,46 @@ function stepsFor(hello?: string | null): Step[] {
    of the directory — the Business ID and the playbooks behind it, and nothing
    that could write to their answers. */
 export type SelfMode = 'demo' | 'invited' | 'view'
+
+/* The walkthrough opens on Welcome and goes straight to the adventures list.
+   Answering it yourself needs one screen in between: who the Business ID is
+   headed with. It is inserted here rather than in the flow data, because the
+   walkthrough is somebody whose name the demo already knows. */
+const IDENTITY_HEAD =
+  'Your Business ID is headed with this. Leave a field blank and it simply drops out of the line.'
+
+/* Where the answers actually go, said on the screen that collects the name.
+   This used to read "Nothing is sent anywhere — the answers stay in this
+   browser", which stopped being true the moment a sitting started reaching the
+   shared directory. Telling somebody their answers are private while posting
+   them is the one line on this page that is not allowed to be out of date. */
+const IDENTITY_WHERE: Record<SelfMode, string> = {
+  demo: 'Kept on this device, and listed in the advisor directory as a sitting.',
+  invited: 'Whoever sent you this link can see what you answer.',
+  view: 'These are their answers, read from the directory.',
+}
+
+const IDENTITY: Step = {
+  id: 'you',
+  kind: 'identity',
+  title: 'Who’s answering?',
+  body: `${IDENTITY_HEAD}
+
+${IDENTITY_WHERE.demo}`,
+  cta: 'Continue',
+}
+
+/* An invited advisor is greeted by name on the first screen — the link was made
+   for them, and a page that opens "Welcome" to somebody who was sent it reads
+   like a page that does not know who asked. Everywhere else the flow opens as
+   it always has. */
+function stepsFor(hello: string | null, mode: SelfMode): Step[] {
+  const welcome = hello ? { ...flowSteps[0], title: hello } : flowSteps[0]
+  const identity: Step = { ...IDENTITY, body: `${IDENTITY_HEAD}
+
+${IDENTITY_WHERE[mode]}` }
+  return [welcome, identity, ...flowSteps.slice(1)]
+}
 
 /* ── writing to the sheet ────────────────────────────────────────────────
    One place that knows how an answer is stored, handed down to the question
@@ -702,14 +719,25 @@ export default function AdvisorSelfScreen({
   // The sheet outlives the session: answering eight minutes of questions and
   // losing them to a reload is not a thing to do to anyone. Viewing is the
   // exception — those answers are somebody else's and arrive with the entry.
-  const [answers, setAnswers] = useState<Answers>(() =>
-    viewing && entry ? entry.answers : loadAnswers(scope),
-  )
+  const [answers, setAnswers] = useState<Answers>(() => {
+    if (viewing && entry) return entry.answers
+    const loaded = loadAnswers(scope)
+    /* The name the link was made for arrives already in the field. The page has
+       just greeted them by it, so asking them to type it is asking them to tell
+       us something we have visibly used — and the field is still theirs to
+       correct, which is why this only fills a blank one and never overwrites a
+       name they have changed. */
+    const given = invite?.name.trim() ?? ''
+    if (mode === 'invited' && given && !loaded.identity.name.trim()) {
+      return { ...loaded, identity: { ...loaded.identity, name: given } }
+    }
+    return loaded
+  })
   const [view, setView] = useState<'flow' | 'report' | 'record'>('flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
   const steps = useMemo(
-    () => stepsFor(mode === 'invited' && invite ? greeting(invite.name) : null),
+    () => stepsFor(mode === 'invited' && invite ? greeting(invite.name) : null, mode),
     [mode, invite],
   )
   useEffect(() => {
