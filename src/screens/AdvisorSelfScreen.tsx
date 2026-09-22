@@ -16,19 +16,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
+import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
 import {
-  ActionRow,
   ArrowRight,
   CheckIcon,
   ClockIcon,
-  CompletedRow,
   DEVICE_H,
   DEVICE_W,
   IPhone,
-  LockedRow,
-  ProgressMeter,
   SheetCredit,
   TabFinId,
   TabQuestions,
@@ -502,49 +499,13 @@ function StepBody({
 
     case 'home':
       return (
-        <>
-          <ProgressMeter done={d.progress.done} required={d.progress.required} />
-          <h2 className="cx-screen-title">My Adventures</h2>
-          <div className="cx-adv-list">
-            {adventureStates(a).map((row) => {
-              // Every row opens its adventure — this is a walkthrough as much as
-              // a form, so the state a row wears is a look, not a gate.
-              const open = () => onAdventure(row.id)
-              if (row.state === 'done') {
-                return (
-                  <CompletedRow
-                    key={row.id}
-                    title={row.title}
-                    artKey={row.art}
-                    on={a.completed}
-                    onRow={open}
-                  />
-                )
-              }
-              if (row.state === 'open') {
-                return (
-                  <ActionRow
-                    key={row.id}
-                    a={{
-                      title: row.title,
-                      art: row.art,
-                      // Half-answered says so, rather than inviting you to
-                      // start something you are already three questions into.
-                      blurb: row.count.done
-                        ? `${row.count.done} of ${row.count.total} questions answered`
-                        : row.blurb,
-                      minutes: row.minutes,
-                      label: row.count.done ? 'Continue' : 'Start',
-                    }}
-                    onAct={open}
-                    onRow={open}
-                  />
-                )
-              }
-              return <LockedRow key={row.id} title={row.title} artKey={row.art} onRow={open} />
-            })}
-          </div>
-        </>
+        <AdventureList
+          rows={adventureStates(a)}
+          done={d.progress.done}
+          required={d.progress.required}
+          completedOn={a.completed}
+          onOpen={onAdventure}
+        />
       )
 
     case 'intro':
@@ -1139,26 +1100,14 @@ function FlowPhone({
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
             </button>
-            {/* Reading somebody else's page, the centre is the mark and nothing
-                more: it is the way into the adventures, and reopening another
-                person's questionnaire is the one thing this bar must not offer.
-                A span rather than a disabled button, because it is not a control
-                that happens to be unavailable — there is no version of this page
-                where it does something. */}
-            {viewing ? (
-              <span className="cx-tab cx-tab-center" aria-hidden>
-                <img className="cx-tab-mark" src={knomeeMark} alt="" />
-              </span>
-            ) : (
-              <button
-                type="button"
-                className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
-                aria-label="Adventures"
-                onClick={closeToList}
-              >
-                <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
-              </button>
-            )}
+            <button
+              type="button"
+              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
+              aria-label="Adventures"
+              onClick={closeToList}
+            >
+              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+            </button>
             {/* The other half of what the eight minutes produce. The Business
                 ID is what a platform reads about you; these are what you put to
                 it — so they belong on the bar beside it rather than only at the
