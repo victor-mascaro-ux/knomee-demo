@@ -34,7 +34,8 @@ import {
   orderGoals,
   useCollapsed,
 } from './profileParts'
-import { Board, Portrait } from './ClientProfileScreen'
+import { Board } from './ClientProfileScreen'
+import { FamilyCard, Who } from './familyParts'
 import { CaretIcon, CheckIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icGoals from '../assets/adventures/goals.svg'
@@ -45,7 +46,7 @@ import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
-import icVision from '../assets/adventures/vision.png'
+import icVision from '../assets/adventures/vision-board.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -72,58 +73,6 @@ const blank = (m: HouseholdMember): FamilyMemberId => ({
   badges: [],
   boards: [],
 })
-
-/* Whose column this is. Every column in every card is headed by it, so a row
-   read halfway down a long card still belongs to somebody. */
-function Who({ m }: { m: FamilyMemberId }) {
-  return (
-    <span className="fid-who">
-      <Portrait name={m.name} size="sm" />
-      <b>{m.name}</b>
-    </span>
-  )
-}
-
-/* The card the whole page is made of: the Financial ID's card and head, with a
-   column per member under it. */
-function FamilyCard({
-  members,
-  icon,
-  title,
-  head,
-  foot,
-  bodyRef,
-  render,
-}: {
-  members: FamilyMemberId[]
-  icon: string
-  title: string
-  head?: React.ReactNode
-  foot?: React.ReactNode
-  bodyRef?: React.RefObject<HTMLDivElement>
-  render: (m: FamilyMemberId) => React.ReactNode
-}) {
-  return (
-    <section className="pp-card">
-      <div className="pp-card-head">
-        <span className="pp-card-title">
-          <img className="pp-card-ic" src={icon} alt="" />
-          {title}
-        </span>
-        {head}
-      </div>
-      <div className="fid-split" ref={bodyRef}>
-        {members.map((m) => (
-          <div className="fid-cell" key={m.name}>
-            <Who m={m} />
-            {render(m)}
-          </div>
-        ))}
-      </div>
-      {foot}
-    </section>
-  )
-}
 
 /* One collapse for a card, shared by both columns: the two lists are two
    answers to one question and should not fold independently. The longer column
@@ -221,7 +170,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
               <div className="fid-split fid-split-tight">
                 {members.map((m) => (
                   <div className="fid-cell" key={m.name}>
-                    <Who m={m} />
+                    <Who name={m.name} />
                     <p className="pp-highlight-text">{m.highlights[h.title] ?? '—'}</p>
                   </div>
                 ))}

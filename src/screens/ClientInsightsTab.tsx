@@ -84,7 +84,7 @@ const ALL_ADVENTURES: SuggestedAdventure[] = [
   ...clientInsights.moreAdventures,
 ]
 
-function AdventuresCard() {
+export function AdventuresCard() {
   /* The card holds names rather than adventures, because an adventure taken off
      the list has to be offered back in the picker — one list, read two ways,
      cannot fall out of step with itself. Adding and removing are the same act

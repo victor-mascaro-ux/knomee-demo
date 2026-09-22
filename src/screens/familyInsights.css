@@ -1,0 +1,159 @@
+/* Family Insights — what a household adds to the toolkit it shares with the
+   client's page: the statements they both answered, and the table of topics to
+   tread carefully around. The cards, the starters, the tags, the rail and the
+   split columns all come from readiness.css, familyId.css and the profile's own
+   card. Scoped to .fin-* and every value is a token. */
+
+.fin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.fin .pp-card {
+  margin-bottom: 0;
+}
+
+/* The working on the left, the reading on the right. */
+.fin-compare {
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: var(--space-20);
+  align-items: start;
+}
+.fin-statements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.fin-statement {
+  padding: var(--space-14);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+}
+/* Two marks on one track, in the two colours the chips under it carry. The
+   dot itself is the confidence card's; only its colour is this page's. */
+.fin-dot-0 {
+  background: var(--k-ocean);
+}
+.fin-dot-1 {
+  background: var(--k-azure);
+}
+.fin-marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  justify-content: flex-end;
+  padding-top: var(--space-10);
+}
+.fin-chip {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+.fin-chip-0 {
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+}
+.fin-chip-1 {
+  background: var(--k-azure-light);
+  color: var(--k-azure);
+}
+
+.fin-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+/* A reading, not a row: the sunken wash the driver blocks wear, so the two
+   sides of the card read as working and conclusion rather than as two lists. */
+.fin-point {
+  margin: 0;
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  border: var(--border-thin) solid var(--border-hairline);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--text-table);
+}
+
+/* The lists each member brings. */
+.fin-bullets {
+  margin: 0;
+  padding-left: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.fin-bullets li {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.fin-none {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+/* ---------- sensitive topics ----------
+   A table of three columns, and the third is the only one that changes what
+   the advisor does — so it is the one that keeps the accent. */
+.fin-topics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.fin-topic {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: var(--space-12);
+  align-items: start;
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-default);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.fin-topic-head {
+  padding-top: 0;
+  padding-bottom: var(--space-4);
+  background: none;
+  border: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+.fin-topic-name {
+  font-weight: var(--weight-semibold);
+  color: var(--rd-ink);
+}
+.fin-topic-how {
+  border-left: 3px solid var(--rd-accent);
+  padding-left: var(--space-12);
+}
+.fin-topic-head span:last-child {
+  padding-left: var(--space-12);
+}
+
+@media (max-width: 1100px) {
+  .fin-compare {
+    grid-template-columns: 1fr;
+  }
+  .fin-topic {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-6);
+  }
+  .fin-topic-head {
+    display: none;
+  }
+  .fin-topic-how {
+    border-left: 0;
+    padding-left: 0;
+  }
+}

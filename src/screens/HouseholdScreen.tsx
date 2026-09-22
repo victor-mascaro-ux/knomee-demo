@@ -21,6 +21,7 @@ import { baseClients } from '../data/clients'
 import type { Client } from '../data/clients'
 import { Portrait } from './ClientProfileScreen'
 import FamilyIdTab from './FamilyIdTab'
+import FamilyInsightsTab from './FamilyInsightsTab'
 import RowMenu from '../components/RowMenu'
 import { RowChevron } from '../components/profileIcons'
 import { scrollPageToTop } from '../reviewBridge'
@@ -235,13 +236,9 @@ export default function HouseholdScreen({
           ) : (
             <>
               <div className="pp-title-row">
-                <h1 className="pp-title">{household.name}’s Insights</h1>
+                <h1 className="pp-title">{household.name} Insights</h1>
               </div>
-              <div className="pp-placeholder">
-                Family Insights — the household’s relationship score, who is engaged and who
-                has gone quiet, and the conversation to have with them together. Not built in this
-                prototype.
-              </div>
+              <FamilyInsightsTab members={members} />
             </>
           )}
         </main>
