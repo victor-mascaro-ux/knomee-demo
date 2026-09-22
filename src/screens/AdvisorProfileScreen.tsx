@@ -14,6 +14,7 @@ import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
 import { marcusProfile, type AdvisorProfileData } from '../data/advisorProfile'
+import { printSheet } from '../printSheet'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
@@ -237,7 +238,16 @@ export default function AdvisorProfileScreen({
                 {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
               </h1>
             </div>
-            <button className="btn btn-download active" type="button">
+            {/* The Business ID is what this button promises, so it is what
+                gets printed — whichever tab you were reading. */}
+            <button
+              className="btn btn-download active"
+              type="button"
+              onClick={() => {
+                setTab('id')
+                printSheet()
+              }}
+            >
               <DownloadIcon /> Download PDF
             </button>
           </div>

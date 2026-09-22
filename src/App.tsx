@@ -4335,7 +4335,7 @@ export default function App() {
       <TopBar
         logo={brand ? brand.logo : undefined}
         cobrand={cobrandLayout}
-        sub={firmView ? 'ADVISOR RECRUITMENT' : adminView ? 'ADMIN' : 'ADVISOR'}
+        sub={firmView ? 'ADVISOR RECRUIT' : adminView ? 'ADMIN' : 'ADVISOR'}
         onSettings={() => {
           setSettingsOpen(true)
           setSegmentationOpen(false)

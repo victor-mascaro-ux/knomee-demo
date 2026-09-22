@@ -210,25 +210,12 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
-        {/* The tier is a reading of the number, not of the breakdown: it sits
-            under the dial it describes rather than at the foot of the seven
-            cards beside it. */}
-        <div className="rd-score-col">
-          <div className="rd-kq">
-            <span className="rd-kq-title">
-              {score.name} ({score.abbr})
-            </span>
-            <span className="rd-kq-q">{s.question}</span>
-            <ScoreRing value={s.kq} label={score.name} />
-          </div>
-          <div className={`rd-tier rd-tier-${s.tier.n}`}>
-            <span className="rd-tier-swatch" aria-hidden />
-            <span className="rd-tier-name">
-              Tier {s.tier.n} – {s.tier.name.toUpperCase()}
-            </span>
-            <p className="rd-tier-body">{s.tier.body}</p>
-            {s.tier.note && <p className="rd-tier-note">{s.tier.note}</p>}
-          </div>
+        <div className="rd-kq">
+          <span className="rd-kq-title">
+            {score.name} ({score.abbr})
+          </span>
+          <span className="rd-kq-q">{s.question}</span>
+          <ScoreRing value={s.kq} label={score.name} />
         </div>
         <div className="rd-breakdown">
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
@@ -238,6 +225,18 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
             ))}
           </div>
         </div>
+      </div>
+      {/* The tier is a reading of every number above it — the dial and the
+          breakdown both — so it runs under the whole card rather than being
+          folded into the dial's column, where a sentence about the household
+          wrapped over four lines in a third of the width. */}
+      <div className={`rd-tier rd-tier-${s.tier.n}`}>
+        <span className="rd-tier-swatch" aria-hidden />
+        <span className="rd-tier-name">
+          Tier {s.tier.n} – {s.tier.name.toUpperCase()}
+        </span>
+        <p className="rd-tier-body">{s.tier.body}</p>
+        {s.tier.note && <p className="rd-tier-note">{s.tier.note}</p>}
       </div>
     </section>
   )

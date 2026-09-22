@@ -34,6 +34,7 @@ import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
+import { printSheet } from '../printSheet'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -583,7 +584,7 @@ export default function ClientProfileScreen({
             {/* The PDF is of the Financial ID — there is no insights document to
                 download, and a button that says there is would be a promise. */}
             {tab === 'id' && (
-              <button className="btn btn-download active" type="button">
+              <button className="btn btn-download active" type="button" onClick={printSheet}>
                 <DownloadIcon /> Download PDF
               </button>
             )}
