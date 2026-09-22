@@ -12,10 +12,28 @@
   background: var(--avatar-bg);
 }
 
-/* ---------- the member list ---------- */
+/* The two controls beside the title travel together at its right edge. The row
+   is space-between, which with three children spaces all three — the title at
+   one end and a button stranded in the middle. */
+.hh-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-left: auto;
+}
+
+/* ---------- the member list ----------
+   A white card rather than the grey tray the Financial ID's cards are. That
+   tray exists to hold white tiles; a list of people is not tiles, and on this
+   page the tray read as a flat grey block with names printed on it. */
+.hh-card {
+  background: var(--surface-card);
+  padding: var(--space-20) var(--space-24);
+}
 .hh-members {
   display: flex;
   flex-direction: column;
+  gap: var(--space-8);
 }
 /* Portrait, who they are, the two readings, and the row's own menu. The name
    and its meta take the middle and everything else holds its width, so the
@@ -25,10 +43,14 @@
   grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: var(--space-14);
-  padding: var(--space-14) var(--space-4);
+  padding: var(--space-10) var(--space-4);
 }
-.hh-member + .hh-member {
-  border-top: var(--border-thin) solid var(--border-default);
+/* A person's face at the size their own page gives it, rather than the 26px
+   the rail squeezes it into. */
+.hh-member-face .cp-person-av {
+  width: 44px;
+  height: 44px;
+  font-size: var(--text-xl);
 }
 .hh-member-main {
   display: flex;
@@ -42,7 +64,7 @@
   padding: 0;
   background: none;
   font-family: inherit;
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   color: var(--text-link);
   cursor: pointer;

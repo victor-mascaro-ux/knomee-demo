@@ -206,19 +206,16 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
-        <div className="rd-kq">
-          <span className="rd-kq-title">
-            {score.name} ({score.abbr})
-          </span>
-          <span className="rd-kq-q">{s.question}</span>
-          <ScoreRing value={s.kq} label={score.name} />
-        </div>
-        <div className="rd-breakdown">
-          <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
-          <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
-            {s.dimensions.map((d, i) => (
-              <DimensionCard d={d} i={i} key={d.key} />
-            ))}
+        {/* The tier is a reading of the number, not of the breakdown: it sits
+            under the dial it describes rather than at the foot of the seven
+            cards beside it. */}
+        <div className="rd-score-col">
+          <div className="rd-kq">
+            <span className="rd-kq-title">
+              {score.name} ({score.abbr})
+            </span>
+            <span className="rd-kq-q">{s.question}</span>
+            <ScoreRing value={s.kq} label={score.name} />
           </div>
           <div className={`rd-tier rd-tier-${s.tier.n}`}>
             <span className="rd-tier-swatch" aria-hidden />
@@ -227,6 +224,14 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
             </span>
             <p className="rd-tier-body">{s.tier.body}</p>
             {s.tier.note && <p className="rd-tier-note">{s.tier.note}</p>}
+          </div>
+        </div>
+        <div className="rd-breakdown">
+          <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
+          <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
+            {s.dimensions.map((d, i) => (
+              <DimensionCard d={d} i={i} key={d.key} />
+            ))}
           </div>
         </div>
       </div>
