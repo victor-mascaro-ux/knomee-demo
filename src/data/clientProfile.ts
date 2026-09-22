@@ -18,6 +18,9 @@ export interface HouseholdMember {
   role: string
   /** The member whose profile is open. */
   current?: boolean
+  /** When they joined the household on knomee. The rail does not show it; the
+      family page's member list does. */
+  joined: string
 }
 
 export interface TeamMember {
@@ -81,8 +84,9 @@ export const clientProfile = {
   checkIn: { mood: 'Good', level: 4, date: '05/03/2025' },
 
   members: [
-    { name: 'Emily Watson', role: 'Spouse', current: true },
-    { name: 'Sebastian Watson', role: 'Spouse' },
+    /* March 2025 for Emily, which is what her own page says she joined. */
+    { name: 'Emily Watson', role: 'Spouse', current: true, joined: '03/12/2025' },
+    { name: 'Sebastian Watson', role: 'Spouse', joined: '05/28/2025' },
   ] as HouseholdMember[],
 
   /* Whose profile this is. There is one built-out client page and it is hers —

@@ -104,6 +104,7 @@ import CollapsibleCard from './components/CollapsibleCard'
 import RowMenu from './components/RowMenu'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
+import HouseholdScreen from './screens/HouseholdScreen'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
 import moodNeutral from './assets/moods/neutral.svg'
@@ -3710,6 +3711,11 @@ const profileSlug = (name: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 
+/* The family's own address, made the same way a person's is, so #/clients/
+   watson-family sits beside #/clients/emily-watson rather than needing a route
+   of its own. */
+const HOUSEHOLD_SLUG = profileSlug(clientProfile.household)
+
 function parseHash(): { view: RouteView | null; profile: string | null } {
   if (typeof window === 'undefined') return { view: null, profile: null }
   const raw = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
@@ -3738,6 +3744,13 @@ export default function App() {
     initialView === 'clients' && initialProfile
       ? (baseClients.find((c) => profileSlug(c.name) === initialProfile) ?? null)
       : null,
+  )
+  /* The family page, reached from a client's breadcrumb or from the household
+     at the top of their rail. It is addressed under /clients like a person,
+     because that is what a household is here — the family one of those rows
+     belongs to. */
+  const [householdOpen, setHouseholdOpen] = useState(
+    initialView === 'clients' && initialProfile === HOUSEHOLD_SLUG,
   )
   const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
   const showToast = (msg: string) => {
@@ -3964,6 +3977,7 @@ export default function App() {
           ? (baseClients.find((c) => profileSlug(c.name) === slug) ?? null)
           : null,
       )
+      setHouseholdOpen(v === 'clients' && slug === HOUSEHOLD_SLUG)
       setAdminView(v === 'admin')
       setFirmView(isFirmRoute(v))
       if (isFirmRoute(v)) setFirmScreen(v)
@@ -4008,8 +4022,10 @@ export default function App() {
     const open =
       currentView === 'prospects' && profileProspect
         ? profileSlug(profileProspect.name)
-        : currentView === 'clients' && profileClient
-          ? profileSlug(profileClient.name)
+        : currentView === 'clients' && householdOpen
+          ? HOUSEHOLD_SLUG
+          : currentView === 'clients' && profileClient
+            ? profileSlug(profileClient.name)
           : currentView === 'firm-candidates' && candidateOpen
             ? profileSlug(candidate.name)
             : currentView === 'advisors' && viewEntryId
@@ -4028,7 +4044,15 @@ export default function App() {
         /* cross-origin parent — ignore */
       }
     }
-  }, [currentView, profileProspect, profileClient, candidateOpen, viewEntryId, inviteToken])
+  }, [
+    currentView,
+    profileProspect,
+    profileClient,
+    householdOpen,
+    candidateOpen,
+    viewEntryId,
+    inviteToken,
+  ])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -4389,9 +4413,27 @@ export default function App() {
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}
           </main>
         )
+      ) : householdOpen ? (
+        <main className="content content-profile">
+          <HouseholdScreen
+            onBack={() => setHouseholdOpen(false)}
+            onOpenMember={(c) => {
+              setHouseholdOpen(false)
+              setProfileClient(c)
+            }}
+            onAction={showToast}
+          />
+        </main>
       ) : profileClient ? (
         <main className="content content-profile">
-          <ClientProfileScreen client={profileClient} onBack={() => setProfileClient(null)} />
+          <ClientProfileScreen
+            client={profileClient}
+            onBack={() => setProfileClient(null)}
+            onOpenHousehold={() => {
+              setProfileClient(null)
+              setHouseholdOpen(true)
+            }}
+          />
         </main>
       ) : profileProspect ? (
         <main className="content content-profile">
