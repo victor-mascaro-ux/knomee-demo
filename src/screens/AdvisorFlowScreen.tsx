@@ -472,10 +472,8 @@ export default function AdvisorFlowScreen({
           >
             {tab === 'questions' ? (
               <div className="af-unlock">
-                <h2 className="af-h1">Your three questions</h2>
-                <p className="af-body">
-                  Put these to every platform you’re considering. Including this one.
-                </p>
+                <h2 className="af-h1">My Three Questions</h2>
+                <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
                 <ol className="af-qs">
                   {businessId.questions.map((q, n) => (
                     <li key={q}>
@@ -565,7 +563,7 @@ export default function AdvisorFlowScreen({
               type="button"
               className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
               aria-label="Adventures"
-              onClick={() => setTab('flow')}
+              onClick={closeToList}
             >
               <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
             </button>
@@ -580,7 +578,7 @@ export default function AdvisorFlowScreen({
               onClick={() => setTab('questions')}
             >
               <TabQuestions />
-              <span className="cx-tab-lbl">Questions</span>
+              <span className="cx-tab-lbl">My Questions</span>
             </button>
           </nav>
           )}

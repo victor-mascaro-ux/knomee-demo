@@ -223,6 +223,15 @@
   justify-content: space-between;
   margin-bottom: 18px;
 }
+/* Whose page this is: the portrait and the heading, as one thing. Empty of the
+   portrait on every page that does not pass one, where it is just a wrapper
+   around the heading and changes nothing. */
+.pp-title-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
 .pp-title {
   font-size: 26px;
   font-weight: 700;

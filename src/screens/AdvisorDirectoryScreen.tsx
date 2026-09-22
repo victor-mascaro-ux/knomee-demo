@@ -25,6 +25,7 @@ import {
   type InviteBrand,
   type Trouble,
 } from '../data/advisorDirectory'
+import { advisor } from '../data/advisorFlow'
 import './advisorDirectory.css'
 
 /* One line per person, whichever kind they are. An entry and an invite are
@@ -43,6 +44,11 @@ interface Row {
   /** The invite behind the row, where there is one — a sitting answered through
       a link has both, and removing the person means removing both. */
   token: string | null
+  /** The worked example cannot be removed. It is what a room is walked through,
+      and a directory that can be emptied of it is one tidy-up away from a demo
+      with nothing in it. Matched on the walkthrough's own name rather than a
+      string typed here, so renaming him renames this. */
+  protected: boolean
   state: 'answered' | 'started' | 'opened' | 'sent'
 }
 
@@ -81,6 +87,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
     at: e.at,
     link: e.token ? inviteLink(e.token) : null,
     token: e.token,
+    protected: e.name.trim() === advisor.name,
     state: e.answered >= e.total ? 'answered' : 'started',
   }))
   const fromInvites: Row[] = invites
@@ -95,6 +102,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
       at: i.openedAt ?? i.createdAt,
       link: inviteLink(i.token),
       token: i.token,
+      protected: false,
       state: i.openedAt ? 'opened' : 'sent',
     }))
   return byRecency([...fromEntries, ...fromInvites])
@@ -408,13 +416,18 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
                     )}
                   </td>
                   <td className="adir-del-col">
-                    <DeleteCell
-                      row={r}
-                      onGone={(t) => {
-                        setTrouble(t)
-                        void load()
-                      }}
-                    />
+                    {/* No control at all rather than a disabled one: there is
+                        nothing here a person could enable, so a greyed ✕ would
+                        only invite the click it refuses. */}
+                    {!r.protected && (
+                      <DeleteCell
+                        row={r}
+                        onGone={(t) => {
+                          setTrouble(t)
+                          void load()
+                        }}
+                      />
+                    )}
                   </td>
                 </tr>
               ))}

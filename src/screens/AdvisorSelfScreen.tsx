@@ -408,8 +408,8 @@ function EndQuestions({
   const wired = !!endpoint()
   return (
     <div className="af-unlock">
-      <h2 className="af-h1">Your three questions</h2>
-      <p className="af-body">Put these to every platform you’re considering. Including this one.</p>
+      <h2 className="af-h1">My Three Questions</h2>
+      <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
       <ol className="af-qs">
         {d.id.questions.map((q, i) => (
           <li key={q}>
@@ -985,12 +985,10 @@ function FlowPhone({
                  nobody earned. */
               d.empty ? (
                 <div className="af-blank">
-                  <h2 className="af-h1">
-                    {viewing ? `${d.who.name}’s three questions` : 'Your three questions'}
-                  </h2>
+                  <h2 className="af-h1">My Three Questions</h2>
                   <p className="af-body">
                     {viewing
-                      ? 'Not enough answered yet for these to say anything. They come out of their answers and take shape as they finish each adventure.'
+                      ? 'Not enough answered yet for these to take shape. They come out of the adventures, and there are still some to finish.'
                       : 'These come out of what you answer — the three worth putting to any platform you are considering. Finish an adventure and they start taking shape.'}
                   </p>
                   {!viewing && (
@@ -1005,14 +1003,11 @@ function FlowPhone({
                 </div>
               ) : (
                 <div className="af-unlock">
-                  <h2 className="af-h1">
-                    {viewing ? `${d.who.name}’s three questions` : 'Your three questions'}
-                  </h2>
-                  <p className="af-body">
-                    {viewing
-                      ? 'The three the flow handed them to put to every platform they are considering — including this one.'
-                      : 'Put these to every platform you’re considering. Including this one.'}
-                  </p>
+                  {/* His page, in the words he reads it in — the directory shows
+                      what he saw, so this speaks to him whoever is holding the
+                      phone. */}
+                  <h2 className="af-h1">My Three Questions</h2>
+                  <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
                   <ol className="af-qs">
                     {d.id.questions.map((q, n) => (
                       <li key={q}>
@@ -1159,7 +1154,7 @@ function FlowPhone({
                 type="button"
                 className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
                 aria-label="Adventures"
-                onClick={() => setTab('flow')}
+                onClick={closeToList}
               >
                 <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
               </button>
@@ -1175,7 +1170,7 @@ function FlowPhone({
               onClick={() => setTab('questions')}
             >
               <TabQuestions />
-              <span className="cx-tab-lbl">Questions</span>
+              <span className="cx-tab-lbl">{viewing ? 'Questions' : 'My Questions'}</span>
             </button>
           </nav>
           )}

@@ -751,8 +751,14 @@
   align-items: center;
   gap: 10px;
 }
-.cx-viewport .pp-title-row .pp-title {
+.cx-viewport .pp-title-row .pp-title-id {
+  /* The portrait and the name take the first line together; Download PDF gets
+     the one under them. The full-width basis used to sit on the heading alone,
+     which is what dropped the portrait onto the button's row. */
   flex: 1 0 100%;
+}
+.cx-viewport .pp-title-row .pp-title {
+  min-width: 0;
 }
 /* Emily's initial, under her name, opening her rail. Sized to the download
    button beside it so the row reads as one line of controls. */
