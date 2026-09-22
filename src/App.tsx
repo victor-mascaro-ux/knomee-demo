@@ -129,9 +129,13 @@ function NameLink({
   name,
   onClick,
   asLink,
+  isNew,
 }: {
   name: string
   onClick?: () => void
+  /* The "new" pill rides the name rather than the avatar: it labels the person,
+     and on the disc it sat over the picture and read as part of it. */
+  isNew?: boolean
   /* Every name in the table is a link in the product; only the one or two with
      a profile built out go anywhere in this prototype. `asLink` gives the rest
      the affordance without the destination, so the table reads as the real one
@@ -141,12 +145,15 @@ function NameLink({
   asLink?: boolean
 }) {
   const inner = (
-    <span className="name-text">
-      {name}
-      <span className="name-chevron" aria-hidden>
-        ›
+    <>
+      <span className="name-text">
+        {name}
+        <span className="name-chevron" aria-hidden>
+          ›
+        </span>
       </span>
-    </span>
+      {isNew && <span className="new-tag">new</span>}
+    </>
   )
   if (onClick) {
     return (
@@ -296,7 +303,12 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
             </div>
             <div className="dist-legend dist-legend-bars">
               {TIER_META.map((m) => (
-                <div className="dist-leg" key={m.key} style={{ flex: prospectStats.byTier[m.tierId] || 0.001 }}>
+                <div
+                  className="dist-leg"
+                  key={m.key}
+                  /* Grow only — the basis is the segment's own padding, set in CSS. */
+                  style={{ flexGrow: prospectStats.byTier[m.tierId] || 0.001 }}
+                >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}
@@ -489,12 +501,12 @@ function ProspectRow({
         <div className="name-cell">
           <span className="avatar-wrap">
             <Avatar name={p.name} avatar={p.avatar} />
-            {p.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
             <NameLink
               name={p.name}
               asLink
+              isNew={p.isNew}
               onClick={p.name === financialId.owner ? () => onOpenProfile(p) : undefined}
             />
             <span className="email-line">{p.email}</span>
@@ -829,11 +841,11 @@ function ClientRow({
                 <HouseIcon />
               </span>
             )}
-            {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <div className="name-block">
             <NameLink
               name={c.name}
+              isNew={c.isNew}
               onClick={
                 onOpenProfile && c.name === clientProfile.owner
                   ? () => onOpenProfile(c)

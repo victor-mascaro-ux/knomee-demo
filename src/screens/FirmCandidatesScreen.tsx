@@ -63,6 +63,8 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
 
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
   const isOwner = c.name === profileOwner
+  /* The "new" pill sits on the name's line, as it does in the advisor's tables. */
+  const tag = c.isNew ? <span className="new-tag">new</span> : null
   return (
     <div className="name-block">
       {isOwner ? (
@@ -73,10 +75,12 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
               ›
             </span>
           </span>
+          {tag}
         </button>
       ) : (
         <span className="name-line">
           <span className="name-text">{c.name}</span>
+          {tag}
         </span>
       )}
       <span className="email-line">{c.firm}</span>
@@ -198,7 +202,8 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                 <div
                   className="dist-leg"
                   key={m.key}
-                  style={{ flex: candidateStats.byTier[m.tierId] || 0.001 }}
+                  /* Grow only — the basis is the segment's own padding, set in CSS. */
+                  style={{ flexGrow: candidateStats.byTier[m.tierId] || 0.001 }}
                 >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
@@ -376,7 +381,6 @@ function Row({
             ) : (
               <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
             )}
-            {c.isNew && <span className="new-tag avatar-new">new</span>}
           </span>
           <CandidateName c={c} onOpen={onOpen} />
         </div>
