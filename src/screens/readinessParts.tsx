@@ -434,6 +434,13 @@ function QuestionRow({ q, i }: { q: AskedQuestion; i: number }) {
           ))}
         </div>
       </div>
+      {/* A question carries its answer with it: the line they may ask, and the
+          three openings it creates — which is what a rep pastes into their
+          notes before the call, not the question on its own. */}
+      <CopyLine
+        text={[q.quote, q.guidance, ...q.points].join('\n')}
+        label="this question and how to answer it"
+      />
     </div>
   )
 }
@@ -492,21 +499,6 @@ export function CommunicationRail({ d }: { d: ToolkitTab }) {
         ))}
       </div>
 
-      {d.verbosity && (
-        <>
-          <h4 className="rd-comm-label rd-verb-head">
-            Verbosity Indicator
-            <span className="rd-verb-level">{d.verbosity.level}</span>
-            <span className="rd-verb-count">{d.verbosity.words} words</span>
-          </h4>
-          <div className="rd-verb">
-            <span className="rd-verb-key">Engagement Level</span>
-            <p className="rd-verb-val">{d.verbosity.engagement}</p>
-            <span className="rd-verb-key">Advisor takeaway</span>
-            <p className="rd-verb-val">{d.verbosity.takeaway}</p>
-          </div>
-        </>
-      )}
     </section>
   )
 }
