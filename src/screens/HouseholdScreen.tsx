@@ -19,6 +19,7 @@ import { clientProfile } from '../data/clientProfile'
 import { baseClients } from '../data/clients'
 import type { Client } from '../data/clients'
 import { Portrait } from './ClientProfileScreen'
+import FamilyIdTab from './FamilyIdTab'
 import RowMenu from '../components/RowMenu'
 import { RowChevron } from '../components/profileIcons'
 import { scrollPageToTop } from '../reviewBridge'
@@ -62,10 +63,14 @@ export default function HouseholdScreen({
             <h2 className="pp-name">{cp.household}</h2>
 
             <div className="cp-side-block">
-              <span className="cp-side-head is-static">
+              {/* The same head as on a member's page, chevron and all: it names
+                  the family and it always goes to the family. Here that is the
+                  page you are on, so it takes you back to the top of it. */}
+              <button className="cp-side-head" type="button" onClick={scrollPageToTop}>
                 {cp.household}
                 <span className="cp-side-count">{cp.members.length}</span>
-              </span>
+                <RowChevron />
+              </button>
               {cp.members.map((m) => {
                 const row = rowFor(m.name)
                 return (
@@ -211,17 +216,22 @@ export default function HouseholdScreen({
                 </div>
               </section>
             </>
+          ) : tab === 'id' ? (
+            <>
+              <div className="pp-title-row">
+                <h1 className="pp-title">{cp.household} ID</h1>
+              </div>
+              <FamilyIdTab />
+            </>
           ) : (
             <>
               <div className="pp-title-row">
-                <h1 className="pp-title">
-                  {cp.household}’s {tab === 'id' ? 'Family ID' : 'Insights'}
-                </h1>
+                <h1 className="pp-title">{cp.household}’s Insights</h1>
               </div>
               <div className="pp-placeholder">
-                {tab === 'id'
-                  ? 'Family ID — the household’s shared picture: the goals, life events and vision the members hold in common, and where they differ. Not built in this prototype.'
-                  : 'Family Insights — the household’s relationship score, who is engaged and who has gone quiet, and the conversation to have with them together. Not built in this prototype.'}
+                Family Insights — the household’s relationship score, who is engaged and who
+                has gone quiet, and the conversation to have with them together. Not built in this
+                prototype.
               </div>
             </>
           )}
