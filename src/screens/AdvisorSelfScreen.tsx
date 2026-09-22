@@ -985,20 +985,33 @@ function FlowPhone({
                  nobody earned. */
               d.empty ? (
                 <div className="af-blank">
-                  <h2 className="af-h1">Your three questions</h2>
+                  <h2 className="af-h1">
+                    {viewing ? `${d.who.name}’s three questions` : 'Your three questions'}
+                  </h2>
                   <p className="af-body">
-                    These come out of what you answer — the three worth putting to any platform
-                    you are considering. Finish an adventure and they start taking shape.
+                    {viewing
+                      ? 'Not enough answered yet for these to say anything. They come out of their answers and take shape as they finish each adventure.'
+                      : 'These come out of what you answer — the three worth putting to any platform you are considering. Finish an adventure and they start taking shape.'}
                   </p>
-                  <button className="cx-start af-wide" type="button" onClick={() => setTab('flow')}>
-                    Go to My Adventures
-                  </button>
+                  {!viewing && (
+                    <button
+                      className="cx-start af-wide"
+                      type="button"
+                      onClick={() => setTab('flow')}
+                    >
+                      Go to My Adventures
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="af-unlock">
-                  <h2 className="af-h1">Your three questions</h2>
+                  <h2 className="af-h1">
+                    {viewing ? `${d.who.name}’s three questions` : 'Your three questions'}
+                  </h2>
                   <p className="af-body">
-                    Put these to every platform you’re considering. Including this one.
+                    {viewing
+                      ? 'The three the flow handed them to put to every platform they are considering — including this one.'
+                      : 'Put these to every platform you’re considering. Including this one.'}
                   </p>
                   <ol className="af-qs">
                     {d.id.questions.map((q, n) => (
@@ -1113,7 +1126,7 @@ function FlowPhone({
                 ))}
               </div>
             </div>
-          ) : viewing ? null : (
+          ) : (
           <nav className="cx-tabbar">
             <svg className="cx-tab-edge" viewBox="0 0 390 96" width="390" height="96" aria-hidden>
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
@@ -1131,14 +1144,26 @@ function FlowPhone({
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
             </button>
-            <button
-              type="button"
-              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
-              aria-label="Adventures"
-              onClick={() => setTab('flow')}
-            >
-              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
-            </button>
+            {/* Reading somebody else's page, the centre is the mark and nothing
+                more: it is the way into the adventures, and reopening another
+                person's questionnaire is the one thing this bar must not offer.
+                A span rather than a disabled button, because it is not a control
+                that happens to be unavailable — there is no version of this page
+                where it does something. */}
+            {viewing ? (
+              <span className="cx-tab cx-tab-center" aria-hidden>
+                <img className="cx-tab-mark" src={knomeeMark} alt="" />
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
+                aria-label="Adventures"
+                onClick={() => setTab('flow')}
+              >
+                <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+              </button>
+            )}
             {/* The other half of what the eight minutes produce. The Business
                 ID is what a platform reads about you; these are what you put to
                 it — so they belong on the bar beside it rather than only at the
