@@ -18,6 +18,7 @@ import {
   IPhone,
   TAB_EDGE,
   TabFinId,
+  TabMark,
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   clampZoom,
@@ -26,7 +27,6 @@ import {
   useZoom,
 } from './ClientExperienceScreen'
 import AdventureList from './AdventureList'
-import knomeeMark from '../assets/knomee-mark.svg'
 import { adventureStates, derive, sampleAnswers } from '../data/advisorAnswers'
 import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
@@ -220,7 +220,7 @@ export default function AdvisorMobileScreen({
               aria-label="Adventures"
               onClick={() => setTab('flow')}
             >
-              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+              <TabMark />
             </button>
             <button
               type="button"

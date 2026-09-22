@@ -23,6 +23,7 @@ import {
   IPhone,
   SheetCredit,
   TabFinId,
+  TabMark,
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
@@ -42,7 +43,6 @@ import {
   type AdventureId,
   type Step,
 } from '../data/advisorFlow'
-import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 import './advisor-flow.css'
 
@@ -530,7 +530,7 @@ export default function AdvisorFlowScreen({
               aria-label="Adventures"
               onClick={closeToList}
             >
-              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+              <TabMark />
             </button>
             {/* The other half of what the eight minutes produce. The Business
                 ID is what a platform reads about you; these are what you put to

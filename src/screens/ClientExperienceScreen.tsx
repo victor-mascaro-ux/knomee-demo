@@ -133,6 +133,22 @@ export const TabFinId = () => (
 
 /* The third tab on the advisor's flow: the three questions the eight minutes
    hand back. Drawn to sit beside TabFinId — same box, same stroke weight. */
+/* The knomee mark as paths rather than an <img>, so a tab bar can colour it.
+   The centre tab is a destination on the advisor's phone — it opens the
+   adventures — and an <img> cannot be recoloured, so "you are here" had to be
+   said by going slightly transparent, which reads as disabled rather than
+   active. As paths it takes the tab's own colour: muted off, plum on.
+
+   The client's journey keeps the <img>: its centre is quick access rather than
+   a page, and dimming is the right word for a control that opens a sheet. */
+export const TabMark = () => (
+  <svg className="cx-tab-mark" viewBox="0 0 288 288" aria-hidden>
+    {MARK_PARTS.map((d, i) => (
+      <path key={i} d={d} />
+    ))}
+  </svg>
+)
+
 export const TabQuestions = () => (
   <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path

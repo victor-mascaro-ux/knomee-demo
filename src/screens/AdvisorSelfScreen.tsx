@@ -28,6 +28,7 @@ import {
   IPhone,
   SheetCredit,
   TabFinId,
+  TabMark,
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
@@ -74,7 +75,6 @@ import {
   testUrl,
   type Sitting,
 } from '../data/advisorRecord'
-import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 import './advisor-flow.css'
 
@@ -1114,7 +1114,7 @@ function FlowPhone({
               aria-label="Adventures"
               onClick={closeToList}
             >
-              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+              <TabMark />
             </button>
             {/* The other half of what the eight minutes produce. The Business
                 ID is what a platform reads about you; these are what you put to

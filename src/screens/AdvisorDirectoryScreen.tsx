@@ -205,11 +205,6 @@ function InvitePanel({
     <div className="adir-invite">
       <div className="adir-invite-head">
         <b>Invite a new advisor</b>
-        <span>
-          The name goes on their first screen. Leave it blank and the flow opens “Welcome,
-          Advisor!” — which is the right thing to say on a link you are handing out before you
-          know who is taking it.
-        </span>
       </div>
       <div className="adir-link-row">
         <input
