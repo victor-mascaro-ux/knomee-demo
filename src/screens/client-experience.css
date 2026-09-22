@@ -622,6 +622,12 @@
 .cx-device.is-bare .cx-home-bar {
   display: none;
 }
+/* The view controls go with the frame. Fit-to-screen and a zoom stepper are for
+   a picture of a phone on a desktop; on the handset itself the screen is
+   already the window, and there is nothing to fit it to. */
+.cx-page.is-bare .cx-view {
+  display: none;
+}
 
 /* ============================================================
    DEMO HARNESS — this app, not the design system

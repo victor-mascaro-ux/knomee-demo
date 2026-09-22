@@ -838,9 +838,11 @@ function FlowPhone({
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   useDarkGround()
-  const { scale: fitScale, windowH } = useFitToWindow()
+  const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
-  const scale = fitScale * zoom
+  /* On a handset the frame is a picture of the device already in your hand,
+     so it comes off and the screen is the window. */
+  const scale = bare ? 1 : fitScale * zoom
 
   const step = steps[i]
   const last = i === steps.length - 1
@@ -899,9 +901,15 @@ function FlowPhone({
     : undefined
 
   return (
-    <div className="cx-page" style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}>
-      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale}>
+    <div
+      className={`cx-page${bare ? ' is-bare' : ''}`}
+      style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}
+    >
+      <div
+        className="cx-fit"
+        style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
+      >
+        <IPhone scale={scale} bare={bare}>
           <header className="cx-appbar">
             {adventure && tab === 'flow' ? (
               <>

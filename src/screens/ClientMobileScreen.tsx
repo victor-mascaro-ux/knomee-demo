@@ -47,9 +47,11 @@ export default function ClientMobileScreen({
   onAccountSettings?: () => void
 }) {
   useDarkGround()
-  const { scale: fitScale, windowH } = useFitToWindow()
+  const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
-  const scale = fitScale * zoom
+  /* On a handset the frame is a picture of the device already in your hand,
+     so it comes off and the screen is the window. */
+  const scale = bare ? 1 : fitScale * zoom
   const [, force] = useState(0)
   /* The rail — portrait, household, advisory team — sits at the foot of the
      page on a phone. The burger brings it up as a drawer so it is a tap away
@@ -72,11 +74,17 @@ export default function ClientMobileScreen({
   useDragScroll(viewport)
 
   return (
-    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
+    <div
+      className={`cx-page${bare ? ' is-bare' : ''}`}
+      style={windowH ? { minHeight: windowH } : undefined}
+    >
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
           the scaled height and the page never grows a phantom scrollbar. */}
-      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale}>
+      <div
+        className="cx-fit"
+        style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
+      >
+        <IPhone scale={scale} bare={bare}>
           {/* The advisor's own bar. The page inside the frame is the advisor's
               product, not the client's app, so it keeps the plum header it has
               on a desktop rather than opening straight onto a white page. */}

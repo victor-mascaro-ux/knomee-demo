@@ -46,9 +46,11 @@ export default function AdvisorMobileScreen({
   onRedo?: () => void
 }) {
   useDarkGround()
-  const { scale: fitScale, windowH } = useFitToWindow()
+  const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
-  const scale = fitScale * zoom
+  /* On a handset the frame is a picture of the device already in your hand,
+     so it comes off and the screen is the window. */
+  const scale = bare ? 1 : fitScale * zoom
   const [, force] = useState(0)
   /* The rail — his portrait, the Recruitment Quotient, the route — sits at the foot
      of the page on a phone. His own portrait brings it up as a drawer. */
@@ -81,9 +83,15 @@ export default function AdvisorMobileScreen({
   }, [])
 
   return (
-    <div className="cx-page" style={windowH ? { minHeight: windowH } : undefined}>
-      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale}>
+    <div
+      className={`cx-page${bare ? ' is-bare' : ''}`}
+      style={windowH ? { minHeight: windowH } : undefined}
+    >
+      <div
+        className="cx-fit"
+        style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
+      >
+        <IPhone scale={scale} bare={bare}>
           {/* The firm's own bar. The page inside the frame is the Dynasty rep's
               product, not Marcus's app, so it keeps the header it has on a
               desktop — and the burger in it is the account menu, as it is
