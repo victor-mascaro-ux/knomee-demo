@@ -131,17 +131,15 @@ export const TabFinId = () => (
   </svg>
 )
 
-/* The third tab on the advisor's flow, and the only one that does nothing yet:
-   the team a practice is built around. Drawn to sit beside TabFinId — three
-   figures at the same stroke weight, the middle one forward. */
-export const TabTeam = () => (
+/* The third tab on the advisor's flow: the three questions the eight minutes
+   hand back. Drawn to sit beside TabFinId — same box, same stroke weight. */
+export const TabQuestions = () => (
   <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <circle cx="16" cy="8.4" r="4" />
-    <path d="M9.4 21.4c1-3.4 3.6-5.2 6.6-5.2s5.6 1.8 6.6 5.2" strokeLinecap="round" />
-    <circle cx="5.4" cy="10.4" r="3.1" />
-    <path d="M1 20.6c.7-2.6 2.4-4 4.4-4" strokeLinecap="round" />
-    <circle cx="26.6" cy="10.4" r="3.1" />
-    <path d="M31 20.6c-.7-2.6-2.4-4-4.4-4" strokeLinecap="round" />
+    <path
+      d="M27.2 2.4H4.8A2.8 2.8 0 0 0 2 5.2v10.4a2.8 2.8 0 0 0 2.8 2.8h3.6v5l5.6-5h13.2a2.8 2.8 0 0 0 2.8-2.8V5.2a2.8 2.8 0 0 0-2.8-2.8Z"
+      strokeLinejoin="round"
+    />
+    <path d="M13.1 8.5a3 3 0 0 1 5.8 1c0 2-2.9 2.4-2.9 4.2" strokeLinecap="round" />
   </svg>
 )
 

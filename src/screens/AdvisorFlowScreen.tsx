@@ -26,7 +26,7 @@ import {
   ProgressMeter,
   SheetCredit,
   TabFinId,
-  TabTeam,
+  TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   brandVars,
@@ -362,7 +362,7 @@ export default function AdvisorFlowScreen({
   // The Move would land in the middle of Future You.
   const [trail, setTrail] = useState<number[]>([0])
   const i = trail[trail.length - 1]
-  const [tab, setTab] = useState<'flow' | 'finid'>('flow')
+  const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>('flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
@@ -470,7 +470,22 @@ export default function AdvisorFlowScreen({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {tab === 'finid' ? (
+            {tab === 'questions' ? (
+              <div className="af-unlock">
+                <h2 className="af-h1">Your three questions</h2>
+                <p className="af-body">
+                  Put these to every platform you’re considering. Including this one.
+                </p>
+                <ol className="af-qs">
+                  {businessId.questions.map((q, n) => (
+                    <li key={q}>
+                      <span className="af-getnum">{n + 1}</span>
+                      <span>{q}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : tab === 'finid' ? (
               /* The Business ID he reads is the Business ID the firm
                  reads — one page, his answers, the same cards. It used to be a
                  second, flatter rendering of the same data that lived only
@@ -534,9 +549,9 @@ export default function AdvisorFlowScreen({
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
               <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
             </svg>
-            {/* Business ID · the mark · My Team. The mark is the way back to the
-                adventures rather than an ornament in the middle of two tabs —
-                it is the one control on this bar that goes to the questions,
+            {/* Business ID · the mark · Questions. The mark is the way back to
+                the adventures rather than an ornament in the middle of two
+                tabs — it is the one control on this bar that goes to them,
                 which is why it is the one wearing the brand. */}
             <button
               type="button"
@@ -554,14 +569,18 @@ export default function AdvisorFlowScreen({
             >
               <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
             </button>
-            {/* Nothing behind it yet. It is on the bar because the practice this
-                flow asks about is a team, and a bar that pretended otherwise
-                would have to be redrawn when it arrives. Disabled rather than
-                silent: a tab that looked live and did nothing would read as
-                broken. */}
-            <button type="button" className="cx-tab" disabled aria-disabled="true">
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
+            {/* The other half of what the eight minutes produce. The Business
+                ID is what a platform reads about you; these are what you put to
+                it — so they belong on the bar beside it rather than only at the
+                end of the flow, where you would have to walk it again to find
+                them. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'questions' ? 'is-on' : ''}`}
+              onClick={() => setTab('questions')}
+            >
+              <TabQuestions />
+              <span className="cx-tab-lbl">Questions</span>
             </button>
           </nav>
           )}

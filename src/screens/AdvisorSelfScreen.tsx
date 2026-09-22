@@ -31,7 +31,7 @@ import {
   ProgressMeter,
   SheetCredit,
   TabFinId,
-  TabTeam,
+  TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   brandVars,
@@ -868,7 +868,7 @@ function FlowPhone({
   const [trail, setTrail] = useState<number[]>([0])
   const i = trail[trail.length - 1]
   const viewing = mode === 'view'
-  const [tab, setTab] = useState<'flow' | 'finid'>(viewing ? 'finid' : 'flow')
+  const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   // Read as the sheet opens rather than held in state: the record is written by
@@ -978,7 +978,39 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {tab === 'finid' ? (
+            {tab === 'questions' ? (
+              /* The three questions are rules over the answers, like the
+                 Business ID — so before anything is answered there is nothing
+                 to ask, and saying so is better than printing three questions
+                 nobody earned. */
+              d.empty ? (
+                <div className="af-blank">
+                  <h2 className="af-h1">Your three questions</h2>
+                  <p className="af-body">
+                    These come out of what you answer — the three worth putting to any platform
+                    you are considering. Finish an adventure and they start taking shape.
+                  </p>
+                  <button className="cx-start af-wide" type="button" onClick={() => setTab('flow')}>
+                    Go to My Adventures
+                  </button>
+                </div>
+              ) : (
+                <div className="af-unlock">
+                  <h2 className="af-h1">Your three questions</h2>
+                  <p className="af-body">
+                    Put these to every platform you’re considering. Including this one.
+                  </p>
+                  <ol className="af-qs">
+                    {d.id.questions.map((q, n) => (
+                      <li key={q}>
+                        <span className="af-getnum">{n + 1}</span>
+                        <span>{q}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )
+            ) : tab === 'finid' ? (
               d.empty ? (
                 /* Nothing answered yet. An empty page of empty cards would read
                    as a broken Business ID rather than an unearned one.
@@ -1087,9 +1119,9 @@ function FlowPhone({
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
               <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
             </svg>
-            {/* Business ID · the mark · My Team. The mark is the way back to the
-                adventures rather than an ornament in the middle of two tabs —
-                it is the one control on this bar that goes to the questions,
+            {/* Business ID · the mark · Questions. The mark is the way back to
+                the adventures rather than an ornament in the middle of two
+                tabs — it is the one control on this bar that goes to them,
                 which is why it is the one wearing the brand. */}
             <button
               type="button"
@@ -1107,14 +1139,18 @@ function FlowPhone({
             >
               <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
             </button>
-            {/* Nothing behind it yet. It is on the bar because the practice this
-                flow asks about is a team, and a bar that pretended otherwise
-                would have to be redrawn when it arrives. Disabled rather than
-                silent: a tab that looked live and did nothing would read as
-                broken. */}
-            <button type="button" className="cx-tab" disabled aria-disabled="true">
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
+            {/* The other half of what the eight minutes produce. The Business
+                ID is what a platform reads about you; these are what you put to
+                it — so they belong on the bar beside it rather than only at the
+                end of the flow, where you would have to walk it again to find
+                them. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'questions' ? 'is-on' : ''}`}
+              onClick={() => setTab('questions')}
+            >
+              <TabQuestions />
+              <span className="cx-tab-lbl">Questions</span>
             </button>
           </nav>
           )}
