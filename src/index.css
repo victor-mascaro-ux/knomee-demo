@@ -347,13 +347,14 @@ body {
   overflow: hidden;
 }
 
-/* The head and every body share --card-pad, so the title and the content
-   under it start from one left edge rather than 17px and 25px. */
+/* The head sits on half of --card-pad: the title and its collapse control pull
+   in closer to the card's own edges than the content below, which keeps the
+   full inset. */
 .card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px var(--card-pad);
+  padding: 8px calc(var(--card-pad) / 2);
   background: #fafafa;
   border-bottom: 1px solid var(--line);
 }
@@ -492,10 +493,22 @@ body {
   gap: 2px;
 }
 
+/* Each segment carries --seg-pad of its own on both sides on top of its share
+   of the bar, so a segment is never exactly its share of the width. The legend
+   below borrows the same number as its flex-basis; that is the whole reason the
+   two rows line up. Pinned here rather than left to the UA's button padding,
+   which is what it used to be. */
+.dist-bar,
+.dist-legend-bars {
+  /* Declared on both rows because both read it: the segments as padding, the
+     legend columns as flex-basis. */
+  --seg-pad: 6px;
+}
 .dist-bar .seg {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1px var(--seg-pad);
   color: #fff;
   font-weight: 600;
   font-size: 15px;
@@ -578,19 +591,21 @@ body {
   justify-content: flex-start;
   gap: 2px;
 }
-/* Every tier aligns to its own left border, on both distributions.
-   Prospects used to right-align its last tier because that column can be
-   narrower than the label in it — 104px of column for 106px of "Tier 3 ·
-   Nurture" — which put one label on a different edge from the other two and
-   read as a mistake rather than as a fit. The column was the thing at fault:
-   `min-width: 0` let a flex item shrink below its own content. It holds its
-   label now, and the tiers keep their left edge. */
+/* Every tier label starts on the left edge of its own bar segment. A legend
+   column is the same flex-grow as its segment, so it only lands on that edge if
+   it also carries the segment's own 2 × --seg-pad — otherwise the fixed padding
+   the segments add walks the later columns a few pixels off their edge, which
+   is what put "Tier 3 · Nurture" to the right of the 5. `min-width: 0` is what
+   lets the column hold that width instead of widening to its label and
+   shrinking the two before it. A label wider than its column wraps rather than
+   spilling past the card, which clips. */
 .dist-legend-bars .dist-leg {
   align-items: flex-start;
-  min-width: min-content;
+  min-width: 0;
+  flex-basis: calc(var(--seg-pad) * 2);
 }
 .dist-legend-bars .dist-leg-name {
-  white-space: nowrap;
+  white-space: normal;
 }
 .dist-legend-bars .dist-leg-range {
   text-align: inherit;
@@ -1196,21 +1211,12 @@ input[type='checkbox'] {
   flex: none;
 }
 
-/* Avatar with an overlaid status badge (e.g. the "new" pill on a fresh
-   client). The badge sits in front of the circle, centered on its bottom edge. */
+/* Avatar with an overlaid status badge (the household glyph). The "new" pill
+   used to be overlaid here too and now rides the name instead. */
 .avatar-wrap {
   position: relative;
   flex: none;
   display: inline-flex;
-}
-.new-tag.avatar-new {
-  position: absolute;
-  left: 50%;
-  top: -8px;
-  transform: translateX(-50%);
-  margin: 0;
-  z-index: 2;
-  box-shadow: 0 0 0 2px #fff;
 }
 /* Small badge on the avatar's bottom-right marking clients in a household. */
 .household-badge {
@@ -1294,7 +1300,11 @@ button.name-link-btn {
   background: none;
   padding: 0;
   margin: 0;
-  font: inherit;
+  /* Family only. `font: inherit` also reset the size to the table's 13px, so
+     the one name that opens a profile read smaller than every name beside it;
+     .name-line's 14.5px reaches it now. */
+  font-family: inherit;
+  color: inherit;
   cursor: pointer;
   text-align: left;
 }
@@ -1947,8 +1957,10 @@ button.name-link-btn:hover .name-text {
   height: 16px;
   padding: 0 9px;
   border-radius: 999px;
-  background: var(--k-violet-new);
-  color: var(--k-plum);
+  /* Plum on the light violet was too faint to read at 11px. White needs a
+     ground dark enough to carry it: grape clears 5:1. */
+  background: var(--k-grape);
+  color: #fff;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0;
