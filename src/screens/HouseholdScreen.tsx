@@ -16,6 +16,7 @@ import './prospectProfile.css'
 import './clientProfile.css'
 import './household.css'
 import { clientProfile } from '../data/clientProfile'
+import type { HouseholdMember } from '../data/clientProfile'
 import { baseClients } from '../data/clients'
 import type { Client } from '../data/clients'
 import { Portrait } from './ClientProfileScreen'
@@ -30,19 +31,27 @@ type FamilyTab = 'members' | 'id' | 'insights'
 const rowFor = (name: string): Client | undefined => baseClients.find((c) => c.name === name)
 
 export default function HouseholdScreen({
+  household,
   onBack,
   onOpenMember,
+  onAddMember,
   onAction,
 }: {
+  /* The family as it stands — its name and who is in it. It is state rather
+     than data: the advisor made it, and can add to it. */
+  household: { name: string; members: HouseholdMember[] }
   onBack: () => void
   /* Opens that person's own page. Everyone in this household has a row in the
      Clients table, so everyone's name is a link. */
   onOpenMember: (c: Client) => void
+  /* The same flow the client's rail opens, with the family already made. */
+  onAddMember: () => void
   /* The prototype's stand-in for the things this page would really do. */
   onAction: (msg: string) => void
 }) {
   const [tab, setTab] = useState<FamilyTab>('members')
   const cp = clientProfile
+  const members = household.members
 
   return (
     <div className="pp cp hh">
@@ -51,7 +60,7 @@ export default function HouseholdScreen({
           My Clients
         </button>
         <span className="pp-crumb-sep">›</span>
-        <span className="pp-crumb-cur">{cp.household}</span>
+        <span className="pp-crumb-cur">{household.name}</span>
       </nav>
 
       <div className="pp-layout">
@@ -59,19 +68,19 @@ export default function HouseholdScreen({
           <div className="pp-side-inner">
             {/* The family's monogram, in the disc a person's portrait would
                 take — a household has no face of its own. */}
-            <span className="pp-avatar hh-monogram">{cp.household.charAt(0)}</span>
-            <h2 className="pp-name">{cp.household}</h2>
+            <span className="pp-avatar hh-monogram">{household.name.charAt(0)}</span>
+            <h2 className="pp-name">{household.name}</h2>
 
             <div className="cp-side-block">
               {/* The same head as on a member's page, chevron and all: it names
                   the family and it always goes to the family. Here that is the
                   page you are on, so it takes you back to the top of it. */}
               <button className="cp-side-head" type="button" onClick={scrollPageToTop}>
-                {cp.household}
-                <span className="cp-side-count">{cp.members.length}</span>
+                {household.name}
+                <span className="cp-side-count">{members.length}</span>
                 <RowChevron />
               </button>
-              {cp.members.map((m) => {
+              {members.map((m) => {
                 const row = rowFor(m.name)
                 return (
                   <button
@@ -146,7 +155,7 @@ export default function HouseholdScreen({
                   <button
                     className="btn btn-primary"
                     type="button"
-                    onClick={() => onAction('Invite sent')}
+                    onClick={onAddMember}
                   >
                     Add Family Member
                   </button>
@@ -158,7 +167,7 @@ export default function HouseholdScreen({
                   <span className="pp-card-title">Members</span>
                 </div>
                 <div className="hh-members">
-                  {cp.members.map((m) => {
+                  {members.map((m) => {
                     const row = rowFor(m.name)
                     /* Both readings come off that row: whether the person is
                        live on knomee, and whether their Financial ID is
@@ -219,14 +228,14 @@ export default function HouseholdScreen({
           ) : tab === 'id' ? (
             <>
               <div className="pp-title-row">
-                <h1 className="pp-title">{cp.household} ID</h1>
+                <h1 className="pp-title">{household.name} ID</h1>
               </div>
-              <FamilyIdTab />
+              <FamilyIdTab members={members} />
             </>
           ) : (
             <>
               <div className="pp-title-row">
-                <h1 className="pp-title">{cp.household}’s Insights</h1>
+                <h1 className="pp-title">{household.name}’s Insights</h1>
               </div>
               <div className="pp-placeholder">
                 Family Insights — the household’s relationship score, who is engaged and who
