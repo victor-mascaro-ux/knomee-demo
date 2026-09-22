@@ -47,7 +47,11 @@ function Statement({ s, members }: { s: SharedStatement; members: HouseholdMembe
           .concat(`, between "${s.low}" and "${s.high}"`)}
       >
         {(together ? [s.marks[0]] : s.marks).map((v, i) => (
-          <span className={`pp-conf-dot fin-dot fin-dot-${i}`} style={{ left: `${v}%` }} key={i} />
+          <span
+            className={`pp-conf-dot fin-dot fin-dot-${i}`}
+            style={{ '--v': v } as React.CSSProperties}
+            key={i}
+          />
         ))}
       </div>
       <div className="pp-conf-ends">

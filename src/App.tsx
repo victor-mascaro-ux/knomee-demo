@@ -79,7 +79,6 @@ import {
   PlusIcon,
   LightningIcon,
   CaretDown,
-  BurgerMenu,
   WarnIcon,
   CheckIcon,
   CloseIcon,
@@ -107,6 +106,7 @@ import RowMenu from './components/RowMenu'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import HouseholdScreen from './screens/HouseholdScreen'
+import TopBar from './components/TopBar'
 import FamilyModal from './screens/FamilyModal'
 import type { NewMember } from './screens/FamilyModal'
 import moodWorried from './assets/moods/worried.svg'
@@ -3780,7 +3780,6 @@ export default function App() {
   // Co-brand credit placement: 'centered' (client centered) or 'left' (client
   // leads the left). knomee always renders small + subordinate beneath it.
   const [cobrandLayout, setCobrandLayout] = useState<'centered' | 'left'>('left')
-  const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
   const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
@@ -3923,16 +3922,6 @@ export default function App() {
   const [candidateOpen, setCandidateOpen] = useState(
     initialView === 'firm-candidates' && initialProfile === profileSlug(candidate.name),
   )
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!menuOpen) return
-    const onDoc = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
-    }
-    document.addEventListener('click', onDoc)
-    return () => document.removeEventListener('click', onDoc)
-  }, [menuOpen])
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
@@ -4340,92 +4329,23 @@ export default function App() {
           : undefined
       }
     >
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            {brand ? (
-              cobrandLayout === 'left' ? (
-                <div className="cobrand-stack">{brand.logo}</div>
-              ) : null
-            ) : firmView ? (
-              <>
-                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-                <span className="brand-sub">ADVISOR RECRUITMENT</span>
-              </>
-            ) : adminView ? (
-              <>
-                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-                <span className="brand-sub">ADMIN</span>
-              </>
-            ) : (
-              <>
-                <img className="brand-logo" src="./knomee-logo-white.svg" alt="knomee" />
-                <span className="brand-sub">ADVISOR</span>
-              </>
-            )}
-          </div>
-          {brand && cobrandLayout === 'centered' && (
-            <div className="cobrand-stack cobrand-center">{brand.logo}</div>
-          )}
-          <div className="menu-wrap" ref={menuRef}>
-            <button
-              className="menu-btn"
-              type="button"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={(e) => {
-                e.stopPropagation()
-                setMenuOpen((v) => !v)
-              }}
-            >
-              <BurgerMenu />
-            </button>
-            {menuOpen && (
-              <div className="menu-pop">
-                <div className="menu-account">
-                  <span className="menu-avatar">A</span>
-                  <span className="menu-name">Alex Advisor</span>
-                </div>
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setSettingsOpen(true)
-                    setSegmentationOpen(false)
-                    setClientExpOpen(false)
-                    setClientMobileOpen(false)
-                    setLandingOpen(false)
-                    setAdminView(false)
-                    setFirmView(false)
-                    setMenuOpen(false)
-                  }}
-                >
-                  Account Settings
-                </button>
-                <button className="menu-item" type="button">
-                  Sign Out
-                </button>
-                {/* No divider element here: .menu-hint draws its own rule, and
-                    the two of them together read as one line printed twice. */}
-                {/* Segmentation, the welcome page, the phone previews and the
-                    advisor's own flow used to be listed here, grouped under
-                    Analysis / Prospect view / Mobile. None of them is a place a
-                    real advisor navigates to from their account menu — they are
-                    the demo's other screens, and they now live in the D panel
-                    with the rest of the scaffolding. What is left in this menu
-                    is what the product would actually put in it. */}
-                {/* The scaffolding — persona switches, empty states, the
-                    white-label brand picker — used to live here, in the
-                    product's own menu, where the room saw it every time this
-                    opened. It moved to the overlay's D panel, outside the app. */}
-                <div className="menu-hint">
-                  Press <b>D</b> for demo controls, <b>C</b> for comments
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* The product's own bar. Shared, because a page that lives outside this
+          shell — the report opened from the advisors directory — has to be able
+          to wear the same one. */}
+      <TopBar
+        logo={brand ? brand.logo : undefined}
+        cobrand={cobrandLayout}
+        sub={firmView ? 'ADVISOR RECRUITMENT' : adminView ? 'ADMIN' : 'ADVISOR'}
+        onSettings={() => {
+          setSettingsOpen(true)
+          setSegmentationOpen(false)
+          setClientExpOpen(false)
+          setClientMobileOpen(false)
+          setLandingOpen(false)
+          setAdminView(false)
+          setFirmView(false)
+        }}
+      />
 
       {firmView ? (
         candidateOpen ? (

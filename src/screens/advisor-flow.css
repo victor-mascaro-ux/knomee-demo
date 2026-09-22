@@ -579,11 +579,26 @@ button.af-opt:hover {
   color: rgba(255, 255, 255, 0.76);
 }
 /* The profile page pins its tabs under the app's top bar and its breadcrumb.
-   Here it has neither — this bar is the whole chrome — so the two offsets it
-   stacks against are restated for the report, or the tabs would pin 90px down
-   the page and the cards would scroll through the daylight above them. */
+   Here the bar is this report's own, so its height is restated — and the
+   breadcrumb is the one the profile draws itself, back to the list. It was
+   declared as 0 when this report had none, which pinned the tabs at the same
+   offset as the crumb and parked the crumb (z 6) on top of them: the tab row
+   was there, underneath, with only the active underline showing. */
 .af-report .pp {
-  --topbar-h: 45px;
+  /* The flow's own bar: 60px, 12px either side of a 36px control. It was
+     declared as 45, so the breadcrumb pinned under the bar's bottom edge with
+     its top slice behind it. */
+  --topbar-h: 60px;
+  --pp-crumb-h: 41px;
+}
+/* Somebody else's report wears the app's own bar, so the offset its breadcrumb
+   pins against is the app's, not this page's. */
+.af-report-viewed .pp {
+  --topbar-h: 64px;
+}
+/* Except on your own report, which is not reached from a list and draws no
+   breadcrumb to stack under. */
+.af-report .pp.ap-mine {
   --pp-crumb-h: 0px;
 }
 @media (max-width: 620px) {

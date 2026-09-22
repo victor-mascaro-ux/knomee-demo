@@ -1244,11 +1244,16 @@
   border-radius: 4px;
   background: #e2def0;
 }
+/* The mark travels the track MINUS its own width, so an answer at either end
+   sits fully on the bar rather than hanging half off it. --v is the answer,
+   0-100, set by whoever draws the row. */
 .pp-conf-dot {
+  --dot: 13px;
   position: absolute;
   top: 50%;
-  width: 13px;
-  height: 13px;
+  left: calc(var(--dot) / 2 + (100% - var(--dot)) * var(--v, 0) / 100);
+  width: var(--dot);
+  height: var(--dot);
   border-radius: 50%;
   background: var(--purple-bolt, #9b51e0);
   transform: translate(-50%, -50%);

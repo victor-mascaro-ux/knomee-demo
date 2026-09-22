@@ -88,8 +88,14 @@ export function emptyAnswers(): Answers {
 /** Marcus's sheet, read out of the flow rather than retyped — so the worked
     example and an empty one are the same instrument, and the walkthrough is
     still one menu item away now that the flow can be answered. */
+/* The walkthrough's answers are one known sitting, not a new person every time
+   somebody fills them in. A fixed id keeps the directory to a single Marcus
+   Hale row, refreshed, rather than one more of him per demo. */
+const SAMPLE_SITTING = 's-sample-marcus-hale'
+
 export function sampleAnswers(): Answers {
   const a = emptyAnswers()
+  a.sittingId = SAMPLE_SITTING
   a.identity = { name: advisor.name, role: 'Lead advisor', book: advisor.book, firm: advisor.firm }
   a.completed = advisor.completedOn
   for (const s of steps) {
