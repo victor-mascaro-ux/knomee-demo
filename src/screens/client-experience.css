@@ -161,15 +161,19 @@
   box-shadow: 0 14px 28px rgba(20, 12, 40, 0.16);
   animation: cxDrop var(--dur-slow) var(--ease-out) both;
 }
-/* The credit, inside the menu rather than only fixed over the page. Right, not
-   left: the left edge is where the panel's own content starts, and a credit
-   that reads before the account row reads as part of it. */
+/* The credit, inside the menu rather than only fixed over the page — and on the
+   account row rather than above it, level with the name. A row of its own
+   pushed the account down the panel and read as the menu's first item. Right,
+   not left: the left edge is where the panel's own content starts. */
 .cx-sheet-credit {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 6px;
-  padding-bottom: var(--space-12);
+  margin-left: auto;
+  /* The account row centres its avatar against a two-line block; the credit
+     belongs on the first of those lines, not between them. */
+  align-self: flex-start;
+  flex: none;
 }
 .cx-sheet-credit span {
   font-size: var(--text-micro);
