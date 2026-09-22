@@ -231,10 +231,12 @@ export default function AdvisorProfileScreen({
           )}
 
           <div className="pp-title-row">
-            <h1 className="pp-title">
-              {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
-            </h1>
-            {ownerMenu}
+            <div className="pp-title-id">
+              {ownerMenu}
+              <h1 className="pp-title">
+                {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
+              </h1>
+            </div>
             <button className="btn btn-download active" type="button">
               <DownloadIcon /> Download PDF
             </button>

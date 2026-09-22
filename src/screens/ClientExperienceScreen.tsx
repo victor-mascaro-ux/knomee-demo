@@ -136,10 +136,11 @@ export const TabFinId = () => (
 export const TabQuestions = () => (
   <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path
-      d="M27.2 2.4H4.8A2.8 2.8 0 0 0 2 5.2v10.4a2.8 2.8 0 0 0 2.8 2.8h3.6v5l5.6-5h13.2a2.8 2.8 0 0 0 2.8-2.8V5.2a2.8 2.8 0 0 0-2.8-2.8Z"
+      d="M28.4 1.8H3.6A2 2 0 0 0 1.6 3.8v12.4a2 2 0 0 0 2 2h3.8v5.2l5.9-5.2h15.1a2 2 0 0 0 2-2V3.8a2 2 0 0 0-2-2Z"
       strokeLinejoin="round"
     />
-    <path d="M13.1 8.5a3 3 0 0 1 5.8 1c0 2-2.9 2.4-2.9 4.2" strokeLinecap="round" />
+    <path d="M12.8 7.6a3.3 3.3 0 0 1 6.4 1.1c0 2.3-3.2 2.7-3.2 4.7" strokeLinecap="round" />
+    <circle cx="16" cy="16.2" r="1.05" fill="currentColor" stroke="none" />
   </svg>
 )
 
