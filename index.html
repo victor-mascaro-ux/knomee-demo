@@ -661,6 +661,14 @@
   // Key that reveals/hides the commenting overlay. It stays completely
   // hidden until this is pressed (F12 is reserved for browser devtools).
   const ACTIVATION_KEY = 'F2';
+  /* An invited advisor's link, and the one address where this shell is not
+     review scaffolding wrapped around a prototype — it is the product, opened
+     by somebody who was sent it. They get no comment rail and no demo panel:
+     the promise the link makes is the flow and nothing else, and "nothing else"
+     has to include the two keys that would otherwise hand a stranger the whole
+     demo. Read once, from the address the page was opened at, so navigating
+     away from a flow inside the frame cannot unlock them either. */
+  const INVITED = /^#\/flow\//.test(window.location.hash || '');
   // ────────────────────────────────────────────────────────
 
   const stage    = document.getElementById('ccStage');
@@ -901,6 +909,8 @@
     'advisor-mobile': 'Business ID on mobile',
     'advisor-flow': 'Advisor Recruit · Sample',
     'advisor-self': 'Advisor Recruit · Your answers',
+    advisors: 'Advisor Flow · Who answered',
+    flow: 'Advisor Flow · An invited advisor',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-analytics': 'Dynasty · Analytics',
     default: 'Prototype'
@@ -1456,10 +1466,12 @@
     }
     return false;
   }
-  window.addEventListener('keydown', (e) => {
-    if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
-    else if (isDemoCombo(e)) { e.preventDefault(); toggleDemo(); }
-  });
+  if (!INVITED) {
+    window.addEventListener('keydown', (e) => {
+      if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
+      else if (isDemoCombo(e)) { e.preventDefault(); toggleDemo(); }
+    });
+  }
 
   // Messages from the prototype iframe: the activation key forwarded from
   // inside the frame (where focus normally sits), and the frame's content
@@ -1473,7 +1485,7 @@
       // however many times you pressed it.
       retreat();
     } else if (d.type === 'cc-activate') {
-      toggleArmed();
+      if (!INVITED) toggleArmed();
     } else if (d.type === 'cc-frame-height' && typeof d.height === 'number') {
       // 0 means "a fixed-layout page — one viewport tall" (see reviewBridge).
       // Only while comments are armed: unarmed, the frame is one viewport tall
@@ -1493,7 +1505,7 @@
       if (demoArmed) renderDemo();
     } else if (d.type === 'cc-demo-state') {
       applyDemoState(d);
-    } else if (d.type === 'cc-demo-activate') {
+    } else if (d.type === 'cc-demo-activate' && !INVITED) {
       toggleDemo();
     }
   });
@@ -1614,13 +1626,13 @@
   // top bar.
   const SHELL_VIEWS = [
     'prospects', 'clients', 'analytics', 'segmentation', 'settings',
-    'admin', 'firm-candidates', 'firm-analytics'
+    'admin', 'firm-candidates', 'firm-analytics', 'advisors'
   ];
   // The journeys. They are standalone pages rather than shell screens, but the
   // firm's colours are the first thing any of them shows somebody — the phone
   // bar wears the brand the way the desktop top bar does — so the company row
   // belongs on them too.
-  const JOURNEY_VIEWS = ['client-experience', 'advisor-flow', 'advisor-self'];
+  const JOURNEY_VIEWS = ['client-experience', 'advisor-flow', 'advisor-self', 'flow'];
   const BRANDED_VIEWS = SHELL_VIEWS.concat(JOURNEY_VIEWS);
   // Where the phone rendering sends you back to. The mobile client page is one
   // screen (Emily's), so without this, turning the view off from it would have
@@ -1707,7 +1719,12 @@
       v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'advisor'],
     ['admin', 'Admin', '#/admin', v => v === 'admin'],
     ['firm', 'Advisor Recruit', '#/firm-candidates',
-      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm']
+      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm'],
+    /* Who has answered the advisor flow, and where invite links are made. A
+       dashboard rather than a journey: it is a list somebody works from, not a
+       page anybody is asked questions on. */
+    ['advisors', 'Advisor Flow · Who answered', '#/advisors',
+      v => v === 'advisors']
   ];
   /* Named for who takes the journey AND what it produces. "Advisor" on its own
      would read as the Advisor dashboard two rows up; the artefact says which
@@ -1731,6 +1748,9 @@
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';
+    // The directory is in the shell but it is not the advisor's book, and two
+    // rows marked at once would say you were on both.
+    if (view === 'advisors') return 'directory';
     if (view.indexOf('firm-') === 0) return 'firm';
     return 'advisor';
   };

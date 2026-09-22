@@ -58,6 +58,14 @@ import {
   type Grade,
 } from '../data/advisorAnswers'
 import {
+  entryOf,
+  greeting,
+  putEntry,
+  touchInvite,
+  type Entry,
+  type Invite,
+} from '../data/advisorDirectory'
+import {
   downloadCsv,
   endpoint,
   ledger,
@@ -91,7 +99,22 @@ Nothing is sent anywhere — the answers stay in this browser.`,
   cta: 'Continue',
 }
 
-const steps: Step[] = [flowSteps[0], IDENTITY, ...flowSteps.slice(1)]
+/* An invited advisor is greeted by name on the first screen — the link was made
+   for them, and a page that opens "Welcome" to somebody who was sent it reads
+   like a page that does not know who asked. Everywhere else the flow opens as
+   it always has. */
+function stepsFor(hello?: string | null): Step[] {
+  const welcome = hello ? { ...flowSteps[0], title: hello } : flowSteps[0]
+  return [welcome, IDENTITY, ...flowSteps.slice(1)]
+}
+
+/* What this screen is being used for. `demo` is the flow as it has always been,
+   opened from the menu and handed round a room. `invited` is one advisor's own
+   link: their own sheet, their name on the first screen, and none of the
+   operator's scaffolding. `view` is somebody else's finished sitting, read out
+   of the directory — the Business ID and the playbooks behind it, and nothing
+   that could write to their answers. */
+export type SelfMode = 'demo' | 'invited' | 'view'
 
 /* ── writing to the sheet ────────────────────────────────────────────────
    One place that knows how an answer is stored, handed down to the question
@@ -659,17 +682,39 @@ function StepBody({
 export default function AdvisorSelfScreen({
   onExit,
   brand,
+  mode = 'demo',
+  invite = null,
+  entry = null,
 }: {
   onExit: () => void
   brand?: FlowBrand | null
+  mode?: SelfMode
+  /** Invited mode: the record behind the link, so the flow can say their name
+      and the directory can tie what they answer back to the invite. */
+  invite?: Invite | null
+  /** Viewing mode: somebody else's sitting, already fetched. */
+  entry?: Entry | null
 }) {
+  const viewing = mode === 'view'
+  // An invited advisor's sheet is scoped to their token, so a device that has
+  // been used to demo the flow does not hand them its leftovers.
+  const scope = mode === 'invited' && invite ? invite.token : null
   // The sheet outlives the session: answering eight minutes of questions and
-  // losing them to a reload is not a thing to do to anyone.
-  const [answers, setAnswers] = useState<Answers>(loadAnswers)
+  // losing them to a reload is not a thing to do to anyone. Viewing is the
+  // exception — those answers are somebody else's and arrive with the entry.
+  const [answers, setAnswers] = useState<Answers>(() =>
+    viewing && entry ? entry.answers : loadAnswers(scope),
+  )
   const [view, setView] = useState<'flow' | 'report' | 'record'>('flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
-  useEffect(() => saveAnswers(answers), [answers])
+  const steps = useMemo(
+    () => stepsFor(mode === 'invited' && invite ? greeting(invite.name) : null),
+    [mode, invite],
+  )
+  useEffect(() => {
+    if (!viewing) saveAnswers(answers, scope)
+  }, [answers, viewing, scope])
 
   // Two stores, on purpose. `saveAnswers` holds the sheet you are filling in
   // and a restart wipes it — that is what resets the Business ID. The record
@@ -679,8 +724,34 @@ export default function AdvisorSelfScreen({
   const answered = !d.empty || Object.keys(answers.text).length > 0 ||
     Object.keys(answers.choice).length > 0 || !!answers.identity.name.trim()
   useEffect(() => {
-    if (answered) noteSitting(answers, answers.sittingId)
-  }, [answers, answered])
+    if (answered && !viewing) noteSitting(answers, answers.sittingId)
+  }, [answers, answered, viewing])
+
+  /* And the third store: the shared directory, so the person who sent the link
+     can see that it was answered. The ledger above is this device's; this one
+     is everybody's.
+
+     Written on a timer rather than on every keystroke. Each answer would
+     otherwise be its own request, and a free-text screen would post on every
+     letter typed — a second of quiet is a fine proxy for "they have stopped
+     doing that for now", and the row is a whole sheet each time rather than a
+     delta, so a lost write costs nothing but freshness. */
+  useEffect(() => {
+    if (viewing || !answered) return
+    const fallback = invite?.name ?? ''
+    const id = window.setTimeout(() => {
+      void putEntry(entryOf(answers, invite?.token ?? null, fallback))
+      if (invite) void touchInvite(invite.token, true)
+    }, 1000)
+    return () => window.clearTimeout(id)
+  }, [answers, answered, viewing, invite])
+
+  /* An opened link is worth knowing about on its own: it separates "has not
+     looked at it yet" from "looked, and did not answer", which are two
+     different conversations to have with somebody. */
+  useEffect(() => {
+    if (mode === 'invited' && invite) void touchInvite(invite.token, false)
+  }, [mode, invite])
 
   const restart = useCallback((next: Answers) => {
     setAnswers(next)
@@ -692,10 +763,14 @@ export default function AdvisorSelfScreen({
      stays on the record whether or not the post got anywhere. */
   const close = useCallback(() => {
     if (answered) void pushSitting(noteSitting(answers, answers.sittingId))
+    /* A restart under an invite is the same person starting over, not the next
+       person in the room — so it keeps the token and the name on the link, and
+       lands in the directory as a second sitting rather than overwriting the
+       first. Nothing they already answered is lost. */
     restart(emptyAnswers())
   }, [answered, answers, restart])
 
-  if (view === 'report') return <FlowReport d={d} onBack={() => setView('flow')} />
+  if (view === 'report') return <FlowReport d={d} mode={mode} onBack={() => setView('flow')} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -703,6 +778,8 @@ export default function AdvisorSelfScreen({
       answers={answers}
       edit={edit}
       d={d}
+      steps={steps}
+      mode={mode}
       brand={brand}
       onExit={onExit}
       onReport={() => setView('report')}
@@ -713,7 +790,7 @@ export default function AdvisorSelfScreen({
       onRestart={close}
       onSample={() => restart(sampleAnswers())}
       onDiscard={() => {
-        clearAnswers()
+        clearAnswers(scope)
         restart(emptyAnswers())
       }}
     />
@@ -726,6 +803,8 @@ function FlowPhone({
   answers,
   edit,
   d,
+  steps,
+  mode,
   onExit,
   onReport,
   onRecord,
@@ -738,6 +817,10 @@ function FlowPhone({
   answers: Answers
   edit: Edit
   d: Derived
+  /** The flow's screens, welcome title and all — handed down rather than read
+      from the module, because an invite's first screen says their name. */
+  steps: Step[]
+  mode: SelfMode
   brand?: FlowBrand | null
   onExit: () => void
   onReport: () => void
@@ -755,7 +838,8 @@ function FlowPhone({
   // The Move would land in the middle of Future You.
   const [trail, setTrail] = useState<number[]>([0])
   const i = trail[trail.length - 1]
-  const [tab, setTab] = useState<'flow' | 'finid'>('flow')
+  const viewing = mode === 'view'
+  const [tab, setTab] = useState<'flow' | 'finid'>(viewing ? 'finid' : 'flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   // Read as the sheet opens rather than held in state: the record is written by
@@ -868,16 +952,31 @@ function FlowPhone({
             {tab === 'finid' ? (
               d.empty ? (
                 /* Nothing answered yet. An empty page of empty cards would read
-                   as a broken Business ID rather than an unearned one. */
+                   as a broken Business ID rather than an unearned one.
+
+                   Reading somebody else's, the same emptiness is a fact about
+                   them rather than a nudge: it is their adventures that are
+                   unfinished, and there is nothing the person looking can do
+                   about it from here — so no button, and their name on it so it
+                   is clear whose page is empty. */
                 <div className="af-blank">
-                  <h2 className="af-h1">Your Business ID</h2>
+                  <h2 className="af-h1">
+                    {viewing ? `${d.who.name}’s Business ID` : 'Your Business ID'}
+                  </h2>
                   <p className="af-body">
-                    This page is built out of your answers. Finish an adventure and it starts
-                    filling in — the first one takes about two minutes.
+                    {viewing
+                      ? 'Not enough answered yet for this to say anything. It is built out of their answers and fills in as they finish each adventure — their progress is on the directory.'
+                      : 'This page is built out of your answers. Finish an adventure and it starts filling in — the first one takes about two minutes.'}
                   </p>
-                  <button className="cx-start af-wide" type="button" onClick={() => setTab('flow')}>
-                    Go to My Adventures
-                  </button>
+                  {!viewing && (
+                    <button
+                      className="cx-start af-wide"
+                      type="button"
+                      onClick={() => setTab('flow')}
+                    >
+                      Go to My Adventures
+                    </button>
+                  )}
                 </div>
               ) : (
                 /* The Business ID he reads is the Business ID the firm
@@ -953,7 +1052,7 @@ function FlowPhone({
                 ))}
               </div>
             </div>
-          ) : (
+          ) : viewing ? null : (
           <nav className="cx-tabbar">
             <svg className="cx-tab-edge" viewBox="0 0 390 96" width="390" height="96" aria-hidden>
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
@@ -1000,7 +1099,12 @@ function FlowPhone({
                   <span className="cx-sheet-avatar">{d.who.initial}</span>
                   <span>
                     <b>{d.who.name}</b>
-                    <i>{d.id.header.meta || 'Your answers, on this device'}</i>
+                    <i>
+                      {d.id.header.meta ||
+                        (viewing
+                          ? 'Their answers, from the directory'
+                          : 'Your answers, on this device')}
+                    </i>
                   </span>
                 </div>
                 {/* Nothing to read until something is answered — an empty
@@ -1014,75 +1118,102 @@ function FlowPhone({
                       onReport()
                     }}
                   >
-                    My readiness and toolkit
+                    {viewing ? 'Their readiness and toolkit' : 'My readiness and toolkit'}
                     <ArrowRight />
                   </button>
                 )}
-                {/* Restarting is how the phone gets handed to the next person:
-                    this sitting goes to the spreadsheet, and the sheet — and so
-                    the Business ID — starts empty. The answers stay recorded. */}
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setTab('flow')
-                    reset(0)
-                    onRestart()
-                  }}
-                >
-                  Restart for the next person
-                  <ArrowRight />
-                </button>
-                <div className="cx-sheet-hint">
-                  Records this sitting, then clears the sheet. The Business ID resets; the answers
-                  stay on the spreadsheet.
-                </div>
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    onRecord()
-                  }}
-                >
-                  Recorded answers{recorded ? ` · ${recorded}` : ''}
-                  <ArrowRight />
-                </button>
-                {/* The worked example, one tap away. It is what this flow was
-                    before it could be answered, and it is still the fastest way
-                    to show somebody the whole instrument. */}
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setTab('flow')
-                    reset(0)
-                    onSample()
-                  }}
-                >
-                  Fill in the sample answers
-                  <ArrowRight />
-                </button>
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setTab('flow')
-                    reset(0)
-                    onDiscard()
-                  }}
-                >
-                  Discard this sitting
-                  <ArrowRight />
-                </button>
-                <button className="cx-sheet-item" type="button" onClick={onExit}>
-                  Advisor Experience
-                  <ArrowRight />
-                </button>
-                <div className="cx-sheet-hint">Switches back to the advisor demo.</div>
+                {/* Restarting is how the phone gets handed to the next person —
+                    or, under an invite, how one advisor starts their own answers
+                    over. Either way this sitting is recorded first and the sheet
+                    starts empty, so the Business ID resets and nothing anybody
+                    typed is thrown away. Never offered over somebody else's
+                    answers. */}
+                {!viewing && (
+                  <>
+                    <button
+                      className="cx-sheet-item"
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        setTab('flow')
+                        reset(0)
+                        onRestart()
+                      }}
+                    >
+                      {mode === 'invited' ? 'Start my answers over' : 'Restart for the next person'}
+                      <ArrowRight />
+                    </button>
+                    <div className="cx-sheet-hint">
+                      {mode === 'invited'
+                        ? 'Keeps this sitting on the record and starts you a fresh one. Your Business ID resets.'
+                        : 'Records this sitting, then clears the sheet. The Business ID resets; the answers stay on the spreadsheet.'}
+                    </div>
+                  </>
+                )}
+                {/* Back-of-house. An invited advisor is a person answering
+                    questions about their own practice, not somebody running a
+                    demo: the spreadsheet, the worked example and the way out
+                    into the advisor dashboard are all operator tools, and a
+                    link sent to a stranger should carry none of them. */}
+                {mode === 'demo' && (
+                  <>
+                    <button
+                      className="cx-sheet-item"
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        onRecord()
+                      }}
+                    >
+                      Recorded answers{recorded ? ` · ${recorded}` : ''}
+                      <ArrowRight />
+                    </button>
+                    {/* The worked example, one tap away. It is what this flow
+                        was before it could be answered, and it is still the
+                        fastest way to show somebody the whole instrument. */}
+                    <button
+                      className="cx-sheet-item"
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        setTab('flow')
+                        reset(0)
+                        onSample()
+                      }}
+                    >
+                      Fill in the sample answers
+                      <ArrowRight />
+                    </button>
+                    <button
+                      className="cx-sheet-item"
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        setTab('flow')
+                        reset(0)
+                        onDiscard()
+                      }}
+                    >
+                      Discard this sitting
+                      <ArrowRight />
+                    </button>
+                  </>
+                )}
+                {/* Viewing has somewhere to go back to. An invite does not:
+                    the flow is the whole of what that link is for. */}
+                {mode !== 'invited' && (
+                  <>
+                    <button className="cx-sheet-item" type="button" onClick={onExit}>
+                      {viewing ? 'Back to the directory' : 'Advisor Experience'}
+                      <ArrowRight />
+                    </button>
+                    <div className="cx-sheet-hint">
+                      {viewing
+                        ? 'Everyone who has taken the flow.'
+                        : 'Switches back to the advisor demo.'}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -1122,7 +1253,15 @@ function FlowPhone({
    preview of that page — it IS that page, handed the sheet from the phone
    instead of the worked example. */
 
-function FlowReport({ d, onBack }: { d: Derived; onBack: () => void }) {
+function FlowReport({
+  d,
+  onBack,
+  mode,
+}: {
+  d: Derived
+  onBack: () => void
+  mode: SelfMode
+}) {
   useEffect(() => {
     window.scrollTo(0, 0)
     try {
@@ -1135,14 +1274,16 @@ function FlowReport({ d, onBack }: { d: Derived; onBack: () => void }) {
     <div className="page af-report">
       <header className="af-report-bar">
         <button className="af-report-back" type="button" onClick={onBack}>
-          ‹ Back to the flow
+          {mode === 'view' ? '‹ Back to their Business ID' : '‹ Back to the flow'}
         </button>
         <span className="af-report-note">
-          What a platform reads from your answers — the same page, the same three tabs.
+          {mode === 'view'
+            ? `What a platform reads from ${d.who.name}’s answers — the same page, the same three tabs.`
+            : 'What a platform reads from your answers — the same page, the same three tabs.'}
         </span>
       </header>
       <main className="content content-profile">
-        <AdvisorProfileScreen mine tabs data={d} onBack={onBack} />
+        <AdvisorProfileScreen mine={mode !== 'view'} tabs data={d} onBack={onBack} />
       </main>
     </div>
   )

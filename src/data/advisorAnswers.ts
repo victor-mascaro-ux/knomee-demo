@@ -106,9 +106,17 @@ export function sampleAnswers(): Answers {
 
 const KEY = 'knomee.advisor-answers.v1'
 
-export function loadAnswers(): Answers {
+/* One sheet per scope, so two people answering on the same device do not
+   overwrite each other. The demo menu's flow is the unscoped sheet it has
+   always been; an invited advisor gets their own, keyed by the token in their
+   link. Without this, opening an invite on a machine that had been used to
+   demo the flow would hand the advisor somebody else's half-finished answers —
+   and their own would be gone the next time the demo was opened. */
+const keyFor = (scope?: string | null) => (scope ? `${KEY}.${scope}` : KEY)
+
+export function loadAnswers(scope?: string | null): Answers {
   try {
-    const raw = window.localStorage.getItem(KEY)
+    const raw = window.localStorage.getItem(keyFor(scope))
     if (!raw) return emptyAnswers()
     // Merged over a fresh sheet, so a copy stored under an older shape cannot
     // arrive missing a bucket every rule below assumes is there — including a
@@ -122,17 +130,17 @@ export function loadAnswers(): Answers {
   }
 }
 
-export function saveAnswers(a: Answers) {
+export function saveAnswers(a: Answers, scope?: string | null) {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(a))
+    window.localStorage.setItem(keyFor(scope), JSON.stringify(a))
   } catch {
     /* private window, or storage full — the sheet just does not survive reload */
   }
 }
 
-export function clearAnswers() {
+export function clearAnswers(scope?: string | null) {
   try {
-    window.localStorage.removeItem(KEY)
+    window.localStorage.removeItem(keyFor(scope))
   } catch {
     /* nothing to undo */
   }

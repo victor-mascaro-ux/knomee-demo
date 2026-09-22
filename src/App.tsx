@@ -95,6 +95,8 @@ import ClientMobileScreen from './screens/ClientMobileScreen'
 import AdvisorMobileScreen from './screens/AdvisorMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
+import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
+import { readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
@@ -3673,6 +3675,12 @@ const ROUTE_VIEWS = [
   'advisor-mobile',
   'advisor-flow',
   'advisor-self',
+  /* Two halves of the same feature. `advisors` is the directory — who has taken
+     the flow — and `advisors/<sitting id>` is one of them, their Business ID on
+     the phone. `flow/<token>` is the other end: the link an invited advisor
+     opens, which is the flow and nothing else. */
+  'advisors',
+  'flow',
   'admin',
   'settings',
   'firm-candidates',
@@ -3767,6 +3775,54 @@ export default function App() {
   // Marcus's and stays pre-filled; this one starts empty and computes its
   // Business ID, readiness and Toolkit from whatever is typed into it.
   const [advisorSelfOpen, setAdvisorSelfOpen] = useState(initialView === 'advisor-self')
+  /* The directory, and whichever of the two things behind a route we are still
+     fetching. Both are read from Firestore on mount rather than held in the
+     bundle: the whole point of them is that they were written by somebody on
+     another device. Null while in flight, and the screens say so. */
+  const [directoryOpen, setDirectoryOpen] = useState(initialView === 'advisors' && !initialProfile)
+  const [viewEntryId, setViewEntryId] = useState<string | null>(
+    initialView === 'advisors' ? initialProfile : null,
+  )
+  const [viewEntry, setViewEntry] = useState<Entry | null>(null)
+  const [inviteToken, setInviteToken] = useState<string | null>(
+    initialView === 'flow' ? initialProfile : null,
+  )
+  const [invite, setInvite] = useState<Invite | null>(null)
+  /* Told apart from "still loading": a link whose token is not in the directory
+     is a real answer, and the person holding it needs to be told rather than
+     left watching a spinner. */
+  const [inviteMissing, setInviteMissing] = useState(false)
+  const [entryMissing, setEntryMissing] = useState(false)
+
+  useEffect(() => {
+    if (!viewEntryId) return
+    setViewEntry(null)
+    setEntryMissing(false)
+    let live = true
+    void readEntry(viewEntryId).then(({ value }) => {
+      if (!live) return
+      if (value) setViewEntry(value)
+      else setEntryMissing(true)
+    })
+    return () => {
+      live = false
+    }
+  }, [viewEntryId])
+
+  useEffect(() => {
+    if (!inviteToken) return
+    setInvite(null)
+    setInviteMissing(false)
+    let live = true
+    void readInvite(inviteToken).then(({ value }) => {
+      if (!live) return
+      if (value) setInvite(value)
+      else setInviteMissing(true)
+    })
+    return () => {
+      live = false
+    }
+  }, [inviteToken])
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
   const [adminView, setAdminView] = useState(initialView === 'admin')
@@ -3809,7 +3865,11 @@ export default function App() {
           ? landingVersion === 'b'
             ? 'welcome-b'
             : 'welcome'
-          : advisorSelfOpen
+          : inviteToken
+            ? 'flow'
+            : directoryOpen || viewEntryId
+            ? 'advisors'
+            : advisorSelfOpen
             ? 'advisor-self'
             : advisorFlowOpen
             ? 'advisor-flow'
@@ -3900,6 +3960,9 @@ export default function App() {
       setSegmentationOpen(v === 'segmentation')
       setAdvisorFlowOpen(v === 'advisor-flow')
       setAdvisorSelfOpen(v === 'advisor-self')
+      setDirectoryOpen(v === 'advisors' && !slug)
+      setViewEntryId(v === 'advisors' ? slug : null)
+      setInviteToken(v === 'flow' ? slug : null)
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
       setClientMobileOpen(v === 'client-mobile')
@@ -3937,7 +4000,11 @@ export default function App() {
           ? profileSlug(profileClient.name)
           : currentView === 'firm-candidates' && candidateOpen
             ? profileSlug(candidate.name)
-            : null
+            : currentView === 'advisors' && viewEntryId
+              ? viewEntryId
+              : currentView === 'flow' && inviteToken
+                ? inviteToken
+                : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
@@ -3949,7 +4016,7 @@ export default function App() {
         /* cross-origin parent — ignore */
       }
     }
-  }, [currentView, profileProspect, profileClient, candidateOpen])
+  }, [currentView, profileProspect, profileClient, candidateOpen, viewEntryId, inviteToken])
 
   // Esc closes the convert modal.
   useEffect(() => {
@@ -4051,7 +4118,104 @@ export default function App() {
   if (advisorSelfOpen) {
     return (
       <>
-        <AdvisorSelfScreen onExit={() => setAdvisorSelfOpen(false)} brand={brand} />
+        {/* Keyed, and so are the other two. All three branches return the same
+            element type at the same position in the tree, so without a key
+            React keeps one instance and only swaps the props — carrying the
+            answer sheet from one mode into the next. That is how reading
+            somebody's Business ID and then opening the demo flow wrote their
+            sitting back to the directory stripped of its invite. */}
+        <AdvisorSelfScreen
+          key="self-demo"
+          onExit={() => setAdvisorSelfOpen(false)}
+          brand={brand}
+        />
+        {brand && <PoweredBy />}
+      </>
+    )
+  }
+
+  /* An invited advisor's link. This branch is above every dashboard on purpose:
+     whoever opens it sees the flow and no way out of it, because the link was
+     sent to somebody who is not running the demo. */
+  if (inviteToken) {
+    if (inviteMissing) {
+      return (
+        <div className="page">
+          <main className="content">
+            <h1 className="page-title">That link has expired</h1>
+            <p className="adir-note">
+              No invitation matches it. Ask whoever sent it for a new one — links are made one
+              per advisor, so a fresh one takes them a moment.
+            </p>
+          </main>
+        </div>
+      )
+    }
+    if (!invite) {
+      return (
+        <div className="page">
+          <main className="content">
+            <h1 className="page-title">Opening your flow…</h1>
+          </main>
+        </div>
+      )
+    }
+    return (
+      <>
+        <AdvisorSelfScreen
+          key={`self-invited-${invite.token}`}
+          mode="invited"
+          invite={invite}
+          brand={brand}
+          /* Nowhere to exit to: the menu hides the way out in this mode, and
+             this is the fallback if anything ever calls it anyway. */
+          onExit={() => undefined}
+        />
+        {brand && <PoweredBy />}
+      </>
+    )
+  }
+
+  /* One person's Business ID, on the phone, from the directory. */
+  if (viewEntryId) {
+    const backToList = () => {
+      setViewEntryId(null)
+      setDirectoryOpen(true)
+    }
+    if (entryMissing) {
+      return (
+        <div className="page">
+          <main className="content">
+            <button className="settings-back" type="button" onClick={backToList}>
+              ‹ Back to the directory
+            </button>
+            <h1 className="page-title">No sitting by that name</h1>
+            <p className="adir-note">
+              It may have been answered on a device that never reached the directory, or the link
+              may be from an older run of the demo.
+            </p>
+          </main>
+        </div>
+      )
+    }
+    if (!viewEntry) {
+      return (
+        <div className="page">
+          <main className="content">
+            <h1 className="page-title">Reading their answers…</h1>
+          </main>
+        </div>
+      )
+    }
+    return (
+      <>
+        <AdvisorSelfScreen
+          key={`self-view-${viewEntry.id}`}
+          mode="view"
+          entry={viewEntry}
+          brand={brand}
+          onExit={backToList}
+        />
         {brand && <PoweredBy />}
       </>
     )
@@ -4212,6 +4376,18 @@ export default function App() {
             prospect={profileProspect}
             onBack={() => setProfileProspect(null)}
             onConvert={(p) => setConvertTarget(p)}
+          />
+        </main>
+      ) : directoryOpen ? (
+        <main className="content">
+          <button className="settings-back" type="button" onClick={() => setDirectoryOpen(false)}>
+            ‹ Back to dashboard
+          </button>
+          <AdvisorDirectoryScreen
+            onOpen={(id) => {
+              setDirectoryOpen(false)
+              setViewEntryId(id)
+            }}
           />
         </main>
       ) : adminView ? (
