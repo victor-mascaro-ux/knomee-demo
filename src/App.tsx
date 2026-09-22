@@ -11,6 +11,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { avatarSources, clientProfile } from './data/clientProfile'
+import { hasProfile } from './data/memberProfiles'
 import type { HouseholdMember } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
@@ -821,7 +822,6 @@ function ClientRow({
   onToggle,
   onOpenProfile,
   onOpenHousehold,
-  familyName,
 }: {
   c: Client
   checked: boolean
@@ -829,17 +829,13 @@ function ClientRow({
   onOpenProfile?: (c: Client) => void
   /* The one household with a page of its own. */
   onOpenHousehold?: () => void
-  /* The household that exists. A row's own `household` is what it WOULD belong
-     to; until the advisor has made that family, the cell has nothing to say. */
-  familyName?: string | null
 }) {
   /* Every row names the family it belongs to, whether or not that family has
      been set up on knomee yet — the household is a fact about the person, not
-     about the product. Where it goes depends on whether it exists: to the
-     family's own page once it does, and to the member's profile before that,
-     which is the only place a family can be made. */
+     about the product. The name goes to the family's page, which is what it
+     names; asking for that page is itself a statement that the family exists,
+     so the click makes it so. */
   const household = c.household ?? null
-  const madeUp = Boolean(household && household === familyName)
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
       <td className="col-check">
@@ -865,7 +861,7 @@ function ClientRow({
               name={c.name}
               isNew={c.isNew}
               onClick={
-                onOpenProfile && c.name === clientProfile.owner
+                onOpenProfile && hasProfile(c.name)
                   ? () => onOpenProfile(c)
                   : undefined
               }
@@ -882,7 +878,7 @@ function ClientRow({
           <button
             type="button"
             className="household-link name-link-btn"
-            onClick={madeUp ? onOpenHousehold : () => onOpenProfile?.(c)}
+            onClick={onOpenHousehold}
           >
             {household}
           </button>
@@ -1257,14 +1253,12 @@ function ClientsScreen({
   onInvite,
   onOpenProfile,
   onOpenHousehold,
-  familyName,
 }: {
   clients: Client[]
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (c: Client) => void
   onOpenHousehold: () => void
-  familyName?: string | null
 }) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -1442,7 +1436,6 @@ function ClientsScreen({
                         onToggle={() => toggle(c.name)}
                         onOpenProfile={onOpenProfile}
                         onOpenHousehold={onOpenHousehold}
-                        familyName={familyName}
                       />
                     ))}
                 </Fragment>
@@ -3798,10 +3791,29 @@ export default function App() {
      first member is the flow that creates it. Everything that names the Watson
      family (the rail, the table's Household column, the badge on her avatar,
      the family's own page) reads this one piece of state, so none of them can
-     claim a family that does not exist yet. */
-  const [family, setFamily] = useState<{ name: string; members: HouseholdMember[] } | null>(null)
+     claim a family that does not exist yet.
+
+     Except when the address bar asks for the family's page. A link to it — a
+     refresh, a bookmark, a URL sent to somebody — is a request to be on a page
+     that cannot exist for a household that does not, so the route seeds the
+     state with the household as the data has it. Landing anywhere else still
+     starts Emily in no family, which is where the flow begins. */
+  const HOUSEHOLD_AS_BUILT = {
+    name: clientProfile.household,
+    members: clientProfile.members,
+  }
+  const [family, setFamily] = useState<{ name: string; members: HouseholdMember[] } | null>(
+    initialView === 'clients' && initialProfile === HOUSEHOLD_SLUG ? HOUSEHOLD_AS_BUILT : null,
+  )
   const [familyModal, setFamilyModal] = useState(false)
   const openFamilyModal = () => setFamilyModal(true)
+  /* Opening the family's page from anywhere: the table's Household column, a
+     member's breadcrumb, the household at the top of their rail. */
+  const openHousehold = () => {
+    setFamily((f) => f ?? HOUSEHOLD_AS_BUILT)
+    setProfileClient(null)
+    setHouseholdOpen(true)
+  }
   /* The demo's today, so a new member's joined date sits after the others. */
   const JOINED_TODAY = '06/12/2025'
   const addFamilyMember = (name: string, m: NewMember) => {
@@ -4023,7 +4035,11 @@ export default function App() {
           ? (baseClients.find((c) => profileSlug(c.name) === slug) ?? null)
           : null,
       )
-      setHouseholdOpen(v === 'clients' && slug === HOUSEHOLD_SLUG)
+      const wantsHousehold = v === 'clients' && slug === HOUSEHOLD_SLUG
+      /* Navigating to the family's own address is the same request as loading
+         it: the page exists, so the family does. */
+      if (wantsHousehold) setFamily((f) => f ?? HOUSEHOLD_AS_BUILT)
+      setHouseholdOpen(wantsHousehold)
       setAdminView(v === 'admin')
       setFirmView(isFirmRoute(v))
       if (isFirmRoute(v)) setFirmScreen(v)
@@ -4479,10 +4495,7 @@ export default function App() {
             client={profileClient}
             household={family}
             onBack={() => setProfileClient(null)}
-            onOpenHousehold={() => {
-              setProfileClient(null)
-              setHouseholdOpen(true)
-            }}
+            onOpenHousehold={openHousehold}
             onAddMember={openFamilyModal}
           />
         </main>
@@ -4568,8 +4581,7 @@ export default function App() {
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('client')}
               onOpenProfile={setProfileClient}
-              onOpenHousehold={() => setHouseholdOpen(true)}
-              familyName={family?.name ?? null}
+              onOpenHousehold={openHousehold}
             />
           ))}
         {screen === 'analytics' &&
