@@ -161,6 +161,32 @@
   box-shadow: 0 14px 28px rgba(20, 12, 40, 0.16);
   animation: cxDrop var(--dur-slow) var(--ease-out) both;
 }
+/* The credit, inside the menu rather than only fixed over the page. Right, not
+   left: the left edge is where the panel's own content starts, and a credit
+   that reads before the account row reads as part of it. */
+.cx-sheet-credit {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-bottom: var(--space-12);
+}
+.cx-sheet-credit span {
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: #8c8998;
+  /* Optical, not geometric: the lockup hangs its wordmark below the mark's
+     centre, and an all-caps run with no descenders sits above its own centre. */
+  transform: translateY(2px);
+}
+.cx-sheet-credit img {
+  display: block;
+  height: 14px;
+  width: auto;
+}
 .cx-sheet-account {
   display: flex;
   align-items: center;
