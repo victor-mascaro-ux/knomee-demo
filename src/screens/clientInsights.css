@@ -33,6 +33,15 @@
 
 /* ---------- suggested adventures ----------
    The rail's second panel: what to put in front of her next. */
+
+/* The rail carried one card until it carried two, and a plain block never
+   spaced them — .rd-card zeroes the margin every .pp-card has, on the
+   understanding that the column owns the gap. This is the column. */
+.rd-kit-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
 .ci-advs {
   display: flex;
   flex-direction: column;
@@ -40,9 +49,11 @@
 }
 .ci-adv {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  gap: var(--space-10);
-  align-items: start;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--space-12);
+  /* Symbol centred on the two lines beside it, the way an adventure row reads
+     everywhere else — not hung off the first one. */
+  align-items: center;
   padding: var(--space-12);
   border: var(--border-thin) solid var(--border-default);
   border-radius: var(--radius-xl);
@@ -58,18 +69,15 @@
   box-shadow: var(--elev-2);
   border-color: var(--rd-hover-line);
 }
-/* What the adventure asks of her, in one glyph: a plus for the ones that add
-   something to the plan, a minus for the ones whose whole point is taking
-   something away. */
-.ci-adv-glyph {
-  line-height: 0;
-  padding-top: 2px;
-}
-.ci-adv-add .ci-adv-glyph {
-  color: var(--k-green);
-}
-.ci-adv-subtract .ci-adv-glyph {
-  color: var(--k-crimson);
+/* The same white disc the Financial ID's card symbols sit in (.pp-card-ic),
+   at the size an adventure row gives it. */
+.ci-adv-ic {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
+  object-fit: contain;
 }
 .ci-adv-body {
   display: flex;
@@ -89,7 +97,7 @@
   color: var(--text-table);
 }
 
-.ci-adv-add {
+.ci-adv-pick {
   display: block;
   margin-top: var(--space-16);
   font-size: 12px;

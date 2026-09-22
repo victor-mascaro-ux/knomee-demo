@@ -1,10 +1,12 @@
-/* Client Insights — the second tab of a client's page.
+/* Client Insights and Client Toolkit — the two advisor-facing tabs of a
+ * client's page, split the way the prospect's are: the read on the
+ * relationship, then the kit for the conversation it says to have.
  *
- * Built out of the cards the Readiness and Toolkit tabs already own, in the
- * order the advisor reads them: what to do now, how the relationship scores,
- * what to say, what she will ask, and how to say it. Nothing here re-implements
- * a card; the only new panel is the one the client page adds — the adventures
- * to put in front of her next.
+ * Insights is what to do now and how the relationship scores. Toolkit is what
+ * to say, what she will ask, and how to say it. Both are built out of the cards
+ * the Readiness and Toolkit tabs already own; nothing here re-implements one.
+ * The only new panel is the one the client page adds — the adventures to put in
+ * front of her next.
  *
  * The page runs in the client palette. `clientInsights.css` turns the `.rd`
  * accents over to the ocean/teal family under `.pp.cp`, the same way
@@ -24,25 +26,32 @@ import { clientInsights } from '../data/clientInsights'
 import type { SuggestedAdventure } from '../data/clientInsights'
 import icTopAction from '../assets/cards/top-action.svg'
 import icAdventures from '../assets/adventures/award.svg'
+import icAngelInvesting from '../assets/adventures/angel-investing.svg'
+import icSubtracting from '../assets/adventures/subtracting.svg'
+import icLegacy from '../assets/adventures/legacy.svg'
+import icGiving from '../assets/adventures/giving.svg'
+import icCare from '../assets/adventures/care.svg'
+import icSimplifying from '../assets/adventures/simplifying.svg'
 
-/* One adventure, as a row you could send. The glyph says what it asks of her:
-   an adventure that adds something to the plan, or one that takes something
-   away — which is the whole difference between Angel Investing and
-   Subtracting, and the only thing a two-line row has room to say. */
+/* Each adventure wears its own artwork, the way the five on the Financial ID
+   do: flat shapes on a white disc, drawn from the brand ramp. Mapped here
+   rather than imported into the data, which is how every other page carrying
+   this artwork does it. */
+const ADVENTURE_ART: Record<string, string> = {
+  'angel-investing': icAngelInvesting,
+  subtracting: icSubtracting,
+  legacy: icLegacy,
+  giving: icGiving,
+  care: icCare,
+  simplifying: icSimplifying,
+}
+
+/* One adventure, as a row you could send: its symbol, its name, and the line
+   that says what it asks of her. */
 function AdventureRow({ a }: { a: SuggestedAdventure }) {
   return (
-    <div className={`ci-adv ci-adv-${a.tone}`}>
-      <span className="ci-adv-glyph" aria-hidden>
-        <svg viewBox="0 0 20 20" width="18" height="18">
-          <circle cx="10" cy="10" r="9" fill="currentColor" />
-          <path
-            d={a.tone === 'add' ? 'M10 5.6v8.8M5.6 10h8.8' : 'M5.6 10h8.8'}
-            stroke="#fff"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      </span>
+    <div className="ci-adv">
+      <img className="ci-adv-ic" src={ADVENTURE_ART[a.art]} alt="" />
       <span className="ci-adv-body">
         <b>{a.name}</b>
         <i>{a.blurb}</i>
@@ -72,7 +81,7 @@ function AdventuresCard() {
           <AdventureRow a={a} key={a.name} />
         ))}
       </div>
-      <label className="ci-adv-add">
+      <label className="ci-adv-pick">
         Add an adventure:
         <select
           className="ci-adv-select"
@@ -97,6 +106,10 @@ function AdventuresCard() {
   )
 }
 
+/* The read: the one thing to do next, and the score that says why. The top
+   action sits here rather than over the toolkit — on this side it is the
+   answer the snapshot leads to, and a line that appears on both tabs is a line
+   nobody reads on either. */
 export default function ClientInsightsTab() {
   const { snapshot, toolkit } = clientInsights
   return (
@@ -108,7 +121,16 @@ export default function ClientInsightsTab() {
       </div>
 
       <ReadinessSnapshot s={snapshot} title="Relationship Snapshot" />
+    </div>
+  )
+}
 
+/* The kit: the same three columns the prospect's toolkit has, plus the rail's
+   second panel. */
+export function ClientToolkitTab() {
+  const { toolkit } = clientInsights
+  return (
+    <div className="rd ci">
       <div className="rd-kit-cols">
         <div className="rd-kit-main">
           <StartersCard starters={toolkit.starters} keyRows={toolkit.key} />
