@@ -147,6 +147,16 @@
   text-decoration: underline;
 }
 
+/* The card's heading lines up with the column it heads. `.card-head` carries a
+   24px inset, which is right for a card whose body is inset to match; this one's
+   body is a table whose cells inset 12, so the title sat a dozen pixels to the
+   right of the names underneath it. Scoped to this card rather than changed on
+   `.card-head`, which every other card on the product shares. */
+.adir-card .card-head {
+  padding-left: var(--space-12);
+  padding-right: var(--space-12);
+}
+
 /* ── the list ── */
 
 .adir-count {
