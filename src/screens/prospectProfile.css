@@ -103,8 +103,10 @@
 /* ── Left sidebar — a full-height strip; its content stays pinned near the top
    as the main column scrolls. ── */
 .pp-side {
+  /* No rule down its edge: the strip's own tint is what separates it from the
+     page, and a hairline on top of a change of surface is one boundary drawn
+     twice. */
   background: #f9fafb;
-  border-right: 1px solid var(--line, #e7e4ee);
 }
 .pp-side-inner {
   position: sticky;
@@ -134,8 +136,9 @@
   background: var(--avatar-bg, #e9d9f4);
   border: 3px solid #fff;
   box-shadow: 0 0 0 1.5px var(--line, #e7e4ee);
-  font-size: 34px;
-  font-weight: 700;
+  /* 0.45 of the 96px disc, and 600, as on the dashboards. */
+  font-size: 42px;
+  font-weight: 600;
   color: var(--avatar-ink, #7639a1);
 }
 /* .cxm-rail-photo fills its circle on its own now — see advisorProfile.css. */
