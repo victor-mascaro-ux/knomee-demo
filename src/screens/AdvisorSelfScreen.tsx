@@ -16,6 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
+import TopBar from '../components/TopBar'
 import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
@@ -1327,12 +1328,17 @@ function FlowReport({
   }, [])
   const viewing = mode === 'view'
   return (
-    <div className="page af-report">
-      {/* Reading somebody else's page, the profile's own breadcrumb already
-          names where you are and where you came from — a bar above it saying
-          the same thing in different words was two headers for one page. The
-          flow keeps its bar: there is no breadcrumb on your own report. */}
-      {!viewing && (
+    <div className={`page af-report${viewing ? ' af-report-viewed' : ''}`}>
+      {/* Reading somebody else's answers is a desktop page in the firm's own
+          product, so it wears the product's own bar — brand and account menu,
+          the same one the directory it was opened from has. The way back is the
+          profile's breadcrumb, which names where it goes.
+
+          Your own report is not in that product: it is the other side of the
+          flow you are holding, and its bar is the way back to it. */}
+      {viewing ? (
+        <TopBar sub="ADVISOR RECRUITMENT" />
+      ) : (
         <header className="af-report-bar">
           <button className="af-report-back" type="button" onClick={onBack}>
             ‹ Back to the flow

@@ -396,7 +396,10 @@ export function ConfidenceResults({
                 role="img"
                 aria-label={`${a.statement} — ${a.value} out of 100, between "${a.low}" and "${a.high}"`}
               >
-                <span className="pp-conf-dot" style={{ left: `${a.value}%` }} />
+                <span
+                  className="pp-conf-dot"
+                  style={{ '--v': a.value } as React.CSSProperties}
+                />
               </div>
               <div className="pp-conf-ends">
                 <span>{a.low}</span>

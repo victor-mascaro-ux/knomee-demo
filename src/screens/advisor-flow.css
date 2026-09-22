@@ -585,8 +585,16 @@ button.af-opt:hover {
    offset as the crumb and parked the crumb (z 6) on top of them: the tab row
    was there, underneath, with only the active underline showing. */
 .af-report .pp {
-  --topbar-h: 45px;
+  /* The flow's own bar: 60px, 12px either side of a 36px control. It was
+     declared as 45, so the breadcrumb pinned under the bar's bottom edge with
+     its top slice behind it. */
+  --topbar-h: 60px;
   --pp-crumb-h: 41px;
+}
+/* Somebody else's report wears the app's own bar, so the offset its breadcrumb
+   pins against is the app's, not this page's. */
+.af-report-viewed .pp {
+  --topbar-h: 64px;
 }
 /* Except on your own report, which is not reached from a list and draws no
    breadcrumb to stack under. */
