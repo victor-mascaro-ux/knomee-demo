@@ -509,6 +509,15 @@
   font-size: 12.5px;
   letter-spacing: 0.1px;
 }
+/* A tab with nothing behind it yet. Lighter than the other two and inert to the
+   pointer, so it reads as "not yet" rather than as a control that ignored you. */
+.cx-tab:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.cx-tab:disabled:hover {
+  color: #8c8998;
+}
 .cx-tab.is-on .cx-tab-lbl {
   font-weight: var(--weight-bold);
 }

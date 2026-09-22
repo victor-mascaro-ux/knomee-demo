@@ -4380,9 +4380,6 @@ export default function App() {
         </main>
       ) : directoryOpen ? (
         <main className="content">
-          <button className="settings-back" type="button" onClick={() => setDirectoryOpen(false)}>
-            ‹ Back to dashboard
-          </button>
           <AdvisorDirectoryScreen
             onOpen={(id) => {
               setDirectoryOpen(false)
