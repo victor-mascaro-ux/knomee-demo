@@ -800,7 +800,7 @@ export default function ClientProfileScreen({
                       <AddButton muted={questions.shown.length === 0} />
                     </div>
                     {questions.shown.length === 0 ? (
-                      <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
+                      <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
                     ) : (
                     <div className="pp-questions" ref={questions.box}>
                       {questions.shown.map((q, i) => (
