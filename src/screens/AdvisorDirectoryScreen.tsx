@@ -163,13 +163,13 @@ function InvitePanel({
         </div>
         <div className="adir-link-row">
           <input className="adir-link" readOnly value={link} onFocus={(e) => e.target.select()} />
-          <button className="adir-btn adir-btn-go" type="button" onClick={copy}>
+          <button className="btn btn-primary" type="button" onClick={copy}>
             {copied ? 'Copied' : 'Copy link'}
           </button>
         </div>
         <div className="adir-invite-foot">
           <button
-            className="adir-btn"
+            className="btn btn-outline"
             type="button"
             onClick={() => {
               setMade(null)
@@ -223,7 +223,7 @@ function InvitePanel({
             </button>
           ))}
         </div>
-        <button className="adir-btn adir-btn-go" type="button" disabled={busy} onClick={make}>
+        <button className="btn btn-primary" type="button" disabled={busy} onClick={make}>
           {busy ? 'Making…' : 'Generate link'}
         </button>
       </div>
@@ -311,11 +311,11 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
       <div className="page-title-row">
         <h1 className="page-title">Recruiting Advisor (Testing Entries)</h1>
         <div className="adir-actions">
-          <button className="adir-btn" type="button" onClick={load} disabled={loading}>
+          <button className="btn btn-outline" type="button" onClick={load} disabled={loading}>
             {loading ? 'Loading…' : 'Refresh'}
           </button>
           <button
-            className="adir-btn adir-btn-go"
+            className="btn btn-primary"
             type="button"
             onClick={() => setInviting((v) => !v)}
           >

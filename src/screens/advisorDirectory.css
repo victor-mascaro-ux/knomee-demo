@@ -8,34 +8,22 @@
   gap: var(--space-10);
 }
 
-.adir-btn {
-  font: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: var(--border-thin) solid var(--k-grape-light);
-  background: var(--surface-card);
-  color: var(--k-grape);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.adir-btn:hover:not(:disabled) {
-  background: var(--k-plum-wash);
-}
-.adir-btn:disabled {
+/* The page's buttons are the dashboards' buttons — `.btn` with its outline and
+   primary variants, one 44px control height across the row. They used to be a
+   smaller pill drawn here, which made this page's controls read as a size the
+   rest of the product does not use.
+
+   The primary variant has no disabled state of its own (only the outline one
+   does), and both buttons here spend time disabled while the directory is being
+   read or a link is being made. */
+.adir-actions .btn:disabled,
+.adir-link-row .btn:disabled {
   opacity: 0.55;
-  cursor: default;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
-/* The one thing on the page that starts something. */
-.adir-btn-go {
-  background: var(--k-plum);
-  border-color: var(--k-plum);
-  color: var(--text-inverse);
-}
-.adir-btn-go:hover:not(:disabled) {
-  background: var(--k-plum-hover);
-}
+
 
 /* ── the invite panel ──
    A panel above the list rather than a modal over it: making a link is a step
@@ -81,7 +69,8 @@
 .adir-link {
   font: inherit;
   font-size: var(--text-sm);
-  padding: 9px 12px;
+  height: var(--control-h);
+  padding: 0 14px;
   border-radius: 10px;
   border: var(--border-thin) solid var(--k-grape-light);
   background: var(--surface-card);
@@ -109,6 +98,8 @@
    have to read the label twice to understand. */
 .adir-seg {
   display: inline-flex;
+  align-items: center;
+  height: var(--control-h);
   padding: 3px;
   border-radius: 999px;
   border: var(--border-thin) solid var(--k-grape-light);
