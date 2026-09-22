@@ -75,11 +75,21 @@ export interface ReadinessTab {
   apprehensionsAction?: string
 }
 
+/* Four techniques per side, and one — Acknowledge and Validate — that both
+   sides reach for. The first four open a relationship that does not exist yet
+   (a prospect, a candidate); the client trio works one that does, where the
+   job is no longer to earn the first conversation but to keep the advice tied
+   to what the person already told you. They share the four `--tag-*` colour
+   pairs: a tag is read off the key under the starters it marks, so the two
+   sets never appear on one page. */
 export type TagName =
   | 'Positive Talk'
   | 'Demonstrate Curiosity'
   | 'Self-Reinforcement'
   | 'Acknowledge and Validate'
+  | 'Re-anchor to Values'
+  | 'Clarify Tradeoffs'
+  | 'Reinforce Progress'
 
 export interface Starter {
   quote: string
@@ -105,6 +115,18 @@ export interface Word {
   hint?: string
 }
 
+/** How much the person actually wrote, and what that says about how to talk to
+    them. The client side carries it under the word lists; the prospect and firm
+    sides leave it out and the rail renders without it. */
+export interface Verbosity {
+  /** 'high' · 'moderate' · 'low' — the pill beside the heading. */
+  level: string
+  /** Words across their written answers. */
+  words: number
+  engagement: string
+  takeaway: string
+}
+
 export interface ToolkitTab {
   topAction: string
   starters: Starter[]
@@ -114,6 +136,8 @@ export interface ToolkitTab {
   /** Sits under the Questions head. The firm side uses it to say the three are
       the ones the flow handed the candidate, so a rep knows they are coming. */
   questionsNote?: string
+  /** Client side only. */
+  verbosity?: Verbosity
 }
 
 /* The four tags are conversation technique rather than domain knowledge, so

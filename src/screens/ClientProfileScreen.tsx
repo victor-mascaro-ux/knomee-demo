@@ -29,6 +29,7 @@ import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodWorried from '../assets/moods/worried.svg'
+import ClientInsightsTab from './ClientInsightsTab'
 import { scrollPageToTop } from '../reviewBridge'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -524,18 +525,24 @@ export default function ClientProfileScreen({
           </div>
 
           <div className="pp-title-row">
-            <h1 className="pp-title">{client.name}’s Financial ID</h1>
+            {/* The page is named after the tab it is showing: her Financial ID
+                is the artefact the adventures produce, her Insights are the
+                advisor's read on it. */}
+            <h1 className="pp-title">
+              {client.name}’s {tab === 'id' ? 'Financial ID' : 'Insights'}
+            </h1>
             {ownerMenu}
-            <button className="btn btn-download active" type="button">
-              <DownloadIcon /> Download PDF
-            </button>
+            {/* The PDF is of the Financial ID — there is no insights document to
+                download, and a button that says there is would be a promise. */}
+            {tab === 'id' && (
+              <button className="btn btn-download active" type="button">
+                <DownloadIcon /> Download PDF
+              </button>
+            )}
           </div>
 
           {tab !== 'id' ? (
-            <div className="pp-placeholder">
-              Client Insights — engagement, sentiment and the next conversation to have. Not built
-              in this prototype.
-            </div>
+            <ClientInsightsTab />
           ) : (
             <>
               <section className="pp-card">

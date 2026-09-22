@@ -88,11 +88,18 @@ function useSeen<T extends HTMLElement>() {
   return { ref, seen }
 }
 
+/* Seven names, four colour pairs. The client trio takes the same four families
+   as the opening trio it replaces — values reads amber, tradeoffs teal,
+   progress azure — because the two sets never share a page, and a reader who
+   knows one key already knows the other's weight. */
 const TAG_CLASS: Record<TagName, string> = {
   'Positive Talk': 'rd-tag-positive',
   'Demonstrate Curiosity': 'rd-tag-curiosity',
   'Self-Reinforcement': 'rd-tag-self',
   'Acknowledge and Validate': 'rd-tag-validate',
+  'Re-anchor to Values': 'rd-tag-positive',
+  'Clarify Tradeoffs': 'rd-tag-curiosity',
+  'Reinforce Progress': 'rd-tag-self',
 }
 
 function Tag({ name }: { name: TagName }) {
@@ -190,11 +197,14 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
   )
 }
 
-export function ReadinessSnapshot({ s }: { s: Snapshot }) {
+export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string }) {
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
+  /* Three dimensions fit a row. A side that scores more of them — the client's
+     seven — takes four columns rather than a third row of one. */
+  const wide = s.dimensions.length > 4
   return (
     <section className="pp-card rd-card rd-snapshot">
-      <Head icon={icScore} title="Conversion Readiness Snapshot" />
+      <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
         <div className="rd-kq">
           <span className="rd-kq-title">
@@ -205,7 +215,7 @@ export function ReadinessSnapshot({ s }: { s: Snapshot }) {
         </div>
         <div className="rd-breakdown">
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
-          <div className="rd-dims">
+          <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
             {s.dimensions.map((d, i) => (
               <DimensionCard d={d} i={i} key={d.key} />
             ))}
@@ -482,6 +492,21 @@ export function CommunicationRail({ d }: { d: ToolkitTab }) {
         ))}
       </div>
 
+      {d.verbosity && (
+        <>
+          <h4 className="rd-comm-label rd-verb-head">
+            Verbosity Indicator
+            <span className="rd-verb-level">{d.verbosity.level}</span>
+            <span className="rd-verb-count">{d.verbosity.words} words</span>
+          </h4>
+          <div className="rd-verb">
+            <span className="rd-verb-key">Engagement Level</span>
+            <p className="rd-verb-val">{d.verbosity.engagement}</p>
+            <span className="rd-verb-key">Advisor takeaway</span>
+            <p className="rd-verb-val">{d.verbosity.takeaway}</p>
+          </div>
+        </>
+      )}
     </section>
   )
 }
