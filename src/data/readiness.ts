@@ -90,6 +90,12 @@ export type TagName =
   | 'Re-anchor to Values'
   | 'Clarify Tradeoffs'
   | 'Reinforce Progress'
+  /* And four for a household, where the subject is two people rather than
+     one: what they share, what they do not, and how to sequence it. */
+  | 'Finding Common Ground'
+  | 'Clarify Shared Priorities'
+  | 'Addressing Differences'
+  | 'Aligning Tradeoffs'
 
 export interface Starter {
   quote: string

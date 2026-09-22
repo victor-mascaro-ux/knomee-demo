@@ -100,6 +100,10 @@ const TAG_CLASS: Record<TagName, string> = {
   'Re-anchor to Values': 'rd-tag-positive',
   'Clarify Tradeoffs': 'rd-tag-curiosity',
   'Reinforce Progress': 'rd-tag-self',
+  'Finding Common Ground': 'rd-tag-positive',
+  'Clarify Shared Priorities': 'rd-tag-curiosity',
+  'Aligning Tradeoffs': 'rd-tag-self',
+  'Addressing Differences': 'rd-tag-validate',
 }
 
 function Tag({ name }: { name: TagName }) {
