@@ -66,10 +66,16 @@ export default function AdvisorProfileScreen({
   ownerMenu,
   mine,
   tabs,
+  backLabel,
   data = marcusProfile,
 }: {
   onBack: () => void
   onAdd?: () => void
+  /** What the breadcrumb calls the list behind this page. A candidate opened
+      from the firm's pipeline came from My Candidates; one opened from the
+      advisor directory did not, and a crumb that said so would be pointing at
+      a page they were never on. */
+  backLabel?: string
   /* Whose page this is. Marcus's is assembled in `advisorProfile.ts`; a page
      built from answers somebody just typed into the phone arrives from
      `advisorAnswers.ts`. Same bundle either way — the screen cannot tell. */
@@ -135,7 +141,7 @@ export default function AdvisorProfileScreen({
       {!mine && (
         <nav className="pp-crumb">
           <button type="button" className="pp-crumb-link" onClick={onBack}>
-            My Candidates
+            {backLabel ?? 'My Candidates'}
           </button>
           <span className="pp-crumb-sep">›</span>
           <span className="pp-crumb-cur">{who.name}</span>
@@ -152,11 +158,18 @@ export default function AdvisorProfileScreen({
                 <img src={who.photo} alt="" onError={() => setPhotoFailed(true)} />
               )}
             </div>
-            <h2 className="pp-name">{who.name}</h2>
-            <div className="pp-meta">
-              <span className="pp-meta-row">
-                <CalendarIcon /> Completed {d.header.completed}
-              </span>
+            {/* Name and date are one thing — who this is and when they said it.
+                They are wrapped so the narrow layout can put them on a line
+                together beside the portrait; at full width the wrapper is
+                `display: contents` and the column is exactly as it was. */}
+            <div className="ap-idline">
+              <h2 className="pp-name">{who.name}</h2>
+              <div className="pp-meta">
+                <span className="pp-meta-row">
+                  <CalendarIcon /> <span className="ap-completed-word">Completed </span>
+                  {d.header.completed}
+                </span>
+              </div>
             </div>
             {/* One page, one rail — but whose rail decides what hangs under the
                 portrait. A Dynasty rep needs the recruiting read and the one
