@@ -283,7 +283,7 @@ export default function FamilyIdTab() {
         foot={questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
         render={(m) =>
           m.questions.length === 0 ? (
-            <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
+            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
           ) : (
             <div className="pp-questions">
               {questions.cut(m.questions).map((q, i) => (

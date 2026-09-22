@@ -47,11 +47,9 @@
   font-weight: var(--weight-semibold);
   color: var(--text-link);
 }
-.fid-who .cp-person-av {
-  width: 22px;
-  height: 22px;
-  font-size: 10px;
-}
+/* The rail's own disc, not a third size: the app has four — 26 inline, 38 in a
+   table, 44 in the member list, 96 on a portrait — and a column head is inline.
+   Size and letter both come from .cp-person-av. */
 
 /* Goals stack in a column here rather than filling two, since the column is
    already half a card wide. */
