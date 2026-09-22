@@ -266,7 +266,8 @@ function trailingGap(grid: HTMLDivElement) {
   return { i: neighbour.i, span: neighbour.colSpan + empty.length }
 }
 
-function Board({ board }: { board: VisionBoard }) {
+/* Exported because the Family ID draws the same boards in its own column. */
+export function Board({ board }: { board: VisionBoard }) {
   const grid = useRef<HTMLDivElement>(null)
   const [fill, setFill] = useState<{ i: number; span: number } | null>(null)
   const [, bump] = useState(0)

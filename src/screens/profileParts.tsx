@@ -29,6 +29,7 @@ import { confidenceAnswers } from '../data/financialId'
 import { avatarSources } from '../data/clientProfile'
 import emptyLifeEvents from '../assets/empty/life-events.svg'
 import emptyQuestions from '../assets/empty/questions.svg'
+import emptyVisionBoard from '../assets/empty/vision-board.svg'
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -419,6 +420,9 @@ export function ConfidenceResults({
 export const EMPTY_ART = {
   lifeEvents: emptyLifeEvents,
   questions: emptyQuestions,
+  /* A board of tiles with nothing in them, in the same flat greys as the other
+     two — the empty tray is a family, not three drawings. */
+  visionBoard: emptyVisionBoard,
 }
 
 export function EmptyState({
