@@ -798,7 +798,8 @@ export default function AdvisorSelfScreen({
     restart(emptyAnswers())
   }, [answered, answers, restart])
 
-  if (view === 'report') return <FlowReport d={d} mode={mode} onBack={() => setView('flow')} />
+  if (view === 'report')
+    return <FlowReport d={d} mode={mode} onBack={() => setView('flow')} onList={onExit} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -1295,10 +1296,13 @@ function FlowReport({
   d,
   onBack,
   mode,
+  onList,
 }: {
   d: Derived
   onBack: () => void
   mode: SelfMode
+  /** Reading somebody else's: the way back to the directory they came from. */
+  onList?: () => void
 }) {
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -1308,20 +1312,33 @@ function FlowReport({
       /* cross-origin parent — ignore */
     }
   }, [])
+  const viewing = mode === 'view'
   return (
     <div className="page af-report">
-      <header className="af-report-bar">
-        <button className="af-report-back" type="button" onClick={onBack}>
-          {mode === 'view' ? '‹ Back to their Business ID' : '‹ Back to the flow'}
-        </button>
-        <span className="af-report-note">
-          {mode === 'view'
-            ? `What a platform reads from ${d.who.name}’s answers — the same page, the same three tabs.`
-            : 'What a platform reads from your answers — the same page, the same three tabs.'}
-        </span>
-      </header>
+      {/* Reading somebody else's page, the profile's own breadcrumb already
+          names where you are and where you came from — a bar above it saying
+          the same thing in different words was two headers for one page. The
+          flow keeps its bar: there is no breadcrumb on your own report. */}
+      {!viewing && (
+        <header className="af-report-bar">
+          <button className="af-report-back" type="button" onClick={onBack}>
+            ‹ Back to the flow
+          </button>
+          <span className="af-report-note">
+            What a platform reads from your answers — the same page, the same three tabs.
+          </span>
+        </header>
+      )}
       <main className="content content-profile">
-        <AdvisorProfileScreen mine={mode !== 'view'} tabs data={d} onBack={onBack} />
+        <AdvisorProfileScreen
+          mine={!viewing}
+          tabs
+          data={d}
+          /* The crumb goes where it says it goes: to the list this person was
+             opened from, not back one step to their phone. */
+          backLabel={viewing ? 'Testing Entries' : undefined}
+          onBack={viewing ? (onList ?? onBack) : onBack}
+        />
       </main>
     </div>
   )

@@ -154,18 +154,55 @@
 @container (max-width: 720px) {
   .ap .pp-side-inner {
     row-gap: 4px;
+    /* The row had no horizontal padding at all, so the portrait sat flush
+       against the edge of its own card. */
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
   }
-  /* The date belongs under the name, not beside it: they are one block of who
-     he is, and side by side they read as two unrelated facts. It takes a line
-     of its own and starts where the name starts — the avatar's width and the
-     row gap — so the two line up as a stack. */
-  .ap .pp-name {
+  /* Name and date on one line beside the portrait. They are one fact — who this
+     is and when they said it — and stacking them spent a whole row on four
+     words, with a 64px indent on the date to keep it under the name. The
+     `.ap-idline` wrapper is what makes the pair a single flex item on that row;
+     these two only have to stop growing inside it. */
+  .ap .ap-idline {
+    display: flex;
+    align-items: baseline;
+    /* Takes what is left of the portrait's row, and never wraps off it: the
+       pair sized to its own content was a dozen pixels too wide for the row and
+       dropped below the portrait, which is the stack again by another route. */
     flex: 1 1 auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    min-width: 0;
   }
-  .ap .pp-meta {
-    /* The portrait's 52px and the row's 12px gap — where the name starts. */
-    flex: 1 1 calc(100% - 64px);
-    margin-left: 64px;
+  /* The name gives way, not the date. A long name truncating is a name you can
+     still read most of; a date pushed onto its own line is the bug this was
+     meant to fix. */
+  .ap .ap-idline .pp-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .ap .ap-idline .pp-meta {
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+  .ap .ap-idline .pp-meta-row {
+    white-space: nowrap;
+  }
+  /* The icon carries the meaning at this width. Keeping the word cost 62px,
+     which was the whole reason the pair would not fit beside the portrait —
+     but it stays in the accessibility tree, because a bare date next to a
+     decorative icon says nothing at all to a screen reader. */
+  .ap .ap-completed-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .ap .ap-side-stat {
     /* A basis with width to it, so the pair claims a line of its own rather
@@ -242,3 +279,18 @@
   object-fit: cover;
   display: block;
 }
+
+/* ── the identity line on a narrow page ──────────────────────────────────
+   The rail lies down below 720px — portrait, then name, then the completion
+   date — and each of those is its own flex child of `.pp-side-inner`, so name
+   and date each took a full line and the date ended up under the portrait
+   rather than beside the name. They belong together: who this is, and when they
+   said it.
+
+   `display: contents` at full width means the wrapper is not there at all as
+   far as layout is concerned, and the desktop rail keeps the centred column it
+   always had. */
+.ap-idline {
+  display: contents;
+}
+
