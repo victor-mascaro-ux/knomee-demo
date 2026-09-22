@@ -817,11 +817,14 @@ function ClientRow({
   checked,
   onToggle,
   onOpenProfile,
+  onOpenHousehold,
 }: {
   c: Client
   checked: boolean
   onToggle: () => void
   onOpenProfile?: (c: Client) => void
+  /* The one household with a page of its own. */
+  onOpenHousehold?: () => void
 }) {
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
@@ -862,13 +865,14 @@ function ClientRow({
       </td>
       <td className="col-household">
         {c.household ? (
-          /* The household opens the same one built-out profile, so it is a link
-             only on the row whose profile that is. */
-          onOpenProfile && c.name === clientProfile.owner ? (
+          /* The household opens the family's own page now that there is one —
+             on every row in that family, not only on the one whose personal
+             profile is built out. A family without a page stays plain text. */
+          onOpenHousehold && c.household === clientProfile.household ? (
             <button
               type="button"
               className="household-link name-link-btn"
-              onClick={() => onOpenProfile(c)}
+              onClick={onOpenHousehold}
             >
               {c.household}
             </button>
@@ -1245,11 +1249,13 @@ function ClientsScreen({
   onDownload,
   onInvite,
   onOpenProfile,
+  onOpenHousehold,
 }: {
   clients: Client[]
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (c: Client) => void
+  onOpenHousehold: () => void
 }) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -1426,6 +1432,7 @@ function ClientsScreen({
                         checked={selected.has(c.name)}
                         onToggle={() => toggle(c.name)}
                         onOpenProfile={onOpenProfile}
+                        onOpenHousehold={onOpenHousehold}
                       />
                     ))}
                 </Fragment>
@@ -4517,6 +4524,7 @@ export default function App() {
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('client')}
               onOpenProfile={setProfileClient}
+              onOpenHousehold={() => setHouseholdOpen(true)}
             />
           ))}
         {screen === 'analytics' &&

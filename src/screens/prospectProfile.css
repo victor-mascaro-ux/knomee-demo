@@ -92,6 +92,12 @@
   grid-template-columns: 210px 1fr;
   gap: 30px;
   align-items: stretch;
+  /* The rail is a strip down the side of the page, not a panel as long as
+     whatever it happens to hold. Stretch already makes it as tall as the main
+     column; this makes the row itself fill the window, so a short page — the
+     family's member list, a tab with one card — keeps the strip running to the
+     bottom instead of stopping halfway. */
+  min-height: calc(100vh - var(--topbar-h) - var(--pp-crumb-h));
 }
 
 /* ── Left sidebar — a full-height strip; its content stays pinned near the top
@@ -825,6 +831,9 @@
   .pp-layout {
     grid-template-columns: 1fr;
     gap: 0;
+    /* Stacked, the rail follows the cards — a window-tall row here would only
+       be empty space under them. */
+    min-height: 0;
   }
   /* The page opens on what you came for. The rail — portrait, household,
      advisory team — follows the Financial ID rather than standing in front of

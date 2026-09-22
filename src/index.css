@@ -1324,9 +1324,10 @@ button.name-link-btn {
   margin: 0;
   /* Family only. `font: inherit` also reset the size to the table's 13px, so
      the one name that opens a profile read smaller than every name beside it;
-     .name-line's 14.5px reaches it now. */
+     .name-line's 14.5px reaches it now. Colour is left alone for the same
+     reason: `color: inherit` took the table's ink and painted the one clickable
+     name a different colour from every name beside it. */
   font-family: inherit;
-  color: inherit;
   cursor: pointer;
   text-align: left;
 }
