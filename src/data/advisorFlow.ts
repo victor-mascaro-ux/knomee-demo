@@ -299,6 +299,21 @@ export const steps: Step[] = [
     stat: 'Did you know? Nearly 1 in 2 share a similar mix of confidence and uncertainty about their business.',
   },
 
+  /* The breath between the reading and what comes next. Confidence is the one
+     adventure that hands back a verdict on how you feel rather than a summary
+     of what you said, so it is the one worth stepping away from for a screen
+     before the questions start again. */
+  {
+    id: 'cf-reflect',
+    kind: 'reflect',
+    adventure: 'confidence',
+    title: 'Understanding how you feel about the practice is important.',
+    body: `The emotional side of a business decision is often overlooked — but it matters.
+
+You’re making great progress. Let’s keep going.`,
+    cta: 'Continue',
+  },
+
   /* ── 3. Outlook ── */
   {
     id: 'ol-intro',
