@@ -3,7 +3,7 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import icCareerChange from '../assets/life-events/career-change.svg'
 import icDeathOfParents from '../assets/life-events/death-of-parents.svg'
@@ -267,6 +267,14 @@ export const COLLAPSED_GOALS = 4
 /* Long enough for the last row's stagger to finish: 0.26s of animation on top
    of three steps of delay. */
 const ROW_OUT_MS = 420
+/* How long the card takes to grow or fold. Long enough to read as one movement
+   with the rows sliding inside it, short enough that a list of four does not
+   feel like waiting. */
+const BOX_MS = 300
+
+const reduceMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
 
 export function useCollapsed<T>(items: T[], max: number) {
   const [open, setOpen] = useState(false)
@@ -289,8 +297,50 @@ export function useCollapsed<T>(items: T[], max: number) {
   }
 
   const extra = open || closing
+
+  /* The rows animated but the card did not: the space for them appeared in one
+     frame and the list slid into a box that had already finished moving. This
+     tweens the box between its own two heights, measured either side of the
+     render that adds or drops the rows — measured rather than declared, because
+     these lists are grids and stacks of different shapes and none of them knows
+     how tall it is about to be. Height goes back to auto at the end, so nothing
+     is pinned by an inline style once it lands. */
+  const box = useRef<HTMLDivElement>(null)
+  const last = useRef<number>()
+  const tidy = useRef<number>()
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    /* Measure the natural height, which means dropping whatever a tween still
+       in flight has left on the element. */
+    window.clearTimeout(tidy.current)
+    el.style.transition = 'none'
+    el.style.height = ''
+    el.style.overflow = ''
+    const to = el.offsetHeight
+    const from = last.current
+    last.current = to
+    if (from === undefined || from === to || reduceMotion()) {
+      el.style.transition = ''
+      return
+    }
+    el.style.height = `${from}px`
+    el.style.overflow = 'hidden'
+    void el.offsetHeight
+    el.style.transition = `height ${BOX_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
+    el.style.height = `${to}px`
+    tidy.current = window.setTimeout(() => {
+      el.style.transition = ''
+      el.style.height = ''
+      el.style.overflow = ''
+    }, BOX_MS + 30)
+  }, [extra])
+  useEffect(() => () => window.clearTimeout(tidy.current), [])
+
   return {
     shown: extra ? items : items.slice(0, max),
+    /* Goes on the element holding the rows. */
+    box,
     open,
     toggle,
     /* No control when everything already fits. */

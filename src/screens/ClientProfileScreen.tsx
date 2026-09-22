@@ -562,7 +562,7 @@ export default function ClientProfileScreen({
                     <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
                   )}
                 </div>
-                <div className="pp-highlights">
+                <div className="pp-highlights" ref={highlights.box}>
                   {highlights.shown.map((h, i) => (
                     <div
                       className={`pp-highlight ${highlights.entering(i) ?? ''}`}
@@ -589,7 +589,7 @@ export default function ClientProfileScreen({
                       </span>
                       <AddButton />
                     </div>
-                    <div className="cp-goal-cols">
+                    <div className="cp-goal-cols" ref={goals.box}>
                       {goals.shown.map((g, i) => (
                         <GoalRow
                           g={g}
@@ -756,7 +756,7 @@ export default function ClientProfileScreen({
                     {events.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
                     ) : (
-                    <div className="pp-events">
+                    <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
                         <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                           <LifeEventIcon kind={e.kind} text={e.text} />
@@ -791,7 +791,7 @@ export default function ClientProfileScreen({
                     {questions.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
                     ) : (
-                    <div className="pp-questions">
+                    <div className="pp-questions" ref={questions.box}>
                       {questions.shown.map((q, i) => (
                         <div className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`} style={questions.delay(i)} key={i}>
                           <span className="pp-q-text">{q.q}</span>
