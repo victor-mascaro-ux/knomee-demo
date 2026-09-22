@@ -537,8 +537,20 @@
   display: block;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
-.cx-tab-center:hover .cx-tab-mark,
-.cx-tab-center.is-on .cx-tab-mark {
+/* The <img> mark cannot be recoloured, so on the client's journey the centre
+   still says "pressed" by dimming — which is the right word there, since it
+   opens a sheet rather than going to a page. */
+.cx-tab-center:hover img.cx-tab-mark,
+.cx-tab-center.is-on img.cx-tab-mark {
+  opacity: 0.72;
+}
+/* The inline one takes the tab's own colour: muted while the adventures are not
+   the page you are on, plum when they are, like the two tabs beside it. */
+svg.cx-tab-mark {
+  fill: currentColor;
+  transition: fill var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+.cx-tab-center:hover svg.cx-tab-mark {
   opacity: 0.72;
 }
 

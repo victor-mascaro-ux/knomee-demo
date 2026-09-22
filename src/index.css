@@ -263,6 +263,13 @@ body {
     bottom: 10px;
   }
 }
+/* A phone rendering with its frame dropped has no ground beside the screen for
+   a fixed badge to sit on, so it lands on the page's own last card. These
+   screens carry the credit at the top of the menu instead. The selector is a
+   sibling because the badge is rendered next to the screen, not inside it. */
+.cx-page.is-bare ~ .powered-by {
+  display: none;
+}
 
 .tab {
   background: none;
