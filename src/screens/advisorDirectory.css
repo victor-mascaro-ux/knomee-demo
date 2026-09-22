@@ -85,7 +85,18 @@
 }
 
 /* Send as: two states in one control, each named, so neither is a switch you
-   have to read the label twice to understand. */
+   have to read the label twice to understand — and now said out loud, because a
+   pair of brand names on their own does not say what picking one does. */
+.adir-seg-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.adir-seg-label {
+  font-size: var(--text-sm);
+  color: var(--grey-text);
+  white-space: nowrap;
+}
 .adir-seg {
   display: inline-flex;
   align-items: center;
@@ -108,7 +119,8 @@
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 .adir-seg-btn.is-on {
-  background: var(--k-plum);
+  /* Each button carries its own brand colour; only the chosen one paints it. */
+  background: var(--seg-tint, var(--k-plum));
   color: var(--text-inverse);
 }
 
