@@ -900,7 +900,7 @@
     'client-mobile': 'Client profile on mobile',
     'advisor-mobile': 'Business ID on mobile',
     'advisor-flow': 'Advisor Recruit · Sample',
-    'advisor-self': 'Enterprise Flow (Advisor)',
+    'advisor-self': 'Advisor Recruit · Your answers',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-analytics': 'Dynasty · Analytics',
     default: 'Prototype'
@@ -1222,8 +1222,11 @@
     time.className = 'cc-pop-time';
     time.textContent = t.messages.length ? relTime(t.createdAt) : 'New comment';
     // Delete is always present (the collapsed "menu" — just this one icon).
-    // On a real thread it confirms and removes; on an empty draft it just
-    // discards the pin.
+    // It removes the thread outright: the button sits inside an open popover,
+    // so you are already looking at the note you are deleting, and a modal
+    // asking whether you meant it only added a click to a one-line comment.
+    // (It could not be relied on either — the overlay runs inside whatever is
+    // previewing the prototype, and not every embedder allows a modal.)
     const actions = document.createElement('div');
     actions.className = 'cc-pop-actions';
     const del = document.createElement('button');
@@ -1232,7 +1235,6 @@
     del.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     del.addEventListener('click', () => {
       if (t.messages.length) {
-        if (!confirm('Delete this comment thread?')) return;
         store.threads = store.threads.filter(x => x.id !== t.id);
         persistDelete(t.id);
       }
@@ -1614,11 +1616,11 @@
     'prospects', 'clients', 'analytics', 'segmentation', 'settings',
     'admin', 'firm-candidates', 'firm-analytics'
   ];
-  // The two journeys. They are standalone pages rather than shell screens, but
-  // the firm's colours are the first thing either of them shows somebody — the
-  // phone bar wears the brand the way the desktop top bar does — so the
-  // company row belongs on them too.
-  const JOURNEY_VIEWS = ['client-experience', 'advisor-flow'];
+  // The journeys. They are standalone pages rather than shell screens, but the
+  // firm's colours are the first thing any of them shows somebody — the phone
+  // bar wears the brand the way the desktop top bar does — so the company row
+  // belongs on them too.
+  const JOURNEY_VIEWS = ['client-experience', 'advisor-flow', 'advisor-self'];
   const BRANDED_VIEWS = SHELL_VIEWS.concat(JOURNEY_VIEWS);
   // Where the phone rendering sends you back to. The mobile client page is one
   // screen (Emily's), so without this, turning the view off from it would have
@@ -1713,11 +1715,19 @@
      is the demo's own vocabulary rather than a label invented for this panel.
      "Prospect as Client" said the opposite of itself: a prospect is precisely
      somebody who is not a client yet. */
+  /* Two advisor rows, because the flow is worth showing from both ends: the
+     sample is Marcus's, answered, and what a room is walked through; the other
+     is the same adventures with the answers taken out, which is the one to hand
+     somebody when they ask what it feels like to be asked. It was unlisted for
+     a while — the route never went away, so nothing needed rebuilding to bring
+     it back, only a way in. */
   const JOURNEYS = [
     ['client-exp', 'Client · Financial ID', '#/client-experience',
       v => v === 'client-experience'],
     ['advisor-exp', 'Advisor · Business ID', '#/advisor-flow',
-      v => v === 'advisor-flow']
+      v => v === 'advisor-flow'],
+    ['advisor-self', 'Advisor · Business ID, your answers', '#/advisor-self',
+      v => v === 'advisor-self']
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';
