@@ -1998,6 +1998,20 @@ button.name-link-btn:hover .name-text {
   transform: none;
   box-shadow: none;
 }
+/* The solid variant, switched off. It keeps its colour and loses its strength:
+   swapping the fill for a grey would read as a different button rather than
+   this one unavailable, and white text has nowhere good to land on one. The
+   hover has to be undone by hand as well — `.btn-primary:hover` would otherwise
+   darken a button that cannot be pressed. */
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary:disabled:hover {
+  background: var(--plum);
+  transform: none;
+  box-shadow: none;
+}
 
 .empty-table {
   border-bottom: none;

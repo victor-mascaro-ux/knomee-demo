@@ -11,18 +11,8 @@
 /* The page's buttons are the dashboards' buttons — `.btn` with its outline and
    primary variants, one 44px control height across the row. They used to be a
    smaller pill drawn here, which made this page's controls read as a size the
-   rest of the product does not use.
-
-   The primary variant has no disabled state of its own (only the outline one
-   does), and both buttons here spend time disabled while the directory is being
-   read or a link is being made. */
-.adir-actions .btn:disabled,
-.adir-link-row .btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+   rest of the product does not use. Their disabled states live with them, in
+   index.css. */
 
 
 /* ── the invite panel ──
