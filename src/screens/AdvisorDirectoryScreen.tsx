@@ -10,7 +10,7 @@
 // name and a link to send again. Keeping them apart in two tables would mean
 // reading both to answer "who have I asked, and did they do it".
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import {
   byRecency,
   createInvite,
@@ -26,6 +26,7 @@ import {
   type Trouble,
 } from '../data/advisorDirectory'
 import { advisor } from '../data/advisorFlow'
+import { CLIENT_BRANDS } from '../components/clientBrands'
 import './advisorDirectory.css'
 
 /* One line per person, whichever kind they are. An entry and an invite are
@@ -51,6 +52,20 @@ interface Row {
   protected: boolean
   state: 'answered' | 'started' | 'opened' | 'sent'
 }
+
+/* The two bars a link can arrive under, each wearing its own colour. The tint
+   is read off the brand rather than written here, so the segment paints what
+   the advisor will actually see; knomee's is the token, because knomee is not
+   one of the client brands. A segment where both options were plum said the
+   choice had been made and then showed no sign of it. */
+const SEND_AS: { id: InviteBrand; label: string; tint: string }[] = [
+  { id: 'knomee', label: 'Knomee', tint: 'var(--k-plum)' },
+  {
+    id: 'acme',
+    label: 'Acme',
+    tint: CLIENT_BRANDS.find((b) => b.id === 'acme')?.primary ?? 'var(--k-plum)',
+  },
+]
 
 const STATE_LABEL: Record<Row['state'], string> = {
   answered: 'Finished',
@@ -210,19 +225,25 @@ function InvitePanel({
         {/* Who the advisor is told they are talking to. knomee leads because it
             is the default — a link to somebody who has signed nothing should
             not arrive wearing a firm's branding unless you chose that. */}
-        <div className="adir-seg" role="group" aria-label="Send as">
-          {(['knomee', 'acme'] as InviteBrand[]).map((b) => (
-            <button
-              key={b}
-              type="button"
-              className={`adir-seg-btn ${brand === b ? 'is-on' : ''}`}
-              aria-pressed={brand === b}
-              onClick={() => setBrand(b)}
-            >
-              {b === 'knomee' ? 'Knomee' : 'Acme'}
-            </button>
-          ))}
-        </div>
+        <span className="adir-seg-wrap">
+          <span className="adir-seg-label" id="adir-send-as">
+            Send as:
+          </span>
+          <span className="adir-seg" role="group" aria-labelledby="adir-send-as">
+            {SEND_AS.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                className={`adir-seg-btn ${brand === b.id ? 'is-on' : ''}`}
+                aria-pressed={brand === b.id}
+                style={{ '--seg-tint': b.tint } as CSSProperties}
+                onClick={() => setBrand(b.id)}
+              >
+                {b.label}
+              </button>
+            ))}
+          </span>
+        </span>
         <button className="btn btn-primary" type="button" disabled={busy} onClick={make}>
           {busy ? 'Making…' : 'Generate link'}
         </button>
