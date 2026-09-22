@@ -11,6 +11,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { avatarSources, clientProfile } from './data/clientProfile'
+import type { HouseholdMember } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
@@ -105,6 +106,8 @@ import RowMenu from './components/RowMenu'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import HouseholdScreen from './screens/HouseholdScreen'
+import FamilyModal from './screens/FamilyModal'
+import type { NewMember } from './screens/FamilyModal'
 import moodWorried from './assets/moods/worried.svg'
 import moodUnsure from './assets/moods/unsure.svg'
 import moodNeutral from './assets/moods/neutral.svg'
@@ -818,6 +821,7 @@ function ClientRow({
   onToggle,
   onOpenProfile,
   onOpenHousehold,
+  familyName,
 }: {
   c: Client
   checked: boolean
@@ -825,7 +829,16 @@ function ClientRow({
   onOpenProfile?: (c: Client) => void
   /* The one household with a page of its own. */
   onOpenHousehold?: () => void
+  /* The household that exists. A row's own `household` is what it WOULD belong
+     to; until the advisor has made that family, the cell has nothing to say. */
+  familyName?: string | null
 }) {
+  /* Other households are other people's and stand as they are. The one this
+     demo builds — the family the flow creates — is not named until it exists,
+     and only it is a link, because only it has a page. */
+  const pending = c.household === clientProfile.household && !familyName
+  const household = pending ? null : (c.household ?? null)
+  const linked = Boolean(onOpenHousehold && household && household === familyName)
   return (
     <tr className={c.isNew ? 'client-new' : undefined}>
       <td className="col-check">
@@ -840,8 +853,8 @@ function ClientRow({
         <div className="name-cell">
           <span className="avatar-wrap">
             <Avatar name={c.name} />
-            {c.household && (
-              <span className="household-badge" title={c.household} aria-label={c.household}>
+            {household && (
+              <span className="household-badge" title={household} aria-label={household}>
                 <HouseIcon />
               </span>
             )}
@@ -864,20 +877,20 @@ function ClientRow({
         <ClientScoreBadge tier={c.tier} value={c.kr} />
       </td>
       <td className="col-household">
-        {c.household ? (
-          /* The household opens the family's own page now that there is one —
-             on every row in that family, not only on the one whose personal
-             profile is built out. A family without a page stays plain text. */
-          onOpenHousehold && c.household === clientProfile.household ? (
+        {household ? (
+          /* The household opens the family's own page, on every row in that
+             family rather than only on the one whose personal profile is built
+             out. */
+          linked ? (
             <button
               type="button"
               className="household-link name-link-btn"
               onClick={onOpenHousehold}
             >
-              {c.household}
+              {household}
             </button>
           ) : (
-            <span className="household-link is-static">{c.household}</span>
+            <span className="household-link is-static">{household}</span>
           )
         ) : (
           <span className="dash">—</span>
@@ -1250,12 +1263,14 @@ function ClientsScreen({
   onInvite,
   onOpenProfile,
   onOpenHousehold,
+  familyName,
 }: {
   clients: Client[]
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (c: Client) => void
   onOpenHousehold: () => void
+  familyName?: string | null
 }) {
   const allNames = clients.map((c) => c.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -1433,6 +1448,7 @@ function ClientsScreen({
                         onToggle={() => toggle(c.name)}
                         onOpenProfile={onOpenProfile}
                         onOpenHousehold={onOpenHousehold}
+                        familyName={familyName}
                       />
                     ))}
                 </Fragment>
@@ -3781,6 +3797,35 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
   const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
+
+  /* A household is not something an advisor sets up and then fills: it exists
+     because there is a second person in it. So the app starts with Emily in no
+     family at all — her rail offers to add one — and the flow that adds the
+     first member is the flow that creates it. Everything that names the Watson
+     family (the rail, the table's Household column, the badge on her avatar,
+     the family's own page) reads this one piece of state, so none of them can
+     claim a family that does not exist yet. */
+  const [family, setFamily] = useState<{ name: string; members: HouseholdMember[] } | null>(null)
+  const [familyModal, setFamilyModal] = useState(false)
+  const openFamilyModal = () => setFamilyModal(true)
+  /* The demo's today, so a new member's joined date sits after the others. */
+  const JOINED_TODAY = '06/12/2025'
+  const addFamilyMember = (name: string, m: NewMember) => {
+    const member: HouseholdMember = { name: m.name, role: m.role, joined: JOINED_TODAY }
+    setFamily((prev) =>
+      prev
+        ? { ...prev, members: [...prev.members, member] }
+        : { name, members: [{ ...clientProfile.members[0] }, member] },
+    )
+    showToast(
+      family
+        ? m.invite
+          ? `Invitation sent to ${m.name}`
+          : `${m.name} added to ${family.name}`
+        : `${name} created`,
+    )
+    setFamilyModal(false)
+  }
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
@@ -4029,7 +4074,7 @@ export default function App() {
     const open =
       currentView === 'prospects' && profileProspect
         ? profileSlug(profileProspect.name)
-        : currentView === 'clients' && householdOpen
+        : currentView === 'clients' && householdOpen && family
           ? HOUSEHOLD_SLUG
           : currentView === 'clients' && profileClient
             ? profileSlug(profileClient.name)
@@ -4056,6 +4101,7 @@ export default function App() {
     profileProspect,
     profileClient,
     householdOpen,
+    family,
     candidateOpen,
     viewEntryId,
     inviteToken,
@@ -4420,14 +4466,16 @@ export default function App() {
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}
           </main>
         )
-      ) : householdOpen ? (
+      ) : householdOpen && family ? (
         <main className="content content-profile">
           <HouseholdScreen
+            household={family}
             onBack={() => setHouseholdOpen(false)}
             onOpenMember={(c) => {
               setHouseholdOpen(false)
               setProfileClient(c)
             }}
+            onAddMember={openFamilyModal}
             onAction={showToast}
           />
         </main>
@@ -4435,11 +4483,13 @@ export default function App() {
         <main className="content content-profile">
           <ClientProfileScreen
             client={profileClient}
+            household={family}
             onBack={() => setProfileClient(null)}
             onOpenHousehold={() => {
               setProfileClient(null)
               setHouseholdOpen(true)
             }}
+            onAddMember={openFamilyModal}
           />
         </main>
       ) : profileProspect ? (
@@ -4525,6 +4575,7 @@ export default function App() {
               onInvite={() => setInviteKind('client')}
               onOpenProfile={setProfileClient}
               onOpenHousehold={() => setHouseholdOpen(true)}
+              familyName={family?.name ?? null}
             />
           ))}
         {screen === 'analytics' &&
@@ -4541,6 +4592,25 @@ export default function App() {
           prospect={convertTarget}
           onCancel={() => setConvertTarget(null)}
           onConfirm={confirmConvert}
+        />
+      )}
+      {familyModal && (
+        <FamilyModal
+          clientName={clientProfile.owner}
+          familyName={family ? family.name : null}
+          /* The second seat this household is missing, so the demo path is to
+             read it and press the button. */
+          prefill={
+            family
+              ? undefined
+              : {
+                  name: clientProfile.members[1].name,
+                  email: 'sebastian.watson@email.com',
+                  role: clientProfile.members[1].role,
+                }
+          }
+          onClose={() => setFamilyModal(false)}
+          onSubmit={addFamilyMember}
         />
       )}
       {inviteKind && (

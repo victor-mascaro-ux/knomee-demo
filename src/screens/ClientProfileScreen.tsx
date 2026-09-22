@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarSources, clientProfile } from '../data/clientProfile'
+import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
@@ -30,6 +31,7 @@ import moodNeutral from '../assets/moods/neutral.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
+import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -365,6 +367,8 @@ export default function ClientProfileScreen({
   onBack,
   ownerMenu,
   onOpenHousehold,
+  household,
+  onAddMember,
   mine,
 }: {
   client: Client
@@ -379,6 +383,10 @@ export default function ClientProfileScreen({
      the top of the rail both go there — they name the family, and naming
      something that goes nowhere is the same as not naming it. */
   onOpenHousehold?: () => void
+  /* The household she is in, or null while she is in none — in which case the
+     rail offers to make one rather than naming a family that does not exist. */
+  household?: { name: string; members: HouseholdMember[] } | null
+  onAddMember?: () => void
   /* Emily reading her own Financial ID in her own app, rather than her advisor
      reading it about her. Same page — it is the artefact the five adventures
      produce — without the two things that only make sense from a client list:
@@ -431,15 +439,18 @@ export default function ClientProfileScreen({
           <button type="button" className="pp-crumb-link" onClick={onBack}>
             My Clients
           </button>
-          <span className="pp-crumb-sep">›</span>
-          <button
-            type="button"
-            className="pp-crumb-link"
-            onClick={onOpenHousehold ?? onBack}
-          >
-            {cp.household}
-          </button>
-          <span className="pp-crumb-sep">›</span>
+          {household && (
+            <>
+              <button
+                type="button"
+                className="pp-crumb-link"
+                onClick={onOpenHousehold ?? onBack}
+              >
+                {household.name}
+              </button>
+              <span className="pp-crumb-sep">›</span>
+            </>
+          )}
           <span className="pp-crumb-cur">{client.name}</span>
         </nav>
       )}
@@ -476,27 +487,44 @@ export default function ClientProfileScreen({
               <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
             </div>
 
-            <div className="cp-side-block">
-              <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
-                {cp.household}
-                <span className="cp-side-count">{cp.members.length}</span>
-                <RowChevron />
-              </button>
-              {cp.members.map((m) => (
-                <button
-                  className={`cp-person ${m.current ? 'is-current' : ''}`}
-                  type="button"
-                  key={m.name}
-                >
-                  <Portrait name={m.name} size="sm" />
-                  <span className="cp-person-main">
-                    <b>{m.name}</b>
-                    <i>{m.role}</i>
-                  </span>
+            {household ? (
+              <div className="cp-side-block">
+                <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
+                  {household.name}
+                  <span className="cp-side-count">{household.members.length}</span>
                   <RowChevron />
                 </button>
-              ))}
-            </div>
+                {household.members.map((m) => (
+                  <button
+                    className={`cp-person ${m.name === client.name ? 'is-current' : ''}`}
+                    type="button"
+                    key={m.name}
+                    onClick={onOpenHousehold}
+                  >
+                    <Portrait name={m.name} size="sm" />
+                    <span className="cp-person-main">
+                      <b>{m.name}</b>
+                      <i>{m.role}</i>
+                    </span>
+                    <RowChevron />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* No household yet. The rail says so by offering the one thing
+                 that would make one, in the place the household would sit. */
+              <button className="cp-add-family" type="button" onClick={onAddMember}>
+                Add a Family Member
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden>
+                  <path
+                    d="M12 5.5v13M5.5 12h13"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
 
             <div className="cp-side-block">
               <span className="cp-side-head is-static">Advisory Team</span>

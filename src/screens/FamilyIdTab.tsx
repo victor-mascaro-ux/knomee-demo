@@ -16,8 +16,11 @@ import { useState } from 'react'
 import './familyId.css'
 import { familyId } from '../data/familyId'
 import type { FamilyMemberId } from '../data/familyId'
+import type { HouseholdMember } from '../data/clientProfile'
 import {
   AddButton,
+  COLLAPSED_ROWS,
+  HeadToggle,
   BadgeMedallion,
   ConfidenceResults,
   DateSelect,
@@ -50,7 +53,23 @@ import moodWorried from '../assets/moods/worried.svg'
 
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 
-const members = familyId.members
+/* A member who has been added but has not answered anything yet. The column is
+   theirs and it is empty — which is the truth about an invitation nobody has
+   opened, and what every card's empty state is for. */
+const blank = (m: HouseholdMember): FamilyMemberId => ({
+  name: m.name,
+  role: m.role,
+  checkIn: { mood: '', level: -1, date: '' },
+  highlights: {},
+  goals: [],
+  confidence: '',
+  lifeEvents: [],
+  questions: [],
+  joy: [],
+  futureYou: { where: [], what: [], who: [] },
+  outlook: { concerns: [], hopes: [] },
+  badges: [],
+})
 
 /* Whose column this is. Every column in every card is headed by it, so a row
    read halfway down a long card still belongs to somebody. */
@@ -66,6 +85,7 @@ function Who({ m }: { m: FamilyMemberId }) {
 /* The card the whole page is made of: the Financial ID's card and head, with a
    column per member under it. */
 function FamilyCard({
+  members,
   icon,
   title,
   head,
@@ -73,6 +93,7 @@ function FamilyCard({
   bodyRef,
   render,
 }: {
+  members: FamilyMemberId[]
   icon: string
   title: string
   head?: React.ReactNode
@@ -108,13 +129,25 @@ function FamilyCard({
 function useSharedCollapse(lists: unknown[][], max: number) {
   const longest = lists.reduce((n, l) => Math.max(n, l.length), 0)
   const c = useCollapsed(new Array(longest).fill(0), max)
+  /* Cut on what is MOUNTED, not on `open`. Closing keeps the extra rows on
+     screen while they animate out and drops them at the end — cutting on `open`
+     dropped them in the first frame and then folded the box 420ms later, on an
+     empty space. */
+  const extra = c.shown.length > max
   return {
     ...c,
-    cut: <T,>(items: T[]) => (c.open ? items : items.slice(0, max)),
+    cut: <T,>(items: T[]) => (extra ? items : items.slice(0, max)),
   }
 }
 
-export default function FamilyIdTab() {
+export default function FamilyIdTab({ members: live }: { members: HouseholdMember[] }) {
+  /* A column per member of the household as it stands. Someone whose answers
+     the demo carries gets them; anyone else gets an empty column until they
+     take the adventures themselves. */
+  const members: FamilyMemberId[] = live.map(
+    (m) => familyId.members.find((f) => f.name === m.name) ?? blank(m),
+  )
+  const highlights = useCollapsed(familyId.highlights, COLLAPSED_ROWS)
   const goals = useSharedCollapse(
     members.map((m) => m.goals),
     4,
@@ -134,7 +167,13 @@ export default function FamilyIdTab() {
       {/* How each of them last said they felt, side by side — the household's
           temperature before any of its answers. */}
       <div className="fid-checkins">
-        {members.map((m) => (
+        {members.map((m) =>
+          m.checkIn.level < 0 ? (
+            <div className="cp-checkin fid-checkin is-empty" key={m.name}>
+              <span className="fid-checkin-who">{m.name}</span>
+              <span className="cp-checkin-date">No check-in yet</span>
+            </div>
+          ) : (
           <div className="cp-checkin fid-checkin" key={m.name}>
             <span className="cp-checkin-face">
               <img src={MOOD_FACE[m.checkIn.level]} alt="" />
@@ -150,7 +189,8 @@ export default function FamilyIdTab() {
             <span className="fid-checkin-who">{m.name}</span>
             <span className="cp-checkin-date">Last check-in: {m.checkIn.date}</span>
           </div>
-        ))}
+          ),
+        )}
       </div>
 
       {/* Key Highlights splits inside each tile rather than into two tiles: the
@@ -161,10 +201,17 @@ export default function FamilyIdTab() {
             <img className="pp-card-ic" src={icKeyHighlights} alt="" />
             Key Highlights
           </span>
+          {highlights.overflows && (
+            <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
+          )}
         </div>
-        <div className="pp-highlights">
-          {familyId.highlights.map((h) => (
-            <div className="pp-highlight" key={h.title}>
+        <div className="pp-highlights" ref={highlights.box}>
+          {highlights.shown.map((h, i) => (
+            <div
+              className={`pp-highlight ${highlights.entering(i) ?? ''}`}
+              style={highlights.delay(i)}
+              key={h.title}
+            >
               <div className="pp-highlight-title">
                 <HighlightIcon source={h.icon} />
                 {h.title}
@@ -183,6 +230,7 @@ export default function FamilyIdTab() {
       </section>
 
       <FamilyCard
+        members={members}
         icon={icGoals}
         title="Goals"
         head={<AddButton />}
@@ -190,8 +238,12 @@ export default function FamilyIdTab() {
         foot={goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
         render={(m) => (
           <div className="fid-goals">
-            {goals.cut(orderGoals(m.goals)).map((g) => (
-              <div className={`pp-goal ${g.completed ? 'is-done' : ''}`} key={g.title}>
+            {goals.cut(orderGoals(m.goals)).map((g, i) => (
+              <div
+                className={`pp-goal ${g.completed ? 'is-done' : ''} ${goals.entering(i) ?? ''}`}
+                style={goals.delay(i)}
+                key={g.title}
+              >
                 <div className="pp-goal-main">
                   {g.tags && g.tags.length > 0 && (
                     <span className="cp-goal-tags">
@@ -220,6 +272,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icConfidence}
         title="Confidence"
         head={<DateSelect />}
@@ -245,6 +298,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icLifeEvents}
         title="Life Events"
         head={<AddButton />}
@@ -256,7 +310,7 @@ export default function FamilyIdTab() {
           ) : (
             <div className="pp-events">
               {events.cut(m.lifeEvents).map((e, i) => (
-                <div className="pp-event" key={i}>
+                <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                   <LifeEventIcon kind={e.kind} text={e.text} />
                   <span className="pp-event-body">
                     <span className="pp-event-head">
@@ -276,6 +330,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icQuestions}
         title="Questions"
         head={<AddButton muted />}
@@ -287,7 +342,13 @@ export default function FamilyIdTab() {
           ) : (
             <div className="pp-questions">
               {questions.cut(m.questions).map((q, i) => (
-                <div className={`pp-question ${q.resolved ? 'is-resolved' : ''}`} key={i}>
+                <div
+                  className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${
+                    questions.entering(i) ?? ''
+                  }`}
+                  style={questions.delay(i)}
+                  key={i}
+                >
                   <span className="pp-q-text">{q.q}</span>
                   <span className="pp-q-date">
                     {q.resolved ? (
@@ -309,6 +370,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icFinancialJoy}
         title="Financial Joy"
         head={<DateSelect />}
@@ -327,6 +389,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icFutureYou}
         title="Future You"
         head={<DateSelect />}
@@ -353,6 +416,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icOutlook}
         title="Outlook"
         head={<DateSelect />}
@@ -375,6 +439,7 @@ export default function FamilyIdTab() {
       />
 
       <FamilyCard
+        members={members}
         icon={icBadges}
         title="Badges"
         head={<DateSelect />}

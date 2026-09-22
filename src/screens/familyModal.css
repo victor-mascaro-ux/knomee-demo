@@ -1,0 +1,104 @@
+/* The family modal — only the fields. The shell, the header, the footer and
+   the two buttons are the app's own modal, from index.css. */
+
+.fam-modal {
+  width: 560px;
+}
+.fam-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.fam-lede {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.fam-field {
+  display: block;
+  min-width: 0;
+  flex: 1;
+}
+/* Name and relationship on one line: the relationship is a short answer and a
+   full-width control for it reads as a question of its own. */
+.fam-row {
+  display: flex;
+  gap: var(--space-12);
+}
+.fam-field-narrow {
+  flex: 0 0 156px;
+}
+/* The invite modal's input, which is the app's text field. */
+.fam-input {
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-base);
+  padding: 11px 13px;
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: 9px;
+  color: var(--text-body);
+  background: var(--surface-card);
+}
+.fam-input::placeholder {
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+.fam-input:focus {
+  outline: none;
+  border-color: var(--k-lilac);
+}
+select.fam-input {
+  cursor: pointer;
+}
+
+.fam-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-10);
+  font-size: var(--text-base);
+  color: var(--text-table);
+  cursor: pointer;
+}
+.fam-check input {
+  margin-top: 2px;
+  flex: none;
+  cursor: pointer;
+}
+.fam-check i {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ---------- the way in, on a client with no household yet ----------
+   It sits where the household block sits on a client who has one, so the rail
+   answers the same question either way: who else is in this? */
+.cp-add-family {
+  align-self: stretch;
+  width: 100%;
+  margin-top: var(--space-24);
+  padding-top: var(--space-16);
+  border-top: var(--border-thin) solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-link);
+  text-align: left;
+  cursor: pointer;
+}
+.cp-add-family svg {
+  flex: none;
+}
+.cp-add-family:hover {
+  text-decoration: underline;
+}
