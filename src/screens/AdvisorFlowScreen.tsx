@@ -11,19 +11,16 @@
 
 import { useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
+import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
 import {
-  ActionRow,
   ArrowRight,
   CheckIcon,
   ClockIcon,
-  CompletedRow,
   DEVICE_H,
   DEVICE_W,
   IPhone,
-  LockedRow,
-  ProgressMeter,
   SheetCredit,
   TabFinId,
   TabQuestions,
@@ -125,45 +122,13 @@ function StepBody({
 
     case 'home':
       return (
-        <>
-          <ProgressMeter done={advisorProgress.done} required={advisorProgress.required} />
-          <h2 className="cx-screen-title">My Adventures</h2>
-          <div className="cx-adv-list">
-            {advisorAdventures.map((a) => {
-              // Every row opens its adventure — this is a walkthrough, so the
-              // state a row wears is a look, not a gate.
-              const open = () => onAdventure(a.id)
-              if (a.state === 'done') {
-                return (
-                  <CompletedRow
-                    key={a.id}
-                    title={a.title}
-                    artKey={a.art}
-                    on={advisor.completedOn}
-                    onRow={open}
-                  />
-                )
-              }
-              if (a.state === 'open') {
-                return (
-                  <ActionRow
-                    key={a.id}
-                    a={{
-                      title: a.title,
-                      art: a.art,
-                      blurb: a.blurb,
-                      minutes: a.minutes,
-                      label: 'Start',
-                    }}
-                    onAct={open}
-                    onRow={open}
-                  />
-                )
-              }
-              return <LockedRow key={a.id} title={a.title} artKey={a.art} onRow={open} />
-            })}
-          </div>
-        </>
+        <AdventureList
+          rows={advisorAdventures}
+          done={advisorProgress.done}
+          required={advisorProgress.required}
+          completedOn={advisor.completedOn}
+          onOpen={onAdventure}
+        />
       )
 
     case 'intro':

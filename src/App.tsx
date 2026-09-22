@@ -4062,6 +4062,10 @@ export default function App() {
       <>
         <AdvisorMobileScreen
           onExit={() => setAdvisorMobileOpen(false)}
+          onRedo={() => {
+            setAdvisorMobileOpen(false)
+            setAdvisorFlowOpen(true)
+          }}
           onAccountSettings={() => {
             setAdvisorMobileOpen(false)
             setSettingsOpen(true)
