@@ -510,12 +510,29 @@ const STAGE_NOTE: Record<Stage, string> = {
   Maintenance: 'Already moved. Holding the new shape.',
 }
 
-/** Weak · Balanced · Strong, off the six Confidence sliders. */
+/* Weak · Balanced · Strong, off the six Confidence sliders — banded on the sum
+   the way the Typeform branching does, rather than on the average this used to
+   take. The two do not agree: an average of 2.5 is a sum of 15, so a score of
+   13 read as strain here and as balanced there.
+
+   Six statements, 1-5 each, so the score runs 6 to 30. All six are set or none
+   are — `isAnswered` will not call a scale set answered until every statement
+   has a value — so the sum is the whole reading wherever the flow shows it. */
+const CONFIDENCE_BANDS = [
+  { max: 11, band: 'Weak' },
+  { max: 19, band: 'Balanced' },
+  { max: Infinity, band: 'Strong' },
+] as const
+
 function confidenceBand(a: Answers) {
   const set = (a.scaleSet['cf-q'] ?? []).filter(Boolean)
   if (!set.length) return 'Balanced'
-  const avg = set.reduce((s, n) => s + n, 0) / set.length
-  return avg < 2.5 ? 'Weak' : avg < 3.75 ? 'Balanced' : 'Strong'
+  /* A Business ID can be built from a half-filled sheet — the directory lists
+     people at "9 of 27" — and there a bare sum would read as strain purely for
+     being unfinished. Scaling the answered ones up to six keeps the published
+     thresholds exactly, and is a no-op once all six are in. */
+  const score = (set.reduce((t, n) => t + n, 0) * 6) / set.length
+  return CONFIDENCE_BANDS.find((b) => score <= b.max)!.band
 }
 
 /* ── the Business ID ────────────────────────────────────────────────────── */
