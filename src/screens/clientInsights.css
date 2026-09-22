@@ -1,0 +1,125 @@
+/* Client Insights — what the client page adds to the Readiness and Toolkit
+   cards it borrows. Two things only: the palette those cards are painted in,
+   and the suggested-adventures panel, which exists on no other side.
+   Scoped under .pp.cp, and every value is a design-system token. */
+
+/* ---------- the client palette ----------
+   readiness.css names its eleven accents at the top of `.rd`; this restates
+   them in the ocean/teal family, exactly as clientProfile.css restates the
+   Financial ID's. Ocean rather than teal for anything carrying text: --k-teal
+   is a surface colour at 2.2:1 on white, and every label drawn in it failed to
+   read. Teal keeps the jobs where it is a fill — the ring, a hover outline. */
+.pp.cp .rd {
+  --rd-accent: var(--k-ocean);
+  --rd-accent-soft: var(--k-teal-light);
+  --rd-ink: var(--k-forest);
+  --rd-strong: var(--k-ocean);
+  --rd-wash: var(--k-teal-light);
+  --rd-quiet: var(--k-ocean);
+  --rd-hover-line: var(--k-teal);
+  --rd-ring-a: var(--k-teal);
+  --rd-ring-b: var(--k-ocean);
+  /* The Clients dashboard's own tier 1, so "TIER 1 – ENGAGED" here is the same
+     colour as the tier 1 band over her row in the table. */
+  --rd-tier-1: var(--client-1);
+  --rd-tier-1-bg: var(--k-teal-light);
+}
+
+/* The top action band: the same faint wash as the purple side, which there is
+   5% plum and here would be a flat teal block. Mint edges it instead. */
+.pp.cp .rd-top-action {
+  border-color: var(--k-mint);
+}
+
+/* ---------- suggested adventures ----------
+   The rail's second panel: what to put in front of her next. */
+.ci-advs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.ci-adv {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: start;
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgba(20, 10, 40, 0.04);
+  transition:
+    transform var(--dur-mid) var(--ease-out),
+    box-shadow var(--dur-mid) var(--ease-out),
+    border-color var(--dur-mid) var(--ease-out);
+}
+.ci-adv:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elev-2);
+  border-color: var(--rd-hover-line);
+}
+/* What the adventure asks of her, in one glyph: a plus for the ones that add
+   something to the plan, a minus for the ones whose whole point is taking
+   something away. */
+.ci-adv-glyph {
+  line-height: 0;
+  padding-top: 2px;
+}
+.ci-adv-add .ci-adv-glyph {
+  color: var(--k-green);
+}
+.ci-adv-subtract .ci-adv-glyph {
+  color: var(--k-crimson);
+}
+.ci-adv-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.ci-adv-body b {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rd-ink);
+}
+.ci-adv-body i {
+  font-style: normal;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-table);
+}
+
+.ci-adv-add {
+  display: block;
+  margin-top: var(--space-16);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.ci-adv-select {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-8);
+  padding: var(--space-8) var(--space-10);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-table);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+.ci-adv-select:hover:not(:disabled),
+.ci-adv-select:focus-visible {
+  border-color: var(--rd-accent);
+}
+.ci-adv-select:disabled {
+  color: var(--text-placeholder);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ci-adv:hover {
+    transform: none;
+  }
+}

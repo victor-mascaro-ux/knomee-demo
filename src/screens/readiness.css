@@ -12,6 +12,25 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
+
+  /* Every colour this file paints an accent with is named here first, in the
+     purple the prospect and candidate pages wear. A product on the other side
+     of the brand — the client page, which is ocean and teal — restates these
+     eleven and turns the whole tab over without a rule below knowing it did.
+     Anything that is NOT an accent (the four tag pairs, the motivator and
+     concern signals, the neutrals) reads the same on both sides and stays a
+     plain token. */
+  --rd-accent: var(--k-grape);
+  --rd-accent-soft: var(--k-grape-light);
+  --rd-ink: var(--k-plum-ink);
+  --rd-strong: var(--k-plum);
+  --rd-wash: var(--k-plum-050);
+  --rd-quiet: var(--k-teal);
+  --rd-hover-line: var(--k-bolt);
+  --rd-ring-a: var(--k-bolt);
+  --rd-ring-b: var(--k-grape-vivid);
+  --rd-tier-1: var(--kq-1);
+  --rd-tier-1-bg: var(--k-teal-light);
 }
 
 /* ── the card and its head ──
@@ -49,7 +68,7 @@
 .rd-kq-title {
   font-size: 17px;
   font-weight: 700;
-  color: var(--k-grape);
+  color: var(--rd-accent);
 }
 .rd-kq-q {
   font-size: 12.5px;
@@ -84,17 +103,17 @@
 /* The gradient's stops are tokens, so the dial belongs to the brand ramp
    rather than to two hard-coded hexes. */
 .rd-ring-stop-a {
-  stop-color: var(--k-bolt);
+  stop-color: var(--rd-ring-a);
 }
 .rd-ring-stop-b {
-  stop-color: var(--k-grape-vivid);
+  stop-color: var(--rd-ring-b);
 }
 .rd-ring-num {
   position: absolute;
   font-size: 62px;
   font-weight: 700;
   line-height: 1;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -108,6 +127,11 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-12);
+}
+/* A side that scores more than four dimensions — the client's seven — takes a
+   fourth column, so seven cards read 4 + 3 rather than 3 + 3 + a widow. */
+.rd-dims-wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .rd-dim {
   padding: var(--space-14) var(--space-12) var(--space-16);
@@ -123,7 +147,7 @@
 .rd-dim-key {
   font-size: 15px;
   font-weight: 700;
-  color: var(--k-grape);
+  color: var(--rd-accent);
 }
 .rd-dim-q {
   font-size: 11.5px;
@@ -136,7 +160,7 @@
   font-size: 46px;
   font-weight: 700;
   line-height: 1.1;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
   font-variant-numeric: tabular-nums;
 }
 .rd-dim-caption {
@@ -176,6 +200,23 @@
   transform: none;
 }
 
+/* In the wide grid the right-hand card is every fourth one, not only the last,
+   so that one hangs its bubble from the page edge too. */
+.rd-dims-wide .rd-dim:nth-child(4n).tt::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+}
+.rd-dims-wide .rd-dim:nth-child(4n).tt:hover::after,
+.rd-dims-wide .rd-dim:nth-child(4n).tt:focus-visible::after {
+  transform: translateY(0);
+}
+.rd-dims-wide .rd-dim:nth-child(4n).tt::before {
+  left: auto;
+  right: 24px;
+  transform: none;
+}
+
 /* Same for the word pills, which live in the right-hand rail. */
 .rd-word.tt::after {
   left: auto;
@@ -202,19 +243,19 @@
   grid-template-columns: 14px minmax(0, 1fr);
   gap: var(--space-4) var(--space-10);
   align-items: center;
-  background: var(--k-teal-light);
+  background: var(--rd-tier-1-bg);
 }
 .rd-tier-swatch {
   width: 14px;
   height: 14px;
   border-radius: var(--radius-xs);
-  background: var(--kq-1);
+  background: var(--rd-tier-1);
 }
 .rd-tier-name {
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-tier-body,
 .rd-tier-note {
@@ -230,10 +271,10 @@
   font-size: 12px;
 }
 .rd-tier-2 {
-  background: var(--k-grape-light);
+  background: var(--rd-accent-soft);
 }
 .rd-tier-2 .rd-tier-swatch {
-  background: var(--k-grape);
+  background: var(--rd-accent);
 }
 .rd-tier-3 {
   background: var(--surface-sunken);
@@ -263,7 +304,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--k-grape);
+  color: var(--rd-accent);
   padding-bottom: var(--space-12);
 }
 .rd-points {
@@ -304,7 +345,7 @@
   display: block;
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-driver-body {
   margin: var(--space-4) 0 0;
@@ -318,18 +359,18 @@
   margin: var(--space-12) 0 0;
   padding: var(--space-10) var(--space-12);
   border-radius: var(--radius-md);
-  background: var(--k-plum-050);
-  border-left: 3px solid var(--k-grape);
+  background: var(--rd-wash);
+  border-left: 3px solid var(--rd-accent);
   font-size: 12.5px;
   line-height: 1.5;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-action-tag {
   display: inline-block;
   margin-right: var(--space-8);
   padding: 1px 7px;
   border-radius: var(--radius-pill);
-  background: var(--k-plum);
+  background: var(--rd-strong);
   color: var(--text-inverse);
   font-size: 9.5px;
   font-weight: 700;
@@ -345,8 +386,8 @@
   gap: var(--space-10);
   padding: var(--space-14) var(--space-16);
   border-radius: var(--radius-xl);
-  background: var(--k-plum-050);
-  border: var(--border-thin) solid var(--k-grape-light);
+  background: var(--rd-wash);
+  border: var(--border-thin) solid var(--rd-accent-soft);
   font-size: 14px;
   color: var(--text-table);
 }
@@ -389,12 +430,12 @@
   background: var(--surface-card);
 }
 .rd-starter-ic {
-  color: var(--k-grape);
+  color: var(--rd-accent);
   line-height: 0;
   padding-top: 2px;
 }
 .rd-ask-ic {
-  color: var(--k-teal);
+  color: var(--rd-quiet);
   line-height: 0;
   padding-top: 2px;
 }
@@ -408,7 +449,7 @@
 }
 .rd-ask-q {
   font-weight: 600;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-starter-why,
 .rd-ask-guidance {
@@ -454,7 +495,7 @@
   margin: var(--space-20) 0 var(--space-10);
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-key {
   border: var(--border-thin) solid var(--border-default);
@@ -489,7 +530,7 @@
   display: block;
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-key-meaning {
   margin: var(--space-4) 0 0;
@@ -506,7 +547,7 @@
 }
 .rd-ask-point {
   padding: var(--space-6) 0 var(--space-6) var(--space-12);
-  border-left: 3px solid var(--k-teal);
+  border-left: 3px solid var(--rd-quiet);
   font-size: 12px;
   line-height: 1.45;
   color: var(--text-table);
@@ -518,7 +559,7 @@
   margin: 0 0 var(--space-10);
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--k-plum-ink);
+  color: var(--rd-ink);
 }
 .rd-words {
   display: flex;
@@ -537,8 +578,8 @@
   font-weight: 500;
 }
 .rd-words-use .rd-word {
-  background: var(--k-grape-light);
-  color: var(--k-grape);
+  background: var(--rd-accent-soft);
+  color: var(--rd-accent);
 }
 .rd-words-avoid .rd-word {
   background: var(--surface-card);
@@ -548,6 +589,51 @@
   text-decoration-color: var(--k-ash);
 }
 
+
+/* How much the person actually wrote, under the two word lists. The heading
+   carries the reading itself — a pill for the level, the count at the right
+   edge — so the block beneath it is only the two sentences that follow from
+   it. */
+.rd-verb-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.rd-verb-level {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--rd-accent-soft);
+  color: var(--rd-accent);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.rd-verb-count {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
+}
+.rd-verb {
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-sunken);
+}
+.rd-verb-key {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rd-ink);
+}
+.rd-verb-val {
+  margin: var(--space-4) 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.rd-verb-val + .rd-verb-key {
+  margin-top: var(--space-12);
+}
 
 /* ── copy affordance ── */
 .rd-copy {
@@ -583,8 +669,8 @@
   transform: translateY(0);
 }
 .rd-copy:hover {
-  color: var(--k-grape);
-  border-color: var(--k-grape);
+  color: var(--rd-accent);
+  border-color: var(--rd-accent);
 }
 .rd-copy.is-done {
   opacity: 1;
@@ -652,7 +738,7 @@
 .rd-ask:hover {
   transform: translateY(-2px);
   box-shadow: var(--elev-2);
-  border-color: var(--k-bolt);
+  border-color: var(--rd-hover-line);
 }
 /* The dial is the page's one big number: it lifts but keeps its border, so it
    reads as a panel rather than a row. */
@@ -660,7 +746,7 @@
   box-shadow: var(--elev-2);
 }
 .rd-kq:hover .rd-ring-num {
-  color: var(--k-plum);
+  color: var(--rd-strong);
 }
 
 /* Words nudge and tint the way the profile chips do. */
@@ -673,7 +759,7 @@
 }
 .rd-words-use .rd-word:hover {
   transform: translateY(-1px);
-  color: var(--k-plum);
+  color: var(--rd-strong);
 }
 .rd-words-avoid .rd-word:hover {
   transform: translateY(-1px);
@@ -686,7 +772,7 @@
   transition: border-left-color var(--dur-base) var(--ease-out);
 }
 .rd-driver:hover .rd-driver-title {
-  color: var(--k-plum);
+  color: var(--rd-strong);
 }
 
 /* The four tags lift a hair, so a pill reads as a label you can look up in the
@@ -735,8 +821,14 @@
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 1180px) {
+  .rd-dims-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 @media (max-width: 900px) {
-  .rd-dims {
+  .rd-dims,
+  .rd-dims-wide {
     grid-template-columns: 1fr;
   }
   .rd-dim-q {
