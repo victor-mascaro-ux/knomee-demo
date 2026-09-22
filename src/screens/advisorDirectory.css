@@ -105,6 +105,32 @@
   color: var(--k-grape);
 }
 
+/* Send as: two states in one control, each named, so neither is a switch you
+   have to read the label twice to understand. */
+.adir-seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  border: var(--border-thin) solid var(--k-grape-light);
+  background: var(--k-plum-wash);
+}
+.adir-seg-btn {
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--grey-text);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.adir-seg-btn.is-on {
+  background: var(--k-plum);
+  color: var(--text-inverse);
+}
+
 .adir-invite-foot {
   display: flex;
   align-items: center;
@@ -239,6 +265,45 @@
 }
 .adir-copy:hover {
   background: var(--k-plum-wash);
+}
+
+/* The remove control. Quiet until you hover the row — a list you read every day
+   should not be a row of delete buttons — and unmistakable once it is armed. */
+.adir-del-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+.adir-del {
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: var(--border-thin) solid transparent;
+  background: none;
+  color: var(--grey-text);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.adir-table tbody tr:hover .adir-del,
+.adir-del:focus-visible {
+  opacity: 1;
+}
+.adir-del:hover {
+  color: var(--k-crimson);
+  border-color: var(--k-crimson-light);
+  background: var(--k-crimson-light);
+}
+/* Armed: always visible, whether or not the pointer is still on the row — the
+   second click has to be findable. */
+.adir-del.is-armed {
+  opacity: 1;
+  color: var(--text-inverse);
+  background: var(--k-crimson);
+  border-color: var(--k-crimson);
 }
 
 /* ── when the directory cannot be reached ──

@@ -25,8 +25,8 @@ import {
   LockedRow,
   ProgressMeter,
   SheetCredit,
-  TabAdventures,
   TabFinId,
+  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   brandVars,
@@ -534,17 +534,10 @@ export default function AdvisorFlowScreen({
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
               <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
             </svg>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
-              onClick={() => setTab('flow')}
-            >
-              <TabAdventures />
-              <span className="cx-tab-lbl">Adventures</span>
-            </button>
-            <button type="button" className="cx-tab cx-tab-center" aria-label="Knomee">
-              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
-            </button>
+            {/* Business ID · the mark · My Team. The mark is the way back to the
+                adventures rather than an ornament in the middle of two tabs —
+                it is the one control on this bar that goes to the questions,
+                which is why it is the one wearing the brand. */}
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -552,6 +545,23 @@ export default function AdvisorFlowScreen({
             >
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
+            </button>
+            <button
+              type="button"
+              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
+              aria-label="Adventures"
+              onClick={() => setTab('flow')}
+            >
+              <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+            </button>
+            {/* Nothing behind it yet. It is on the bar because the practice this
+                flow asks about is a team, and a bar that pretended otherwise
+                would have to be redrawn when it arrives. Disabled rather than
+                silent: a tab that looked live and did nothing would read as
+                broken. */}
+            <button type="button" className="cx-tab" disabled aria-disabled="true">
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
             </button>
           </nav>
           )}

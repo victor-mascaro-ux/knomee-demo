@@ -4160,18 +4160,25 @@ export default function App() {
         </div>
       )
     }
+    /* The bar the link was sent under, not whichever brand the demo happens to
+       be showing. An invited advisor never touched the demo's brand toggle, and
+       the person who made the link already decided this. Invites written before
+       there was a choice have no brand and are knomee's, which is the default
+       either way. */
+    const sentAs =
+      invite.brand === 'acme' ? (CLIENT_BRANDS.find((b) => b.id === 'acme') ?? null) : null
     return (
       <>
         <AdvisorSelfScreen
           key={`self-invited-${invite.token}`}
           mode="invited"
           invite={invite}
-          brand={brand}
+          brand={sentAs}
           /* Nowhere to exit to: the menu hides the way out in this mode, and
              this is the fallback if anything ever calls it anyway. */
           onExit={() => undefined}
         />
-        {brand && <PoweredBy />}
+        {sentAs && <PoweredBy />}
       </>
     )
   }
@@ -4380,9 +4387,6 @@ export default function App() {
         </main>
       ) : directoryOpen ? (
         <main className="content">
-          <button className="settings-back" type="button" onClick={() => setDirectoryOpen(false)}>
-            ‹ Back to dashboard
-          </button>
           <AdvisorDirectoryScreen
             onOpen={(id) => {
               setDirectoryOpen(false)
