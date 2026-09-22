@@ -97,11 +97,15 @@
   color: var(--grey-text);
   white-space: nowrap;
 }
-/* The demo panel's own segmented control, in the product's tokens: a rounded
-   track rather than a pill, two equal halves inside it, and the chosen one
-   lifted out of the track rather than outlined. The panel and this page offer
-   the same choice — which bar the advisor sees — so they should not be two
-   different-looking switches. */
+/* The demo panel's segmented control, to the value: same track wash, same two
+   radii, same type, same weights. The colours are written out rather than taken
+   from the product's palette because the point is to be that control — a track
+   tinted from the purple ramp read as a different switch sitting next to it.
+   rgba(20,10,40,0.08) is a near-neutral wash, which is why the panel's reads
+   grey and the grape-light one did not.
+
+   The one departure is the height: this sits in a row with the name field and
+   Generate link, and the panel's control floats in a column of its own. */
 .adir-seg {
   display: inline-flex;
   align-items: stretch;
@@ -109,7 +113,7 @@
   padding: 3px;
   height: var(--control-h);
   border-radius: 11px;
-  background: var(--k-grape-light);
+  background: rgba(20, 10, 40, 0.08);
 }
 .adir-seg-btn {
   flex: 1;
@@ -120,18 +124,18 @@
   padding: 0 16px;
   font: inherit;
   font-size: 12.5px;
-  color: var(--grey-text);
+  color: #6e6880;
   cursor: pointer;
-  transition: background 0.13s var(--ease-out), color 0.13s var(--ease-out);
+  transition: background 0.13s, color 0.13s;
 }
 .adir-seg-btn:hover {
-  color: var(--text-strong);
+  color: #37323f;
 }
 .adir-seg-btn.is-on {
   /* Each button carries its own brand colour; only the chosen one paints it. */
   background: var(--seg-tint, var(--k-plum));
-  color: var(--text-inverse);
-  font-weight: var(--weight-semibold);
+  color: #fff;
+  font-weight: 500;
 }
 
 .adir-invite-foot {
