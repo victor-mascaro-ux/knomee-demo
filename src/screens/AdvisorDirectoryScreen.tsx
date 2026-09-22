@@ -14,12 +14,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   byRecency,
   createInvite,
+  deleteEntry,
+  deleteInvite,
   greeting,
   inviteLink,
   listEntries,
   listInvites,
   type Entry,
   type Invite,
+  type InviteBrand,
   type Trouble,
 } from '../data/advisorDirectory'
 import './advisorDirectory.css'
@@ -37,6 +40,9 @@ interface Row {
   at: string
   /** The link, for a row that is still waiting on somebody. */
   link: string | null
+  /** The invite behind the row, where there is one — a sitting answered through
+      a link has both, and removing the person means removing both. */
+  token: string | null
   state: 'answered' | 'started' | 'opened' | 'sent'
 }
 
@@ -74,6 +80,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
     total: e.total,
     at: e.at,
     link: e.token ? inviteLink(e.token) : null,
+    token: e.token,
     state: e.answered >= e.total ? 'answered' : 'started',
   }))
   const fromInvites: Row[] = invites
@@ -87,6 +94,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
       total: 0,
       at: i.openedAt ?? i.createdAt,
       link: inviteLink(i.token),
+      token: i.token,
       state: i.openedAt ? 'opened' : 'sent',
     }))
   return byRecency([...fromEntries, ...fromInvites])
@@ -102,13 +110,14 @@ function InvitePanel({
   onTrouble: (t: Trouble) => void
 }) {
   const [name, setName] = useState('')
+  const [brand, setBrand] = useState<InviteBrand>('knomee')
   const [made, setMade] = useState<Invite | null>(null)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const make = async () => {
     setBusy(true)
-    const { invite, trouble } = await createInvite(name)
+    const { invite, trouble } = await createInvite(name, brand)
     setBusy(false)
     onTrouble(trouble)
     // A link that never reached the directory would open to nothing, so it is
@@ -139,8 +148,9 @@ function InvitePanel({
         <div className="adir-invite-head">
           <b>Link ready</b>
           <span>
-            Opens straight into the flow and says “{greeting(made.name)}”. Nothing else — no
-            dashboard, no sample answers, no way back into the demo.
+            Opens straight into the flow and says “{greeting(made.name)}”, under{' '}
+            {made.brand === 'acme' ? 'Acme’s' : 'knomee’s'} bar. Nothing else — no dashboard, no
+            sample answers, no way back into the demo.
           </span>
         </div>
         <div className="adir-link-row">
@@ -189,11 +199,74 @@ function InvitePanel({
             if (e.key === 'Enter') void make()
           }}
         />
+        {/* Who the advisor is told they are talking to. knomee leads because it
+            is the default — a link to somebody who has signed nothing should
+            not arrive wearing a firm's branding unless you chose that. */}
+        <div className="adir-seg" role="group" aria-label="Send as">
+          {(['knomee', 'acme'] as InviteBrand[]).map((b) => (
+            <button
+              key={b}
+              type="button"
+              className={`adir-seg-btn ${brand === b ? 'is-on' : ''}`}
+              aria-pressed={brand === b}
+              onClick={() => setBrand(b)}
+            >
+              {b === 'knomee' ? 'Knomee' : 'Acme'}
+            </button>
+          ))}
+        </div>
         <button className="adir-btn adir-btn-go" type="button" disabled={busy} onClick={make}>
           {busy ? 'Making…' : 'Generate link'}
         </button>
       </div>
     </div>
+  )
+}
+
+/* Removing somebody is two clicks, not a modal: the first arms it, the second
+   does it, and walking away disarms it on its own. A dialog for this would be
+   one more thing to dismiss on a page whose whole job is tidying a list — and a
+   bare ✕ that fired on the first click would sooner or later take eight minutes
+   of somebody's answers by accident. */
+function DeleteCell({ row, onGone }: { row: Row; onGone: (t: Trouble) => void }) {
+  const [armed, setArmed] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (!armed) return
+    const id = window.setTimeout(() => setArmed(false), 4000)
+    return () => window.clearTimeout(id)
+  }, [armed])
+
+  const remove = async () => {
+    setBusy(true)
+    /* A person answered through a link has both records. Removing the sitting
+       and leaving the invite would put them straight back on the list as
+       somebody who has not started, which is not what "delete" looked like it
+       would do. */
+    const troubles: Trouble[] = []
+    if (row.entryId) troubles.push(await deleteEntry(row.entryId))
+    if (row.token) troubles.push(await deleteInvite(row.token))
+    setBusy(false)
+    setArmed(false)
+    onGone(troubles.find(Boolean) ?? null)
+  }
+
+  if (busy) return <span className="adir-meta">Removing…</span>
+  return armed ? (
+    <button className="adir-del is-armed" type="button" onClick={remove}>
+      Really?
+    </button>
+  ) : (
+    <button
+      className="adir-del"
+      type="button"
+      title={`Remove ${row.name} from the directory`}
+      aria-label={`Remove ${row.name} from the directory`}
+      onClick={() => setArmed(true)}
+    >
+      ✕
+    </button>
   )
 }
 
@@ -228,7 +301,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
   return (
     <>
       <div className="page-title-row">
-        <h1 className="page-title">Advisor Flow — Who Has Answered</h1>
+        <h1 className="page-title">Recruiting Advisor (Testing Entries)</h1>
         <div className="adir-actions">
           <button className="adir-btn" type="button" onClick={load} disabled={loading}>
             {loading ? 'Loading…' : 'Refresh'}
@@ -283,6 +356,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
                 <th>Progress</th>
                 <th>Last seen</th>
                 <th>Link</th>
+                <th className="adir-del-col"></th>
               </tr>
             </thead>
             <tbody>
@@ -333,6 +407,15 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
                       <span className="adir-meta">walked in</span>
                     )}
                   </td>
+                  <td className="adir-del-col">
+                    <DeleteCell
+                      row={r}
+                      onGone={(t) => {
+                        setTrouble(t)
+                        void load()
+                      }}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -343,7 +426,8 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
       <p className="adir-note">
         A name opens that person's Business ID on the phone, the way they saw it — their readiness
         and toolkit are in its menu. Rows marked “walked in” were answered from the demo menu
-        rather than through a link.
+        rather than through a link. Removing a row throws away the answers behind it and stops
+        their link working; the device they answered on keeps its own copy.
       </p>
     </>
   )

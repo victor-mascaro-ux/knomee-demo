@@ -43,6 +43,12 @@ const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/
 
 /* ── what is stored ─────────────────────────────────────────────────────── */
 
+/* Whose product the advisor is handed. knomee's own bar is the default: a link
+   sent to somebody who has not signed anything should not arrive wearing a
+   firm's branding, and the co-branded version is the deliberate choice rather
+   than the accident. */
+export type InviteBrand = 'knomee' | 'acme'
+
 export interface Invite {
   /** The tail of the link, and the document id. Lowercase, because the router
       lowercases the whole hash before it reads it. */
@@ -50,6 +56,9 @@ export interface Invite {
   /** What the admin typed when they made the link. Blank is allowed and means
       the flow greets them as "Advisor" — see `greeting()`. */
   name: string
+  /** Optional on purpose: invites written before there was a choice have no
+      brand, and knomee is what they were sent as. */
+  brand?: InviteBrand
   createdAt: string
   /** First time the link was opened. Null until somebody does. */
   openedAt: string | null
@@ -115,6 +124,17 @@ async function put(path: string, value: unknown): Promise<Trouble> {
   }
 }
 
+async function drop(path: string): Promise<Trouble> {
+  try {
+    const res = await fetch(`${BASE}/${path}?key=${KEY}`, { method: 'DELETE' })
+    // Firestore answers 200 for deleting something that was not there, which is
+    // the right answer to "make sure this is gone".
+    return res.ok ? null : `The directory refused the delete (${res.status}).`
+  } catch {
+    return 'Could not reach the directory.'
+  }
+}
+
 async function get<T>(path: string): Promise<{ value: T | null; trouble: Trouble }> {
   try {
     const res = await fetch(`${BASE}/${path}?key=${KEY}`)
@@ -160,10 +180,14 @@ export function newToken(): string {
   return out
 }
 
-export async function createInvite(name: string): Promise<{ invite: Invite; trouble: Trouble }> {
+export async function createInvite(
+  name: string,
+  brand: InviteBrand = 'knomee',
+): Promise<{ invite: Invite; trouble: Trouble }> {
   const invite: Invite = {
     token: newToken(),
     name: name.trim().slice(0, 60),
+    brand,
     createdAt: new Date().toISOString(),
     openedAt: null,
     answeredAt: null,
@@ -178,6 +202,13 @@ export async function readInvite(token: string) {
 
 export async function listInvites() {
   return list<Invite>('invites')
+}
+
+/** Throws the invite away. The link stops working — a token that is not in the
+    directory opens to "that link has expired" — so this is also how you cancel
+    one you sent by mistake. */
+export async function deleteInvite(token: string): Promise<Trouble> {
+  return drop(`${ROOT}/invites/${token}`)
 }
 
 /** Stamps the invite the first time its link is opened, and again whenever a
@@ -228,6 +259,13 @@ export async function listEntries() {
 
 export async function readEntry(id: string) {
   return get<Entry>(`${ROOT}/sittings/${id}`)
+}
+
+/** Throws one sitting away — their answers, and the Business ID built out of
+    them. The device they answered on keeps its own copy, and the spreadsheet
+    keeps its row; this removes the shared one the directory lists. */
+export async function deleteEntry(id: string): Promise<Trouble> {
+  return drop(`${ROOT}/sittings/${id}`)
 }
 
 /* ── what a screen shows ────────────────────────────────────────────────── */
