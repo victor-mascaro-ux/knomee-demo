@@ -166,7 +166,7 @@
      these two only have to stop growing inside it. */
   .ap .ap-idline {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     /* Takes what is left of the portrait's row, and never wraps off it: the
        pair sized to its own content was a dozen pixels too wide for the row and
        dropped below the portrait, which is the stack again by another route. */
