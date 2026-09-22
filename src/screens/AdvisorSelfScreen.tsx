@@ -1337,7 +1337,7 @@ function FlowReport({
           Your own report is not in that product: it is the other side of the
           flow you are holding, and its bar is the way back to it. */}
       {viewing ? (
-        <TopBar sub="ADVISOR RECRUITMENT" />
+        <TopBar sub="ADVISOR RECRUIT" />
       ) : (
         <header className="af-report-bar">
           <button className="af-report-back" type="button" onClick={onBack}>

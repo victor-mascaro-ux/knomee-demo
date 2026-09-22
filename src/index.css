@@ -6210,3 +6210,107 @@ button.name-link-btn:hover .name-text {
   display: block;
   border-radius: 50%;
 }
+
+/* ---------- Print: the sheet, on paper ----------
+   "Download PDF" prints, and the browser's own Save as PDF is the file. What
+   comes out has to be a document rather than a photograph of an app, so
+   everything that only makes sense on screen — the bar, the rail, the tabs,
+   every control, the tooltips, the credit — is not on it. Colour is kept:
+   these pages are read by their tiers and their accents, and a greyscale
+   Business ID is a worse document, not a more printable one. */
+@media print {
+  :root {
+    --topbar-h: 0px;
+  }
+  body {
+    background: #fff;
+  }
+  /* The browser drops backgrounds by default; a card that is a grey tray and a
+     tier band that is a colour both stop saying what they say without them. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .topbar,
+  .tabs,
+  .pp-crumb,
+  .pp-tabs,
+  .pp-side,
+  .af-report-bar,
+  .powered-by,
+  .btn,
+  .pp-add,
+  .pp-show,
+  .pp-head-toggle,
+  .row-menu,
+  .rd-copy,
+  .ci-adv-x,
+  .ci-adv-pick,
+  .pp-dateselect,
+  .toast {
+    display: none !important;
+  }
+  /* Two columns of cards side by side is a screen layout; on paper the rail
+     column lands under the main one, which is where a reader expects it. */
+  .pp-layout,
+  .pp-cols,
+  .rd-kit-cols,
+  .rd-snapshot-body {
+    display: block !important;
+  }
+  .content,
+  .content-profile,
+  .pp-main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  /* A card broken across two pages reads as two half-cards. */
+  .pp-card,
+  .rd-card,
+  .card,
+  .metric-tile,
+  .fin-statement,
+  .hh-member {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .pp-title {
+    break-after: avoid;
+  }
+  /* A collapsed card prints what it shows: the height animation's clip would
+     otherwise cut the last row off mid-line. */
+  .collapse {
+    grid-template-rows: 1fr !important;
+  }
+  .collapse-inner {
+    overflow: visible !important;
+  }
+  /* Nothing on paper is sticky, and a mount animation that never ran would
+     print the page at opacity 0. */
+  * {
+    position: static !important;
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Except the things whose whole job is to sit somewhere: a dot on a track, a
+     badge on an avatar, the ring's number in its ring. */
+  .pp-conf-track,
+  .rd-ring,
+  .avatar-wrap,
+  .pp-goal,
+  .cp-tile {
+    position: relative !important;
+  }
+  .pp-conf-dot,
+  .household-badge,
+  .rd-ring-num,
+  .pp-goal-caret {
+    position: absolute !important;
+  }
+}
+@page {
+  margin: 14mm;
+}

@@ -23,6 +23,7 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
+import { printSheet } from '../printSheet'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -141,7 +142,7 @@ export default function ProspectProfileScreen({
                   ? 'Prospect Readiness'
                   : 'Prospect Toolkit'}
             </h1>
-            <button className="btn btn-download active" type="button">
+            <button className="btn btn-download active" type="button" onClick={printSheet}>
               <DownloadIcon /> Download PDF
             </button>
           </div>
