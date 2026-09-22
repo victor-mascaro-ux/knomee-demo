@@ -279,7 +279,11 @@ function FoldCard({
           <CaretIcon up={open} />
         </span>
       </button>
-      {open && <div className="ap-fold-body">{children}</div>}
+      <div className={`collapse ${open ? 'open' : ''}`}>
+        <div className="collapse-inner">
+          <div className="ap-fold-body">{children}</div>
+        </div>
+      </div>
     </section>
   )
 }
