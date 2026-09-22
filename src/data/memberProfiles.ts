@@ -13,14 +13,31 @@
 
 import { clientProfile } from './clientProfile'
 import { familyId } from './familyId'
+import { differences, similarities } from './familyInsights'
+
+/** A client page's content. The one built-out profile plus, where the person
+    has answers of their own, the statements behind their confidence dial. */
+export type MemberProfile = typeof clientProfile & {
+  confidenceAnswers?: { statement: string; value: number; low: string; high: string }[]
+}
 
 const him = familyId.members[1]
+/* Index of his mark on a statement the household answered together. */
+const HIS = 1
 
-/* What a profile page needs that a Family ID column does not: the prompt over
-   the joy chips, and where he wants his attention to go. Everything else is
-   shared with the household (the members, the advisory team) or read off his
-   column. */
-const sebastian: typeof clientProfile = {
+/* His confidence answers are the statements the Family Insights already carries
+   marks for — the one the household answered the same way, then the three they
+   did not — read at his mark. The statement asked twice in that data is asked
+   once here. */
+const hisConfidence = [similarities.statement, ...differences.statements]
+  .filter((s, i, all) => all.findIndex((o) => o.statement === s.statement) === i)
+  .map((s) => ({ statement: s.statement, value: s.marks[HIS], low: s.low, high: s.high }))
+
+/* Everything on his page is what his column of the Family ID says, or the
+   household's own (the members, the advisory team). Nothing is invented for
+   him: a card the family data has no answer for shows the tray or the gap it
+   would show anywhere else. */
+const sebastian: MemberProfile = {
   ...clientProfile,
   joined: 'May 2025',
   owner: him.name,
@@ -32,10 +49,9 @@ const sebastian: typeof clientProfile = {
   })),
   goals: him.goals,
   financialJoy: { ...clientProfile.financialJoy, chips: him.joy },
-  attention: {
-    more: ['Family time', 'Time outdoors', 'Saving steadily for the long term'],
-    less: ['Market noise', 'Work that spills into the weekend'],
-  },
+  /* The second half of the Joy adventure is not among his answers, so the card
+     carries the chips and stops rather than putting words in his mouth. */
+  attention: { more: [], less: [] },
   futureYou: him.futureYou,
   outlook: him.outlook,
   badges: him.badges,
@@ -44,9 +60,10 @@ const sebastian: typeof clientProfile = {
   lifeEvents: him.lifeEvents,
   questions: him.questions,
   boards: him.boards,
+  confidenceAnswers: hisConfidence,
 }
 
-const BY_NAME: Record<string, typeof clientProfile> = {
+const BY_NAME: Record<string, MemberProfile> = {
   [clientProfile.owner]: clientProfile,
   [sebastian.owner]: sebastian,
 }

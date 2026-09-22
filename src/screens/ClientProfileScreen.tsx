@@ -661,6 +661,11 @@ export default function ClientProfileScreen({
                         </span>
                       ))}
                     </div>
+                    {/* Where they want their attention is the second half of the
+                        Joy adventure, and not everyone has answered it. The card
+                        carries the chips and stops rather than printing two
+                        empty headings. */}
+                    {(cp.attention.more.length > 0 || cp.attention.less.length > 0) && (
                     <div className="pp-attention">
                       <div>
                         <span className="pp-fy-label">More attention</span>
@@ -679,6 +684,7 @@ export default function ClientProfileScreen({
                         ))}
                       </div>
                     </div>
+                    )}
                   </section>
 
                   <section className="pp-card">
@@ -777,7 +783,9 @@ export default function ClientProfileScreen({
                       <span className="pp-confidence-label">{cp.confidence}</span>
                       <Gauge label={cp.confidence} />
                     </div>
-                    <ConfidenceResults open={confidence} />
+                    {/* The statements behind the dial, where this person has
+                        their own. */}
+                    <ConfidenceResults open={confidence} answers={cp.confidenceAnswers} />
                     <button
                       className="pp-show"
                       type="button"
