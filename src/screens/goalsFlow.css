@@ -292,20 +292,17 @@
   box-shadow: 0 12px 30px -12px rgba(20, 10, 40, 0.55);
   animation: jrDeal 0.55s cubic-bezier(0.2, 1.1, 0.4, 1) 0.15s both;
 }
-/* The ramp lives on the profile pages; the ending restates the Financial ID's
-   purples so her bars are the ones her Financial ID shows. */
-.glr {
-  --bar-1: #240446;
-  --bar-2: #4c1d95;
-  --bar-3: #7038c8;
-  --bar-4: #9b51e0;
-  --bar-5: #b57ceb;
-  --bar-off: #e2def0;
+/* The stage artwork as drawn: large in the hero, at text size in a summary. */
+.glr-ttm {
+  display: block;
+  width: 88px;
+  height: auto;
+  margin-top: 4px;
 }
-.glr-bars .pp-readiness {
-  transform: scale(2.2);
-  transform-origin: center bottom;
-  margin: 18px 0 4px;
+.gl-ttm {
+  display: block;
+  width: 20px;
+  height: auto;
 }
 .glr-stage b {
   font-size: 20px;

@@ -18,7 +18,7 @@ import ReadinessModal from './ReadinessModal'
 import JoyReward from './JoyReward'
 import { Reveal } from './JoyResults'
 import { MARK_PARTS } from './ClientExperienceScreen'
-import { GoalDetail, ReadinessLevel, TTM_STAGES } from './profileParts'
+import { GoalDetail, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
 
 export interface GoalsAnswers {
@@ -60,6 +60,12 @@ const SAMPLE_OWN: Pick<Goal, 'pros' | 'cons' | 'note'> = {
   cons: ['Takes time and money'],
   note: 'This matters to me and to the people I love.',
 }
+
+/* The stage artwork, one drawing per rung, the marker under the rung she is on. */
+const TTM_ART = ['./goals/TTM.svg', './goals/TTM-1.svg', './goals/TTM-2.svg', './goals/TTM-3.svg', './goals/TTM-4.svg']
+const StageArt = ({ level, className }: { level: number; className?: string }) => (
+  <img className={className ?? 'gl-ttm'} src={TTM_ART[Math.max(1, level) - 1]} alt="" draggable={false} />
+)
 
 const ClockIcon = () => (
   <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -191,7 +197,7 @@ export default function GoalsFlow({
           <div className="gl-summary">
             <span className="gl-summary-head">Goal Summary</span>
             <b className="gl-summary-title">{current.title}</b>
-            <GoalDetail g={current} />
+            <GoalDetail g={current} stageArt={(lv) => <StageArt level={lv} />} />
           </div>
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => setStep('readiness')}>
@@ -234,9 +240,7 @@ export default function GoalsFlow({
               </span>
               <span className="glr-kicker">My readiness stage for my goal is</span>
               <div className="glr-stage">
-                <span className="glr-bars">
-                  <ReadinessLevel level={level || 1} />
-                </span>
+                <StageArt level={level || 1} className="glr-ttm" />
                 <b>{(stage ?? TTM_STAGES[0]).toUpperCase()}</b>
               </div>
               <p className="glr-line">{STAGE_LINE[(level || 1) - 1]}</p>
@@ -252,7 +256,7 @@ export default function GoalsFlow({
                 {goals.map((g, i) => (
                   <div className="gl-summary glr-summary" key={`${i}:${g.title}`} style={{ ['--i' as string]: i }}>
                     <b className="gl-summary-title">{g.title}</b>
-                    <GoalDetail g={g} />
+                    <GoalDetail g={g} stageArt={(lv) => <StageArt level={lv} />} />
                   </div>
                 ))}
               </div>

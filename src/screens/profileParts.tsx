@@ -3,7 +3,7 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -380,7 +380,14 @@ export function useCollapsed<T>(items: T[], max: number) {
 /* What a goal opens onto, printed inside the row rather than behind a click:
    on screen the panel carries it, and on paper there is nothing to click. Empty
    on a goal nobody went back to, which is most of them. */
-export function GoalDetail({ g }: { g: Goal }) {
+export function GoalDetail({
+  g,
+  stageArt,
+}: {
+  g: Goal
+  /** Drawn in place of the bars where a page has the stage artwork. */
+  stageArt?: (level: number) => ReactNode
+}) {
   return (
     <dl className="pp-goal-detail">
       {g.timeline && (
@@ -423,7 +430,7 @@ export function GoalDetail({ g }: { g: Goal }) {
           up to. Bars alone are a shape somebody has to know how to read. */}
       <dt>Readiness</dt>
       <dd className="pp-goal-stage">
-        <ReadinessLevel level={g.readiness} />
+        {stageArt ? (g.readiness ? stageArt(g.readiness) : null) : <ReadinessLevel level={g.readiness} />}
         {TTM_STAGES[g.readiness - 1] ?? 'Not set'}
       </dd>
     </dl>
