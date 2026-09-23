@@ -695,7 +695,9 @@ export default function AdvisorSelfScreen({
     }
     return loaded
   })
-  const [view, setView] = useState<'flow' | 'report' | 'record'>('flow')
+  /* Somebody else's sitting, opened from the firm's candidate table, lands on
+     the report a rep reads — not on their phone. */
+  const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing ? 'report' : 'flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
   const steps = useMemo(
@@ -1352,7 +1354,7 @@ function FlowReport({
           data={d}
           /* The crumb goes where it says it goes: to the list this person was
              opened from, not back one step to their phone. */
-          backLabel={viewing ? 'Testing Entries' : undefined}
+          backLabel={viewing ? 'My Candidates' : undefined}
           onBack={viewing ? (onList ?? onBack) : onBack}
         />
       </main>

@@ -12,25 +12,30 @@
    `candidateInsights.ts`, which the table reads too, so the two halves of the
    screen cannot disagree. */
 
-import { Fragment, useState } from 'react'
+import { InvitePanel } from './AdvisorDirectoryScreen'
+import { listEntries, type Trouble } from '../data/advisorDirectory'
+import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
+import './advisorDirectory.css'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import CollapsibleCard from '../components/CollapsibleCard'
 import RowMenu from '../components/RowMenu'
 import './firmCandidates.css'
 import {
   candidates,
-  candidateStats,
+  statsOf,
   profileOwner,
   tierGroups,
   type Candidate,
   type Tier,
 } from '../data/candidates'
-import { insights, talkTo } from '../data/candidateInsights'
+import { talkTo } from '../data/candidateInsights'
 import { advisor } from '../data/advisorFlow'
 import {
   CaretDown,
   ChartIcon,
   ChevronDown,
   ChevronRight,
+  CloseIcon,
   DownloadIcon,
   LightningIcon,
   PlusIcon,
@@ -61,8 +66,13 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   )
 }
 
+/* A row with a report behind it: the walkthrough's, or a live sitting that
+   finished the flow. */
+const opensProfile = (c: Candidate) =>
+  c.name === profileOwner || ('entryId' in c && c.kq !== null)
+
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
-  const isOwner = c.name === profileOwner
+  const isOwner = opensProfile(c)
   /* The "new" pill sits on the name's line, as it does in the advisor's tables. */
   const tag = c.isNew ? <span className="new-tag">new</span> : null
   return (
@@ -93,18 +103,24 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
    one next action always visible; the call-list and the reasoning are
    discoverable layers; the tier bar is the drill-in spine. */
 
-function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => void }) {
+function CommandCenter({
+  onOpenProfile,
+  stats,
+  names,
+}: {
+  onOpenProfile: (c: Candidate) => void
+  /** The pipeline's figures, over the rows on the page. */
+  stats: ReturnType<typeof statsOf>
+  /** Who is on the page: the call-list only names people who are. */
+  names: Set<string>
+}) {
   const [tier, setTier] = useState<TierKey | null>(null)
   const [listOpen, setListOpen] = useState(false)
-  const [whyOpen, setWhyOpen] = useState(false)
 
-  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
+  const onPage = talkTo.filter((t) => names.has(t.name))
+  const flagged = tier ? onPage.filter((t) => t.tier === tier) : onPage
   const lead = flagged[0]
   const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
-  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
-  const orderedInsights = tierInsight
-    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
-    : insights
 
   const pickTier = (k: TierKey) =>
     setTier((prev) => {
@@ -139,14 +155,14 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
-                {candidateStats.avgRQ.toFixed(1)}
+                {stats.avgRQ.toFixed(1)}
               </span>
             </div>
           </div>
           <div className="metric-tile">
             <span className="metric-label">TOTAL CANDIDATES</span>
             <div className="metric-num">
-              <span className="metric-value">{candidateStats.total}</span>
+              <span className="metric-value">{stats.total}</span>
             </div>
           </div>
           <div className="metric-tile distribution">
@@ -179,7 +195,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </div>
             <div className="dist-bar cmd-dist-bar">
               {TIER_META.map((m) => {
-                const n = candidateStats.byTier[m.tierId]
+                const n = stats.byTier[m.tierId]
                 return (
                   <button
                     key={m.key}
@@ -199,12 +215,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </div>
             <div className="dist-legend dist-legend-bars">
               {TIER_META.map((m) => (
-                <div
-                  className="dist-leg"
-                  key={m.key}
-                  /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: candidateStats.byTier[m.tierId] || 0.001 }}
-                >
+                <div className="dist-leg" key={m.key}>
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}
@@ -213,10 +224,10 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                 </div>
               ))}
             </div>
-            {candidateStats.byTier.incomplete > 0 && (
+            {stats.byTier.incomplete > 0 && (
               <p className="dist-foot">
-                {candidateStats.byTier.incomplete} incomplete profile
-                {candidateStats.byTier.incomplete === 1 ? '' : 's'} not shown
+                {stats.byTier.incomplete} incomplete profile
+                {stats.byTier.incomplete === 1 ? '' : 's'} not shown
               </p>
             )}
           </div>
@@ -307,38 +318,6 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
           </div>
         </div>
 
-        {/* Layer 1 — the evidence */}
-        <div className="cmd-why">
-          <button
-            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
-            type="button"
-            aria-expanded={whyOpen}
-            onClick={() => setWhyOpen((o) => !o)}
-          >
-            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
-          </button>
-          {meta && tierInsight && !whyOpen && (
-            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
-              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
-              <span className="cmd-why-peek-more">Read more →</span>
-            </button>
-          )}
-          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
-            <div className="collapse-inner">
-              <div className="cmd-insights">
-                {orderedInsights.map((ins) => (
-                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
-                    <div className="insight-num">{ins.n}</div>
-                    <div className="insight-text">
-                      <div className="insight-title">{ins.title}</div>
-                      <p className="insight-body">{ins.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
     </CollapsibleCard>
   )
 }
@@ -392,9 +371,32 @@ function Row({
           <span className={`score-badge score-${c.tier}`}>{c.kq}</span>
         )}
       </td>
-      <td className="col-num col-intent">{c.intent ?? '–'}</td>
-      <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
-      <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
+      {/* A sitting still under way has no scores yet: its three score cells
+          are one, showing how far through the flow it is. */}
+      {incomplete && 'entryId' in c ? (
+        <td className="col-progress" colSpan={3}>
+          {(() => {
+            const { answered, total } = c as LiveCandidate
+            const pct = total ? Math.round((answered / total) * 100) : 0
+            return (
+              <div className="fc-progress" aria-label={`${answered} of ${total} answered`}>
+                <span className="fc-progress-track">
+                  <i style={{ width: `${pct}%` }} />
+                </span>
+                <span className="fc-progress-label">
+                  {answered} of {total} answered
+                </span>
+              </div>
+            )
+          })()}
+        </td>
+      ) : (
+        <>
+          <td className="col-num col-intent">{c.intent ?? '–'}</td>
+          <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
+          <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
+        </>
+      )}
       <td className="col-action">
         <div className="top-action">
           <div className="top-action-text">{c.topAction}</div>
@@ -428,8 +430,8 @@ function Row({
                   { label: 'Add to Network', onClick: () => onAdd(c) },
                   {
                     label: 'View profile',
-                    disabled: c.name !== profileOwner,
-                    onClick: c.name === profileOwner ? () => onOpen(c) : undefined,
+                    disabled: !opensProfile(c),
+                    onClick: opensProfile(c) ? () => onOpen(c) : undefined,
                   },
                 ]
           }
@@ -578,20 +580,74 @@ function Table({
 
 /* ── the screen ─────────────────────────────────────────────────────────── */
 
+function InviteAdvisorModal({
+  onClose,
+  onDone,
+  onTrouble,
+}: {
+  onClose: () => void
+  onDone: () => void
+  onTrouble: (t: Trouble) => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="fc-invite-title">
+      <div className="modal invite-modal fc-invite-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title" id="fc-invite-title">
+            Invite Advisor
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body invite-body">
+          <InvitePanel onDone={onDone} onTrouble={onTrouble} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function FirmCandidatesScreen({
   onOpenProfile,
+  onOpenEntry,
   onDownload,
-  onInvite,
   onAdd,
 }: {
   onOpenProfile: (c: Candidate) => void
+  /** A live sitting's row: opens the report built from its answers. */
+  onOpenEntry: (entryId: string) => void
   onDownload: () => void
-  onInvite: () => void
   onAdd: (c: Candidate) => void
 }) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
-  const rows = candidates.filter(
+  /* The advisors who have taken the flow for real, placed in the pipeline by
+     the same scoring as their reports. The walkthrough's own sitting is
+     already a row (Marcus), so it is not listed twice. */
+  const [live, setLive] = useState<LiveCandidate[]>([])
+  const [inviting, setInviting] = useState(false)
+  const [trouble, setTrouble] = useState<Trouble>(null)
+  const loadLive = useCallback(async () => {
+    const { values, trouble: t } = await listEntries()
+    setTrouble(t)
+    const authored = new Set(candidates.map((c) => c.name))
+    setLive(values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry))
+  }, [])
+  useEffect(() => {
+    void loadLive()
+  }, [loadLive])
+  /* The pipeline is the people who actually took the flow, and Marcus — the
+     worked example whose report the demo walks through. No invented rows. */
+  const pipeline = [...live, ...candidates.filter((c) => c.name === profileOwner)]
+  const rows = pipeline.filter(
     (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
   )
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -609,7 +665,11 @@ export default function FirmCandidatesScreen({
   return (
     <>
       <h1 className="page-title">My Candidates</h1>
-      <CommandCenter onOpenProfile={onOpenProfile} />
+      <CommandCenter
+        onOpenProfile={onOpenProfile}
+        stats={statsOf(pipeline)}
+        names={new Set(pipeline.map((c) => c.name))}
+      />
 
       <div className="toolbar">
         <div className="search-box">
@@ -631,15 +691,22 @@ export default function FirmCandidatesScreen({
           >
             <DownloadIcon /> Download
           </button>
-          <button className="btn btn-primary" type="button" onClick={onInvite}>
+          <button className="btn btn-primary" type="button" onClick={() => setInviting(true)}>
             <PlusIcon /> Invite
           </button>
         </div>
       </div>
+      {/* The real invite, in the same modal the advisor dashboards open: a link
+          to the advisor flow, sent under a brand, whose sitting lands in this
+          table when it is answered. */}
+      {inviting && (
+        <InviteAdvisorModal onClose={() => setInviting(false)} onDone={loadLive} onTrouble={setTrouble} />
+      )}
+      {trouble && <div className="adir-trouble">{trouble}</div>}
 
       <Table
         rows={rows}
-        onOpen={onOpenProfile}
+        onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
         onAdd={onAdd}
         selected={selected}
         onToggle={toggle}

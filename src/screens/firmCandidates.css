@@ -93,3 +93,79 @@
   text-align: left;
   line-height: 1.6;
 }
+
+/* The advisor invite, inside the dashboards' invite modal: the panel drops its
+   own card, since the modal is the card. */
+.fc-invite-modal .adir-invite {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+
+/* An unfinished sitting's progress, across the three score cells. */
+.fc-table td.col-progress {
+  padding-right: var(--space-16);
+}
+.fc-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.fc-progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #ebe4f3;
+  overflow: hidden;
+}
+.fc-progress-track i {
+  display: block;
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #240446, #7639a1 60%, #b98ddc);
+}
+.fc-progress-label {
+  flex: none;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+/* The tier legend in three even columns: sized by count, a tier with nobody
+   in it squeezed its own name into a sliver. The bar above still splits by
+   count. */
+.dist-legend.dist-legend-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.dist-legend.dist-legend-bars .dist-leg {
+  min-width: 0;
+}
+/* An empty tier keeps a segment wide enough to read its 0. */
+.cmd-dist-bar .seg {
+  min-width: 32px;
+}
+
+/* In the modal the invite reads top to bottom — their name, who it is sent
+   as — with Generate link at the right edge, where a modal's action goes. */
+.fc-invite-modal .adir-invite-head {
+  display: none;
+}
+.fc-invite-modal .adir-link-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-14);
+}
+.fc-invite-modal .adir-name {
+  width: 100%;
+  flex: none;
+}
+.fc-invite-modal .adir-seg-wrap {
+  align-self: flex-start;
+}
+.fc-invite-modal .adir-link-row > .btn-primary {
+  align-self: flex-end;
+}

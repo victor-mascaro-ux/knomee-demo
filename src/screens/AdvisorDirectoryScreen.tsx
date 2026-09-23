@@ -125,7 +125,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
 
 /* ── the invite panel ───────────────────────────────────────────────────── */
 
-function InvitePanel({
+export function InvitePanel({
   onDone,
   onTrouble,
 }: {
