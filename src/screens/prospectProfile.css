@@ -1588,3 +1588,12 @@
 .pp-event-meta {
   margin-top: 4px;
 }
+
+/* A face that falls back to its letter takes the avatar's size: the rail's
+   initial is set at 16px for the phone's small rail, and in the 96px disc it
+   sat as a speck in the middle. */
+.pp-avatar .cxm-rail-initial {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+}
