@@ -83,9 +83,14 @@ const ClockIcon = () => (
 
 export default function JoyFlow({
   onComplete,
+  reward = { before: 0, after: 1, total: 5, next: 'Confidence' },
 }: {
   /** Leaving is the bar's cross, which the shell owns; kept for the caller. */
   onClose?: () => void
+  /** Where her journey stands, for the reward: the count before and after
+      this adventure (the same when it is being taken again), and what is
+      next. */
+  reward?: { before: number; after: number; total: number; next: string }
   /** Their answers, on the way to the Financial ID. */
   onComplete: (a: JoyAnswers) => void
 }) {
@@ -291,7 +296,14 @@ export default function JoyFlow({
       )}
 
       {step.kind === 'badge' && (
-        <JoyReward badge={bgFinancialJoy} done={1} total={5} next="Confidence" onNext={onCta} />
+        <JoyReward
+          badge={bgFinancialJoy}
+          from={reward.before}
+          done={reward.after}
+          total={reward.total}
+          next={reward.next}
+          onNext={onCta}
+        />
       )}
 
       {/* The advisor flow's segmented progress, one bar per screen, and the
