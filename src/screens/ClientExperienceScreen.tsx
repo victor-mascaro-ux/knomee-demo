@@ -1421,7 +1421,7 @@ export default function ClientExperienceScreen({
     // the controls stranded below the fold after a zoom out.
     <div
       className={`cx-page${bare ? ' is-bare' : ''}`}
-      style={{ ...brandVars(brand), ...(windowH && !bare ? { minHeight: windowH } : null) }}
+      style={windowH && !bare ? { minHeight: windowH } : undefined}
     >
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
           the scaled height and the page never grows a phantom scrollbar. On a
@@ -1432,7 +1432,9 @@ export default function ClientExperienceScreen({
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
         <IPhone scale={scale} bare={bare} dim={sheet || voiceOpen}>
-          <header className="cx-appbar">
+          {/* Under a firm's brand only the bar changes: its colour, and its logo
+              in place of knomee's. Everything inside stays the journey's own. */}
+          <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
             {adventure ? (
               <>
                 {/* Inside an adventure the bar carries its name and the way

@@ -4190,7 +4190,7 @@ export default function App() {
   if (clientExpOpen) {
     return (
       <>
-        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
+        <ClientExperienceScreen brand={brand} onExit={() => setClientExpOpen(false)} />
       </>
     )
   }
