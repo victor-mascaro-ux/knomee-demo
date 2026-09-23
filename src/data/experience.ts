@@ -191,8 +191,9 @@ export const clientInitial = 'D'
 
 /* ── a new client's journey ───────────────────────────────────────────────
    Her phone starts where a new client starts: nothing done, Financial Joy
-   open, the rest waiting in the order they are taken. Finishing one opens the
-   next. Only Financial Joy is built, so the others open but go nowhere yet. */
+   open, the rest waiting in the order they are taken, ending at Life Events.
+   Finishing one opens the next. Only Financial Joy is built, so the others
+   open but go nowhere yet. */
 export interface JourneyStep {
   id: string
   title: string
@@ -210,9 +211,4 @@ export const journey: JourneyStep[] = [
   { id: 'future-you', title: 'Future You', art: 'future-you', blurb: 'Picture where you want to be.', minutes: 3, core: true },
   { id: 'goals', title: 'Goals', art: 'goals', blurb: 'Set what you are working toward.', minutes: 3, core: true },
   { id: 'life-events', title: 'Life Events', art: 'life-events', blurb: 'Add what is changing in your life.', minutes: 3 },
-  { id: 'people', title: 'People', blurb: '', minutes: 3 },
-  { id: 'short-term-goals', title: 'Short Term Goals', blurb: '', minutes: 3 },
-  { id: 'values', title: 'Values', blurb: '', minutes: 3 },
-  { id: 'money-history', title: 'Money History', blurb: '', minutes: 3 },
-  { id: 'risk-tolerance', title: 'Risk Tolerance', blurb: '', minutes: 3 },
 ]

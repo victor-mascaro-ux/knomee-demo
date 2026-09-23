@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
-import JoyFlow, { type JoyAnswers } from './JoyFlow'
+import JoyFlow, { sampleJoyAnswers, type JoyAnswers } from './JoyFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -634,6 +634,7 @@ function AdventuresScreen({
   onPick,
   onOpenAdventure,
   done,
+  onSkipTo,
 }: {
   onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** An adventure that can actually be taken. */
@@ -641,6 +642,9 @@ function AdventuresScreen({
   /** Adventures completed, by id, with the day each was. Given, the list is
       a new client's journey; absent, the authored five-of-five. */
   done?: Record<string, string>
+  /** A greyed adventure, tapped: for the demo, everything before it is
+      completed with sample answers and it becomes the one that is next. */
+  onSkipTo?: (id: string) => void
 }) {
   if (done) {
     /* The journey: what is done, the one thing next, and the rest waiting in
@@ -669,7 +673,12 @@ function AdventuresScreen({
                 onRow={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
               />
             ) : (
-              <LockedRow key={j.id} title={j.title} artKey={j.art} />
+              <LockedRow
+                key={j.id}
+                title={j.title}
+                artKey={j.art}
+                onRow={onSkipTo ? () => onSkipTo(j.id) : undefined}
+              />
             ),
           )}
         </div>
@@ -1121,11 +1130,27 @@ export default function ClientExperienceScreen({
      finishing Financial Joy completes it on the list, opens the next, and
      puts its answers on the page. */
   const [joy, setJoy] = useState<JoyAnswers | null>(null)
+  /* Adventures completed, by id, with the day. */
+  const [done, setDone] = useState<Record<string, string>>({})
+  /* For the demo: a greyed adventure tapped completes every one before it
+     with sample answers — Financial Joy with the answers OK would record, the
+     rest with her authored ones — and leaves the tapped one next. */
+  const skipTo = (id: string) => {
+    const upTo = journey.findIndex((j) => j.id === id)
+    if (upTo < 0) return
+    setDone((d) => {
+      const next = { ...d }
+      for (const j of journey.slice(0, upTo)) if (!next[j.id]) next[j.id] = DEMO_TODAY
+      return next
+    })
+    if (!joy) setJoy(sampleJoyAnswers())
+  }
   /* A restart is a new client: the answers go, and her Financial ID is rebuilt
      from nothing — anything added to it, and her check-in, go too. */
   const [journeyRun, setJourneyRun] = useState(0)
   const restart = () => {
     setJoy(null)
+    setDone({})
     setCheckIn(null)
     setAdventure(null)
     setFlow(null)
@@ -1135,7 +1160,6 @@ export default function ClientExperienceScreen({
     setJourneyRun((n) => n + 1)
     setMenuOpen(false)
   }
-  const done: Record<string, string> = joy ? { 'financial-joy': DEMO_TODAY } : {}
   const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
     setTab('finid')
@@ -1265,12 +1289,18 @@ export default function ClientExperienceScreen({
                      the list, where the adventure now reads as complete and the
                      next one has opened. */
                   setJoy(answers)
+                  setDone((d) => ({ ...d, 'financial-joy': d['financial-joy'] ?? DEMO_TODAY }))
                   setAdventure(null)
                   setTab('adventures')
                 }}
               />
             ) : tab === 'adventures' ? (
-              <AdventuresScreen onPick={openFlow} onOpenAdventure={setAdventure} done={done} />
+              <AdventuresScreen
+                onPick={openFlow}
+                onOpenAdventure={setAdventure}
+                done={done}
+                onSkipTo={skipTo}
+              />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
                  answers — one artefact, not a second rendering of it. It was a
@@ -1279,7 +1309,7 @@ export default function ClientExperienceScreen({
               <ProspectProfileScreen
                 key={journeyRun}
                 prospect={SARAH}
-                fresh={{ joy }}
+                fresh={{ joy, done }}
                 mine
                 checkIn={
                   checkIn
@@ -1395,7 +1425,7 @@ export default function ClientExperienceScreen({
               onExit={onExit}
               onClose={() => setMenuOpen(false)}
               onRestart={restart}
-              progress={`${joy ? 1 : 0} of 5 adventures complete`}
+              progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}
         </IPhone>

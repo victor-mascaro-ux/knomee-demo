@@ -69,7 +69,7 @@ export default function ProspectProfileScreen({
 }: {
   /** Her phone as a new client's: nothing on the page until an adventure has
       put it there. `joy` is what Financial Joy handed back, once it has. */
-  fresh?: { joy: JoyAnswers | null }
+  fresh?: { joy: JoyAnswers | null; done?: Record<string, string> }
   prospect: Prospect
   onBack: () => void
   onConvert?: (p: Prospect) => void
@@ -96,22 +96,29 @@ export default function ProspectProfileScreen({
      its card, a highlight drawn from the memory, and its badge. Everything
      else keeps its heading and waits. */
   const joy = fresh?.joy ?? null
+  /* What is complete. Financial Joy's cards come from her answers; the rest
+     are not built yet, so a completed one shows her authored answers. */
+  const doneIds = fresh?.done ?? {}
+  const isDone = (id: string) => !!doneIds[id] || (id === 'financial-joy' && !!joy)
   const fi = fresh
     ? {
         ...financialId,
-        keyHighlights: joy
-          ? [
-              {
-                title: 'Joy & Motivation',
-                icon: 'financial-joy',
-                text: joy.notes.find((n) => n.trim()) ?? '',
-              },
-            ].filter((h) => h.text)
-          : [],
-        goals: [],
-        lifeEvents: [],
+        keyHighlights: [
+          ...(joy
+            ? [
+                {
+                  title: 'Joy & Motivation',
+                  icon: 'financial-joy',
+                  text: joy.notes.find((n) => n.trim()) ?? '',
+                },
+              ].filter((h) => h.text)
+            : []),
+          ...financialId.keyHighlights.filter((h) => h.icon !== 'financial-joy' && isDone(h.icon)),
+        ],
+        goals: isDone('goals') ? financialId.goals : [],
+        lifeEvents: isDone('life-events') ? financialId.lifeEvents : [],
         questions: [],
-        badges: joy ? ['Financial Joy'] : [],
+        badges: BADGE_ORDER.filter((b) => isDone(b.toLowerCase().replace(/ /g, '-'))),
         financialJoy: {
           ...financialId.financialJoy,
           chips: joy ? [...joy.tools, ...(joy.other.trim() ? [joy.other.trim()] : [])] : [],
@@ -125,9 +132,9 @@ export default function ProspectProfileScreen({
   /* Which cards have anything in them yet. */
   const has = {
     joy: !fresh || !!joy,
-    futureYou: !fresh,
-    outlook: !fresh,
-    confidence: !fresh,
+    futureYou: !fresh || isDone('future-you'),
+    outlook: !fresh || isDone('outlook'),
+    confidence: !fresh || isDone('confidence'),
   }
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.

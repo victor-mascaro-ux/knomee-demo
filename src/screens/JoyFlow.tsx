@@ -47,6 +47,15 @@ const SAMPLE_WAYS: Record<string, number> = {
   'Home life': 0,
 }
 
+/* Financial Joy answered entirely with the samples — what clicking OK through
+   every screen records, and what the adventures list's shortcut records. */
+export const sampleJoyAnswers = (): JoyAnswers => ({
+  tools: SAMPLE_TOOLS,
+  attention: { ...SAMPLE_WAYS },
+  notes: joySteps.filter((s) => s.kind === 'reflect').map((s) => (s.kind === 'reflect' ? s.example : '')),
+  other: '',
+})
+
 const emptyAnswers = (): JoyAnswers => ({
   tools: [],
   attention: {},
