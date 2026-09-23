@@ -126,6 +126,15 @@
    let .cx-screen's overflow clip the fringe; the horizontal padding gains the
    same amount, so the content keeps the inset the design gave it. */
 .kx-sheet,.vx-sheet{left:-20px;right:-20px}
+
+/* The 22 under both sheets is the home bar, which only the framed phone has.
+   On a handset there is none, and the gap it left showed a strip of the page
+   between the sheet and the tab bar. */
+.cx-page.is-bare .kx-sheet,
+.cx-page.is-bare .vx-sheet {
+  bottom: var(--mobile-tabbar-h);
+}
+
 .kx-sheet{padding-left:calc(var(--space-16) + 20px);padding-right:calc(var(--space-16) + 20px)}
 .vx-sheet{padding-left:52px;padding-right:52px}
 
