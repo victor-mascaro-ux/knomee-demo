@@ -6362,11 +6362,32 @@ button.name-link-btn:hover .name-text {
 
   /* ── the cards ── */
   .pp-cols,
-  .rd-cols,
   .rd-kit-cols,
-  .rd-snapshot-body,
   .fin-compare {
     display: block !important;
+  }
+  /* The readiness read is two blocks, and both of them want the width of the
+     page: the dial beside its breakdown with the tier under the pair, then the
+     three columns that follow it two abreast. Stacked, the first was a ring and
+     three cards down the left of an empty sheet. */
+  .rd-snapshot-body {
+    display: grid !important;
+    grid-template-columns: 56mm minmax(0, 1fr) !important;
+    gap: 6mm !important;
+  }
+  .rd-dims,
+  .rd-dims-wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .rd-cols {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6mm !important;
+  }
+  .rd-ring,
+  .rd-ring svg {
+    width: 46mm !important;
+    height: 46mm !important;
   }
   /* Stacked, the cards carry their own space between them: the columns they
      came out of were holding that with a grid gap. */
@@ -6408,6 +6429,32 @@ button.name-link-btn:hover .name-text {
   .ap-fold .pp-card-head + * {
     display: block !important;
   }
+  /* A goal prints its whole picture: the row opens the rest on screen, and a
+     sheet of paper opens nothing. */
+  .pp-goal {
+    display: block !important;
+  }
+  .pp-goal-detail {
+    display: grid !important;
+    grid-template-columns: 26mm minmax(0, 1fr);
+    gap: 1mm 4mm;
+    margin: var(--space-8) 0 0;
+    padding-top: var(--space-8);
+    border-top: var(--border-thin) solid var(--border-default);
+    font-size: var(--text-sm);
+    color: var(--text-table);
+  }
+  .pp-goal-detail dt {
+    font-weight: var(--weight-semibold);
+    color: var(--text-secondary);
+  }
+  .pp-goal-detail dd {
+    margin: 0;
+  }
+  .pp-goal-caret {
+    display: none !important;
+  }
+
   /* Badges are a screen's reward, not a document's content. */
   .pp-card:has(.pp-badges) {
     display: none !important;

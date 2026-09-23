@@ -5,6 +5,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
+import type { Goal } from '../data/financialId'
 import icCareerChange from '../assets/life-events/career-change.svg'
 import icDeathOfParents from '../assets/life-events/death-of-parents.svg'
 import icDebtRepayment from '../assets/life-events/debt-repayment.svg'
@@ -360,6 +361,48 @@ export function useCollapsed<T>(items: T[], max: number) {
       return undefined
     },
   }
+}
+
+/* What a goal opens onto, printed inside the row rather than behind a click:
+   on screen the panel carries it, and on paper there is nothing to click. Empty
+   on a goal nobody went back to, which is most of them. */
+export function GoalDetail({ g }: { g: Goal }) {
+  const has = g.timeline || g.pros?.length || g.cons?.length || g.note
+  if (!has) return null
+  return (
+    <dl className="pp-goal-detail">
+      {g.timeline && (
+        <>
+          <dt>Timeline</dt>
+          <dd>{g.timeline}</dd>
+        </>
+      )}
+      {g.pros && g.pros.length > 0 && (
+        <>
+          <dt>Pros</dt>
+          <dd>{g.pros.join(' · ')}</dd>
+        </>
+      )}
+      {g.cons && g.cons.length > 0 && (
+        <>
+          <dt>Cons</dt>
+          <dd>{g.cons.join(' · ')}</dd>
+        </>
+      )}
+      {g.note && (
+        <>
+          <dt>My goal</dt>
+          <dd>{g.note}</dd>
+        </>
+      )}
+      {g.updated && (
+        <>
+          <dt>Last updated</dt>
+          <dd>{g.updated}</dd>
+        </>
+      )}
+    </dl>
+  )
 }
 
 export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {

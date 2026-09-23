@@ -16,7 +16,7 @@ import { useState } from 'react'
 import './familyId.css'
 import { familyId } from '../data/familyId'
 import type { FamilyMemberId } from '../data/familyId'
-import type { HouseholdMember } from '../data/clientProfile'
+import type { HouseholdMember, ClientGoal } from '../data/clientProfile'
 import {
   AddButton,
   COLLAPSED_ROWS,
@@ -30,12 +30,14 @@ import {
   HighlightIcon,
   LifeEventIcon,
   ReadinessLevel,
+  GoalDetail,
   ShowToggle,
   orderGoals,
   useCollapsed,
 } from './profileParts'
 import { Board } from './ClientProfileScreen'
 import { FamilyCard, Who } from './familyParts'
+import GoalModal from './GoalModal'
 import { CaretIcon, CheckIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icGoals from '../assets/adventures/goals.svg'
@@ -112,6 +114,10 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
     3,
   )
   const [confidence, setConfidence] = useState(false)
+  /* A goal opens here too, to read. Not to change: this page is two people's
+     own pages laid side by side, and deleting somebody's goal from a view of
+     their household is not a thing a household can do. */
+  const [openGoal, setOpenGoal] = useState<ClientGoal | null>(null)
 
   return (
     <div className="fid">
@@ -191,9 +197,20 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
           <div className="fid-goals">
             {goals.cut(orderGoals(m.goals)).map((g, i) => (
               <div
-                className={`pp-goal ${g.completed ? 'is-done' : ''} ${goals.entering(i) ?? ''}`}
+                className={`pp-goal is-open-able ${g.completed ? 'is-done' : ''} ${
+                  goals.entering(i) ?? ''
+                }`}
                 style={goals.delay(i)}
                 key={g.title}
+                role="button"
+                tabIndex={0}
+                onClick={() => setOpenGoal(g)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setOpenGoal(g)
+                  }
+                }}
               >
                 <div className="pp-goal-main">
                   {g.tags && g.tags.length > 0 && (
@@ -216,6 +233,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
                 <span className="pp-goal-caret">
                   <RowChevron />
                 </span>
+                <GoalDetail g={g} />
               </div>
             ))}
           </div>
@@ -424,6 +442,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
           </div>
         )}
       />
+      {openGoal && <GoalModal goal={openGoal} onClose={() => setOpenGoal(null)} />}
     </div>
   )
 }
