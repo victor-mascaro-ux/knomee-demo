@@ -20,10 +20,14 @@
 }
 .modal-footer.vb-foot {
   flex: none;
-  /* Back at one edge, Save at the other, whatever the panel's width. */
+  /* Delete at one edge, Save at the other, whatever the panel's width. */
   justify-content: space-between;
   gap: var(--space-10);
   padding-top: var(--space-12);
+}
+/* Save keeps the right edge, with or without Delete board on the left. */
+.vb-foot .btn-primary {
+  margin-left: auto;
 }
 .vb-foot .btn:disabled {
   opacity: 0.45;

@@ -309,9 +309,6 @@ export default function AddVisionBoardModal({
                   Delete board
                 </button>
               )}
-              <button className="btn btn-outline" type="button" onClick={() => setNamed(false)}>
-                Back
-              </button>
               <button
                 className="btn btn-primary"
                 type="button"
