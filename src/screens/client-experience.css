@@ -596,19 +596,30 @@ svg.cx-tab-mark {
    review frame, not the window's. */
 .cx-page.is-bare {
   padding: 0;
+  /* The window, exactly — not the content. The screen is a column of three:
+     the bar at the top, the bar at the foot, and the scrolling part between
+     them. Let the screen grow with what is in it and the page scrolls instead,
+     which takes both bars off the top and the bottom of a handset. */
   min-height: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--surface-card);
 }
 /* One flex chain from the page to the screen, so the screen is exactly as tall
-   as the window without anybody measuring it. */
+   as the window without anybody measuring it. Every link in it has to be told
+   it may shrink: a flex item's floor is its own content, and the content here
+   is a whole scrolling app. */
 .cx-page.is-bare .cx-fit {
   width: 100%;
   flex: 1;
+  min-height: 0;
   display: flex;
 }
 .cx-device.is-bare {
   width: 100%;
   flex: 1;
+  min-height: 0;
   display: flex;
   padding: 0;
   border-radius: 0;
@@ -618,6 +629,7 @@ svg.cx-tab-mark {
 }
 .cx-device.is-bare .cx-bezel {
   flex: 1;
+  min-height: 0;
   display: flex;
   padding: 0;
   border-radius: 0;
@@ -625,8 +637,8 @@ svg.cx-tab-mark {
 }
 .cx-device.is-bare .cx-screen {
   width: 100%;
-  height: auto;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   border-radius: 0;
 }
 .cx-device.is-bare .cx-island,
