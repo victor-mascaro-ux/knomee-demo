@@ -85,7 +85,12 @@ export default function AddVisionBoardModal({
   onClose,
   onSave,
   onDelete,
+  boardWidth,
 }: {
+  /** The width the page draws the board at. The board being made is laid out
+      at that width and zoomed to fit the panel, so it is the page's board,
+      smaller — not a narrower board arranged differently. */
+  boardWidth?: number
   /** A board already on the page, opened to be changed. It opens on the board
       itself — they are changing what is on it — and Back still renames it. */
   board?: VisionBoard
@@ -100,6 +105,18 @@ export default function AddVisionBoardModal({
   const [tiles, setTiles] = useState<BoardTile[]>(board?.tiles ?? [])
   const [mode, setMode] = useState<Mode>(null)
   const photoInput = useRef<HTMLInputElement>(null)
+  /* The room the preview has, against the width the page draws the board at. */
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [room, setRoom] = useState(0)
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setRoom(el.clientWidth))
+    ro.observe(el)
+    setRoom(el.clientWidth)
+    return () => ro.disconnect()
+  })
+  const scale = boardWidth && room ? Math.min(1, room / boardWidth) : 1
   /* Asking whether to leave a board that has not been saved. */
   const [leaving, setLeaving] = useState(false)
   /* Asking before a board is deleted: it cannot be brought back. */
@@ -232,7 +249,11 @@ export default function AddVisionBoardModal({
               <h3 className="vb-board-name">{title.trim()}</h3>
               {blurb.trim() && <p className="vb-board-blurb">{blurb.trim()}</p>}
               {tiles.length > 0 && (
-                <div className="vb-preview">
+                <div className="vb-preview" ref={previewRef}>
+                  <div
+                    className="vb-scale"
+                    style={boardWidth ? { width: boardWidth, zoom: scale } : undefined}
+                  >
                   <Board
                     board={{ title: title.trim(), blurb: blurb.trim(), tiles }}
                     onResize={resize}
@@ -246,6 +267,7 @@ export default function AddVisionBoardModal({
                       })
                     }
                   />
+                  </div>
                 </div>
               )}
 
@@ -371,7 +393,7 @@ export default function AddVisionBoardModal({
                   autoFocus
                   onClick={() => setLeaving(false)}
                 >
-                  Go back
+                  Keep creating
                 </button>
               </div>
             </div>
