@@ -1,8 +1,8 @@
 /* Goal Readiness — what this panel adds to the app's modal. The shell, the
    header, the close and the buttons are index.css's own. */
 
-.rm-modal {
-  width: 480px;
+.modal.rm-modal {
+  width: 560px;
 }
 .rm-body {
   display: flex;

@@ -4,7 +4,10 @@
    is green, on a prospect's purple, because --plum and --text-link are already
    turned over there. */
 
-.goal-modal {
+/* The width every panel on these pages takes. The goal panel set it, and the
+   life event, the question and the two forms that open off them follow it, so
+   opening one after another is not a set of boxes of different sizes. */
+.modal.goal-modal {
   width: 560px;
 }
 .goal-body {
@@ -182,7 +185,10 @@
   position: absolute;
 }
 .cx-screen .modal {
-  width: auto;
+  /* The width of the screen less a margin, rather than the width of whatever
+     is in it: `auto` let a panel of three short rows shrink to a column down
+     the middle of the phone with its own page showing either side. */
+  width: calc(100% - var(--space-24));
   max-width: calc(100% - var(--space-24));
   max-height: calc(100% - var(--space-40));
   overflow: auto;

@@ -3,8 +3,8 @@
    read from the page underneath: on a client's page the arrows are green, on a
    prospect's purple, because --text-link is already turned over there. */
 
-.ag-modal {
-  width: 520px;
+.modal.ag-modal {
+  width: 560px;
 }
 .ag-body {
   display: flex;

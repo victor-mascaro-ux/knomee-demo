@@ -182,10 +182,12 @@ export function AddLifeEventModal({
         ) : (
           <>
             <div className="modal-body le-body">
-              <span className="le-advisor">Advisor added</span>
               <div className="le-kind-line">
                 <LifeEventIcon kind={kind} text={kind} />
                 <h3 className="le-kind-name">{kind}</h3>
+                {/* Who is filling this in, at the end of the line the event
+                    names itself on rather than on a line of its own. */}
+                <span className="le-advisor">Advisor added</span>
               </div>
 
               <label className="le-label" htmlFor="le-text">
