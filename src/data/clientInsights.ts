@@ -66,13 +66,6 @@ export const clientSnapshot: Snapshot = {
       ],
     },
     {
-      key: 'Word Count',
-      question: 'Verbosity of text responses',
-      score: 248,
-      caption: 'Moderate verbosity',
-      evidence: ['248 words across her written answers, including her vision boards'],
-    },
-    {
       key: 'Knomee Activity',
       question: 'How active and current is their knomee profile?',
       score: 90,
