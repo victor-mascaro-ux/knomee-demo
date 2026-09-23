@@ -9,24 +9,47 @@ import { useEffect, useRef, useState, type RefObject } from 'react'
 const DRAG_SLOP = 6
 
 /**
- * Drag-to-scroll with momentum, for a scrollable element inside the device.
+ * Drag-to-scroll with momentum, for everything scrollable on the phone.
  *
  * Native touch scrolling is already right on a real handset, so this only takes
- * over for mouse and pen. It swallows the click that ends a drag, or letting go
- * over a row would open it.
+ * over for mouse and pen. It listens on the whole phone screen and moves the
+ * nearest thing under the pointer that can scroll — the page, or a panel's
+ * body, a photo library, the drawer — so every scrolling surface drags, not
+ * only the page. A drag that starts inside a dialog stays in the dialog: if
+ * nothing in it scrolls, nothing does, rather than the page behind it. It
+ * swallows the click that ends a drag, or letting go over a row would open it.
  */
 export function useDragScroll<T extends HTMLElement>(ref: RefObject<T | null>) {
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
+    /* Found fresh on every press, not held from the first render: the phone
+       rebuilds its screen when it switches between framed and handset, and a
+       listener left on the old one silently stopped every drag. */
+    let page: HTMLElement = document.body
+    let root: HTMLElement = document.body
+    let el: HTMLElement = page
     let dragging = false
     let pointer = -1
     let lastY = 0
     let lastT = 0
     let velocity = 0 // px per frame
     let travelled = 0
+    let scale = 1
     let raf = 0
+
+    const scrolls = (n: HTMLElement) => {
+      const oy = getComputedStyle(n).overflowY
+      return (oy === 'auto' || oy === 'scroll') && n.scrollHeight > n.clientHeight + 1
+    }
+    /* The nearest scrollable thing under the pointer, stopping at a dialog's
+       edge; null when the drag should not scroll anything. */
+    const scrollerFor = (target: Element | null): HTMLElement | null => {
+      for (let n = target as HTMLElement | null; n && n !== root; n = n.parentElement) {
+        if (n === page) return page
+        if (scrolls(n)) return n
+        if (n.matches('.modal-backdrop, [role="dialog"], [aria-modal="true"]')) return null
+      }
+      return null
+    }
 
     const glide = () => {
       velocity *= 0.94 // friction — a flick coasts for about a second
@@ -37,27 +60,40 @@ export function useDragScroll<T extends HTMLElement>(ref: RefObject<T | null>) {
 
     const onDown = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.button !== 0) return
+      const target = e.target as Element | null
+      const current = ref.current
+      if (!current || !current.isConnected) return
+      page = current
+      /* The phone's whole screen: sheets, drawers and panels that are not
+         inside the page still sit on it. */
+      root = (page.closest('.cx-screen') as HTMLElement | null) ?? page
+      if (!target || !root.contains(target)) return
       // A drag that starts inside a field is a text selection, not a flick.
       // Now that the advisor flow can be typed into, taking it over would make
       // selecting your own sentence scroll the phone instead.
-      if ((e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable]'))
-        return
-      // A control that is itself dragged — a board tile's resize handle — keeps
-      // its drag rather than having the page scroll under it.
-      if ((e.target as Element | null)?.closest?.('[data-no-drag-scroll]')) return
+      if (target?.closest?.('input, textarea, select, [contenteditable]')) return
+      // A control that is itself dragged — a board tile's resize handle, a
+      // card thrown off a deck — keeps its drag rather than having the page
+      // scroll under it.
+      if (target?.closest?.('[data-no-drag-scroll]')) return
+      const found = scrollerFor(target)
+      if (!found) return
+      el = found
       cancelAnimationFrame(raf)
+      // The phone is drawn scaled; the pointer moves in screen pixels.
+      scale = root.getBoundingClientRect().height / root.offsetHeight || 1
       dragging = true
       pointer = e.pointerId
       lastY = e.clientY
       lastT = performance.now()
       velocity = 0
       travelled = 0
-      el.classList.add('is-dragging')
+      page.classList.add('is-dragging')
     }
 
     const onMove = (e: PointerEvent) => {
       if (!dragging || e.pointerId !== pointer) return
-      const dy = e.clientY - lastY
+      const dy = (e.clientY - lastY) / scale
       const now = performance.now()
       travelled += Math.abs(dy)
       velocity = (dy / Math.max(1, now - lastT)) * 16
@@ -71,26 +107,26 @@ export function useDragScroll<T extends HTMLElement>(ref: RefObject<T | null>) {
       if (!dragging || e.pointerId !== pointer) return
       dragging = false
       pointer = -1
-      el.classList.remove('is-dragging')
+      page.classList.remove('is-dragging')
       if (travelled > DRAG_SLOP) {
         // The click that ends a drag is not a tap — swallow exactly one.
         const swallow = (ev: Event) => {
           ev.stopPropagation()
           ev.preventDefault()
         }
-        el.addEventListener('click', swallow, { capture: true, once: true })
-        window.setTimeout(() => el.removeEventListener('click', swallow, true), 60)
+        root.addEventListener('click', swallow, { capture: true, once: true })
+        window.setTimeout(() => root.removeEventListener('click', swallow, true), 60)
         raf = requestAnimationFrame(glide)
       }
     }
 
-    el.addEventListener('pointerdown', onDown)
+    document.addEventListener('pointerdown', onDown)
     window.addEventListener('pointermove', onMove, { passive: false })
     window.addEventListener('pointerup', onUp)
     window.addEventListener('pointercancel', onUp)
     return () => {
       cancelAnimationFrame(raf)
-      el.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
