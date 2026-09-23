@@ -756,12 +756,16 @@ function AdventuresScreen({
         <h2 className="cx-screen-title">My Adventures</h2>
         <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
         <div className="cx-adv-list">
-          {/* Once Goals is done, it and Life Events are the two she keeps
-              adding to, so they lead the list rather than trail it. */}
-          {(done.goals
-            ? [...journey.filter((j) => REPEAT[j.id]), ...journey.filter((j) => !REPEAT[j.id])]
-            : journey
-          ).map((j) =>
+          {/* What is still to do leads — the next adventure, the ones waiting
+              behind it, and (once Goals is done) the two she keeps adding to —
+              and what she has finished sits at the foot, in the order she did
+              it. */}
+          {(() => {
+            const finished = (j: (typeof journey)[number]) => !!done[j.id] && !REPEAT[j.id]
+            const open = journey.filter((j) => !finished(j))
+            const lead = done.goals ? [...open.filter((j) => REPEAT[j.id]), ...open.filter((j) => !REPEAT[j.id])] : open
+            return [...lead, ...journey.filter(finished)]
+          })().map((j) =>
             REPEAT[j.id] && (done[j.id] || (j.id === 'life-events' && j === next)) ? (
               /* Goals and Life Events are never finished: once done they stay a
                  card with its way to add one more, not a completed row. Life
