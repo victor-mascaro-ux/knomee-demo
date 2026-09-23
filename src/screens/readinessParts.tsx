@@ -404,18 +404,22 @@ export function StartersCard({
   starters: Starter[]
   keyRows: { tag: TagName; meaning: string }[]
 }) {
+  /* Two cards rather than one. The key is read against the starters but it is
+     not part of them, and as one card the pair was taller than a sheet of
+     paper: it broke, and the grey ran on to the foot of the page with nothing
+     in it. Each card is now the size of what it holds. */
   return (
-    <section className="pp-card rd-card">
-      <Head icon={icStarters} title="Conversation Starters" />
-      <div className="rd-starters">
-        {starters.map((s, i) => (
-          <StarterRow s={s} i={i} key={s.quote} />
-        ))}
-      </div>
+    <>
+      <section className="pp-card rd-card">
+        <Head icon={icStarters} title="Conversation Starters" />
+        <div className="rd-starters">
+          {starters.map((s, i) => (
+            <StarterRow s={s} i={i} key={s.quote} />
+          ))}
+        </div>
+      </section>
 
-      {/* Heading and key are one block: on paper they carry their own ground,
-          and a block is what can be kept whole across a page break. */}
-      <div className="rd-key-block">
+      <section className="pp-card rd-card rd-key-card">
         <h4 className="rd-sub-head">Strategic Recommendations Key</h4>
         <div className="rd-key">
           {keyRows.map((k) => (
@@ -425,8 +429,8 @@ export function StartersCard({
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
 
