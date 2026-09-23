@@ -383,7 +383,8 @@
 /* ── the toolkit ── */
 .rd-top-action {
   display: flex;
-  align-items: center;
+  /* Icon and label sit on the first line of the action, not its middle. */
+  align-items: flex-start;
   gap: var(--space-10);
   padding: var(--space-14) var(--space-16);
   border-radius: var(--radius-xl);
@@ -397,6 +398,12 @@
   height: 26px;
 }
 .rd-top-action b {
+  /* The label keeps to one line: squeezed by a long action beside it, it
+     broke into "Top / Action". */
+  flex: none;
+  white-space: nowrap;
+  /* The icon's height, so the label sits level with it on the first line. */
+  line-height: 26px;
   color: var(--text-strong);
 }
 

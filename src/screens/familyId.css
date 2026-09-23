@@ -119,3 +119,14 @@
     padding-left: 0;
   }
 }
+
+/* A check-in column: their name and face, then the standard card. */
+.fid-checkin-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.fid-checkin-col .pp-checkin {
+  margin: 0;
+}

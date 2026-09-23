@@ -35,6 +35,7 @@ import {
   ShowToggle,
   orderGoals,
   useCollapsed,
+  CheckInCard,
 } from './profileParts'
 import { FamilyCard, Who } from './familyParts'
 import GoalModal from './GoalModal'
@@ -49,13 +50,7 @@ import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icVision from '../assets/adventures/vision-board.svg'
-import moodGood from '../assets/moods/good.svg'
-import moodGreat from '../assets/moods/great.svg'
-import moodNeutral from '../assets/moods/neutral.svg'
-import moodUnsure from '../assets/moods/unsure.svg'
-import moodWorried from '../assets/moods/worried.svg'
 
-const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 
 /* A member who has been added but has not answered anything yet. The column is
    theirs and it is empty — which is the truth about an invitation nobody has
@@ -124,25 +119,20 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
       {/* How each of them last said they felt, side by side — the household's
           temperature before any of its answers. */}
       <div className="fid-checkins">
-        {members.map((m) =>
-          m.checkIn.level < 0 ? (
-            <div className="cp-checkin fid-checkin is-empty" key={m.name}>
-              <span className="fid-checkin-who">{m.name}</span>
-              <span className="cp-checkin-date">No check-in yet</span>
-            </div>
-          ) : (
-          <div className={`cp-checkin fid-checkin is-mood-${m.checkIn.level}`} key={m.name}>
-            <span className="cp-checkin-face">
-              <img src={MOOD_FACE[m.checkIn.level]} alt="" />
-            </span>
-            <span className="cp-checkin-main">
-              <span className="cp-checkin-mood">{m.checkIn.mood}</span>
-            </span>
-            <span className="fid-checkin-who">{m.name}</span>
-            <span className="cp-checkin-date">Last check-in: {m.checkIn.date}</span>
+        {/* Each of them named the way every split card here names them, then
+            the same check-in card their own page shows. */}
+        {members.map((m) => (
+          <div className="fid-checkin-col" key={m.name}>
+            <Who name={m.name} />
+            {m.checkIn.level < 0 ? (
+              <div className="cp-checkin fid-checkin is-empty">
+                <span className="cp-checkin-date">No check-in yet</span>
+              </div>
+            ) : (
+              <CheckInCard checkIn={m.checkIn} />
+            )}
           </div>
-          ),
-        )}
+        ))}
       </div>
 
       {/* Key Highlights splits inside each tile rather than into two tiles: the
