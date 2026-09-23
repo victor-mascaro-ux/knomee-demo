@@ -146,15 +146,6 @@ export const joySteps: JoyStep[] = [
       'Taking the whole family to the coast last summer. A rented house, no plans, the kids in the water every day. It was the first trip we paid for without checking the account first.',
   },
   {
-    kind: 'reflect',
-    eyebrow: 'Think back!',
-    title: 'What would you do tomorrow if money were taken care of?',
-    body: 'The first answer is usually the honest one.',
-    placeholder: 'Write as much or as little as you like.',
-    example:
-      'Move closer to my daughter, and spend the mornings painting. Travel with Vic while we both still can.',
-  },
-  {
     kind: 'done',
     title: 'You found Financial Joy',
     body: 'Here is what you said. It is on your Financial ID now, and your advisor reads the same page you do.',
