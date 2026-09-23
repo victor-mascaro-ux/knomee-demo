@@ -156,6 +156,8 @@
 .pp-meta {
   display: flex;
   flex-direction: column;
+  /* Centred under the name, the way the portrait and the name are. */
+  align-items: center;
   gap: 6px;
   font-size: 12.5px;
   color: var(--grey-text, #8b8598);
@@ -975,6 +977,8 @@
     margin: 0;
     gap: 2px;
     font-size: 12px;
+    /* Beside the portrait here, so it lines up with the name on the left. */
+    align-items: flex-start;
   }
   .pp-convert {
     margin-left: auto;
