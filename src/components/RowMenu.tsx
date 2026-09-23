@@ -16,6 +16,9 @@ export interface MenuItem {
 
 export default function RowMenu({ items }: { items: MenuItem[] }) {
   const [open, setOpen] = useState(false)
+  /* Opens upward when there is no room below — the last rows of a table sit
+     against its clipped, rounded frame, which cut the menu off. */
+  const [up, setUp] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
@@ -33,13 +36,17 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
         aria-label="Row actions"
         onClick={(e) => {
           e.stopPropagation()
+          const r = ref.current?.getBoundingClientRect()
+          const frame = ref.current?.closest('.table-wrap')?.getBoundingClientRect()
+          const floor = Math.min(frame?.bottom ?? window.innerHeight, window.innerHeight)
+          setUp(!!r && floor - r.bottom < 40 * items.length + 24)
           setOpen((v) => !v)
         }}
       >
         <DotsIcon />
       </button>
       {open && (
-        <div className="row-menu-pop">
+        <div className={`row-menu-pop${up ? ' is-up' : ''}`}>
           {items.map((it) => (
             <button
               key={it.label}

@@ -6751,3 +6751,9 @@ button.name-link-btn:hover .name-text {
 .pp-empty-cta:hover .pp-empty-disc {
   box-shadow: 0 10px 22px -8px rgba(36, 4, 70, 0.3);
 }
+
+/* A row menu near the table's foot opens upward, inside the frame. */
+.row-menu-pop.is-up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}

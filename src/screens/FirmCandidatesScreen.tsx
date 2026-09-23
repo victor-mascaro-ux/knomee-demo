@@ -13,7 +13,7 @@
    screen cannot disagree. */
 
 import { InvitePanel } from './AdvisorDirectoryScreen'
-import { listEntries, type Trouble } from '../data/advisorDirectory'
+import { deleteEntry, deleteInvite, listEntries, type Trouble } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useState } from 'react'
@@ -328,12 +328,15 @@ function Row({
   c,
   onOpen,
   onAdd,
+  onRemove,
   checked,
   onToggle,
 }: {
   c: Candidate
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
+  /** Only a live sitting can be removed; the worked example cannot. */
+  onRemove?: (c: LiveCandidate) => void
   checked: boolean
   onToggle: () => void
 }) {
@@ -423,8 +426,8 @@ function Row({
       </td>
       <td className="col-dots">
         <RowMenu
-          items={
-            incomplete
+          items={[
+            ...(incomplete
               ? [{ label: 'View profile', disabled: true }]
               : [
                   { label: 'Add to Network', onClick: () => onAdd(c) },
@@ -433,8 +436,11 @@ function Row({
                     disabled: !opensProfile(c),
                     onClick: opensProfile(c) ? () => onOpen(c) : undefined,
                   },
-                ]
-          }
+                ]),
+            ...('entryId' in c && onRemove
+              ? [{ label: 'Remove entry', danger: true, onClick: () => onRemove(c as LiveCandidate) }]
+              : []),
+          ]}
         />
       </td>
     </tr>
@@ -445,6 +451,7 @@ function Table({
   rows,
   onOpen,
   onAdd,
+  onRemove,
   selected,
   onToggle,
   allChecked,
@@ -453,6 +460,7 @@ function Table({
   rows: Candidate[]
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
+  onRemove: (c: LiveCandidate) => void
   selected: Set<string>
   onToggle: (name: string) => void
   allChecked: boolean
@@ -559,9 +567,10 @@ function Table({
                   sortRows(inGroup).map((c) => (
                     <Row
                       c={c}
-                      key={c.name}
+                      key={'entryId' in c ? (c as LiveCandidate).entryId : c.name}
                       onOpen={onOpen}
                       onAdd={onAdd}
+                      onRemove={onRemove}
                       checked={selected.has(c.name)}
                       onToggle={() => onToggle(c.name)}
                     />
@@ -639,8 +648,21 @@ export default function FirmCandidatesScreen({
     const { values, trouble: t } = await listEntries()
     setTrouble(t)
     const authored = new Set(candidates.map((c) => c.name))
-    setLive(values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry))
+    const rowsLive = values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry)
+    /* "New" is the latest arrival only: the pill moves on when somebody newer
+       comes in. */
+    const newest = rowsLive.reduce<LiveCandidate | null>((a, c) => (!a || c.at > a.at ? c : a), null)
+    setLive(rowsLive.map((c) => ({ ...c, isNew: c === newest })))
   }, [])
+  /* Removing a sitting: asked once, since it throws its answers away. */
+  const [removing, setRemoving] = useState<LiveCandidate | null>(null)
+  const remove = async (c: LiveCandidate) => {
+    setRemoving(null)
+    const t = await deleteEntry(c.entryId)
+    if (!t && c.token) await deleteInvite(c.token)
+    setTrouble(t)
+    void loadLive()
+  }
   useEffect(() => {
     void loadLive()
   }, [loadLive])
@@ -699,6 +721,34 @@ export default function FirmCandidatesScreen({
       {/* The real invite, in the same modal the advisor dashboards open: a link
           to the advisor flow, sent under a brand, whose sitting lands in this
           table when it is answered. */}
+      {removing && (
+        <div className="modal-backdrop" onClick={() => setRemoving(null)} role="alertdialog" aria-modal="true" aria-labelledby="fc-remove-title">
+          <div className="modal fc-remove-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title" id="fc-remove-title">
+                Remove {removing.name}?
+              </h2>
+              <button className="modal-close" type="button" aria-label="Close" onClick={() => setRemoving(null)}>
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="fc-remove-note">
+                Their answers leave the pipeline{removing.token ? ' and their link stops working' : ''}. This
+                can’t be undone.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" type="button" autoFocus onClick={() => setRemoving(null)}>
+                Keep
+              </button>
+              <button className="btn btn-primary fc-remove-yes" type="button" onClick={() => void remove(removing)}>
+                Remove entry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {inviting && (
         <InviteAdvisorModal onClose={() => setInviting(false)} onDone={loadLive} onTrouble={setTrouble} />
       )}
@@ -707,6 +757,7 @@ export default function FirmCandidatesScreen({
       <Table
         rows={rows}
         onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
+        onRemove={setRemoving}
         onAdd={onAdd}
         selected={selected}
         onToggle={toggle}

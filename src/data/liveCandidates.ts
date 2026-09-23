@@ -19,6 +19,10 @@ export interface LiveCandidate extends Candidate {
   /** How far through the flow they are, for a row still unfinished. */
   answered: number
   total: number
+  /** The invite it came through, if any: removing the person removes it too. */
+  token: string | null
+  /** When it was last written — the newest one wears the "new" pill. */
+  at: string
 }
 
 const STAGE: Record<string, Stage> = {
@@ -47,6 +51,8 @@ export function candidateFromEntry(e: Entry): LiveCandidate {
     entryId: e.id,
     answered: e.answered,
     total: e.total,
+    token: e.token,
+    at: e.at,
     name: e.name || 'Advisor',
     firm: [e.role, e.firm].filter(Boolean).join(' · ') || '—',
     kq: scored ? d.readiness.snapshot.kq : null,
@@ -65,6 +71,5 @@ export function candidateFromEntry(e: Entry): LiveCandidate {
     progress: done ? 'completed' : 'started',
     topAction: scored ? d.toolkit.topAction : `Finish the flow — ${e.answered} of ${e.total} answered.`,
     tier: scored ? tierOf(d.readiness.snapshot.kq) : 'incomplete',
-    isNew: true,
   }
 }
