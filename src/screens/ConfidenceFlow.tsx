@@ -10,12 +10,13 @@
  * started, records a sample answer so a demo can be clicked straight through.
  */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './confidenceFlow.css'
 import { confidenceAnswers } from '../data/financialId'
-import { ConfidenceResults, Gauge } from './profileParts'
+import { Gauge } from './profileParts'
+import { AboutOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
@@ -55,6 +56,16 @@ export const confidenceReading = (values: number[]) => {
   const mean = values.reduce((a, b) => a + b, 0) / Math.max(1, values.length)
   return mean < 40 ? 'Weak' : mean < 70 ? 'Moderate' : 'Strong'
 }
+
+/* A statement said inside a sentence: "I believe I can…" becomes "you
+   believe you can…". */
+const lower = (st: string) =>
+  st
+    .replace(/^I’m /, 'you’re ')
+    .replace(/^I /, 'you ')
+    .replace(/\bmy\b/g, 'your')
+    .replace(/\bI\b/g, 'you')
+    .replace(/\bme\b/g, 'you')
 
 /* What the reading means, in a line. */
 const MEANS: Record<string, string> = {
@@ -129,13 +140,26 @@ type Step = 'intro' | number | 'results' | 'badge'
 export default function ConfidenceFlow({
   reward,
   onComplete,
+  review,
 }: {
+  /** Her answers, to open straight on the ending with. */
+  review?: ConfidenceAnswers
   reward: { before: number; after: number; total: number; next: string }
   onComplete: (a: ConfidenceAnswers) => void
 }) {
   const n = CONFIDENCE_STATEMENTS.length
-  const [step, setStep] = useState<Step>('intro')
-  const [values, setValues] = useState<(number | null)[]>(() => CONFIDENCE_STATEMENTS.map(() => null))
+  const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  /* The ending's overlay: said once a moment after it arrives, as Financial
+     Joy's is, and again from "Learn more". */
+  const [about, setAbout] = useState(false)
+  useEffect(() => {
+    if (step !== 'results') return
+    const t = window.setTimeout(() => setAbout(true), 700)
+    return () => window.clearTimeout(t)
+  }, [step])
+  const [values, setValues] = useState<(number | null)[]>(() =>
+    review ? review.values : CONFIDENCE_STATEMENTS.map(() => null),
+  )
   /* Which way the last move went, so a statement slides in from that side. */
   const dir = useRef<1 | -1>(1)
 
@@ -162,6 +186,9 @@ export default function ConfidenceFlow({
 
   const settled = values.map((x, i) => x ?? CONFIDENCE_STATEMENTS[i].sample)
   const reading = confidenceReading(settled)
+  /* Her strongest and her softest, for the flags and the line under them. */
+  const high = settled.indexOf(Math.max(...settled))
+  const low = settled.indexOf(Math.min(...settled))
 
   return (
     <div className="jf cf">
@@ -210,32 +237,107 @@ export default function ConfidenceFlow({
       )}
 
       {step === 'results' && (
-        <div className="cf-results">
-          <h2 className="jr-title">Your confidence</h2>
-          <p className="jr-sub">How you feel about your money today:</p>
-          <div className="cf-reading">
-            <span className="cf-gauge">
-              <Gauge label={reading} />
-            </span>
-            <b className="cf-word">{reading}</b>
-            <p className="cf-means">{MEANS[reading]}</p>
-          </div>
-          <h3 className="jr-h">What you said</h3>
-          <ConfidenceResults
-            open
-            answers={CONFIDENCE_STATEMENTS.map((s, i) => ({
-              statement: s.statement,
-              value: settled[i],
-              low: s.low,
-              high: s.high,
-            }))}
-          />
-          <div className="jr-reward cf-reward">
+        <div className="jr cfr">
+          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+            Learn more
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+              <circle cx="8" cy="8" r="7" fill="currentColor" />
+              <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+              <circle cx="8" cy="4.7" r="1" fill="#fff" />
+            </svg>
+          </button>
+          {about && (
+            <AboutOverlay
+              title="Money confidence matters!"
+              share={21}
+              onClose={() => setAbout(false)}
+              first={
+                <>
+                  <b>
+                    <CountUp to={21} />%
+                  </b>{' '}
+                  of US adults are <b>confident</b> in budgeting, saving, and investing.
+                </>
+              }
+              second={
+                <>
+                  <p>
+                    Pew Research says that only <b>27%</b> of Americans are <b>confident</b> in their
+                    ability to create an investment plan to build wealth.
+                  </p>
+                  <p>
+                    <b>Knowing your confidence</b> is a powerful insight.
+                  </p>
+                </>
+              }
+            />
+          )}
+          <Reveal>
+            <h2 className="jr-title">You found your confidence</h2>
+            <p className="jr-sub">This is how you feel about your money today:</p>
+            {/* The reading as the picture: a warm sky that keeps moving, and on
+                it the Financial ID's own confidence row — her word and the dial,
+                its needle swinging round to where she landed. */}
+            <figure className="jr-memory cfr-hero">
+              <span className="jr-sky cfr-sky" aria-hidden>
+                <i className="jr-sun" />
+                <i className="jr-glow jr-glow-a" />
+                <i className="jr-glow jr-glow-b" />
+                <i className="jr-glow jr-glow-c" />
+              </span>
+              <div className="pp-confidence cfr-dial">
+                <span className="pp-confidence-label">{reading}</span>
+                <span className="cfr-gauge">
+                  <Gauge label={reading} />
+                </span>
+              </div>
+              <blockquote className="jr-words cfr-means">
+                <Typed text={MEANS[reading]} />
+              </blockquote>
+              <figcaption className="jr-tag">Your confidence</figcaption>
+            </figure>
+          </Reveal>
+
+          <Reveal>
+            <h3 className="jr-h">What you said</h3>
+            <p className="jr-sub">Where you left each one:</p>
+            <div className="cfr-answers">
+              {CONFIDENCE_STATEMENTS.map((st, i) => (
+                <div
+                  className={`cfr-answer${i === high ? ' is-high' : ''}${i === low ? ' is-low' : ''}`}
+                  key={st.statement}
+                  style={{ ['--i' as string]: i, ['--v' as string]: settled[i] }}
+                >
+                  {i === high && <span className="cfr-flag">Your strongest</span>}
+                  {i === low && <span className="cfr-flag">Where to start</span>}
+                  <p>{st.statement}</p>
+                  <span className="cfr-track">
+                    <i className="cfr-fill" />
+                    <img className="cfr-sun" src={icConfidence} alt="" />
+                  </span>
+                  <span className="cfr-ends">
+                    <span>{st.low}</span>
+                    <span>{st.high}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* What it adds up to: the line a conversation can open with. */}
+            <p className="jr-reading">
+              <span className="jr-reading-mark" aria-hidden>
+                ✦
+              </span>
+              You feel most sure that {lower(CONFIDENCE_STATEMENTS[high].statement)} You feel least sure
+              that {lower(CONFIDENCE_STATEMENTS[low].statement)} That is where your advisor will start.
+            </p>
+          </Reveal>
+
+          <Reveal className="jr-reward">
             <p className="jr-reward-line">You got a reward!</p>
             <button className="jr-claim" type="button" onClick={() => go('badge')}>
               <span>Claim Badge</span>
             </button>
-          </div>
+          </Reveal>
         </div>
       )}
 

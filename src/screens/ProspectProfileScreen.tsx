@@ -67,7 +67,10 @@ export default function ProspectProfileScreen({
   onStartFlowDone,
   checkIn,
   fresh,
+  onOpenEnding,
 }: {
+  /** A completed adventure's heading, tapped: its ending screen again. */
+  onOpenEnding?: (id: string) => void
   /** Her phone as a new client's: nothing on the page until an adventure has
       put it there. `joy` is what Financial Joy handed back, once it has. */
   fresh?: { joy: JoyAnswers | null; done?: Record<string, string>; conf?: ConfidenceAnswers | null }
@@ -390,7 +393,22 @@ export default function ProspectProfileScreen({
 
                   <section className={`pp-card${has.joy ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
+                      {fresh && has.joy && onOpenEnding ? (
+                        <button
+                          type="button"
+                          className="pp-card-title pp-card-title-link"
+                          onClick={() => onOpenEnding('financial-joy')}
+                          aria-label="Financial Joy — see your results again"
+                        >
+                          <img className="pp-card-ic" src={icFinancialJoy} alt="" />
+                          Financial Joy
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
+                      )}
                       {has.joy && <DateSelect />}
                     </div>
                     {!has.joy && <p className="pp-waiting">Complete the Financial Joy adventure</p>}
@@ -520,7 +538,22 @@ export default function ProspectProfileScreen({
                 <div className="pp-rail">
                   <section className={`pp-card${has.confidence ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
+                      {fresh && has.confidence && onOpenEnding ? (
+                        <button
+                          type="button"
+                          className="pp-card-title pp-card-title-link"
+                          onClick={() => onOpenEnding('confidence')}
+                          aria-label="Confidence — see your results again"
+                        >
+                          <img className="pp-card-ic" src={icConfidence} alt="" />
+                          Confidence
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
+                      )}
                       {has.confidence && <DateSelect />}
                     </div>
                     {!has.confidence && <p className="pp-waiting">Complete the Confidence adventure</p>}
