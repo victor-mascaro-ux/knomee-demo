@@ -17,7 +17,8 @@
 
 import { useState } from 'react'
 import './joyFlow.css'
-import { JOY_AREAS, joySteps } from '../data/joyFlow'
+import { JOY_AREAS, JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
+import JoySwipe from './JoySwipe'
 import bgFinancialJoy from '../assets/badges/financial-joy.svg'
 
 export interface JoyAnswers {
@@ -76,12 +77,6 @@ export default function JoyFlow({
     setA((prev) => ({
       ...prev,
       tools: prev.tools.includes(o) ? prev.tools.filter((t) => t !== o) : [...prev.tools, o],
-    }))
-
-  const setAttention = (name: string, v: number) =>
-    setA((prev) => ({
-      ...prev,
-      attention: { ...prev.attention, [name]: prev.attention[name] === v ? 0 : v },
     }))
 
   const noteIndex = joySteps.slice(0, at).filter((s) => s.kind === 'reflect').length
@@ -175,60 +170,25 @@ export default function JoyFlow({
       )}
 
       {step.kind === 'split' && (
-        <div className="af-q jf-split">
-          <div className="af-eyebrow">{step.eyebrow}</div>
+        <div className="jf-split">
           <div className="jf-count">
-            {area + 1}/{JOY_AREAS.length}
+            {Math.min(area + 1, JOY_AREA_CARDS.length)} / {JOY_AREA_CARDS.length}
           </div>
-          <h2 className="af-h2">{JOY_AREAS[area]}</h2>
-          <p className="af-body">Would you like this to take less of you, or more?</p>
-          {/* Less and more, as the two things they are: the same size, either
-              side of the area they are about. */}
-          <div className="jf-split-controls">
-            <button
-              type="button"
-              className={`jf-way jf-less ${a.attention[JOY_AREAS[area]] === -1 ? 'is-on' : ''}`}
-              aria-pressed={a.attention[JOY_AREAS[area]] === -1}
-              onClick={() => setAttention(JOY_AREAS[area], -1)}
-            >
-              <span aria-hidden>−</span>
-              Less
-            </button>
-            <button
-              type="button"
-              className={`jf-way jf-more ${a.attention[JOY_AREAS[area]] === 1 ? 'is-on' : ''}`}
-              aria-pressed={a.attention[JOY_AREAS[area]] === 1}
-              onClick={() => setAttention(JOY_AREAS[area], 1)}
-            >
-              <span aria-hidden>+</span>
-              More
-            </button>
-          </div>
-          <div className="jf-areas">
-            <button
-              type="button"
-              className="jf-arrow"
-              aria-label="The area before this one"
-              disabled={area === 0}
-              onClick={() => setArea((n) => Math.max(0, n - 1))}
-            >
-              ‹
-            </button>
-            <span className="jf-dots" aria-hidden>
-              {JOY_AREAS.map((name, i) => (
-                <i key={name} className={i === area ? 'is-on' : a.attention[name] ? 'is-done' : ''} />
-              ))}
-            </span>
-            <button
-              type="button"
-              className="jf-arrow"
-              aria-label="The next area"
-              disabled={area === JOY_AREAS.length - 1}
-              onClick={() => setArea((n) => Math.min(JOY_AREAS.length - 1, n + 1))}
-            >
-              ›
-            </button>
-          </div>
+          <p className="jf-split-ask">
+            Would you like to direct <b className="is-more">more</b>,{' '}
+            <b className="is-same">the same</b>, or <b className="is-less">less</b> of your
+            attention to…
+          </p>
+          <JoySwipe
+            areas={JOY_AREA_CARDS}
+            at={area}
+            onAnswer={(name, way) => {
+              setA((prev) => ({ ...prev, attention: { ...prev.attention, [name]: way } }))
+              /* The last card thrown is the question answered. */
+              if (area + 1 >= JOY_AREA_CARDS.length) next()
+              else setArea(area + 1)
+            }}
+          />
         </div>
       )}
 

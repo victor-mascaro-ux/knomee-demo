@@ -71,106 +71,235 @@
   color: var(--text-strong);
 }
 
-/* ── where the attention goes ──
-   One area to a screen, with the two directions the same size: neither is the
-   recommended answer. */
+/* ── where the attention goes: a deck ──
+   Thrown right for more, left for less, down for the same. The three answers
+   keep one colour each, in the question, on the tint a leaning card wears, and
+   on their buttons. */
 .jf-split {
-  text-align: left;
+  --way-less: var(--k-crimson);
+  --way-same: var(--k-azure);
+  --way-more: var(--k-teal-deep);
+  padding-top: var(--space-16);
+  display: flex;
+  flex-direction: column;
 }
 .jf-count {
-  margin-top: var(--space-8);
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
 }
-.jf-split-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-12);
-  margin-top: var(--space-24);
+.jf-split-ask {
+  margin: 2px 0 0;
+  font-size: var(--text-lg);
+  line-height: 1.4;
+  color: var(--text-strong);
 }
-.jf-way {
+.jf-split-ask .is-more {
+  color: var(--way-more);
+}
+.jf-split-ask .is-same {
+  color: var(--way-same);
+}
+.jf-split-ask .is-less {
+  color: var(--way-less);
+}
+
+.js {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-16) var(--space-12);
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-2xl);
-  background: var(--surface-card);
-  font: inherit;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--text-strong);
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out);
-}
-.jf-way span {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-circle);
-  background: var(--surface-sunken);
-  font-size: 26px;
-  line-height: 1;
-}
-.jf-less.is-on {
-  border-color: var(--k-crimson);
-  background: var(--k-crimson-light);
-}
-.jf-less.is-on span {
-  background: var(--k-crimson);
-  color: #fff;
-}
-.jf-more.is-on {
-  border-color: var(--k-grape);
-  background: var(--k-grape-light);
-}
-.jf-more.is-on span {
-  background: var(--k-grape);
-  color: #fff;
-}
-
-/* Which of the seven this is, and the way between them. */
-.jf-areas {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
+  gap: var(--space-24);
   margin-top: var(--space-24);
 }
-.jf-arrow {
-  width: 40px;
-  height: 40px;
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-circle);
-  background: var(--surface-card);
-  font-size: 22px;
-  line-height: 1;
-  color: var(--text-strong);
-  cursor: pointer;
+/* The deck: the card on top, two under it stepping down and in, and — while
+   more are left — a few edges under those, the way a pile of cards looks. */
+.js-deck {
+  position: relative;
+  width: 86%;
+  aspect-ratio: 300 / 352;
 }
-.jf-arrow:disabled {
-  opacity: 0.35;
+.js-deck.has-more::after {
+  content: '';
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: -14px;
+  height: 14px;
+  border-radius: 0 0 14px 14px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #e6e6ea 0 3px,
+    #fff 3px 4px
+  );
+  box-shadow: 0 4px 10px rgba(20, 10, 40, 0.12);
+}
+.js-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 0;
+  border-radius: 14px;
+  background: #eeeef0;
+  box-shadow: 0 1px 2px rgba(20, 10, 40, 0.08), 0 10px 24px rgba(20, 10, 40, 0.16);
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.2, 1.1, 0.4, 1);
+  will-change: transform;
+}
+.js-depth-0 {
+  z-index: 3;
+  cursor: grab;
+}
+.js-depth-0:active {
+  cursor: grabbing;
+}
+/* The two underneath, stepped down and narrowed: when the top is thrown each
+   rises into the place of the one above it. */
+.js-depth-1 {
+  z-index: 2;
+  transform: translateY(8px) scale(0.965);
+}
+.js-depth-2 {
+  z-index: 1;
+  transform: translateY(16px) scale(0.93);
+}
+.js-photo {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #d9d9de;
+}
+.js-photo img,
+.js-photo-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+.js-photo-fallback {
+  background: linear-gradient(135deg, var(--k-teal-light), var(--k-grape-light));
+}
+.js-name {
+  padding: var(--space-16) var(--space-8) var(--space-20);
+  font-size: 24px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-strong);
+}
+/* Leaning: the card takes the colour of where it is heading, stronger the
+   further it has gone, and says the word in its corner. */
+.js-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--lean-color, transparent);
+  opacity: calc(var(--lean, 0) * 0.28);
+  transition: opacity 0.12s linear;
+}
+.js-card.is-lean-more {
+  --lean-color: var(--way-more);
+}
+.js-card.is-lean-less {
+  --lean-color: var(--way-less);
+}
+.js-card.is-lean-same {
+  --lean-color: var(--way-same);
+}
+.js-stamp {
+  position: absolute;
+  top: 26px;
+  z-index: 1;
+  padding: 4px 12px;
+  border: 3px solid currentColor;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 18px;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: scale(0.8) rotate(-10deg);
+  transition: opacity 0.14s ease, transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.js-card.is-lean-more .js-stamp {
+  left: 26px;
+  color: var(--way-more);
+  opacity: 1;
+  transform: scale(1) rotate(-10deg);
+}
+.js-card.is-lean-less .js-stamp {
+  right: 26px;
+  color: var(--way-less);
+  opacity: 1;
+  transform: scale(1) rotate(10deg);
+}
+.js-card.is-lean-same .js-stamp {
+  left: 50%;
+  top: auto;
+  bottom: 90px;
+  color: var(--way-same);
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* The three answers as filled discs — solid, the design system's way of
+   saying "press this" — each in its answer's colour with the mark in white. */
+.js-ways {
+  display: flex;
+  justify-content: space-between;
+  width: 86%;
+}
+.js-way {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-circle);
+  color: var(--text-inverse);
+  cursor: pointer;
+  box-shadow: 0 6px 16px -4px rgba(20, 10, 40, 0.35);
+  transition: transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.18s ease, filter 0.16s ease;
+}
+.js-way.is-less {
+  background: var(--way-less);
+}
+.js-way.is-same {
+  background: var(--way-same);
+}
+.js-way.is-more {
+  background: var(--way-more);
+}
+.js-way:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 22px -6px rgba(20, 10, 40, 0.4);
+}
+.js-way:active {
+  transform: scale(0.92);
+  box-shadow: 0 3px 8px -2px rgba(20, 10, 40, 0.35);
+}
+/* The card is heading its way: the button it would press swells. */
+.js-way.is-lean {
+  transform: scale(1.14);
+}
+.js-way:disabled {
   cursor: default;
 }
-.jf-dots {
-  display: flex;
-  gap: var(--space-6);
-}
-.jf-dots i {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-circle);
-  background: var(--border-default);
-}
-.jf-dots i.is-done {
-  background: var(--k-grape-light);
-}
-.jf-dots i.is-on {
-  background: var(--k-grape);
+@media (prefers-reduced-motion: reduce) {
+  .js-card,
+  .js-card::after,
+  .js-stamp,
+  .js-way {
+    transition: none;
+  }
 }
 
 /* ── a memory, in their words ── */
