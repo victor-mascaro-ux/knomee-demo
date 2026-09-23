@@ -29,7 +29,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 const picks = (labels: string[]): Pick[] => labels.map((label) => ({ label, src: `./future-you/${slug(label)}.png` }))
 
 const WHERE = picks(['At the beach', 'In the mountains', 'In a big city', 'In a suburb', 'In the country', 'Abroad'])
-const DOING = picks(['Relaxing', 'Creative pursuits', 'Running a business', 'Traveling', 'Helping others', 'Learning'])
+const DOING = picks(['Relaxing', 'Creative pursuits', 'Running a business', 'Traveling', 'Helping others', 'Socializing'])
 const WITH = picks(['Family', 'Friends', 'A larger group', 'Solo', 'A romantic partner', 'Business partners'])
 /* Each photograph's angle on the table: loose, never the same twice in a row. */
 const TILT = [-6, 4, -3, 7, -8, 2, 5, -4, 3, -7, 6, -2]
