@@ -607,7 +607,7 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
       worthIt: said('mv-q8', a),
       challenging: said('mv-q9', a),
       stakeholders: chosen('mv-q10', a).join(' · '),
-      hardest: said('mv-q10b', a),
+      blocker: said('mv-q10b', a),
     },
     badges: advisorAdventures.filter((r) => adventureDone(r.id, a)).map((r) => r.title),
     questions: themes.slice(0, 3).map((k) => THEME_QUESTIONS[k].question),
@@ -673,8 +673,9 @@ function apprehensions(a: Answers) {
   for (const fragment of hard.slice(0, Math.max(0, 4 - out.length))) {
     out.push({ title: sentence(fragment), body: 'Named among what makes the move hard.' })
   }
-  const hardest = said('mv-q10b', a)
-  if (hardest && out.length < 4) out.push({ title: 'The person hardest to bring along', body: hardest })
+  const blocker = said('mv-q10b', a)
+  if (blocker && out.length < 4)
+    out.push({ title: 'What is holding the decision', body: blocker })
   return out
 }
 
@@ -694,7 +695,7 @@ function velocity(a: Answers, intent: number, id: BusinessId) {
     )
   if (picked('mv-q7', a)) points.push(`Action taken so far: “${picked('mv-q7', a)}”`)
   if (picked('mv-q6', a)) points.push(`On what the steps even are: “${picked('mv-q6', a)}”`)
-  if (id.move.hardest) points.push(`Hardest to bring along — ${firstSentence(id.move.hardest, 160)}`)
+  if (id.move.blocker) points.push(`Holding the decision — ${firstSentence(id.move.blocker, 160)}`)
   return {
     title: 'How Quickly Will This Advisor Move?',
     verdict,
@@ -762,11 +763,11 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
       why: 'Their own sentence, back. It makes the meeting their agenda before it is the firm’s.',
       tags: ['Acknowledge and Validate'],
     })
-  const hardest = said('mv-q10b', a)
-  if (hardest)
+  const blocker = said('mv-q10b', a)
+  if (blocker)
     out.push({
-      quote: `You said the hardest person to bring along is this — ${quoted(hardest, 130)} What would they need to see?`,
-      why: 'The blocker they have not tested. Their answer tells you which meeting you are actually in.',
+      quote: `You said this is what is holding the decision — ${quoted(blocker, 130)} What would settle it?`,
+      why: 'The one thing standing between them and a decision. Their answer tells you which meeting you are actually in.',
       tags: ['Demonstrate Curiosity'],
     })
   else if (themes[0])
