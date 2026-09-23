@@ -192,16 +192,16 @@
 .ol-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-8);
+  gap: var(--space-10) var(--space-8);
 }
 .ol-chip {
-  padding: 7px 14px;
-  border: 1.5px solid var(--text-strong);
-  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  border: 2.5px solid var(--k-plum);
+  border-radius: 16px;
   background: var(--surface-card);
   font: inherit;
-  font-size: var(--text-sm);
-  color: var(--text-strong);
+  font-size: var(--text-base);
+  color: var(--k-plum);
   cursor: pointer;
   animation: jrDeal 0.35s cubic-bezier(0.2, 1.2, 0.4, 1) both;
   animation-delay: calc(var(--i) * 0.04s);

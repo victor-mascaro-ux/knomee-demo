@@ -27,29 +27,30 @@ export interface OutlookAnswers {
   hopes: string[]
 }
 
-/* Things people say, to start from: tapping one puts it in the box to finish
-   in their own words. */
+/* The design's prompts: the start of a sentence, to finish in their own
+   words. Tapping one puts it in the box without its dots. */
 const CONCERN_STARTS = [
-  'Health',
-  'Paying for college',
-  'Losing my job',
-  'Caring for my parents',
-  'The market',
-  'Not saving enough',
-  'Debt',
-  'What if I get sick?',
-  'Retiring on time',
+  'I feel…',
+  'I worry about…',
+  'How will I…',
+  'Can I afford to…',
+  'What happens if…',
+  'I’m struggling with…',
+  'What if I face…',
+  'When will I be able to…',
+  'I want to…',
 ]
 const HOPE_STARTS = [
-  'Retire early',
-  'Travel more',
-  'A home by the water',
-  'My kids thriving',
-  'Giving back',
-  'More time with family',
-  'Start a business',
-  'Peace of mind',
+  'I dream of…',
+  'I hope to…',
+  'I can’t wait to…',
+  'Someday I’ll…',
+  'I’d love to…',
+  'My perfect day…',
+  'I’m excited about…',
+  'I want to…',
 ]
+const stem = (c: string) => c.replace(/…$/, '')
 
 /* The samples a demo types in, and OK records: her authored answers. */
 export const SAMPLE_OUTLOOK: OutlookAnswers = {
@@ -195,18 +196,23 @@ function Ask({
         )}
       </h2>
       <p className="ol-note">
-        {concern ? 'Start from one of these, or say it your way.' : 'Big or small — whatever you are looking forward to.'}
+        Use the prompts to help you start.
       </p>
       <div className="ol-chips">
         {starts.map((c, i) => (
           <button
             key={c}
             type="button"
-            className={`ol-chip${text.startsWith(c) ? ' is-on' : ''}`}
+            className={`ol-chip${text.startsWith(stem(c)) ? ' is-on' : ''}`}
             style={{ ['--i' as string]: i }}
             onClick={() => {
-              setText(c.endsWith('?') ? c : `${c} `)
-              box.current?.focus()
+              setText(`${stem(c)} `)
+              const el = box.current
+              if (el) {
+                el.focus()
+                /* The cursor waits at the end, ready for the rest. */
+                requestAnimationFrame(() => el.setSelectionRange(el.value.length, el.value.length))
+              }
             }}
           >
             {c}
@@ -218,7 +224,7 @@ function Ask({
         className="jf-note ol-box"
         rows={3}
         value={text}
-        placeholder={concern ? 'What keeps you up at night?' : 'What are you looking forward to?'}
+        placeholder={concern ? 'Can I afford to retire in 10 years?' : 'I dream of a home by the water.'}
         onChange={(e) => setText(e.target.value)}
         onDoubleClick={(e) => {
           if (!e.currentTarget.value.trim()) typeIn()
