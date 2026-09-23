@@ -72,6 +72,15 @@ export default function JoyFlow({
   const step = joySteps[at]
 
   const next = () => setAt((n) => Math.min(n + 1, joySteps.length - 1))
+  /* One question back. Inside the deck that is the card before this one, put
+     back on top to be sorted again; out of it, the screen before — and a deck
+     come back to opens on its last card, the one answered last. */
+  const previous = () => {
+    if (step.kind === 'split' && area > 0) return setArea(area - 1)
+    const to = Math.max(0, at - 1)
+    if (joySteps[to]?.kind === 'split') setArea(JOY_AREA_CARDS.length - 1)
+    setAt(to)
+  }
 
   const toggleTool = (o: string) =>
     setA((prev) => ({
@@ -264,11 +273,26 @@ export default function JoyFlow({
           again. The intro carries its own Get Started, so it has no foot. */}
       {step.kind !== 'intro' && (
         <div className="jf-foot">
-          {/* Where you are, then the one thing to press, on one line. */}
-          <div className="af-progress" aria-hidden>
-            {joySteps.slice(1).map((_, i) => (
-              <i key={i} className={i < at ? 'is-on' : ''} />
-            ))}
+          {/* Where you are, and under it the way one question back; then the
+              one thing to press. */}
+          <div className="jf-where">
+            <div className="af-progress" aria-hidden>
+              {joySteps.slice(1).map((_, i) => (
+                <i key={i} className={i < at ? 'is-on' : ''} />
+              ))}
+            </div>
+            <button className="jf-prev" type="button" onClick={previous}>
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
+                <path
+                  d="M10 3.5 5.5 8 10 12.5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Previous question
+            </button>
           </div>
           <button className="cx-start jf-ok" type="button" onClick={onCta}>
             {cta}
