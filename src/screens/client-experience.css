@@ -317,40 +317,53 @@
   transform: scaleX(0);
   transform-origin: left;
 }
+/* One after the other at one even speed, each starting the moment the one
+   before it is full, so the five read as one bar filling. */
 .cx-progress-seg.is-on i {
-  animation: cxSegFill 0.45s cubic-bezier(0.3, 0.9, 0.35, 1) both;
-  animation-delay: calc(0.15s + var(--i) * 0.14s);
+  animation: cxSegFill 0.3s linear both;
+  animation-delay: calc(0.2s + var(--order, 0) * 0.3s);
 }
 @keyframes cxSegFill {
   to {
     transform: scaleX(1);
   }
 }
-/* A light running across what is done, every nine seconds or so. */
-.cx-progress-seg.is-on::after {
+/* The light: one band over everything done, gliding from its start to its
+   end with an ease in and out, every nine seconds. */
+.cx-progress-track {
+  position: relative;
+}
+.cx-progress-shine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cx-progress-shine::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.75) 50%, transparent 80%);
-  transform: translateX(-120%);
-  animation: cxSegShine 9s ease-in-out infinite;
-  /* Phase-locked to the wall clock (see MeterSeg), each a beat behind the
-     one before so the light travels along the bar. */
-  animation-delay: calc(var(--sync, 0ms) + var(--i) * 0.12s);
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 45%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.55) 55%, transparent 70%);
+  transform: translateX(-100%);
+  animation: cxShine 9s cubic-bezier(0.45, 0, 0.25, 1) 2s infinite;
 }
-@keyframes cxSegShine {
+@keyframes cxShine {
   0% {
-    transform: translateX(-120%);
+    transform: translateX(-100%);
   }
-  13%,
+  22%,
   100% {
-    transform: translateX(120%);
+    transform: translateX(100%);
   }
 }
+
 /* The segment she reached last glows at its edge. */
 .cx-progress-seg.is-last {
   animation: cxSegGlow 0.6s ease-out both;
-  animation-delay: calc(0.5s + var(--i) * 0.14s);
+  animation-delay: calc(0.5s + var(--order, 0) * 0.3s);
 }
 @keyframes cxSegGlow {
   to {
@@ -389,7 +402,7 @@
   .cx-progress-seg:not(.is-on) i {
     transform: scaleX(0);
   }
-  .cx-progress-seg::after,
+  .cx-progress-shine::after,
   .cx-progress.is-full .cx-progress-track {
     animation: none;
   }
@@ -1259,4 +1272,84 @@ svg.cx-tab-mark {
   .cx-adv-list > .cx-adv {
     animation: none;
   }
+}
+
+/* ── the adventure up next, laid out as a card of its own ──
+   Art top left in a raised white disc, the name and what it is beside it, the
+   time as a small lilac pill in the corner, and one full-width Start along the
+   bottom — the thing to do, the width of the thing. */
+.cx-adv.cx-adv-open {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'art main min'
+    'art act  act';
+  column-gap: 14px;
+  row-gap: 14px;
+  align-items: start;
+  padding: 16px 16px 16px;
+}
+.cx-adv-open .cx-adv-right {
+  display: contents;
+}
+.cx-adv-open .cx-adv-art {
+  grid-area: art;
+  width: 52px;
+  height: 52px;
+  margin-top: 0;
+  box-shadow:
+    0 0 0 3px rgba(185, 141, 220, 0.35),
+    0 6px 14px -4px rgba(36, 4, 70, 0.3);
+}
+.cx-adv-open .cx-adv-main {
+  grid-area: main;
+  padding-top: 2px;
+}
+.cx-adv-open .cx-adv-title {
+  font-size: 19px;
+  line-height: 1.2;
+}
+.cx-adv-open .cx-adv-blurb {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #4a4058;
+}
+.cx-adv-open .cx-adv-min {
+  grid-area: min;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(118, 57, 161, 0.12);
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  color: #5b2a86;
+  white-space: nowrap;
+}
+.cx-adv-open .cx-adv-min svg {
+  width: 12px;
+  height: 12px;
+}
+.cx-adv-open .cx-start {
+  grid-area: act;
+  justify-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: var(--text-lg);
+  box-shadow: 0 8px 18px -8px rgba(36, 4, 70, 0.6);
+}
+/* An arrow that leans forward when the card is pressed or hovered. */
+.cx-adv-open .cx-start::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8.5 4 12.5 8l-4 4' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8.5 4 12.5 8l-4 4' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 0.25s var(--ease-out);
+}
+.cx-adv-open:hover .cx-start::after,
+.cx-adv-open .cx-start:focus-visible::after {
+  transform: translateX(3px);
 }
