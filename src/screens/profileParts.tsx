@@ -732,6 +732,26 @@ export function EmptyFold({
   )
 }
 
+/* What was just done to a row, said on it: "New" on one just added,
+   "Updated" on one just saved. Other tags (Sensitive) stay beside it. */
+export function withTag<T extends { tags?: string[] }>(x: T, tag: 'New' | 'Updated'): T {
+  return { ...x, tags: [tag, ...(x.tags ?? []).filter((t) => t !== 'New' && t !== 'Updated')] }
+}
+
+/* A row's pills. */
+export function StatusTags({ tags }: { tags?: string[] }) {
+  if (!tags?.length) return null
+  return (
+    <span className="cp-goal-tags">
+      {tags.map((t) => (
+        <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
+          {t}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <button className="pp-head-toggle" type="button" aria-expanded={open} onClick={onToggle}>

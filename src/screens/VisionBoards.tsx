@@ -11,8 +11,9 @@
 import { useRef, useState } from 'react'
 import type { VisionBoard } from '../data/clientProfile'
 import AddVisionBoardModal from './AddVisionBoardModal'
+import VisionBoardEditor from './VisionBoardEditor'
 import { Board } from './ClientProfileScreen'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, withTag } from './profileParts'
 import icVision from '../assets/adventures/vision-board.svg'
 
 /* The boards, the panel, and the ways into it. `body` is the boards (or the
@@ -23,6 +24,8 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
      changed. */
   const [open, setOpen] = useState<'new' | number | null>(null)
   const add = () => setOpen('new')
+  /* The board being changed in place, if any. */
+  const [editingAt, setEditingAt] = useState<number | null>(null)
   /* The width the board is drawn at on the page, handed to the panel so the
      board being edited is laid out at exactly that width — the same columns,
      the same notes wrapping the same way — and only then shrunk to fit. */
@@ -34,9 +37,28 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
         <EmptyState art={EMPTY_ART.visionBoard} label="Make a Vision Board" cta onClick={add} />
       ) : (
         <div className="cp-boards">
-          {boards.map((b, i) => (
-            <Board board={b} key={`${i}:${b.title}`} onEdit={() => setOpen(i)} />
-          ))}
+          {boards.map((b, i) =>
+            /* Edit changes the board where it hangs, not in a panel. */
+            editingAt === i ? (
+              <VisionBoardEditor
+                key={`${i}:${b.title}:edit`}
+                board={b}
+                onCancel={() => setEditingAt(null)}
+                onSave={(nb) => {
+                  setBoards((bs) => bs.map((o, j) => (j === i ? withTag(nb, 'Updated') : o)))
+                  onToast?.('Vision board updated')
+                  setEditingAt(null)
+                }}
+                onDelete={() => {
+                  setBoards((bs) => bs.filter((_, j) => j !== i))
+                  onToast?.('Vision board deleted')
+                  setEditingAt(null)
+                }}
+              />
+            ) : (
+              <Board board={b} key={`${i}:${b.title}`} onEdit={() => setEditingAt(i)} />
+            ),
+          )}
         </div>
       )}
     </div>
@@ -51,7 +73,9 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
         onClose={() => setOpen(null)}
         onSave={(b) => {
           setBoards((bs) =>
-            typeof open === 'number' ? bs.map((o, i) => (i === open ? b : o)) : [...bs, b],
+            typeof open === 'number'
+              ? bs.map((o, i) => (i === open ? withTag(b, 'Updated') : o))
+              : [...bs, withTag(b, 'New')],
           )
           onToast?.(typeof open === 'number' ? 'Vision board updated' : 'Vision board saved')
           setOpen(null)

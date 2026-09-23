@@ -50,6 +50,8 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
 export const DEMO_TODAY = '06/12/2025'
 
 export interface Goal {
+  /** "New" when just added, "Updated" when just saved — a pill on its row. */
+  tags?: string[]
   title: string
   readiness: number // 1–5 bars
   completed?: string // date if the goal is done
@@ -69,6 +71,8 @@ export interface Goal {
 }
 
 export interface LifeEvent {
+  /** "New" when just added, "Updated" when just saved — a pill on its row. */
+  tags?: string[]
   /* The event the client picked — "Property purchase". The mobile picker files
      these under supercategories (Purchase / Professional / Personal), but those
      exist to help someone *find* the event in a long list; once one is chosen
@@ -88,6 +92,8 @@ export interface LifeEvent {
 }
 
 export interface ProfileQuestion {
+  /** "New" when just added, "Updated" when just saved — a pill on its row. */
+  tags?: string[]
   q: string
   date?: string
   resolved?: string

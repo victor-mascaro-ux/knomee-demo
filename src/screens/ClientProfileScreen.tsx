@@ -9,7 +9,7 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -127,9 +127,12 @@ function BoardPhoto({
   onResize,
   onRemove,
   lifted,
+  sized,
 }: {
   src: string
   alt: string
+  /** Sized by hand: her choice stands over the landscape rule. */
+  sized?: boolean
   tall?: boolean
   wide?: boolean
   style?: CSSProperties
@@ -151,7 +154,7 @@ function BoardPhoto({
      though: the rule is for the authored boards, not for overruling her. */
   const [landscape, setLandscape] = useState(false)
   const size: TileSize =
-    draft ?? (wide ? '2x1' : tall && (onResize || !landscape) ? '1x2' : '1x1')
+    draft ?? (wide ? '2x1' : tall && (sized || !landscape) ? '1x2' : '1x1')
 
   /* The drag is read in cells: the tile's size plus how far the handle has
      travelled, snapped to one cell or two on each axis. Past halfway on both is
@@ -423,8 +426,14 @@ export function Board({
   onRemove,
   onEdit,
   onMove,
+  head,
+  foot,
 }: {
   board: VisionBoard
+  /** A board being edited in place: what sits beside its title instead of
+      Edit (its Cancel and Save), and what closes the frame (the ways to add). */
+  head?: ReactNode
+  foot?: ReactNode
   /** A board being made: tiles are picked up and carried to a new place, and
       the board reorders under the pointer as they go. */
   onMove?: (from: number, to: number) => void
@@ -671,10 +680,21 @@ export function Board({
   }
 
   return (
-    <div className="cp-board">
-      {onEdit ? (
+    <div className={`cp-board${head ? ' is-editing' : ''}`}>
+      {head ? (
         <div className="cp-board-head">
-          <h4 className="cp-board-title">{board.title}</h4>
+          <h4 className="cp-board-title">
+            <StatusTags tags={board.tags} />
+            {board.title}
+          </h4>
+          <span className="cp-board-acts">{head}</span>
+        </div>
+      ) : onEdit ? (
+        <div className="cp-board-head">
+          <h4 className="cp-board-title">
+            <StatusTags tags={board.tags} />
+            {board.title}
+          </h4>
           <button type="button" className="cp-board-edit" onClick={onEdit}>
             <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
               <path
@@ -688,7 +708,10 @@ export function Board({
           </button>
         </div>
       ) : (
-        <h4 className="cp-board-title">{board.title}</h4>
+        <h4 className="cp-board-title">
+            <StatusTags tags={board.tags} />
+            {board.title}
+          </h4>
       )}
       <p className="cp-board-blurb">{board.blurb}</p>
       <div
@@ -706,6 +729,7 @@ export function Board({
               alt={t.alt}
               tall={t.tall}
               wide={t.wide}
+              sized={t.sized}
               style={spanOf(i)}
               onResize={onResize ? (size) => onResize(i, size) : undefined}
               onRemove={onRemove ? () => onRemove(i) : undefined}
@@ -722,6 +746,7 @@ export function Board({
           ),
         )}
       </div>
+      {foot}
     </div>
   )
 }
@@ -754,15 +779,7 @@ function GoalRow({
       }}
     >
       <div className="pp-goal-main">
-        {g.tags && g.tags.length > 0 && (
-          <span className="cp-goal-tags">
-            {g.tags.map((t) => (
-              <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
-                {t}
-              </span>
-            ))}
-          </span>
-        )}
+        <StatusTags tags={g.tags} />
         <span className="pp-goal-title">{g.title}</span>
         {g.completed && <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>}
       </div>
@@ -1285,6 +1302,7 @@ export default function ClientProfileScreen({
                         >
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
+                            <StatusTags tags={e.tags} />
                             <span className="pp-event-head">
                               <span className="pp-event-kind">{e.kind}</span>
                             </span>
@@ -1345,7 +1363,10 @@ export default function ClientProfileScreen({
                             if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
                           }}
                         >
-                          <span className="pp-q-text">{q.q}</span>
+                          <span className="pp-q-text">
+                            <StatusTags tags={q.tags} />
+                            {q.q}
+                          </span>
                           <span className="pp-q-date">
                             {q.resolved ? (
                               <>
@@ -1398,7 +1419,7 @@ export default function ClientProfileScreen({
           suggestions={cp.suggestedGoals}
           onClose={() => setAddingGoal(false)}
           onAdd={(g) => {
-            setGoalList((list) => [g, ...list])
+            setGoalList((list) => [withTag(g, 'New'), ...list])
             setAddingGoal(false)
             setOpenGoal(g.title)
             onToast?.('Goal added')
@@ -1417,7 +1438,7 @@ export default function ClientProfileScreen({
           goal={editing}
           onClose={() => setEditingGoal(null)}
           onAdd={(g) => {
-            setGoalList((list) => list.map((o) => (o === editing ? g : o)))
+            setGoalList((list) => list.map((o) => (o === editing ? withTag(g, 'Updated') : o)))
             setEditingGoal(null)
             setOpenGoal(g.title)
           }}
@@ -1451,7 +1472,8 @@ export default function ClientProfileScreen({
         <AddQuestionModal
           question={questionForm === 'edit' ? (openQuestion ?? undefined) : undefined}
           onClose={() => setQuestionForm(null)}
-          onSave={(q) => {
+          onSave={(saved) => {
+            const q = withTag(saved, questionForm === 'edit' ? 'Updated' : 'New')
             setQuestionList((list) =>
               questionForm === 'edit' && openQuestion
                 ? list.map((o) => (o === openQuestion ? q : o))
@@ -1489,7 +1511,8 @@ export default function ClientProfileScreen({
         <AddLifeEventModal
           event={eventForm === 'edit' ? (openEvent ?? undefined) : undefined}
           onClose={() => setEventForm(null)}
-          onSave={(e) => {
+          onSave={(saved) => {
+            const e = withTag(saved, eventForm === 'edit' ? 'Updated' : 'New')
             setEventList((list) =>
               eventForm === 'edit' && openEvent
                 ? list.map((o) => (o === openEvent ? e : o))
@@ -1511,7 +1534,7 @@ export default function ClientProfileScreen({
           onClose={() => setAssessing(null)}
           onSave={(readiness) => {
             setGoalList((list) =>
-              list.map((g) => (g === assessed ? { ...g, readiness, updated: DEMO_TODAY } : g)),
+              list.map((g) => (g === assessed ? withTag({ ...g, readiness, updated: DEMO_TODAY }, 'Updated') : g)),
             )
             setAssessing(null)
             setOpenGoal(assessed.title)

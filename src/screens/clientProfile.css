@@ -552,9 +552,8 @@
   box-shadow: var(--ring-focus);
 }
 /* A note's words keep clear of its cross. */
-.cp-tile-note.is-sizable .cp-note-inner {
-  padding-right: 18px;
-}
+/* No room is made for the cross: a note that wrapped differently in edit
+   mode claimed a second cell and the whole board rearranged under Edit. */
 .cp-tile-handle:focus-visible {
   outline: none;
   box-shadow: var(--ring-focus);
@@ -714,4 +713,40 @@
   grid-row: 2;
   justify-self: end;
   margin-top: var(--space-4);
+}
+
+/* Each board is a board: its own white card on the section's grey, framed
+   like something pinned up — and the same frame in the edit panel, so what is
+   being edited is the thing on the page. */
+.cp-board {
+  box-sizing: border-box;
+  padding: var(--space-16);
+  background: var(--surface-card, #fff);
+  border: var(--border-thin) solid var(--border-default, #e7e4ee);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px -10px rgba(36, 4, 70, 0.18);
+}
+
+/* "Updated" wherever a row can be saved — the prospect's page as well as the
+   client's — and the pill sits on its own line above what it marks. */
+.pp .cp-goal-tag.is-updated {
+  background: var(--k-mint);
+  color: var(--k-forest);
+}
+.pp-event-body > .cp-goal-tags,
+.pp-q-text > .cp-goal-tags,
+.cp-board-title > .cp-goal-tags {
+  display: flex;
+  width: fit-content;
+}
+/* An opened card says the same as its row: its pills above its title. */
+.modal-body > .cp-goal-tags,
+.card-pills {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: fit-content;
+}
+.card-pills > .cp-goal-tags {
+  margin-bottom: 0;
 }

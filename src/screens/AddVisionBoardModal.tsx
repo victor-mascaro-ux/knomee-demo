@@ -44,7 +44,7 @@ const TONES: { id: Tone; label: string }[] = [
   { id: 'lilac', label: 'Lilac' },
 ]
 
-const MicIcon = ({ size = 18 }: { size?: number }) => (
+export const MicIcon = ({ size = 18 }: { size?: number }) => (
   <svg viewBox="0 0 20 20" width={size} height={size} fill="none" aria-hidden>
     <rect x="7" y="2.5" width="6" height="10" rx="3" fill="currentColor" />
     <path
@@ -55,7 +55,7 @@ const MicIcon = ({ size = 18 }: { size?: number }) => (
     />
   </svg>
 )
-const PhotoIcon = () => (
+export const PhotoIcon = () => (
   <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden>
     <rect x="2.6" y="4" width="14.8" height="12" rx="2.2" stroke="currentColor" strokeWidth="1.6" />
     <circle cx="7.2" cy="8.3" r="1.5" fill="currentColor" />
@@ -67,7 +67,7 @@ const PhotoIcon = () => (
     />
   </svg>
 )
-const TextIcon = () => (
+export const TextIcon = () => (
   <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden>
     <path
       d="M4 5h12M10 5v11M7.4 16h5.2"
@@ -174,7 +174,7 @@ export default function AddVisionBoardModal({
     setTiles((ts) =>
       ts.map((t, j) =>
         j === i && t.kind === 'photo'
-          ? { ...t, wide: size === '2x1' || undefined, tall: size === '1x2' || undefined }
+          ? { ...t, wide: size === '2x1' || undefined, tall: size === '1x2' || undefined, sized: true }
           : t,
       ),
     )
@@ -424,7 +424,7 @@ function TonePicker({ tone, onChange }: { tone: Tone; onChange: (t: Tone) => voi
 }
 
 /* A sticker, typed: the words, and the paper they go on. */
-function TextComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCancel: () => void }) {
+export function TextComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCancel: () => void }) {
   const [text, setText] = useState('')
   const [tone, setTone] = useState<Tone>('mint')
   return (
@@ -457,7 +457,7 @@ function TextComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCa
 
 /* A sticker, said: it listens, streams what it heard, and hands the words
    over to be corrected before they go on the board as writing. */
-function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCancel: () => void }) {
+export function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCancel: () => void }) {
   const words = SPOKEN.split(' ')
   const [heard, setHeard] = useState(0)
   const [text, setText] = useState('')
@@ -523,7 +523,7 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
 
 /* Photographs to put on the board: the library, any number of them at once,
    and a way out to her own phone's pictures. */
-function PhotoPicker({
+export function PhotoPicker({
   onAdd,
   onUpload,
   onCancel,
