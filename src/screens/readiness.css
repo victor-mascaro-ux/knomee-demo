@@ -128,8 +128,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-12);
 }
-/* A side that scores more than four dimensions — the client's seven — takes a
-   fourth column, so seven cards read 4 + 3 rather than 3 + 3 + a widow. */
+/* A side that scores more than six dimensions takes a fourth column, so seven
+   cards read 4 + 3 rather than 3 + 3 + a widow; six stay 3 + 3. */
 .rd-dims-wide {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -212,6 +212,22 @@
   transform: translateY(0);
 }
 .rd-dims-wide .rd-dim:nth-child(4n).tt::before {
+  left: auto;
+  right: 24px;
+  transform: none;
+}
+
+/* And in three columns, every third card is the right-hand one. */
+.rd-dims:not(.rd-dims-wide) .rd-dim:nth-child(3n).tt::after {
+  left: auto;
+  right: 0;
+  transform: translateY(-3px);
+}
+.rd-dims:not(.rd-dims-wide) .rd-dim:nth-child(3n).tt:hover::after,
+.rd-dims:not(.rd-dims-wide) .rd-dim:nth-child(3n).tt:focus-visible::after {
+  transform: translateY(0);
+}
+.rd-dims:not(.rd-dims-wide) .rd-dim:nth-child(3n).tt::before {
   left: auto;
   right: 24px;
   transform: none;
@@ -833,4 +849,29 @@
 .rd-kit-main:has(.tt:hover),
 .rd-kit-rail:has(.tt:hover) {
   z-index: 40;
+}
+
+/* The action's first line centres on the icon, as the label does: a 20px line
+   set 3px down puts its middle at the icon's 13. */
+.rd-top-text {
+  padding-top: 3px;
+  line-height: 20px;
+}
+
+/* The score card runs the full height of the breakdown beside it, its dial
+   centred in that height, so the two columns end on the same line. */
+.rd-snapshot-body > .rd-kq {
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* The score in words, under its dial. */
+.rd-kq-verdict {
+  margin-top: var(--space-8);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--rd-wash, #e6f7f5);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
 }

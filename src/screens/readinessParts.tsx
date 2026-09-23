@@ -202,11 +202,27 @@ function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number 
   )
 }
 
+/* A score in words. KR reads a relationship; KQ (and anything else) reads
+   readiness to convert. */
+function verdictOf(v: number, abbr: string) {
+  if (abbr === 'KR') {
+    if (v >= 85) return 'Very strong'
+    if (v >= 70) return 'Strong'
+    if (v >= 50) return 'Building'
+    if (v >= 30) return 'Early days'
+    return 'Just starting'
+  }
+  if (v >= 85) return 'Very ready'
+  if (v >= 70) return 'Ready'
+  if (v >= 50) return 'Getting ready'
+  if (v >= 30) return 'Not ready yet'
+  return 'Far from ready'
+}
+
 export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string }) {
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
-  /* Three dimensions fit a row. A side that scores more of them — the client's
-     seven — takes four columns rather than a third row of one. */
-  const wide = s.dimensions.length > 4
+  /* Six read as two rows of three; a fourth column only for seven or more. */
+  const wide = s.dimensions.length > 6
   return (
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
@@ -217,6 +233,9 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
           </span>
           <span className="rd-kq-q">{s.question}</span>
           <ScoreRing value={s.kq} label={score.name} />
+          {/* The number, said in words: how ready they are, or how strong the
+              relationship is. */}
+          <span className="rd-kq-verdict">{verdictOf(s.kq, score.abbr)}</span>
         </div>
         <div className="rd-breakdown">
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>

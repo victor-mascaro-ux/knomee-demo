@@ -95,6 +95,10 @@ select.fam-input {
   color: var(--text-link);
   text-align: left;
   cursor: pointer;
+  /* No side padding, so its words start where Watson Family and Advisory
+     Team do: the button's default inset pushed them in. */
+  padding-left: 0;
+  padding-right: 0;
 }
 .cp-add-family svg {
   flex: none;
