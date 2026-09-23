@@ -293,6 +293,8 @@
 /* Three columns of equal width; a tall tile spans two rows, which is what gives
    the board its collaged rhythm without any of it being hand-placed. */
 .cp-board-grid {
+  /* The offset parent its tiles are measured against (trailingGap). */
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 104px;
@@ -610,6 +612,91 @@
   color: var(--text-link);
   cursor: pointer;
 }
+/* A board being made: tiles are picked up and carried. The one in hand lifts
+   and dims a little, so the gap it will drop into reads as the gap. */
+.cp-board-grid.is-movable .cp-tile {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.cp-board-grid.is-carrying,
+.cp-board-grid.is-carrying .cp-tile {
+  cursor: grabbing;
+}
+.cp-board-grid.is-carrying .cp-tile:hover {
+  transform: none;
+  box-shadow: none;
+}
+.cp-tile.is-lifted,
+.cp-tile.is-lifted:hover {
+  opacity: 0.55;
+  transform: scale(0.96);
+  box-shadow: 0 0 0 2px var(--action-primary);
+}
+
+/* ── motion on a board being made ──
+   A tile arrives by growing into its cell, and leaves by shrinking out of it;
+   the board closes over it after (the glide is played from the script). */
+.cp-board-grid.is-movable .cp-tile {
+  animation: cpTileIn 0.28s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes cpTileIn {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+.cp-tile.is-leaving,
+.cp-tile.is-leaving:hover {
+  pointer-events: none;
+  animation: cpTileOut 0.19s ease-in forwards;
+}
+@keyframes cpTileOut {
+  to {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+/* The controls answer the pointer: the cross turns to the colour of what it
+   does, the handle swells to say it can be taken hold of. */
+.cp-tile-x,
+.cp-tile-handle {
+  transition: transform 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+.cp-tile-x:hover {
+  transform: scale(1.12);
+  background: var(--k-crimson);
+  color: var(--text-inverse);
+}
+.cp-tile-handle:hover {
+  transform: scale(1.14);
+}
+.cp-tile.is-sizing .cp-tile-handle {
+  transform: scale(1.2);
+  background: var(--action-primary);
+  color: var(--text-inverse);
+}
+.cp-tile-size {
+  animation: cpBadge 0.16s ease-out both;
+}
+@keyframes cpBadge {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cp-board-grid.is-movable .cp-tile,
+  .cp-tile.is-leaving,
+  .cp-tile-size {
+    animation: none;
+  }
+  .cp-tile-x,
+  .cp-tile-handle {
+    transition: none;
+  }
+}
+
 @media print {
   .cp-board-edit,
   .cp-board-more,

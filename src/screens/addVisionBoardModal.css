@@ -504,3 +504,62 @@
   max-height: 210px;
   overflow-y: auto;
 }
+
+/* ── microinteractions ── */
+/* A paper chosen pops, so the choice is felt rather than only seen. */
+.vb-tone {
+  transition: transform 0.16s cubic-bezier(0.2, 1.4, 0.4, 1), border-color 0.14s ease;
+}
+.vb-tone:hover {
+  transform: scale(1.1);
+}
+.vb-tone.is-on {
+  animation: vbTonePop 0.26s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes vbTonePop {
+  40% {
+    transform: scale(1.25);
+  }
+}
+/* The field takes on the paper it is set to, rather than snapping to it. */
+.vb-note-field {
+  transition: background 0.2s ease, box-shadow 0.16s ease;
+}
+/* The three ways in: the disc lifts under the pointer. */
+.vb-add-ic {
+  transition: transform 0.18s cubic-bezier(0.2, 1.3, 0.4, 1), background 0.16s ease;
+}
+.vb-add:hover .vb-add-ic {
+  transform: translateY(-2px) scale(1.06);
+  background: var(--action-primary);
+  color: var(--text-inverse);
+}
+/* A picked photograph answers with its number arriving. */
+.vb-pick-n {
+  animation: vbTonePop 0.26s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.vb-pick:active {
+  transform: scale(0.96);
+}
+/* Save wakes up once there is something to save. */
+.modal-footer.vb-foot .btn {
+  transition: opacity 0.2s ease, transform 0.16s ease, background 0.16s ease;
+}
+.modal-footer.vb-foot .btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+/* The mic answers the first word it hears. */
+.vb-heard {
+  transition: background 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vb-tone,
+  .vb-tone.is-on,
+  .vb-note-field,
+  .vb-add-ic,
+  .vb-pick-n,
+  .modal-footer.vb-foot .btn {
+    animation: none;
+    transition: none;
+  }
+}
