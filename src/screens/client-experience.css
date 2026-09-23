@@ -1004,6 +1004,19 @@ svg.cx-tab-mark {
 .cx-viewport-id {
   padding: 0 var(--space-16) 96px;
 }
+/* The page ends on the owner's stripe: it runs edge to edge across the screen,
+   and its own foot clears the tab bar, so the scroll stops on it rather than
+   on a band of empty page underneath. */
+.cx-viewport-id,
+.cxm-viewport {
+  padding-bottom: 0;
+}
+.cx-viewport-id .pp-side,
+.cxm-viewport .pp-side {
+  margin-left: calc(-1 * var(--space-16));
+  margin-right: calc(-1 * var(--space-16));
+  padding: 0 var(--space-16) 88px;
+}
 
 /* The rail as a drawer. It lives at the foot of the page on a phone, so the
    burger lifts it over the content rather than scrolling to it — the same

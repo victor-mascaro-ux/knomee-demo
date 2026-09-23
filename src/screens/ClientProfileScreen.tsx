@@ -9,7 +9,7 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -1089,13 +1089,17 @@ export default function ClientProfileScreen({
               <div className="pp-cols">
                 <div className="pp-col-main">
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
+                    <EmptyFold
+                      empty={goals.shown.length === 0} startOpen
+                      title={<span className="pp-card-title">
                         <img className="pp-card-ic" src={icGoals} alt="" />
                         Goals
-                      </span>
-                      <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
-                    </div>
+                      </span>}
+                      action={<AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />}
+                    >
+                    {goals.shown.length === 0 ? (
+                      <EmptyState art={EMPTY_ART.goals} label="Add a Goal" cta onClick={() => setAddingGoal(true)} />
+                    ) : (
                     <div className="cp-goal-cols" ref={goals.box}>
                       {goals.shown.map((g, i) => (
                         <GoalRow
@@ -1107,6 +1111,8 @@ export default function ClientProfileScreen({
                         />
                       ))}
                     </div>
+                    )}
+                    </EmptyFold>
                     {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
 
@@ -1253,13 +1259,14 @@ export default function ClientProfileScreen({
                   </section>
 
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
+                    <EmptyFold
+                      empty={events.shown.length === 0}
+                      title={<span className="pp-card-title">
                         <img className="pp-card-ic" src={icLifeEvents} alt="" />
                         Life Events
-                      </span>
-                      <AddButton label="Add a life event" onClick={() => setEventForm('add')} />
-                    </div>
+                      </span>}
+                      action={<AddButton label="Add a life event" onClick={() => setEventForm('add')} />}
+                    >
                     {events.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta onClick={() => setEventForm('add')} />
                     ) : (
@@ -1305,21 +1312,23 @@ export default function ClientProfileScreen({
                     </div>
                     )}
                     
+                    </EmptyFold>
                     {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
+                    <EmptyFold
+                      empty={questions.shown.length === 0}
+                      title={<span className="pp-card-title">
                         <img className="pp-card-ic" src={icQuestions} alt="" />
                         Questions
-                      </span>
-                      <AddButton
+                      </span>}
+                      action={<AddButton
                         muted={questions.shown.length === 0}
                         label="Ask a question"
                         onClick={() => setQuestionForm('add')}
-                      />
-                    </div>
+                      />}
+                    >
                     {questions.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta onClick={() => setQuestionForm('add')} />
                     ) : (
@@ -1354,6 +1363,7 @@ export default function ClientProfileScreen({
                     </div>
                     )}
                     
+                    </EmptyFold>
                     {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
                   </section>
                 </div>

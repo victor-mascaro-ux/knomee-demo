@@ -10,7 +10,7 @@ import moodGreat from '../assets/moods/great.svg'
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -354,8 +354,9 @@ export default function ProspectProfileScreen({
             <ToolkitTabView d={prospectToolkit} />
           ) : (
             <>
-              {/* Key Highlights */}
-              <section className="pp-card">
+              {/* Key Highlights — waiting, like the other cards, until some
+                  adventure has put one here. */}
+              <section className={`pp-card${fi.keyHighlights.length ? '' : ' is-waiting'}`}>
                 <div className="pp-card-head">
                   <span className="pp-card-title">
                     <img className="pp-card-ic" src={icKeyHighlights} alt="" />
@@ -365,6 +366,7 @@ export default function ProspectProfileScreen({
                     <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
                   )}
                 </div>
+                {fi.keyHighlights.length === 0 && <p className="pp-waiting">Complete any adventure</p>}
                 <div className="pp-highlights" ref={highlights.box}>
                   {highlights.shown.map((h, i) => (
                     <div
@@ -386,12 +388,16 @@ export default function ProspectProfileScreen({
                 {/* Left content column */}
                 <div className="pp-col-main">
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      {/* No way back to the Goals ending here: each goal opens its
+                    {/* No way back to the Goals ending here: each goal opens its
                           own card, which is the reading the ending gave. */}
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
-                      <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
-                    </div>
+                    <EmptyFold
+                      empty={goals.shown.length === 0} startOpen
+                      title={<span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>}
+                      action={<AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />}
+                    >
+                    {goals.shown.length === 0 ? (
+                      <EmptyState art={EMPTY_ART.goals} label="Add a Goal" cta onClick={() => setAddingGoal(true)} />
+                    ) : (
                     <div className="pp-goals" ref={goals.box}>
                       {goals.shown.map((g, i) => (
                         <div
@@ -424,6 +430,8 @@ export default function ProspectProfileScreen({
                         </div>
                       ))}
                     </div>
+                    )}
+                    </EmptyFold>
                     {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
 
@@ -589,14 +597,16 @@ export default function ProspectProfileScreen({
                   {/* Their boards: none until they make one — on her phone, or
                       here with the advisor. */}
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
+                    <EmptyFold
+                      empty={vision.boards.length === 0}
+                      title={<span className="pp-card-title">
                         <img className="pp-card-ic is-inset" src={icVision} alt="" />
                         Future Vision Board
-                      </span>
-                      <AddButton label="Add a vision board" onClick={vision.add} />
-                    </div>
+                      </span>}
+                      action={<AddButton label="Add a vision board" onClick={vision.add} />}
+                    >
                     {vision.body}
+                    </EmptyFold>
                   </section>
                 </div>
 
@@ -655,10 +665,11 @@ export default function ProspectProfileScreen({
                   </section>
 
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>
-                      <AddButton label="Add a life event" onClick={() => setEventForm('add')} />
-                    </div>
+                    <EmptyFold
+                      empty={events.shown.length === 0}
+                      title={<span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>}
+                      action={<AddButton label="Add a life event" onClick={() => setEventForm('add')} />}
+                    >
                     {events.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta onClick={() => setEventForm('add')} />
                     ) : (
@@ -706,17 +717,19 @@ export default function ProspectProfileScreen({
                     </div>
                     )}
                     
+                    </EmptyFold>
                     {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
                   <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>
-                      <AddButton
+                    <EmptyFold
+                      empty={questions.shown.length === 0}
+                      title={<span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>}
+                      action={<AddButton
                         label="Ask a question"
                         onClick={() => setQuestionForm('add')}
-                      />
-                    </div>
+                      />}
+                    >
                     {questions.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta onClick={() => setQuestionForm('add')} />
                     ) : (
@@ -751,6 +764,7 @@ export default function ProspectProfileScreen({
                     </div>
                     )}
                     
+                    </EmptyFold>
                     {questions.overflows && (
                       <ShowToggle open={questions.open} onToggle={questions.toggle} />
                     )}
