@@ -221,17 +221,28 @@ function DimensionCard({
   )
 }
 
-/* A dimension, opened: its score and its working as one list — each thing it
-   counts, what they answered, and the points that earned — then how the
-   dimensions add up. Where a side has no worked calculation, its evidence is
-   the list. */
-function DimensionModal({
-  d,
-  total,
+/* A score's working as one list — each thing it counts, what they answered,
+   and the points that earned — then the score they add up to, set apart.
+   Used for a dimension card and for the headline score card alike. */
+function WorkModal({
+  title,
+  question,
+  colLeft,
+  rows,
+  sumLabel,
+  sumCaption,
+  sumScore,
+  note,
   onClose,
 }: {
-  d: Snapshot['dimensions'][number]
-  total?: string
+  title: string
+  question: string
+  colLeft: string
+  rows: CalcRow[]
+  sumLabel: string
+  sumCaption: string
+  sumScore: number
+  note?: string
   onClose: () => void
 }) {
   useEffect(() => {
@@ -241,12 +252,6 @@ function DimensionModal({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
-  const rows: CalcRow[] =
-    d.calc ??
-    (d.evidence ?? []).map((line) => {
-      const at = line.indexOf(': ')
-      return at > 0 ? { label: line.slice(0, at), value: line.slice(at + 2) } : { label: line, value: '' }
-    })
   /* On the page's own root, not inside the card: a card that animates in
      would otherwise become the fixed backdrop's frame. */
   return createPortal(
@@ -254,25 +259,22 @@ function DimensionModal({
       <div className="modal rd-why" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title" id="rd-why-title">
-            {d.key}
+            {title}
           </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
         <div className="modal-body rd-why-body">
-          <p className="rd-why-q">{d.question}</p>
+          <p className="rd-why-q">{question}</p>
           <h3 className="rd-why-h">How it’s calculated</h3>
-          {/* One small card per metric: what was measured and what they
-              answered on the left, the points it earned on the right — then
-              the score they add up to, set apart. */}
           <div className="rd-calc">
             <div className="rd-calc-cols" aria-hidden>
-              <span>What they answered</span>
+              <span>{colLeft}</span>
               <span>Points</span>
             </div>
             {rows.map((r) => (
-              <div className="rd-calc-item" key={r.label + r.value}>
+              <div className={`rd-calc-item${r.weight === 'not counted' ? ' is-out' : ''}`} key={r.label + r.value}>
                 <div className="rd-calc-main">
                   <span className="rd-calc-metric">{r.label}</span>
                   {r.value && <span className="rd-calc-answer">{r.value}</span>}
@@ -280,24 +282,47 @@ function DimensionModal({
                 {r.points !== undefined && (
                   <div className="rd-calc-side">
                     <b>{r.points}</b>
-                    {r.weight && <i>counts {r.weight}</i>}
+                    {r.weight && <i>{r.weight === 'not counted' ? r.weight : `counts ${r.weight}`}</i>}
                   </div>
                 )}
               </div>
             ))}
             <div className="rd-calc-total">
               <div className="rd-calc-main">
-                <span className="rd-calc-metric">{d.key} score</span>
-                <span className="rd-calc-answer">{d.caption}</span>
+                <span className="rd-calc-metric">{sumLabel}</span>
+                <span className="rd-calc-answer">{sumCaption}</span>
               </div>
-              <b className="rd-calc-score">{d.score}</b>
+              <b className="rd-calc-score">{sumScore}</b>
             </div>
           </div>
-          {total && <p className="rd-why-note">{total}</p>}
+          {note && <p className="rd-why-note">{note}</p>}
         </div>
       </div>
     </div>,
     document.body,
+  )
+}
+
+/* A dimension, opened. Where a side has no worked calculation, its evidence is
+   the list. */
+function DimensionModal({ d, onClose }: { d: Snapshot['dimensions'][number]; onClose: () => void }) {
+  const rows: CalcRow[] =
+    d.calc ??
+    (d.evidence ?? []).map((line) => {
+      const at = line.indexOf(': ')
+      return at > 0 ? { label: line.slice(0, at), value: line.slice(at + 2) } : { label: line, value: '' }
+    })
+  return (
+    <WorkModal
+      title={d.key}
+      question={d.question}
+      colLeft="What they answered"
+      rows={rows}
+      sumLabel={`${d.key} score`}
+      sumCaption={d.caption}
+      sumScore={d.score}
+      onClose={onClose}
+    />
   )
 }
 
@@ -322,8 +347,9 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
   /* Six read as two rows of three; a fourth column only for seven or more. */
   const wide = s.dimensions.length > 6
-  /* The card opened to show how it was worked out. */
+  /* The card opened to show how it was worked out, and the headline card. */
   const [why, setWhy] = useState<Snapshot['dimensions'][number] | null>(null)
+  const [whyTotal, setWhyTotal] = useState(false)
   // A prospect's KQ and an advisor's RQ; the client's KR keeps it full width.
   const tierInBreakdown = score.abbr !== 'KR'
   const tier = (
@@ -340,7 +366,19 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
-        <div className={`rd-kq${tierInBreakdown ? ' is-fit' : ''}`}>
+        <div
+          className={`rd-kq is-open-able${tierInBreakdown ? ' is-fit' : ''}`}
+          role="button"
+          tabIndex={0}
+          aria-label={`${score.name}: ${s.kq}. How it is calculated`}
+          onClick={() => setWhyTotal(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setWhyTotal(true)
+            }
+          }}
+        >
           <span className="rd-kq-title">
             {score.name} ({score.abbr})
           </span>
@@ -368,8 +406,25 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
       {/* The tier is a reading of every number above it, so on the client's
           relationship card it runs under the whole card. */}
       {!tierInBreakdown && tier}
-      {why && (
-        <DimensionModal d={why} total={s.total} onClose={() => setWhy(null)} />
+      {why && <DimensionModal d={why} onClose={() => setWhy(null)} />}
+      {whyTotal && (
+        <WorkModal
+          title={`${score.name} (${score.abbr})`}
+          question={s.question}
+          colLeft="Dimension"
+          rows={s.dimensions.map((d) => ({
+            label: d.key,
+            value: d.caption,
+            points: d.score,
+            // The KR leaves a referral score out while there is no signal.
+            weight: score.abbr === 'KR' && d.key === 'Referenceability' && d.score === 0 ? 'not counted' : undefined,
+          }))}
+          sumLabel={`${score.abbr} score`}
+          sumCaption={verdictOf(s.kq, score.abbr)}
+          sumScore={s.kq}
+          note={s.total}
+          onClose={() => setWhyTotal(false)}
+        />
       )}
     </section>
   )
