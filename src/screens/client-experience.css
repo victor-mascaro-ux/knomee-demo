@@ -543,6 +543,15 @@
   display: block;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
+/* The mark rises above the bar's own white and into whatever is behind it —
+   the page, or the quick-access sheet, which is a dark plum disc. It carries
+   its own ground so it reads the same against both: a white circle the size of
+   the notch it sits in, with the bar's hairline around it. */
+.cx-tab-center img.cx-tab-mark {
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
+  box-shadow: 0 0 0 1px #e6e5ea;
+}
 /* The <img> mark cannot be recoloured, so on the client's journey the centre
    still says "pressed" by dimming — which is the right word there, since it
    opens a sheet rather than going to a page. */

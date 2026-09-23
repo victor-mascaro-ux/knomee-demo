@@ -29,10 +29,10 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
-/* The Future You mark the flow wears on the adventure this board comes out of.
-   The board is the picture half of that adventure, not a thing of its own, and
-   it should be recognised as the same one. */
-import icVision from '../assets/adventures/future-you.svg'
+/* The vision artwork her own app carries — the one on "Save a vision" in her
+   quick-access sheet. The card and the thing that fills it wear the same
+   picture, and it is not the telescope the Future You card above it wears. */
+import icVision from '../assets/adventures/vision.png'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
