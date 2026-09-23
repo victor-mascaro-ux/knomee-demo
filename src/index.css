@@ -6242,6 +6242,14 @@ button.name-link-btn:hover .name-text {
   body {
     background: #fff;
   }
+  /* The sheet's own white, and nothing else's. The grey behind each goal is a
+     patch that sits below the goal — below anything opaque between it and the
+     page, too — so the white the app paints on this wrapper hid it the moment
+     an ancestor stopped being a stacking context, which is what killing the
+     animations does. The body is the white here. */
+  .page {
+    background: transparent !important;
+  }
   /* The browser drops backgrounds by default; a card that is a grey tray and a
      tier band that is a colour both stop saying what they say without them. */
   * {
