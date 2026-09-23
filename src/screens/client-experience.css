@@ -1047,7 +1047,9 @@ svg.cx-tab-mark {
   grid-row: 1;
   align-self: center;
   margin: 0;
-  text-align: left;
+  /* Set to the card's right edge: the mood is the left-hand fact, her reason
+     is the right-hand one, and the two rag towards their own ends. */
+  text-align: right;
 }
 .cx-screen .pp-checkin .cp-checkin-date {
   display: block;
