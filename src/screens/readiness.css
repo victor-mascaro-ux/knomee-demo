@@ -565,7 +565,8 @@
   display: inline-block;
 }
 .rd-key-meaning {
-  margin: var(--space-4) 0 0;
+  /* A little air under the pill, so it reads as the row's title. */
+  margin: var(--space-8) 0 0;
   font-size: 12px;
   font-style: italic;
   line-height: 1.5;
