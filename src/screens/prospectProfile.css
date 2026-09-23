@@ -718,6 +718,11 @@
 }
 .pp-event-body {
   min-width: 0;
+  /* It takes the whole row rather than the width of its longest line, or the
+     date and the pill at the two ends of the meta line end up at the two ends
+     of the SENTENCE above them — which is why a short event kept its "Advisor
+     added" halfway across the card. */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 3px;
