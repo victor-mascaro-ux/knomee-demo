@@ -143,7 +143,8 @@
   height: 12px;
   border-radius: 2px;
   opacity: 0;
-  animation: glBit 1.3s cubic-bezier(0.15, 0.7, 0.4, 1) 0.1s both;
+  /* Forwards: filled backwards, the pieces sat visible in the middle during their delay. */
+  animation: glBit 1.3s cubic-bezier(0.15, 0.7, 0.4, 1) 0.1s forwards;
 }
 @keyframes glBit {
   0% {

@@ -134,14 +134,35 @@
 }
 /* The input itself is the whole track, invisible, on top: the real control,
    so a finger, a mouse and the arrow keys all move it. */
+/* It reaches half a sun past each end, and its (hidden) thumb is the sun's
+   36px: the sun at 0 or 100 hangs over the track's ends, and a press on that
+   half used to land outside the control. With the thumb as wide as the
+   overhang, the value under a finger is still exactly where the sun sits. */
 .cf-track input {
+  -webkit-appearance: none;
+  appearance: none;
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  bottom: 0;
+  left: -18px;
+  width: calc(100% + 36px);
+  height: 100%;
   margin: 0;
+  background: transparent;
   opacity: 0;
   cursor: grab;
   touch-action: none;
+}
+.cf-track input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+}
+.cf-track input::-moz-range-thumb {
+  width: 36px;
+  height: 36px;
+  border: 0;
 }
 .cf-slider.is-held .cf-track input {
   cursor: grabbing;

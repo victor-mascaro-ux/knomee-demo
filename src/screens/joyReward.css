@@ -174,7 +174,10 @@
   left: 50%;
   top: 50%;
   opacity: 0;
-  animation: jwPiece var(--t) cubic-bezier(0.15, 0.7, 0.4, 1) calc(0.35s + var(--d)) both;
+  /* Forwards, not both: filled backwards, every piece sat at its first frame —
+     visible, stacked in the middle — for the whole of its delay, and the
+     screen opened on a small blob before the burst. */
+  animation: jwPiece var(--t) cubic-bezier(0.15, 0.7, 0.4, 1) calc(0.35s + var(--d)) forwards;
 }
 @keyframes jwPiece {
   0% {
