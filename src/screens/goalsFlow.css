@@ -220,6 +220,17 @@
 .gl-summary .pp-goal-detail dd {
   margin: 0;
 }
+/* Readiness is bars and a word: side by side, centred on each other, and the
+   row's label centred on both rather than hanging at the top of the bars' box. */
+.gl-summary .pp-goal-stage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-weight: var(--weight-semibold);
+}
+.gl-summary .pp-goal-detail dt:last-of-type {
+  align-self: center;
+}
 .gl-acts {
   display: flex;
   flex-direction: column;
