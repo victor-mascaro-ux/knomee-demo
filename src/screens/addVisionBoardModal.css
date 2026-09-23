@@ -2,7 +2,11 @@
    shell, the plum header and the footer buttons are index.css's own; the board
    preview is the Board component's, styled by clientProfile.css. */
 
+/* The panel wears the cards' grey, so the white things on it — the fields,
+   the ways in, a composer, the photo tiles' controls — read as things on a
+   tray, the way a card's rows do. */
 .modal.vb-modal {
+  background: #f1f3f7;
   width: 560px;
   display: flex;
   flex-direction: column;
@@ -187,6 +191,7 @@
    scrolls inside it rather than pushing the buttons off the panel. */
 .vb-dock {
   flex: none;
+  background: #f1f3f7;
   max-height: 58%;
   overflow-y: auto;
   /* Room under the three ways in, so they read as their own row and not as
