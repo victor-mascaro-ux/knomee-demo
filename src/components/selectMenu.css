@@ -34,15 +34,15 @@ button.sm-trigger.is-open:not(.is-closing) .sm-caret {
 }
 /* Open, the field and its list are one shape: the field gives up the corners
    on the side the list comes out of, and both wear the accent edge. */
-button.sm-trigger.is-open {
+button.sm-trigger.sm-field.is-open {
   border-color: var(--purple-bolt, #9b51e0);
   transition: border-radius 0.1s ease;
 }
-button.sm-trigger.is-open:not(.is-up) {
+button.sm-trigger.sm-field.is-open:not(.is-up) {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-button.sm-trigger.is-open.is-up {
+button.sm-trigger.sm-field.is-open.is-up {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
@@ -148,5 +148,51 @@ button.sm-trigger.is-open.is-up {
   }
   .sm-caret {
     transition: none;
+  }
+}
+
+/* The inline variant: a small text control's list, a card of its own just
+   under it — same items, same unrolling, all four corners rounded. */
+.sm-pop.sm-pop-inline,
+.sm-pop.sm-pop-inline.is-up {
+  min-width: 160px;
+  border: 1px solid var(--line, #e7e4ee);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px -8px rgba(36, 4, 70, 0.2);
+}
+.sm-pop-inline .sm-item {
+  font-size: 13px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+button.sm-trigger.sm-inline {
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 5px;
+}
+button.sm-trigger.sm-inline .sm-caret {
+  color: currentColor;
+}
+
+/* ── The standard for every dropdown ──
+   Menus that are not choices (a row's actions, the account menu) unroll from
+   their button and roll back the same way the choice lists do. */
+.drop-anim {
+  animation: smOpen 0.22s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.drop-anim.is-up {
+  animation-name: smOpenUp;
+}
+.drop-anim.is-closing {
+  animation: smClose 0.14s ease-in both;
+  pointer-events: none;
+}
+.drop-anim.is-up.is-closing {
+  animation-name: smCloseUp;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drop-anim,
+  .drop-anim.is-closing {
+    animation-duration: 0.01ms;
   }
 }

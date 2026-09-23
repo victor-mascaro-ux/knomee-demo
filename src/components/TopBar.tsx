@@ -11,8 +11,9 @@
  * passed rather than offered and dead.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { BurgerMenu } from './icons'
+import { useDropdown } from './useDropdown'
 
 export default function TopBar({
   /** A white-label brand's logo, where one is on. */
@@ -29,7 +30,7 @@ export default function TopBar({
   sub?: string
   onSettings?: () => void
 }) {
-  const [open, setOpen] = useState(false)
+  const { open, shown, closing, setOpen } = useDropdown()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
@@ -71,8 +72,8 @@ export default function TopBar({
           >
             <BurgerMenu />
           </button>
-          {open && (
-            <div className="menu-pop">
+          {shown && (
+            <div className={`menu-pop drop-anim${closing ? ' is-closing' : ''}`}>
               <div className="menu-account">
                 <span className="menu-avatar">A</span>
                 <span className="menu-name">Alex Advisor</span>

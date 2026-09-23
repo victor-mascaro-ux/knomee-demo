@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { DotsIcon } from './icons'
+import { useDropdown } from './useDropdown'
 
 export interface MenuItem {
   label: string
@@ -15,7 +16,7 @@ export interface MenuItem {
 }
 
 export default function RowMenu({ items }: { items: MenuItem[] }) {
-  const [open, setOpen] = useState(false)
+  const { open, shown, closing, setOpen } = useDropdown()
   /* Opens upward when there is no room below — the last rows of a table sit
      against its clipped, rounded frame, which cut the menu off. */
   const [up, setUp] = useState(false)
@@ -39,14 +40,14 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
           const r = ref.current?.getBoundingClientRect()
           const frame = ref.current?.closest('.table-wrap')?.getBoundingClientRect()
           const floor = Math.min(frame?.bottom ?? window.innerHeight, window.innerHeight)
-          setUp(!!r && floor - r.bottom < 40 * items.length + 24)
+          if (!open) setUp(!!r && floor - r.bottom < 40 * items.length + 24)
           setOpen((v) => !v)
         }}
       >
         <DotsIcon />
       </button>
-      {open && (
-        <div className={`row-menu-pop${up ? ' is-up' : ''}`}>
+      {shown && (
+        <div className={`row-menu-pop drop-anim${up ? ' is-up' : ''}${closing ? ' is-closing' : ''}`}>
           {items.map((it) => (
             <button
               key={it.label}
