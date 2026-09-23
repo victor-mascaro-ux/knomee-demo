@@ -893,7 +893,9 @@
    taller: it takes no height of its own (size containment) and stretches to
    the row the right-hand column sets, with the dial a size smaller to sit in
    it. Stacked, below 1180px, it sizes to itself again. */
-@media (min-width: 1181px) {
+/* Screen only: on paper the card sizes to its own dial — size containment
+   there collapsed it to its title in the PDF. */
+@media screen and (min-width: 1181px) {
   .rd-snapshot-body > .rd-kq.is-fit {
     contain: size;
   }
