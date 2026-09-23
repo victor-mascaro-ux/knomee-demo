@@ -576,25 +576,6 @@ function BusinessIdTab({
             </div>
           </section>
 
-          {/* The two cards nobody arrives for. They used to ride in the rail,
-              level with Confidence, which gave two empty trays the same weight
-              as the dial — so they come last, and folded, and open when you
-              have something to put in them. */}
-          <FoldCard icon={icLifeEvents} title="Life Events">
-            {/* The advisor adventures do not ask for these yet, and inventing
-                them would put words in his mouth — so the card wears the empty
-                tray a client's would, and the tray invites you to add one. */}
-            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
-          </FoldCard>
-
-          <FoldCard icon={icQuestions} title="Questions">
-            {/* He has asked nobody anything yet — this card is for questions he
-                puts to Dynasty. The three the flow handed HIM are a different
-                thing and live on the Recruiting Toolkit. An empty tray that
-                only reports its own emptiness is a dead end: this one is the
-                way in, the same way the Life Events tray above it is. */}
-            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
-          </FoldCard>
         </div>
 
         {/* Right rail */}
@@ -621,6 +602,26 @@ function BusinessIdTab({
               {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
             </button>
           </section>
+
+          {/* The two cards nobody arrives for, under the dial where the rail
+              has room for them — folded, so two empty trays do not carry the
+              same weight as the reading above them, and open when there is
+              something to put in them. */}
+          <FoldCard icon={icLifeEvents} title="Life Events">
+            {/* The advisor adventures do not ask for these yet, and inventing
+                them would put words in his mouth — so the card wears the empty
+                tray a client's would, and the tray invites you to add one. */}
+            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
+          </FoldCard>
+
+          <FoldCard icon={icQuestions} title="Questions">
+            {/* He has asked nobody anything yet — this card is for questions he
+                puts to Dynasty. The three the flow handed HIM are a different
+                thing and live on the Recruiting Toolkit. An empty tray that
+                only reports its own emptiness is a dead end: this one is the
+                way in, the same way the Life Events tray above it is. */}
+            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+          </FoldCard>
         </div>
       </div>
 
