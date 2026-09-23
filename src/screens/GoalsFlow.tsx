@@ -18,7 +18,7 @@ import ReadinessModal from './ReadinessModal'
 import JoyReward from './JoyReward'
 import { Reveal } from './JoyResults'
 import { MARK_PARTS } from './ClientExperienceScreen'
-import { GoalDetail, TTM_STAGES } from './profileParts'
+import { GoalDetail, TTM_ART, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
 
 export interface GoalsAnswers {
@@ -61,10 +61,8 @@ const SAMPLE_OWN: Pick<Goal, 'pros' | 'cons' | 'note'> = {
   note: 'This matters to me and to the people I love.',
 }
 
-/* The stage artwork, one drawing per rung, the marker under the rung she is on. */
-const TTM_ART = ['./goals/TTM.svg', './goals/TTM-1.svg', './goals/TTM-2.svg', './goals/TTM-3.svg', './goals/TTM-4.svg']
-const StageArt = ({ level, className }: { level: number; className?: string }) => (
-  <img className={className ?? 'gl-ttm'} src={TTM_ART[Math.max(1, level) - 1]} alt="" draggable={false} />
+const StageArt = ({ level }: { level: number }) => (
+  <img className="glr-ttm" src={TTM_ART[Math.max(1, level) - 1]} alt="" draggable={false} />
 )
 
 const ClockIcon = () => (
@@ -95,12 +93,16 @@ export default function GoalsFlow({
   reward,
   onComplete,
   review,
+  again,
 }: {
   reward: { before: number; after: number; total: number; next: string }
   onComplete: (a: GoalsAnswers) => void
   review?: GoalsAnswers
+  /** Goals already done, taken again: straight to adding one, and it ends
+      back on the list rather than on a second badge. */
+  again?: boolean
 }) {
-  const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  const [step, setStep] = useState<Step>(review ? 'results' : again ? 'add' : 'intro')
   const [goals, setGoals] = useState<Goal[]>(review?.goals ?? [])
   const current = goals[goals.length - 1]
 
@@ -158,7 +160,7 @@ export default function GoalsFlow({
       {step === 'add' && (
         <AddGoalModal
           suggestions={financialId.suggestedGoals}
-          onClose={() => (goals.length ? setStep('added') : setStep('intro'))}
+          onClose={() => (goals.length ? setStep('added') : again ? onComplete({ goals: [] }) : setStep('intro'))}
           onAdd={(g) => {
             /* Dated today: the panel stamps the advisor demo's fixed day. */
             const d = new Date()
@@ -197,7 +199,7 @@ export default function GoalsFlow({
           <div className="gl-summary">
             <span className="gl-summary-head">Goal Summary</span>
             <b className="gl-summary-title">{current.title}</b>
-            <GoalDetail g={current} stageArt={(lv) => <StageArt level={lv} />} />
+            <GoalDetail g={current} />
           </div>
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => setStep('readiness')}>
@@ -240,7 +242,7 @@ export default function GoalsFlow({
               </span>
               <span className="glr-kicker">My readiness stage for my goal is</span>
               <div className="glr-stage">
-                <StageArt level={level || 1} className="glr-ttm" />
+                <StageArt level={level || 1} />
                 <b>{(stage ?? TTM_STAGES[0]).toUpperCase()}</b>
               </div>
               <p className="glr-line">{STAGE_LINE[(level || 1) - 1]}</p>
@@ -256,19 +258,27 @@ export default function GoalsFlow({
                 {goals.map((g, i) => (
                   <div className="gl-summary glr-summary" key={`${i}:${g.title}`} style={{ ['--i' as string]: i }}>
                     <b className="gl-summary-title">{g.title}</b>
-                    <GoalDetail g={g} stageArt={(lv) => <StageArt level={lv} />} />
+                    <GoalDetail g={g} />
                   </div>
                 ))}
               </div>
             </Reveal>
           )}
 
-          <Reveal className="jr-reward">
-            <p className="jr-reward-line">You got a reward!</p>
-            <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
-              <span>Claim Badge</span>
-            </button>
-          </Reveal>
+          {again ? (
+            <Reveal className="jr-reward">
+              <button className="jr-claim" type="button" onClick={() => onComplete({ goals })}>
+                <span>Back to My Adventures</span>
+              </button>
+            </Reveal>
+          ) : (
+            <Reveal className="jr-reward">
+              <p className="jr-reward-line">You got a reward!</p>
+              <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
+                <span>Claim Badge</span>
+              </button>
+            </Reveal>
+          )}
         </div>
       )}
 

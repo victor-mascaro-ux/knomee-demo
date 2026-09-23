@@ -515,6 +515,14 @@
   display: inline-flex;
   flex: none;
 }
+/* The stage artwork, at the size the bars were drawn: 20px wide, with room
+   for its marker below. */
+.pp-ttm {
+  display: block;
+  width: 20px;
+  height: auto;
+  margin: 5px 0;
+}
 .pp-bars {
   position: relative;
   display: inline-flex;

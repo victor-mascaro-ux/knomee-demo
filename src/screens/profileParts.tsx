@@ -3,7 +3,7 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -62,6 +62,11 @@ const BAR_RAMP = ['var(--bar-1)', 'var(--bar-2)', 'var(--bar-3)', 'var(--bar-4)'
 const BAR_W = 4
 const BAR_GAP = 1.5
 
+/* The stage artwork, one drawing per rung with the marker under the rung
+   reached — Pre-Contemplation to Maintenance. Served beside app.html, so the
+   same path reaches it from every page. */
+export const TTM_ART = [1, 2, 3, 4, 5].map((n) => `./goals/TTM-${n}.svg`)
+
 export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
   const label = stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'
@@ -71,6 +76,9 @@ export function ReadinessLevel({ level }: { level: number }) {
       data-tip={stage ?? undefined}
       aria-label={label}
     >
+      {stage ? (
+        <img className="pp-ttm" src={TTM_ART[level - 1]} alt="" draggable={false} />
+      ) : (
       <span className="pp-bars" aria-hidden>
         {[1, 2, 3, 4, 5].map((i) => (
           <span
@@ -92,6 +100,7 @@ export function ReadinessLevel({ level }: { level: number }) {
           />
         )}
       </span>
+      )}
     </span>
   )
 }
@@ -380,14 +389,7 @@ export function useCollapsed<T>(items: T[], max: number) {
 /* What a goal opens onto, printed inside the row rather than behind a click:
    on screen the panel carries it, and on paper there is nothing to click. Empty
    on a goal nobody went back to, which is most of them. */
-export function GoalDetail({
-  g,
-  stageArt,
-}: {
-  g: Goal
-  /** Drawn in place of the bars where a page has the stage artwork. */
-  stageArt?: (level: number) => ReactNode
-}) {
+export function GoalDetail({ g }: { g: Goal }) {
   return (
     <dl className="pp-goal-detail">
       {g.timeline && (
@@ -430,7 +432,7 @@ export function GoalDetail({
           up to. Bars alone are a shape somebody has to know how to read. */}
       <dt>Readiness</dt>
       <dd className="pp-goal-stage">
-        {stageArt ? (g.readiness ? stageArt(g.readiness) : null) : <ReadinessLevel level={g.readiness} />}
+        <ReadinessLevel level={g.readiness} />
         {TTM_STAGES[g.readiness - 1] ?? 'Not set'}
       </dd>
     </dl>

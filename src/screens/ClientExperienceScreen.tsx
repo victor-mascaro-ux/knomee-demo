@@ -640,6 +640,7 @@ function AdventuresScreen({
   done,
   onSkipTo,
   built = ['financial-joy'],
+  onAddAgain,
 }: {
   onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** An adventure that can actually be taken. */
@@ -652,6 +653,8 @@ function AdventuresScreen({
   onSkipTo?: (id: string) => void
   /** The adventures that can actually be taken. */
   built?: string[]
+  /** Goals or Life Events, done and taken again: one more of each. */
+  onAddAgain?: (id: string) => void
 }) {
   if (done) {
     /* The journey: what is done, the one thing next, and the rest waiting in
@@ -664,7 +667,16 @@ function AdventuresScreen({
         <h2 className="cx-screen-title">My Adventures</h2>
         <div className="cx-adv-list">
           {journey.map((j) =>
-            done[j.id] ? (
+            done[j.id] && REPEAT[j.id] ? (
+              /* Goals and Life Events are never finished: once done they stay a
+                 card with its way to add one more, not a completed row. */
+              <ActionRow
+                key={j.id}
+                a={{ title: j.title, art: j.art!, minutes: j.minutes, outline: true, ...REPEAT[j.id] }}
+                onAct={onAddAgain ? () => onAddAgain(j.id) : undefined}
+                onRow={onAddAgain ? () => onAddAgain(j.id) : undefined}
+              />
+            ) : done[j.id] ? (
               <CompletedRow
                 key={j.id}
                 title={j.title}
@@ -731,6 +743,13 @@ function AdventuresScreen({
   )
 }
 
+/* The adventures a client keeps coming back to, and how their card asks once
+   they are done. */
+const REPEAT: Record<string, { blurb: string; label: string }> = {
+  goals: { blurb: 'Add a new goal.', label: 'Add Goal' },
+  'life-events': { blurb: 'Add a new Life Event.', label: 'Add Life Event' },
+}
+
 /* Which of the four quick actions opens a form on the Financial ID — all four:
    saving a vision builds a board, which lands on her Financial ID. */
 const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question' | 'vision'>> = {
@@ -747,7 +766,11 @@ function KnomeeSheet({
   onClose,
   onPick,
   onSaveMood,
+  next,
 }: {
+  /** What the journey says is next, and what taking it does. Absent, the
+      authored demo's Life Events. */
+  next?: { a: AdventureAction; go?: () => void }
   onClose: () => void
   /** One of the four things the Financial ID can add. */
   onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
@@ -812,11 +835,15 @@ function KnomeeSheet({
       <div className="kx-next">
         {/* Start does what the card says is next: the flow its art names,
             the same one the tile below it opens. */}
-        <ActionRow
-          a={quickNext}
-          onAct={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
-          onRow={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
-        />
+        {next ? (
+          <ActionRow a={next.a} onAct={next.go} onRow={next.go} />
+        ) : (
+          <ActionRow
+            a={quickNext}
+            onAct={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+            onRow={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+          />
+        )}
       </div>
       <div className="kx-actions">
         {quickActions.map((q, i) => (
@@ -1146,8 +1173,13 @@ export default function ClientExperienceScreen({
   const [reviewing, setReviewing] = useState(false)
   /* However an adventure is left — its end, or the bar's cross — a replay is
      over with it, so the next one opened is taken for real. */
+  /* Goals taken again once done: straight to adding one, no second badge. */
+  const [goalsAgain, setGoalsAgain] = useState(false)
   useEffect(() => {
-    if (!adventure) setReviewing(false)
+    if (!adventure) {
+      setReviewing(false)
+      setGoalsAgain(false)
+    }
   }, [adventure])
   const leaveReview = () => {
     setReviewing(false)
@@ -1219,6 +1251,41 @@ export default function ClientExperienceScreen({
     setTab('finid')
     setFlow(f)
   }
+  /* One more goal, or one more life event, once that adventure is done. */
+  const addAgain = (id: string) => {
+    setSheet(false)
+    if (id === 'goals') {
+      setTab('adventures')
+      setGoalsAgain(true)
+      setAdventure('goals')
+    } else openFlow('event')
+  }
+  /* The quick sheet's card is the journey's own next step: the adventure up
+     next, or once all are done, one more goal. */
+  const upNext = journey.find((j) => !done[j.id])
+  const sheetNext = upNext
+    ? {
+        a: {
+          title: upNext.title,
+          art: upNext.art!,
+          blurb: `Next up · ${upNext.blurb.charAt(0).toLowerCase()}${upNext.blurb.slice(1)}`,
+          minutes: upNext.minutes,
+          label: 'Start',
+        },
+        go: BUILT.includes(upNext.id)
+          ? () => {
+              setSheet(false)
+              setTab('adventures')
+              setAdventure(upNext.id)
+            }
+          : upNext.id === 'life-events'
+            ? () => openFlow('event')
+            : undefined,
+      }
+    : {
+        a: { title: 'Goals', art: 'goals' as const, minutes: 3, outline: true, ...REPEAT.goals },
+        go: () => addAgain('goals'),
+      }
   const [voiceOpen, setVoiceOpen] = useState(false)
   /* Which scripted example the next long press plays. Each press takes the
      next one — a life event, a question, a goal — and then round again. */
@@ -1339,6 +1406,7 @@ export default function ClientExperienceScreen({
           >
             {adventure === 'goals' ? (
               <GoalsFlow
+                again={goalsAgain}
                 review={reviewing ? (goalsDone ?? { goals: financialId.goals.slice(0, 1) }) : undefined}
                 reward={
                   reviewing
@@ -1357,6 +1425,16 @@ export default function ClientExperienceScreen({
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
+                  if (goalsAgain) {
+                    /* One more on the list she has: hers, or the authored ones
+                       when Goals was skipped past. */
+                    setGoalsDone((had) => ({
+                      goals: [...(had?.goals ?? financialId.goals), ...answers.goals],
+                    }))
+                    setAdventure(null)
+                    setTab('adventures')
+                    return
+                  }
                   setGoalsDone(answers)
                   completeAt('goals')
                   setAdventure(null)
@@ -1480,6 +1558,7 @@ export default function ClientExperienceScreen({
                 done={done}
                 onSkipTo={skipTo}
                 built={BUILT}
+                onAddAgain={addAgain}
               />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
@@ -1533,6 +1612,7 @@ export default function ClientExperienceScreen({
 
           {sheet && (
             <KnomeeSheet
+              next={sheetNext}
               onClose={() => setSheet(false)}
               onPick={openFlow}
               onSaveMood={(mood, note) => {
