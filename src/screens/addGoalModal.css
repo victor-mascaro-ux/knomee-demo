@@ -257,3 +257,42 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Readiness, on an edit: the stage it is at, and the way to work it out
+   again — the assessment, not a picker. */
+.ag-ttm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: 8px 8px 8px 14px;
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+.ag-ttm-now {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}
+.ag-ttm-retake {
+  flex: none;
+  padding: 8px 14px;
+  border: 1.5px solid var(--action-primary);
+  border-radius: 999px;
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--action-primary);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.ag-ttm-retake:hover {
+  background: rgba(118, 57, 161, 0.08);
+}
+.ag-ttm-retake:active {
+  transform: scale(0.97);
+}

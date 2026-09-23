@@ -33,6 +33,7 @@ import {
   useCollapsed,
 } from './profileParts'
 import GoalModal from './GoalModal'
+import AddGoalModal from './AddGoalModal'
 import type { Goal } from '../data/financialId'
 
 import { DownloadIcon } from '../components/icons'
@@ -354,7 +355,11 @@ function BusinessIdTab({
 }) {
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
-  const [openGoal, setOpenGoal] = useState<Goal | null>(null)
+  const [openGoal, setOpenGoal] = useState<number | null>(null)
+  /* A goal edited here — its stage by taking the assessment again — laid over
+     the one the flow put together, by its place in the list. */
+  const [edits, setEdits] = useState<Record<number, Goal>>({})
+  const [editingGoal, setEditingGoal] = useState<number | null>(null)
   /* Six highlights, three of them shown — the same fold the client and the
      prospect pages have had, and the same on paper: a print shows all six
      whether the card is open or shut. */
@@ -364,7 +369,7 @@ function BusinessIdTab({
      panel a client's goal does. Marcus's answers and an advisor who took the
      flow this morning fill the same shape, so Gary's move opens as readily as
      his. */
-  const goals: Goal[] = [
+  const authored: Goal[] = [
     {
       title: d.move.change,
       readiness: stageLevel,
@@ -382,6 +387,7 @@ function BusinessIdTab({
       ],
     },
   ]
+  const goals = authored.map((g, i) => edits[i] ?? g)
   // He has taken the flow once, so every card's date picker offers that sitting.
   const dates = [d.header.completed]
   return (
@@ -422,17 +428,17 @@ function BusinessIdTab({
               <AddButton />
             </div>
             <div className="pp-goals">
-              {goals.map((g) => (
+              {goals.map((g, i) => (
                 <div
                   className="pp-goal is-open-able"
-                  key={g.title}
+                  key={i}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setOpenGoal(g)}
+                  onClick={() => setOpenGoal(i)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
-                      setOpenGoal(g)
+                      setOpenGoal(i)
                     }
                   }}
                 >
@@ -627,7 +633,26 @@ function BusinessIdTab({
 
       {/* Their move, opened. Read-only: these are their answers, and a rep
           reading them has nothing to rename or throw away. */}
-      {openGoal && <GoalModal goal={openGoal} onClose={() => setOpenGoal(null)} />}
+      {openGoal !== null && (
+        <GoalModal
+          goal={goals[openGoal]}
+          onClose={() => setOpenGoal(null)}
+          onEdit={() => {
+            setEditingGoal(openGoal)
+            setOpenGoal(null)
+          }}
+        />
+      )}
+      {editingGoal !== null && (
+        <AddGoalModal
+          goal={goals[editingGoal]}
+          onClose={() => setEditingGoal(null)}
+          onAdd={(g) => {
+            setEdits((e) => ({ ...e, [editingGoal]: { ...goals[editingGoal], ...g } }))
+            setEditingGoal(null)
+          }}
+        />
+      )}
     </>
   )
 }

@@ -107,10 +107,12 @@
   left: 48%;
   top: -34%;
 }
-/* At dawn the clouds thin: their fill goes translucent, not the cloud — the
-   whole cloud fading took its words with it and left them unreadable. */
+/* At dawn the clouds thin: their fill lightens toward the morning sky. It
+   stays solid — a see-through fill showed the three puffs through each other,
+   and the whole cloud fading took its words with it. */
 .ol-sky.is-dawn .ol-cloud {
-  background: rgba(239, 231, 244, 0.6);
+  background: #f3edf8;
+  box-shadow: 0 6px 16px rgba(10, 2, 30, 0.22);
 }
 @keyframes olCloudIn {
   from {

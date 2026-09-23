@@ -39,6 +39,11 @@ import {
 } from './profileParts'
 import { FamilyCard, Who } from './familyParts'
 import GoalModal from './GoalModal'
+import AddGoalModal from './AddGoalModal'
+
+/** A goal on this page, carrying which member's list, and where in it, it
+    came from — so an edit lands back on the one it was made to. */
+type KeyedGoal = ClientGoal & { _k: string }
 import { CaretIcon, CheckIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icGoals from '../assets/adventures/goals.svg'
@@ -92,9 +97,15 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
   /* A column per member of the household as it stands. Someone whose answers
      the demo carries gets them; anyone else gets an empty column until they
      take the adventures themselves. */
-  const members: FamilyMemberId[] = live.map(
-    (m) => familyId.members.find((f) => f.name === m.name) ?? blank(m),
-  )
+  /* A goal edited here, by who it is and where it sits in their list, laid
+     over the answers the demo carries. */
+  const [edits, setEdits] = useState<Record<string, ClientGoal>>({})
+  const members: FamilyMemberId[] = live
+    .map((m) => familyId.members.find((f) => f.name === m.name) ?? blank(m))
+    .map((m) => ({
+      ...m,
+      goals: m.goals.map((g, i) => ({ ...(edits[`${m.name}|${i}`] ?? g), _k: `${m.name}|${i}` })),
+    }))
   const highlights = useCollapsed(familyId.highlights, COLLAPSED_ROWS)
   const goals = useSharedCollapse(
     members.map((m) => m.goals),
@@ -109,10 +120,11 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
     3,
   )
   const [confidence, setConfidence] = useState(false)
-  /* A goal opens here too, to read. Not to change: this page is two people's
-     own pages laid side by side, and deleting somebody's goal from a view of
-     their household is not a thing a household can do. */
-  const [openGoal, setOpenGoal] = useState<ClientGoal | null>(null)
+  /* A goal opens here too, and can be edited — its stage by taking the
+     assessment again — like it can on the member's own page. Deleting stays
+     theirs: that is not a thing a household does from a view of itself. */
+  const [openGoal, setOpenGoal] = useState<KeyedGoal | null>(null)
+  const [editingGoal, setEditingGoal] = useState<KeyedGoal | null>(null)
 
   return (
     <div className="fid">
@@ -189,11 +201,11 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
                 key={g.title}
                 role="button"
                 tabIndex={0}
-                onClick={() => setOpenGoal(g)}
+                onClick={() => setOpenGoal(g as KeyedGoal)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    setOpenGoal(g)
+                    setOpenGoal(g as KeyedGoal)
                   }
                 }}
               >
@@ -417,7 +429,27 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         title="Future Vision Board"
         render={(m) => <MemberVisionBoards key={m.name} initial={m.boards} />}
       />
-      {openGoal && <GoalModal goal={openGoal} onClose={() => setOpenGoal(null)} />}
+      {openGoal && (
+        <GoalModal
+          goal={openGoal}
+          onClose={() => setOpenGoal(null)}
+          onEdit={() => {
+            setEditingGoal(openGoal)
+            setOpenGoal(null)
+          }}
+        />
+      )}
+      {editingGoal && (
+        <AddGoalModal
+          goal={editingGoal}
+          onClose={() => setEditingGoal(null)}
+          onAdd={(g) => {
+            const { _k, ...was } = editingGoal
+            setEdits((e) => ({ ...e, [_k]: { ...was, ...g } }))
+            setEditingGoal(null)
+          }}
+        />
+      )}
     </div>
   )
 }
