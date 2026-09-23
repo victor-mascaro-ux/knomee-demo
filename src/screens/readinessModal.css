@@ -101,8 +101,8 @@
 /* The stage artwork drawn at size rather than the inline one scaled up: a
    transform left its layout box small, so it rode up over the panel's top. */
 .rm-result .pp-ttm {
-  width: 56px;
-  margin: 0;
+  --ttm-w: 56px;
+  margin: 0 0 calc(var(--ttm-w) * -0.2879 + 16px);
 }
 .rm-stage {
   font-size: var(--text-2xl);
@@ -125,6 +125,6 @@
 
 @media (max-width: 620px) {
   .rm-result .pp-ttm {
-    width: 48px;
+    --ttm-w: 48px;
   }
 }

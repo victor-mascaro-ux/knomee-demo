@@ -155,14 +155,16 @@ export const TabMark = () => (
   </svg>
 )
 
+/* The bubble is taller than it was — more room above and below the question
+   mark — with the mark re-centred in it and the tail unchanged. */
 export const TabQuestions = () => (
-  <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+  <svg viewBox="0 0 32 29" width="34" height="31" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path
-      d="M6 2.6h20A3.4 3.4 0 0 1 29.4 6v9.3a3.4 3.4 0 0 1-3.4 3.4H13.7l-5.5 4.7v-4.7H6a3.4 3.4 0 0 1-3.4-3.4V6A3.4 3.4 0 0 1 6 2.6Z"
+      d="M6 2.6h20A3.4 3.4 0 0 1 29.4 6v12a3.4 3.4 0 0 1-3.4 3.4H13.7l-5.5 4.7v-4.7H6a3.4 3.4 0 0 1-3.4-3.4V6A3.4 3.4 0 0 1 6 2.6Z"
       strokeLinejoin="round"
     />
-    <path d="M12.9 7.2a3.2 3.2 0 0 1 6.2.8c0 2.2-3.1 2.5-3.1 4.4" strokeLinecap="round" />
-    <circle cx="16" cy="15" r="1.15" fill="currentColor" stroke="none" />
+    <path d="M12.9 8.6a3.2 3.2 0 0 1 6.2.8c0 2.2-3.1 2.5-3.1 4.4" strokeLinecap="round" />
+    <circle cx="16" cy="16.4" r="1.15" fill="currentColor" stroke="none" />
   </svg>
 )
 

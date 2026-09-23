@@ -33,7 +33,6 @@ import {
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
-  brandVars,
   type FlowBrand,
   clampZoom,
   useDarkGround,
@@ -664,6 +663,7 @@ export default function AdvisorSelfScreen({
   mode = 'demo',
   invite = null,
   entry = null,
+  phone = false,
 }: {
   onExit: () => void
   brand?: FlowBrand | null
@@ -673,6 +673,8 @@ export default function AdvisorSelfScreen({
   invite?: Invite | null
   /** Viewing mode: somebody else's sitting, already fetched. */
   entry?: Entry | null
+  /** Viewing mode: open on their phone rather than on the report. */
+  phone?: boolean
 }) {
   const viewing = mode === 'view'
   // An invited advisor's sheet is scoped to their token, so a device that has
@@ -697,7 +699,7 @@ export default function AdvisorSelfScreen({
   })
   /* Somebody else's sitting, opened from the firm's candidate table, lands on
      the report a rep reads — not on their phone. */
-  const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing ? 'report' : 'flow')
+  const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing && !phone ? 'report' : 'flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
   const steps = useMemo(
@@ -763,7 +765,7 @@ export default function AdvisorSelfScreen({
   }, [answered, answers, restart])
 
   if (view === 'report')
-    return <FlowReport d={d} mode={mode} onBack={() => setView('flow')} onList={onExit} />
+    return <FlowReport d={d} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -906,14 +908,16 @@ function FlowPhone({
   return (
     <div
       className={`cx-page${bare ? ' is-bare' : ''}`}
-      style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}
+      style={windowH ? { minHeight: windowH } : undefined}
     >
       <div
         className="cx-fit"
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
         <IPhone scale={scale} bare={bare}>
-          <header className="cx-appbar">
+          {/* Under a firm's brand only the bar changes — its colour and its
+              logo — the way the client's phone does it. */}
+          <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
             {adventure && tab === 'flow' ? (
               <>
                 <div className="af-appbar-title">{adventure.title}</div>
@@ -1310,10 +1314,13 @@ function FlowReport({
   onBack,
   mode,
   onList,
+  brand,
 }: {
   d: Derived
   onBack: () => void
   mode: SelfMode
+  /** The firm's colours and logo, for the product bar. */
+  brand?: FlowBrand | null
   /** Reading somebody else's: the way back to the directory they came from. */
   onList?: () => void
 }) {
@@ -1336,7 +1343,7 @@ function FlowReport({
           Your own report is not in that product: it is the other side of the
           flow you are holding, and its bar is the way back to it. */}
       {viewing ? (
-        <TopBar sub="ADVISOR RECRUIT" />
+        <TopBar sub="ADVISOR RECRUIT" logo={brand ? brand.logo : undefined} />
       ) : (
         <header className="af-report-bar">
           <button className="af-report-back" type="button" onClick={onBack}>

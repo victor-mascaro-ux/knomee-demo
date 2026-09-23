@@ -225,3 +225,13 @@
 .cx-screen .goal-complete {
   font-size: var(--text-base);
 }
+
+/* The readiness row leads with the stage drawing, so its baseline was the
+   drawing's foot: the label and the row centre on each other instead. */
+.goal-rows .goal-readiness,
+.goal-rows dt:has(+ .goal-readiness) {
+  align-self: center;
+}
+.goal-readiness .pp-ttm {
+  margin: 0 0 calc(var(--ttm-w) * -0.2879);
+}

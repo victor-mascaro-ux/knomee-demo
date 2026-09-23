@@ -1633,7 +1633,7 @@
   // bar wears the brand the way the desktop top bar does — so the company row
   // belongs on them too.
   const JOURNEY_VIEWS = ['client-experience', 'advisor-flow', 'advisor-self', 'flow'];
-  const BRANDED_VIEWS = SHELL_VIEWS.concat(JOURNEY_VIEWS);
+  const BRANDED_VIEWS = SHELL_VIEWS.concat(JOURNEY_VIEWS, ['advisor-mobile']);
   // Where the phone rendering sends you back to. The mobile client page is one
   // screen (Emily's), so without this, turning the view off from it would have
   // to guess a client — it remembers the page you turned it on from.
@@ -1651,6 +1651,32 @@
   };
   const BACK_FROM_MOBILE = {
     'client-mobile': '#/clients/emily-watson'
+  };
+  /* The recruit pages have a phone too: a candidate's report opens on the
+     phone they answered on (#/advisors/<id>/phone), and Marcus's page on his
+     Business ID on mobile. Read off the route, since the page is the person. */
+  const entryOfRoute = () => {
+    const m = (currentRoute || '').match(/^#\/?advisors\/([^/?#]+)/i);
+    return m ? m[1] : null;
+  };
+  const mobileOf = () => {
+    const here = canon(demoState.view);
+    if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute() + '/phone';
+    if (here === 'firm-candidates' && demoState.profile === 'marcus-hale') return '#/advisor-mobile';
+    if (here === 'advisor-mobile') return '#/advisor-mobile';
+    return MOBILE_OF[here] || null;
+  };
+  const isMobileView = () => {
+    const here = canon(demoState.view);
+    if (here === 'advisors') return /\/phone$/i.test(currentRoute || '');
+    if (here === 'advisor-mobile') return true;
+    return !!BACK_FROM_MOBILE[here];
+  };
+  const desktopOf = () => {
+    const here = canon(demoState.view);
+    if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute();
+    if (here === 'advisor-mobile') return '#/firm-candidates/marcus-hale';
+    return null;
   };
   const CONTROLS = [
     { key: 'empty', kind: 'toggle', label: 'Empty state',
@@ -1671,19 +1697,19 @@
     // and its absence read as "this page has no mobile view" only if you
     // already knew the control existed. Pages without a phone show it inert.
     { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
-      views: SHELL_VIEWS,
+      views: SHELL_VIEWS.concat(['advisor-mobile']),
       // Strictly whether THIS page has a phone. The old guard also let any
       // open profile through, which on a prospect meant the toggle offered a
       // mobile view that fell back to Emily's — a different person's page.
-      hasMobile: () => !!MOBILE_OF[canon(demoState.view)],
-      isOn: () => !!BACK_FROM_MOBILE[canon(demoState.view)],
+      hasMobile: () => !!mobileOf(),
+      isOn: () => isMobileView(),
       apply: (on) => {
         const here = canon(demoState.view);
         if (on) {
           mobileBackTo = currentRoute;
-          navigateFrame(MOBILE_OF[here] || '#/client-mobile');
+          navigateFrame(mobileOf() || '#/client-mobile');
         } else {
-          navigateFrame(mobileBackTo || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
+          navigateFrame(mobileBackTo || desktopOf() || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
         }
       } },
     { key: 'brand', kind: 'brands', label: 'Company', views: BRANDED_VIEWS }
