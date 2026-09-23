@@ -1,0 +1,379 @@
+/* Outlook — the sky, the two questions, and the ending. The intro, the foot
+   and the reward are Financial Joy's. */
+
+.ol-hero-fallback {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  max-width: 342px;
+  aspect-ratio: 342 / 244;
+  background: radial-gradient(circle at 34% 60%, var(--k-teal) 0 58%, transparent 58.5%);
+}
+
+/* ── the sky ──
+   Dusk while concerns are being named: deep plum into a bruised violet, the
+   sun below the line. Dawn for hopes: the gradient warms, the sun rises, the
+   clouds thin. Everything on it drifts. */
+.ol-sky {
+  position: relative;
+  height: 128px;
+  margin: 0 calc(-1 * var(--space-16)) var(--space-16);
+  overflow: hidden;
+  background: linear-gradient(180deg, #1a0433 0%, #3b1566 55%, #6a3d8f 100%);
+  transition: background 1.2s ease;
+  isolation: isolate;
+}
+.ol-sky.is-dawn {
+  background: linear-gradient(180deg, #2a0d58 0%, #7639a1 38%, #e8795a 78%, #ffc46b 100%);
+}
+.ol-sky.is-tall {
+  height: 300px;
+  margin: 0 calc(-1 * var(--space-16));
+}
+.ol-sun {
+  position: absolute;
+  left: 50%;
+  bottom: -60px;
+  width: 110px;
+  height: 110px;
+  margin-left: -55px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6d6 0 30%, #ffd27a 52%, rgba(255, 196, 107, 0) 72%);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 1.2s ease;
+  z-index: -1;
+}
+.ol-sky.is-dawn .ol-sun {
+  opacity: 1;
+  transform: translateY(-28px);
+  animation: olBreathe 5s ease-in-out 1.4s infinite;
+}
+.ol-sky.is-tall .ol-sun {
+  bottom: 10px;
+  width: 150px;
+  height: 150px;
+  margin-left: -75px;
+}
+@keyframes olBreathe {
+  50% {
+    transform: translateY(-28px) scale(1.08);
+  }
+}
+.ol-haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(107, 214, 196, 0.25), transparent 60%),
+    radial-gradient(ellipse at 90% 100%, rgba(199, 125, 255, 0.3), transparent 60%);
+  animation: olHaze 12s ease-in-out infinite alternate;
+  z-index: -1;
+}
+@keyframes olHaze {
+  to {
+    transform: translateX(-8%) scale(1.1);
+  }
+}
+
+/* A concern: a soft cloud that drifts in from the side, then sways. */
+.ol-cloud {
+  --s: 1;
+  position: absolute;
+  width: calc(96px * var(--s));
+  height: calc(36px * var(--s));
+  border-radius: 40px;
+  background: #d9d3e6;
+  box-shadow: 0 6px 16px rgba(10, 2, 30, 0.35);
+  opacity: 0.92;
+  animation: olCloudIn 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+    olSway calc(7s + var(--i) * 1.3s) ease-in-out 0.9s infinite alternate;
+  transition: opacity 1s ease, filter 1s ease;
+}
+.ol-cloud::before,
+.ol-cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: inherit;
+}
+.ol-cloud::before {
+  width: 46%;
+  height: 120%;
+  left: 14%;
+  top: -52%;
+}
+.ol-cloud::after {
+  width: 36%;
+  height: 96%;
+  left: 48%;
+  top: -34%;
+}
+/* At dawn the clouds thin and brighten at their edges. */
+.ol-sky.is-dawn .ol-cloud {
+  opacity: 0.55;
+  background: #efe7f4;
+}
+@keyframes olCloudIn {
+  from {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.6);
+  }
+}
+@keyframes olSway {
+  to {
+    transform: translateX(14px);
+  }
+}
+.ol-cloud b,
+.ol-light b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: max-content;
+  max-width: 150px;
+  transform: translate(-50%, -50%);
+  font-size: 10.5px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  text-align: center;
+  color: #2a1a44;
+}
+.ol-light b {
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(26, 4, 51, 0.7);
+}
+
+/* A hope: a light that rises from the horizon and keeps floating. */
+.ol-light {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0 30%, #ffd166 60%, rgba(255, 209, 102, 0) 72%);
+  box-shadow: 0 0 18px 6px rgba(255, 214, 120, 0.55);
+  animation: olRise 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+    olFloat calc(3.4s + var(--i) * 0.6s) ease-in-out 1.1s infinite alternate;
+}
+@keyframes olRise {
+  from {
+    opacity: 0;
+    transform: translateY(90px) scale(0.3);
+  }
+}
+@keyframes olFloat {
+  to {
+    transform: translateY(-8px) scale(1.12);
+  }
+}
+
+/* ── a question ── */
+.ol-ask {
+  animation: jrDeal 0.4s var(--ease-out) both;
+}
+.ol-q {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  line-height: 1.35;
+  color: var(--text-strong);
+}
+.ol-q b {
+  font-weight: var(--weight-bold);
+}
+.ol-note {
+  margin: 4px 0 var(--space-12);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.ol-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.ol-chip {
+  padding: 7px 14px;
+  border: 1.5px solid var(--text-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  cursor: pointer;
+  animation: jrDeal 0.35s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+  animation-delay: calc(var(--i) * 0.04s);
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.ol-chip:hover {
+  transform: translateY(-1px);
+}
+.ol-chip:active {
+  transform: scale(0.95);
+}
+.ol-chip.is-on {
+  background: var(--k-plum);
+  color: #fff;
+}
+.ol-box {
+  margin-top: var(--space-16);
+}
+.ol-add-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-10);
+}
+.ol-add {
+  padding: 10px 22px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.2s ease, background 0.16s ease;
+}
+.ol-add:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.ol-add:not(:disabled):active {
+  transform: scale(0.96);
+}
+.ol-list {
+  margin-top: var(--space-16);
+}
+.ol-list-head {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.ol-list ul {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.ol-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding: 8px 10px 8px 12px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--text-strong);
+  animation: olItem 0.45s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+.ol-list li.is-concern {
+  background: #efedf4;
+}
+.ol-list li.is-hope {
+  background: #fff4dc;
+}
+.ol-list li span {
+  flex: 1;
+}
+@keyframes olItem {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+.ol-list li button {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(36, 4, 70, 0.1);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.ol-list li button:hover {
+  background: var(--k-crimson);
+  color: #fff;
+}
+
+/* ── the ending ── */
+.olr-hero {
+  position: relative;
+  margin: 0 calc(-1 * var(--space-16));
+}
+.olr-words {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  margin: 0;
+  min-height: 3.6em;
+  font-size: 15.5px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(26, 4, 51, 0.5), 0 2px 14px rgba(26, 4, 51, 0.6);
+}
+.olr-hero .ol-sky.is-tall::after {
+  /* The words' ground, at the foot of the sky. */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  background: linear-gradient(to top, rgba(26, 4, 51, 0.8), transparent);
+  z-index: 2;
+}
+.olr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.olr-list li {
+  padding: 14px 16px;
+  border-radius: var(--radius-xl);
+  font-size: var(--text-lg);
+  line-height: 1.4;
+  color: var(--text-strong);
+  opacity: 0;
+}
+.jr-sec.is-in .olr-list li {
+  animation: jrDeal 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) both;
+  animation-delay: calc(0.15s + var(--i) * 0.12s);
+}
+.olr-list.is-concern li {
+  background: #efedf4;
+}
+.olr-list.is-hope li {
+  background: linear-gradient(135deg, #fff4dc, #ffe7b8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ol-cloud,
+  .ol-light,
+  .ol-haze,
+  .ol-sun,
+  .ol-ask,
+  .ol-chip,
+  .ol-list li,
+  .olr-list li {
+    animation: none !important;
+    opacity: 1;
+  }
+  .ol-sky,
+  .ol-sun {
+    transition: none;
+  }
+}
