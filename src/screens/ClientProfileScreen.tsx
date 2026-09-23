@@ -9,7 +9,7 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -909,7 +909,7 @@ export default function ClientProfileScreen({
   /* Done events go to the end, the way completed goals do; the rest keep
      their order. */
   const orderedEvents = useMemo(
-    () => [...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)],
+    () => sortFresh([...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)]),
     [eventList],
   )
   const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
@@ -919,7 +919,7 @@ export default function ClientProfileScreen({
   useEffect(() => setQuestionList(cp.questions), [cp])
   const [openQuestion, setOpenQuestion] = useState<ProfileQuestion | null>(null)
   const [questionForm, setQuestionForm] = useState<'add' | 'edit' | null>(null)
-  const questions = useCollapsed(questionList, COLLAPSED_ROWS)
+  const questions = useCollapsed(useMemo(() => sortFresh(questionList), [questionList]), COLLAPSED_ROWS)
 
   return (
     <div className={`pp cp ${mine ? 'cp-mine' : ''}`}>

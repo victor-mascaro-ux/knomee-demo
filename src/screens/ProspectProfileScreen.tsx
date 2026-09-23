@@ -10,7 +10,7 @@ import moodGreat from '../assets/moods/great.svg'
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -210,7 +210,7 @@ export default function ProspectProfileScreen({
   /* Done events go to the end, the way completed goals do; the rest keep
      their order. */
   const orderedEvents = useMemo(
-    () => [...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)],
+    () => sortFresh([...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)]),
     [eventList],
   )
   const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
@@ -218,7 +218,7 @@ export default function ProspectProfileScreen({
   const [questionList, setQuestionList] = useState<ProfileQuestion[]>(fi.questions)
   const [openQuestion, setOpenQuestion] = useState<ProfileQuestion | null>(null)
   const [questionForm, setQuestionForm] = useState<'add' | 'edit' | null>(null)
-  const questions = useCollapsed(questionList, COLLAPSED_ROWS)
+  const questions = useCollapsed(useMemo(() => sortFresh(questionList), [questionList]), COLLAPSED_ROWS)
 
   // Open the profile scrolled to the top, regardless of where the prospect's
   // row sat in the table when it was clicked. On the live site the app runs in

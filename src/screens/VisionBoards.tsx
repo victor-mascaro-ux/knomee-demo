@@ -13,7 +13,7 @@ import type { VisionBoard } from '../data/clientProfile'
 import AddVisionBoardModal from './AddVisionBoardModal'
 import VisionBoardEditor from './VisionBoardEditor'
 import { Board } from './ClientProfileScreen'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, withTag } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, sortFresh, withTag } from './profileParts'
 import icVision from '../assets/adventures/vision-board.svg'
 
 /* The boards, the panel, and the ways into it. `body` is the boards (or the
@@ -45,7 +45,7 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
                 board={b}
                 onCancel={() => setEditingAt(null)}
                 onSave={(nb) => {
-                  setBoards((bs) => bs.map((o, j) => (j === i ? withTag(nb, 'Updated') : o)))
+                  setBoards((bs) => sortFresh(bs.map((o, j) => (j === i ? withTag(nb, 'Updated') : o))))
                   onToast?.('Vision board updated')
                   setEditingAt(null)
                 }}
@@ -73,9 +73,11 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
         onClose={() => setOpen(null)}
         onSave={(b) => {
           setBoards((bs) =>
-            typeof open === 'number'
-              ? bs.map((o, i) => (i === open ? withTag(b, 'Updated') : o))
-              : [...bs, withTag(b, 'New')],
+            sortFresh(
+              typeof open === 'number'
+                ? bs.map((o, i) => (i === open ? withTag(b, 'Updated') : o))
+                : [withTag(b, 'New'), ...bs],
+            ),
           )
           onToast?.(typeof open === 'number' ? 'Vision board updated' : 'Vision board saved')
           setOpen(null)

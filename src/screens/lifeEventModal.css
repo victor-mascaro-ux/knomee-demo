@@ -90,16 +90,9 @@
 /* ── the event itself ── */
 /* Who put it there, said while it is being filled in rather than only after.
    The quietest pill in the set: it is provenance, not a call to action. */
+/* Its look is the design system's badge, shared with the row's pills. */
 .le-advisor {
   align-self: flex-start;
-  /* The same quiet grey pill the row wears: provenance, not a call. */
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--pearl, #efeef2);
-  font-size: 10px;
-  font-weight: var(--weight-medium, 500);
-  color: var(--text-secondary, #6a6480);
-  white-space: nowrap;
 }
 .le-kind-line {
   display: flex;
