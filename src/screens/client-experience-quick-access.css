@@ -253,3 +253,17 @@
 .kx-mood-again{padding:var(--space-8) 0;border:0;background:none;font:inherit;font-size:14.5px;color:rgba(255,255,255,.8);text-decoration:underline;cursor:pointer}
 .kx-mood-save{padding:var(--space-10) var(--space-24);border:0;border-radius:var(--radius-pill);background:var(--surface-card);font:inherit;font-size:15.5px;font-weight:var(--weight-semibold);color:var(--k-plum);cursor:pointer}
 .kx-mood-save:active{transform:scale(.985)}
+
+/* ── the voice sheet, centred ──
+   The mark, what it heard and the choices about it are one group, and the
+   group sits in the middle of the sheet rather than hanging from its top. The
+   action names what it makes, which is longer than "Listen again" was, so the
+   two buttons keep to one line each. */
+.vx-sheet {
+  justify-content: center;
+  padding-bottom: 44px;
+}
+.vx-acts .vx-primary,
+.vx-acts .vx-second {
+  white-space: nowrap;
+}

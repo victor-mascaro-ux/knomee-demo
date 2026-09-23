@@ -21,7 +21,9 @@ import {
   moods,
   quickActions,
   quickNext,
-  voice as voiceScript,
+  voices,
+  voiceTiming,
+  type VoiceScript,
   type AdventureAction,
   type ArtKey,
   type MoodId,
@@ -812,21 +814,34 @@ function sheetStyle(swipe: ReturnType<typeof useSwipeDown>) {
 
 type VoicePhase = 'listen' | 'ready' | 'done'
 
-function VoiceSheet({ onClose }: { onClose: () => void }) {
+/* The mic, for listening again: the same glyph the capture itself is about. */
+const MicGlyph = () => (
+  <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
+    <rect x="7" y="2.5" width="6" height="10" rx="3" fill="currentColor" />
+    <path
+      d="M4.6 9.6a5.4 5.4 0 0 0 10.8 0M10 15v2.6"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => void }) {
   const swipe = useSwipeDown(onClose)
   const [phase, setPhase] = useState<VoicePhase>('listen')
   const [heard, setHeard] = useState(0)
-  const said = voiceScript.said
+  const said = script.said
 
   useEffect(() => {
     if (phase !== 'listen') return
     if (heard >= said.length) {
-      const t = window.setTimeout(() => setPhase('ready'), voiceScript.settleMs)
+      const t = window.setTimeout(() => setPhase('ready'), voiceTiming.settleMs)
       return () => window.clearTimeout(t)
     }
     const t = window.setTimeout(
       () => setHeard((n) => n + 1),
-      heard === 0 ? voiceScript.firstWordMs : voiceScript.wordMs,
+      heard === 0 ? voiceTiming.firstWordMs : voiceTiming.wordMs,
     )
     return () => window.clearTimeout(t)
   }, [phase, heard, said.length])
@@ -875,7 +890,7 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
               <i key={i} style={{ animationDelay: `${i * 0.11}s` }} />
             ))}
           </div>
-          <div className="vx-hint">{voiceScript.hint}</div>
+          <div className="vx-hint">{voiceTiming.hint}</div>
         </>
       )}
 
@@ -903,14 +918,15 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
               : said.join(' ')}
             {live && <span className="vx-caret" aria-hidden />}
           </div>
+          {/* Heard wrong? Say it again, from where the words are. */}
           {!live && (
             <button
               className="vx-send"
               type="button"
-              aria-label="Send"
-              onClick={() => setPhase('done')}
+              aria-label="Listen again"
+              onClick={listenAgain}
             >
-              <ArrowRight size={17} />
+              <MicGlyph />
             </button>
           )}
         </div>
@@ -921,8 +937,9 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
           <button className="vx-second" type="button" onClick={onClose}>
             Cancel
           </button>
-          <button className="vx-primary" type="button" onClick={listenAgain}>
-            Listen again
+          {/* The button says what it will make, not that it will send. */}
+          <button className="vx-primary" type="button" onClick={() => setPhase('done')}>
+            {script.action}
           </button>
         </div>
       )}
@@ -931,19 +948,19 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
         <>
           <div className="vx-done">
             <CheckIcon />
-            Life event created
+            {script.done}
           </div>
           {/* The same anatomy the event will have on the Financial ID — the
               adventure row's art disc, then category, title and meta — so the
               client is looking at the record itself, not a receipt for it. */}
           <div className="vx-card">
             <span className="cx-adv-art has-img is-open">
-              <img src={art[voiceScript.result.art]} alt="" />
+              <img src={art[script.result.art]} alt="" />
             </span>
             <div className="vx-card-main">
-              <span className="vx-card-tag">{voiceScript.result.tag}</span>
-              <b>{voiceScript.result.title}</b>
-              <i>{voiceScript.result.meta}</i>
+              <span className="vx-card-tag">{script.result.tag}</span>
+              <b>{script.result.title}</b>
+              <i>{script.result.meta}</i>
             </div>
           </div>
           <button className="vx-dismiss" type="button" onClick={onClose}>
@@ -1022,6 +1039,9 @@ export default function ClientExperienceScreen({
     setFlow(f)
   }
   const [voiceOpen, setVoiceOpen] = useState(false)
+  /* Which scripted example the next long press plays. Each press takes the
+     next one — a life event, a question, a goal — and then round again. */
+  const [voiceAt, setVoiceAt] = useState(-1)
   const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
@@ -1044,6 +1064,7 @@ export default function ClientExperienceScreen({
       held.current = true
       setPressing(false)
       setSheet(false)
+      setVoiceAt((i) => (i + 1) % voices.length)
       setVoiceOpen(true)
     }, 290)
   }
@@ -1200,7 +1221,13 @@ export default function ClientExperienceScreen({
               }}
             />
           )}
-          {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
+          {voiceOpen && (
+            <VoiceSheet
+              key={voiceAt}
+              script={voices[Math.max(0, voiceAt)]}
+              onClose={() => setVoiceOpen(false)}
+            />
+          )}
 
           {!adventure && (
           <nav
