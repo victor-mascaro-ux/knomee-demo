@@ -211,6 +211,9 @@ export default function AddGoalModal({
 
         {title === null ? (
           <div className="modal-body ag-body">
+            {/* No journey to draw on yet, no suggestions: only the field. */}
+            {suggestions.length > 0 && (
+            <>
             <h3 className="ag-step-title">Select a goal</h3>
             <p className="ag-step-note">
               Based on your Knomee self-discovery journey so far, here are suggested goals:
@@ -232,11 +235,13 @@ export default function AddGoalModal({
             </ul>
 
             <h3 className="ag-step-title ag-own-title">Write your own goal</h3>
+            </>
+            )}
             <div className="ag-own">
               <input
                 className="ag-input"
                 value={own}
-                placeholder="Add your own goal"
+                placeholder="Buy a lake house"
                 onChange={(e) => setOwn(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && own.trim()) setTitle(own.trim())
