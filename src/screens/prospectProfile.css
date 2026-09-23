@@ -968,12 +968,20 @@
     padding-left: 0;
   }
 
-  /* The title and its action stop fighting for the same line. */
+  /* The title and its action stop fighting for the same line: who this is on
+     one, what you can do with it under — at the end of the row, which is where
+     it was when they shared a line. */
   .pp-title-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 12px;
     margin-bottom: 14px;
+  }
+  /* The row wraps rather than stacking, so the button is the second line's
+     only item — and what puts it at the end of a line is a margin, not an
+     alignment, which in a row means vertically. */
+  .pp-title-row > .btn-download {
+    margin-left: auto;
   }
   .pp-title {
     font-size: 20px;

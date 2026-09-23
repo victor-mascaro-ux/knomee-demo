@@ -479,11 +479,15 @@
   justify-content: space-around;
   padding: 0 var(--space-6);
 }
+/* The bar's top edge, with its swell around the centre mark. Drawn at 390 and
+   stretched to whatever the bar actually is: on a handset the screen is the
+   window, which is not 390, and a fixed-width edge put the notch a few pixels
+   off the button that sits in it. */
 .cx-tab-edge {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: var(--phone-w);
+  width: 100%;
   height: 96px;
   pointer-events: none;
 }
@@ -525,10 +529,12 @@
 .cx-tab.is-on .cx-tab-lbl {
   font-weight: var(--weight-bold);
 }
-/* The centre mark sits into the swell, label-free and sized to fill the space
-   the label used to take: its top lines up with the bar's flat edge. */
+/* The centre mark sits INTO the swell, label-free and sized to fill the space
+   the label used to take. The arc rises 18 above the bar's flat edge, and the
+   mark has to rise with it: at -8 its top was level with the flat edge and the
+   swell was empty air above it. */
 .cx-tab-center {
-  margin-top: -8px;
+  margin-top: -24px;
   justify-content: center;
 }
 .cx-tab-mark {
