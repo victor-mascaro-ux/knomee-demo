@@ -90,8 +90,8 @@
   --k-green-bright:  #22c55e;  /* inline success check */
 
   /* ---- Mobile "open adventure" pair (client experience only) ---- */
-  --k-adv-open:      #e9f7c9;  /* the one unlocked adventure's card fill */
-  --k-adv-open-edge: #c6e68d;  /* its 1.5px border */
+  --k-adv-open:      #f3ebfa;  /* the one unlocked adventure's card fill — pale lilac */
+  --k-adv-open-edge: #b98ddc;  /* its 1.5px border — the meter's lilac */
 
   /* ---- Mood faces (client experience: "How do you feel about your money today?") ---- */
   --mood-1:          #ff9080;  /* worried */

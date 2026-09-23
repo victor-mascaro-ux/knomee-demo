@@ -85,13 +85,19 @@ export default function JoyReward({
             /{total} Adventures Completed
           </span>
         </div>
+        {/* The same five segments as My Adventures: the ones done before
+            are there already, and this one fills in once the screen is up. */}
         <div className="jw-progress-bar">
-          <svg className={`jw-check${moved ? ' is-on' : ''}`} viewBox="0 0 16 16" width="15" height="15" aria-hidden>
-            <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 1.6" />
-            <path d="M5 8.2 7 10.2 11 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="jw-track">
-            <i style={{ width: `${pct}%` }} />
+          <span className="jw-track" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={shown}>
+            {Array.from({ length: total }, (_, i) => (
+              <span
+                key={i}
+                className={`jw-seg${i < from ? ' is-on' : ''}${i >= from && i < shown ? ' is-on is-new' : ''}`}
+                style={{ ['--i' as string]: i }}
+              >
+                <i />
+              </span>
+            ))}
           </span>
           <span className="jw-pct">{pct}%</span>
         </div>
