@@ -130,7 +130,7 @@ button.sm-trigger.sm-field.is-open.is-up {
   transition: background 0.12s ease;
 }
 .sm-item.is-active {
-  background: var(--k-lavender-mist, #f3eefc);
+  background: var(--k-plum-wash, #f7f2fc);
 }
 .sm-item.is-on {
   font-weight: 600;
