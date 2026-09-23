@@ -754,6 +754,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  /* The date says when, the pill says who put it there — two different
+     questions, so they sit at the two ends of the line rather than reading as
+     one phrase. */
+  justify-content: space-between;
+}
+.pp-event-added {
+  margin-left: auto;
 }
 /* Provenance, not a call to action — so it takes the quietest pill in the set.
    The lilac belongs to "New", which is asking to be looked at. */
