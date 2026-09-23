@@ -716,6 +716,17 @@
   padding: 11px 13px;
   background: #fff;
 }
+/* The mood, at the end of the row and level with the name it belongs to. */
+.pp-event-mood {
+  flex: none;
+  align-self: flex-start;
+  margin-left: var(--space-8);
+}
+.pp-event-mood img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
 .pp-event-body {
   min-width: 0;
   /* It takes the whole row rather than the width of its longest line, or the

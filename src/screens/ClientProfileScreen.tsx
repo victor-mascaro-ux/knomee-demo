@@ -6,7 +6,7 @@ import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
-import LifeEventModal, { AddLifeEventModal } from './LifeEventModal'
+import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -888,6 +888,13 @@ export default function ClientProfileScreen({
                               )}
                             </span>
                           </span>
+                          {/* How they felt about it, where the row has room —
+                              only on the events somebody answered that for. */}
+                          {e.sentiment ? (
+                            <span className="pp-event-mood">
+                              <SentimentFace level={e.sentiment} />
+                            </span>
+                          ) : null}
                         </div>
                       ))}
                     </div>

@@ -26,7 +26,7 @@ import { usePrintSheet } from '../printSheet'
 import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
-import LifeEventModal, { AddLifeEventModal } from './LifeEventModal'
+import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent } from '../data/financialId'
 
@@ -402,6 +402,13 @@ export default function ProspectProfileScreen({
                               )}
                             </span>
                           </span>
+                          {/* How they felt about it, where the row has room —
+                              only on the events somebody answered that for. */}
+                          {e.sentiment ? (
+                            <span className="pp-event-mood">
+                              <SentimentFace level={e.sentiment} />
+                            </span>
+                          ) : null}
                         </div>
                       ))}
                     </div>
