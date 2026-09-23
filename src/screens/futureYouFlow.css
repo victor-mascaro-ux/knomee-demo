@@ -372,7 +372,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
-  margin-top: var(--space-16);
 }
 .fyr-lines p {
   margin: 0;
@@ -618,4 +617,31 @@
   font-size: var(--text-lg);
   text-align: center;
   color: var(--text-strong);
+}
+
+/* Sent: after the postmark, the card lifts a touch and goes off to the right,
+   tilting as it goes, the way a card leaves a hand for the box. */
+.fy-post {
+  overflow: hidden;
+}
+.fy-card.is-stamped.is-sent:not(.fyr-card) {
+  animation: fySend 0.65s cubic-bezier(0.55, 0, 0.75, 0.3) forwards;
+}
+@keyframes fySend {
+  0% {
+    transform: none;
+  }
+  18% {
+    transform: translate(-10px, -6px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(135%, -30px) rotate(12deg);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fy-card.is-stamped.is-sent:not(.fyr-card) {
+    animation: none;
+    opacity: 0;
+  }
 }
