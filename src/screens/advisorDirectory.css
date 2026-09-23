@@ -343,3 +343,24 @@
   line-height: 1.5;
   max-width: 78ch;
 }
+
+/* A made link: the link across the panel, "Open it yourself" under it at the
+   right, then Invite another and Copy link together at the right edge. */
+.adir-invite.is-made {
+  display: flex;
+  flex-direction: column;
+}
+.adir-invite.is-made .adir-link {
+  width: 100%;
+  min-width: 0;
+  flex: none;
+}
+.adir-invite.is-made .adir-open {
+  align-self: flex-end;
+  margin-top: var(--space-8);
+}
+.adir-invite.is-made .adir-invite-foot {
+  justify-content: flex-end;
+  gap: var(--space-10);
+  margin-top: var(--space-16);
+}
