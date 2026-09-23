@@ -485,7 +485,7 @@ export default function FutureYouFlow({
       {step === 'results' && (
         <div className="jr fyr">
           <Reveal>
-            <h2 className="jr-title">You met Future You</h2>
+            <h2 className="jr-title">You visualized Future You</h2>
             <p className="jr-sub">This is the life you are saving for:</p>
             {/* The vision as a poster: the living sky, and on it where, what,
                 with whom and when, each stamped on in turn. */}
