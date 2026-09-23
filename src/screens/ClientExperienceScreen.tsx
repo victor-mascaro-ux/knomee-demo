@@ -614,7 +614,7 @@ export function LockedRow({
   )
 }
 
-function AdventuresScreen() {
+function AdventuresScreen({ onPick }: { onPick: (flow: 'goal' | 'event' | 'question') => void }) {
   return (
     <>
       <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
@@ -623,9 +623,19 @@ function AdventuresScreen() {
         {completedAdventures.map((a) => (
           <CompletedRow key={a.title} title={a.title} artKey={a.art} on={a.on} />
         ))}
-        {adventureActions.map((a) => (
-          <ActionRow key={a.title} a={a} />
-        ))}
+        {adventureActions.map((a) => {
+          /* "Add a new goal" on this list and "Add a new goal" on the quick
+             sheet are the same sentence, so they open the same form. */
+          const flow = QUICK_FLOW[a.art]
+          return (
+            <ActionRow
+              key={a.title}
+              a={a}
+              onAct={flow ? () => onPick(flow) : undefined}
+              onRow={flow ? () => onPick(flow) : undefined}
+            />
+          )
+        })}
         {lockedAdventures.map((t) => (
           <LockedRow key={t} title={t} />
         ))}
@@ -927,6 +937,14 @@ export default function ClientExperienceScreen({
   const [sheet, setSheet] = useState(false)
   /* What the quick-access sheet asked for, on its way to the Financial ID. */
   const [flow, setFlow] = useState<'goal' | 'event' | 'question' | null>(null)
+  /* Wherever one of the three is asked for — the quick sheet, a row on the
+     adventures list — it is the same thing: the Financial ID, with that form
+     already open on it. */
+  const openFlow = (f: 'goal' | 'event' | 'question') => {
+    setSheet(false)
+    setTab('finid')
+    setFlow(f)
+  }
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
@@ -1020,7 +1038,7 @@ export default function ClientExperienceScreen({
             ref={viewport}
           >
             {tab === 'adventures' ? (
-              <AdventuresScreen />
+              <AdventuresScreen onPick={openFlow} />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
                  answers — one artefact, not a second rendering of it. It was a
@@ -1058,13 +1076,7 @@ export default function ClientExperienceScreen({
           {sheet && (
             <KnomeeSheet
               onClose={() => setSheet(false)}
-              onPick={(f) => {
-                /* The sheet closes, the Financial ID comes up, and the form is
-                   already open on it. */
-                setSheet(false)
-                setTab('finid')
-                setFlow(f)
-              }}
+              onPick={openFlow}
             />
           )}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
