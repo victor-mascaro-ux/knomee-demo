@@ -3875,6 +3875,11 @@ export default function App() {
   const [viewEntryId, setViewEntryId] = useState<string | null>(
     initialView === 'advisors' ? initialProfile : null,
   )
+  /* #/advisors/<id>/phone: the same candidate on the phone they answered on —
+     the demo controls' Desktop / Mobile switch on a recruit page. */
+  const [viewEntryPhone, setViewEntryPhone] = useState(
+    () => typeof window !== 'undefined' && /^#\/?advisors\/[^/]+\/phone/i.test(window.location.hash),
+  )
   const [viewEntry, setViewEntry] = useState<Entry | null>(null)
   const [inviteToken, setInviteToken] = useState<string | null>(
     initialView === 'flow' ? initialProfile : null,
@@ -4052,6 +4057,7 @@ export default function App() {
       setAdvisorSelfOpen(v === 'advisor-self')
       setDirectoryOpen(false)
       setViewEntryId(v === 'advisors' ? slug : null)
+      setViewEntryPhone(v === 'advisors' && /^#\/?advisors\/[^/]+\/phone/i.test(window.location.hash))
       setInviteToken(v === 'flow' ? slug : null)
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
@@ -4093,7 +4099,7 @@ export default function App() {
           : currentView === 'firm-candidates' && candidateOpen
             ? profileSlug(candidate.name)
             : currentView === 'advisors' && viewEntryId
-              ? viewEntryId
+              ? viewEntryId + (viewEntryPhone ? '/phone' : '')
               : currentView === 'flow' && inviteToken
                 ? inviteToken
                 : null
@@ -4116,6 +4122,7 @@ export default function App() {
     family,
     candidateOpen,
     viewEntryId,
+    viewEntryPhone,
     inviteToken,
   ])
 
@@ -4162,6 +4169,7 @@ export default function App() {
     return (
       <>
         <AdvisorMobileScreen
+          brand={brand}
           onExit={() => setAdvisorMobileOpen(false)}
           onRedo={() => {
             setAdvisorMobileOpen(false)
@@ -4322,8 +4330,9 @@ export default function App() {
     return (
       <>
         <AdvisorSelfScreen
-          key={`self-view-${viewEntry.id}`}
+          key={`self-view-${viewEntry.id}${viewEntryPhone ? '-phone' : ''}`}
           mode="view"
+          phone={viewEntryPhone}
           entry={viewEntry}
           brand={brand}
           onExit={backToList}

@@ -25,6 +25,7 @@ import {
   useFitToWindow,
   useZoom,
   TabEdge,
+  type FlowBrand,
 } from './ClientExperienceScreen'
 import AdventureList from './AdventureList'
 import { adventureStates, derive, sampleAnswers } from '../data/advisorAnswers'
@@ -38,7 +39,10 @@ export default function AdvisorMobileScreen({
   onExit,
   onAccountSettings,
   onRedo,
+  brand,
 }: {
+  /** The firm's colours and logo: under a brand, the bar changes, nothing else. */
+  brand?: FlowBrand | null
   onExit: () => void
   onAccountSettings?: () => void
   /** Into the flow itself, which is the only place an adventure can be answered
@@ -96,9 +100,9 @@ export default function AdvisorMobileScreen({
               product, not Marcus's app, so it keeps the header it has on a
               desktop — and the burger in it is the account menu, as it is
               everywhere else. */}
-          <header className="cx-appbar cxm-appbar">
+          <header className="cx-appbar cxm-appbar" style={brand ? { background: brand.primary } : undefined}>
             <div className="cx-appbar-brand">
-              <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
+              {brand ? brand.logo : <img src="./knomee-advisor-white.svg" alt="knomee advisor" />}
             </div>
             <div className="menu-wrap cxm-account" ref={accountRef}>
               <button
