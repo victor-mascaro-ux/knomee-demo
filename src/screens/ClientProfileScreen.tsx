@@ -29,10 +29,9 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
-/* The vision artwork her own app carries — the one on "Save a vision" in her
-   quick-access sheet. The card and the thing that fills it wear the same
-   picture, and it is not the telescope the Future You card above it wears. */
-import icVision from '../assets/adventures/vision.png'
+/* The design system's vision board, which is what her own app puts on "Save a
+   vision" too. One mark wherever a vision is named. */
+import icVision from '../assets/adventures/vision-board.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'

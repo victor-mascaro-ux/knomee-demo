@@ -472,6 +472,11 @@
    the screen's exact width and the buttons stack on top of it. */
 .cx-tabbar {
   position: relative;
+  /* Above the quick-access sheet (4). The mark rises out of the bar, and the
+     sheet was painting over the half of it that had risen — which is why the
+     disc came out sliced. The voice sheet (6) still covers the bar, which is
+     right: it takes the whole screen. */
+  z-index: 5;
   flex: none;
   height: var(--mobile-tabbar-h);
   display: flex;
@@ -920,5 +925,55 @@ svg.cx-tab-mark {
   .cx-viewport.is-menu-open .pp-side,
   .cxm-scrim {
     animation: none;
+  }
+}
+
+/* ============================================================
+   PRINTING FROM INSIDE THE PHONE
+   Download PDF on the client's own Financial ID printed a
+   photograph of the demo: the dark stage, the titanium rail, the
+   notch, the tab bar — a picture of a phone rather than the sheet
+   on it. The harness is not the document. Everything that makes
+   this look like a device comes off, the screen stops being a
+   fixed-size scrolling box, and what prints is the page inside it,
+   laid out by index.css's print rules like any other.
+   ============================================================ */
+@media print {
+  .cx-page,
+  .cx-fit,
+  .cx-device,
+  .cx-bezel,
+  .cx-screen,
+  .cx-viewport {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    font-size: inherit;
+  }
+  /* The device's own furniture, and the demo's controls. */
+  .cx-statusbar,
+  .cx-island,
+  .cx-home-bar,
+  .cx-appbar,
+  .cx-tabbar,
+  .cx-view,
+  .cx-sheet,
+  .kx-sheet,
+  .vx-sheet,
+  .cxm-scrim,
+  .cxm-rail-btn {
+    display: none !important;
   }
 }
