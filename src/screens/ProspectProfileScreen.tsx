@@ -24,6 +24,7 @@ import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
 import GoalModal from './GoalModal'
+import AddGoalModal from './AddGoalModal'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -56,6 +57,8 @@ export default function ProspectProfileScreen({
      thrown away from the panel a row opens — so the screen holds them. */
   const [goalList, setGoalList] = useState(fi.goals)
   const [openGoal, setOpenGoal] = useState<string | null>(null)
+  /* Adding one is the other thing this page can do to the list. */
+  const [addingGoal, setAddingGoal] = useState(false)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
@@ -194,7 +197,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
-                      <AddButton />
+                      <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
                     </div>
                     <div className="pp-goals" ref={goals.box}>
                       {goals.shown.map((g, i) => (
@@ -434,6 +437,22 @@ export default function ProspectProfileScreen({
           )}
         </main>
       </div>
+      {addingGoal && (
+        <AddGoalModal
+          suggestions={fi.suggestedGoals}
+          onClose={() => setAddingGoal(false)}
+          onAdd={(g) => {
+            setGoalList((list) => [g, ...list])
+            setAddingGoal(false)
+            setOpenGoal(g.title)
+            /* A goal at the first stage sorts to the end of the list, which is
+               behind the fold on a page with four already. Open it, or the
+               thing they just added is the one thing they cannot see. */
+            if (!goals.open) goals.toggle()
+          }}
+        />
+      )}
+
       {/* The goal, opened. */}
       {goal && (
         <GoalModal

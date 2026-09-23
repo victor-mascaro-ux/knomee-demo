@@ -48,6 +48,12 @@ const sebastian: MemberProfile = {
     text: him.highlights[h.title] ?? h.text,
   })),
   goals: him.goals,
+  /* His, not hers: the lake place, the four-day week, the two he mentors. */
+  suggestedGoals: [
+    'Put a number on the place by the lake',
+    'Agree the four-day week with my partners',
+    'Hand one of my teams to someone I mentor',
+  ],
   financialJoy: { ...clientProfile.financialJoy, chips: him.joy },
   /* The second half of the Joy adventure is not among his answers, so the card
      carries the chips and stops rather than putting words in his mouth. */

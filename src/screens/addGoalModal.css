@@ -1,0 +1,199 @@
+/* Adding a goal — only what this panel adds to the app's modal. The shell, the
+   plum header, the close and the footer are index.css's own, and the accents
+   read from the page underneath: on a client's page the arrows are green, on a
+   prospect's purple, because --text-link is already turned over there. */
+
+.ag-modal {
+  width: 520px;
+}
+.ag-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* ── step one: which goal ── */
+.ag-step-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.ag-own-title {
+  margin-top: var(--space-16);
+}
+.ag-step-note {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.ag-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* A row rather than a button that looks like one: the whole line is the hit
+   area, and the arrow at the end is what says where it goes. */
+.ag-suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: var(--space-10) var(--space-8);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+  font: inherit;
+  font-size: var(--text-lg);
+  text-align: left;
+  color: var(--text-table);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.ag-suggestion:hover {
+  background: var(--surface-sunken);
+}
+.ag-spark {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-link);
+}
+.ag-suggestion-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+.ag-go {
+  flex: none;
+  display: inline-flex;
+  color: var(--text-link);
+}
+
+/* ── their own words ── */
+.ag-own {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.ag-own .ag-input {
+  flex: 1;
+  min-width: 0;
+  font-style: italic;
+}
+.ag-go-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.ag-go-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── step two: the detail ── */
+.ag-goal-name {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+  color: var(--text-strong);
+}
+.ag-label {
+  margin-top: var(--space-8);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.ag-hint {
+  margin: 0;
+  font-size: var(--text-base);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.ag-input {
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-strong);
+}
+.ag-input::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.ag-input:focus {
+  outline: none;
+  border-color: var(--text-link);
+}
+.ag-select {
+  appearance: none;
+  /* The caret the date pickers on these pages draw, in the same place. */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 18px center, right 13px center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--space-32);
+  cursor: pointer;
+}
+
+/* A field with the pencil sitting in its right-hand end: the pencil is a mark,
+   not a control — the field is already a field. */
+.ag-field {
+  position: relative;
+}
+.ag-field .ag-input {
+  padding-right: var(--space-32);
+}
+.ag-pencil {
+  position: absolute;
+  top: 50%;
+  right: var(--space-12);
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* What is good about it and what is not, side by side, because that is how
+   they are read back on the card. */
+.ag-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8) var(--space-16);
+  margin-top: var(--space-4);
+}
+.ag-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.ag-points-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.ag-points-head .ag-label {
+  margin-top: 0;
+}
+
+.ag-foot {
+  justify-content: flex-end;
+  gap: var(--space-10);
+}
+
+@media (max-width: 620px) {
+  .ag-cols {
+    grid-template-columns: 1fr;
+  }
+}

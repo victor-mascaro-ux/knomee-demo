@@ -101,6 +101,13 @@ export const financialId = {
     { icon: 'future-you', title: 'Lifestyle Aspiration', text: 'Living near family with the freedom to travel, connect, and enjoy meaningful experiences' },
     { icon: 'future-you', title: 'Future Vision', text: 'Near loved ones, traveling, and staying active with family in the years ahead' },
   ],
+  /* The three the app puts in front of her when she adds a goal, drawn from
+     what her adventures already say she is weighing. */
+  suggestedGoals: [
+    'Plan a family beach vacation',
+    'Spend more time with my mom as she goes through treatments',
+    'Contribute more to cancer-related philanthropy',
+  ],
   goals: [
     {
       title: 'Family Disney beach vacation to Oahu.',
