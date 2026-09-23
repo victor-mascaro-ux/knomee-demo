@@ -2,8 +2,8 @@
    header, the close, the footer and the label/answer rows the read view uses
    are index.css's and goalModal.css's own. */
 
-.le-modal {
-  width: 500px;
+.modal.le-modal {
+  width: 560px;
 }
 .le-body {
   display: flex;
@@ -104,6 +104,9 @@
   align-items: center;
   gap: var(--space-10);
   margin-bottom: var(--space-4);
+}
+.le-kind-line .le-advisor {
+  margin-left: auto;
 }
 .le-kind-name {
   margin: 0;

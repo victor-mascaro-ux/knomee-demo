@@ -2,8 +2,8 @@
    header, the close and the footer are index.css's own, and the checkbox and
    the bin are the goal panel's, because they are the same two controls. */
 
-.qm-modal {
-  width: 460px;
+.modal.qm-modal {
+  width: 560px;
 }
 .qm-body {
   display: flex;
