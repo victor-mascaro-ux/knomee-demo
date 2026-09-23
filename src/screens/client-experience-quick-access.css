@@ -294,3 +294,13 @@
    start right under the bar, over the page's own title, not 54px lower. */
 .cx-page.is-bare .kx-sheet,
 .cx-page.is-bare .vx-sheet{top:calc(var(--mobile-appbar-h) - 1px)}
+
+/* When the tiles get less height than their tall form needs — the framed
+   phone, with the next adventure's card above them — they turn on their side:
+   the art beside the label, sized to the room they have, never under the arc. */
+.kx-actions{container-type:size;grid-auto-rows:minmax(0,1fr)}
+.kx-action{min-height:0;overflow:hidden}
+@container (max-height: 250px){
+  .kx-action{flex-direction:row;justify-content:flex-start;gap:var(--space-10);padding:8px 12px;text-align:left;font-size:14.5px}
+  .kx-action span{width:40px;height:40px}
+}

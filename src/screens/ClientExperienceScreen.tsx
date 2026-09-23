@@ -1339,7 +1339,7 @@ export default function ClientExperienceScreen({
         a: {
           title: upNext.title,
           art: upNext.art!,
-          blurb: `Next up · ${upNext.blurb.charAt(0).toLowerCase()}${upNext.blurb.slice(1)}`,
+          blurb: upNext.blurb,
           minutes: upNext.minutes,
           label: 'Start',
         },
