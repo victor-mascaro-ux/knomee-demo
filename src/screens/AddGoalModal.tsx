@@ -241,7 +241,7 @@ export default function AddGoalModal({
               <input
                 className="ag-input"
                 value={own}
-                placeholder="e.g. Buy a lake house"
+                placeholder="Buy a lake house"
                 onChange={(e) => setOwn(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && own.trim()) setTitle(own.trim())
