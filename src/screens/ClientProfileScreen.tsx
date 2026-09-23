@@ -1255,7 +1255,7 @@ export default function ClientProfileScreen({
                       <AddButton label="Add a life event" onClick={() => setEventForm('add')} />
                     </div>
                     {events.shown.length === 0 ? (
-                      <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
+                      <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta onClick={() => setEventForm('add')} />
                     ) : (
                     <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
@@ -1311,7 +1311,7 @@ export default function ClientProfileScreen({
                       />
                     </div>
                     {questions.shown.length === 0 ? (
-                      <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+                      <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta onClick={() => setQuestionForm('add')} />
                     ) : (
                     <div className="pp-questions" ref={questions.box}>
                       {questions.shown.map((q, i) => (
