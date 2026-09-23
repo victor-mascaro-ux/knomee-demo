@@ -31,6 +31,8 @@ const picks = (labels: string[]): Pick[] => labels.map((label) => ({ label, src:
 const WHERE = picks(['At the beach', 'In the mountains', 'In a big city', 'In a suburb', 'In the country', 'Abroad'])
 const DOING = picks(['Relaxing', 'Creative pursuits', 'Running a business', 'Traveling', 'Helping others', 'Learning'])
 const WITH = picks(['Family', 'Friends', 'A larger group', 'Solo', 'A romantic partner', 'Business partners'])
+/* Each photograph's angle on the table: loose, never the same twice in a row. */
+const TILT = [-6, 4, -3, 7, -8, 2, 5, -4, 3, -7, 6, -2]
 const WHEN = ['1–5 years', '5–10 years', '10–15 years', '15–20 years', 'Over 20 years']
 
 /* The detail of the life, the design's five kinds. */
@@ -166,12 +168,25 @@ function PhotoAsk({
 }
 
 /* How far away: a road, and her pin travels along it to the band chosen. */
-function Road({ value, onChange }: { value: string | null; onChange: (v: string) => void }) {
+function Road({
+  value,
+  onChange,
+  still,
+}: {
+  value: string | null
+  onChange?: (v: string) => void
+  /** On the ending: the road as she left it, not a question. */
+  still?: boolean
+}) {
   const at = value ? WHEN.indexOf(value) : -1
   return (
-    <div className="fy-when">
-      <h2 className="fy-h">How far in the future is your vision?</h2>
-      <p className="fy-sub">Pick the stretch of road it sits on.</p>
+    <div className={`fy-when${still ? ' is-still' : ''}`}>
+      {!still && (
+        <>
+          <h2 className="fy-h">How far in the future is your vision?</h2>
+          <p className="fy-sub">Pick the stretch of road it sits on.</p>
+        </>
+      )}
       <div className="fy-road" style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: WHEN.length - 1 }}>
         <i className="fy-road-line" />
         <i className={`fy-road-done${at < 0 ? ' is-empty' : ''}`} />
@@ -188,7 +203,8 @@ function Road({ value, onChange }: { value: string | null; onChange: (v: string)
               type="button"
               className={`fy-stop${i === at ? ' is-on' : ''}${i < at ? ' is-past' : ''}`}
               aria-pressed={i === at}
-              onClick={() => onChange(w)}
+              disabled={still}
+              onClick={() => onChange?.(w)}
             >
               <i />
               <span>{w}</span>
@@ -326,6 +342,9 @@ export default function FutureYouFlow({
   const [other, setOther] = useState<Record<string, string>>({})
   const [extra, setExtra] = useState<Record<string, string[]>>({})
   const [stamped, setStamped] = useState(false)
+  /* A print tapped on the ending: shown large, as a phone shows a photograph
+     — a tap is what a hover is on a mouse. */
+  const [zoom, setZoom] = useState<Pick | null>(null)
   const typing = useRef(0)
   useEffect(() => () => window.clearInterval(typing.current), [])
 
@@ -381,12 +400,6 @@ export default function FutureYouFlow({
     setStep('intro')
   }
 
-  const vision = [
-    ['Where', a.where.join(', ')],
-    ['Doing', a.doing.join(', ')],
-    ['With', a.with.join(', ')],
-    ['When', a.when ?? ''],
-  ].filter(([, v]) => v)
 
   return (
     <div className="jf fy">
@@ -484,13 +497,54 @@ export default function FutureYouFlow({
                 <i className="jr-glow jr-glow-c" />
               </span>
               <span className="fyr-kicker">Future You · {a.when ?? 'someday'}</span>
+              {/* Where, doing, with: the words, and beside them the pictures
+                  she chose for them, dropped on like photographs, each at its
+                  own angle. When: the road, her pin at her stretch of it. */}
               <div className="fyr-lines">
-                {vision.map(([k, v], i) => (
-                  <p key={k} style={{ ['--i' as string]: i }}>
-                    <span>{k}</span>
-                    <b>{v}</b>
-                  </p>
-                ))}
+                {(
+                  [
+                    ['Where', a.where, WHERE],
+                    ['Doing', a.doing, DOING],
+                    ['With', a.with, WITH],
+                  ] as [string, string[], Pick[]][]
+                )
+                  .filter(([, v]) => v.length)
+                  .map(([k, v, pool], i) => (
+                    <div className="fyr-line" key={k} style={{ ['--i' as string]: i }}>
+                      <p>
+                        <span>{k}</span>
+                        <b>{v.join(', ')}</b>
+                      </p>
+                      <div className="fyr-cluster">
+                        {pool
+                          .filter((o) => v.includes(o.label))
+                          .map((o, j) => (
+                            <button
+                              type="button"
+                              className="fyr-mini"
+                              key={o.label}
+                              aria-label={`${o.label} — see it larger`}
+                              onClick={() => setZoom(o)}
+                              style={{
+                                ['--j' as string]: j + i * 3,
+                                ['--r' as string]: `${TILT[(j + i * 2) % TILT.length]}deg`,
+                              }}
+                            >
+                              <Photo src={o.src} fallback="jf-photo-fallback" />
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                {a.when && (
+                  <div className="fyr-line fyr-line-when" style={{ ['--i' as string]: 3 }}>
+                    <p>
+                      <span>When</span>
+                      <b>{a.when}</b>
+                    </p>
+                    <Road value={a.when} still />
+                  </div>
+                )}
               </div>
             </figure>
           </Reveal>
@@ -540,6 +594,17 @@ export default function FutureYouFlow({
               <span>Claim Badge</span>
             </button>
           </Reveal>
+        </div>
+      )}
+
+      {zoom && (
+        <div className="modal-backdrop fyr-zoom" role="dialog" aria-modal="true" aria-label={zoom.label} onClick={() => setZoom(null)}>
+          <figure className="fyr-zoom-print">
+            <span className="fyr-zoom-img">
+              <Photo src={zoom.src} fallback="jf-photo-fallback" />
+            </span>
+            <figcaption>{zoom.label}</figcaption>
+          </figure>
         </div>
       )}
 
