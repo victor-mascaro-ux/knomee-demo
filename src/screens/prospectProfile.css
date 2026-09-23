@@ -716,6 +716,20 @@
   padding: 11px 13px;
   background: #fff;
 }
+/* The mood, level with the name it belongs to — lifted out of the flow so the
+   text under it still runs the full width of the row and the date and the
+   "Advisor added" pill keep the two edges of the card. It sits on the row's
+   own padding, above the line the pill sits on, so the two never meet. */
+.pp-event-mood {
+  position: absolute;
+  top: 11px;
+  right: 13px;
+}
+.pp-event-mood img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
 .pp-event-body {
   min-width: 0;
   /* It takes the whole row rather than the width of its longest line, or the
@@ -751,6 +765,10 @@
    disc beside it, so the two centre on each other. Anything that can wrap — the
    pill, the date — lives below, or a second line pushes the head's centre down
    and the icon stops lining up with the event. */
+/* The first line stops short of the face; everything under it does not. */
+.pp-event:has(.pp-event-mood) .pp-event-head {
+  padding-right: var(--space-32);
+}
 .pp-event-head {
   display: flex;
   align-items: center;
