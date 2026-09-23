@@ -24,10 +24,14 @@ import {
   EMPTY_ART,
   EmptyState,
   Gauge,
+  GoalDetail,
   HighlightIcon,
   ReadinessLevel,
   TTM_STAGES,
 } from './profileParts'
+import GoalModal from './GoalModal'
+import type { Goal } from '../data/financialId'
+
 import { DownloadIcon } from '../components/icons'
 import { CalendarIcon, CaretIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -40,6 +44,12 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
+
+/* An answer that is a list of things rather than a sentence — "Ownership, my
+   name on it, equity for Ana and Dev" — reads as lines. One with a full stop in
+   it is prose somebody wrote, and stays whole. */
+const listOf = (text?: string) =>
+  text ? (text.includes('.') ? [text] : text.split(/,\s*/).filter(Boolean)) : []
 
 type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
@@ -329,8 +339,30 @@ function BusinessIdTab({
 }) {
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
-  // The change he named, read as a goal at the stage the flow put him in.
-  const goals = [{ title: d.move.change, readiness: stageLevel }]
+  const [openGoal, setOpenGoal] = useState<Goal | null>(null)
+  /* The change they named, read as a goal at the stage the flow put them in —
+     and carrying everything else The Move asked, so the row opens onto the same
+     panel a client's goal does. Marcus's answers and an advisor who took the
+     flow this morning fill the same shape, so Gary's move opens as readily as
+     his. */
+  const goals: Goal[] = [
+    {
+      title: d.move.change,
+      readiness: stageLevel,
+      updated: d.header.completed,
+      timeline: d.move.when,
+      pros: listOf(d.move.worthIt),
+      cons: listOf(d.move.challenging),
+      extra: [
+        ...(d.move.stakeholders
+          ? [{ label: 'Who it involves', value: d.move.stakeholders }]
+          : []),
+        ...(d.move.hardest
+          ? [{ label: 'Hardest to bring along', value: d.move.hardest }]
+          : []),
+      ],
+    },
+  ]
   // He has taken the flow once, so every card's date picker offers that sitting.
   const dates = [d.header.completed]
   return (
@@ -364,7 +396,19 @@ function BusinessIdTab({
             </div>
             <div className="pp-goals">
               {goals.map((g) => (
-                <div className="pp-goal" key={g.title}>
+                <div
+                  className="pp-goal is-open-able"
+                  key={g.title}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenGoal(g)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setOpenGoal(g)
+                    }
+                  }}
+                >
                   <div className="pp-goal-main">
                     <span className="pp-goal-title">{g.title}</span>
                   </div>
@@ -372,6 +416,7 @@ function BusinessIdTab({
                   <span className="pp-goal-caret">
                     <RowChevron />
                   </span>
+                  <GoalDetail g={g} />
                 </div>
               ))}
             </div>
@@ -551,6 +596,10 @@ function BusinessIdTab({
           </section>
         </div>
       </div>
+
+      {/* Their move, opened. Read-only: these are their answers, and a rep
+          reading them has nothing to rename or throw away. */}
+      {openGoal && <GoalModal goal={openGoal} onClose={() => setOpenGoal(null)} />}
     </>
   )
 }

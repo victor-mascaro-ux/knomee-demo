@@ -472,6 +472,9 @@ export default function ClientProfileScreen({
           <button type="button" className="pp-crumb-link" onClick={onBack}>
             My Clients
           </button>
+          {/* The separator belongs to the step BEFORE it, or a trail with no
+              family in it loses the one between the list and the person. */}
+          <span className="pp-crumb-sep">›</span>
           {household && (
             <>
               <button

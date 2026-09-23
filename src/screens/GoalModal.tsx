@@ -14,7 +14,7 @@
  * can only read.
  */
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './goalModal.css'
 import type { Goal } from '../data/financialId'
 import { ReadinessLevel, TTM_STAGES } from './profileParts'
@@ -141,6 +141,12 @@ export default function GoalModal({
                 <dd>{goal.note}</dd>
               </>
             )}
+            {goal.extra?.map((row) => (
+              <React.Fragment key={row.label}>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </React.Fragment>
+            ))}
             <dt>Readiness</dt>
             <dd className="goal-readiness">
               <ReadinessLevel level={goal.readiness} />
