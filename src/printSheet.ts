@@ -15,6 +15,16 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
+/* Set on <body> for as long as the print is being prepared, synchronously with
+   the click, so the cards that mount for it can see it on their first render.
+   The scores count themselves up when they scroll into view; a tab that is
+   rendered only to be printed never scrolls anywhere, and an observer that
+   fires after the dialog has opened is an observer that fires too late — so
+   anything that waits for the screen reads this and arrives at its value. */
+export const PRINTING_CLASS = 'is-printing'
+export const isPrinting = () =>
+  typeof document !== 'undefined' && document.body.classList.contains(PRINTING_CLASS)
+
 export function usePrintSheet() {
   const [printing, setPrinting] = useState(false)
 
@@ -23,7 +33,10 @@ export function usePrintSheet() {
     /* The dialog blocks the thread the moment it opens, so the extra tabs have
        to be painted before it does — one frame, then a beat for the images the
        other tabs bring with them. */
-    const done = () => setPrinting(false)
+    const done = () => {
+      document.body.classList.remove(PRINTING_CLASS)
+      setPrinting(false)
+    }
     window.addEventListener('afterprint', done)
     const raf = window.requestAnimationFrame(() => {
       window.setTimeout(() => {
@@ -38,6 +51,9 @@ export function usePrintSheet() {
     }
   }, [printing])
 
-  const print = useCallback(() => setPrinting(true), [])
+  const print = useCallback(() => {
+    document.body.classList.add(PRINTING_CLASS)
+    setPrinting(true)
+  }, [])
   return { printing, print }
 }
