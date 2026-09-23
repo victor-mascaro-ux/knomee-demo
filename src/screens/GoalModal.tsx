@@ -14,7 +14,7 @@
  * can only read.
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import './goalModal.css'
 import type { Goal } from '../data/financialId'
 import { ReadinessLevel, TTM_STAGES } from './profileParts'
@@ -23,20 +23,19 @@ import { CloseIcon } from '../components/icons'
 export default function GoalModal({
   goal,
   onClose,
-  onRename,
+  onEdit,
   onToggleComplete,
   onDelete,
 }: {
   goal: Goal & { tags?: string[] }
   onClose: () => void
-  /** Renaming, marking done and deleting are the owner's to offer. */
-  onRename?: (title: string) => void
+  /** Editing, marking done and deleting are the owner's to offer. The pencil
+      opens the goal's own form, where every answer can be changed — the title
+      was never the only thing worth correcting. */
+  onEdit?: () => void
   onToggleComplete?: () => void
   onDelete?: () => void
 }) {
-  const [editing, setEditing] = useState(false)
-  const [title, setTitle] = useState(goal.title)
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -44,13 +43,6 @@ export default function GoalModal({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
-
-  const save = () => {
-    const next = title.trim()
-    setEditing(false)
-    if (next && next !== goal.title) onRename?.(next)
-    else setTitle(goal.title)
-  }
 
   const stage = TTM_STAGES[goal.readiness - 1]
 
@@ -66,30 +58,13 @@ export default function GoalModal({
 
         <div className="modal-body goal-body">
           <div className="goal-head">
-            {editing ? (
-              <input
-                className="goal-title-input"
-                value={title}
-                autoFocus
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={save}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') save()
-                  if (e.key === 'Escape') {
-                    setTitle(goal.title)
-                    setEditing(false)
-                  }
-                }}
-              />
-            ) : (
-              <h3 className="goal-title">{title}</h3>
-            )}
-            {onRename && (
+            <h3 className="goal-title">{goal.title}</h3>
+            {onEdit && (
               <button
                 className="goal-edit"
                 type="button"
-                aria-label={editing ? 'Save the goal’s name' : 'Rename this goal'}
-                onClick={() => (editing ? save() : setEditing(true))}
+                aria-label="Edit this goal"
+                onClick={onEdit}
               >
                 <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
                   <path

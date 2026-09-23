@@ -109,11 +109,54 @@
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }
+/* The prompt under Pros and Cons: a line of text that is also the way in, so
+   it carries no button chrome — only the pointer says it can be pressed. */
 .ag-hint {
-  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
   font-size: var(--text-base);
   font-style: italic;
+  text-align: left;
   color: var(--text-secondary);
+  cursor: pointer;
+}
+.ag-hint:hover {
+  color: var(--text-link);
+}
+
+/* A point and the cross that takes it away. The cross is quiet until the row
+   is hovered: there are up to half a dozen of these and a column of crosses
+   reads as a list of things to delete. */
+.ag-point {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+.ag-point .ag-input {
+  flex: 1;
+  min-width: 0;
+}
+.ag-drop {
+  flex: none;
+  display: inline-flex;
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+.ag-point:hover .ag-drop,
+.ag-drop:focus-visible {
+  opacity: 1;
+}
+.ag-drop:hover {
+  color: var(--k-crimson);
+  background: var(--k-crimson-light);
 }
 
 .ag-input {
