@@ -701,3 +701,17 @@
     display: none !important;
   }
 }
+
+/* In the rail the card is ~180px, too narrow for the date to share the top
+   row with the mood: it takes a line of its own under everything, bottom
+   right, the way a note is signed off. */
+.pp-side .cp-checkin {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+.pp-side .cp-checkin .cp-checkin-date {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: end;
+  margin-top: var(--space-4);
+}
