@@ -106,7 +106,7 @@ export const quickNext: AdventureAction = {
 }
 
 export const quickActions: QuickAction[] = [
-  { label: 'Save a vision', art: 'vision', raster: true },
+  { label: 'Save a vision', art: 'vision' },
   { label: 'Add a new goal', art: 'goals' },
   { label: 'Add a life event', art: 'life-events' },
   { label: 'Ask a question', art: 'questions' },
