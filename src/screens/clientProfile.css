@@ -707,7 +707,7 @@
    right, the way a note is signed off. */
 .pp-side .cp-checkin {
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
 }
 .pp-side .cp-checkin .cp-checkin-date {
   grid-column: 1 / -1;

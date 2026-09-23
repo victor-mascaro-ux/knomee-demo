@@ -151,6 +151,11 @@ export function Gauge({ label }: { label: string }) {
           d="M18 4.82308C12.5273 7.98274 7.98275 12.5272 4.82309 17.9999C1.66343 23.4726 2.0591e-06 29.6806 0 35.9999L18 35.9999C18 32.8402 18.8317 29.7363 20.4115 26.9999C21.9914 24.2636 24.2637 21.9914 27 20.4115L18 4.82308Z"
           fill="var(--dial-1)"
         />
+        {/* Two groups: the outer one is what an animation may swing about the
+            dial's centre; the inner one carries the needle's own placement.
+            On one element, a CSS transform-origin shifted the placement and
+            the needle left the dial. */}
+        <g className="pp-needle">
         <g transform={needle}>
           <path
             d="M16.0757 0.961386C16.226 0.785021 16.2577 0.536341 16.1563 0.327944C16.0432 0.0956357 15.7907 -0.0345688 15.5359 0.00800544L4.04027 1.92858C0.717702 2.48369 -1.0318 6.18253 0.646823 9.10312C2.31222 12.0007 6.34562 12.3735 8.51395 9.83036L16.0757 0.961386Z"
@@ -160,6 +165,7 @@ export function Gauge({ label }: { label: string }) {
             d="M4.29615 4.46698C2.9558 4.63811 2.00795 5.8634 2.17908 7.20375C2.3502 8.54411 3.5755 9.49196 4.91585 9.32083C6.2562 9.14971 7.20405 7.92441 7.03293 6.58406C6.8618 5.2437 5.63651 4.29586 4.29615 4.46698Z"
             fill="white"
           />
+        </g>
         </g>
       </svg>
     </span>

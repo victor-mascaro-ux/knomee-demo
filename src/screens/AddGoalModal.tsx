@@ -17,9 +17,9 @@
 import { useEffect, useState } from 'react'
 import './addGoalModal.css'
 import type { Goal } from '../data/financialId'
-import { DEMO_TODAY } from '../data/financialId'
 import { CloseIcon } from '../components/icons'
-import { AddButton } from './profileParts'
+import { AddButton, ReadinessLevel, TTM_STAGES } from './profileParts'
+import ReadinessModal from './ReadinessModal'
 
 /* The horizons the profiles already speak in. Kept in one list so a goal added
    here reads like the ones that came out of the app. */
@@ -131,6 +131,13 @@ function PointList({
   )
 }
 
+/** Today as the page writes dates, MM/DD/YYYY. */
+function today() {
+  const d = new Date()
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  return `${p2(d.getMonth() + 1)}/${p2(d.getDate())}/${d.getFullYear()}`
+}
+
 export default function AddGoalModal({
   suggestions = [],
   goal,
@@ -154,14 +161,19 @@ export default function AddGoalModal({
   const [pros, setPros] = useState<string[]>(goal?.pros ?? [])
   const [cons, setCons] = useState<string[]>(goal?.cons ?? [])
   const [note, setNote] = useState(goal?.note ?? '')
+  /* An edit can move the goal's stage too: they know where they are with it
+     better than the answers they gave the last time did. */
+  const [readiness, setReadiness] = useState(goal?.readiness ?? 0)
+  const [assessing, setAssessing] = useState(false)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      // The assessment over this panel closes itself; this one stays.
+      if (e.key === 'Escape' && !assessing) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, assessing])
 
   const save = () => {
     const name = (title ?? '').trim()
@@ -177,8 +189,9 @@ export default function AddGoalModal({
       title: name,
       /* No rung until they take one: the panel that opens on a new goal asks
          for it, and a stage nobody chose is not a reading. */
-      readiness: goal?.readiness ?? 0,
-      updated: DEMO_TODAY,
+      readiness: goal ? readiness : 0,
+      /* Saved is updated: the day it was, not the demo's fixed one. */
+      updated: today(),
       timeline,
       pros: keep(pros),
       cons: keep(cons),
@@ -284,6 +297,23 @@ export default function AddGoalModal({
                 />
               </div>
 
+              {/* The stage is not picked, it is worked out: changing it means
+                  answering the readiness questions again. */}
+              {goal && (
+                <>
+                  <span className="ag-label">Readiness</span>
+                  <div className="ag-ttm">
+                    <span className="ag-ttm-now">
+                      <ReadinessLevel level={readiness} />
+                      {TTM_STAGES[readiness - 1] ?? 'Not set'}
+                    </span>
+                    <button className="ag-ttm-retake" type="button" onClick={() => setAssessing(true)}>
+                      {readiness ? 'Retake assessment' : 'Assess readiness'}
+                    </button>
+                  </div>
+                </>
+              )}
+
               <span className="ag-label">I want to do this because…</span>
               <div className="ag-field">
                 <input
@@ -308,6 +338,21 @@ export default function AddGoalModal({
           </>
         )}
       </div>
+      {/* Its own backdrop's click closes the assessment only, not this panel
+          beneath it. */}
+      {assessing && (
+        <div onClick={(e) => e.stopPropagation()}>
+        <ReadinessModal
+          goal={{ ...(goal as Goal), title: title ?? goal?.title ?? '' }}
+          saveLabel="Use this stage"
+          onClose={() => setAssessing(false)}
+          onSave={(lv) => {
+            setReadiness(lv)
+            setAssessing(false)
+          }}
+        />
+        </div>
+      )}
     </div>
   )
 }
