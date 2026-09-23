@@ -213,7 +213,10 @@
   font-size: var(--text-lg);
 }
 .jw-next-btn {
-  padding: 13px 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+  padding: 9px 30px 9px 12px;
   border: 0;
   border-radius: var(--radius-pill);
   background: #fff;
@@ -248,4 +251,12 @@
   .jw-seg.is-new i {
     animation: none;
   }
+}
+
+/* The next adventure's mark, at the button's left. */
+.jw-next-ic {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: block;
 }
