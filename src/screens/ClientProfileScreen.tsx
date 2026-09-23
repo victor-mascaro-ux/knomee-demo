@@ -476,46 +476,120 @@ export function Board({
      rather than jumping at the end: every tile it passes over steps aside, so
      where it will land is always what is on the screen. */
   const [carried, setCarried] = useState<number | null>(null)
+  /* The carry in progress, outside React: the tile is moved under the pointer
+     straight on its style, every pointer move, because a render per pixel is
+     what made it feel dragged through mud. React hears only when the order
+     changes. */
+  const carry = useRef<{
+    at: number
+    x0: number
+    y0: number
+    left: number
+    top: number
+    px: number
+    py: number
+    scale: number
+  } | null>(null)
+
+  /* Puts the carried tile under the pointer, wherever the board has laid it
+     out: the pointer's travel, less how far its cell has moved since it was
+     picked up. */
+  const follow = () => {
+    const c = carry.current
+    const g = grid.current
+    if (!c || !g) return
+    const el = g.children[c.at] as HTMLElement | undefined
+    if (!el) return
+    const dx = (c.px - c.x0) / c.scale - (el.offsetLeft - c.left)
+    const dy = (c.py - c.y0) / c.scale - (el.offsetTop - c.top)
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(1.04)`
+  }
+
   const startCarry = (e: React.PointerEvent<HTMLDivElement>) => {
     const g = grid.current
     if (!onMove || !g || e.button !== 0) return
     const target = e.target as HTMLElement
     // Its cross and its handle are controls of their own.
     if (target.closest('.cp-tile-x, .cp-tile-handle')) return
-    const el = target.closest('.cp-tile')
+    const el = target.closest('.cp-tile') as HTMLElement | null
     if (!el || el.parentElement !== g) return
-    let at = Array.from(g.children).indexOf(el)
+    e.preventDefault()
     const x0 = e.clientX
     const y0 = e.clientY
+    const scale = g.getBoundingClientRect().width / g.clientWidth || 1
+    const at0 = Array.from(g.children).indexOf(el)
     let moving = false
+
     const move = (ev: PointerEvent) => {
       if (!moving) {
         // A press that has not travelled is not a drag.
-        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return
         moving = true
-        setCarried(at)
+        carry.current = { at: at0, x0, y0, left: el.offsetLeft, top: el.offsetTop, px: x0, py: y0, scale }
+        setCarried(at0)
       }
       ev.preventDefault()
-      const over = document
-        .elementFromPoint(ev.clientX, ev.clientY)
-        ?.closest('.cp-tile') as HTMLElement | null
-      if (!over || over.parentElement !== g) return
-      const to = Array.from(g.children).indexOf(over)
-      if (to < 0 || to === at) return
-      onMove(at, to)
-      at = to
+      const c = carry.current
+      if (!c) return
+      c.px = ev.clientX
+      c.py = ev.clientY
+      follow()
+      /* Where the pointer is on the board, in the board's own pixels, and
+         which other tile it is well inside — the middle of it, not its edge,
+         so a pointer resting on a border does not swap two tiles back and
+         forth. */
+      const box = g.getBoundingClientRect()
+      const x = (ev.clientX - box.left) / scale
+      const y = (ev.clientY - box.top) / scale
+      const kids = Array.from(g.children) as HTMLElement[]
+      const to = kids.findIndex((k, i) => {
+        if (i === c.at) return false
+        const ix = k.offsetWidth * 0.2
+        const iy = k.offsetHeight * 0.2
+        return (
+          x > k.offsetLeft + ix &&
+          x < k.offsetLeft + k.offsetWidth - ix &&
+          y > k.offsetTop + iy &&
+          y < k.offsetTop + k.offsetHeight - iy
+        )
+      })
+      if (to < 0) return
+      onMove(c.at, to)
+      c.at = to
       setCarried(to)
     }
+
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
+      const c = carry.current
+      carry.current = null
+      if (!c) return
+      /* Let go: it settles into the cell it was carried to. */
+      const tile = g.children[c.at] as HTMLElement | undefined
+      if (tile) {
+        const from = tile.style.transform
+        tile.style.transform = ''
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        if (from && !reduce)
+          tile.animate([{ transform: from }, { transform: 'none' }], {
+            duration: 200,
+            easing: 'cubic-bezier(0.22, 0.81, 0.28, 1.05)',
+          })
+      }
       setCarried(null)
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
     window.addEventListener('pointercancel', up)
   }
+
+  /* After the board reorders, the carried tile's cell has moved: put it back
+     under the pointer before the frame paints. */
+  useLayoutEffect(() => {
+    follow()
+  })
 
   /* Where each tile was on the last commit, by key, so the next one can play
      the difference: a tile that moved, grew or shrank glides from its old box
@@ -541,6 +615,8 @@ export function Board({
       const now: Box = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }
       next.set(k, now)
       const was = boxes.current.get(k)
+      // The tile in hand is placed by the pointer, not by a glide.
+      if (carry.current?.at === i) return
       if (reduce || !was || !now.w || !now.h) return
       if (was.x === now.x && was.y === now.y && was.w === now.w && was.h === now.h) return
       glides.current.get(k)?.cancel()

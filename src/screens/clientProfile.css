@@ -629,9 +629,15 @@
 }
 .cp-tile.is-lifted,
 .cp-tile.is-lifted:hover {
-  opacity: 0.55;
-  transform: scale(0.96);
-  box-shadow: 0 0 0 2px var(--action-primary);
+  position: relative;
+  z-index: 3;
+  /* Its transform is the pointer's, set every move: nothing may ease it. */
+  transition: none;
+  box-shadow: 0 14px 30px rgba(20, 10, 40, 0.3), 0 0 0 2px var(--action-primary);
+}
+.cp-tile.is-lifted img,
+.cp-tile.is-lifted:hover img {
+  transform: none;
 }
 
 /* ── motion on a board being made ──
