@@ -132,20 +132,59 @@ export const MOOD_ARC = { r: 250, faceR: 200, face: 46 }
 /* ── voice capture (long press on the knomee mark) ────────────────────────── */
 
 // A scripted demo: the words arrive one at a time, are offered for editing, and
-// land as a life event the client can finish later.
-export const voice = {
-  said: ['I', 'just', 'got', 'divorced'],
+// land as the thing they ask for. Three of them, one per long press in turn,
+// so a room sees the one gesture become each of the three records it can make.
+export const voiceTiming = {
   wordMs: 320,
   firstWordMs: 1100,
   settleMs: 520,
   hint: 'Say anything. Knomee turns it into the right next step.',
-  result: {
-    tag: 'Personal',
-    title: 'Divorce',
-    meta: 'Added to Life Events · 3 min to finish',
-    art: 'divorce' as ArtKey,
-  },
 }
+
+export interface VoiceScript {
+  said: string[]
+  /** The button that makes it: what will happen, in words. */
+  action: string
+  /** Said once it has. */
+  done: string
+  result: { tag: string; title: string; meta: string; art: ArtKey }
+}
+
+export const voices: VoiceScript[] = [
+  {
+    said: ['I', 'just', 'got', 'divorced'],
+    action: 'Create a life event',
+    done: 'Life event created',
+    result: {
+      tag: 'Personal',
+      title: 'Divorce',
+      meta: 'Added to Life Events · 3 min to finish',
+      art: 'divorce',
+    },
+  },
+  {
+    said: ['Can', 'I', 'afford', 'to', 'retire', 'at', 'sixty?'],
+    action: 'Ask a question',
+    done: 'Question sent',
+    result: {
+      tag: 'Question',
+      title: 'Can I afford to retire at 60?',
+      meta: 'Sent to your advisor · Added to Questions',
+      art: 'questions',
+    },
+  },
+  {
+    said: ['I', 'want', 'a', 'lake', 'house', 'in', 'five', 'years'],
+    action: 'Add a goal',
+    done: 'Goal added',
+    result: {
+      tag: 'Goal',
+      title: 'Buy a lake house',
+      meta: 'Added to Goals · 3–5 years',
+      art: 'goals',
+    },
+  },
+]
 
 /** Signed-in client, shown as the avatar initial in the in-phone menu. */
 export const clientInitial = 'D'
