@@ -213,6 +213,8 @@
   margin-top: 1px;
 }
 .cx-sheet-avatar {
+  /* Never squeezed: a long line beside it narrowed the disc into an oval. */
+  flex: none;
   width: 34px;
   height: 34px;
   border-radius: var(--radius-circle);
