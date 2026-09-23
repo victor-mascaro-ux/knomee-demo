@@ -542,6 +542,8 @@
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   background: var(--surface-sunken);
 }
+/* The bar is the pill's ink, so the key reads straight across to the tag it
+   explains. */
 .rd-key-row.rd-tag-positive {
   border-left-color: var(--tag-positive-ink);
 }
@@ -554,14 +556,17 @@
 .rd-key-row.rd-tag-validate {
   border-left-color: var(--tag-validate-ink);
 }
+/* The row itself keeps the key's own wash; only its pill wears the pair. */
+.rd-key-row[class*='rd-tag-'] {
+  background: var(--surface-sunken);
+  color: inherit;
+}
 .rd-key-tag {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--rd-ink);
+  display: inline-block;
 }
 .rd-key-meaning {
-  margin: var(--space-4) 0 0;
+  /* A little air under the pill, so it reads as the row's title. */
+  margin: var(--space-8) 0 0;
   font-size: 12px;
   font-style: italic;
   line-height: 1.5;

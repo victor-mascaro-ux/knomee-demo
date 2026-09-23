@@ -740,7 +740,9 @@ export function StartersCard({
         <div className="rd-key">
           {keyRows.map((k) => (
             <div className={`rd-key-row ${TAG_CLASS[k.tag]}`} key={k.tag}>
-              <span className="rd-key-tag">{k.tag}</span>
+              {/* Titled with the pill itself, so the key reads as a legend for
+                  the pills on the cards above. */}
+              <span className={`rd-tag rd-key-tag ${TAG_CLASS[k.tag]}`}>{k.tag}</span>
               <p className="rd-key-meaning">{k.meaning}</p>
             </div>
           ))}
