@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -503,6 +504,24 @@ export function SheetCredit() {
   )
 }
 
+/* The shine's loop, and the clock every segment keeps it to. */
+const SHINE_MS = 9000
+/* One segment of the meter. Its shine starts when the segment turns on, so it
+   is set against the wall clock at that moment — segments that fill at
+   different times, a skip ahead or a remount, still sweep as the one wave. */
+function MeterSeg({ i, on, last }: { i: number; on: boolean; last: boolean }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sync = useMemo(() => -(Date.now() % SHINE_MS), [on])
+  return (
+    <span
+      className={`cx-progress-seg${on ? ' is-on' : ''}${last ? ' is-last' : ''}`}
+      style={{ ['--i' as string]: i, ['--sync' as string]: `${sync}ms` }}
+    >
+      <i />
+    </span>
+  )
+}
+
 /* How far through the core adventures she is: one segment per adventure,
    each filling in turn with the brand's plum-to-lilac, a light running across
    what is done, and the percentage counting up to where she is. */
@@ -540,13 +559,7 @@ export function ProgressMeter({ done, required }: { done: number; required: numb
           aria-label={`${done} of ${required} adventures completed`}
         >
           {Array.from({ length: required }, (_, i) => (
-            <span
-              key={i}
-              className={`cx-progress-seg${i < done ? ' is-on' : ''}${i === done - 1 ? ' is-last' : ''}`}
-              style={{ ['--i' as string]: i }}
-            >
-              <i />
-            </span>
+            <MeterSeg key={i} i={i} on={i < done} last={i === done - 1} />
           ))}
         </div>
         <span className="cx-progress-pct">{shown}%</span>

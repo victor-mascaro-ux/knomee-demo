@@ -43,29 +43,62 @@
   gap: var(--space-8);
   margin-top: 6px;
 }
-.jw-check {
-  flex: none;
-  color: rgba(255, 255, 255, 0.55);
-  transition: color 0.3s ease, transform 0.4s cubic-bezier(0.2, 1.5, 0.4, 1);
-}
-.jw-check.is-on {
-  color: var(--k-lime);
-  transform: scale(1.2) rotate(-12deg);
-}
+/* Five segments in the meter's own purples, lightened for the plum ground:
+   lilac through to pale lilac, one gradient across the whole track. */
 .jw-track {
   flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  gap: 4px;
+}
+.jw-seg {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
   overflow: hidden;
 }
-.jw-track i {
-  display: block;
-  height: 100%;
+.jw-seg i {
+  position: absolute;
+  inset: 0;
   border-radius: inherit;
-  background: var(--k-lime);
-  box-shadow: 0 0 10px rgba(175, 252, 65, 0.9);
-  transition: width 1s cubic-bezier(0.3, 0.8, 0.3, 1);
+  background: linear-gradient(90deg, #9b51e0, #b98ddc 50%, #e9d9f4);
+  background-size: 500% 100%;
+  background-position: calc(var(--i) * 25%) 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.jw-seg.is-on i {
+  transform: scaleX(1);
+}
+/* This adventure's segment: it fills, the whole segment pops, and it keeps a
+   glow so it reads as the one just earned. */
+.jw-seg.is-new {
+  overflow: visible;
+  animation: jwSegPop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) 0.75s both;
+}
+.jw-seg.is-new i {
+  animation: jwSegFill 0.7s cubic-bezier(0.3, 0.9, 0.35, 1) both;
+  box-shadow: 0 0 12px rgba(233, 217, 244, 0.85);
+}
+@keyframes jwSegFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes jwSegPop {
+  0% {
+    transform: scaleY(1);
+  }
+  40% {
+    transform: scaleY(1.7);
+  }
+  100% {
+    transform: scaleY(1);
+  }
 }
 .jw-pct {
   flex: none;
@@ -208,8 +241,8 @@
   .jw-confetti {
     display: none;
   }
-  .jw-track i,
-  .jw-check {
-    transition: none;
+  .jw-seg.is-new,
+  .jw-seg.is-new i {
+    animation: none;
   }
 }
