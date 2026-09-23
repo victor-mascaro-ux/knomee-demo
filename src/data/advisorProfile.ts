@@ -375,6 +375,8 @@ export const readinessTab: ReadinessTab = {
 
 export const toolkitTab: ToolkitTab = {
   topAction: topAction.title,
+  topActionWhy: topAction.body,
+  topActionSource: 'Outlook · Q1 — the concern he wrote in his own words.',
   starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag], source: s.source })),
   key: RECOMMENDATIONS_KEY,
   questions: questionsTheyAsk.map((q) => ({

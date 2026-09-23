@@ -21,10 +21,10 @@ import {
   QuestionsCard,
   ReadinessSnapshot,
   StartersCard,
+  TopAction,
 } from './readinessParts'
 import { clientInsights } from '../data/clientInsights'
 import type { SuggestedAdventure } from '../data/clientInsights'
-import icTopAction from '../assets/cards/top-action.svg'
 import icAdventures from '../assets/adventures/award.svg'
 import icAngelInvesting from '../assets/adventures/angel-investing.svg'
 import icSubtracting from '../assets/adventures/subtracting.svg'
@@ -177,11 +177,7 @@ export default function ClientInsightsTab({ name }: { name?: string }) {
   const snapshot = snapshotFor(name)
   return (
     <div className="rd ci">
-      <div className="rd-top-action">
-        <img className="pp-card-ic rd-top-ic" src={icTopAction} alt="" />
-        <b>Top Action</b>
-        <span className="rd-top-text">{toolkit.topAction}</span>
-      </div>
+      <TopAction d={toolkit} />
 
       <ReadinessSnapshot s={snapshot} title="Relationship Snapshot" />
     </div>

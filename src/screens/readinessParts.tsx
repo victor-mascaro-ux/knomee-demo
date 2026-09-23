@@ -857,14 +857,35 @@ export function CommunicationRail({ d }: { d: ToolkitTab }) {
   )
 }
 
-export function ToolkitTabView({ d, extras }: { d: ToolkitTab; extras?: React.ReactNode }) {
+/* The one thing to do next, as a row that opens like a conversation starter:
+   the action, what it is built on, and why it is the move. */
+export function TopAction({ d }: { d: Pick<ToolkitTab, 'topAction' | 'topActionWhy' | 'topActionSource'> }) {
+  const [open, setOpen] = useState(false)
   return (
-    <div className="rd">
-      <div className="rd-top-action">
+    <>
+      <div className="rd-top-action is-open-able" aria-label="Top Action — why this is the move" {...opens(() => setOpen(true))}>
         <img className="pp-card-ic rd-top-ic" src={icTopAction} alt="" />
         <b>Top Action</b>
         <span className="rd-top-text">{d.topAction}</span>
       </div>
+      {open && (
+        <TalkModal
+          kind="Top Action"
+          quote={d.topAction}
+          leadHead="Why this is the move"
+          lead={d.topActionWhy ?? 'The first thing this person\u2019s answers ask for.'}
+          source={d.topActionSource}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+export function ToolkitTabView({ d, extras }: { d: ToolkitTab; extras?: React.ReactNode }) {
+  return (
+    <div className="rd">
+      <TopAction d={d} />
 
       <div className="rd-kit-cols">
         <div className="rd-kit-main">

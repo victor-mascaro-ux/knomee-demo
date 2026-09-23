@@ -1168,3 +1168,13 @@
 .rd-calc-item.is-out {
   opacity: 0.6;
 }
+
+/* Top Action opens its panel: it lifts like the other cards that do. */
+.rd-top-action.is-open-able {
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.rd-top-action.is-open-able:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20, 10, 40, 0.1);
+}

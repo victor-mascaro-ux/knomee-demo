@@ -788,6 +788,12 @@ function buildToolkit(a: Answers, themes: ThemeKey[], clarity: number): ToolkitT
     topAction: said('ol-q1', a)
       ? `Answer ${THEME_QUESTIONS[top].label} with evidence, in the first ten minutes.`
       : 'Open by asking what they want the practice to give them. The sheet does not say yet.',
+    topActionSource: said('ol-q1', a)
+      ? `Outlook · Q1 — they wrote: “${firstSentence(said('ol-q1', a), 160)}”`
+      : undefined,
+    topActionWhy: said('ol-q1', a)
+      ? 'It is the question they brought. Nothing else in the meeting moves until it is answered, so a rep who opens anywhere else has spent the meeting.'
+      : 'Nothing they wrote names a first question yet, so the meeting starts by finding it.',
     starters: starters(a, themes, clarity),
     key: RECOMMENDATIONS_KEY,
     questions: themes.slice(0, 3).map((k) => ({
