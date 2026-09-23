@@ -6379,6 +6379,7 @@ button.name-link-btn:hover .name-text {
   .pp-meta {
     grid-area: meta;
     align-self: start;
+    align-items: flex-start;
   }
   /* The advisor's rail wraps the name and the date in .ap-idline, which is
      `display: contents` at full width and a flex column below it — and paper is
