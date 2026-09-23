@@ -1214,3 +1214,12 @@
 .rd .rd-tier-3 .rd-tier-swatch {
   background: var(--rd-t3);
 }
+
+/* The key inside the starters' grey card: under the starters, its rows white
+   like theirs, the heading given room to start a new part of the card. */
+.rd-starters-card .rd-key-card {
+  margin-top: var(--space-24);
+}
+.rd-starters-card .rd-key-row[class*='rd-tag-'] {
+  background: var(--surface-card);
+}
