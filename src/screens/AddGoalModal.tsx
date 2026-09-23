@@ -19,6 +19,7 @@ import './addGoalModal.css'
 import type { Goal } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
 import { CloseIcon } from '../components/icons'
+import { AddButton } from './profileParts'
 
 /* The horizons the profiles already speak in. Kept in one list so a goal added
    here reads like the ones that came out of the app. */
@@ -67,13 +68,6 @@ const PencilTip = () => (
   </svg>
 )
 
-const PlusRound = () => (
-  <svg viewBox="0 0 22 22" width="19" height="19" fill="none" aria-hidden>
-    <circle cx="11" cy="11" r="10" fill="currentColor" />
-    <path d="M11 6.4v9.2M6.4 11h9.2" stroke="#1a3d12" strokeWidth="2.1" strokeLinecap="round" />
-  </svg>
-)
-
 /* A pro or a con: a line they are typing, or one they have typed. The list is
    the thing, so an empty last line is simply not saved. */
 function PointList({
@@ -91,14 +85,12 @@ function PointList({
     <div className="ag-points">
       <div className="ag-points-head">
         <span className="ag-label">{label}</span>
-        <button
-          className="ag-plus"
-          type="button"
-          aria-label={`Add a ${label.slice(0, -1).toLowerCase()}`}
+        {/* The card's own plus — the one that opened this panel — rather than a
+            second drawing of the same idea. */}
+        <AddButton
+          label={`Add a ${label.slice(0, -1).toLowerCase()}`}
           onClick={() => onChange([...items, ''])}
-        >
-          <PlusRound />
-        </button>
+        />
       </div>
       {items.length === 0 ? (
         <p className="ag-hint">{hint}</p>

@@ -186,17 +186,6 @@
 .ag-points-head .ag-label {
   margin-top: 0;
 }
-.ag-plus {
-  padding: 0;
-  border: 0;
-  background: none;
-  line-height: 0;
-  color: var(--k-lime, #a0f040);
-  cursor: pointer;
-}
-.ag-plus:hover {
-  filter: brightness(0.95);
-}
 
 .ag-foot {
   justify-content: flex-end;
