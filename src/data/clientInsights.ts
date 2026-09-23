@@ -105,7 +105,7 @@ export const clientSnapshot: Snapshot = {
       score: 88,
       caption: 'Household is highly engaged',
       evidence: [`${cp.household}: ${cp.members.map((m) => m.name).join(' · ')}`],
-      calc: [{ label: 'Her household members’ KR', value: 'Emily and Sebastian', points: 88 }],
+      calc: [{ label: 'Household member (their own KR)', value: 'Sebastian Watson', points: 88 }],
     },
   ],
   tier: {

@@ -1054,7 +1054,7 @@ export default function ClientProfileScreen({
           {mine && <CheckInCard checkIn={cp.checkIn} />}
 
           {!printing && tab === 'insights' ? (
-            <ClientInsightsTab />
+            <ClientInsightsTab name={client.name} />
           ) : !printing && tab === 'toolkit' ? (
             <ClientToolkitTab />
           ) : (
@@ -1370,7 +1370,7 @@ export default function ClientProfileScreen({
             <>
               <div className="print-page">
                 <h2 className="print-head">Client Insights</h2>
-                <ClientInsightsTab />
+                <ClientInsightsTab name={client.name} />
               </div>
               <div className="print-page">
                 <h2 className="print-head">Client Toolkit</h2>
