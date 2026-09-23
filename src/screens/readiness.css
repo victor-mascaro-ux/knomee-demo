@@ -1149,3 +1149,22 @@
   align-items: flex-start;
   gap: 4px;
 }
+
+/* The headline score card opens its own working too. */
+.rd-kq.is-open-able {
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.rd-kq.is-open-able:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover, #cfc8dc);
+  box-shadow: 0 8px 18px rgba(20, 10, 40, 0.12);
+}
+.rd-kq.is-open-able:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+/* A dimension the total leaves out reads quieter. */
+.rd-calc-item.is-out {
+  opacity: 0.6;
+}
