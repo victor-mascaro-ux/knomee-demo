@@ -6317,10 +6317,19 @@ button.name-link-btn:hover .name-text {
 
   /* ── the cards ── */
   .pp-cols,
+  .rd-cols,
   .rd-kit-cols,
   .rd-snapshot-body,
   .fin-compare {
     display: block !important;
+  }
+  /* Stacked, the cards carry their own space between them: the columns they
+     came out of were holding that with a grid gap. */
+  .rd-card,
+  .rd-cols > *,
+  .rd-kit-main > *,
+  .rd-kit-rail > * {
+    margin-bottom: var(--space-16) !important;
   }
   .content,
   .content-profile,
@@ -6379,6 +6388,8 @@ button.name-link-btn:hover .name-text {
 .print-head {
   display: none;
 }
+/* The sheet's own margin. A document is read with a hand's width of paper
+   around it; 14mm was the page bleeding into its own edges. */
 @page {
-  margin: 14mm;
+  margin: 18mm;
 }

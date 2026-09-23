@@ -328,6 +328,7 @@ function BusinessIdTab({
   stageLevel: number
 }) {
   const [confidence, setConfidence] = useState(false)
+  const [postcard, setPostcard] = useState(false)
   // The change he named, read as a goal at the stage the flow put him in.
   const goals = [{ title: d.move.change, readiness: stageLevel }]
   // He has taken the flow once, so every card's date picker offers that sitting.
@@ -441,16 +442,29 @@ function BusinessIdTab({
                 </div>
               </div>
             ))}
+            {/* What Future You wrote back, inside the adventure it came out of
+                rather than in a card of its own — a section of this one, shut
+                until asked for, because it is a letter among lists. Open on
+                paper, where there is nothing to scroll past. */}
+            {d.postcard && (
+              <div className="ap-sub">
+                <button
+                  className="ap-sub-head"
+                  type="button"
+                  aria-expanded={postcard}
+                  onClick={() => setPostcard((v) => !v)}
+                >
+                  <span className="pp-fy-label">Postcard from Future Me</span>
+                  <CaretIcon up={postcard} />
+                </button>
+                <div className={`collapse ${postcard ? 'open' : ''}`}>
+                  <div className="collapse-inner">
+                    <p className="ap-postcard">{d.postcard}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
-
-          {/* What Future You wrote back. Folded, because it is the longest
-              thing on the page and the cards around it are lists — and open on
-              paper, where there is nothing to scroll past. */}
-          {d.postcard && (
-            <FoldCard icon={icFutureYou} title="Postcard from Future Me">
-              <p className="ap-postcard">{d.postcard}</p>
-            </FoldCard>
-          )}
 
           <section className="pp-card">
             <div className="pp-card-head">
