@@ -706,3 +706,26 @@
 .fy-when:not(.is-still) .fy-road {
   margin: 58px 30px 0;
 }
+
+/* The road can be dragged: the pin is a handle, and while it is held it
+   keeps pace with the finger rather than easing behind it. */
+.fy-when:not(.is-still) .fy-road {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.fy-when:not(.is-still) .fy-pin {
+  cursor: grab;
+}
+.fy-road.is-dragging,
+.fy-road.is-dragging .fy-pin {
+  cursor: grabbing;
+}
+.fy-road.is-dragging .fy-pin {
+  transition-duration: 0.14s;
+  animation: none;
+  transform: translateY(-6px) scale(1.12);
+}
+.fy-road.is-dragging .fy-road-done {
+  transition-duration: 0.14s;
+}
