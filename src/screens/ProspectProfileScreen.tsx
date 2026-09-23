@@ -37,6 +37,7 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
+import { clientProfile } from '../data/clientProfile'
 import type { JoyAnswers } from './JoyFlow'
 import { CONFIDENCE_STATEMENTS, confidenceReading, type ConfidenceAnswers } from './ConfidenceFlow'
 import type { OutlookAnswers } from './OutlookFlow'
@@ -133,7 +134,9 @@ export default function ProspectProfileScreen({
            skipped past; none before. */
         goals: fresh.goals ? fresh.goals.goals : isDone('goals') ? financialId.goals : [],
         lifeEvents: isDone('life-events') ? financialId.lifeEvents : [],
-        questions: [],
+        /* All five done — Life Events is what is left — and her page carries
+           what a client this far along has: questions she has asked. */
+        questions: isDone('goals') ? financialId.questions : [],
         /* Her own reading when she has taken Confidence; the authored one when
            it was skipped past. */
         confidence: fresh.conf
@@ -182,8 +185,9 @@ export default function ProspectProfileScreen({
   const [assessing, setAssessing] = useState<string | null>(null)
   const assessed = goalList.find((g) => g.title === assessing)
 
-  /* Their vision boards: none until they make one. */
-  const vision = useVisionBoards([], onToast)
+  /* Their vision boards: none until they make one — or, on her new-client
+     journey once all five adventures are done, the demo's board (Emily's). */
+  const vision = useVisionBoards(fresh && isDone('goals') ? clientProfile.boards : [], onToast)
   /* Handed in from her phone's quick-access sheet, and cleared as soon as it
      is honoured so closing the form does not reopen it. */
   useEffect(() => {
