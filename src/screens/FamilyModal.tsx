@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react'
 import './familyModal.css'
 import { CloseIcon } from '../components/icons'
+import SelectMenu from '../components/SelectMenu'
 
 export interface NewMember {
   /** The two halves, and the name they make — which is what the household,
@@ -177,11 +178,7 @@ export default function FamilyModal({
             </label>
             <label className="fam-field fam-field-narrow">
               <span className="invite-field-label">Relationship</span>
-              <select className="fam-input" value={role} onChange={(e) => setRole(e.target.value)}>
-                {ROLES.map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </select>
+              <SelectMenu className="fam-input" value={role} options={ROLES} onChange={setRole} />
             </label>
           </div>
 

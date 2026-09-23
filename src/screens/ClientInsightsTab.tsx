@@ -32,6 +32,7 @@ import icLegacy from '../assets/adventures/legacy.svg'
 import icGiving from '../assets/adventures/giving.svg'
 import icCare from '../assets/adventures/care.svg'
 import icSimplifying from '../assets/adventures/simplifying.svg'
+import SelectMenu from '../components/SelectMenu'
 
 /* Each adventure wears its own artwork, the way the five on the Financial ID
    do: flat shapes on a white disc, drawn from the brand ramp. Mapped here
@@ -119,24 +120,17 @@ export function AdventuresCard() {
       </div>
       <label className="ci-adv-pick">
         Add an adventure:
-        <select
+        <SelectMenu
           className="ci-adv-select"
           value=""
           disabled={left.length === 0}
-          onChange={(e) => {
-            const pick = left.find((m) => m.name === e.target.value)
+          placeholder={left.length ? 'Choose a Knomee Adventure' : 'All adventures suggested'}
+          options={left.map((m) => m.name)}
+          onChange={(v) => {
+            const pick = left.find((m) => m.name === v)
             if (pick) setShown((list) => [...list, pick.name])
           }}
-        >
-          <option value="">
-            {left.length ? 'Choose a Knomee Adventure' : 'All adventures suggested'}
-          </option>
-          {left.map((m) => (
-            <option value={m.name} key={m.name}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        />
       </label>
     </section>
   )

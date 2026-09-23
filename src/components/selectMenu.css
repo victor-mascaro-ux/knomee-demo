@@ -1,0 +1,148 @@
+/* The product's dropdown. Shut, it is the field it replaced — that field's
+   class draws the box — with its value on the left and a chevron on the right
+   that turns over while the list is open. */
+button.sm-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  /* The native select's drawn caret, if the field class carries one. */
+  background-image: none;
+  appearance: none;
+}
+.sm-trigger:disabled {
+  cursor: default;
+}
+.sm-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sm-trigger.is-empty .sm-value {
+  color: var(--text-placeholder, #8b8598);
+}
+.sm-caret {
+  flex: none;
+  color: var(--plum, #240446);
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.sm-trigger.is-open .sm-caret {
+  transform: rotate(180deg);
+}
+.sm-trigger.is-open {
+  border-color: var(--purple-bolt, #9b51e0);
+}
+
+/* The list: the page's card, growing out of the field and folding back. */
+.sm-pop {
+  position: fixed;
+  z-index: 3000;
+  box-sizing: border-box;
+  /* Every option in view at once: a list this short never scrolls. */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--line, #e7e4ee);
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(36, 4, 70, 0.16);
+  font-family: inherit;
+  transform-origin: top center;
+  animation: smOpen 0.18s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.sm-pop.is-up {
+  transform-origin: bottom center;
+}
+.sm-pop.is-closing {
+  animation: smClose 0.14s ease-in both;
+  pointer-events: none;
+}
+@keyframes smOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes smClose {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.92);
+  }
+}
+.sm-pop.is-up {
+  animation-name: smOpenUp;
+}
+.sm-pop.is-up.is-closing {
+  animation-name: smCloseUp;
+}
+@keyframes smOpenUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scaleY(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes smCloseUp {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px) scaleY(0.92);
+  }
+}
+
+.sm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base, 14px);
+  color: var(--text-strong, #240446);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.sm-item.is-active {
+  background: var(--k-lavender-mist, #f3eefc);
+}
+.sm-item.is-on {
+  font-weight: 600;
+  color: var(--plum, #240446);
+}
+.sm-item svg {
+  flex: none;
+  color: var(--purple-bolt, #9b51e0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-pop,
+  .sm-pop.is-closing {
+    animation-duration: 0.01ms;
+  }
+  .sm-caret {
+    transition: none;
+  }
+}
