@@ -3,7 +3,7 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import type { Goal } from '../data/financialId'
 import icCareerChange from '../assets/life-events/career-change.svg'
@@ -395,6 +395,12 @@ export function GoalDetail({ g }: { g: Goal }) {
           <dd>{g.note}</dd>
         </>
       )}
+      {g.extra?.map((row) => (
+        <Fragment key={row.label}>
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </Fragment>
+      ))}
       {g.updated && (
         <>
           <dt>Last updated</dt>

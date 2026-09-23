@@ -62,6 +62,10 @@ export interface Goal {
   cons?: string[]
   /** The sentence they wrote about it, in their own words. */
   note?: string
+  /** Rows only some goals have. An advisor's move carries who it involves and
+      who is hardest to bring along, which no client's goal has a slot for and
+      neither of which is "My goal". */
+  extra?: { label: string; value: string }[]
 }
 
 export interface LifeEvent {
@@ -124,16 +128,90 @@ export const financialId = {
       pros: ['Makes the beach house possible', 'Forces a savings habit'],
       cons: ['Competes with college funding'],
     },
-    { title: 'Add alternatives to portfolio - angel invest', readiness: 1 },
-    { title: 'Purchase a new car', readiness: 5 },
-    { title: 'Build a year of living expenses in cash', readiness: 5 },
-    { title: 'Set up a trust for the grandchildren', readiness: 3 },
-    { title: 'Take a sabbatical in 2027', readiness: 1 },
-    { title: 'Move the parents closer to us', readiness: 2 },
-    { title: 'Fund a scholarship at my old school', readiness: 4 },
-    { title: 'Buy a boat', readiness: 2, completed: '05/03/2025' },
-    { title: 'Increase gift to my favorite philanthropy', readiness: 4, completed: '05/03/2025' },
-    { title: 'Go on vacation with family to Mexico in 2025', readiness: 2, completed: '05/03/2025' },
+    {
+      title: 'Add alternatives to portfolio - angel invest',
+      readiness: 1,
+      timeline: '1–3 years',
+      pros: ['Backing people I believe in', 'Something outside the market'],
+      cons: ['Illiquid', 'Most of them fail'],
+      updated: '02/09/2025',
+    },
+    {
+      title: 'Purchase a new car',
+      readiness: 5,
+      timeline: '<6 months',
+      pros: ['Safer for the kids', 'Nothing left to decide'],
+      cons: ['Depreciates the moment it moves'],
+      updated: '05/06/2025',
+    },
+    {
+      title: 'Build a year of living expenses in cash',
+      readiness: 5,
+      timeline: 'Ongoing',
+      pros: ['Sleep at night', 'A year of anything changes nothing'],
+      cons: ['Cash earns little'],
+      updated: '03/22/2025',
+    },
+    {
+      title: 'Set up a trust for the grandchildren',
+      readiness: 3,
+      timeline: '1–3 years',
+      pros: ['Certainty for the kids', 'Decided while everyone agrees'],
+      cons: ['Legal work', 'Locks money away'],
+      updated: '03/22/2025',
+    },
+    {
+      title: 'Take a sabbatical in 2027',
+      readiness: 1,
+      timeline: '3–5 years',
+      pros: ['Time before the next chapter', 'Something to look forward to'],
+      cons: ['A year without income', 'Hard to plan around the kids'],
+      note: 'Three months away, somewhere near water.',
+      updated: '02/09/2025',
+    },
+    {
+      title: 'Move the parents closer to us',
+      readiness: 2,
+      timeline: '1–3 years',
+      pros: ['Easier to help', 'The kids see them weekly'],
+      cons: ['Cost of the move', 'They may not want to'],
+      updated: '03/10/2025',
+    },
+    {
+      title: 'Fund a scholarship at my old school',
+      readiness: 4,
+      timeline: '5–10 years',
+      pros: ['Giving where it was given to me', 'Something with our name on it'],
+      cons: ['Needs the rest of the plan settled first'],
+      updated: '01/15/2025',
+    },
+    {
+      title: 'Buy a boat',
+      readiness: 2,
+      completed: '05/03/2025',
+      timeline: 'Done',
+      pros: ['Weekends on the water'],
+      cons: ['Upkeep'],
+      updated: '05/03/2025',
+    },
+    {
+      title: 'Increase gift to my favorite philanthropy',
+      readiness: 4,
+      completed: '05/03/2025',
+      timeline: 'Done',
+      pros: ['Giving while we can see it work'],
+      cons: ['Less for the other goals'],
+      updated: '05/03/2025',
+    },
+    {
+      title: 'Go on vacation with family to Mexico in 2025',
+      readiness: 2,
+      completed: '05/03/2025',
+      timeline: 'Done',
+      pros: ['Everyone in one place'],
+      cons: ['Booked late'],
+      updated: '05/03/2025',
+    },
   ] as Goal[],
   financialJoy: {
     prompt: 'I want money to help me with',

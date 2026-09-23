@@ -226,6 +226,15 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 0;
+  /* The page's own top inset, held by the row rather than by the page above it.
+     Pinned under the bar, the row had nothing over its labels and they sat
+     against the bar's edge; as padding INSIDE the sticky element the space
+     travels with it, and at rest the page looks exactly as it did — the inset
+     moved rather than doubled (see .content:has(> .tabs)). */
+  padding-top: var(--page-pad);
+}
+.content:has(> .tabs) {
+  padding-top: 0;
 }
 /* .slide-nav sets position: relative, for the indicator that slides between the
    tabs, and every switch in the app wears it — so the sticky is re-stated for
@@ -6384,6 +6393,13 @@ button.name-link-btn:hover .name-text {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 6mm !important;
   }
+  /* How quickly they will move is a paragraph and a list, and it reads across
+     the page. What drives them and what holds them back are a pair, and they
+     read against each other — so the first takes the row and the other two
+     share the next one. */
+  .rd-cols > *:first-child {
+    grid-column: 1 / -1;
+  }
   .rd-ring,
   .rd-ring svg {
     width: 46mm !important;
@@ -6414,6 +6430,25 @@ button.name-link-btn:hover .name-text {
     break-inside: avoid;
     page-break-inside: avoid;
     box-shadow: none !important;
+  }
+  /* The starters and the key they are read against are two blocks in one card,
+     and together they are taller than a sheet. Held whole, the card threw
+     itself onto a page of its own and left the one before it half empty: it
+     may break between its blocks, and each block stays intact. */
+  .rd-card:has(.rd-key) {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  .rd-starter,
+  .rd-ask,
+  .rd-key,
+  .rd-key-row,
+  .rd-driver {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .rd-sub-head {
+    break-after: avoid;
   }
   .pp-title {
     break-after: avoid;
