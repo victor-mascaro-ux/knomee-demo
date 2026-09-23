@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
+import JoyFlow from './JoyFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -614,14 +615,29 @@ export function LockedRow({
   )
 }
 
-function AdventuresScreen({ onPick }: { onPick: (flow: 'goal' | 'event' | 'question') => void }) {
+function AdventuresScreen({
+  onPick,
+  onOpenAdventure,
+}: {
+  onPick: (flow: 'goal' | 'event' | 'question') => void
+  /** An adventure that can actually be taken. */
+  onOpenAdventure: (id: string) => void
+}) {
   return (
     <>
       <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
       <h2 className="cx-screen-title">My Adventures</h2>
       <div className="cx-adv-list">
         {completedAdventures.map((a) => (
-          <CompletedRow key={a.title} title={a.title} artKey={a.art} on={a.on} />
+          <CompletedRow
+            key={a.title}
+            title={a.title}
+            artKey={a.art}
+            on={a.on}
+            /* Financial Joy is the one that is built. A completed adventure
+               opens where it ended — the answers, and the badge. */
+            onRow={a.art === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+          />
         ))}
         {adventureActions.map((a) => {
           /* "Add a new goal" on this list and "Add a new goal" on the quick
@@ -940,6 +956,9 @@ export default function ClientExperienceScreen({
   /* Wherever one of the three is asked for — the quick sheet, a row on the
      adventures list — it is the same thing: the Financial ID, with that form
      already open on it. */
+  /* The adventure being taken, if any. It takes over the screen: the app bar
+     carries its name and a way out, and its own footer replaces the tab bar. */
+  const [adventure, setAdventure] = useState<string | null>(null)
   const openFlow = (f: 'goal' | 'event' | 'question') => {
     setSheet(false)
     setTab('finid')
@@ -1017,18 +1036,38 @@ export default function ClientExperienceScreen({
       >
         <IPhone scale={scale} bare={bare} dim={sheet || voiceOpen}>
           <header className="cx-appbar">
-            <AppbarBrand brand={brand} />
-            <button
-              className="cx-appbar-burger"
-              type="button"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
-                <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
-              </svg>
-            </button>
+            {adventure ? (
+              <>
+                {/* Inside an adventure the bar carries its name and the way
+                    out, in place of the wordmark and the burger. */}
+                <div className="af-appbar-title">Financial Joy</div>
+                <button
+                  className="cx-appbar-burger"
+                  type="button"
+                  aria-label="Close this adventure and go back to My Adventures"
+                  onClick={() => setAdventure(null)}
+                >
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2">
+                    <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <>
+                <AppbarBrand brand={brand} />
+                <button
+                  className="cx-appbar-burger"
+                  type="button"
+                  aria-label="Menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
+                >
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
+                    <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </>
+            )}
           </header>
 
           <div
@@ -1037,8 +1076,18 @@ export default function ClientExperienceScreen({
             }`}
             ref={viewport}
           >
-            {tab === 'adventures' ? (
-              <AdventuresScreen onPick={openFlow} />
+            {adventure ? (
+              <JoyFlow
+                onClose={() => setAdventure(null)}
+                onComplete={() => {
+                  /* Their answers land on the Financial ID, which is where the
+                     adventure was always going. */
+                  setAdventure(null)
+                  setTab('finid')
+                }}
+              />
+            ) : tab === 'adventures' ? (
+              <AdventuresScreen onPick={openFlow} onOpenAdventure={setAdventure} />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
                  answers — one artefact, not a second rendering of it. It was a
@@ -1081,6 +1130,7 @@ export default function ClientExperienceScreen({
           )}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
 
+          {!adventure && (
           <nav
             className="cx-tabbar"
             onPointerDown={pressStart}
@@ -1122,6 +1172,7 @@ export default function ClientExperienceScreen({
               ),
             )}
           </nav>
+          )}
 
           {/* The mark's five strokes fill to plum inside-out under the finger,
               and stay filled while either sheet is open. */}
