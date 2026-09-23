@@ -62,6 +62,11 @@ const BAR_RAMP = ['var(--bar-1)', 'var(--bar-2)', 'var(--bar-3)', 'var(--bar-4)'
 const BAR_W = 4
 const BAR_GAP = 1.5
 
+/* The stage artwork, one drawing per rung with the marker under the rung
+   reached — Pre-Contemplation to Maintenance. Served beside app.html, so the
+   same path reaches it from every page. */
+export const TTM_ART = [1, 2, 3, 4, 5].map((n) => `./goals/TTM-${n}.svg`)
+
 export function ReadinessLevel({ level }: { level: number }) {
   const stage = TTM_STAGES[level - 1]
   const label = stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'
@@ -71,6 +76,9 @@ export function ReadinessLevel({ level }: { level: number }) {
       data-tip={stage ?? undefined}
       aria-label={label}
     >
+      {stage ? (
+        <img className="pp-ttm" src={TTM_ART[level - 1]} alt="" draggable={false} />
+      ) : (
       <span className="pp-bars" aria-hidden>
         {[1, 2, 3, 4, 5].map((i) => (
           <span
@@ -92,6 +100,7 @@ export function ReadinessLevel({ level }: { level: number }) {
           />
         )}
       </span>
+      )}
     </span>
   )
 }

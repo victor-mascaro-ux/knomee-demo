@@ -18,7 +18,7 @@ import ReadinessModal from './ReadinessModal'
 import JoyReward from './JoyReward'
 import { Reveal } from './JoyResults'
 import { MARK_PARTS } from './ClientExperienceScreen'
-import { GoalDetail, ReadinessLevel, TTM_STAGES } from './profileParts'
+import { GoalDetail, TTM_ART, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
 
 export interface GoalsAnswers {
@@ -60,6 +60,10 @@ const SAMPLE_OWN: Pick<Goal, 'pros' | 'cons' | 'note'> = {
   cons: ['Takes time and money'],
   note: 'This matters to me and to the people I love.',
 }
+
+const StageArt = ({ level }: { level: number }) => (
+  <img className="glr-ttm" src={TTM_ART[Math.max(1, level) - 1]} alt="" draggable={false} />
+)
 
 const ClockIcon = () => (
   <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -234,9 +238,7 @@ export default function GoalsFlow({
               </span>
               <span className="glr-kicker">My readiness stage for my goal is</span>
               <div className="glr-stage">
-                <span className="glr-bars">
-                  <ReadinessLevel level={level || 1} />
-                </span>
+                <StageArt level={level || 1} />
                 <b>{(stage ?? TTM_STAGES[0]).toUpperCase()}</b>
               </div>
               <p className="glr-line">{STAGE_LINE[(level || 1) - 1]}</p>
