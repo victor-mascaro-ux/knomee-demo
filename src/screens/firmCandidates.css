@@ -173,3 +173,21 @@
 .fc-invite-modal .adir-link-row > .btn-primary {
   align-self: flex-end;
 }
+
+/* Removing a sitting: the one destructive action, in the warning colour. */
+.fc-remove-modal {
+  width: min(440px, calc(100vw - 32px));
+}
+.fc-remove-note {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-table, #3d3948);
+}
+.fc-remove-yes {
+  background: var(--k-crimson, #d81e4a);
+  border-color: var(--k-crimson, #d81e4a);
+}
+.fc-remove-yes:hover {
+  background: #b8173e;
+}

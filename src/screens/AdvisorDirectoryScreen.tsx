@@ -176,12 +176,12 @@ export function InvitePanel({
             sample answers, no way back into the demo.
           </span>
         </div>
-        <div className="adir-link-row">
-          <input className="adir-link" readOnly value={link} onFocus={(e) => e.target.select()} />
-          <button className="btn btn-primary" type="button" onClick={copy}>
-            {copied ? 'Copied' : 'Copy link'}
-          </button>
-        </div>
+        {/* The link, with the way to try it right under it; then the two
+            actions together at the right, the one that finishes it last. */}
+        <input className="adir-link" readOnly value={link} onFocus={(e) => e.target.select()} />
+        <a className="adir-open" href={link} target="_blank" rel="noreferrer">
+          Open it yourself ↗
+        </a>
         <div className="adir-invite-foot">
           <button
             className="btn btn-outline"
@@ -193,9 +193,9 @@ export function InvitePanel({
           >
             Invite another
           </button>
-          <a className="adir-open" href={link} target="_blank" rel="noreferrer">
-            Open it yourself ↗
-          </a>
+          <button className="btn btn-primary" type="button" onClick={copy}>
+            {copied ? 'Copied' : 'Copy link'}
+          </button>
         </div>
       </div>
     )
