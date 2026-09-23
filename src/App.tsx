@@ -263,7 +263,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               />
             </span>
             <div className="metric-num">
-              <span className="metric-value metric-value-kq">{prospectStats.avgKQ.toFixed(1)}</span>
+              <span className="metric-value metric-value-kq">{Math.round(prospectStats.avgKQ)}</span>
             </div>
           </div>
           <div className="metric-tile">

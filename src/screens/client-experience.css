@@ -213,11 +213,15 @@
   margin-top: 1px;
 }
 .cx-sheet-avatar {
+  /* Never squeezed: a long line beside it narrowed the disc into an oval. */
+  flex: none;
   width: 34px;
   height: 34px;
   border-radius: var(--radius-circle);
-  background: var(--surface-brand);
-  color: var(--text-inverse);
+  /* A letter stands in the product's standard light-purple disc, the same
+     one every letter avatar on the dashboards wears. */
+  background: var(--k-grape-light);
+  color: var(--k-grape);
   display: grid;
   place-items: center;
   font-size: var(--text-lg);
