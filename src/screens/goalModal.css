@@ -120,6 +120,13 @@
 .goal-foot {
   justify-content: center !important;
 }
+/* The reading to take, and the way out under it — stacked, because they are
+   not two choices of the same weight. */
+.goal-foot-assess {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
 .goal-delete {
   display: inline-flex;
   align-items: center;

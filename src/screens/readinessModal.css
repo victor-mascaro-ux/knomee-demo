@@ -1,0 +1,129 @@
+/* Goal Readiness — what this panel adds to the app's modal. The shell, the
+   header, the close and the buttons are index.css's own. */
+
+.rm-modal {
+  width: 480px;
+}
+.rm-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* How far through, as one rule across the top — four questions and then the
+   reading, which is four steps, not five: the reading is not a thing to do. */
+.rm-rule {
+  display: block;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--border-default);
+  overflow: hidden;
+}
+.rm-rule i {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--text-strong);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rm-goal {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: 1.3;
+  color: var(--text-strong);
+}
+.rm-ask {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--text-table);
+}
+
+/* ── the question ── */
+.rm-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+/* An answer, and nothing to rank it by: they are the same pill whichever rung
+   they argue for, sized to their own words rather than stretched across the
+   panel, so the list reads as things somebody might say. */
+.rm-options li {
+  display: flex;
+}
+.rm-option {
+  padding: var(--space-10) var(--space-14);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--k-lime-soft);
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 1.4;
+  text-align: left;
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: background 0.14s ease, transform 0.14s ease;
+}
+.rm-option:hover {
+  background: var(--k-lime);
+  transform: translateX(2px);
+}
+
+/* The way back one question, under the answers where it is out of the way of
+   them: this is a flow of four taps and the wrong tap should cost one more. */
+.rm-back {
+  align-self: flex-start;
+  margin-top: var(--space-4);
+  padding: var(--space-4) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* ── the reading ── */
+.rm-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-24) var(--space-16);
+  border-radius: var(--radius-xl);
+  background: var(--k-lime-light);
+}
+/* The rung, drawn at the size of a finding rather than a table cell. */
+.rm-result .pp-readiness {
+  transform: scale(2.1);
+  transform-origin: center bottom;
+  margin-bottom: var(--space-12);
+}
+.rm-stage {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+}
+.rm-statement {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.rm-foot {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-4);
+}
+
+@media (max-width: 620px) {
+  .rm-result .pp-readiness {
+    transform: scale(1.7);
+  }
+}

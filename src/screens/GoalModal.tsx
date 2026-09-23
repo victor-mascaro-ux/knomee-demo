@@ -24,6 +24,7 @@ export default function GoalModal({
   goal,
   onClose,
   onEdit,
+  onAssess,
   onToggleComplete,
   onDelete,
 }: {
@@ -33,6 +34,8 @@ export default function GoalModal({
       opens the goal's own form, where every answer can be changed — the title
       was never the only thing worth correcting. */
   onEdit?: () => void
+  /** Offered on a goal nobody has put a stage on yet. */
+  onAssess?: () => void
   onToggleComplete?: () => void
   onDelete?: () => void
 }) {
@@ -50,7 +53,7 @@ export default function GoalModal({
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal goal-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Goals</h2>
+          <h2 className="modal-title">Goal</h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
@@ -122,11 +125,17 @@ export default function GoalModal({
                 <dd>{row.value}</dd>
               </React.Fragment>
             ))}
-            <dt>Readiness</dt>
-            <dd className="goal-readiness">
-              <ReadinessLevel level={goal.readiness} />
-              <span className="goal-stage">{stage ?? 'Not set'}</span>
-            </dd>
+            {/* A goal nobody has assessed has no rung to show. The button
+                below is what that gap is for. */}
+            {goal.readiness > 0 && (
+              <>
+                <dt>Readiness</dt>
+                <dd className="goal-readiness">
+                  <ReadinessLevel level={goal.readiness} />
+                  <span className="goal-stage">{stage ?? 'Not set'}</span>
+                </dd>
+              </>
+            )}
           </dl>
 
           {onToggleComplete && (
@@ -137,25 +146,42 @@ export default function GoalModal({
           )}
         </div>
 
-        {onDelete && (
-          <div className="modal-footer goal-foot">
-            {/* The one destructive thing on the panel, so it is the one thing
-                that does not look like a button. */}
-            <button className="goal-delete" type="button" onClick={onDelete}>
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" aria-hidden>
-                <path
-                  d="M4 6h12M8.5 6V4.5h3V6M6 6l.7 9.2a1.3 1.3 0 0 0 1.3 1.2h4a1.3 1.3 0 0 0 1.3-1.2L14 6"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Delete Goal
+        {onAssess && goal.readiness < 1 ? (
+          /* A goal with no rung on it yet: the reading to take, and under it
+             the way to drop a goal that was a mistake. */
+          <div className="modal-footer goal-foot goal-foot-assess">
+            <button className="btn btn-primary" type="button" onClick={onAssess}>
+              Assess My Readiness
             </button>
+            {onDelete && <DeleteGoal onClick={onDelete} />}
           </div>
+        ) : (
+          onDelete && (
+            <div className="modal-footer goal-foot">
+              <DeleteGoal onClick={onDelete} />
+            </div>
+          )
         )}
       </div>
     </div>
+  )
+}
+
+/* The one destructive thing on the panel, so it is the one thing that does not
+   look like a button. */
+function DeleteGoal({ onClick }: { onClick: () => void }) {
+  return (
+    <button className="goal-delete" type="button" onClick={onClick}>
+      <svg viewBox="0 0 20 20" width="15" height="15" fill="none" aria-hidden>
+        <path
+          d="M4 6h12M8.5 6V4.5h3V6M6 6l.7 9.2a1.3 1.3 0 0 0 1.3 1.2h4a1.3 1.3 0 0 0 1.3-1.2L14 6"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      Delete Goal
+    </button>
   )
 }
