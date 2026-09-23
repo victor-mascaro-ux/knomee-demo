@@ -3979,6 +3979,18 @@ export default function App() {
     ;(window as unknown as { __ccScreenId?: string }).__ccScreenId = currentView
   }, [currentView])
 
+  /* A new dashboard (or any other view) opens at its top, not wherever the last
+     one was scrolled to. The live site runs in the overlay's iframe, which is
+     sized to the page, so the parent is what scrolls there — both are reset. */
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    try {
+      if (window.parent && window.parent !== window) window.parent.scrollTo(0, 0)
+    } catch {
+      /* cross-origin parent — ignore */
+    }
+  }, [currentView])
+
   // ── Demo layer (the overlay's D panel) ──
   // The panel lives in the parent frame, outside this app, so it never shows up
   // in the demo itself. It drives navigation through the hash (below); these two
