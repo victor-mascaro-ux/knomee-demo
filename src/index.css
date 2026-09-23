@@ -6852,10 +6852,11 @@ button.name-link-btn:hover .name-text {
   object-fit: cover;
 }
 
-/* The tables' "New" is the row pill itself (.cp-goal-tag.is-new): grape among
-   prospects and candidates, lime among clients — the same pair the profiles
-   use on each side. */
+/* The tables' "New" is the row pill itself (.cp-goal-tag.is-new), and it is
+   one pill on every side: grape with white, the design system's badge — the
+   clients' lime variant is retired. */
+.clients-table .new-tag,
 .clients-table .cp-goal-tag.is-new {
-  background: var(--k-lime);
-  color: var(--k-plum);
+  background: var(--k-grape);
+  color: #fff;
 }
