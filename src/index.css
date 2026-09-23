@@ -6540,8 +6540,8 @@ button.name-link-btn:hover .name-text {
     /* Laid out as blocks, the goals lost the gap their column gave them and
        sat on each other. A goal is kept whole; the card that holds them is
        not, so four of them may run over two sheets rather than being squeezed
-       onto one. Sixteen above and sixteen below is what each patch of grey
-       covers, so a gap of thirty-two is filled by the two either side of it. */
+       onto one. Twelve above and twelve below is what each patch of grey
+       covers, so a gap of twenty is filled by the two either side of it. */
     /* Positioned, but NOT a stacking context: with a z-index of its own the
        goal would paint its white after the patch behind it and the patch would
        cover it — which is a goal printed flat on grey. A transform does the
@@ -6549,7 +6549,7 @@ button.name-link-btn:hover .name-text {
        entrance animation left on them, so it goes here too. */
     position: relative;
     transform: none !important;
-    margin-bottom: var(--space-32);
+    margin-bottom: var(--space-20);
     box-shadow: none !important;
     break-inside: avoid;
     page-break-inside: avoid;
@@ -6560,13 +6560,15 @@ button.name-link-btn:hover .name-text {
     /* Deeper than half the gap, so neighbouring patches overlap rather than
        meet: an inset is measured from the padding box, and a hairline border
        between them was enough to leave a white seam down the tray. */
-    inset: -18px -18px;
+    inset: -12px -18px;
     z-index: -1;
     background: #f1f3f7;
   }
   /* The tray's own bottom corners, on whichever goal ends it — the head
      carries the two at the top. */
   .pp-goal:last-child::before {
+    /* The foot of the tray, with the air the head has at the top of it. */
+    bottom: -20px;
     border-radius: 0 0 14px 14px;
   }
   .pp-goal:last-child {
@@ -6603,7 +6605,10 @@ button.name-link-btn:hover .name-text {
   .pp-card:has(.pp-goals) > .pp-card-head,
   .pp-card:has(.cp-goal-cols) > .pp-card-head {
     margin: 0;
-    padding: 16px 18px;
+    /* More air under the title than over it: the first goal's patch starts
+       twelve above the card, and this is the rest of the room the head gives
+       the list under it. */
+    padding: 18px 18px 22px;
     border-radius: 14px 14px 0 0;
     background: #f1f3f7;
   }
