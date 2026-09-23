@@ -542,23 +542,31 @@
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   background: var(--surface-sunken);
 }
+/* The bar is the pill's fill, not its ink: the row and its pill are one
+   colour, so the key reads straight across to the tag it explains. */
 .rd-key-row.rd-tag-positive {
-  border-left-color: var(--tag-positive-ink);
+  border-left-color: var(--tag-positive-bg);
 }
 .rd-key-row.rd-tag-curiosity {
-  border-left-color: var(--tag-curiosity-ink);
+  border-left-color: var(--tag-curiosity-bg);
 }
 .rd-key-row.rd-tag-self {
-  border-left-color: var(--tag-self-ink);
+  border-left-color: var(--tag-self-bg);
 }
 .rd-key-row.rd-tag-validate {
-  border-left-color: var(--tag-validate-ink);
+  border-left-color: var(--tag-validate-bg);
+}
+/* The row itself keeps the key's own wash; only its pill wears the pair. */
+.rd-key-row[class*='rd-tag-'] {
+  background: var(--surface-sunken);
+  color: inherit;
+}
+/* The fills are soft washes, so the bar takes a little more width to hold. */
+.rd-key-row {
+  border-left-width: 5px;
 }
 .rd-key-tag {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--rd-ink);
+  display: inline-block;
 }
 .rd-key-meaning {
   margin: var(--space-4) 0 0;
