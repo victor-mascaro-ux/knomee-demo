@@ -1047,10 +1047,13 @@ const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0
 function MobileMenu({
   onExit,
   onClose,
+  onRestart,
   progress,
 }: {
   onExit: () => void
   onClose: () => void
+  /** Back to a new client's first day. */
+  onRestart: () => void
   /** Where she is on the five, said under her name. */
   progress: string
 }) {
@@ -1069,6 +1072,19 @@ function MobileMenu({
           </span>
           <SheetCredit />
         </div>
+        <button className="cx-sheet-item" type="button" onClick={onRestart}>
+          Restart all adventures
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden>
+            <path
+              d="M3.2 8a4.8 4.8 0 1 0 1.5-3.5M3.2 2.6v2.6h2.6"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <div className="cx-sheet-hint">Back to 0 of 5 and an empty Financial ID.</div>
         <button className="cx-sheet-item" type="button" onClick={onExit}>
           Advisor Experience
           <ArrowRight />
@@ -1105,6 +1121,20 @@ export default function ClientExperienceScreen({
      finishing Financial Joy completes it on the list, opens the next, and
      puts its answers on the page. */
   const [joy, setJoy] = useState<JoyAnswers | null>(null)
+  /* A restart is a new client: the answers go, and her Financial ID is rebuilt
+     from nothing — anything added to it, and her check-in, go too. */
+  const [journeyRun, setJourneyRun] = useState(0)
+  const restart = () => {
+    setJoy(null)
+    setCheckIn(null)
+    setAdventure(null)
+    setFlow(null)
+    setSheet(false)
+    setVoiceOpen(false)
+    setTab('adventures')
+    setJourneyRun((n) => n + 1)
+    setMenuOpen(false)
+  }
   const done: Record<string, string> = joy ? { 'financial-joy': DEMO_TODAY } : {}
   const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
@@ -1247,6 +1277,7 @@ export default function ClientExperienceScreen({
                  "not built yet" card here long after the page itself was
                  built. */
               <ProspectProfileScreen
+                key={journeyRun}
                 prospect={SARAH}
                 fresh={{ joy }}
                 mine
@@ -1363,6 +1394,7 @@ export default function ClientExperienceScreen({
             <MobileMenu
               onExit={onExit}
               onClose={() => setMenuOpen(false)}
+              onRestart={restart}
               progress={`${joy ? 1 : 0} of 5 adventures complete`}
             />
           )}

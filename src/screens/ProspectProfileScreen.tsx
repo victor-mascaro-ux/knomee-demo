@@ -375,11 +375,12 @@ export default function ProspectProfileScreen({
                     {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
 
-                  <section className="pp-card">
+                  <section className={`pp-card${has.joy ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
-                      <DateSelect />
+                      {has.joy && <DateSelect />}
                     </div>
+                    {!has.joy && <p className="pp-waiting">Complete the Financial Joy adventure</p>}
                     {has.joy && (
                     <>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
@@ -412,11 +413,12 @@ export default function ProspectProfileScreen({
                     )}
                   </section>
 
-                  <section className="pp-card">
+                  <section className={`pp-card${has.futureYou ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
-                      <DateSelect />
+                      {has.futureYou && <DateSelect />}
                     </div>
+                    {!has.futureYou && <p className="pp-waiting">Complete the Future You adventure</p>}
                     {has.futureYou && (
                     <>
                     {(
@@ -442,11 +444,12 @@ export default function ProspectProfileScreen({
                     )}
                   </section>
 
-                  <section className="pp-card">
+                  <section className={`pp-card${has.outlook ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
-                      <DateSelect />
+                      {has.outlook && <DateSelect />}
                     </div>
+                    {!has.outlook && <p className="pp-waiting">Complete the Outlook adventure</p>}
                     {has.outlook && (
                     <>
                     <span className="pp-fy-label">Concerns</span>
@@ -502,11 +505,12 @@ export default function ProspectProfileScreen({
 
                 {/* Right rail */}
                 <div className="pp-rail">
-                  <section className="pp-card">
+                  <section className={`pp-card${has.confidence ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
-                      <DateSelect />
+                      {has.confidence && <DateSelect />}
                     </div>
+                    {!has.confidence && <p className="pp-waiting">Complete the Confidence adventure</p>}
                     {has.confidence && (
                     <>
                     <div className="pp-confidence">
