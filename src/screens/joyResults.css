@@ -63,10 +63,17 @@
   animation: jrSky 14s ease-in-out infinite alternate;
 }
 .jr-sky::after {
+  /* The words' ground: deep enough under the text that white holds against
+     every part of the drifting sky, the sun included. */
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(26, 4, 51, 0.55), transparent 62%);
+  background: linear-gradient(
+    to top,
+    rgba(26, 4, 51, 0.82) 0%,
+    rgba(26, 4, 51, 0.62) 55%,
+    rgba(26, 4, 51, 0.18) 100%
+  );
 }
 @keyframes jrSky {
   to {
@@ -74,11 +81,12 @@
   }
 }
 .jr-sun {
+  /* Up in the corner, clear of the words. */
   position: absolute;
-  top: 26px;
-  right: 34px;
-  width: 92px;
-  height: 92px;
+  top: 10px;
+  right: 16px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: radial-gradient(circle, #fff6d6 0 32%, #ffd27a 55%, rgba(255, 196, 107, 0) 72%);
   animation: jrSun 5s ease-in-out infinite;
@@ -147,7 +155,7 @@
   font-weight: var(--weight-semibold);
   line-height: 1.38;
   text-wrap: pretty;
-  text-shadow: 0 1px 12px rgba(26, 4, 51, 0.35);
+  text-shadow: 0 1px 2px rgba(26, 4, 51, 0.45), 0 2px 16px rgba(26, 4, 51, 0.55);
 }
 .jr-caret {
   display: inline-block;
@@ -514,13 +522,23 @@
 .jr-about-body > div.jr-about-card {
   animation-delay: 0.55s;
 }
-/* The slice sweeps round to its share. */
-.jr-pie-rest {
-  animation: jrPie 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) 0.1s both;
+/* The slice sweeps clockwise to its share, and its far edge rides with it. */
+.jr-pie-slice {
+  animation: jrPie 1s cubic-bezier(0.3, 0.7, 0.3, 1) 0.15s both;
 }
 @keyframes jrPie {
   from {
-    stroke-dasharray: 100 100;
+    stroke-dasharray: 0 100;
+  }
+}
+.jr-pie-edge {
+  transform-origin: 24px 24px;
+  transform: rotate(var(--turn));
+  animation: jrEdge 1s cubic-bezier(0.3, 0.7, 0.3, 1) 0.15s both;
+}
+@keyframes jrEdge {
+  from {
+    transform: rotate(0deg);
   }
 }
 .jr-pie {
@@ -544,7 +562,8 @@
 @media (prefers-reduced-motion: reduce) {
   .jr-about-card,
   .jr-pie,
-  .jr-pie-rest,
+  .jr-pie-slice,
+  .jr-pie-edge,
   .jr-book {
     opacity: 1;
     animation: none;
