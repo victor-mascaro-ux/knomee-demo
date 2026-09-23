@@ -146,8 +146,35 @@ export function AdventuresCard() {
    action sits here rather than over the toolkit — on this side it is the
    answer the snapshot leads to, and a line that appears on both tabs is a line
    nobody reads on either. */
-export default function ClientInsightsTab() {
-  const { snapshot, toolkit } = clientInsights
+/* Household KR is the other member's own KR: Sebastian's on Emily's page,
+   Emily's on Sebastian's. The authored snapshot is Emily's, so on his page
+   that one card — and the average it feeds — reads her KR instead. */
+const EMILY_KR = 92
+function snapshotFor(name?: string) {
+  const s = clientInsights.snapshot
+  if (!name || !/^Sebastian/.test(name)) return s
+  const dimensions = s.dimensions.map((d) =>
+    d.key === 'Household KR'
+      ? {
+          ...d,
+          score: EMILY_KR,
+          calc: [{ label: 'Household member (their own KR)', value: 'Emily Watson', points: EMILY_KR }],
+        }
+      : d,
+  )
+  const counted = dimensions.filter((d) => !(d.key === 'Referenceability' && d.score === 0))
+  const kq = Math.round(counted.reduce((n, d) => n + d.score, 0) / counted.length)
+  return {
+    ...s,
+    kq,
+    dimensions,
+    total: `The KR is the average of the dimensions: (${counted.map((d) => d.score).join(' + ')}) ÷ ${counted.length} = ${kq}. Referenceability is left out while there is no referral signal either way.`,
+  }
+}
+
+export default function ClientInsightsTab({ name }: { name?: string }) {
+  const { toolkit } = clientInsights
+  const snapshot = snapshotFor(name)
   return (
     <div className="rd ci">
       <div className="rd-top-action">
