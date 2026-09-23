@@ -40,6 +40,7 @@ import { useVisionBoards } from './VisionBoards'
 import type { JoyAnswers } from './JoyFlow'
 import { CONFIDENCE_STATEMENTS, confidenceReading, type ConfidenceAnswers } from './ConfidenceFlow'
 import type { OutlookAnswers } from './OutlookFlow'
+import type { FutureYouAnswers } from './FutureYouFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
@@ -79,6 +80,7 @@ export default function ProspectProfileScreen({
     done?: Record<string, string>
     conf?: ConfidenceAnswers | null
     outlook?: OutlookAnswers | null
+    future?: FutureYouAnswers | null
   }
   prospect: Prospect
   onBack: () => void
@@ -136,6 +138,11 @@ export default function ProspectProfileScreen({
         /* Her own worries and hopes when she has taken Outlook; the authored
            ones when it was skipped past. */
         outlook: fresh.outlook ?? financialId.outlook,
+        /* Her own vision and postcard when she has taken Future You. */
+        futureYou: fresh.future
+          ? { where: fresh.future.where, what: fresh.future.doing, who: fresh.future.with }
+          : financialId.futureYou,
+        postcard: fresh.future?.postcard.trim() ? fresh.future.postcard : financialId.postcard,
         badges: BADGE_ORDER.filter((b) => isDone(b.toLowerCase().replace(/ /g, '-'))),
         financialJoy: {
           ...financialId.financialJoy,
@@ -455,7 +462,22 @@ export default function ProspectProfileScreen({
 
                   <section className={`pp-card${has.futureYou ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
+                      {fresh && has.futureYou && onOpenEnding ? (
+                        <button
+                          type="button"
+                          className="pp-card-title pp-card-title-link"
+                          onClick={() => onOpenEnding('future-you')}
+                          aria-label="Future You — see your results again"
+                        >
+                          <img className="pp-card-ic" src={icFutureYou} alt="" />
+                          Future You
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
+                      )}
                       {has.futureYou && <DateSelect />}
                     </div>
                     {!has.futureYou && <p className="pp-waiting">Complete the Future You adventure</p>}
