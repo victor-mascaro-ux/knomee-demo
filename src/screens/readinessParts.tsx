@@ -223,19 +223,33 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
   /* Six read as two rows of three; a fourth column only for seven or more. */
   const wide = s.dimensions.length > 6
+  const tierInBreakdown = score.abbr === 'KQ'
+  const tier = (
+    <div className={`rd-tier rd-tier-${s.tier.n}${tierInBreakdown ? ' is-in-breakdown' : ''}`}>
+      <span className="rd-tier-swatch" aria-hidden />
+      <span className="rd-tier-name">
+        Tier {s.tier.n} – {s.tier.name.toUpperCase()}
+      </span>
+      <p className="rd-tier-body">{s.tier.body}</p>
+      {s.tier.note && <p className="rd-tier-note">{s.tier.note}</p>}
+    </div>
+  )
   return (
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
-        <div className="rd-kq">
+        <div className={`rd-kq${tierInBreakdown ? ' is-fit' : ''}`}>
           <span className="rd-kq-title">
             {score.name} ({score.abbr})
           </span>
           <span className="rd-kq-q">{s.question}</span>
-          <ScoreRing value={s.kq} label={score.name} />
-          {/* The number, said in words: how ready they are, or how strong the
-              relationship is. */}
-          <span className="rd-kq-verdict">{verdictOf(s.kq, score.abbr)}</span>
+          {/* The dial and its reading, centred in the height left under the
+              title. The number, said in words: how ready they are, or how
+              strong the relationship is. */}
+          <div className="rd-kq-dial">
+            <ScoreRing value={s.kq} label={score.name} />
+            <span className="rd-kq-verdict">{verdictOf(s.kq, score.abbr)}</span>
+          </div>
         </div>
         <div className="rd-breakdown">
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
@@ -244,20 +258,14 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
               <DimensionCard d={d} i={i} key={d.key} />
             ))}
           </div>
+          {/* A prospect's three cards leave the column's lower half empty: the
+              tier sits there, under the breakdown it reads. */}
+          {tierInBreakdown && tier}
         </div>
       </div>
-      {/* The tier is a reading of every number above it — the dial and the
-          breakdown both — so it runs under the whole card rather than being
-          folded into the dial's column, where a sentence about the household
-          wrapped over four lines in a third of the width. */}
-      <div className={`rd-tier rd-tier-${s.tier.n}`}>
-        <span className="rd-tier-swatch" aria-hidden />
-        <span className="rd-tier-name">
-          Tier {s.tier.n} – {s.tier.name.toUpperCase()}
-        </span>
-        <p className="rd-tier-body">{s.tier.body}</p>
-        {s.tier.note && <p className="rd-tier-note">{s.tier.note}</p>}
-      </div>
+      {/* The tier is a reading of every number above it, so on the client's
+          relationship card it runs under the whole card. */}
+      {!tierInBreakdown && tier}
     </section>
   )
 }

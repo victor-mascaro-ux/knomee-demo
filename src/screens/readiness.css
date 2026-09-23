@@ -862,7 +862,15 @@
    centred in that height, so the two columns end on the same line. */
 .rd-snapshot-body > .rd-kq {
   align-self: stretch;
+}
+/* Title at the top; the dial and its pill centred in what is left. */
+.rd-kq-dial {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: var(--space-2);
 }
 
 /* The score in words, under its dial. */
@@ -874,4 +882,22 @@
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
   color: var(--text-strong);
+}
+
+/* Under a prospect's breakdown the tier sits right beneath the cards. */
+.rd-tier.is-in-breakdown {
+  margin-top: var(--space-12);
+}
+
+/* A prospect's score card is as tall as the breakdown and tier beside it, not
+   taller: it takes no height of its own (size containment) and stretches to
+   the row the right-hand column sets, with the dial a size smaller to sit in
+   it. Stacked, below 1180px, it sizes to itself again. */
+@media (min-width: 1181px) {
+  .rd-snapshot-body > .rd-kq.is-fit {
+    contain: size;
+  }
+  .rd-kq.is-fit .rd-ring {
+    zoom: 0.78;
+  }
 }
