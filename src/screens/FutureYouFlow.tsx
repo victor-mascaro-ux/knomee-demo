@@ -18,7 +18,7 @@ import './joyResults.css'
 import './futureYouFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { Reveal } from './JoyResults'
+import { AboutOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
 interface Pick {
@@ -329,6 +329,37 @@ function Detail({
   )
 }
 
+/* The postcard on the ending: it slides in only once she has scrolled down
+   to it — watched against the phone's own scrolling page, and only when a
+   good part of the card is showing, so it does not arrive unseen on load. */
+function ArrivingCard({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [arrived, setArrived] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const root = el.closest('.cx-viewport')
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setArrived(true)
+          io.disconnect()
+        }
+      },
+      { root, threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  /* Watched on a wrapper that stays put: the card itself waits off to the
+     left, where it would never be seen coming into view. */
+  return (
+    <div ref={ref} className="fyr-arrive">
+      <div className={`fy-card is-stamped fyr-card${arrived ? ' is-arrived' : ''}`}>{children}</div>
+    </div>
+  )
+}
+
 /* The postcard back from there: airmail edge, a stamp, and — once there are
    words on it — a postmark that lands. */
 function Postcard({
@@ -404,6 +435,13 @@ export default function FutureYouFlow({
   /* A print tapped on the ending: shown large, as a phone shows a photograph
      — a tap is what a hover is on a mouse. */
   const [zoom, setZoom] = useState<Pick | null>(null)
+  /* The ending's overlay, as the other adventures have it. */
+  const [about, setAbout] = useState(false)
+  useEffect(() => {
+    if (step !== 'results') return
+    const t = window.setTimeout(() => setAbout(true), 700)
+    return () => window.clearTimeout(t)
+  }, [step])
   const typing = useRef(0)
   useEffect(() => () => window.clearInterval(typing.current), [])
 
@@ -546,6 +584,46 @@ export default function FutureYouFlow({
 
       {step === 'results' && (
         <div className="jr fyr">
+          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+            Learn more
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+              <circle cx="8" cy="8" r="7" fill="currentColor" />
+              <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+              <circle cx="8" cy="4.7" r="1" fill="#fff" />
+            </svg>
+          </button>
+          {about && (
+            <AboutOverlay
+              title="You visualized Future You!"
+              share={80}
+              onClose={() => setAbout(false)}
+              first={
+                <>
+                  <b>
+                    <CountUp to={80} />%
+                  </b>{' '}
+                  of respondents share your vision of{' '}
+                  <b>
+                    {[
+                      (a.doing[0] ?? 'living well').toLowerCase(),
+                      (a.where[0] ?? '').toLowerCase(),
+                      a.with[0] ? `with ${a.with[0].toLowerCase().replace(/^a /, 'a ')}` : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  </b>
+                  .
+                </>
+              }
+              second={
+                <p>
+                  Research proves that when you vividly <b>connect with your future self</b>, you
+                  bridge the gap between today’s choices and tomorrow’s well-being. You just took a{' '}
+                  <b>powerful and actionable step</b> toward the life you want.
+                </p>
+              }
+            />
+          )}
           <Reveal>
             <h2 className="jr-title">You visualized Future You</h2>
             <p className="jr-sub">This is the life you are preparing for:</p>
@@ -626,7 +704,7 @@ export default function FutureYouFlow({
           <Reveal>
             <h3 className="jr-h">Your postcard</h3>
             <p className="jr-sub">Sent back from there:</p>
-            <div className="fy-card is-stamped fyr-card">
+            <ArrivingCard>
               <span className="fy-stamp" aria-hidden>
                 <i>✈</i>
               </span>
@@ -639,7 +717,7 @@ export default function FutureYouFlow({
                 {/* Whole, not typed: the card arriving is the motion. */}
                 {a.postcard || SAMPLE_FUTURE.postcard}
               </p>
-            </div>
+            </ArrivingCard>
             <p className="jr-reading">
               <span className="jr-reading-mark" aria-hidden>
                 ✦
