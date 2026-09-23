@@ -6213,11 +6213,11 @@ button.name-link-btn:hover .name-text {
 
 /* ---------- Print: the sheet, on paper ----------
    "Download PDF" prints, and the browser's own Save as PDF is the file. What
-   comes out has to be a document rather than a photograph of an app, so
-   everything that only makes sense on screen — the bar, the rail, the tabs,
-   every control, the tooltips, the credit — is not on it. Colour is kept:
-   these pages are read by their tiers and their accents, and a greyscale
-   Business ID is a worse document, not a more printable one. */
+   comes out has to be a document rather than a photograph of an app: the bar,
+   the tabs and every control drop out, the rail becomes a band of who this is
+   across the top, and the three tabs follow one another a page at a time.
+   Colour is kept — these pages are read by their tiers and their accents, and
+   a greyscale Business ID is a worse document, not a more printable one. */
 @media print {
   :root {
     --topbar-h: 0px;
@@ -6231,31 +6231,95 @@ button.name-link-btn:hover .name-text {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  /* Motion only. Killing the animation leaves each element at its own styles,
+     which is the settled state — where blanking every transform instead moved
+     the confidence dots off their track and swung the gauge needle off its
+     dial, both of which are positioned BY a transform. */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  /* Nothing sticks to a sheet of paper. Named rather than swept, for the same
+     reason: a blanket `position: static` unpins the dots too. */
   .topbar,
   .tabs,
   .pp-crumb,
   .pp-tabs,
-  .pp-side,
+  .pp-side-inner,
+  .af-report-bar,
+  .powered-by,
+  .settings-side-inner {
+    position: static !important;
+  }
+  .topbar,
+  .tabs,
+  .pp-crumb,
+  .pp-tabs,
   .af-report-bar,
   .powered-by,
   .btn,
   .pp-add,
   .pp-show,
   .pp-head-toggle,
+  .ap-fold-caret,
   .row-menu,
   .rd-copy,
   .ci-adv-x,
   .ci-adv-pick,
   .pp-dateselect,
-  .toast {
+  .toast,
+  .cmd-clear,
+  .dist-filter-hint,
+  .pp-convert {
     display: none !important;
   }
-  /* Two columns of cards side by side is a screen layout; on paper the rail
-     column lands under the main one, which is where a reader expects it. */
-  .pp-layout,
+
+  /* ── who this is, across the top ──
+     The rail is a column down the side of a screen; on paper it is a band: the
+     portrait, the name, when they finished, and the score with its tier. */
+  .pp-layout {
+    display: block !important;
+  }
+  .pp-side {
+    background: transparent !important;
+    border: 0 !important;
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-12);
+    border-bottom: var(--border-thin) solid var(--border-default) !important;
+  }
+  .pp-side-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+    text-align: left !important;
+    padding: 0 !important;
+  }
+  .pp-avatar {
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 25px !important;
+  }
+  .pp-name {
+    margin: 0 !important;
+  }
+  .pp-meta {
+    margin: 0 !important;
+  }
+  /* The household and the advisory team are the client page's rail, and belong
+     on the sheet no more than the tab bar does. */
+  .cp-side-block,
+  .cp-add-family,
+  .cp-checkin {
+    display: none !important;
+  }
+
+  /* ── the cards ── */
   .pp-cols,
   .rd-kit-cols,
-  .rd-snapshot-body {
+  .rd-snapshot-body,
+  .fin-compare {
     display: block !important;
   }
   .content,
@@ -6264,7 +6328,6 @@ button.name-link-btn:hover .name-text {
     padding: 0 !important;
     max-width: none !important;
   }
-  /* A card broken across two pages reads as two half-cards. */
   .pp-card,
   .rd-card,
   .card,
@@ -6278,38 +6341,43 @@ button.name-link-btn:hover .name-text {
   .pp-title {
     break-after: avoid;
   }
-  /* A collapsed card prints what it shows: the height animation's clip would
-     otherwise cut the last row off mid-line. */
+  /* A folded card prints open: on paper there is nothing to scroll past, and a
+     card that says only its own name is a line wasted. */
   .collapse {
     grid-template-rows: 1fr !important;
   }
   .collapse-inner {
     overflow: visible !important;
   }
-  /* Nothing on paper is sticky, and a mount animation that never ran would
-     print the page at opacity 0. */
-  * {
-    position: static !important;
-    animation: none !important;
-    transition: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+  .ap-fold .pp-card-head + * {
+    display: block !important;
   }
-  /* Except the things whose whole job is to sit somewhere: a dot on a track, a
-     badge on an avatar, the ring's number in its ring. */
-  .pp-conf-track,
-  .rd-ring,
-  .avatar-wrap,
-  .pp-goal,
-  .cp-tile {
-    position: relative !important;
+  /* Badges are a screen's reward, not a document's content. */
+  .pp-card:has(.pp-badges) {
+    display: none !important;
   }
-  .pp-conf-dot,
-  .household-badge,
-  .rd-ring-num,
-  .pp-goal-caret {
-    position: absolute !important;
+  /* And a card whose whole content is an empty tray has nothing to print. */
+  .pp-card:has(.pp-empty) {
+    display: none !important;
   }
+
+  /* ── one tab to a page ──
+     The sheet carries all three tabs; each after the first starts its own. */
+  .print-page {
+    break-before: page;
+    page-break-before: always;
+  }
+  .print-head {
+    display: block !important;
+    margin: 0 0 var(--space-16);
+    font-size: 22px;
+    font-weight: var(--weight-bold);
+    color: var(--plum);
+  }
+}
+/* Only ever on paper. */
+.print-head {
+  display: none;
 }
 @page {
   margin: 14mm;

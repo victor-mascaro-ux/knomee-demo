@@ -272,3 +272,15 @@
   display: contents;
 }
 
+
+/* The postcard: a letter among lists, so it reads as one — wider measure, and
+   the italic the profile gives every quoted voice. */
+.ap-postcard {
+  margin: 0;
+  padding: var(--space-4) 0 var(--space-6);
+  max-width: 62ch;
+  font-size: var(--text-base);
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--text-table);
+}

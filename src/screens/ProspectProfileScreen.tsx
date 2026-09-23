@@ -23,7 +23,7 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
-import { printSheet } from '../printSheet'
+import { usePrintSheet } from '../printSheet'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -45,6 +45,7 @@ export default function ProspectProfileScreen({
   onConvert: (p: Prospect) => void
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
+  const { printing, print } = usePrintSheet()
   const fi = financialId
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
@@ -142,14 +143,14 @@ export default function ProspectProfileScreen({
                   ? 'Prospect Readiness'
                   : 'Prospect Toolkit'}
             </h1>
-            <button className="btn btn-download active" type="button" onClick={printSheet}>
+            <button className="btn btn-download active" type="button" onClick={print}>
               <DownloadIcon /> Download PDF
             </button>
           </div>
 
-          {tab === 'readiness' ? (
+          {!printing && tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
-          ) : tab === 'toolkit' ? (
+          ) : !printing && tab === 'toolkit' ? (
             <ToolkitTabView d={prospectToolkit} />
           ) : (
             <>
@@ -394,6 +395,21 @@ export default function ProspectProfileScreen({
                     )}
                   </section>
                 </div>
+              </div>
+            </>
+          )}
+
+          {/* Printing takes the whole sheet: the Financial ID above, then the
+              two reads, each starting its own page. */}
+          {printing && (
+            <>
+              <div className="print-page">
+                <h2 className="print-head">Prospect Readiness</h2>
+                <ReadinessTabView d={prospectReadiness} />
+              </div>
+              <div className="print-page">
+                <h2 className="print-head">Prospect Toolkit</h2>
+                <ToolkitTabView d={prospectToolkit} />
               </div>
             </>
           )}
