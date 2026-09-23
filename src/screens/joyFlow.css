@@ -439,9 +439,37 @@
   align-items: center;
   gap: var(--space-16);
 }
-.jf-foot .af-progress {
+.jf-where {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+.jf-foot .af-progress {
+  align-self: stretch;
   margin: 0;
+}
+/* Quieter than OK by a long way: going back is there when it is wanted. */
+.jf-prev {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.jf-prev:hover {
+  color: var(--text-strong);
+}
+.jf-prev:active {
+  transform: translateX(-2px);
 }
 .jf-ok {
   flex: none;
