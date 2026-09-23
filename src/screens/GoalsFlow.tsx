@@ -34,6 +34,33 @@ const STAGE_LINE = [
   'Keeping this stage is a major accomplishment. Stay consistent, and you will keep building on your success.',
 ]
 
+/* What a goal saved bare is filled in with, the house rule for a question left
+   unanswered: a sample fitting the goal, so a demo never lands on an empty
+   summary. Keyed by the suggested goals; anything she wrote herself gets the
+   last. */
+const SAMPLE_DETAIL: Record<string, Pick<Goal, 'pros' | 'cons' | 'note'>> = {
+  'Plan a family beach vacation': {
+    pros: ['Quality time with family', 'Rest and adventure'],
+    cons: ['High cost', 'Scheduling around school'],
+    note: 'I want the kids to remember a summer we spent together.',
+  },
+  'Spend more time with my mom as she goes through treatments': {
+    pros: ['Being there when it matters', 'Peace of mind'],
+    cons: ['Less time at work', 'Travel costs'],
+    note: 'I want to be with her for every appointment I can.',
+  },
+  'Contribute more to cancer-related philanthropy': {
+    pros: ['Giving back', 'A cause close to home'],
+    cons: ['Less to save each month'],
+    note: 'I want our giving to mean something to our family.',
+  },
+}
+const SAMPLE_OWN: Pick<Goal, 'pros' | 'cons' | 'note'> = {
+  pros: ['Something to work toward', 'Peace of mind'],
+  cons: ['Takes time and money'],
+  note: 'This matters to me and to the people I love.',
+}
+
 const ClockIcon = () => (
   <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
     <circle cx="8" cy="8" r="6.4" />
@@ -131,7 +158,9 @@ export default function GoalsFlow({
             const d = new Date()
             const p2 = (n: number) => String(n).padStart(2, '0')
             const updated = `${p2(d.getMonth() + 1)}/${p2(d.getDate())}/${d.getFullYear()}`
-            setGoals((gs) => [...gs, { ...g, updated }])
+            const bare = !g.pros?.length && !g.cons?.length && !g.note
+            const filled = bare ? { ...g, ...(SAMPLE_DETAIL[g.title] ?? SAMPLE_OWN) } : g
+            setGoals((gs) => [...gs, { ...filled, updated }])
             setStep('added')
           }}
         />
