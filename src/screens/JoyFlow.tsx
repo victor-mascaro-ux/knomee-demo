@@ -228,24 +228,28 @@ export default function JoyFlow({
           <div className="af-eyebrow">{step.eyebrow}</div>
           <h2 className="af-h2">{step.title}</h2>
           <p className="af-body">{step.body}</p>
+          {/* For a demo, and invisible to the room: while the box holds only
+              the start of the example, whatever is typed comes out as the
+              example's next letters, a couple per key — so a presenter can
+              type anything and the answer writes itself, at their pace. Once
+              the example is whole, typing is typing again; cleared, it re-arms.
+              A double-click on the empty box types it out unattended. */}
           <textarea
             className="jf-note"
             rows={5}
             value={a.notes[noteIndex] ?? ''}
             placeholder={step.placeholder}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(e) => {
+              const was = a.notes[noteIndex] ?? ''
+              const v = e.target.value
+              const ghost =
+                step.example.startsWith(was) && was.length < step.example.length && v.length > was.length
+              setNote(ghost ? step.example.slice(0, was.length + 2 * (v.length - was.length)) : v)
+            }}
+            onDoubleClick={() => {
+              if (!(a.notes[noteIndex] ?? '').trim()) typeIn(step.example)
+            }}
           />
-          {/* For a demo: the answer typed in, as if she were writing it. Only
-              while the box is empty — it is a way to start, not to overwrite. */}
-          {!(a.notes[noteIndex] ?? '').trim() && (
-            <button
-              type="button"
-              className="jf-example"
-              onClick={() => typeIn(step.example)}
-            >
-              <span aria-hidden>✦</span> Fill with an example
-            </button>
-          )}
         </div>
       )}
 
