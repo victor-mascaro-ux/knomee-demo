@@ -498,10 +498,10 @@
   font-weight: 700;
   color: var(--rd-ink);
 }
+/* The four rows are the key — they do not need a box around them as well. A
+   card inside a card put two frames between the reader and four sentences, so
+   the rows sit straight under the heading on the card that is already there. */
 .rd-key {
-  border: var(--border-thin) solid var(--border-default);
-  border-radius: var(--radius-xl);
-  padding: var(--space-14);
   display: flex;
   flex-direction: column;
   gap: var(--space-14);
