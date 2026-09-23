@@ -19,7 +19,7 @@ import './joyResults.css'
 import './outlookFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { Reveal, Typed } from './JoyResults'
+import { AboutOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
 
 export interface OutlookAnswers {
@@ -123,7 +123,7 @@ function Sky({
           <span
             className="ol-cloud"
             key={`c${i}:${c}`}
-            style={{ left: `${p.x}%`, top: `${tall ? p.y * 0.6 + 34 : p.y}%`, ['--s' as string]: p.s, ['--i' as string]: i }}
+            style={{ left: `${p.x}%`, top: `${tall ? p.y * 0.4 + 30 : p.y}%`, ['--s' as string]: p.s, ['--i' as string]: i }}
           >
             {tall && <b>{short(c)}</b>}
           </span>
@@ -286,6 +286,14 @@ export default function OutlookFlow({
 }) {
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
   const [a, setA] = useState<OutlookAnswers>(() => review ?? { concerns: [], hopes: [] })
+  /* The ending's overlay, as the other adventures have it: said once a moment
+     after it arrives, and again from "Learn more". */
+  const [about, setAbout] = useState(false)
+  useEffect(() => {
+    if (step !== 'results') return
+    const t = window.setTimeout(() => setAbout(true), 700)
+    return () => window.clearTimeout(t)
+  }, [step])
 
   useEffect(() => {
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
@@ -364,6 +372,46 @@ export default function OutlookFlow({
 
       {step === 'results' && (
         <div className="jr olr">
+          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+            Learn more
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+              <circle cx="8" cy="8" r="7" fill="currentColor" />
+              <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+              <circle cx="8" cy="4.7" r="1" fill="#fff" />
+            </svg>
+          </button>
+          {about && (
+            <AboutOverlay
+              title="You asked the big questions!"
+              share={70}
+              onClose={() => setAbout(false)}
+              first={
+                <>
+                  Most respondents share{' '}
+                  <b>
+                    <CountUp to={4} /> concerns
+                  </b>{' '}
+                  and{' '}
+                  <b>
+                    <CountUp to={3} /> hopes
+                  </b>
+                  !
+                </>
+              }
+              second={
+                <>
+                  <p>
+                    Great! Your <b>questions</b> matter.
+                  </p>
+                  <p>
+                    By sharing your questions, you’re giving your advisor the insight to tailor
+                    advice to your life. <b>More clarity means better support</b>—so you can move
+                    forward with confidence.
+                  </p>
+                </>
+              }
+            />
+          )}
           <Reveal>
             <h2 className="jr-title">Your outlook</h2>
             <p className="jr-sub">This is what’s on your mind:</p>
