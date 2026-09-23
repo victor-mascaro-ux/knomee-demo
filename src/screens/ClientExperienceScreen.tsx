@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
 import JoyFlow, { sampleJoyAnswers, type JoyAnswers } from './JoyFlow'
+import ConfidenceFlow, { type ConfidenceAnswers } from './ConfidenceFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -635,6 +636,7 @@ function AdventuresScreen({
   onOpenAdventure,
   done,
   onSkipTo,
+  built = ['financial-joy'],
 }: {
   onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** An adventure that can actually be taken. */
@@ -645,6 +647,8 @@ function AdventuresScreen({
   /** A greyed adventure, tapped: for the demo, everything before it is
       completed with sample answers and it becomes the one that is next. */
   onSkipTo?: (id: string) => void
+  /** The adventures that can actually be taken. */
+  built?: string[]
 }) {
   if (done) {
     /* The journey: what is done, the one thing next, and the rest waiting in
@@ -663,14 +667,14 @@ function AdventuresScreen({
                 title={j.title}
                 artKey={j.art!}
                 on={done[j.id]}
-                onRow={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+                onRow={built.includes(j.id) ? () => onOpenAdventure(j.id) : undefined}
               />
             ) : j === next ? (
               <ActionRow
                 key={j.id}
                 a={{ title: j.title, art: j.art!, blurb: j.blurb, minutes: j.minutes, label: 'Start' }}
-                onAct={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
-                onRow={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+                onAct={built.includes(j.id) ? () => onOpenAdventure(j.id) : undefined}
+                onRow={built.includes(j.id) ? () => onOpenAdventure(j.id) : undefined}
               />
             ) : (
               <LockedRow
@@ -1140,6 +1144,22 @@ export default function ClientExperienceScreen({
   const [joy, setJoy] = useState<JoyAnswers | null>(null)
   /* Adventures completed, by id, with the day. */
   const [done, setDone] = useState<Record<string, string>>({})
+  /* What Confidence handed back, once it has. */
+  const [conf, setConf] = useState<ConfidenceAnswers | null>(null)
+  /* An adventure that has been built, and can be taken. */
+  const BUILT = ['financial-joy', 'confidence']
+  /* Completing an adventure — the first time or again — makes the journey
+     stand at it: everything before it complete, it complete, and everything
+     after it waiting. */
+  const completeAt = (id: string) => {
+    const upTo = journey.findIndex((j) => j.id === id)
+    setDone((d) => {
+      const next: Record<string, string> = {}
+      for (const j of journey.slice(0, upTo)) next[j.id] = d[j.id] ?? completedToday()
+      next[id] = completedToday()
+      return next
+    })
+  }
   /* For the demo: a greyed adventure tapped completes every one before it
      with sample answers — Financial Joy with the answers OK would record, the
      rest with her authored ones — and leaves the tapped one next. */
@@ -1158,6 +1178,7 @@ export default function ClientExperienceScreen({
   const [journeyRun, setJourneyRun] = useState(0)
   const restart = () => {
     setJoy(null)
+    setConf(null)
     setDone({})
     setCheckIn(null)
     setAdventure(null)
@@ -1253,7 +1274,9 @@ export default function ClientExperienceScreen({
               <>
                 {/* Inside an adventure the bar carries its name and the way
                     out, in place of the wordmark and the burger. */}
-                <div className="af-appbar-title">Financial Joy</div>
+                <div className="af-appbar-title">
+                  {journey.find((j) => j.id === adventure)?.title ?? 'Financial Joy'}
+                </div>
                 <button
                   className="cx-appbar-burger"
                   type="button"
@@ -1289,7 +1312,22 @@ export default function ClientExperienceScreen({
             }`}
             ref={viewport}
           >
-            {adventure ? (
+            {adventure === 'confidence' ? (
+              <ConfidenceFlow
+                reward={{
+                  before: 1,
+                  after: 2,
+                  total: journey.filter((j) => j.core).length,
+                  next: 'Outlook',
+                }}
+                onComplete={(answers) => {
+                  setConf(answers)
+                  completeAt('confidence')
+                  setAdventure(null)
+                  setTab('adventures')
+                }}
+              />
+            ) : adventure ? (
               <JoyFlow
                 /* Financial Joy is the first adventure, and taking it — the first
                    time or again — is where the journey starts: the reward always
@@ -1304,7 +1342,7 @@ export default function ClientExperienceScreen({
                      Financial Joy is complete, Confidence is next, and what
                      came after goes back to waiting. */
                   setJoy(answers)
-                  setDone({ 'financial-joy': completedToday() })
+                  completeAt('financial-joy')
                   setAdventure(null)
                   setTab('adventures')
                 }}
@@ -1315,6 +1353,7 @@ export default function ClientExperienceScreen({
                 onOpenAdventure={setAdventure}
                 done={done}
                 onSkipTo={skipTo}
+                built={BUILT}
               />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
@@ -1324,7 +1363,7 @@ export default function ClientExperienceScreen({
               <ProspectProfileScreen
                 key={journeyRun}
                 prospect={SARAH}
-                fresh={{ joy, done }}
+                fresh={{ joy, done, conf }}
                 mine
                 checkIn={
                   checkIn

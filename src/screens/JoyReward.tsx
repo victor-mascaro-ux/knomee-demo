@@ -43,6 +43,7 @@ const PIECES = seeded(90)
 
 export default function JoyReward({
   badge,
+  name = 'Financial Joy',
   from,
   done,
   total,
@@ -50,6 +51,8 @@ export default function JoyReward({
   onNext,
 }: {
   badge: string
+  /** The adventure the badge is for. */
+  name?: string
   /** Adventures complete before this one — the same as `done` when it was
       being taken again, and the bar has nothing to move. */
   from: number
@@ -119,7 +122,7 @@ export default function JoyReward({
           ))}
         </div>
         <span className="jw-halo" aria-hidden />
-        <img className="jw-badge" src={badge} alt="Financial Joy — adventure complete" />
+        <img className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
       </div>
 
       <div className="jw-next">
