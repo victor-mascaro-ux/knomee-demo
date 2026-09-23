@@ -1534,3 +1534,42 @@
   flex-direction: column;
   gap: 2px;
 }
+
+/* A tray that is a button: on hover its drawing turns to colour and the white
+   disc lifts on a soft shadow. The two drawings sit on the same spot. */
+.pp-empty-disc {
+  position: relative;
+}
+.pp-empty-cta .pp-empty-disc {
+  transition: transform 0.18s ease, box-shadow 0.22s ease;
+}
+.pp-empty-cta .pp-empty-disc img {
+  transition: opacity 0.22s ease;
+}
+.pp-empty-colour {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+}
+/* The colour marks carry their own disc of air (the drawing is ~55-65% of
+   the file), so they are drawn at 75px: the drawing then stands at the grey
+   one's ~40-46px — the same size, only coloured. */
+.pp-empty-disc img.pp-empty-colour {
+  width: 75px;
+  height: 75px;
+}
+/* The board's drawing fills more of its file, so it needs less. */
+.pp-empty-disc img.pp-empty-colour.is-board {
+  width: 66px;
+  height: 66px;
+}
+.pp-empty-cta:hover .pp-empty-disc {
+  box-shadow: 0 10px 22px -8px rgba(36, 4, 70, 0.3);
+}
+.pp-empty-cta:hover .pp-empty-disc img:not(.pp-empty-colour) {
+  opacity: 0;
+}
+.pp-empty-cta:hover .pp-empty-colour {
+  opacity: 1;
+}

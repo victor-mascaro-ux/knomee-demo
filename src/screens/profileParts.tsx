@@ -40,6 +40,16 @@ import { avatarSources } from '../data/clientProfile'
 import emptyLifeEvents from '../assets/empty/life-events.svg'
 import emptyQuestions from '../assets/empty/questions.svg'
 import emptyVisionBoard from '../assets/empty/vision-board.svg'
+import colourLifeEvents from '../assets/adventures/life-events.svg'
+import colourQuestions from '../assets/adventures/questions.svg'
+import colourVisionBoard from '../assets/adventures/vision-board.svg'
+/* Each empty tray's drawing in colour, for the tray that is a button: it
+   comes alive under the pointer, the grey giving way to the real thing. */
+const EMPTY_COLOUR: Record<string, string> = {
+  [emptyLifeEvents]: colourLifeEvents,
+  [emptyQuestions]: colourQuestions,
+  [emptyVisionBoard]: colourVisionBoard,
+}
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -594,6 +604,13 @@ export function EmptyState({
     <>
       <span className="pp-empty-disc">
         <img src={art} alt="" />
+        {cta && EMPTY_COLOUR[art] && (
+          <img
+            className={`pp-empty-colour${art === emptyVisionBoard ? ' is-board' : ''}`}
+            src={EMPTY_COLOUR[art]}
+            alt=""
+          />
+        )}
       </span>
       <span className="pp-empty-label">
         {cta && (
