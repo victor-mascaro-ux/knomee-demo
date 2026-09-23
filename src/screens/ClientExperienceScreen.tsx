@@ -1087,7 +1087,14 @@ export default function ClientExperienceScreen({
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
-            <svg className="cx-tab-edge" viewBox="0 0 390 96" width="390" height="96" aria-hidden>
+            <svg
+              className="cx-tab-edge"
+              viewBox="0 0 390 96"
+              width="390"
+              height="96"
+              preserveAspectRatio="none"
+              aria-hidden
+            >
               <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
               <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
             </svg>

@@ -29,9 +29,10 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
-/* The client's own artwork for a vision, which is what her app calls it when
-   she saves one — rather than the abstract board the card used to wear. */
-import icVision from '../assets/adventures/vision.png'
+/* The Future You mark the flow wears on the adventure this board comes out of.
+   The board is the picture half of that adventure, not a thing of its own, and
+   it should be recognised as the same one. */
+import icVision from '../assets/adventures/future-you.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -651,14 +652,17 @@ export default function ClientProfileScreen({
           )}
 
           <div className="pp-title-row">
-            {/* The page is named after the tab it is showing: her Financial ID
-                is the artefact the adventures produce, her Insights are the
-                advisor's read on it. */}
-            <h1 className="pp-title">
-              {client.name}’s{' '}
-              {tab === 'id' ? 'Financial ID' : tab === 'insights' ? 'Insights' : 'Toolkit'}
-            </h1>
-            {ownerMenu}
+            {/* Whose page this is, as one thing: her face, then the page named
+                after the tab it is showing — her Financial ID is the artefact
+                the adventures produce, her Insights the advisor's read on it.
+                The portrait leads it, the way a name badge does. */}
+            <div className="pp-title-id">
+              {ownerMenu}
+              <h1 className="pp-title">
+                {client.name}’s{' '}
+                {tab === 'id' ? 'Financial ID' : tab === 'insights' ? 'Insights' : 'Toolkit'}
+              </h1>
+            </div>
             {/* The PDF is of the Financial ID — there is no insights document to
                 download, and a button that says there is would be a promise. */}
             {tab === 'id' && (
@@ -983,8 +987,11 @@ export default function ClientProfileScreen({
           )}
 
           {/* Printing takes the whole sheet: her Financial ID above, then the
-              insights and the toolkit, each starting its own page. */}
-          {printing && (
+              insights and the toolkit, each starting its own page — for the
+              advisor. On her own copy the sheet is her Financial ID and stops
+              there: the insights and the toolkit are the advisor's read of her,
+              written for the meeting rather than for her. */}
+          {printing && !mine && (
             <>
               <div className="print-page">
                 <h2 className="print-head">Client Insights</h2>
