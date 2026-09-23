@@ -898,7 +898,7 @@
   const SCREEN_LABELS = {
     prospects: 'My Prospects',
     clients: 'My Clients',
-    analytics: 'Analytics',
+    analytics: 'Prospect Analytics',
     segmentation: 'Segmentation',
     settings: 'Account Settings',
     admin: 'Admin overview',
@@ -911,8 +911,8 @@
     'advisor-self': 'Advisor Recruit · Business ID',
     advisors: 'Advisor Recruit · Candidate report',
     flow: 'Advisor Flow · An invited advisor',
-    'firm-candidates': 'Dynasty · My Candidates',
-    'firm-analytics': 'Dynasty · Analytics',
+    'firm-candidates': 'My Candidates',
+    'firm-analytics': 'Candidate Analytics',
     default: 'Prototype'
   };
   const prettySlug = (s) =>
@@ -1744,10 +1744,10 @@
     /* First: the recruiting pipeline is the demo's lead story. The advisors
        who took the flow live in it, so a candidate's report (#/advisors/<id>)
        is Advisor Recruit too. */
-    ['firm', 'Advisor Recruit', '#/firm-candidates',
-      v => (SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm') || v === 'advisors'],
-    ['advisor', 'Advisor Prospects & Clients', '#/prospects',
-      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'advisor'],
+    /* One dashboard now: Candidates is its first tab, beside Prospects and
+       Clients, so the recruiting pipeline and the book are one row here. */
+    ['advisor', 'Advisor Dashboard', '#/firm-candidates',
+      v => (SHELL_VIEWS.indexOf(v) !== -1 && (personaOf(v) === 'firm' || personaOf(v) === 'advisor')) || v === 'advisors'],
     ['admin', 'Admin', '#/admin', v => v === 'admin']
   ];
   /* Named for who takes the journey AND what it produces. "Advisor" on its own

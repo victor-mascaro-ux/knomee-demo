@@ -20,7 +20,7 @@ export const outcomes = {
   rate: 30, // %
   scored: 40,
   target: 25, // %
-  avgKQ: 65.6,
+  avgKQ: 66,
 }
 
 export interface TierStats {

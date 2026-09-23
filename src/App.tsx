@@ -2306,7 +2306,7 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           title rather than in the tab row, because it takes the page over
           instead of filling the tab body. */}
       <div className="page-title-row">
-        <h1 className="page-title">Analytics</h1>
+        <h1 className="page-title">Prospect Analytics</h1>
         {onSegmentation && (
           <button className="btn btn-outline" type="button" onClick={onSegmentation}>
             Segmentation
@@ -3663,12 +3663,6 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
   )
 }
 
-const tabs: { id: Screen; label: string }[] = [
-  { id: 'prospects', label: 'Prospects' },
-  { id: 'clients', label: 'Clients' },
-  { id: 'analytics', label: 'Analytics' },
-]
-
 /* ── The firm persona (Dynasty) ───────────────────────────────────────────
    A second product on the same engine: a platform recruiting advisors ONTO
    itself, where the advisor is the one being assessed. It is not a fourth tab
@@ -3678,9 +3672,15 @@ const tabs: { id: Screen; label: string }[] = [
    label, and owns its own routes. */
 type FirmScreen = 'firm-candidates' | 'firm-analytics'
 
-const firmTabs: { id: FirmScreen; label: string }[] = [
-  { id: 'firm-candidates', label: 'My Candidates' },
-  { id: 'firm-analytics', label: 'Analytics' },
+/* One tab bar for the whole dashboard: the recruiting pipeline sits beside
+   the advisor's own book, candidates first, and each side's analytics after
+   Clients — candidates' first again. */
+const dashTabs: { id: Screen | FirmScreen; label: string; firm?: boolean }[] = [
+  { id: 'firm-candidates', label: 'Candidates', firm: true },
+  { id: 'prospects', label: 'Prospects' },
+  { id: 'clients', label: 'Clients' },
+  { id: 'firm-analytics', label: 'Candidate Analytics', firm: true },
+  { id: 'analytics', label: 'Prospect Analytics' },
 ]
 
 // ── Hash routing ──────────────────────────────────────────────────────────
@@ -3741,7 +3741,6 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>(
     initialView === 'clients' || initialView === 'analytics' ? initialView : 'prospects',
   )
-  const tabsInd = useSlideIndicator<HTMLElement>(screen)
   const [converted, setConverted] = useState<Client[]>([])
   const [convertTarget, setConvertTarget] = useState<Prospect | null>(null)
   // When set, a prospect's full "Financial ID" profile page takes over the main
@@ -3933,7 +3932,8 @@ export default function App() {
   const [firmScreen, setFirmScreen] = useState<FirmScreen>(
     isFirmRoute(initialView) ? initialView : 'firm-candidates',
   )
-  const firmTabsInd = useSlideIndicator<HTMLElement>(firmScreen)
+  /* The dashboard's one tab bar follows whichever side is showing. */
+  const dashInd = useSlideIndicator<HTMLElement>(firmView ? firmScreen : screen)
   // Only Marcus Hale's flow is complete, so he is the one candidate with a
   // profile behind his name.
   const [candidateOpen, setCandidateOpen] = useState(
@@ -4354,6 +4354,42 @@ export default function App() {
     )
   }
 
+  const dashActive = firmView ? firmScreen : screen
+  const dashNav = (
+    <nav className="tabs slide-nav" ref={dashInd.ref}>
+      {dashInd.box && (
+        <span
+          className="slide-ind slide-ind-underline"
+          style={{
+            transform: `translateX(${dashInd.box.left}px)`,
+            width: dashInd.box.width,
+          }}
+        />
+      )}
+      {dashTabs.map((t) => (
+        <button
+          key={t.id}
+          className={`tab ${dashActive === t.id ? 'tab-active' : ''}`}
+          type="button"
+          data-active={dashActive === t.id}
+          onClick={() => {
+            if (t.firm) {
+              setFirmScreen(t.id as FirmScreen)
+              setCandidateOpen(false)
+              setFirmView(true)
+            } else {
+              setScreen(t.id as Screen)
+              setFirmView(false)
+            }
+            scrollPageToTop()
+          }}
+        >
+          {t.label}
+        </button>
+      ))}
+    </nav>
+  )
+
   return (
     <div
       className={`page ${brand ? 'brand-client' : ''}`}
@@ -4369,7 +4405,7 @@ export default function App() {
       <TopBar
         logo={brand ? brand.logo : undefined}
         cobrand={cobrandLayout}
-        sub={firmView ? 'ADVISOR RECRUIT' : adminView ? 'ADMIN' : 'ADVISOR'}
+        sub={adminView ? 'ADMIN' : 'ADVISOR'}
         onSettings={() => {
           setSettingsOpen(true)
           setSegmentationOpen(false)
@@ -4393,31 +4429,7 @@ export default function App() {
           <main className="content">
             {/* The firm's own tab bar. It replaces the advisor's rather than
                 extending it — the two products never share navigation. */}
-            <nav className="tabs slide-nav" ref={firmTabsInd.ref}>
-              {firmTabsInd.box && (
-                <span
-                  className="slide-ind slide-ind-underline"
-                  style={{
-                    transform: `translateX(${firmTabsInd.box.left}px)`,
-                    width: firmTabsInd.box.width,
-                  }}
-                />
-              )}
-              {firmTabs.map((t) => (
-                <button
-                  key={t.id}
-                  className={`tab ${firmScreen === t.id ? 'tab-active' : ''}`}
-                  type="button"
-                  data-active={firmScreen === t.id}
-                  onClick={() => {
-                    setFirmScreen(t.id)
-                    scrollPageToTop()
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </nav>
+            {dashNav}
 
             {firmScreen === 'firm-candidates' && (
               <FirmCandidatesScreen
@@ -4511,31 +4523,7 @@ export default function App() {
         </main>
       ) : (
       <main className="content">
-        <nav className="tabs slide-nav" ref={tabsInd.ref}>
-          {tabsInd.box && (
-            <span
-              className="slide-ind slide-ind-underline"
-              style={{
-                transform: `translateX(${tabsInd.box.left}px)`,
-                width: tabsInd.box.width,
-              }}
-            />
-          )}
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              className={`tab ${screen === t.id ? 'tab-active' : ''}`}
-              type="button"
-              data-active={screen === t.id}
-              onClick={() => {
-                setScreen(t.id)
-                scrollPageToTop()
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
+        {dashNav}
 
         {screen === 'prospects' &&
           (emptyMode ? (

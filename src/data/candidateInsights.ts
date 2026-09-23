@@ -154,8 +154,8 @@ export interface Cluster extends Copy {
   thin: boolean
 }
 
-const round1 = (n: number) => Math.round(n * 10) / 10
-const mean = (xs: number[]) => (xs.length ? round1(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
+/* Scores are whole numbers wherever they are shown — averages included. */
+const mean = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
 
 function modeApprehension(members: Candidate[]) {
   const counts = new Map<string, number>()
