@@ -503,31 +503,53 @@ export function SheetCredit() {
   )
 }
 
+/* How far through the core adventures she is: one segment per adventure,
+   each filling in turn with the brand's plum-to-lilac, a light running across
+   what is done, and the percentage counting up to where she is. */
 export function ProgressMeter({ done, required }: { done: number; required: number }) {
   const pct = Math.round((done / required) * 100)
+  const [shown, setShown] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return setShown(pct)
+    let raf = 0
+    const t0 = performance.now()
+    const from = 0
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - t0) / 900)
+      setShown(Math.round(from + (pct - from) * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [pct])
   return (
-    <div className="cx-progress">
+    <div className={`cx-progress${done >= required ? ' is-full' : ''}`}>
       <div className="cx-progress-top">
-        <span>Progress</span>
+        <span className="cx-progress-label">Progress</span>
         <span>
-          {done}/{required} Adventures Completed
+          <b>{done}</b>/{required} Adventures Completed
         </span>
       </div>
       <div className="cx-progress-row">
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden>
-          <circle cx="10" cy="10" r="8.6" stroke="#240446" strokeWidth="1.5" />
-          <path
-            d="M6 10.3 8.9 13l5-5.6"
-            stroke="#086375"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <div className="cx-progress-track">
-          <i style={{ width: `${pct}%` }} />
+        <div
+          className="cx-progress-track"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={required}
+          aria-valuenow={done}
+          aria-label={`${done} of ${required} adventures completed`}
+        >
+          {Array.from({ length: required }, (_, i) => (
+            <span
+              key={i}
+              className={`cx-progress-seg${i < done ? ' is-on' : ''}${i === done - 1 ? ' is-last' : ''}`}
+              style={{ ['--i' as string]: i }}
+            >
+              <i />
+            </span>
+          ))}
         </div>
-        <span className="cx-progress-pct">{pct}%</span>
+        <span className="cx-progress-pct">{shown}%</span>
       </div>
     </div>
   )
@@ -666,8 +688,8 @@ function AdventuresScreen({
     const coreDone = journey.filter((j) => j.core && done[j.id]).length
     return (
       <>
-        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
         <h2 className="cx-screen-title">My Adventures</h2>
+        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
         <div className="cx-adv-list">
           {/* Once Goals is done, it and Life Events are the two she keeps
               adding to, so they lead the list rather than trail it. */}
