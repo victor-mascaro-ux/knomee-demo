@@ -272,9 +272,9 @@ export const financialId = {
     },
     /* How she feels about each, on the five faces her phone offers. */
     { kind: 'Career change', text: 'Laid off in March', date: '05/03/2025', sentiment: 1 },
-    { kind: 'Separation', text: 'Going through a separation', date: '05/03/2025', sentiment: 2 },
+    { kind: 'Separation', text: 'Going through a separation', date: '05/03/2025', sentiment: 2, completed: '05/03/2025' },
     { kind: 'New baby', text: 'First grandchild due in October', date: '04/02/2025', sentiment: 5 },
-    { kind: 'Retirement', text: 'Targeting a wind-down from 2028', date: '02/17/2025', sentiment: 4, completed: '05/03/2025' },
+    { kind: 'Retirement', text: 'Targeting a wind-down from 2028', date: '02/17/2025', sentiment: 4 },
   ] as LifeEvent[],
   questions: [
     { q: 'Can I afford to go to college?', date: '05/03/2025' },

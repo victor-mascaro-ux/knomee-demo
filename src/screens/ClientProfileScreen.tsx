@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
@@ -889,7 +889,13 @@ export default function ClientProfileScreen({
   useEffect(() => setEventList(cp.lifeEvents), [cp])
   const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
   const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
-  const events = useCollapsed(eventList, COLLAPSED_ROWS)
+  /* Done events go to the end, the way completed goals do; the rest keep
+     their order. */
+  const orderedEvents = useMemo(
+    () => [...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)],
+    [eventList],
+  )
+  const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
   /* And the questions, which behave the same way: asked from the plus, opened
      to read, reworded, marked answered. */
   const [questionList, setQuestionList] = useState<ProfileQuestion[]>(cp.questions)
@@ -1260,7 +1266,7 @@ export default function ClientProfileScreen({
                     <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
                         <div
-                          className={`pp-event is-open-able ${events.entering(i) ?? ''}`}
+                          className={`pp-event is-open-able ${e.completed ? 'is-done' : ''} ${events.entering(i) ?? ''}`}
                           style={events.delay(i)}
                           key={i}
                           role="button"
@@ -1277,7 +1283,11 @@ export default function ClientProfileScreen({
                             </span>
                             <span className="pp-event-text">{e.text}</span>
                             <span className="pp-event-meta">
-                              <span className="pp-event-date">{e.date}</span>
+                              {e.completed ? (
+                                <span className="pp-goal-done"><CheckIcon /> Completed: {e.completed}</span>
+                              ) : (
+                                <span className="pp-event-date">{e.date}</span>
+                              )}
                               {e.advisorAdded && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}

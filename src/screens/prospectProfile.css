@@ -1573,3 +1573,12 @@
 .pp-empty-cta:hover .pp-empty-colour {
   opacity: 1;
 }
+
+/* A life event marked done: quieter, the way a completed goal is. */
+.pp-event.is-done {
+  background: #fff;
+}
+.pp-event.is-done .pp-event-kind,
+.pp-event.is-done .pp-event-text {
+  color: #8b8598;
+}
