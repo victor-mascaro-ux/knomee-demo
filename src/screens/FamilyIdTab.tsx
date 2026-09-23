@@ -131,16 +131,11 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
               <span className="cp-checkin-date">No check-in yet</span>
             </div>
           ) : (
-          <div className="cp-checkin fid-checkin" key={m.name}>
+          <div className={`cp-checkin fid-checkin is-mood-${m.checkIn.level}`} key={m.name}>
             <span className="cp-checkin-face">
               <img src={MOOD_FACE[m.checkIn.level]} alt="" />
             </span>
             <span className="cp-checkin-main">
-              <span className="cp-checkin-dots" aria-hidden>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <i key={i} className={i <= m.checkIn.level ? 'is-on' : ''} />
-                ))}
-              </span>
               <span className="cp-checkin-mood">{m.checkIn.mood}</span>
             </span>
             <span className="fid-checkin-who">{m.name}</span>

@@ -323,6 +323,17 @@
   background: #fff;
   object-fit: contain;
 }
+/* The adventure marks are drawn inside their own disc, with air around the
+   artwork. The badges and vision-board marks are the artwork alone, so they
+   need that air added or they read a size larger than everything beside them.
+   Matched on the file rather than a class, so every card that uses them —
+   including the household's, which takes its icon as a prop — gets it. */
+.pp-card-ic.is-inset,
+.pp-card-ic[src*="badges-icon"],
+.pp-card-ic[src*="vision-board"] {
+  padding: 3px;
+  box-sizing: border-box;
+}
 .pp-add {
   display: inline-flex;
   width: 24px;

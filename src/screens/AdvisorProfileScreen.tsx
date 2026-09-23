@@ -563,7 +563,7 @@ function BusinessIdTab({
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
-                <img className="pp-card-ic" src={icBadges} alt="" />
+                <img className="pp-card-ic is-inset" src={icBadges} alt="" />
                 Badges
               </span>
             </div>
