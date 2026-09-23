@@ -193,7 +193,9 @@
 }
 .cx-sheet-account {
   display: flex;
-  align-items: center;
+  /* The photo sits level with her name, not the middle of a line that may
+     wrap to two. */
+  align-items: flex-start;
   gap: 11px;
   padding-bottom: var(--space-14);
   border-bottom: var(--border-thin) solid #ededf0;
