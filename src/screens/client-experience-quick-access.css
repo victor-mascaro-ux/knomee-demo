@@ -63,6 +63,12 @@
    raster art without one is inset to the same optical size. */
 .kx-action img{width:100%;height:100%;display:block}
 .kx-action img.is-raster{width:62%;height:62%}
+/* Optical corrections, measured from the art itself. The vision board is a
+   solid square that fills two thirds of its frame, where the others are open
+   shapes, so at the same size it reads a size larger. Questions and life
+   events draw their weight a few units above their frame's centre. */
+.kx-action img.kx-art-vision{transform:scale(.86)}
+.kx-action img.kx-art-questions,.kx-action img.kx-art-life-events{transform:translateY(3%)}
 /* The mood disc arrives rather than appearing: it slides up from under the
    screen's edge, the faces pop on along its rim one after another, and the
    question fades in last. Quick — the whole thing is over in under half a

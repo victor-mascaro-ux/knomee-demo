@@ -739,7 +739,13 @@ function KnomeeSheet({
         </div>
       ) : null}
       <div className="kx-next">
-        <ActionRow a={quickNext} />
+        {/* Start does what the card says is next: the flow its art names,
+            the same one the tile below it opens. */}
+        <ActionRow
+          a={quickNext}
+          onAct={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+          onRow={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+        />
       </div>
       <div className="kx-actions">
         {quickActions.map((q, i) => (
@@ -754,7 +760,7 @@ function KnomeeSheet({
             }}
           >
             <span>
-              <img className={q.raster ? 'is-raster' : undefined} src={art[q.art]} alt="" />
+              <img className={`kx-art-${q.art}${q.raster ? ' is-raster' : ''}`} src={art[q.art]} alt="" />
             </span>
             {q.label}
           </button>
