@@ -137,21 +137,33 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
         <div className="modal-body jr-about-body">
           {/* A share, drawn: the slice sweeps round to its size. */}
           <svg className="jr-pie" viewBox="0 0 48 48" width="56" height="56" aria-hidden>
-            <circle cx="24" cy="24" r="20" fill="var(--k-teal)" />
+            {/* A pie the way pies are read: the slice sweeps clockwise from
+                twelve o'clock to its share, with a dark edge at each side of
+                it — the second edge travelling round with the sweep. */}
+            <circle cx="24" cy="24" r="20" fill="#fff" />
             <circle
-              className="jr-pie-rest"
+              className="jr-pie-slice"
               cx="24"
               cy="24"
               r="10"
               fill="none"
-              stroke="#fff"
+              stroke="var(--k-teal)"
               strokeWidth="20"
               pathLength="100"
-              strokeDasharray={`${100 - SHARE} 100`}
-              transform="rotate(-90 24 24) scale(-1 1) translate(-48 0)"
+              strokeDasharray={`${SHARE} 100`}
+              transform="rotate(-90 24 24)"
+              style={{ ['--share' as string]: SHARE }}
+            />
+            <path d="M24 24V4" stroke="var(--k-ocean)" strokeWidth="3" strokeLinecap="round" />
+            <path
+              className="jr-pie-edge"
+              d="M24 24V4"
+              stroke="var(--k-ocean)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              style={{ ['--turn' as string]: `${SHARE * 3.6}deg` }}
             />
             <circle cx="24" cy="24" r="20" fill="none" stroke="var(--k-ocean)" strokeWidth="3.4" />
-            <path d="M24 4v20" stroke="var(--k-ocean)" strokeWidth="3" strokeLinecap="round" />
           </svg>
           <p className="jr-about-card">
             <b>
