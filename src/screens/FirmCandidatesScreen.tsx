@@ -30,7 +30,6 @@ import {
 } from '../data/candidates'
 import { talkTo } from '../data/candidateInsights'
 import { advisor } from '../data/advisorFlow'
-import { segFlex } from '../components/segFlex'
 import {
   CaretDown,
   ChartIcon,
@@ -200,15 +199,15 @@ function CommandCenter({
               )}
             </div>
             <div className="dist-bar cmd-dist-bar">
-              {TIER_META.map((m) => {
+              {/* A tier with nobody in it is left off the bar and its legend. */}
+              {TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => {
                 const n = stats.byTier[m.tierId]
                 return (
                   <button
                     key={m.key}
                     type="button"
-                    disabled={n === 0}
-                    style={{ flex: segFlex(n, TIER_META.map((t) => stats.byTier[t.tierId])) }}
-                    className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${tier === m.key ? 'is-sel' : ''} ${
+                    style={{ flex: n }}
+                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
                       tier && tier !== m.key ? 'is-dim' : ''
                     }`}
                     onClick={() => pickTier(m.key)}
@@ -221,12 +220,8 @@ function CommandCenter({
               })}
             </div>
             <div className="dist-legend dist-legend-bars">
-              {TIER_META.map((m) => (
-                <div
-                  className="dist-leg"
-                  key={m.key}
-                  style={{ flexGrow: segFlex(stats.byTier[m.tierId], TIER_META.map((t) => stats.byTier[t.tierId])) }}
-                >
+              {TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => (
+                <div className="dist-leg" key={m.key} style={{ flexGrow: stats.byTier[m.tierId] }}>
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}

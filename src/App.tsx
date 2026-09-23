@@ -118,7 +118,6 @@ import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
-import { segFlex } from './components/segFlex'
 
 /* Under this share, a bar is narrower than the label it would have to hold,
    so the label steps outside it instead of going white on a pale track. */
@@ -289,15 +288,15 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               )}
             </div>
             <div className="dist-bar cmd-dist-bar">
-              {TIER_META.map((m) => {
+              {/* A tier with nobody in it is left off the bar and its legend. */}
+              {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => {
                 const n = prospectStats.byTier[m.tierId]
                 return (
                   <button
                     key={m.key}
                     type="button"
-                    disabled={n === 0}
-                    style={{ flex: segFlex(n, TIER_META.map((t) => prospectStats.byTier[t.tierId])) }}
-                    className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${tier === m.key ? 'is-sel' : ''} ${
+                    style={{ flex: n }}
+                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
                       tier && tier !== m.key ? 'is-dim' : ''
                     }`}
                     onClick={() => pickTier(m.key)}
@@ -310,12 +309,12 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               })}
             </div>
             <div className="dist-legend dist-legend-bars">
-              {TIER_META.map((m) => (
+              {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => (
                 <div
                   className="dist-leg"
                   key={m.key}
                   /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: segFlex(prospectStats.byTier[m.tierId], TIER_META.map((t) => prospectStats.byTier[t.tierId])) }}
+                  style={{ flexGrow: prospectStats.byTier[m.tierId] }}
                 >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
@@ -1148,17 +1147,16 @@ function ClientsMetrics({
             )}
           </div>
           <div className="dist-bar cmd-dist-bar">
-            {CLIENT_TIER_META.map((m) => {
+            {CLIENT_TIER_META.filter((m) => count(m.tierId) > 0).map((m) => {
               const n = count(m.tierId)
               return (
                 <button
                   key={m.tierId}
                   type="button"
-                  disabled={n === 0}
-                  className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${filterTier === m.tierId ? 'is-sel' : ''} ${
+                  className={`seg ${m.seg} tt ${filterTier === m.tierId ? 'is-sel' : ''} ${
                     filterTier && filterTier !== m.tierId ? 'is-dim' : ''
                   }`}
-                  style={{ flex: segFlex(n, CLIENT_TIER_META.map((t) => count(t.tierId))) }}
+                  style={{ flex: n }}
                   onClick={() => onPickTier(m.tierId)}
                   aria-pressed={filterTier === m.tierId}
                   data-tip={`${m.label} · ${n}`}
@@ -1169,12 +1167,8 @@ function ClientsMetrics({
             })}
           </div>
           <div className="dist-legend dist-legend-bars">
-            {CLIENT_TIER_META.map((m) => (
-              <div
-                className="dist-leg"
-                key={m.tierId}
-                style={{ flex: segFlex(count(m.tierId), CLIENT_TIER_META.map((t) => count(t.tierId))) }}
-              >
+            {CLIENT_TIER_META.filter((m) => count(m.tierId) > 0).map((m) => (
+              <div className="dist-leg" key={m.tierId} style={{ flex: count(m.tierId) }}>
                 <span className="dist-leg-name"><i className={`dot ${m.dot}`} />{m.label}</span>
                 <span className="dist-leg-range">{m.range}</span>
               </div>

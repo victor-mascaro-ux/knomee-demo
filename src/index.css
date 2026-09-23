@@ -6767,14 +6767,87 @@ button.name-link-btn:hover .name-text {
   bottom: calc(100% + 4px);
 }
 
-/* An empty tier: still on the bar so its slot and legend hold, but grey and
-   not a control — there is nobody in it to filter to. */
-.cmd-dist-bar .seg.is-zero,
-.cmd-dist-bar .seg.is-zero:hover {
-  background: var(--k-pearl, #eeeeee);
-  color: var(--k-ash, #afafaf);
-  cursor: default;
-  transform: none;
-  box-shadow: none;
-  filter: none;
+
+/* ── The account (burger) menu, on the design system ──
+   The same card and rows as the dropdowns (selectMenu.css), so every list that
+   drops from a control is one component: the tokens' line and plum, a 12px
+   card on the dropdown's shadow, rows at the dropdown's size with the plum
+   wash under the pointer, and the standard light-purple letter avatar. */
+.menu-pop {
+  width: 240px;
+  padding: 6px;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: var(--surface-card, #fff);
+  box-shadow: 0 14px 30px -8px rgba(36, 4, 70, 0.2);
+  color: var(--text-strong);
+}
+.menu-account {
+  gap: var(--space-10, 10px);
+  margin-bottom: 4px;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--k-line);
+}
+.menu-avatar {
+  /* The profile's avatar, small: the tinted disc, a white rim and the thin
+     line ring round it — the one avatar the product has. */
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--k-line);
+  font-size: 15px;
+  font-weight: 600;
+}
+.menu-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.menu-item {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-strong);
+  transition: background 0.12s ease;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+  outline: none;
+  background: var(--k-plum-wash);
+  color: var(--text-strong);
+}
+.menu-hint {
+  margin: 4px 0 0;
+  padding: 10px 12px 6px;
+  border-top: 1px solid var(--k-line);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.menu-hint b {
+  color: var(--text-strong);
+}
+
+/* ── Dashboard avatars are the profile's avatar ──
+   The same disc the Financial ID and Business ID pages draw (.pp-avatar): a
+   photograph or the tinted initial, inside a white rim and a thin line ring,
+   the initial at 0.45 of the disc in 600. Only the size differs. */
+.avatar {
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--k-line);
+}
+.avatar-initial {
+  font-size: 17px;
+  font-weight: 600;
+}
+.fc-portrait {
+  overflow: hidden;
+}
+.fc-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
