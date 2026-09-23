@@ -373,22 +373,9 @@ export default function ProspectProfileScreen({
                 <div className="pp-col-main">
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      {fresh && isDone('goals') && onOpenEnding ? (
-                        <button
-                          type="button"
-                          className="pp-card-title pp-card-title-link"
-                          onClick={() => onOpenEnding('goals')}
-                          aria-label="Goals — see your readiness again"
-                        >
-                          <img className="pp-card-ic" src={icGoals} alt="" />
-                          Goals
-                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
-                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
-                      ) : (
-                        <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
-                      )}
+                      {/* No way back to the Goals ending here: each goal opens its
+                          own card, which is the reading the ending gave. */}
+                      <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
                       <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
                     </div>
                     <div className="pp-goals" ref={goals.box}>

@@ -93,16 +93,12 @@ export default function GoalsFlow({
   reward,
   onComplete,
   review,
-  again,
 }: {
   reward: { before: number; after: number; total: number; next: string }
   onComplete: (a: GoalsAnswers) => void
   review?: GoalsAnswers
-  /** Goals already done, taken again: straight to adding one, and it ends
-      back on the list rather than on a second badge. */
-  again?: boolean
 }) {
-  const [step, setStep] = useState<Step>(review ? 'results' : again ? 'add' : 'intro')
+  const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
   const [goals, setGoals] = useState<Goal[]>(review?.goals ?? [])
   const current = goals[goals.length - 1]
 
@@ -160,7 +156,7 @@ export default function GoalsFlow({
       {step === 'add' && (
         <AddGoalModal
           suggestions={financialId.suggestedGoals}
-          onClose={() => (goals.length ? setStep('added') : again ? onComplete({ goals: [] }) : setStep('intro'))}
+          onClose={() => (goals.length ? setStep('added') : setStep('intro'))}
           onAdd={(g) => {
             /* Dated today: the panel stamps the advisor demo's fixed day. */
             const d = new Date()
@@ -265,20 +261,12 @@ export default function GoalsFlow({
             </Reveal>
           )}
 
-          {again ? (
-            <Reveal className="jr-reward">
-              <button className="jr-claim" type="button" onClick={() => onComplete({ goals })}>
-                <span>Back to My Adventures</span>
-              </button>
-            </Reveal>
-          ) : (
-            <Reveal className="jr-reward">
-              <p className="jr-reward-line">You got a reward!</p>
-              <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
-                <span>Claim Badge</span>
-              </button>
-            </Reveal>
-          )}
+          <Reveal className="jr-reward">
+            <p className="jr-reward-line">You got a reward!</p>
+            <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
+              <span>Claim Badge</span>
+            </button>
+          </Reveal>
         </div>
       )}
 

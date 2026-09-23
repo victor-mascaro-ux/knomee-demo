@@ -1100,3 +1100,69 @@ svg.cx-tab-mark {
 .cx-device.is-bare .cx-viewport.is-menu-open .pp-side {
   top: var(--mobile-appbar-h);
 }
+
+/* Goals and Life Events once Goals is done: the two she keeps adding to, set
+   apart from the finished rows by a plum edge. */
+.cx-adv.cx-adv-keep {
+  border: 1.5px solid var(--k-plum);
+}
+
+/* ── My Adventures, with some depth ──
+   Every card that can be opened floats on a soft two-layer shadow tinted with
+   the plum, deals in one after another when the list appears, and lifts a
+   little under the pointer. Locked ones stay flat: they are not there yet. */
+.cx-adv-list > .cx-adv:not(.cx-adv-locked) {
+  box-shadow:
+    0 1px 2px rgba(36, 4, 70, 0.06),
+    0 6px 16px -6px rgba(36, 4, 70, 0.16);
+  transition:
+    transform 0.22s var(--ease-out),
+    box-shadow 0.22s var(--ease-out),
+    border-color 0.22s var(--ease-out);
+}
+.cx-adv-list > .cx-adv:not(.cx-adv-locked):hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(36, 4, 70, 0.08),
+    0 14px 26px -10px rgba(36, 4, 70, 0.28);
+}
+.cx-adv-list > .cx-adv:not(.cx-adv-locked):active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: 0 1px 3px rgba(36, 4, 70, 0.12);
+}
+/* The one up next glows in its own lime. */
+.cx-adv-list > .cx-adv-open {
+  box-shadow:
+    0 1px 2px rgba(36, 4, 70, 0.06),
+    0 10px 24px -8px rgba(122, 190, 30, 0.45);
+}
+/* The two she keeps adding to carry the plum in their shadow as well as their
+   edge. */
+.cx-adv-list > .cx-adv.cx-adv-keep {
+  box-shadow:
+    0 1px 2px rgba(36, 4, 70, 0.08),
+    0 10px 24px -8px rgba(36, 4, 70, 0.34);
+}
+.cx-adv-list > .cx-adv {
+  animation: cxAdvIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+.cx-adv-list > .cx-adv:nth-child(2) { animation-delay: 0.05s; }
+.cx-adv-list > .cx-adv:nth-child(3) { animation-delay: 0.1s; }
+.cx-adv-list > .cx-adv:nth-child(4) { animation-delay: 0.15s; }
+.cx-adv-list > .cx-adv:nth-child(5) { animation-delay: 0.2s; }
+.cx-adv-list > .cx-adv:nth-child(6) { animation-delay: 0.25s; }
+@keyframes cxAdvIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+/* A little room so the shadows are not cut by the list's edges. */
+.cx-adv-list {
+  padding-bottom: var(--space-12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-adv-list > .cx-adv {
+    animation: none;
+  }
+}

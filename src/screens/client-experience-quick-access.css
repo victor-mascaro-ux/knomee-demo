@@ -283,3 +283,14 @@
   height: 62%;
   object-fit: contain;
 }
+
+/* The four quick actions are the sheet's main business, so they take all the
+   room between the next adventure and the mood arc, and stop the sheet's own
+   gap short of the arc's top — the same space as above them. */
+.kx-actions{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;margin-bottom:var(--kx-arc-clear,258px)}
+.kx-action{justify-content:center;gap:var(--space-12);font-size:16px}
+.kx-action span{width:56px;height:56px}
+/* Nor is there a status bar above the app bar on a handset, so both sheets
+   start right under the bar, over the page's own title, not 54px lower. */
+.cx-page.is-bare .kx-sheet,
+.cx-page.is-bare .vx-sheet{top:calc(var(--mobile-appbar-h) - 1px)}

@@ -567,14 +567,17 @@ export function ActionRow({
   a,
   onAct,
   onRow,
+  keep,
 }: {
   a: AdventureAction
   onAct?: () => void
   onRow?: () => void
+  /** One of the two adventures she keeps coming back to, drawn to stand out. */
+  keep?: boolean
 }) {
   return (
     <div
-      className={`cx-adv ${a.outline ? 'cx-adv-done' : 'cx-adv-open'}${tapClass(onRow)}`}
+      className={`cx-adv ${a.outline ? 'cx-adv-done' : 'cx-adv-open'}${keep ? ' cx-adv-keep' : ''}${tapClass(onRow)}`}
       {...rowTap(onRow)}
     >
       <span className="cx-adv-art has-img is-open">
@@ -666,13 +669,21 @@ function AdventuresScreen({
         <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
         <h2 className="cx-screen-title">My Adventures</h2>
         <div className="cx-adv-list">
-          {journey.map((j) =>
-            done[j.id] && REPEAT[j.id] ? (
+          {/* Once Goals is done, it and Life Events are the two she keeps
+              adding to, so they lead the list rather than trail it. */}
+          {(done.goals
+            ? [...journey.filter((j) => REPEAT[j.id]), ...journey.filter((j) => !REPEAT[j.id])]
+            : journey
+          ).map((j) =>
+            REPEAT[j.id] && (done[j.id] || (j.id === 'life-events' && j === next)) ? (
               /* Goals and Life Events are never finished: once done they stay a
-                 card with its way to add one more, not a completed row. */
+                 card with its way to add one more, not a completed row. Life
+                 Events is one from the start — it is a list to keep, not an
+                 adventure to finish. */
               <ActionRow
                 key={j.id}
                 a={{ title: j.title, art: j.art!, minutes: j.minutes, outline: true, ...REPEAT[j.id] }}
+                keep
                 onAct={onAddAgain ? () => onAddAgain(j.id) : undefined}
                 onRow={onAddAgain ? () => onAddAgain(j.id) : undefined}
               />
@@ -1173,13 +1184,8 @@ export default function ClientExperienceScreen({
   const [reviewing, setReviewing] = useState(false)
   /* However an adventure is left — its end, or the bar's cross — a replay is
      over with it, so the next one opened is taken for real. */
-  /* Goals taken again once done: straight to adding one, no second badge. */
-  const [goalsAgain, setGoalsAgain] = useState(false)
   useEffect(() => {
-    if (!adventure) {
-      setReviewing(false)
-      setGoalsAgain(false)
-    }
+    if (!adventure) setReviewing(false)
   }, [adventure])
   const leaveReview = () => {
     setReviewing(false)
@@ -1251,19 +1257,19 @@ export default function ClientExperienceScreen({
     setTab('finid')
     setFlow(f)
   }
-  /* One more goal, or one more life event, once that adventure is done. */
-  const addAgain = (id: string) => {
-    setSheet(false)
-    if (id === 'goals') {
-      setTab('adventures')
-      setGoalsAgain(true)
-      setAdventure('goals')
-    } else openFlow('event')
-  }
+  /* One more goal, or one more life event, once that adventure is done: the
+     Financial ID's own Add panel, not the adventure over again. */
+  const addAgain = (id: string) => openFlow(id === 'goals' ? 'goal' : 'event')
   /* The quick sheet's card is the journey's own next step: the adventure up
      next, or once all are done, one more goal. */
   const upNext = journey.find((j) => !done[j.id])
-  const sheetNext = upNext
+  const sheetNext =
+    upNext?.id === 'life-events'
+      ? {
+          a: { title: upNext.title, art: upNext.art!, minutes: upNext.minutes, outline: true, ...REPEAT['life-events'] },
+          go: () => addAgain('life-events'),
+        }
+      : upNext
     ? {
         a: {
           title: upNext.title,
@@ -1406,7 +1412,6 @@ export default function ClientExperienceScreen({
           >
             {adventure === 'goals' ? (
               <GoalsFlow
-                again={goalsAgain}
                 review={reviewing ? (goalsDone ?? { goals: financialId.goals.slice(0, 1) }) : undefined}
                 reward={
                   reviewing
@@ -1425,16 +1430,6 @@ export default function ClientExperienceScreen({
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
-                  if (goalsAgain) {
-                    /* One more on the list she has: hers, or the authored ones
-                       when Goals was skipped past. */
-                    setGoalsDone((had) => ({
-                      goals: [...(had?.goals ?? financialId.goals), ...answers.goals],
-                    }))
-                    setAdventure(null)
-                    setTab('adventures')
-                    return
-                  }
                   setGoalsDone(answers)
                   completeAt('goals')
                   setAdventure(null)
