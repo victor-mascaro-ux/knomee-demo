@@ -800,13 +800,9 @@ function FlowPhone({
   d,
   steps,
   mode,
-  onExit,
   onReport,
   onRecord,
   onSend,
-  onRestart,
-  onSample,
-  onDiscard,
   brand,
 }: {
   answers: Answers
@@ -817,15 +813,16 @@ function FlowPhone({
   steps: Step[]
   mode: SelfMode
   brand?: FlowBrand | null
-  onExit: () => void
+  /* The menu's old ways around the demo — back to it, restart, samples,
+     discard — are gone from the phone's menu (the demo menu has them); still
+     accepted, no longer read. */
+  onExit?: () => void
   onReport: () => void
   onRecord: () => void
   onSend: () => void
-  /** Close this sitting — record it, then start an empty sheet. */
-  onRestart: () => void
-  onSample: () => void
-  /** Throw this sitting's sheet away. The record keeps the row. */
-  onDiscard: () => void
+  onRestart?: () => void
+  onSample?: () => void
+  onDiscard?: () => void
 }) {
   // Where you have been, not just where you are: tapping a row on the
   // adventures list jumps across the flow, and Back has to mean "the screen I
@@ -837,10 +834,11 @@ function FlowPhone({
   const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
-  // Read as the sheet opens rather than held in state: the record is written by
-  // the parent on every answer, and a count that lags is worse than no count.
-  const recorded = menuOpen ? ledger().length : 0
   const viewport = useRef<HTMLDivElement>(null)
+  /* A tab opens at its top, not wherever the last one was scrolled to. */
+  useEffect(() => {
+    viewport.current?.scrollTo({ top: 0 })
+  }, [tab])
   useDragScroll(viewport)
   useDarkGround()
   const { scale: fitScale, windowH, bare } = useFitToWindow()
@@ -1163,132 +1161,18 @@ function FlowPhone({
                   </span>
                   <SheetCredit />
                 </div>
-                {/* Nothing to read until something is answered — an empty
-                    report is worse than no way to it. */}
-                {!d.empty && !viewing && (
-                  <button
-                    className="cx-sheet-item"
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      onReport()
-                    }}
-                  >
-                    My readiness and toolkit
-                    <ArrowRight />
-                  </button>
-                )}
-                {/* Somebody else's phone, opened from the pipeline: the menu is
-                    the dashboard's own account menu — the rep is still signed
-                    in to the product, and the way back is the demo's switch. */}
-                {viewing && (
-                  <>
-                    <button
-                      className="cx-sheet-item"
-                      type="button"
-                      /* A mock, like Sign Out: it answers the tap and goes
-                         nowhere — this is a view of the product, not a way out. */
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Account Settings
-                      <ArrowRight />
-                    </button>
-                    <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
-                      Sign Out
-                      <ArrowRight />
-                    </button>
-                  </>
-                )}
-                {/* Restarting is how the phone gets handed to the next person —
-                    or, under an invite, how one advisor starts their own answers
-                    over. Either way this sitting is recorded first and the sheet
-                    starts empty, so the Business ID resets and nothing anybody
-                    typed is thrown away. Never offered over somebody else's
-                    answers. */}
-                {!viewing && (
-                  <>
-                    <button
-                      className="cx-sheet-item"
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        setTab('flow')
-                        reset(0)
-                        onRestart()
-                      }}
-                    >
-                      {mode === 'invited' ? 'Start my answers over' : 'Restart for the next person'}
-                      <ArrowRight />
-                    </button>
-                    <div className="cx-sheet-hint">
-                      {mode === 'invited'
-                        ? 'Keeps this sitting on the record and starts you a fresh one. Your Business ID resets.'
-                        : 'Records this sitting, then clears the sheet. The Business ID resets; the answers stay on the spreadsheet.'}
-                    </div>
-                  </>
-                )}
-                {/* Back-of-house. An invited advisor is a person answering
-                    questions about their own practice, not somebody running a
-                    demo: the spreadsheet, the worked example and the way out
-                    into the advisor dashboard are all operator tools, and a
-                    link sent to a stranger should carry none of them. */}
-                {mode === 'demo' && (
-                  <>
-                    <button
-                      className="cx-sheet-item"
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        onRecord()
-                      }}
-                    >
-                      Recorded answers{recorded ? ` · ${recorded}` : ''}
-                      <ArrowRight />
-                    </button>
-                    {/* The worked example, one tap away. It is what this flow
-                        was before it could be answered, and it is still the
-                        fastest way to show somebody the whole instrument. */}
-                    <button
-                      className="cx-sheet-item"
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        setTab('flow')
-                        reset(0)
-                        onSample()
-                      }}
-                    >
-                      Fill in the sample answers
-                      <ArrowRight />
-                    </button>
-                    <button
-                      className="cx-sheet-item"
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false)
-                        setTab('flow')
-                        reset(0)
-                        onDiscard()
-                      }}
-                    >
-                      Discard this sitting
-                      <ArrowRight />
-                    </button>
-                  </>
-                )}
-                {/* Viewing has somewhere to go back to. An invite does not:
-                    the flow is the whole of what that link is for. */}
-                {mode !== 'invited' && !viewing && (
-                  <>
-                    <button className="cx-sheet-item" type="button" onClick={onExit}>
-                      Advisor Experience
-                      <ArrowRight />
-                    </button>
-                    <div className="cx-sheet-hint">
-                      Switches back to the advisor demo.
-                    </div>
-                  </>
-                )}
+                {/* The product's own account menu, as mocks, on every phone:
+                    each answers the tap and goes nowhere. The demo's own ways
+                    around — restart, samples, the report — live in the demo
+                    menu, not in somebody's app. */}
+                <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
+                  Account Settings
+                  <ArrowRight />
+                </button>
+                <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
+                  Sign Out
+                  <ArrowRight />
+                </button>
               </div>
             </div>
           )}

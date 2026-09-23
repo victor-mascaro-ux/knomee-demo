@@ -12,7 +12,7 @@ import { useRef, useState } from 'react'
 import type { VisionBoard } from '../data/clientProfile'
 import AddVisionBoardModal from './AddVisionBoardModal'
 import { Board } from './ClientProfileScreen'
-import { AddButton, EMPTY_ART, EmptyState } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState } from './profileParts'
 import icVision from '../assets/adventures/vision-board.svg'
 
 /* The boards, the panel, and the ways into it. `body` is the boards (or the
@@ -82,14 +82,16 @@ export function VisionBoardCard({
   const v = useVisionBoards(initial, onToast)
   return (
     <section className="pp-card">
-      <div className="pp-card-head">
-        <span className="pp-card-title">
+      <EmptyFold
+        empty={v.boards.length === 0}
+        title={<span className="pp-card-title">
           <img className="pp-card-ic is-inset" src={icVision} alt="" />
           Future Vision Board
-        </span>
-        <AddButton label="Add a vision board" onClick={v.add} />
-      </div>
+        </span>}
+        action={<AddButton label="Add a vision board" onClick={v.add} />}
+      >
       {v.body}
+      </EmptyFold>
       {v.modal}
     </section>
   )

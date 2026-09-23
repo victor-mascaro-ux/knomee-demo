@@ -1206,15 +1206,10 @@ const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0
 /* The in-phone menu. The only way back to the advisor side lives here, so the
    demo is driven entirely from inside the device. */
 function MobileMenu({
-  onExit,
   onClose,
-  onRestart,
   progress,
 }: {
-  onExit: () => void
   onClose: () => void
-  /** Back to a new client's first day. */
-  onRestart: () => void
   /** Where she is on the five, said under her name. */
   progress: string
 }) {
@@ -1233,34 +1228,27 @@ function MobileMenu({
           </span>
           <SheetCredit />
         </div>
-        <button className="cx-sheet-item" type="button" onClick={onRestart}>
-          Restart all adventures
-          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden>
-            <path
-              d="M3.2 8a4.8 4.8 0 1 0 1.5-3.5M3.2 2.6v2.6h2.6"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <div className="cx-sheet-hint">Back to 0 of 5 and an empty Financial ID.</div>
-        <button className="cx-sheet-item" type="button" onClick={onExit}>
-          Advisor Experience
+        {/* The product's own account menu, as mocks: each answers the tap and
+            goes nowhere. */}
+        <button className="cx-sheet-item" type="button" onClick={onClose}>
+          Account Settings
           <ArrowRight />
         </button>
-        <div className="cx-sheet-hint">Switches back to the advisor demo.</div>
+        <button className="cx-sheet-item" type="button" onClick={onClose}>
+          Sign Out
+          <ArrowRight />
+        </button>
       </div>
     </div>
   )
 }
 
 export default function ClientExperienceScreen({
-  onExit,
   brand,
 }: {
-  onExit: () => void
+  /** The way back to the advisor demo. Her menu no longer offers it — the demo
+      menu does — so it is accepted and not used. */
+  onExit?: () => void
   brand?: FlowBrand | null
 }) {
   const [tab, setTab] = useState<TabId>('adventures')
@@ -1346,31 +1334,14 @@ export default function ClientExperienceScreen({
   const skipTo = (id: string) => {
     const upTo = journey.findIndex((j) => j.id === id)
     if (upTo < 0) return
+    // The list reorders under the tap; start it again at its top.
+    viewport.current?.scrollTo({ top: 0 })
     setDone((d) => {
       const next = { ...d }
       for (const j of journey.slice(0, upTo)) if (!next[j.id]) next[j.id] = completedToday()
       return next
     })
     if (!joy) setJoy(sampleJoyAnswers())
-  }
-  /* A restart is a new client: the answers go, and her Financial ID is rebuilt
-     from nothing — anything added to it, and her check-in, go too. */
-  const [journeyRun, setJourneyRun] = useState(0)
-  const restart = () => {
-    setJoy(null)
-    setConf(null)
-    setOutlook(null)
-    setFuture(null)
-    setGoalsDone(null)
-    setDone({})
-    setCheckIn(null)
-    setAdventure(null)
-    setFlow(null)
-    setSheet(false)
-    setVoiceOpen(false)
-    setTab('adventures')
-    setJourneyRun((n) => n + 1)
-    setMenuOpen(false)
   }
   const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
@@ -1419,6 +1390,11 @@ export default function ClientExperienceScreen({
   const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
+  /* Opening an adventure (or leaving one), or switching tabs, starts the page
+     at its top, not wherever the last one was scrolled to. */
+  useEffect(() => {
+    viewport.current?.scrollTo({ top: 0 })
+  }, [adventure, tab])
   useDarkGround()
   const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
@@ -1684,7 +1660,6 @@ export default function ClientExperienceScreen({
                  "not built yet" card here long after the page itself was
                  built. */
               <ProspectProfileScreen
-                key={journeyRun}
                 prospect={SARAH}
                 fresh={{ joy, done, conf, outlook, future, goals: goalsDone }}
                 onOpenEnding={(id) => {
@@ -1807,9 +1782,7 @@ export default function ClientExperienceScreen({
 
           {menuOpen && (
             <MobileMenu
-              onExit={onExit}
               onClose={() => setMenuOpen(false)}
-              onRestart={restart}
               progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}

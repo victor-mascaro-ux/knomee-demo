@@ -1601,3 +1601,67 @@
   font-weight: inherit;
   line-height: 1;
 }
+
+/* An empty card: on a desktop it is open and wears its plus; on a phone it
+   folds, the chevron in the plus's place and the whole head the toggle. */
+.pp-fold {
+  display: contents;
+}
+.pp-fold-caret {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px -6px -4px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--plum, #240446);
+  cursor: pointer;
+}
+.pp-fold-caret svg {
+  width: 16px;
+  height: 16px;
+}
+.pp-fold > .pp-fold-collapse {
+  grid-template-rows: 1fr;
+}
+@container (max-width: 720px) {
+  .pp-fold-caret {
+    display: inline-flex;
+  }
+  .pp-fold-action {
+    display: none;
+  }
+  .pp-card-head.pp-fold-head {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+  .pp-fold > .pp-fold-collapse {
+    grid-template-rows: 0fr;
+  }
+  .pp-fold.is-open > .pp-fold-collapse {
+    grid-template-rows: 1fr;
+  }
+  .pp-fold-body {
+    padding-top: 14px;
+  }
+}
+
+/* The tray's drawing at rest: the colour drawing itself in greyscale, so the
+   two states are one picture. */
+/* The colour files are each a whole disc — the same white circle, the drawing
+   at the product's own proportion inside it — so drawn at the disc's size
+   every tray's icon sits in its circle exactly as the adventure icons do. */
+.pp-empty-cta .pp-empty-disc img.pp-empty-colour,
+.pp-empty-cta .pp-empty-disc img.pp-empty-colour.is-board {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  filter: grayscale(1) opacity(0.5);
+  transition: filter 0.22s ease;
+}
+.pp-empty-cta:hover .pp-empty-disc img.pp-empty-colour {
+  filter: none;
+}

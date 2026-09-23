@@ -3,7 +3,7 @@
    with a different confidence dial and a different badge entirely. Both screens
    now import these, so the two pages cannot diverge again. */
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -43,13 +43,19 @@ import emptyVisionBoard from '../assets/empty/vision-board.svg'
 import colourLifeEvents from '../assets/adventures/life-events.svg'
 import colourQuestions from '../assets/adventures/questions.svg'
 import colourVisionBoard from '../assets/adventures/vision-board.svg'
-/* Each empty tray's drawing in colour, for the tray that is a button: it
-   comes alive under the pointer, the grey giving way to the real thing. */
+import colourGoals from '../assets/adventures/goals.svg'
+/* Each empty tray's drawing in colour, for the tray that is a button. At rest
+   it is that same drawing in greyscale, so the grey and the colour are one
+   picture — the same size and the same shapes — and only the colour arrives
+   under the pointer. */
 const EMPTY_COLOUR: Record<string, string> = {
   [emptyLifeEvents]: colourLifeEvents,
   [emptyQuestions]: colourQuestions,
   [emptyVisionBoard]: colourVisionBoard,
+  [colourGoals]: colourGoals,
 }
+/* Drawings that fill more of their file, drawn a little smaller. */
+const EMPTY_TIGHT = new Set([emptyVisionBoard, colourGoals])
 import icFinancialJoy from '../assets/adventures/financial-joy.svg'
 import icFutureYou from '../assets/adventures/future-you.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -584,6 +590,7 @@ export const EMPTY_ART = {
   /* A board of tiles with nothing in them, in the same flat greys as the other
      two — the empty tray is a family, not three drawings. */
   visionBoard: emptyVisionBoard,
+  goals: colourGoals,
 }
 
 export function EmptyState({
@@ -603,13 +610,14 @@ export function EmptyState({
   const inner = (
     <>
       <span className="pp-empty-disc">
-        <img src={art} alt="" />
-        {cta && EMPTY_COLOUR[art] && (
+        {cta && EMPTY_COLOUR[art] ? (
           <img
-            className={`pp-empty-colour${art === emptyVisionBoard ? ' is-board' : ''}`}
+            className={`pp-empty-colour${EMPTY_TIGHT.has(art) ? ' is-board' : ''}`}
             src={EMPTY_COLOUR[art]}
             alt=""
           />
+        ) : (
+          <img src={art} alt="" />
         )}
       </span>
       <span className="pp-empty-label">
@@ -716,6 +724,60 @@ export function AddButton({
 
 /* The disclosure that sits in a card's header rather than its footer: compact
    and right-aligned, where ShowToggle is full-width and centred. */
+/* A card's head and body while the card is empty. On a phone the empty card
+   folds: the chevron takes the plus's place — down while shut, up while open —
+   and the dashed tray under it is the way to add one. Life Events, Questions
+   and the Vision Board open shut; Goals opens open. On a desktop nothing
+   folds and the plus stays. A card with something in it is drawn as always. */
+export function EmptyFold({
+  empty,
+  title,
+  action,
+  startOpen = false,
+  children,
+}: {
+  empty: boolean
+  title: ReactNode
+  action?: ReactNode
+  startOpen?: boolean
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(startOpen)
+  if (!empty)
+    return (
+      <>
+        <div className="pp-card-head">
+          {title}
+          {action}
+        </div>
+        {children}
+      </>
+    )
+  return (
+    <div className={`pp-fold${open ? ' is-open' : ''}`}>
+      <div className="pp-card-head pp-fold-head" onClick={() => setOpen((v) => !v)}>
+        {title}
+        <span className="pp-fold-action" onClick={(e) => e.stopPropagation()}>
+          {action}
+        </span>
+        <button
+          className="pp-fold-caret"
+          type="button"
+          aria-expanded={open}
+          aria-label={open ? 'Collapse' : 'Expand'}
+        >
+          <CaretIcon up={open} />
+        </button>
+      </div>
+      <div className="collapse pp-fold-collapse">
+        <div className="collapse-inner">
+          <div className="pp-fold-body">{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <button className="pp-head-toggle" type="button" aria-expanded={open} onClick={onToggle}>

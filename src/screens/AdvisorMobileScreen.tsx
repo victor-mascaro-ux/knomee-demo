@@ -71,6 +71,10 @@ export default function AdvisorMobileScreen({
   const accountRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
+  /* A tab opens at its top, not wherever the last one was scrolled to. */
+  useEffect(() => {
+    viewport.current?.scrollTo({ top: 0 })
+  }, [tab])
 
   useEffect(() => {
     if (!accountOpen) return
