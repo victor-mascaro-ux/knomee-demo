@@ -350,3 +350,9 @@
     opacity: 1;
   }
 }
+
+/* No quote beside it here, so the picture takes the screen's full width. */
+.gl .jf-hero-img,
+.gl .gl-hero-fallback {
+  max-width: none;
+}

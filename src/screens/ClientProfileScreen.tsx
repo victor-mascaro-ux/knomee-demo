@@ -937,6 +937,11 @@ export default function ClientProfileScreen({
               </span>
             </div>
 
+            {/* On the advisor's page the check-in sits with who she is, in the
+                rail beside her name; on her own phone the rail is a drawer, so
+                there it goes under the title instead. */}
+            {!mine && <CheckInCard checkIn={cp.checkIn} />}
+
             {household ? (
               <div className="cp-side-block">
                 <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
@@ -1040,7 +1045,7 @@ export default function ClientProfileScreen({
 
           {/* How she last said she felt, under the name of the page she said it
               on — the same card her own phone shows her, in the same place. */}
-          <CheckInCard checkIn={cp.checkIn} />
+          {mine && <CheckInCard checkIn={cp.checkIn} />}
 
           {!printing && tab === 'insights' ? (
             <ClientInsightsTab />

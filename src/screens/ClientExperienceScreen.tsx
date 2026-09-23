@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -504,18 +503,12 @@ export function SheetCredit() {
   )
 }
 
-/* The shine's loop, and the clock every segment keeps it to. */
-const SHINE_MS = 9000
-/* One segment of the meter. Its shine starts when the segment turns on, so it
-   is set against the wall clock at that moment — segments that fill at
-   different times, a skip ahead or a remount, still sweep as the one wave. */
-function MeterSeg({ i, on, last }: { i: number; on: boolean; last: boolean }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sync = useMemo(() => -(Date.now() % SHINE_MS), [on])
+/* One segment of the meter; `order` is its place in the row filling now. */
+function MeterSeg({ i, on, last, order }: { i: number; on: boolean; last: boolean; order: number }) {
   return (
     <span
       className={`cx-progress-seg${on ? ' is-on' : ''}${last ? ' is-last' : ''}`}
-      style={{ ['--i' as string]: i, ['--sync' as string]: `${sync}ms` }}
+      style={{ ['--i' as string]: i, ['--order' as string]: order }}
     >
       <i />
     </span>
@@ -527,6 +520,13 @@ function MeterSeg({ i, on, last }: { i: number; on: boolean; last: boolean }) {
    what is done, and the percentage counting up to where she is. */
 export function ProgressMeter({ done, required }: { done: number; required: number }) {
   const pct = Math.round((done / required) * 100)
+  /* The segments that fill now fill in a row from the first new one, so a
+     skip ahead continues the bar rather than starting it over. */
+  // Worked out once per change of `done`, not on every render: the count-up
+  // below re-renders each frame, and a recomputed order restarted the fills.
+  const seen = useRef({ done: 0, from: 0 })
+  if (seen.current.done !== done) seen.current = { done, from: Math.min(seen.current.done, done) }
+  const firstNew = seen.current.from
   const [shown, setShown] = useState(0)
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return setShown(pct)
@@ -559,8 +559,17 @@ export function ProgressMeter({ done, required }: { done: number; required: numb
           aria-label={`${done} of ${required} adventures completed`}
         >
           {Array.from({ length: required }, (_, i) => (
-            <MeterSeg key={i} i={i} on={i < done} last={i === done - 1} />
+            <MeterSeg key={i} i={i} on={i < done} last={i === done - 1} order={Math.max(0, i - firstNew)} />
           ))}
+          {/* One light for the whole of what is done, gliding across it —
+              a single band rather than one per segment, so it flows. */}
+          {done > 0 && (
+            <span
+              className="cx-progress-shine"
+              aria-hidden
+              style={{ width: `calc(${(done / required) * 100}% - ${done === required ? 0 : 2}px)` }}
+            />
+          )}
         </div>
         <span className="cx-progress-pct">{shown}%</span>
       </div>
@@ -720,7 +729,15 @@ function AdventuresScreen({
                 a={{ title: j.title, art: j.art!, minutes: j.minutes, outline: true, ...REPEAT[j.id] }}
                 keep
                 onAct={onAddAgain ? () => onAddAgain(j.id) : undefined}
-                onRow={onAddAgain ? () => onAddAgain(j.id) : undefined}
+                /* The card itself takes the journey back to this adventure,
+                   like every finished one; its button adds one more. */
+                onRow={
+                  done[j.id] && built.includes(j.id)
+                    ? () => onOpenAdventure(j.id)
+                    : onAddAgain
+                      ? () => onAddAgain(j.id)
+                      : undefined
+                }
               />
             ) : done[j.id] ? (
               <CompletedRow
@@ -1255,6 +1272,19 @@ export default function ClientExperienceScreen({
       return next
     })
   }
+  /* A finished adventure opened again from the list is taken again: it and
+     everything after it go back to waiting, so however it is left — its end
+     or the bar's cross — it is the one next. */
+  const reopen = (id: string) => {
+    const at = journey.findIndex((j) => j.id === id)
+    if (at >= 0)
+      setDone((d) => {
+        const kept: Record<string, string> = {}
+        for (const j of journey.slice(0, at)) if (d[j.id]) kept[j.id] = d[j.id]
+        return kept
+      })
+    setAdventure(id)
+  }
   /* For the demo: a greyed adventure tapped completes every one before it
      with sample answers — Financial Joy with the answers OK would record, the
      rest with her authored ones — and leaves the tapped one next. */
@@ -1584,7 +1614,7 @@ export default function ClientExperienceScreen({
             ) : tab === 'adventures' ? (
               <AdventuresScreen
                 onPick={openFlow}
-                onOpenAdventure={setAdventure}
+                onOpenAdventure={reopen}
                 done={done}
                 onSkipTo={skipTo}
                 built={BUILT}
