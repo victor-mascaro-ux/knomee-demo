@@ -21,6 +21,9 @@ export interface HouseholdMember {
   /** When they joined the household on knomee. The rail does not show it; the
       family page's member list does. */
   joined: string
+  /** Invited and not yet answering: somebody who is on the household but has
+      no row in the book of business to read a status off yet. */
+  invited?: boolean
 }
 
 export interface TeamMember {

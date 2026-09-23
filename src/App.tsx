@@ -3818,7 +3818,13 @@ export default function App() {
   /* The demo's today, so a new member's joined date sits after the others. */
   const JOINED_TODAY = '06/12/2025'
   const addFamilyMember = (name: string, m: NewMember) => {
-    const member: HouseholdMember = { name: m.name, role: m.role, joined: JOINED_TODAY }
+    const member: HouseholdMember = {
+      name: m.name,
+      role: m.role,
+      joined: JOINED_TODAY,
+      /* Invited is a state of its own: on the household, not yet answering. */
+      invited: m.invite,
+    }
     setFamily((prev) =>
       prev
         ? { ...prev, members: [...prev.members, member] }
@@ -3827,7 +3833,7 @@ export default function App() {
     showToast(
       family
         ? m.invite
-          ? `Invitation sent to ${m.name}`
+          ? `Invite sent to ${m.name}`
           : `${m.name} added to ${family.name}`
         : `${name} created`,
     )

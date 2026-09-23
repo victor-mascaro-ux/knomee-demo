@@ -16,9 +16,16 @@ import './familyModal.css'
 import { CloseIcon } from '../components/icons'
 
 export interface NewMember {
+  /** The two halves, and the name they make — which is what the household,
+      the table and every page downstream actually read. */
+  first: string
+  last: string
   name: string
   email: string
+  phone?: string
   role: string
+  /** Optional, and only ever used to tell two people with one name apart. */
+  dob?: string
   /** Whether the invitation goes out with them. */
   invite: boolean
 }
@@ -48,8 +55,16 @@ export default function FamilyModal({
      advisor does not have to think about is one fewer reason to abandon this. */
   const suggested = `${clientName.trim().split(' ').slice(-1)[0]} Family`
   const [family, setFamily] = useState(familyName ?? suggested)
-  const [name, setName] = useState(prefill?.name ?? '')
+  /* Asked as two fields because that is how a name is typed off a form or a
+     phone call — and because the surname is the one that says which household
+     they are joining. */
+  const [first, setFirst] = useState(prefill?.first ?? prefill?.name?.split(' ')[0] ?? '')
+  const [last, setLast] = useState(
+    prefill?.last ?? prefill?.name?.split(' ').slice(1).join(' ') ?? '',
+  )
   const [email, setEmail] = useState(prefill?.email ?? '')
+  const [phone, setPhone] = useState(prefill?.phone ?? '')
+  const [dob, setDob] = useState(prefill?.dob ?? '')
   const [role, setRole] = useState(prefill?.role ?? ROLES[0])
   const [invite, setInvite] = useState(prefill?.invite ?? true)
 
@@ -61,10 +76,22 @@ export default function FamilyModal({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const ready = family.trim() !== '' && name.trim() !== ''
+  const name = [first.trim(), last.trim()].filter(Boolean).join(' ')
+  /* An invitation with nowhere to go is not an invitation: the address is
+     required only when one is being sent. */
+  const ready = family.trim() !== '' && name !== '' && (!invite || email.trim() !== '')
   const submit = () => {
     if (!ready) return
-    onSubmit(family.trim(), { name: name.trim(), email: email.trim(), role, invite })
+    onSubmit(family.trim(), {
+      first: first.trim(),
+      last: last.trim(),
+      name,
+      email: email.trim(),
+      phone: phone.trim() || undefined,
+      dob: dob.trim() || undefined,
+      role,
+      invite,
+    })
   }
 
   return (
@@ -105,22 +132,23 @@ export default function FamilyModal({
 
           <div className="fam-row">
             <label className="fam-field">
-              <span className="invite-field-label">Full name</span>
+              <span className="invite-field-label">First name</span>
               <input
                 className="fam-input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Who are you adding?"
+                value={first}
+                onChange={(e) => setFirst(e.target.value)}
+                placeholder="First name"
                 autoFocus
               />
             </label>
-            <label className="fam-field fam-field-narrow">
-              <span className="invite-field-label">Relationship</span>
-              <select className="fam-input" value={role} onChange={(e) => setRole(e.target.value)}>
-                {ROLES.map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </select>
+            <label className="fam-field">
+              <span className="invite-field-label">Last name</span>
+              <input
+                className="fam-input"
+                value={last}
+                onChange={(e) => setLast(e.target.value)}
+                placeholder="Last name"
+              />
             </label>
           </div>
 
@@ -133,6 +161,37 @@ export default function FamilyModal({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Where the invitation goes"
               onKeyDown={(e) => e.key === 'Enter' && submit()}
+            />
+          </label>
+
+          <div className="fam-row">
+            <label className="fam-field">
+              <span className="invite-field-label">Phone (optional)</span>
+              <input
+                className="fam-input"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(555) 000-0000"
+              />
+            </label>
+            <label className="fam-field fam-field-narrow">
+              <span className="invite-field-label">Relationship</span>
+              <select className="fam-input" value={role} onChange={(e) => setRole(e.target.value)}>
+                {ROLES.map((r) => (
+                  <option key={r}>{r}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <label className="fam-field fam-field-narrow">
+            <span className="invite-field-label">Date of birth (optional)</span>
+            <input
+              className="fam-input"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              placeholder="MM/DD/YYYY"
             />
           </label>
 
@@ -153,7 +212,7 @@ export default function FamilyModal({
             Cancel
           </button>
           <button className="btn btn-primary" type="button" disabled={!ready} onClick={submit}>
-            {creating ? 'Create family' : 'Add member'}
+            {creating ? 'Create family' : invite ? 'Send Invite' : 'Add member'}
           </button>
         </div>
       </div>
