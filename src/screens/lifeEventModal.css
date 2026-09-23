@@ -211,6 +211,12 @@
   line-height: 1.25;
   color: var(--text-strong);
 }
+.le-row-face {
+  align-self: center;
+}
+.le-face-read {
+  display: block;
+}
 .le-face-read img {
   width: 26px;
   height: 26px;

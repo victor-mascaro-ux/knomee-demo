@@ -332,8 +332,10 @@ export default function LifeEventModal({
             )}
             {event.sentiment && (
               <>
-                <dt>Sentiment</dt>
-                <dd>
+                {/* The face has no baseline to sit on, so its row centres
+                    instead of aligning to one. */}
+                <dt className="le-row-face">Sentiment</dt>
+                <dd className="le-row-face">
                   <SentimentFace level={event.sentiment} />
                 </dd>
               </>
