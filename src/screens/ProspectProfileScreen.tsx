@@ -792,7 +792,13 @@ export default function ProspectProfileScreen({
       </div>
       {addingGoal && (
         <AddGoalModal
-          suggestions={fi.suggestedGoals}
+          suggestions={
+            /* Suggestions are read from the adventures; before she has taken
+               them there is nothing to suggest from. */
+            !fresh || ['financial-joy', 'confidence', 'outlook', 'future-you'].every(isDone)
+              ? fi.suggestedGoals
+              : []
+          }
           onClose={() => setAddingGoal(false)}
           onAdd={(g) => {
             setGoalList((list) => [g, ...list])
