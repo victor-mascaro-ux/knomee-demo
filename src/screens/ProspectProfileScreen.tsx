@@ -272,7 +272,9 @@ export default function ProspectProfileScreen({
                 <MailIcon /> {prospect.email}
               </span>
             </div>
-            {checkIn && (
+            {/* On her own phone the check-in heads the page (below), so the
+                rail at its foot does not say it a second time. */}
+            {checkIn && !mine && (
               <div className="cp-checkin">
                 <span className="cp-checkin-face">
                   <img src={MOOD_FACE[checkIn.level]} alt="" />
@@ -685,9 +687,9 @@ export default function ProspectProfileScreen({
                               ) : (
                                 <span className="pp-event-date">{e.date}</span>
                               )}
-                              {/* Who added it is the advisor's to know; her
-                                  own phone is the client's flow. */}
-                              {e.advisorAdded && !mine && (
+                              {/* Who added it, on her phone too: she sees what
+                                  her advisor has put on her page. */}
+                              {e.advisorAdded && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}
                             </span>

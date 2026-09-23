@@ -1582,3 +1582,9 @@
 .pp-event.is-done .pp-event-text {
   color: #8b8598;
 }
+
+/* The date and pill sit as far below the event's line as that line sits below
+   its name: ~7px each, the name's 26px row giving it its share. */
+.pp-event-meta {
+  margin-top: 4px;
+}

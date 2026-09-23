@@ -51,7 +51,7 @@ import moodGreat from '../assets/moods/great.svg'
 import './client-experience.css'
 import ProspectProfileScreen from './ProspectProfileScreen'
 import { prospects } from '../data/prospects'
-import { DEMO_TODAY, financialId } from '../data/financialId'
+import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 
 const art: Record<ArtKey, string> = {
@@ -1692,7 +1692,8 @@ export default function ClientExperienceScreen({
                         level: moods.findIndex((m) => m.id === checkIn.mood),
                         mood: moods.find((m) => m.id === checkIn.mood)?.word ?? '',
                         note: checkIn.note,
-                        date: DEMO_TODAY,
+                        /* The day she said it, not the demo's fixed one. */
+                        date: completedToday().replace(/\./g, '/'),
                       }
                     : undefined
                 }

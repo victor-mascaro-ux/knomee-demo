@@ -90,6 +90,9 @@
   --k-green-bright:  #22c55e;  /* inline success check */
 
   /* ---- Mobile "open adventure" pair (client experience only) ---- */
+  /* A white circle icon on a white surface would vanish into it: the rule is
+     that it always lifts on this — one subtle shadow, everywhere. */
+  --disc-lift: 0 1px 2px rgba(36, 4, 70, 0.1), 0 3px 8px -2px rgba(36, 4, 70, 0.16);
   --k-adv-open:      #f3ebfa;  /* the one unlocked adventure's card fill — pale lilac */
   --k-adv-open-edge: #b98ddc;  /* its 1.5px border — the meter's lilac */
 

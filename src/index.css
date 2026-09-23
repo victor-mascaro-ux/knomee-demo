@@ -6732,3 +6732,22 @@ button.name-link-btn:hover .name-text {
      after the first has only this. */
   margin: 20mm 14mm 12mm;
 }
+
+/* ── the rule: a white circle icon on a white surface lifts on --disc-lift ──
+   Every place one sits on white: the adventure rows, a life event's and a
+   highlight's mark, the dashboard card heads, the suggested goals and
+   adventures, and the empty trays. An icon on a coloured or grey card needs
+   none — the ground already sets it off. */
+.cx-adv-done .cx-adv-art.has-img,
+.pp-event-ic,
+.pp-hl-icon,
+.card-title > svg,
+.ag-spark,
+.ci-adv-ic,
+.pp-empty-disc {
+  box-shadow: var(--disc-lift);
+}
+/* The tray's own hover shadow still wins over the resting one. */
+.pp-empty-cta:hover .pp-empty-disc {
+  box-shadow: 0 10px 22px -8px rgba(36, 4, 70, 0.3);
+}
