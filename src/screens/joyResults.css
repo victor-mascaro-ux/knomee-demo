@@ -591,3 +591,11 @@
     animation: none;
   }
 }
+
+/* An ending held behind its overlay: everything waits at its first frame,
+   and plays once the overlay is closed. The overlay itself runs. */
+.jr.is-held *:not(.jr-about-back):not(.jr-about-back *),
+.jr.is-held *:not(.jr-about-back):not(.jr-about-back *)::before,
+.jr.is-held *:not(.jr-about-back):not(.jr-about-back *)::after {
+  animation-play-state: paused !important;
+}

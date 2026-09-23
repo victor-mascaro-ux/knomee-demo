@@ -18,7 +18,7 @@ import './joyResults.css'
 import './futureYouFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { AboutOverlay, CountUp, Reveal } from './JoyResults'
+import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
 interface Pick {
@@ -436,12 +436,7 @@ export default function FutureYouFlow({
      — a tap is what a hover is on a mouse. */
   const [zoom, setZoom] = useState<Pick | null>(null)
   /* The ending's overlay, as the other adventures have it. */
-  const [about, setAbout] = useState(false)
-  useEffect(() => {
-    if (step !== 'results') return
-    const t = window.setTimeout(() => setAbout(true), 700)
-    return () => window.clearTimeout(t)
-  }, [step])
+  const ending = useEndingOverlay(step === 'results')
   const typing = useRef(0)
   useEffect(() => () => window.clearInterval(typing.current), [])
 
@@ -583,8 +578,8 @@ export default function FutureYouFlow({
       )}
 
       {step === 'results' && (
-        <div className="jr fyr">
-          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+        <div className={`jr fyr${ending.held ? ' is-held' : ''}`} key={ending.run}>
+          <button className="jr-learn" type="button" onClick={ending.open}>
             Learn more
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
               <circle cx="8" cy="8" r="7" fill="currentColor" />
@@ -592,11 +587,11 @@ export default function FutureYouFlow({
               <circle cx="8" cy="4.7" r="1" fill="#fff" />
             </svg>
           </button>
-          {about && (
+          {ending.about && (
             <AboutOverlay
               title="You visualized Future You!"
               share={80}
-              onClose={() => setAbout(false)}
+              onClose={ending.close}
               first={
                 <>
                   <b>
