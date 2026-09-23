@@ -4,6 +4,7 @@ import './prospectProfile.css'
 import './clientProfile.css'
 import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
+import AddGoalModal from './AddGoalModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -460,6 +461,8 @@ export default function ClientProfileScreen({
   const [goalList, setGoalList] = useState<ClientGoal[]>(cp.goals)
   useEffect(() => setGoalList(cp.goals), [cp])
   const [openGoal, setOpenGoal] = useState<string | null>(null)
+  /* Adding one is the other thing this page can do to the list. */
+  const [addingGoal, setAddingGoal] = useState(false)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
@@ -662,7 +665,7 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icGoals} alt="" />
                         Goals
                       </span>
-                      <AddButton />
+                      <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
                     </div>
                     <div className="cp-goal-cols" ref={goals.box}>
                       {goals.shown.map((g, i) => (
@@ -920,6 +923,24 @@ export default function ClientProfileScreen({
           )}
         </main>
       </div>
+
+      {/* A new goal. It lands at the top of the list she is looking at, at the
+          stage a goal just named is at. */}
+      {addingGoal && (
+        <AddGoalModal
+          suggestions={cp.suggestedGoals}
+          onClose={() => setAddingGoal(false)}
+          onAdd={(g) => {
+            setGoalList((list) => [g, ...list])
+            setAddingGoal(false)
+            setOpenGoal(g.title)
+            /* A goal at the first stage sorts to the end of the list, which is
+               behind the fold on a page with four already. Open it, or the
+               thing they just added is the one thing they cannot see. */
+            if (!goals.open) goals.toggle()
+          }}
+        />
+      )}
 
       {/* The goal, opened. Renaming, marking done and deleting all land on the
           list this page holds, so the card behind the panel changes with it. */}

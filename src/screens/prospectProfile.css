@@ -329,6 +329,12 @@
   height: 24px;
   flex: none;
   cursor: pointer;
+  /* The plus is a button where it opens something, so it has a button's chrome
+     to shed: the drawing is the whole control. */
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
   /* The interactive purple, and ocean on the client page — both the darker,
      readable end of their family rather than the surface tint. */
   color: var(--add-ink, #7639a1);

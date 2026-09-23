@@ -136,6 +136,14 @@ export const clientProfile = {
 
   // Rendered in two columns, filled column-first the way the design lays them
   // out: the live goals first, the completed ones beneath.
+  /* What the app offers when she goes to add one: read off the adventures she
+     has already taken — the beach house in Financial Joy, her parents in
+     Outlook, the giving in Future You — rather than a generic list. */
+  suggestedGoals: [
+    'Set a date for the beach house',
+    'Put the college plan in writing for both kids',
+    'Give to my old school every year, not once',
+  ],
   goals: [
     {
       title: 'Family Disney beach vacation to Oahu.',

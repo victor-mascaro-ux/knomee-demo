@@ -606,9 +606,22 @@ export function LifeEventIcon({ kind, text }: { kind?: string; text: string }) {
 /* The add control, drawn rather than imported, so its glyph takes the page's
    accent — plum-purple on a prospect, ocean on a client — instead of being
    fixed in a file. The white disc is the same one the card icons sit on. */
-export function AddButton({ muted }: { muted?: boolean } = {}) {
+export function AddButton({
+  muted,
+  onClick,
+  label = 'Add',
+}: { muted?: boolean; onClick?: () => void; label?: string } = {}) {
+  /* A plus with nothing behind it is a mark on a card; a plus that opens
+     something is a button, and only the cards that have somewhere to go pass a
+     handler. The drawing is the same either way. */
+  const Tag = onClick ? 'button' : 'span'
   return (
-    <span className={`pp-add${muted ? ' is-muted' : ''}`} aria-label="Add" role="img">
+    <Tag
+      className={`pp-add${muted ? ' is-muted' : ''}`}
+      {...(onClick
+        ? { type: 'button' as const, onClick, 'aria-label': label }
+        : { 'aria-label': label, role: 'img' })}
+    >
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden>
         <circle cx="12" cy="12" r="12" fill="#fff" />
         <path
@@ -618,7 +631,7 @@ export function AddButton({ muted }: { muted?: boolean } = {}) {
           strokeLinecap="round"
         />
       </svg>
-    </span>
+    </Tag>
   )
 }
 
