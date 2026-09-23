@@ -935,7 +935,9 @@
     align-items: center;
     text-align: left;
     gap: 2px 12px;
-    padding: 14px 0;
+    /* The band runs edge to edge, so its content keeps the page's gutter —
+       with none, the portrait sat hard against the screen's edge. */
+    padding: 14px var(--space-16);
   }
   .pp-avatar {
     grid-row: span 2;
