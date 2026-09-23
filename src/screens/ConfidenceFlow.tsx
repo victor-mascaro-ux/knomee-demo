@@ -16,7 +16,7 @@ import './joyResults.css'
 import './confidenceFlow.css'
 import { confidenceAnswers } from '../data/financialId'
 import { Gauge } from './profileParts'
-import { AboutOverlay, CountUp, Reveal, Typed } from './JoyResults'
+import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
@@ -151,12 +151,7 @@ export default function ConfidenceFlow({
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
   /* The ending's overlay: said once a moment after it arrives, as Financial
      Joy's is, and again from "Learn more". */
-  const [about, setAbout] = useState(false)
-  useEffect(() => {
-    if (step !== 'results') return
-    const t = window.setTimeout(() => setAbout(true), 700)
-    return () => window.clearTimeout(t)
-  }, [step])
+  const ending = useEndingOverlay(step === 'results')
   const [values, setValues] = useState<(number | null)[]>(() =>
     review ? review.values : CONFIDENCE_STATEMENTS.map(() => null),
   )
@@ -243,8 +238,8 @@ export default function ConfidenceFlow({
       )}
 
       {step === 'results' && (
-        <div className="jr cfr">
-          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+        <div className={`jr cfr${ending.held ? ' is-held' : ''}`} key={ending.run}>
+          <button className="jr-learn" type="button" onClick={ending.open}>
             Learn more
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
               <circle cx="8" cy="8" r="7" fill="currentColor" />
@@ -252,11 +247,11 @@ export default function ConfidenceFlow({
               <circle cx="8" cy="4.7" r="1" fill="#fff" />
             </svg>
           </button>
-          {about && (
+          {ending.about && (
             <AboutOverlay
               title="Money confidence matters!"
               share={21}
-              onClose={() => setAbout(false)}
+              onClose={ending.close}
               first={
                 <>
                   <b>

@@ -19,7 +19,7 @@ import './joyResults.css'
 import './outlookFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { AboutOverlay, CountUp, Reveal, Typed } from './JoyResults'
+import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
 
 export interface OutlookAnswers {
@@ -288,12 +288,7 @@ export default function OutlookFlow({
   const [a, setA] = useState<OutlookAnswers>(() => review ?? { concerns: [], hopes: [] })
   /* The ending's overlay, as the other adventures have it: said once a moment
      after it arrives, and again from "Learn more". */
-  const [about, setAbout] = useState(false)
-  useEffect(() => {
-    if (step !== 'results') return
-    const t = window.setTimeout(() => setAbout(true), 700)
-    return () => window.clearTimeout(t)
-  }, [step])
+  const ending = useEndingOverlay(step === 'results')
 
   useEffect(() => {
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
@@ -371,8 +366,8 @@ export default function OutlookFlow({
       )}
 
       {step === 'results' && (
-        <div className="jr olr">
-          <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+        <div className={`jr olr${ending.held ? ' is-held' : ''}`} key={ending.run}>
+          <button className="jr-learn" type="button" onClick={ending.open}>
             Learn more
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
               <circle cx="8" cy="8" r="7" fill="currentColor" />
@@ -380,11 +375,11 @@ export default function OutlookFlow({
               <circle cx="8" cy="4.7" r="1" fill="#fff" />
             </svg>
           </button>
-          {about && (
+          {ending.about && (
             <AboutOverlay
               title="You asked the big questions!"
               share={70}
-              onClose={() => setAbout(false)}
+              onClose={ending.close}
               first={
                 <>
                   Most respondents share{' '}

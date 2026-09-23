@@ -47,6 +47,27 @@ export function Reveal({ children, className }: { children: ReactNode; className
   )
 }
 
+/* An ending's overlay, and the ending behind it. The overlay opens as the
+   ending arrives; until it is first closed the page is held at its first frame
+   (`held`), and when it closes the page starts over (`run`, as a key) — so the
+   reveals, the count-ups and the typing all play in view, not behind it. */
+export function useEndingOverlay(active = true) {
+  const [about, setAbout] = useState(false)
+  const [held, setHeld] = useState(true)
+  const [run, setRun] = useState(0)
+  useEffect(() => {
+    if (active) setAbout(true)
+  }, [active])
+  const close = () => {
+    setAbout(false)
+    if (held) {
+      setHeld(false)
+      setRun((r) => r + 1)
+    }
+  }
+  return { about, open: () => setAbout(true), close, held: active && held, run }
+}
+
 /* Their words, written onto the card a few letters at a time. */
 export function Typed({ text }: { text: string }) {
   const [n, setN] = useState(0)
@@ -281,11 +302,7 @@ export default function JoyResults({
   /* What it adds up to, in one line. */
   /* Said once, a moment after they arrive — long enough to see the page it
      is about — and again from "Learn more". */
-  const [about, setAbout] = useState(false)
-  useEffect(() => {
-    const t = window.setTimeout(() => setAbout(true), 700)
-    return () => window.clearTimeout(t)
-  }, [])
+  const ending = useEndingOverlay()
 
   const reading =
     more.length && less.length
@@ -297,8 +314,8 @@ export default function JoyResults({
           : 'You are happy with where your time goes today. Your advisor will help you keep it there.'
 
   return (
-    <div className="jr">
-      <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+    <div className={`jr${ending.held ? ' is-held' : ''}`} key={ending.run}>
+      <button className="jr-learn" type="button" onClick={ending.open}>
         Learn more
         <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
           <circle cx="8" cy="8" r="7" fill="currentColor" />
@@ -306,7 +323,7 @@ export default function JoyResults({
           <circle cx="8" cy="4.7" r="1" fill="#fff" />
         </svg>
       </button>
-      {about && <AboutJoy tools={tools} onClose={() => setAbout(false)} />}
+      {ending.about && <AboutJoy tools={tools} onClose={ending.close} />}
       <Reveal className="jr-found">
         <h2 className="jr-title">You found joy</h2>
         <p className="jr-sub">This was the last time you truly experienced joy:</p>
