@@ -25,9 +25,12 @@ import {
   EmptyState,
   Gauge,
   GoalDetail,
+  HeadToggle,
   HighlightIcon,
   ReadinessLevel,
   TTM_STAGES,
+  COLLAPSED_ROWS,
+  useCollapsed,
 } from './profileParts'
 import GoalModal from './GoalModal'
 import type { Goal } from '../data/financialId'
@@ -59,7 +62,18 @@ const TAB_LABEL: Record<ProfileTab, string> = {
   toolkit: 'Recruiting Toolkit',
 }
 
-function CardHead({ icon, title, right }: { icon: string; title: string; right?: string }) {
+function CardHead({
+  icon,
+  title,
+  right,
+  children,
+}: {
+  icon: string
+  title: string
+  right?: string
+  /* A control on the head's right, where the client's cards put theirs. */
+  children?: React.ReactNode
+}) {
   return (
     <div className="pp-card-head">
       <span className="pp-card-title">
@@ -67,6 +81,7 @@ function CardHead({ icon, title, right }: { icon: string; title: string; right?:
         {title}
       </span>
       {right && <span className="ap-card-note">{right}</span>}
+      {children}
     </div>
   )
 }
@@ -340,6 +355,10 @@ function BusinessIdTab({
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
   const [openGoal, setOpenGoal] = useState<Goal | null>(null)
+  /* Six highlights, three of them shown — the same fold the client and the
+     prospect pages have had, and the same on paper: a print shows all six
+     whether the card is open or shut. */
+  const highlights = useCollapsed(d.highlights, COLLAPSED_ROWS)
   /* The change they named, read as a goal at the stage the flow put them in —
      and carrying everything else The Move asked, so the row opens onto the same
      panel a client's goal does. Marcus's answers and an advisor who took the
@@ -369,10 +388,18 @@ function BusinessIdTab({
     <>
       {/* Key Highlights */}
       <section className="pp-card">
-        <CardHead icon={icKeyHighlights} title="Key Highlights" />
-        <div className="pp-highlights">
-          {d.highlights.map((h) => (
-            <div className="pp-highlight" key={h.title}>
+        <CardHead icon={icKeyHighlights} title="Key Highlights">
+          {highlights.overflows && (
+            <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
+          )}
+        </CardHead>
+        <div className="pp-highlights" ref={highlights.box}>
+          {highlights.shown.map((h, i) => (
+            <div
+              className={`pp-highlight ${highlights.entering(i) ?? ''}`}
+              style={highlights.delay(i)}
+              key={h.title}
+            >
               <div className="pp-highlight-title">
                 <HighlightIcon source={h.icon} />
                 {h.title}

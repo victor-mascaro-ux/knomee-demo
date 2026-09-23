@@ -38,14 +38,32 @@ export function usePrintSheet() {
       setPrinting(false)
     }
     window.addEventListener('afterprint', done)
+    let cancelled = false
     const raf = window.requestAnimationFrame(() => {
-      window.setTimeout(() => {
-        window.print()
-        /* Safari fires no afterprint on some versions; this is the belt. */
-        window.setTimeout(done, 400)
-      }, 120)
+      /* Wait for the pictures rather than for a guess at how long they take.
+         The rows a fold was hiding mount for the print and fetch their artwork
+         then, and the dialog freezes the page the moment it opens — a beat of
+         120ms was enough for a 600-byte icon and not for a 12KB one, so one
+         life event printed as an empty circle. Bounded, because a file that
+         never arrives must not hold the dialog shut. */
+      const imgs = Array.from(document.images).filter((i) => !i.complete)
+      const ready = Promise.all(
+        imgs.map((i) => (i.decode ? i.decode().catch(() => {}) : Promise.resolve())),
+      )
+      const capped = new Promise((r) => window.setTimeout(r, 1500))
+      Promise.race([ready, capped]).then(() => {
+        if (cancelled) return
+        /* One more frame, so what decoded is also painted. */
+        window.requestAnimationFrame(() => {
+          if (cancelled) return
+          window.print()
+          /* Safari fires no afterprint on some versions; this is the belt. */
+          window.setTimeout(done, 400)
+        })
+      })
     })
     return () => {
+      cancelled = true
       window.removeEventListener('afterprint', done)
       window.cancelAnimationFrame(raf)
     }
