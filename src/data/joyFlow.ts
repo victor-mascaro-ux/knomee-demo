@@ -83,6 +83,14 @@ export const JOY_AREAS = [
 
 const joyPhoto = (label: string, file: string): JoyPick => ({ label, src: `./joy/${file}.png` })
 
+/* The same seven areas as cards, each with its photograph, in
+   public/joy/areas/ under the area's name. */
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+export const JOY_AREA_CARDS: JoyPick[] = JOY_AREAS.map((label) => ({
+  label,
+  src: `./joy/areas/${slug(label)}.png`,
+}))
+
 /* The nine the phone shows, in the design's order. */
 export const JOY_PICKS: JoyPick[] = [
   joyPhoto('Choice', 'choice'),
