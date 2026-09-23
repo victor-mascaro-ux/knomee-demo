@@ -6278,7 +6278,9 @@ button.name-link-btn:hover .name-text {
   .pp-add,
   .pp-show,
   .pp-head-toggle,
+  .show-toggle,
   .ap-fold-caret,
+  .ap-sub-head svg,
   .row-menu,
   .rd-copy,
   .ci-adv-x,
@@ -6467,6 +6469,17 @@ button.name-link-btn:hover .name-text {
   }
   .collapse-inner {
     overflow: visible !important;
+  }
+  /* The dashboard's explainers fold on their own rows rather than the shared
+     .collapse, and they fold open here for the same reason. */
+  .exp-collapse {
+    grid-template-rows: 1fr !important;
+  }
+  .exp-collapse-inner {
+    overflow: visible !important;
+    /* It is hidden from assistive tech as well as clipped when shut, and the
+       transition that reveals it is one of the ones print kills. */
+    visibility: visible !important;
   }
   .ap-fold .pp-card-head + * {
     display: block !important;
