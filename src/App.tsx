@@ -157,7 +157,7 @@ function NameLink({
           ›
         </span>
       </span>
-      {isNew && <span className="new-tag">New</span>}
+      {isNew && <span className="new-tag cp-goal-tag is-new">New</span>}
     </>
   )
   if (onClick) {
@@ -587,6 +587,7 @@ function TopActionCell({ text }: { text: string }) {
 function ProspectsTable({
   onConvert,
   onOpenProfile,
+  hidden,
   selected,
   onToggle,
   allChecked,
@@ -594,6 +595,8 @@ function ProspectsTable({
 }: {
   onConvert: (p: Prospect) => void
   onOpenProfile: (p: Prospect) => void
+  /** Prospects converted to clients: they have left this table. */
+  hidden?: Set<string>
   selected: Set<string>
   onToggle: (name: string) => void
   allChecked: boolean
@@ -664,7 +667,7 @@ function ProspectsTable({
         </thead>
         <tbody>
           {orderedGroups.map((group) => {
-            const rows = prospects.filter((p) => p.tier === group.id)
+            const rows = prospects.filter((p) => p.tier === group.id && !hidden?.has(p.email))
             if (rows.length === 0) return null
             const isCollapsed = collapsed.has(group.id)
             return (
@@ -750,7 +753,9 @@ function ProspectsScreen({
   onDownload,
   onInvite,
   onOpenProfile,
+  hidden,
 }: {
+  hidden?: Set<string>
   onConvert: (p: Prospect) => void
   onDownload: () => void
   onInvite: () => void
@@ -775,6 +780,7 @@ function ProspectsScreen({
       <ProspectsTable
         onConvert={onConvert}
         onOpenProfile={onOpenProfile}
+        hidden={hidden}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}
@@ -824,10 +830,13 @@ function ClientRow({
   onToggle,
   onOpenProfile,
   onOpenHousehold,
+  onDemote,
 }: {
   c: Client
   checked: boolean
   onToggle: () => void
+  /** A converted prospect can be sent back to the Prospects table. */
+  onDemote?: (c: Client) => void
   onOpenProfile?: (c: Client) => void
   /* The one household with a page of its own. */
   onOpenHousehold?: () => void
@@ -923,7 +932,14 @@ function ClientRow({
         )}
       </td>
       <td className="col-dots">
-        <RowMenu items={[{ label: 'View profile', disabled: true }]} />
+        <RowMenu
+          items={[
+            onOpenProfile && hasProfile(c.name)
+              ? { label: 'View profile', onClick: () => onOpenProfile(c) }
+              : { label: 'View profile', disabled: true },
+            ...(onDemote ? [{ label: 'Convert to Prospect', onClick: () => onDemote(c) }] : []),
+          ]}
+        />
       </td>
     </tr>
   )
@@ -1257,8 +1273,11 @@ function ClientsScreen({
   onInvite,
   onOpenProfile,
   onOpenHousehold,
+  onDemote,
 }: {
   clients: Client[]
+  /** Whose rows can go back to being prospects, and how. */
+  onDemote?: { can: (c: Client) => boolean; go: (c: Client) => void }
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (c: Client) => void
@@ -1440,6 +1459,7 @@ function ClientsScreen({
                         onToggle={() => toggle(c.name)}
                         onOpenProfile={onOpenProfile}
                         onOpenHousehold={onOpenHousehold}
+                        onDemote={onDemote?.can(c) ? onDemote.go : undefined}
                       />
                     ))}
                 </Fragment>
@@ -4166,10 +4186,24 @@ export default function App() {
       setConverted((prev) => [convertedClient(convertTarget.name, convertTarget.email), ...prev])
     }
     confettiRef.current?.fire() // fire immediately, before the heavy screen switch
+    /* Converted from her own page: the page becomes her client page — the
+       client design, rail and all — rather than leaving a prospect page open
+       over a table she is no longer in. */
+    if (profileProspect && profileProspect.email === convertTarget.email) {
+      setProfileProspect(null)
+      setProfileClient(convertedClient(convertTarget.name, convertTarget.email))
+    }
     setConvertTarget(null)
     setScreen('clients')
     showToast('Converted to Client')
   }
+  /* And back: a converted prospect returns to the Prospects table. */
+  const demote = (c: Client) => {
+    setConverted((prev) => prev.filter((o) => o.email !== c.email))
+    if (profileClient?.email === c.email) setProfileClient(null)
+    showToast('Converted to Prospect')
+  }
+  const convertedEmails = new Set(converted.map((c) => c.email))
 
   const clients = [...converted, ...baseClients]
 
@@ -4495,7 +4529,11 @@ export default function App() {
         <main className="content content-profile">
           <ClientProfileScreen
             client={profileClient}
-            household={family}
+            /* The family only on the pages of the people in it: a converted
+               prospect has no household yet, and her rail offers to start one. */
+            household={
+              family && family.members.some((m) => m.name === profileClient.name) ? family : null
+            }
             onBack={() => setProfileClient(null)}
             onOpenHousehold={openHousehold}
             onAddMember={openFamilyModal}
@@ -4546,6 +4584,7 @@ export default function App() {
             <EmptyScreen variant="prospects" onCta={() => setEmptyMode(false)} />
           ) : (
             <ProspectsScreen
+              hidden={convertedEmails}
               onConvert={setConvertTarget}
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('prospect')}
@@ -4562,6 +4601,7 @@ export default function App() {
               onInvite={() => setInviteKind('client')}
               onOpenProfile={setProfileClient}
               onOpenHousehold={openHousehold}
+              onDemote={{ can: (c) => convertedEmails.has(c.email), go: demote }}
             />
           ))}
         {screen === 'analytics' &&

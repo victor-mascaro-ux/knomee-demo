@@ -12,6 +12,7 @@
  */
 
 import { clientProfile } from './clientProfile'
+import { financialId } from './financialId'
 import { familyId } from './familyId'
 import { differences, similarities } from './familyInsights'
 
@@ -70,9 +71,34 @@ const sebastian: MemberProfile = {
   confidenceAnswers: hisConfidence,
 }
 
+/* Sarah once she is converted: the client page, carrying her own Financial ID
+   answers — the same ones her prospect page shows — and no household yet, so
+   her rail offers to start one. The advisory team is the practice's. */
+const sarah: MemberProfile = {
+  ...clientProfile,
+  joined: financialId.joined,
+  owner: financialId.owner,
+  household: '',
+  members: [],
+  keyHighlights: financialId.keyHighlights,
+  suggestedGoals: financialId.suggestedGoals,
+  goals: financialId.goals,
+  financialJoy: financialId.financialJoy,
+  attention: financialId.attention,
+  futureYou: financialId.futureYou,
+  postcard: financialId.postcard,
+  outlook: financialId.outlook,
+  badges: financialId.badges,
+  confidence: financialId.confidence,
+  lifeEvents: financialId.lifeEvents,
+  questions: financialId.questions,
+  boards: [],
+}
+
 const BY_NAME: Record<string, MemberProfile> = {
   [clientProfile.owner]: clientProfile,
   [sebastian.owner]: sebastian,
+  [sarah.owner]: sarah,
 }
 
 /** True where that person has answers of their own. Their name is a link in

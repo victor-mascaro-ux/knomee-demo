@@ -6851,3 +6851,11 @@ button.name-link-btn:hover .name-text {
   height: 100%;
   object-fit: cover;
 }
+
+/* The tables' "New" is the row pill itself (.cp-goal-tag.is-new): grape among
+   prospects and candidates, lime among clients — the same pair the profiles
+   use on each side. */
+.clients-table .cp-goal-tag.is-new {
+  background: var(--k-lime);
+  color: var(--k-plum);
+}
