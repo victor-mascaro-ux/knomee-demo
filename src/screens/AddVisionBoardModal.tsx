@@ -219,10 +219,15 @@ export default function AddVisionBoardModal({
                     board={{ title: title.trim(), blurb: blurb.trim(), tiles }}
                     onResize={resize}
                     onRemove={(i) => setTiles((ts) => ts.filter((_, j) => j !== i))}
+                    onMove={(from, to) =>
+                      setTiles((ts) => {
+                        const next = [...ts]
+                        const [t] = next.splice(from, 1)
+                        next.splice(to, 0, t)
+                        return next
+                      })
+                    }
                   />
-                  {tiles.some((t) => t.kind === 'photo') && (
-                    <p className="vb-hint">Drag a photo's corner to make it wide or tall.</p>
-                  )}
                 </div>
               )}
 
@@ -308,6 +313,25 @@ export default function AddVisionBoardModal({
   )
 }
 
+/* The paper a sticker goes on, for the typed ones and the said ones alike. */
+function TonePicker({ tone, onChange }: { tone: Tone; onChange: (t: Tone) => void }) {
+  return (
+    <div className="vb-tones" role="radiogroup" aria-label="Sticker colour">
+      {TONES.map((t) => (
+        <button
+          key={t.label}
+          type="button"
+          role="radio"
+          aria-checked={tone === t.id}
+          aria-label={t.label}
+          className={`vb-tone ${t.id ? `is-${t.id}` : ''}${tone === t.id ? ' is-on' : ''}`}
+          onClick={() => onChange(t.id)}
+        />
+      ))}
+    </div>
+  )
+}
+
 /* A sticker, typed: the words, and the paper they go on. */
 function TextComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCancel: () => void }) {
   const [text, setText] = useState('')
@@ -323,19 +347,7 @@ function TextComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onCa
         onChange={(e) => setText(e.target.value)}
       />
       <div className="vb-compose-foot">
-        <div className="vb-tones" role="radiogroup" aria-label="Sticker colour">
-          {TONES.map((t) => (
-            <button
-              key={t.label}
-              type="button"
-              role="radio"
-              aria-checked={tone === t.id}
-              aria-label={t.label}
-              className={`vb-tone ${t.id ? `is-${t.id}` : ''}${tone === t.id ? ' is-on' : ''}`}
-              onClick={() => setTone(t.id)}
-            />
-          ))}
-        </div>
+        <TonePicker tone={tone} onChange={setTone} />
         <button className="vb-link" type="button" onClick={onCancel}>
           Cancel
         </button>
@@ -358,6 +370,7 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
   const words = SPOKEN.split(' ')
   const [heard, setHeard] = useState(0)
   const [text, setText] = useState('')
+  const [tone, setTone] = useState<Tone>('lilac')
   const listening = heard < words.length
 
   useEffect(() => {
@@ -391,15 +404,16 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
         </p>
       ) : (
         <textarea
-          className="vb-note-field is-lilac"
+          className={`vb-note-field ${tone ? `is-${tone}` : ''}`}
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
       )}
       <div className="vb-compose-foot">
-        {/* Empty, and still there: it holds Cancel and Add to the right. */}
-        <span className="vb-voice-hint" />
+        {/* Its paper, once there are words to put on it; until then an empty
+            slot that holds Cancel and Add to the right. */}
+        {listening ? <span className="vb-voice-hint" /> : <TonePicker tone={tone} onChange={setTone} />}
         <button className="vb-link" type="button" onClick={onCancel}>
           Cancel
         </button>
@@ -407,7 +421,7 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
           className="btn btn-primary vb-small"
           type="button"
           disabled={listening || !text.trim()}
-          onClick={() => onAdd({ kind: 'note', text: text.trim(), tone: 'lilac', voice: true })}
+          onClick={() => onAdd({ kind: 'note', text: text.trim(), tone, voice: true })}
         >
           Add sticker
         </button>

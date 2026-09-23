@@ -80,6 +80,9 @@ export function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
    photograph in public/vision/ is 292×298 — is not read as landscape. */
 const LANDSCAPE = 1.15
 
+/* A tile's place in its grid, in CSS pixels. */
+type Box = { x: number; y: number; w: number; h: number }
+
 /* A photograph's cell, in columns × rows. */
 export type TileSize = '1x1' | '2x1' | '1x2'
 
@@ -91,7 +94,15 @@ function TileRemove({ onRemove }: { onRemove: () => void }) {
       className="cp-tile-x"
       aria-label="Remove from board"
       data-no-drag-scroll
-      onClick={onRemove}
+      onClick={(e) => {
+        /* The tile shrinks away first and the board closes over it after, so
+           a delete is something seen happening rather than a gap appearing. */
+        const tile = e.currentTarget.closest('.cp-tile')
+        if (!tile || tile.classList.contains('is-leaving')) return
+        tile.classList.add('is-leaving')
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        window.setTimeout(onRemove, reduce ? 0 : 190)
+      }}
     >
       <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
         <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
@@ -115,6 +126,7 @@ function BoardPhoto({
   style,
   onResize,
   onRemove,
+  lifted,
 }: {
   src: string
   alt: string
@@ -122,6 +134,8 @@ function BoardPhoto({
   wide?: boolean
   style?: CSSProperties
   onRemove?: () => void
+  /** Being carried to a new place on the board. */
+  lifted?: boolean
   /** A board being made: the photograph carries a handle that drags it to one
       cell, two across or two down. */
   onResize?: (size: TileSize) => void
@@ -196,7 +210,7 @@ function BoardPhoto({
         size === '2x1' ? 'is-wide' : ''
       } ${failed ? 'is-missing' : ''}${onResize || onRemove ? ' is-sizable' : ''}${
         draft ? ' is-sizing' : ''
-      }`}
+      }${lifted ? ' is-lifted' : ''}`}
     >
       {failed ? (
         <span className="cp-tile-alt">{alt}</span>
@@ -265,10 +279,12 @@ function BoardNote({
   style,
   onSpan,
   onRemove,
+  lifted,
 }: {
   tile: Extract<BoardTile, { kind: 'note' }>
   style?: CSSProperties
   onRemove?: () => void
+  lifted?: boolean
   /* The board has to re-measure when a note claims a second cell, and a note's
      own state change does not re-render its parent. It says so instead. */
   onSpan?: () => void
@@ -323,7 +339,7 @@ function BoardNote({
       style={style}
       className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''} ${
         measuring ? '' : span
-      }${onRemove ? ' is-sizable' : ''}`}
+      }${onRemove ? ' is-sizable' : ''}${lifted ? ' is-lifted' : ''}`}
     >
       {onRemove && <TileRemove onRemove={onRemove} />}
       <div className="cp-note-inner" ref={inner}>
@@ -355,23 +371,26 @@ function trailingGap(grid: HTMLDivElement) {
   if (!cols || Number.isNaN(tracks[0])) return null
   const gap = parseFloat(cs.rowGap) || 0
   const rowH = parseFloat(cs.gridAutoRows) || 0
-  const box = grid.getBoundingClientRect()
-  /* The board can be inside the scaled phone frame, where painted pixels and
-     CSS pixels are not the same length. One ratio recovers the scale. */
-  const laid = tracks.reduce((a, b) => a + b, 0) + gap * (cols - 1)
-  const k = laid > 0 ? box.width / laid : 1
-  const colStep = (tracks[0] + gap) * k
-  const rowStep = (rowH + gap) * k
+  /* Measured from layout, not from paint: offsets ignore transforms, so a
+     tile that is mid-animation — popping in, gliding to a new place, the whole
+     panel scaling open — is read where it will be rather than where it is
+     drawn. Reading painted boxes during an animation gave a different answer
+     each frame, and the board re-laid itself without end. The grid is the
+     tiles' offset parent (clientProfile.css), and offsets are CSS pixels, so
+     the phone frame's scale does not enter into it either. */
+  const colStep = tracks[0] + gap
+  const rowStep = rowH + gap
   if (!(colStep > 0) || !(rowStep > 0)) return null
 
   const cells = new Set<string>()
   let lastRow = 0
-  const placed = [...grid.children].map((el, i) => {
-    const b = el.getBoundingClientRect()
-    const col = Math.round((b.left - box.left) / colStep)
-    const row = Math.round((b.top - box.top) / rowStep)
-    const colSpan = Math.max(1, Math.round((b.width + gap * k) / colStep))
-    const rowSpan = Math.max(1, Math.round((b.height + gap * k) / rowStep))
+  const placed = [...grid.children].map((node, i) => {
+    const el = node as HTMLElement
+    const col = Math.round(el.offsetLeft / colStep)
+    const row = Math.round(el.offsetTop / rowStep)
+    // Nothing on a board is more than two cells either way.
+    const colSpan = Math.min(2, Math.max(1, Math.round((el.offsetWidth + gap) / colStep)))
+    const rowSpan = Math.min(2, Math.max(1, Math.round((el.offsetHeight + gap) / rowStep)))
     for (let r = row; r < row + rowSpan; r += 1) {
       for (let c = col; c < col + colSpan; c += 1) cells.add(`${r},${c}`)
       lastRow = Math.max(lastRow, r)
@@ -403,8 +422,12 @@ export function Board({
   onResize,
   onRemove,
   onEdit,
+  onMove,
 }: {
   board: VisionBoard
+  /** A board being made: tiles are picked up and carried to a new place, and
+      the board reorders under the pointer as they go. */
+  onMove?: (from: number, to: number) => void
   /** A board that can be changed: an Edit beside its title opens it. */
   onEdit?: () => void
   /** A board being made: its photographs can be dragged to a size. */
@@ -449,6 +472,109 @@ export function Board({
   const spanOf = (i: number) =>
     fill && fill.i === i ? { gridColumn: `span ${fill.span}` } : undefined
 
+  /* The tile being carried, by where it is now. It moves through the board
+     rather than jumping at the end: every tile it passes over steps aside, so
+     where it will land is always what is on the screen. */
+  const [carried, setCarried] = useState<number | null>(null)
+  const startCarry = (e: React.PointerEvent<HTMLDivElement>) => {
+    const g = grid.current
+    if (!onMove || !g || e.button !== 0) return
+    const target = e.target as HTMLElement
+    // Its cross and its handle are controls of their own.
+    if (target.closest('.cp-tile-x, .cp-tile-handle')) return
+    const el = target.closest('.cp-tile')
+    if (!el || el.parentElement !== g) return
+    let at = Array.from(g.children).indexOf(el)
+    const x0 = e.clientX
+    const y0 = e.clientY
+    let moving = false
+    const move = (ev: PointerEvent) => {
+      if (!moving) {
+        // A press that has not travelled is not a drag.
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return
+        moving = true
+        setCarried(at)
+      }
+      ev.preventDefault()
+      const over = document
+        .elementFromPoint(ev.clientX, ev.clientY)
+        ?.closest('.cp-tile') as HTMLElement | null
+      if (!over || over.parentElement !== g) return
+      const to = Array.from(g.children).indexOf(over)
+      if (to < 0 || to === at) return
+      onMove(at, to)
+      at = to
+      setCarried(to)
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      setCarried(null)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
+
+  /* Where each tile was on the last commit, by key, so the next one can play
+     the difference: a tile that moved, grew or shrank glides from its old box
+     to its new one instead of jumping. Only on a board being made — the page's
+     boards do not rearrange themselves. */
+  const boxes = useRef(new Map<string, Box>())
+  const glides = useRef(new Map<string, Animation>())
+  const keys: string[] = []
+  useLayoutEffect(() => {
+    const g = grid.current
+    if (!g || !(onMove || onRemove || onResize)) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    /* Boxes from layout, not paint. A painted box read while a tile is still
+       gliding is where the glide has got to, and starting the next glide from
+       there compounded every frame until the tiles flew off the board. Layout
+       is where the tile is, full stop — and in CSS pixels, so the phone
+       frame's scale does not enter into it. */
+    const next = new Map<string, Box>()
+    Array.from(g.children).forEach((node, i) => {
+      const el = node as HTMLElement
+      const k = keys[i]
+      if (!k) return
+      const now: Box = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }
+      next.set(k, now)
+      const was = boxes.current.get(k)
+      if (reduce || !was || !now.w || !now.h) return
+      if (was.x === now.x && was.y === now.y && was.w === now.w && was.h === now.h) return
+      glides.current.get(k)?.cancel()
+      glides.current.set(
+        k,
+        el.animate(
+          [
+            {
+              transformOrigin: '0 0',
+              transform: `translate(${was.x - now.x}px, ${was.y - now.y}px) scale(${was.w / now.w}, ${was.h / now.h})`,
+            },
+            { transformOrigin: '0 0', transform: 'none' },
+          ],
+          { duration: 240, easing: 'cubic-bezier(0.22, 0.81, 0.28, 1.05)' },
+        ),
+      )
+    })
+    boxes.current = next
+  })
+
+  /* Keyed by what each tile is, and which of its kind it is, but not by where:
+     a tile carried across the board, or one taken off before it, stays the same
+     element and does not flash while it reloads. A note's shape is its own
+     words' business, so moving it does not need a fresh measure. */
+  const seen = new Map<string, number>()
+  const keyOf = (t: BoardTile) => {
+    const base = t.kind === 'photo' ? `p:${t.src}` : `n:${t.title ?? ''}${t.text ?? ''}`
+    const n = seen.get(base) ?? 0
+    seen.set(base, n + 1)
+    const k = `${base}#${n}`
+    keys.push(k)
+    return k
+  }
+
   return (
     <div className="cp-board">
       {onEdit ? (
@@ -470,14 +596,17 @@ export function Board({
         <h4 className="cp-board-title">{board.title}</h4>
       )}
       <p className="cp-board-blurb">{board.blurb}</p>
-      <div className="cp-board-grid" ref={grid}>
-        {/* Keyed by what the tile is as well as where: a tile taken off the
-            middle shifts the rest, and a note that moved must measure itself
-            again rather than keep the shape of the one that was there. */}
+      <div
+        className={`cp-board-grid${onMove ? ' is-movable' : ''}${carried !== null ? ' is-carrying' : ''}`}
+        ref={grid}
+        onPointerDown={onMove ? startCarry : undefined}
+        {...(onMove ? { 'data-no-drag-scroll': '' } : {})}
+      >
         {board.tiles.map((t, i) =>
           t.kind === 'photo' ? (
             <BoardPhoto
-              key={`${i}:${t.src}`}
+              key={keyOf(t)}
+              lifted={carried === i}
               src={t.src}
               alt={t.alt}
               tall={t.tall}
@@ -488,7 +617,8 @@ export function Board({
             />
           ) : (
             <BoardNote
-              key={`${i}:${t.title ?? ''}${t.text ?? ''}`}
+              key={keyOf(t)}
+              lifted={carried === i}
               tile={t}
               style={spanOf(i)}
               onSpan={remeasure}
