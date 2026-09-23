@@ -10,6 +10,7 @@ import { useDragScroll, useSwipeDown } from './mobileGestures'
 import JoyFlow, { sampleJoyAnswers, type JoyAnswers } from './JoyFlow'
 import ConfidenceFlow, { CONFIDENCE_STATEMENTS, type ConfidenceAnswers } from './ConfidenceFlow'
 import OutlookFlow, { SAMPLE_OUTLOOK, type OutlookAnswers } from './OutlookFlow'
+import FutureYouFlow, { SAMPLE_FUTURE, type FutureYouAnswers } from './FutureYouFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -1162,8 +1163,10 @@ export default function ClientExperienceScreen({
   const [conf, setConf] = useState<ConfidenceAnswers | null>(null)
   /* And what Outlook handed back. */
   const [outlook, setOutlook] = useState<OutlookAnswers | null>(null)
+  /* And what Future You handed back. */
+  const [future, setFuture] = useState<FutureYouAnswers | null>(null)
   /* An adventure that has been built, and can be taken. */
-  const BUILT = ['financial-joy', 'confidence', 'outlook']
+  const BUILT = ['financial-joy', 'confidence', 'outlook', 'future-you']
   /* Completing an adventure — the first time or again — makes the journey
      stand at it: everything before it complete, it complete, and everything
      after it waiting. */
@@ -1196,6 +1199,7 @@ export default function ClientExperienceScreen({
     setJoy(null)
     setConf(null)
     setOutlook(null)
+    setFuture(null)
     setDone({})
     setCheckIn(null)
     setAdventure(null)
@@ -1329,7 +1333,33 @@ export default function ClientExperienceScreen({
             }`}
             ref={viewport}
           >
-            {adventure === 'outlook' ? (
+            {adventure === 'future-you' ? (
+              <FutureYouFlow
+                review={reviewing ? (future ?? SAMPLE_FUTURE) : undefined}
+                reward={
+                  reviewing
+                    ? {
+                        before: journey.filter((j) => j.core && done[j.id]).length,
+                        after: journey.filter((j) => j.core && done[j.id]).length,
+                        total: journey.filter((j) => j.core).length,
+                        next: journey.find((j) => !done[j.id])?.title ?? 'Goals',
+                      }
+                    : {
+                        before: 3,
+                        after: 4,
+                        total: journey.filter((j) => j.core).length,
+                        next: 'Goals',
+                      }
+                }
+                onComplete={(answers) => {
+                  if (reviewing) return leaveReview()
+                  setFuture(answers)
+                  completeAt('future-you')
+                  setAdventure(null)
+                  setTab('adventures')
+                }}
+              />
+            ) : adventure === 'outlook' ? (
               <OutlookFlow
                 review={reviewing ? (outlook ?? SAMPLE_OUTLOOK) : undefined}
                 reward={
@@ -1429,7 +1459,7 @@ export default function ClientExperienceScreen({
               <ProspectProfileScreen
                 key={journeyRun}
                 prospect={SARAH}
-                fresh={{ joy, done, conf, outlook }}
+                fresh={{ joy, done, conf, outlook, future }}
                 onOpenEnding={(id) => {
                   setReviewing(true)
                   setAdventure(id)

@@ -1,0 +1,586 @@
+/* Future You, taken on the phone.
+ *
+ * The fourth adventure: a vision of the life they are saving for, built a
+ * piece at a time. First a breath — an orb that grows as they breathe in and
+ * settles as they breathe out, while they picture it. Then where it is, what
+ * they are doing, who they are with (photographs, as Financial Joy asks), how
+ * far away it is (a road their pin travels along), the detail of it, and a
+ * postcard written back from there, which takes a stamp and a postmark when
+ * it is done. The ending is the vision as a poster, and the postcard under it.
+ *
+ * The house rules hold: OK on a question left blank records her sample
+ * answer, and a double-click on the empty postcard writes hers in.
+ */
+
+import { useEffect, useRef, useState } from 'react'
+import './joyFlow.css'
+import './joyResults.css'
+import './futureYouFlow.css'
+import { financialId } from '../data/financialId'
+import JoyReward from './JoyReward'
+import { Reveal, Typed } from './JoyResults'
+import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
+
+interface Pick {
+  label: string
+  src: string
+}
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+const picks = (labels: string[]): Pick[] => labels.map((label) => ({ label, src: `./future-you/${slug(label)}.png` }))
+
+const WHERE = picks(['At the beach', 'In the mountains', 'In a big city', 'In a suburb', 'In the country', 'Abroad'])
+const DOING = picks(['Relaxing', 'Creative pursuits', 'Running a business', 'Traveling', 'Helping others', 'Learning'])
+const WITH = picks(['Family', 'Friends', 'A larger group', 'Solo', 'A romantic partner', 'Business partners'])
+const WHEN = ['1–5 years', '5–10 years', '10–15 years', '15–20 years', 'Over 20 years']
+
+/* The detail of the life, the design's five kinds. */
+const DETAIL: { group: string; icon: string; items: string[] }[] = [
+  { group: 'Activities', icon: '✺', items: ['Cooking', 'Art', 'Entertaining', 'Gardening', 'Reading', 'Music', 'Gaming', 'Dancing'] },
+  { group: 'Culture', icon: '♫', items: ['Theater', 'Concerts', 'Museums', 'Cinema', 'Festivals', 'History'] },
+  { group: 'Travel', icon: '✈', items: ['International', 'Road trips', 'Cruises', 'Camping', 'Solo', 'Adventure'] },
+  { group: 'Work', icon: '◆', items: ['Big work', 'Board seats', 'Volunteer', 'Philanthropic giving', 'Side hustle', 'Consulting'] },
+  { group: 'Health', icon: '♥', items: ['Gym', 'Sports', 'Outdoors', 'Meditating', 'Yoga', 'Walking', 'Cycling', 'Water sports'] },
+]
+
+export interface FutureYouAnswers {
+  where: string[]
+  doing: string[]
+  with: string[]
+  when: string | null
+  detail: string[]
+  postcard: string
+}
+
+/* Her authored answers: the samples OK records and a double-click writes. */
+export const SAMPLE_FUTURE: FutureYouAnswers = {
+  where: financialId.futureYou.where,
+  doing: financialId.futureYou.what,
+  with: financialId.futureYou.who.map((w) => (w === 'Romantic partner' ? 'A romantic partner' : w)),
+  when: '5–10 years',
+  detail: ['Cooking', 'Entertaining', 'Concerts', 'International', 'Road trips', 'Volunteer', 'Walking', 'Yoga'],
+  postcard: `Dear Me,\n\n${financialId.postcard}\n\nWith love,\nFuture You`,
+}
+
+const ClockIcon = () => (
+  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="8" cy="8" r="6.4" />
+    <path d="M8 4.6V8l2.4 1.6" strokeLinecap="round" />
+  </svg>
+)
+
+function Photo({ src, className, fallback }: { src: string; className?: string; fallback: string }) {
+  const [missing, setMissing] = useState(false)
+  if (missing) return <span className={fallback} aria-hidden />
+  return <img className={className} src={src} alt="" draggable={false} onError={() => setMissing(true)} />
+}
+
+/* The breath: in for four, out for four, while they picture it. */
+function Breathe() {
+  const [inhale, setInhale] = useState(true)
+  useEffect(() => {
+    const t = window.setInterval(() => setInhale((v) => !v), 4000)
+    return () => window.clearInterval(t)
+  }, [])
+  return (
+    <div className="fy-breathe">
+      <h2 className="fy-h">This is your future.</h2>
+      <p className="fy-sub">Take a moment to visualize what it looks like for you.</p>
+      <div className={`fy-orb${inhale ? ' is-in' : ' is-out'}`} aria-live="polite">
+        <i className="fy-ring fy-ring-3" />
+        <i className="fy-ring fy-ring-2" />
+        <i className="fy-ring fy-ring-1" />
+        <span className="fy-core">
+          <b key={inhale ? 'in' : 'out'}>{inhale ? 'Inhale' : 'Exhale'}</b>
+        </span>
+      </div>
+      <p className="fy-prompts">
+        Where are you?
+        <br />
+        What are you doing?
+        <br />
+        Who are you with?
+        <br />
+        How do you feel in the future you see?
+      </p>
+    </div>
+  )
+}
+
+/* One of the three photograph questions. */
+function PhotoAsk({
+  title,
+  sub,
+  options,
+  chosen,
+  other,
+  otherPlaceholder,
+  onToggle,
+  onOther,
+}: {
+  title: string
+  sub: string
+  options: Pick[]
+  chosen: string[]
+  other: string
+  otherPlaceholder: string
+  onToggle: (label: string) => void
+  onOther: (v: string) => void
+}) {
+  return (
+    <div className="jf-pick fy-ask">
+      <h2 className="jf-pick-title">{title}</h2>
+      <p className="jf-pick-sub">{sub}</p>
+      <p className="jf-pick-note">Choose as many as you see.</p>
+      <div className="jf-photos">
+        {options.map((o) => {
+          const on = chosen.includes(o.label)
+          return (
+            <button
+              key={o.label}
+              type="button"
+              className={`jf-photo${on ? ' is-on' : ''}`}
+              aria-pressed={on}
+              onClick={() => onToggle(o.label)}
+            >
+              <span className="jf-photo-frame">
+                <Photo src={o.src} fallback="jf-photo-fallback" />
+              </span>
+              <span className="jf-photo-label">{o.label}</span>
+            </button>
+          )
+        })}
+      </div>
+      <label className="jf-other-label" htmlFor="fy-other">
+        Other
+      </label>
+      <span className="jf-other-hint">Or write your answer.</span>
+      <input
+        id="fy-other"
+        className="jf-other"
+        value={other}
+        placeholder={otherPlaceholder}
+        onChange={(e) => onOther(e.target.value)}
+      />
+    </div>
+  )
+}
+
+/* How far away: a road, and her pin travels along it to the band chosen. */
+function Road({ value, onChange }: { value: string | null; onChange: (v: string) => void }) {
+  const at = value ? WHEN.indexOf(value) : -1
+  return (
+    <div className="fy-when">
+      <h2 className="fy-h">How far in the future is your vision?</h2>
+      <p className="fy-sub">Pick the stretch of road it sits on.</p>
+      <div className="fy-road" style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: WHEN.length - 1 }}>
+        <i className="fy-road-line" />
+        <i className={`fy-road-done${at < 0 ? ' is-empty' : ''}`} />
+        <span className={`fy-pin${at < 0 ? ' is-waiting' : ''}`} aria-hidden>
+          <svg viewBox="0 0 24 32" width="26" height="34">
+            <path d="M12 1C6 1 1.5 5.6 1.5 11.4 1.5 19 12 31 12 31s10.5-12 10.5-19.6C22.5 5.6 18 1 12 1Z" fill="var(--k-plum)" />
+            <circle cx="12" cy="11.5" r="4.2" fill="var(--k-lime)" />
+          </svg>
+        </span>
+        <div className="fy-stops">
+          {WHEN.map((w, i) => (
+            <button
+              key={w}
+              type="button"
+              className={`fy-stop${i === at ? ' is-on' : ''}${i < at ? ' is-past' : ''}`}
+              aria-pressed={i === at}
+              onClick={() => onChange(w)}
+            >
+              <i />
+              <span>{w}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* The detail: five kinds, each with its own and a way to add theirs. */
+function Detail({
+  chosen,
+  onToggle,
+  extra,
+  onAdd,
+}: {
+  chosen: string[]
+  onToggle: (v: string) => void
+  extra: Record<string, string[]>
+  onAdd: (group: string, v: string) => void
+}) {
+  const [adding, setAdding] = useState<string | null>(null)
+  const [text, setText] = useState('')
+  return (
+    <div className="fy-detail">
+      <h2 className="fy-h fy-h-sm">Share more detail about what Future You’s life will include.</h2>
+      <p className="fy-sub">Tap everything that belongs in it, or add your own.</p>
+      {DETAIL.map((d, gi) => (
+        <section className="fy-group" key={d.group} style={{ ['--g' as string]: gi }}>
+          <h3>
+            <span aria-hidden>{d.icon}</span> {d.group}
+          </h3>
+          <div className="fy-chips">
+            {[...d.items, ...(extra[d.group] ?? [])].map((it) => (
+              <button
+                key={it}
+                type="button"
+                className={`fy-chip${chosen.includes(it) ? ' is-on' : ''}`}
+                aria-pressed={chosen.includes(it)}
+                onClick={() => onToggle(it)}
+              >
+                {it}
+              </button>
+            ))}
+            {adding === d.group ? (
+              <input
+                className="fy-chip-input"
+                autoFocus
+                value={text}
+                placeholder="Your own"
+                onChange={(e) => setText(e.target.value)}
+                onBlur={() => {
+                  if (text.trim()) onAdd(d.group, text.trim())
+                  setText('')
+                  setAdding(null)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                  if (e.key === 'Escape') {
+                    setText('')
+                    setAdding(null)
+                  }
+                }}
+              />
+            ) : (
+              <button type="button" className="fy-chip fy-chip-add" onClick={() => setAdding(d.group)}>
+                + Add your own
+              </button>
+            )}
+          </div>
+        </section>
+      ))}
+    </div>
+  )
+}
+
+/* The postcard back from there: airmail edge, a stamp, and — once there are
+   words on it — a postmark that lands. */
+function Postcard({
+  text,
+  onChange,
+  onSample,
+  stamped,
+}: {
+  text: string
+  onChange: (v: string) => void
+  onSample: () => void
+  stamped: boolean
+}) {
+  return (
+    <div className="fy-post">
+      <h2 className="fy-h fy-h-sm">Now step into the shoes of Future You.</h2>
+      <p className="fy-sub">Write a postcard to yourself, right now, from Future You.</p>
+      <div className={`fy-card${stamped ? ' is-stamped' : ''}`}>
+        <span className="fy-stamp" aria-hidden>
+          <i>✈</i>
+        </span>
+        <span className="fy-postmark" aria-hidden>
+          FUTURE YOU
+          <br />
+          ✦ POSTED ✦
+        </span>
+        <textarea
+          className="fy-card-field"
+          value={text}
+          placeholder="Dear Me,"
+          onChange={(e) => onChange(e.target.value)}
+          onDoubleClick={(e) => {
+            if (!e.currentTarget.value.trim()) onSample()
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+type Step = 'intro' | 'breathe' | 'where' | 'doing' | 'with' | 'when' | 'detail' | 'postcard' | 'results' | 'badge'
+const QUESTIONS: Step[] = ['breathe', 'where', 'doing', 'with', 'when', 'detail', 'postcard']
+
+export default function FutureYouFlow({
+  reward,
+  onComplete,
+  review,
+}: {
+  reward: { before: number; after: number; total: number; next: string }
+  onComplete: (a: FutureYouAnswers) => void
+  review?: FutureYouAnswers
+}) {
+  const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  const [a, setA] = useState<FutureYouAnswers>(
+    () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '' },
+  )
+  const [other, setOther] = useState<Record<string, string>>({})
+  const [extra, setExtra] = useState<Record<string, string[]>>({})
+  const [stamped, setStamped] = useState(false)
+  const typing = useRef(0)
+  useEffect(() => () => window.clearInterval(typing.current), [])
+
+  useEffect(() => {
+    document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+  }, [step])
+
+  const toggle = (key: 'where' | 'doing' | 'with' | 'detail', v: string) =>
+    setA((p) => ({ ...p, [key]: p[key].includes(v) ? p[key].filter((x) => x !== v) : [...p[key], v] }))
+
+  const writeSample = () => {
+    window.clearInterval(typing.current)
+    const full = SAMPLE_FUTURE.postcard
+    let n = 0
+    typing.current = window.setInterval(() => {
+      n = Math.min(full.length, n + 4)
+      setA((p) => ({ ...p, postcard: full.slice(0, n) }))
+      if (n >= full.length) window.clearInterval(typing.current)
+    }, 16)
+  }
+
+  const qi = QUESTIONS.indexOf(step)
+  const withOther = (key: 'where' | 'doing' | 'with') =>
+    other[key]?.trim() ? [...a[key], other[key].trim()] : a[key]
+
+  const onOk = () => {
+    /* Left blank: the sample goes in, so a demo still arrives at a vision. */
+    if (step === 'where' && !withOther('where').length) setA((p) => ({ ...p, where: SAMPLE_FUTURE.where }))
+    if (step === 'doing' && !withOther('doing').length) setA((p) => ({ ...p, doing: SAMPLE_FUTURE.doing }))
+    if (step === 'with' && !withOther('with').length) setA((p) => ({ ...p, with: SAMPLE_FUTURE.with }))
+    if (step === 'when' && !a.when) setA((p) => ({ ...p, when: SAMPLE_FUTURE.when }))
+    if (step === 'detail' && !a.detail.length) setA((p) => ({ ...p, detail: SAMPLE_FUTURE.detail }))
+    if (step === 'postcard') {
+      window.clearInterval(typing.current)
+      if (!a.postcard.trim()) setA((p) => ({ ...p, postcard: SAMPLE_FUTURE.postcard }))
+      /* Posted: the postmark lands, then the ending. */
+      setStamped(true)
+      window.setTimeout(() => {
+        setA((p) => ({
+          ...p,
+          where: withOther('where'),
+          doing: withOther('doing'),
+          with: withOther('with'),
+        }))
+        setStep('results')
+      }, 900)
+      return
+    }
+    setStep(QUESTIONS[qi + 1])
+  }
+  const previous = () => {
+    if (qi > 0) return setStep(QUESTIONS[qi - 1])
+    setStep('intro')
+  }
+
+  const vision = [
+    ['Where', a.where.join(', ')],
+    ['Doing', a.doing.join(', ')],
+    ['With', a.with.join(', ')],
+    ['When', a.when ?? ''],
+  ].filter(([, v]) => v)
+
+  return (
+    <div className="jf fy">
+      {step === 'intro' && (
+        <div className="jf-intro">
+          <div className="jf-hero">
+            <Photo className="jf-hero-img" src="./future-you/intro.png" fallback="fy-hero-fallback" />
+          </div>
+          <h2 className="jf-title">Let’s materialize your vision for Future You!</h2>
+          <p className="jf-body">
+            The clearer your vision, the more likely you are to achieve it.
+          </p>
+          <div className="jf-start">
+            <button className="jf-go" type="button" onClick={() => setStep('breathe')}>
+              Get Started
+            </button>
+            <span className="jf-min">
+              <ClockIcon /> Takes 1 min
+            </span>
+          </div>
+        </div>
+      )}
+
+      {step === 'breathe' && <Breathe />}
+
+      {step === 'where' && (
+        <PhotoAsk
+          title="Let’s materialize your vision!"
+          sub="Where is Future You?"
+          options={WHERE}
+          chosen={a.where}
+          other={other.where ?? ''}
+          otherPlaceholder="In the desert somewhere"
+          onToggle={(v) => toggle('where', v)}
+          onOther={(v) => setOther((o) => ({ ...o, where: v }))}
+        />
+      )}
+      {step === 'doing' && (
+        <PhotoAsk
+          title="Let’s materialize your vision!"
+          sub="What is Future You doing?"
+          options={DOING}
+          chosen={a.doing}
+          other={other.doing ?? ''}
+          otherPlaceholder="Writing a memoir"
+          onToggle={(v) => toggle('doing', v)}
+          onOther={(v) => setOther((o) => ({ ...o, doing: v }))}
+        />
+      )}
+      {step === 'with' && (
+        <PhotoAsk
+          title="Let’s materialize your vision!"
+          sub="Who is Future You with?"
+          options={WITH}
+          chosen={a.with}
+          other={other.with ?? ''}
+          otherPlaceholder="My grandchildren"
+          onToggle={(v) => toggle('with', v)}
+          onOther={(v) => setOther((o) => ({ ...o, with: v }))}
+        />
+      )}
+      {step === 'when' && <Road value={a.when} onChange={(v) => setA((p) => ({ ...p, when: v }))} />}
+      {step === 'detail' && (
+        <Detail
+          chosen={a.detail}
+          onToggle={(v) => toggle('detail', v)}
+          extra={extra}
+          onAdd={(g, v) => {
+            setExtra((e) => ({ ...e, [g]: [...(e[g] ?? []), v] }))
+            setA((p) => ({ ...p, detail: [...p.detail, v] }))
+          }}
+        />
+      )}
+      {step === 'postcard' && (
+        <Postcard
+          text={a.postcard}
+          onChange={(v) => setA((p) => ({ ...p, postcard: v }))}
+          onSample={writeSample}
+          stamped={stamped}
+        />
+      )}
+
+      {step === 'results' && (
+        <div className="jr fyr">
+          <Reveal>
+            <h2 className="jr-title">You met Future You</h2>
+            <p className="jr-sub">This is the life you are saving for:</p>
+            {/* The vision as a poster: the living sky, and on it where, what,
+                with whom and when, each stamped on in turn. */}
+            <figure className="jr-memory fyr-poster">
+              <span className="jr-sky fyr-sky" aria-hidden>
+                <i className="jr-sun" />
+                <i className="jr-glow jr-glow-a" />
+                <i className="jr-glow jr-glow-b" />
+                <i className="jr-glow jr-glow-c" />
+              </span>
+              <span className="fyr-kicker">Future You · {a.when ?? 'someday'}</span>
+              <div className="fyr-lines">
+                {vision.map(([k, v], i) => (
+                  <p key={k} style={{ ['--i' as string]: i }}>
+                    <span>{k}</span>
+                    <b>{v}</b>
+                  </p>
+                ))}
+              </div>
+            </figure>
+          </Reveal>
+
+          {a.detail.length > 0 && (
+            <Reveal>
+              <h3 className="jr-h">What it includes</h3>
+              <div className="fyr-chips">
+                {a.detail.map((d, i) => (
+                  <span key={d} className="fyr-chip" style={{ ['--i' as string]: i }}>
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
+          )}
+
+          <Reveal>
+            <h3 className="jr-h">Your postcard</h3>
+            <p className="jr-sub">Sent back from there:</p>
+            <div className="fy-card is-stamped fyr-card">
+              <span className="fy-stamp" aria-hidden>
+                <i>✈</i>
+              </span>
+              <span className="fy-postmark" aria-hidden>
+                FUTURE YOU
+                <br />
+                ✦ POSTED ✦
+              </span>
+              <p className="fyr-words">
+                <Typed text={a.postcard || SAMPLE_FUTURE.postcard} />
+              </p>
+            </div>
+            <p className="jr-reading">
+              <span className="jr-reading-mark" aria-hidden>
+                ✦
+              </span>
+              {a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself {a.where[0]?.toLowerCase() ?? 'somewhere new'}
+              {a.with[0] ? `, with ${a.with[0].toLowerCase()}` : ''}. Your advisor will build the plan
+              toward exactly that.
+            </p>
+          </Reveal>
+
+          <Reveal className="jr-reward">
+            <p className="jr-reward-line">You got a reward!</p>
+            <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
+              <span>Claim Badge</span>
+            </button>
+          </Reveal>
+        </div>
+      )}
+
+      {step === 'badge' && (
+        <JoyReward
+          badge={bgFutureYou}
+          name="Future You"
+          from={reward.before}
+          done={reward.after}
+          total={reward.total}
+          next={reward.next}
+          onNext={() => onComplete(a)}
+        />
+      )}
+
+      {qi >= 0 && (
+        <div className="jf-foot">
+          <div className="jf-where">
+            <div className="af-progress" aria-hidden>
+              {QUESTIONS.map((s, i) => (
+                <i key={s} className={i <= qi ? 'is-on' : ''} />
+              ))}
+            </div>
+            <button className="jf-prev" type="button" onClick={previous}>
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
+                <path
+                  d="M10 3.5 5.5 8 10 12.5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Previous question
+            </button>
+          </div>
+          <button className="cx-start jf-ok" type="button" onClick={onOk} disabled={stamped}>
+            {step === 'postcard' ? 'Send' : 'OK'}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

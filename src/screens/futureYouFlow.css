@@ -1,0 +1,444 @@
+/* Future You — the breath, the road, the detail, the postcard, the poster.
+   The intro, the photo grids, the foot and the reward are Financial Joy's. */
+
+.fy-hero-fallback {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  max-width: 342px;
+  aspect-ratio: 342 / 244;
+  background: radial-gradient(circle at 34% 60%, var(--k-teal) 0 58%, transparent 58.5%);
+}
+.fy-h {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+  color: var(--text-strong);
+}
+.fy-h-sm {
+  font-size: var(--text-xl);
+}
+.fy-sub {
+  margin: 4px 0 var(--space-16);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.fy-breathe,
+.fy-when,
+.fy-detail,
+.fy-post,
+.fy-ask {
+  padding-top: var(--space-16);
+  animation: jrDeal 0.4s var(--ease-out) both;
+}
+
+/* ── the breath ──
+   The orb grows over four seconds as the word says Inhale, and settles over
+   four as it says Exhale; its rings follow a beat behind, like a ripple. */
+.fy-breathe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.fy-orb {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: var(--space-16) 0 var(--space-24);
+  display: grid;
+  place-items: center;
+}
+.fy-ring,
+.fy-core {
+  position: absolute;
+  border-radius: 50%;
+  transition: transform 4s cubic-bezier(0.45, 0, 0.55, 1);
+}
+.fy-ring-3 {
+  inset: 0;
+  background: radial-gradient(circle, rgba(8, 99, 117, 0.05), rgba(8, 99, 117, 0.35));
+  transition-delay: 0.3s;
+}
+.fy-ring-2 {
+  inset: 16%;
+  background: var(--k-ocean);
+  transition-delay: 0.18s;
+}
+.fy-ring-1 {
+  inset: 28%;
+  background: var(--k-teal);
+  transition-delay: 0.08s;
+}
+.fy-core {
+  inset: 38%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 40% 35%, #e9ffc0, var(--k-lime));
+  box-shadow: 0 0 40px rgba(175, 252, 65, 0.6);
+}
+.fy-orb.is-in .fy-ring,
+.fy-orb.is-in .fy-core {
+  transform: scale(1);
+}
+.fy-orb.is-out .fy-ring-3 {
+  transform: scale(0.62);
+}
+.fy-orb.is-out .fy-ring-2 {
+  transform: scale(0.7);
+}
+.fy-orb.is-out .fy-ring-1 {
+  transform: scale(0.78);
+}
+.fy-orb.is-out .fy-core {
+  transform: scale(0.86);
+}
+.fy-core b {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--k-plum);
+  animation: fyWord 0.6s ease both;
+}
+@keyframes fyWord {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+.fy-prompts {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--text-strong);
+}
+
+/* ── how far: the road ── */
+.fy-road {
+  --at: 0;
+  --n: 4;
+  position: relative;
+  margin: 60px 8px 0;
+  padding-bottom: 10px;
+}
+.fy-road-line,
+.fy-road-done {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+.fy-road-line {
+  right: 0;
+  background: repeating-linear-gradient(90deg, #e2e1e6 0 14px, #eeedf1 14px 22px);
+}
+.fy-road-done {
+  width: calc(var(--at) / var(--n) * 100%);
+  background: linear-gradient(90deg, var(--k-teal), var(--k-lime));
+  transition: width 0.7s cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+.fy-road-done.is-empty {
+  width: 0;
+}
+.fy-pin {
+  position: absolute;
+  left: calc(var(--at) / var(--n) * 100%);
+  top: -38px;
+  margin-left: -13px;
+  transition: left 0.7s cubic-bezier(0.3, 1.3, 0.4, 1);
+  filter: drop-shadow(0 4px 6px rgba(20, 10, 40, 0.3));
+  animation: fyBob 1.6s ease-in-out infinite;
+}
+.fy-pin.is-waiting {
+  opacity: 0.45;
+}
+@keyframes fyBob {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.fy-stops {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+.fy-stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.fy-stop i {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #d7d5dd;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.fy-stop.is-past i {
+  border-color: var(--k-teal);
+  background: var(--k-teal);
+}
+.fy-stop.is-on i {
+  border-color: var(--k-plum);
+  background: var(--k-lime);
+  transform: scale(1.2);
+}
+.fy-stop:hover i {
+  transform: scale(1.15);
+}
+.fy-stop span {
+  width: 64px;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.fy-stop.is-on span {
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+
+/* ── the detail ── */
+.fy-group {
+  margin-top: var(--space-16);
+  animation: jrDeal 0.4s var(--ease-out) both;
+  animation-delay: calc(var(--g) * 0.07s);
+}
+.fy-group h3 {
+  margin: 0 0 var(--space-8);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.fy-group h3 span {
+  color: var(--k-grape);
+}
+.fy-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.fy-chip,
+.fy-chip-input {
+  padding: 6px 12px;
+  border: 2px solid var(--k-plum);
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--k-plum);
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.fy-chip:active {
+  transform: scale(0.94);
+}
+.fy-chip.is-on {
+  background: var(--k-plum);
+  color: #fff;
+  animation: fyPop 0.3s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+@keyframes fyPop {
+  40% {
+    transform: scale(1.1);
+  }
+}
+.fy-chip-add {
+  border-style: dashed;
+  border-color: #b5b1c2;
+  color: var(--text-secondary);
+}
+.fy-chip-input {
+  width: 120px;
+  cursor: text;
+  outline: none;
+}
+
+/* ── the postcard ── */
+.fy-card {
+  position: relative;
+  min-height: 300px;
+  padding: 18px;
+  border-radius: 6px;
+  background: #fffdf8;
+  /* The airmail edge: red and blue stripes, the border of a card that has
+     come a long way. */
+  border: 10px solid transparent;
+  border-image: repeating-linear-gradient(135deg, #e3453b 0 12px, #fff 12px 20px, #2f6fd6 20px 32px, #fff 32px 40px)
+    10;
+  box-shadow: 0 16px 30px -14px rgba(20, 10, 40, 0.4);
+}
+.fy-stamp {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 50px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  background: var(--k-teal);
+  outline: 3px dotted #fffdf8;
+  outline-offset: -3px;
+  color: #fff;
+  font-size: 22px;
+  transform: rotate(4deg);
+}
+.fy-postmark {
+  position: absolute;
+  top: 18px;
+  right: 40px;
+  z-index: 2;
+  width: 80px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+  border: 2.5px solid rgba(118, 57, 161, 0.75);
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.8px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(118, 57, 161, 0.85);
+  opacity: 0;
+  transform: scale(2) rotate(-24deg);
+  pointer-events: none;
+}
+/* Sent: the postmark comes down hard and stays. */
+.fy-card.is-stamped .fy-postmark {
+  animation: fyThunk 0.45s cubic-bezier(0.5, 0, 0.3, 1.4) forwards;
+}
+@keyframes fyThunk {
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-14deg);
+  }
+}
+.fy-card.is-stamped:not(.fyr-card) {
+  animation: fyShake 0.3s ease 0.3s;
+}
+@keyframes fyShake {
+  30% {
+    transform: translateY(3px);
+  }
+}
+.fy-card-field {
+  width: 100%;
+  min-height: 250px;
+  margin-top: 60px;
+  padding: 0;
+  border: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 27px, #ece8e0 27px 28px);
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: 28px;
+  color: var(--text-strong);
+  resize: none;
+  outline: none;
+}
+.fy-card-field::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ── the ending: a poster of the future ── */
+.fyr-sky {
+  background: linear-gradient(160deg, #0f4a3a 0%, #086375 34%, #3dbdaa 70%, #affc41 100%);
+  background-size: 160% 160%;
+}
+.fyr-poster {
+  min-height: 280px;
+  padding: 26px 22px 24px;
+  justify-content: flex-start;
+}
+.fyr-kicker {
+  font-size: 12px;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.fyr-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  margin-top: var(--space-16);
+}
+.fyr-lines p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: jrDeal 0.55s cubic-bezier(0.2, 1.1, 0.4, 1) both;
+  animation-delay: calc(0.3s + var(--i) * 0.18s);
+}
+.fyr-lines span {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.fyr-lines b {
+  font-size: 21px;
+  line-height: 1.25;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(10, 40, 30, 0.45);
+}
+.fyr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.fyr-chip {
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: var(--k-teal-light);
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  opacity: 0;
+}
+.jr-sec.is-in .fyr-chip {
+  animation: jrDeal 0.4s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  animation-delay: calc(0.1s + var(--i) * 0.05s);
+}
+.fyr-card {
+  min-height: 0;
+}
+.fyr-words {
+  margin: 60px 0 0;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  white-space: pre-line;
+  color: var(--text-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fy-ring,
+  .fy-core {
+    transition: none;
+  }
+  .fy-pin,
+  .fy-card.is-stamped .fy-postmark,
+  .fy-card.is-stamped,
+  .fyr-lines p,
+  .fyr-chip,
+  .fy-group,
+  .fy-chip.is-on {
+    animation: none;
+    opacity: 1;
+  }
+  .fy-card.is-stamped .fy-postmark {
+    transform: scale(1) rotate(-14deg);
+  }
+}
