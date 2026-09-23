@@ -275,6 +275,7 @@
 .modal .btn.vb-small {
   padding: 8px 18px;
   font-size: 14.5px;
+  white-space: nowrap;
 }
 .modal .btn.vb-small:disabled {
   opacity: 0.45;
