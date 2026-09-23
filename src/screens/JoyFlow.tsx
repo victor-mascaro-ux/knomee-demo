@@ -17,8 +17,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import './joyFlow.css'
-import { JOY_AREAS, JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
+import { JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
+import JoyResults from './JoyResults'
 import bgFinancialJoy from '../assets/badges/financial-joy.svg'
 
 export interface JoyAnswers {
@@ -248,46 +249,7 @@ export default function JoyFlow({
       )}
 
       {step.kind === 'done' && (
-        <div className="jf-done">
-          <h2 className="af-h1">{step.title}</h2>
-          <p className="af-body">{step.body}</p>
-          <div className="jf-recap">
-            <span className="jf-recap-head">Money is a tool for</span>
-            <div className="jf-chips">
-              {a.tools.length ? (
-                a.tools.map((t) => (
-                  <span className="jf-chip" key={t}>
-                    {t}
-                  </span>
-                ))
-              ) : (
-                <span className="jf-none">Nothing chosen — you can come back to it.</span>
-              )}
-            </div>
-            <span className="jf-recap-head">More attention</span>
-            <div className="jf-chips">
-              {JOY_AREAS.filter((n) => a.attention[n] === 1).map((n) => (
-                <span className="jf-chip is-more" key={n}>
-                  {n}
-                </span>
-              )) || null}
-              {!JOY_AREAS.some((n) => a.attention[n] === 1) && (
-                <span className="jf-none">Nothing marked.</span>
-              )}
-            </div>
-            <span className="jf-recap-head">Less attention</span>
-            <div className="jf-chips">
-              {JOY_AREAS.filter((n) => a.attention[n] === -1).map((n) => (
-                <span className="jf-chip is-less" key={n}>
-                  {n}
-                </span>
-              ))}
-              {!JOY_AREAS.some((n) => a.attention[n] === -1) && (
-                <span className="jf-none">Nothing marked.</span>
-              )}
-            </div>
-          </div>
-        </div>
+        <JoyResults answers={a} cta={step.cta} onClaim={next} />
       )}
 
       {step.kind === 'badge' && (
@@ -302,7 +264,7 @@ export default function JoyFlow({
           one thing to press beside it. There is no Back — the
           bar's cross is the way out, and a question is changed by answering it
           again. The intro carries its own Get Started, so it has no foot. */}
-      {step.kind !== 'intro' && (
+      {step.kind !== 'intro' && step.kind !== 'done' && (
         <div className="jf-foot">
           {/* Where you are, and under it the way one question back; then the
               one thing to press. */}
