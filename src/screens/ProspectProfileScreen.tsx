@@ -389,19 +389,6 @@ export default function ProspectProfileScreen({
                     <PostcardSection text={fi.postcard} />
                   </section>
 
-                  {/* Their boards: none until they make one — on her phone, or
-                      here with the advisor. */}
-                  <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
-                        <img className="pp-card-ic is-inset" src={icVision} alt="" />
-                        Future Vision Board
-                      </span>
-                      <AddButton label="Add a vision board" onClick={vision.add} />
-                    </div>
-                    {vision.body}
-                  </section>
-
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
@@ -435,6 +422,19 @@ export default function ProspectProfileScreen({
                         </div>
                       ))}
                     </div>
+                  </section>
+
+                  {/* Their boards: none until they make one — on her phone, or
+                      here with the advisor. */}
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic is-inset" src={icVision} alt="" />
+                        Future Vision Board
+                      </span>
+                      <AddButton label="Add a vision board" onClick={vision.add} />
+                    </div>
+                    {vision.body}
                   </section>
                 </div>
 

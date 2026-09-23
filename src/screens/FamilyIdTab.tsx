@@ -402,16 +402,6 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         )}
       />
 
-      {/* The board is the one card whose answer is a made thing rather than a
-          list, so a member who has not made one gets the same tray Life Events
-          and Questions use — the way in, not a notice that there is nothing. */}
-      <FamilyCard
-        members={members}
-        icon={icVision}
-        title="Future Vision Board"
-        render={(m) => <MemberVisionBoards key={m.name} initial={m.boards} />}
-      />
-
       <FamilyCard
         members={members}
         icon={icBadges}
@@ -426,6 +416,16 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             ))}
           </div>
         )}
+      />
+
+      {/* The board is the one card whose answer is a made thing rather than a
+          list, so a member who has not made one gets the same tray Life Events
+          and Questions use — the way in, not a notice that there is nothing. */}
+      <FamilyCard
+        members={members}
+        icon={icVision}
+        title="Future Vision Board"
+        render={(m) => <MemberVisionBoards key={m.name} initial={m.boards} />}
       />
       {openGoal && <GoalModal goal={openGoal} onClose={() => setOpenGoal(null)} />}
     </div>
