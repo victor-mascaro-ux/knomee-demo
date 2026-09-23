@@ -272,7 +272,9 @@ export default function ProspectProfileScreen({
                 <MailIcon /> {prospect.email}
               </span>
             </div>
-            {checkIn && (
+            {/* On her own phone the check-in heads the page (below), so the
+                rail at its foot does not say it a second time. */}
+            {checkIn && !mine && (
               <div className="cp-checkin">
                 <span className="cp-checkin-face">
                   <img src={MOOD_FACE[checkIn.level]} alt="" />

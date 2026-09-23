@@ -1586,5 +1586,5 @@
 /* The date and pill sit as far below the event's line as that line sits below
    its name: ~7px each, the name's 26px row giving it its share. */
 .pp-event-meta {
-  margin-top: 3px;
+  margin-top: 4px;
 }
