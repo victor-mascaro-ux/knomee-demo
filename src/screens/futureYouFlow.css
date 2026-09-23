@@ -398,7 +398,8 @@
 .fyr-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-6);
+  gap: var(--space-8) var(--space-6);
+  margin-top: var(--space-12);
 }
 .fyr-chip {
   padding: 6px 12px;
