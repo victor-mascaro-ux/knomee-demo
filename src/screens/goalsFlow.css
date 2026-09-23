@@ -359,3 +359,10 @@
 .gl .gl-hero-fallback {
   max-width: none;
 }
+
+/* The same wait on a dashboard: room around it, on the page's own ground. */
+.knomee-loader {
+  min-height: 420px;
+  padding: var(--space-32, 32px) 0;
+  color: var(--text-strong);
+}
