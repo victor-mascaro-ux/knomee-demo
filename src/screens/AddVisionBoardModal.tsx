@@ -223,7 +223,7 @@ export default function AddVisionBoardModal({
           </>
         ) : (
           <>
-            <div className="modal-body vb-body">
+            <div className="modal-body vb-body vb-board-area">
               {/* The board's own name heads what is being made — a step under
                   the panel's title, and the preview below drops its copy. */}
               <h3 className="vb-board-name">{title.trim()}</h3>
