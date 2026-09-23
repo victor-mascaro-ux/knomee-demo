@@ -4190,8 +4190,7 @@ export default function App() {
   if (clientExpOpen) {
     return (
       <>
-        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} brand={brand} />
-        {brand && <PoweredBy />}
+        <ClientExperienceScreen onExit={() => setClientExpOpen(false)} />
       </>
     )
   }
