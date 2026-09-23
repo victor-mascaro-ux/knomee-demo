@@ -10,9 +10,10 @@
  * mid-call has a name for it and little else, and a form that refuses to save
  * without a date is a form that does not get used.
  *
- * Anything added here is added by the advisor, so it carries the same "Advisor
- * added" mark the table shows — said on the panel while they are filling it
- * in, not just afterwards.
+ * Anything an advisor adds here carries the same "Advisor added" mark the
+ * table shows — said on the panel while they are filling it in, not just
+ * afterwards. On the client's own phone (`client`) the one filling it in is
+ * the client, so there is no mark to make and none to show.
  */
 
 import { useEffect, useState } from 'react'
@@ -96,11 +97,14 @@ export function SentimentFace({ level }: { level: number }) {
 
 export function AddLifeEventModal({
   event,
+  client,
   onClose,
   onSave,
 }: {
   /** An event already on the page, opened to be changed. */
   event?: LifeEvent
+  /** The client is adding it, on their own phone. */
+  client?: boolean
   onClose: () => void
   onSave: (e: LifeEvent) => void
 }) {
@@ -132,7 +136,7 @@ export function AddLifeEventModal({
       details: details.trim() || undefined,
       sentiment: sentiment || undefined,
       completed: completed || undefined,
-      advisorAdded: true,
+      advisorAdded: client ? event?.advisorAdded : true,
     })
   }
 
@@ -187,7 +191,7 @@ export function AddLifeEventModal({
                 <h3 className="le-kind-name">{kind}</h3>
                 {/* Who is filling this in, at the end of the line the event
                     names itself on rather than on a line of its own. */}
-                <span className="le-advisor">Advisor added</span>
+                {!client && <span className="le-advisor">Advisor added</span>}
               </div>
 
               <label className="le-label" htmlFor="le-text">
@@ -269,12 +273,15 @@ export function AddLifeEventModal({
 
 export default function LifeEventModal({
   event,
+  client,
   onClose,
   onEdit,
   onToggleComplete,
   onDelete,
 }: {
   event: LifeEvent
+  /** Read on the client's own phone, where who added it is not news. */
+  client?: boolean
   onClose: () => void
   /** The owner's to offer, like a goal's. */
   onEdit?: () => void
@@ -300,7 +307,7 @@ export default function LifeEventModal({
         </div>
 
         <div className="modal-body le-body le-read">
-          {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
+          {event.advisorAdded && !client && <span className="le-advisor">Advisor added</span>}
           <div className="le-head">
             <h3 className="le-title">{event.text}</h3>
             {onEdit && (

@@ -471,7 +471,9 @@ export default function ProspectProfileScreen({
                             <span className="pp-event-text">{e.text}</span>
                             <span className="pp-event-meta">
                               <span className="pp-event-date">{e.date}</span>
-                              {e.advisorAdded && (
+                              {/* Who added it is the advisor's to know; her
+                                  own phone is the client's flow. */}
+                              {e.advisorAdded && !mine && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}
                             </span>
@@ -634,6 +636,7 @@ export default function ProspectProfileScreen({
       {openEvent && !eventForm && (
         <LifeEventModal
           event={openEvent}
+          client={mine}
           onClose={() => setOpenEvent(null)}
           onEdit={() => setEventForm('edit')}
           onToggleComplete={() => {
@@ -654,6 +657,7 @@ export default function ProspectProfileScreen({
       {eventForm && (
         <AddLifeEventModal
           event={eventForm === 'edit' ? (openEvent ?? undefined) : undefined}
+          client={mine}
           onClose={() => setEventForm(null)}
           onSave={(e) => {
             setEventList((list) =>

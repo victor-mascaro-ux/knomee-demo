@@ -791,10 +791,16 @@ function KnomeeSheet({
    Listening → what it heard, offered for editing → the thing it created. The
    transcript is scripted; the point is the shape of the interaction. */
 /** A sheet follows the finger while held, and springs when released. */
+/* It goes down behind the tab bar rather than past it: whatever the drag pushes
+   below the sheet's resting foot is clipped away, or the mood disc slid out
+   into the strip under the bar. */
 function sheetStyle(swipe: ReturnType<typeof useSwipeDown>) {
+  const ease = '0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05)'
+  const down = Math.max(0, swipe.offset)
   return {
     transform: swipe.offset ? `translateY(${swipe.offset}px)` : undefined,
-    transition: swipe.holding ? 'none' : 'transform 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05)',
+    clipPath: down ? `inset(0 0 ${down}px 0)` : undefined,
+    transition: swipe.holding ? 'none' : `transform ${ease}, clip-path ${ease}`,
   }
 }
 
