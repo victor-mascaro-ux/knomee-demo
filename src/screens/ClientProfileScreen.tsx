@@ -201,6 +201,20 @@ function BoardNote({
       }`}
     >
       <div className="cp-note-inner" ref={inner}>
+        {tile.voice && (
+          <span className="cp-note-voice" aria-label="Voice note">
+            <svg viewBox="0 0 20 20" width="11" height="11" fill="none" aria-hidden>
+              <rect x="7" y="2.5" width="6" height="10" rx="3" fill="currentColor" />
+              <path
+                d="M4.6 9.6a5.4 5.4 0 0 0 10.8 0M10 15v2.6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+            Voice note
+          </span>
+        )}
         {tile.title && <span className="cp-note-title">{tile.title}</span>}
         {tile.text && <p className="cp-note-text">{tile.text}</p>}
         {tile.items && (
