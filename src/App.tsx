@@ -4413,6 +4413,23 @@ export default function App() {
               setHouseholdOpen(false)
               setProfileClient(c)
             }}
+            /* Off the household, and nowhere else: their row in the book of
+               business, their profile and their answers all stay where they
+               are. A household of one is not a household, so emptying it back
+               to the client alone puts the page back to before there was a
+               family at all. */
+            onRemoveMember={(name) => {
+              setFamily((prev) => {
+                if (!prev) return prev
+                const members = prev.members.filter((m) => m.name !== name)
+                if (members.length < 2) {
+                  setHouseholdOpen(false)
+                  return null
+                }
+                return { ...prev, members }
+              })
+              showToast('Family member removed')
+            }}
             onAddMember={openFamilyModal}
             onAction={showToast}
           />
