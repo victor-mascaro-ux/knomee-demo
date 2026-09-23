@@ -78,6 +78,13 @@ export interface LifeEvent {
   date: string
   /* Logged by the advisor rather than answered by the client. */
   advisorAdded?: boolean
+  /* What the panel opens onto, all optional — an event somebody logged in a
+     hurry is a kind and a line, and the panel shows what there is. */
+  details?: string
+  /** How they feel about it, on the app's own five faces. */
+  sentiment?: number
+  /** The date they marked it done. */
+  completed?: string
 }
 
 export interface ProfileQuestion {

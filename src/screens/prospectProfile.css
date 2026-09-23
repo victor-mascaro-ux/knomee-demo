@@ -1372,12 +1372,17 @@
   display: none;
 }
 
-/* A goal row you can open: the whole row is the control, so it takes the
-   pointer and the outline a row you can act on has. */
-.pp-goal.is-open-able {
+/* A row you can open — a goal, a life event: the whole row is the control, so
+   it takes the pointer and the outline a row you can act on has. */
+.pp-goal.is-open-able,
+.pp-event.is-open-able {
   cursor: pointer;
 }
-.pp-goal.is-open-able:focus-visible {
+.pp-goal.is-open-able:focus-visible,
+.pp-event.is-open-able:focus-visible {
   outline: 2px solid var(--purple-bolt, #9b51e0);
   outline-offset: 2px;
+}
+.pp-event.is-open-able:hover {
+  background: var(--surface-sunken);
 }

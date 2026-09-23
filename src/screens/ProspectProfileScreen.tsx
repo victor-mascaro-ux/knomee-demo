@@ -26,7 +26,9 @@ import { usePrintSheet } from '../printSheet'
 import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
+import LifeEventModal, { AddLifeEventModal } from './LifeEventModal'
 import { DEMO_TODAY, financialId } from '../data/financialId'
+import type { LifeEvent } from '../data/financialId'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -71,7 +73,12 @@ export default function ProspectProfileScreen({
   const assessed = goalList.find((g) => g.title === assessing)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
-  const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
+  /* The life events are the page's second list it can change: added from the
+     card's plus, opened to read, edited and marked done. */
+  const [eventList, setEventList] = useState<LifeEvent[]>(fi.lifeEvents)
+  const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
+  const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
+  const events = useCollapsed(eventList, COLLAPSED_ROWS)
   const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
 
   // Open the profile scrolled to the top, regardless of where the prospect's
@@ -364,14 +371,24 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>
-                      <AddButton />
+                      <AddButton label="Add a life event" onClick={() => setEventForm('add')} />
                     </div>
                     {events.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
                     ) : (
                     <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
-                        <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
+                        <div
+                          className={`pp-event is-open-able ${events.entering(i) ?? ''}`}
+                          style={events.delay(i)}
+                          key={i}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOpenEvent(e)}
+                          onKeyDown={(k) => {
+                            if (k.key === 'Enter' || k.key === ' ') setOpenEvent(e)
+                          }}
+                        >
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
                             <span className="pp-event-head">
@@ -474,6 +491,45 @@ export default function ProspectProfileScreen({
             setGoalList((list) => list.map((o) => (o === editing ? g : o)))
             setEditingGoal(null)
             setOpenGoal(g.title)
+          }}
+        />
+      )}
+
+
+      {/* A life event, opened — and the form that adds or changes one. */}
+      {openEvent && !eventForm && (
+        <LifeEventModal
+          event={openEvent}
+          onClose={() => setOpenEvent(null)}
+          onEdit={() => setEventForm('edit')}
+          onToggleComplete={() => {
+            const next = {
+              ...openEvent,
+              completed: openEvent.completed ? undefined : DEMO_TODAY,
+            }
+            setEventList((list) => list.map((e) => (e === openEvent ? next : e)))
+            setOpenEvent(next)
+            if (next.completed) onToast?.('Life event completed')
+          }}
+          onDelete={() => {
+            setEventList((list) => list.filter((e) => e !== openEvent))
+            setOpenEvent(null)
+          }}
+        />
+      )}
+      {eventForm && (
+        <AddLifeEventModal
+          event={eventForm === 'edit' ? (openEvent ?? undefined) : undefined}
+          onClose={() => setEventForm(null)}
+          onSave={(e) => {
+            setEventList((list) =>
+              eventForm === 'edit' && openEvent
+                ? list.map((o) => (o === openEvent ? e : o))
+                : [e, ...list],
+            )
+            if (eventForm === 'add') onToast?.('Life event added')
+            setEventForm(null)
+            setOpenEvent(e)
           }}
         />
       )}

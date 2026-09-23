@@ -6,6 +6,7 @@ import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
+import LifeEventModal, { AddLifeEventModal } from './LifeEventModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -36,6 +37,7 @@ import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import GoalModal from './GoalModal'
 import { DEMO_TODAY } from '../data/financialId'
+import type { LifeEvent } from '../data/financialId'
 import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
@@ -475,7 +477,13 @@ export default function ClientProfileScreen({
   const assessed = goalList.find((g) => g.title === assessing)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
-  const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
+  /* The life events are the page's second list it can change: added from the
+     card's plus, opened to read, edited and marked done. */
+  const [eventList, setEventList] = useState<LifeEvent[]>(cp.lifeEvents)
+  useEffect(() => setEventList(cp.lifeEvents), [cp])
+  const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
+  const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
+  const events = useCollapsed(eventList, COLLAPSED_ROWS)
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
 
   return (
@@ -849,14 +857,24 @@ export default function ClientProfileScreen({
                         <img className="pp-card-ic" src={icLifeEvents} alt="" />
                         Life Events
                       </span>
-                      <AddButton />
+                      <AddButton label="Add a life event" onClick={() => setEventForm('add')} />
                     </div>
                     {events.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
                     ) : (
                     <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
-                        <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
+                        <div
+                          className={`pp-event is-open-able ${events.entering(i) ?? ''}`}
+                          style={events.delay(i)}
+                          key={i}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOpenEvent(e)}
+                          onKeyDown={(k) => {
+                            if (k.key === 'Enter' || k.key === ' ') setOpenEvent(e)
+                          }}
+                        >
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
                             <span className="pp-event-head">
@@ -963,6 +981,45 @@ export default function ClientProfileScreen({
             setGoalList((list) => list.map((o) => (o === editing ? g : o)))
             setEditingGoal(null)
             setOpenGoal(g.title)
+          }}
+        />
+      )}
+
+
+      {/* A life event, opened — and the form that adds or changes one. */}
+      {openEvent && !eventForm && (
+        <LifeEventModal
+          event={openEvent}
+          onClose={() => setOpenEvent(null)}
+          onEdit={() => setEventForm('edit')}
+          onToggleComplete={() => {
+            const next = {
+              ...openEvent,
+              completed: openEvent.completed ? undefined : DEMO_TODAY,
+            }
+            setEventList((list) => list.map((e) => (e === openEvent ? next : e)))
+            setOpenEvent(next)
+            if (next.completed) onToast?.('Life event completed')
+          }}
+          onDelete={() => {
+            setEventList((list) => list.filter((e) => e !== openEvent))
+            setOpenEvent(null)
+          }}
+        />
+      )}
+      {eventForm && (
+        <AddLifeEventModal
+          event={eventForm === 'edit' ? (openEvent ?? undefined) : undefined}
+          onClose={() => setEventForm(null)}
+          onSave={(e) => {
+            setEventList((list) =>
+              eventForm === 'edit' && openEvent
+                ? list.map((o) => (o === openEvent ? e : o))
+                : [e, ...list],
+            )
+            if (eventForm === 'add') onToast?.('Life event added')
+            setEventForm(null)
+            setOpenEvent(e)
           }}
         />
       )}
