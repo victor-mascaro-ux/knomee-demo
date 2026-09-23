@@ -685,9 +685,9 @@ export default function ProspectProfileScreen({
                               ) : (
                                 <span className="pp-event-date">{e.date}</span>
                               )}
-                              {/* Who added it is the advisor's to know; her
-                                  own phone is the client's flow. */}
-                              {e.advisorAdded && !mine && (
+                              {/* Who added it, on her phone too: she sees what
+                                  her advisor has put on her page. */}
+                              {e.advisorAdded && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}
                             </span>

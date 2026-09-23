@@ -273,14 +273,14 @@ export function AddLifeEventModal({
 
 export default function LifeEventModal({
   event,
-  client,
   onClose,
   onEdit,
   onToggleComplete,
   onDelete,
 }: {
   event: LifeEvent
-  /** Read on the client's own phone, where who added it is not news. */
+  /** Read on the client's own phone. "Advisor added" shows there too: it is
+      on the events her advisor put on her page, never on her own. */
   client?: boolean
   onClose: () => void
   /** The owner's to offer, like a goal's. */
@@ -307,7 +307,7 @@ export default function LifeEventModal({
         </div>
 
         <div className="modal-body le-body le-read">
-          {event.advisorAdded && !client && <span className="le-advisor">Advisor added</span>}
+          {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
           <div className="le-head">
             <h3 className="le-title">{event.text}</h3>
             {onEdit && (
