@@ -281,11 +281,13 @@
   justify-self: end;
 }
 .js-way.is-same {
-  margin-top: 34px;
+  /* 10px less of a drop than it had, so the answers growing by 10 took
+     nothing from the deck. */
+  margin-top: 24px;
 }
 .js-way {
-  width: 72px;
-  height: 72px;
+  width: 82px;
+  height: 82px;
   display: grid;
   place-items: center;
   padding: 0;
