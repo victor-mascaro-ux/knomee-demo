@@ -12,7 +12,7 @@
  * answer, and a double-click on the empty postcard writes hers in.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './futureYouFlow.css'
@@ -344,6 +344,14 @@ function Postcard({
   stamped: boolean
   sent?: boolean
 }) {
+  /* The card grows with what is written on it — a postcard does not scroll. */
+  const field = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const el = field.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [text])
   return (
     <div className="fy-post">
       <h2 className="fy-h fy-h-sm">Now step into the shoes of Future You.</h2>
@@ -358,6 +366,7 @@ function Postcard({
           ✦ POSTED ✦
         </span>
         <textarea
+          ref={field}
           className="fy-card-field"
           value={text}
           placeholder="Dear Me,"
