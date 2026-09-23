@@ -414,7 +414,7 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
       )}
       <div className="vb-compose-foot">
         <span className="vb-voice-hint">
-          {listening ? 'Say what you see in your future.' : 'It goes on the board as a written sticker.'}
+          {listening && 'Say what you see in your future.'}
         </span>
         <button className="vb-link" type="button" onClick={onCancel}>
           Cancel
