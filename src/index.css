@@ -6534,8 +6534,10 @@ button.name-link-btn:hover .name-text {
        not, so four of them may run over two sheets rather than being squeezed
        onto one. Sixteen above and sixteen below is what each patch of grey
        covers, so a gap of thirty-two is filled by the two either side of it. */
+    /* Positioned, but NOT a stacking context: with a z-index of its own the
+       goal would paint its white after the patch behind it and the patch would
+       cover it — which is a goal printed flat on grey. */
     position: relative;
-    z-index: 0;
     margin-bottom: var(--space-32);
     box-shadow: none !important;
     break-inside: avoid;
