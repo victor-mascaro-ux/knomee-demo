@@ -935,9 +935,10 @@
     align-items: center;
     text-align: left;
     gap: 2px 12px;
-    /* The band runs edge to edge, so its content keeps the page's gutter —
-       with none, the portrait sat hard against the screen's edge. */
-    padding: 14px var(--space-16);
+    /* The band runs edge to edge, so its content keeps a gutter — with none,
+       the portrait sat hard against the screen's edge. Half the page's, so it
+       reads as set in rather than as a second margin. */
+    padding: 14px var(--space-8);
   }
   .pp-avatar {
     grid-row: span 2;
