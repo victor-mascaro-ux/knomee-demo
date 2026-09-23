@@ -32,12 +32,15 @@ export const clientTierGroups: ClientTierGroup[] = [
 
 // Overall client confidence breakdown (sums to 100).
 export const confidenceScore = 33
+/* The colours are the five faces' own, in the faces' own order: the pie is a
+   count of the same moods the table shows one client at a time, and it read as
+   a different scale while it carried a different red and a different green. */
 export const confidenceSegments = [
-  { label: 'Frustrated', color: '#ef4444', pct: 7 },
-  { label: 'Concerned', color: '#f97316', pct: 21 },
-  { label: 'Neutral', color: '#facc15', pct: 18 },
-  { label: 'Positive', color: '#6ee787', pct: 26 },
-  { label: 'Delighted', color: '#17c964', pct: 28 },
+  { label: 'Frustrated', color: '#ff9080', pct: 7 },
+  { label: 'Concerned', color: '#ffd060', pct: 21 },
+  { label: 'Neutral', color: '#fff040', pct: 18 },
+  { label: 'Positive', color: '#e0ff70', pct: 26 },
+  { label: 'Delighted', color: '#a0f040', pct: 28 },
 ]
 
 // "Clients active this week" trend (percent of clients active per week).

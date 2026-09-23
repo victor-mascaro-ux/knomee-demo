@@ -979,7 +979,9 @@ function ConfidencePie({
             onMouseLeave={() => setHover((h) => (h === i ? null : h))}
             onClick={() => onPick(i + 1)}
           >
-            <span className="pie-swatch" style={{ background: s.color }} />
+            {/* The face itself rather than a chip of its colour: the legend
+                names the five moods the table draws, so it draws them too. */}
+            <img className="pie-face" src={SENTIMENT_FACES[i].art} alt="" />
             <span className="pie-label">{s.label}</span>
             <span className="pie-pct">{s.pct}%</span>
           </li>

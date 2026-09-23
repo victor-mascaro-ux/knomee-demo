@@ -53,6 +53,7 @@ const sebastian: MemberProfile = {
      carries the chips and stops rather than putting words in his mouth. */
   attention: { more: [], less: [] },
   futureYou: him.futureYou,
+  postcard: him.postcard ?? '',
   outlook: him.outlook,
   badges: him.badges,
   confidence: him.confidence,

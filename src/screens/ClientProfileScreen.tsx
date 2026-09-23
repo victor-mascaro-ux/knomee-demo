@@ -5,7 +5,7 @@ import './clientProfile.css'
 import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -746,6 +746,7 @@ export default function ClientProfileScreen({
                         </div>
                       </div>
                     ))}
+                    <PostcardSection text={cp.postcard} />
                   </section>
 
                   <section className="pp-card">

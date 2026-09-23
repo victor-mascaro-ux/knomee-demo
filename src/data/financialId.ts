@@ -225,6 +225,12 @@ export const financialId = {
     more: ['Family time', 'Health and wellbeing', 'Travel and experiences', 'Giving and philanthropy'],
     less: ['Day-to-day money admin', 'Worrying about the market'],
   },
+  /* Her own words, written to herself from ten years out. */
+  postcard:
+    'The house is close enough to the water that I can hear it with the windows open. ' +
+    'The business runs without me in the room, which took longer than I wanted and was worth every ' +
+    'bit of it. Both kids finished school with no debt between them. I still check the numbers on a ' +
+    'Sunday, but it is a habit now, not a worry. Stop bracing for the bad year — you got through it.',
   futureYou: {
     where: ['At the beach', 'Abroad'],
     what: ['Relaxing', 'Running a business', 'Helping others', 'Traveling'],

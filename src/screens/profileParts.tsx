@@ -5,6 +5,7 @@
 
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
+import { isPrinting } from '../printSheet'
 import type { Goal } from '../data/financialId'
 import icCareerChange from '../assets/life-events/career-change.svg'
 import icDeathOfParents from '../assets/life-events/death-of-parents.svg'
@@ -298,7 +299,9 @@ export function useCollapsed<T>(items: T[], max: number) {
     }
   }
 
-  const extra = open || closing
+  /* Paper has no control to press, so a folded list prints whole: all six key
+      highlights rather than the three the card shows shut. */
+  const extra = open || closing || isPrinting()
 
   /* The rows animated but the card did not: the space for them appeared in one
      frame and the list slid into a box that had already finished moving. This
@@ -322,7 +325,10 @@ export function useCollapsed<T>(items: T[], max: number) {
     const to = el.offsetHeight
     const from = last.current
     last.current = to
-    if (from === undefined || from === to || reduceMotion()) {
+    /* A tween mid-flight leaves an inline height on the box, and the print
+       dialog opens a fifth of a second after the rows appear — the sheet would
+       be printed with the list clipped to the height it was growing from. */
+    if (from === undefined || from === to || reduceMotion() || isPrinting()) {
       el.style.transition = ''
       return
     }
@@ -413,6 +419,35 @@ export function GoalDetail({ g }: { g: Goal }) {
         {TTM_STAGES[g.readiness - 1] ?? 'Not set'}
       </dd>
     </dl>
+  )
+}
+
+/* What Future You wrote back.
+   It belongs inside the adventure it came out of rather than in a card of its
+   own — a section of that card, shut until it is asked for, because it is a
+   letter among lists. The print sheet opens every collapse, so on paper it is
+   simply there. Written once here: the candidate page had it first, and the
+   client, the prospect and a household member all have the same letter. */
+export function PostcardSection({ text }: { text?: string }) {
+  const [open, setOpen] = useState(false)
+  if (!text) return null
+  return (
+    <div className="ap-sub">
+      <button
+        className="ap-sub-head"
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="pp-fy-label">Postcard from Future Me</span>
+        <CaretIcon up={open} />
+      </button>
+      <div className={`collapse ${open ? 'open' : ''}`}>
+        <div className="collapse-inner">
+          <p className="ap-postcard">{text}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
