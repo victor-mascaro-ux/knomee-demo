@@ -41,6 +41,7 @@ import type { JoyAnswers } from './JoyFlow'
 import { CONFIDENCE_STATEMENTS, confidenceReading, type ConfidenceAnswers } from './ConfidenceFlow'
 import type { OutlookAnswers } from './OutlookFlow'
 import type { FutureYouAnswers } from './FutureYouFlow'
+import type { GoalsAnswers } from './GoalsFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
@@ -81,6 +82,7 @@ export default function ProspectProfileScreen({
     conf?: ConfidenceAnswers | null
     outlook?: OutlookAnswers | null
     future?: FutureYouAnswers | null
+    goals?: GoalsAnswers | null
   }
   prospect: Prospect
   onBack: () => void
@@ -127,7 +129,9 @@ export default function ProspectProfileScreen({
             : []),
           ...financialId.keyHighlights.filter((h) => h.icon !== 'financial-joy' && isDone(h.icon)),
         ],
-        goals: isDone('goals') ? financialId.goals : [],
+        /* The goals she set in the adventure; the authored ones when it was
+           skipped past; none before. */
+        goals: fresh.goals ? fresh.goals.goals : isDone('goals') ? financialId.goals : [],
         lifeEvents: isDone('life-events') ? financialId.lifeEvents : [],
         questions: [],
         /* Her own reading when she has taken Confidence; the authored one when
@@ -369,7 +373,22 @@ export default function ProspectProfileScreen({
                 <div className="pp-col-main">
                   <section className="pp-card">
                     <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
+                      {fresh && isDone('goals') && onOpenEnding ? (
+                        <button
+                          type="button"
+                          className="pp-card-title pp-card-title-link"
+                          onClick={() => onOpenEnding('goals')}
+                          aria-label="Goals — see your readiness again"
+                        >
+                          <img className="pp-card-ic" src={icGoals} alt="" />
+                          Goals
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span className="pp-card-title"><img className="pp-card-ic" src={icGoals} alt="" />Goals</span>
+                      )}
                       <AddButton label="Add a goal" onClick={() => setAddingGoal(true)} />
                     </div>
                     <div className="pp-goals" ref={goals.box}>

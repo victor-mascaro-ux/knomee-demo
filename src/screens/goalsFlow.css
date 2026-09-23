@@ -1,0 +1,348 @@
+/* Goals — the waiting moment, the goal added, and the readiness ending. The
+   panels are the page's own Add a Goal and readiness modals. */
+
+.gl-hero-fallback {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  max-width: 342px;
+  aspect-ratio: 342 / 244;
+  background: radial-gradient(circle at 34% 60%, var(--k-teal) 0 58%, transparent 58.5%);
+}
+
+/* ── hold tight ── */
+.gl-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-strong);
+}
+.gl-loading p {
+  margin: 4px 0 0;
+  font-size: var(--text-lg);
+  animation: glPulse 1.6s ease-in-out infinite;
+}
+@keyframes glPulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+.gl-hold {
+  margin: var(--space-20) 0 0;
+  font-size: 26px;
+  font-weight: var(--weight-bold);
+}
+/* The knomee mark, working: the heart beats in the middle while each ring
+   turns at its own speed and direction and pulses on its own beat, so the
+   mark never lines back up the same way twice while it waits. */
+.gl-mark {
+  display: block;
+  overflow: visible;
+}
+.gl-mark g,
+.gl-mark path {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.gl-mark-spin {
+  animation: glSpin var(--spin, 2s) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite var(--dir, normal);
+}
+.gl-mark-spin path {
+  fill: var(--c);
+  animation: glRing var(--beat, 1.4s) ease-in-out var(--lag, 0s) infinite;
+}
+/* the heart */
+.gl-mark-0 {
+  --c: var(--k-plum);
+  animation: none;
+}
+.gl-mark-0 path {
+  animation-name: glBeat;
+  --beat: 1.2s;
+}
+/* upper inner ring */
+.gl-mark-1 {
+  --c: var(--k-teal);
+  --spin: 1.9s;
+  --beat: 1.3s;
+}
+/* lower inner ring */
+.gl-mark-2 {
+  --c: var(--k-ocean);
+  --spin: 2.5s;
+  --dir: reverse;
+  --beat: 1.6s;
+  --lag: 0.3s;
+}
+/* upper outer ring */
+.gl-mark-3 {
+  --c: #9b51e0;
+  --spin: 3.1s;
+  --dir: reverse;
+  --beat: 1.9s;
+  --lag: 0.15s;
+}
+/* lower outer ring */
+.gl-mark-4 {
+  --c: var(--k-aqua);
+  --spin: 3.7s;
+  --beat: 1.5s;
+  --lag: 0.45s;
+}
+@keyframes glSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes glRing {
+  0%,
+  100% {
+    transform: scale(0.94);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+@keyframes glBeat {
+  0%,
+  100% {
+    transform: scale(0.88);
+  }
+  18% {
+    transform: scale(1.14);
+  }
+  36% {
+    transform: scale(0.96);
+  }
+  52% {
+    transform: scale(1.06);
+  }
+}
+
+/* ── the goal added ── */
+.gl-added {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-24) 0;
+  text-align: center;
+}
+.gl-burst {
+  position: absolute;
+  left: 50%;
+  top: 56px;
+  pointer-events: none;
+}
+.gl-burst i {
+  position: absolute;
+  width: 7px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: glBit 1.3s cubic-bezier(0.15, 0.7, 0.4, 1) 0.1s both;
+}
+@keyframes glBit {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0) scale(0.5);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--x) * 1.1), calc(var(--y) + 120px)) rotate(calc(var(--r) * 2));
+  }
+}
+.gl-check {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--k-lime);
+  color: var(--k-plum);
+  box-shadow: 0 0 0 10px rgba(175, 252, 65, 0.25);
+  animation: glCheck 0.55s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+@keyframes glCheck {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+.gl-title {
+  margin: var(--space-16) 0 var(--space-16);
+  font-size: 24px;
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+  animation: jrDeal 0.45s var(--ease-out) 0.2s both;
+}
+.gl-summary {
+  align-self: stretch;
+  padding: var(--space-16);
+  border-radius: var(--radius-xl);
+  background: #f1f3f7;
+  text-align: left;
+  animation: jrDeal 0.5s var(--ease-out) 0.35s both;
+}
+.gl-summary-head {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-secondary);
+}
+.gl-summary-title {
+  display: block;
+  margin: 4px 0 var(--space-10);
+  font-size: var(--text-xl);
+  color: var(--text-strong);
+}
+/* The goal's detail, open, as it prints: the page hides it until a goal is
+   opened, and here it is the point. */
+.gl-summary .pp-goal-detail {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+}
+.gl-summary .pp-goal-detail dt {
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+.gl-summary .pp-goal-detail dd {
+  margin: 0;
+}
+.gl-acts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-10);
+  margin-top: var(--space-24);
+  animation: jrDeal 0.45s var(--ease-out) 0.5s both;
+}
+.gl-second {
+  padding: 11px 26px;
+  border: 2px solid var(--k-plum);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--k-plum);
+  cursor: pointer;
+}
+.gl-second:active,
+.gl-link:active {
+  transform: scale(0.97);
+}
+.gl-link {
+  padding: 6px 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ── the ending: her stage, at size ── */
+.glr-sky {
+  background: linear-gradient(160deg, #240446 0%, #4c1d95 40%, #7639a1 70%, #b98ddc 100%);
+  background-size: 160% 160%;
+}
+.glr-hero {
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-12);
+  padding: 28px 22px 26px;
+  text-align: center;
+}
+.glr-kicker {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.85);
+}
+.glr-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-10);
+  padding: 18px 26px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 30px -12px rgba(20, 10, 40, 0.55);
+  animation: jrDeal 0.55s cubic-bezier(0.2, 1.1, 0.4, 1) 0.15s both;
+}
+/* The ramp lives on the profile pages; the ending restates the Financial ID's
+   purples so her bars are the ones her Financial ID shows. */
+.glr {
+  --bar-1: #240446;
+  --bar-2: #4c1d95;
+  --bar-3: #7038c8;
+  --bar-4: #9b51e0;
+  --bar-5: #b57ceb;
+  --bar-off: #e2def0;
+}
+.glr-bars .pp-readiness {
+  transform: scale(2.2);
+  transform-origin: center bottom;
+  margin: 18px 0 4px;
+}
+.glr-stage b {
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--text-strong);
+}
+.glr-line {
+  margin: 0;
+  max-width: 300px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: 1.45;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(26, 4, 51, 0.5);
+  animation: jrDeal 0.5s var(--ease-out) 0.45s both;
+}
+.glr-summaries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+/* Dealt in as the section scrolls into view, not on load like the added
+   screen's single summary. */
+.glr-summary {
+  animation: none;
+  opacity: 0;
+}
+.glr-summary .gl-summary-title {
+  margin-top: 0;
+}
+.jr-sec.is-in .glr-summary {
+  animation: jrDeal 0.45s var(--ease-out) both;
+  animation-delay: calc(0.1s + var(--i) * 0.08s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-mark g,
+  .gl-mark path,
+  .gl-loading p,
+  .gl-burst,
+  .gl-check,
+  .gl-title,
+  .gl-summary,
+  .gl-acts,
+  .glr-stage,
+  .glr-line,
+  .glr-summary {
+    animation: none !important;
+    opacity: 1;
+  }
+}

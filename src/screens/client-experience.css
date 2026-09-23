@@ -1089,3 +1089,14 @@ svg.cx-tab-mark {
   font-size: 27px;
   letter-spacing: var(--tracking-title);
 }
+
+/* Without the frame there is no status bar above the app bar, so whatever drops
+   from the bar starts right under it — not 54px lower, which left the page's
+   progress showing between the bar and the menu. */
+.cx-device.is-bare .cx-sheet,
+.cx-device.is-bare .cxm-scrim {
+  top: var(--mobile-appbar-h);
+}
+.cx-device.is-bare .cx-viewport.is-menu-open .pp-side {
+  top: var(--mobile-appbar-h);
+}
