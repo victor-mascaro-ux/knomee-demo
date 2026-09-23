@@ -1353,7 +1353,16 @@ function FlowReport({
   }, [])
   const viewing = mode === 'view'
   return (
-    <div className={`page af-report${viewing ? ' af-report-viewed' : ''}`}>
+    <div
+      className={`page af-report${viewing ? ' af-report-viewed' : ''}${brand ? ' brand-client' : ''}`}
+      /* The same white label the shell's pages wear: the bar's colour and the
+         firm's logo in it. */
+      style={
+        brand
+          ? ({ '--plum': brand.primary, '--purple-bolt': brand.accent } as React.CSSProperties)
+          : undefined
+      }
+    >
       {/* Reading somebody else's answers is a desktop page in the firm's own
           product, so it wears the product's own bar — brand and account menu,
           the same one the directory it was opened from has. The way back is the
@@ -1362,7 +1371,7 @@ function FlowReport({
           Your own report is not in that product: it is the other side of the
           flow you are holding, and its bar is the way back to it. */}
       {viewing ? (
-        <TopBar sub="ADVISOR RECRUIT" logo={brand ? brand.logo : undefined} />
+        <TopBar sub="ADVISOR RECRUIT" logo={brand ? brand.logo : undefined} cobrand="left" />
       ) : (
         <header className="af-report-bar">
           <button className="af-report-back" type="button" onClick={onBack}>
