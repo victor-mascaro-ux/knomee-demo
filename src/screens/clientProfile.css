@@ -643,15 +643,6 @@
 /* ── motion on a board being made ──
    A tile arrives by growing into its cell, and leaves by shrinking out of it;
    the board closes over it after (the glide is played from the script). */
-.cp-board-grid.is-movable .cp-tile {
-  animation: cpTileIn 0.28s cubic-bezier(0.2, 1.2, 0.4, 1) both;
-}
-@keyframes cpTileIn {
-  from {
-    opacity: 0;
-    transform: scale(0.82);
-  }
-}
 .cp-tile.is-leaving,
 .cp-tile.is-leaving:hover {
   pointer-events: none;
@@ -692,7 +683,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cp-board-grid.is-movable .cp-tile,
   .cp-tile.is-leaving,
   .cp-tile-size {
     animation: none;
