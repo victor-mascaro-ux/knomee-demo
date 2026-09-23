@@ -133,7 +133,9 @@ export default function ProspectProfileScreen({
         /* The goals she set in the adventure; the authored ones when it was
            skipped past; none before. */
         goals: fresh.goals ? fresh.goals.goals : isDone('goals') ? financialId.goals : [],
-        lifeEvents: isDone('life-events') ? financialId.lifeEvents : [],
+        /* With all five done she has life events on her page too, like the
+           questions and the board. */
+        lifeEvents: isDone('goals') ? financialId.lifeEvents : [],
         /* All five done — Life Events is what is left — and her page carries
            what a client this far along has: questions she has asked. */
         questions: isDone('goals') ? financialId.questions : [],
