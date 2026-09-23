@@ -60,17 +60,14 @@
 .fy-ring-3 {
   inset: 0;
   background: radial-gradient(circle, rgba(8, 99, 117, 0.05), rgba(8, 99, 117, 0.35));
-  transition-delay: 0.3s;
 }
 .fy-ring-2 {
   inset: 16%;
   background: var(--k-ocean);
-  transition-delay: 0.18s;
 }
 .fy-ring-1 {
   inset: 28%;
   background: var(--k-teal);
-  transition-delay: 0.08s;
 }
 .fy-core {
   inset: 38%;
@@ -79,27 +76,31 @@
   background: radial-gradient(circle at 40% 35%, #e9ffc0, var(--k-lime));
   box-shadow: 0 0 40px rgba(175, 252, 65, 0.6);
 }
+/* One breath for the whole orb: every ring and the core on the same curve,
+   at the same time, to the same proportion — in to full, out to three
+   quarters. Rings on their own delays and ranges drifted out of step. */
 .fy-orb.is-in .fy-ring,
 .fy-orb.is-in .fy-core {
   transform: scale(1);
 }
-.fy-orb.is-out .fy-ring-3 {
-  transform: scale(0.62);
-}
-.fy-orb.is-out .fy-ring-2 {
-  transform: scale(0.7);
-}
-.fy-orb.is-out .fy-ring-1 {
-  transform: scale(0.78);
-}
+.fy-orb.is-out .fy-ring,
 .fy-orb.is-out .fy-core {
-  transform: scale(0.86);
+  transform: scale(0.74);
 }
 .fy-core b {
+  display: block;
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   color: var(--k-plum);
   animation: fyWord 0.6s ease both;
+  /* The word breathes with it, on top of the core's own growth. */
+  transition: transform 4s cubic-bezier(0.45, 0, 0.55, 1);
+}
+.fy-orb.is-in .fy-core b {
+  transform: scale(1.08);
+}
+.fy-orb.is-out .fy-core b {
+  transform: scale(0.94);
 }
 @keyframes fyWord {
   from {
@@ -687,4 +688,21 @@
     opacity: 1;
     transform: scale(1) rotate(-14deg);
   }
+}
+
+/* How far away, as the question card the screen is about — Confidence's
+   shape: centred, white, lifted — with room inside it for the road's end
+   labels, which ran off the screen's edges. */
+.fy-when:not(.is-still) {
+  margin: auto 0;
+  padding: 26px 18px 30px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 10, 40, 0.06), 0 16px 36px -14px rgba(20, 10, 40, 0.28);
+}
+.fy-when:not(.is-still) .fy-h {
+  font-size: 22px;
+}
+.fy-when:not(.is-still) .fy-road {
+  margin: 58px 30px 0;
 }
