@@ -1037,52 +1037,86 @@
   border-left: 3px solid var(--action-primary);
 }
 
-/* ── the working, as a score sheet ── */
+/* ── the working: one card per metric, then the score ── */
 .rd-calc {
   display: flex;
   flex-direction: column;
-  gap: var(--space-12);
+  gap: var(--space-8);
+}
+.rd-calc-cols {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--space-14);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.rd-calc-item,
+.rd-calc-total {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-lg);
 }
 .rd-calc-item {
+  border: var(--border-thin) solid var(--border-default);
+  background: var(--surface-card);
+}
+.rd-calc-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
-.rd-calc-line {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: var(--text-base);
+.rd-calc-metric {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
   color: var(--text-strong);
 }
-.rd-calc-line > span,
-.rd-calc-line > b {
-  flex: none;
-  max-width: 78%;
-}
-.rd-calc-line > :last-child {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-/* The space between a metric and its points: empty, it pushes the points to
-   the right edge. */
-.rd-calc-line > i {
-  flex: 1;
-  min-width: 16px;
-}
-.rd-calc-line.is-head {
+.rd-calc-answer {
   font-size: var(--text-sm);
+  line-height: 1.4;
   color: var(--text-secondary);
 }
-.rd-calc-item.is-total {
+.rd-calc-side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.rd-calc-side b {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+.rd-calc-side i {
+  font-style: normal;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+/* The score they add up to, set apart in the page's wash. */
+.rd-calc-total {
   margin-top: var(--space-4);
-  padding-top: var(--space-12);
-  border-top: var(--border-thin) solid var(--border-default);
+  background: #f1f3f7;
+}
+.rd-calc-total .rd-calc-metric {
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
 }
 .rd-calc-score {
-  font-size: 24px;
-}
-.rd-calc-caption {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  flex: none;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
 }

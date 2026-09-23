@@ -263,31 +263,34 @@ function DimensionModal({
         <div className="modal-body rd-why-body">
           <p className="rd-why-q">{d.question}</p>
           <h3 className="rd-why-h">How it’s calculated</h3>
-          {/* Each metric as a two-line entry, the way a score sheet reads:
-              what was measured against what it scores, then their answer
-              against the points it earned. */}
+          {/* One small card per metric: what was measured and what they
+              answered on the left, the points it earned on the right — then
+              the score they add up to, set apart. */}
           <div className="rd-calc">
+            <div className="rd-calc-cols" aria-hidden>
+              <span>What they answered</span>
+              <span>Points</span>
+            </div>
             {rows.map((r) => (
               <div className="rd-calc-item" key={r.label + r.value}>
-                <div className="rd-calc-line is-head">
-                  <span>{r.label}</span>
-                  <i aria-hidden />
-                  <span>{r.points !== undefined ? (r.weight ? `${r.weight} of ${d.key} score` : `${d.key} score`) : ''}</span>
+                <div className="rd-calc-main">
+                  <span className="rd-calc-metric">{r.label}</span>
+                  {r.value && <span className="rd-calc-answer">{r.value}</span>}
                 </div>
-                <div className="rd-calc-line">
-                  <b>{r.value || '—'}</b>
-                  <i aria-hidden />
-                  <b>{r.points ?? ''}</b>
-                </div>
+                {r.points !== undefined && (
+                  <div className="rd-calc-side">
+                    <b>{r.points}</b>
+                    {r.weight && <i>counts {r.weight}</i>}
+                  </div>
+                )}
               </div>
             ))}
-            <div className="rd-calc-item is-total">
-              <div className="rd-calc-line">
-                <b>{d.key} score</b>
-                <i aria-hidden />
-                <b className="rd-calc-score">{d.score}</b>
+            <div className="rd-calc-total">
+              <div className="rd-calc-main">
+                <span className="rd-calc-metric">{d.key} score</span>
+                <span className="rd-calc-answer">{d.caption}</span>
               </div>
-              <span className="rd-calc-caption">{d.caption}</span>
+              <b className="rd-calc-score">{d.score}</b>
             </div>
           </div>
           {total && <p className="rd-why-note">{total}</p>}
