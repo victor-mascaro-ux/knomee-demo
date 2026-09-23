@@ -81,6 +81,16 @@ const CLOUD_SPOTS = [
   { x: 6, y: 64, s: 0.75 },
   { x: 48, y: 76, s: 0.7 },
 ]
+/* On the ending the lights carry their words, so they take spots spread
+   wide across the top, clear of each other and of the clouds below. */
+const LIGHT_SPOTS_TALL = [
+  { x: 20, y: 12 },
+  { x: 76, y: 8 },
+  { x: 48, y: 30 },
+  { x: 84, y: 32 },
+  { x: 14, y: 36 },
+  { x: 56, y: 4 },
+]
 const LIGHT_SPOTS = [
   { x: 22, y: 26 },
   { x: 68, y: 20 },
@@ -120,12 +130,12 @@ function Sky({
         )
       })}
       {hopes.slice(0, LIGHT_SPOTS.length).map((h, i) => {
-        const p = LIGHT_SPOTS[i]
+        const p = (tall ? LIGHT_SPOTS_TALL : LIGHT_SPOTS)[i]
         return (
           <span
             className="ol-light"
             key={`h${i}:${h}`}
-            style={{ left: `${p.x}%`, top: `${tall ? p.y * 0.8 : p.y}%`, ['--i' as string]: i }}
+            style={{ left: `${p.x}%`, top: `${p.y}%`, ['--i' as string]: i }}
           >
             {tall && <b>{short(h)}</b>}
           </span>

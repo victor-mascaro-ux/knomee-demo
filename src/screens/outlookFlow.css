@@ -107,10 +107,10 @@
   left: 48%;
   top: -34%;
 }
-/* At dawn the clouds thin and brighten at their edges. */
+/* At dawn the clouds thin: their fill goes translucent, not the cloud — the
+   whole cloud fading took its words with it and left them unreadable. */
 .ol-sky.is-dawn .ol-cloud {
-  opacity: 0.55;
-  background: #efe7f4;
+  background: rgba(239, 231, 244, 0.6);
 }
 @keyframes olCloudIn {
   from {
@@ -376,4 +376,51 @@
   .ol-sun {
     transition: none;
   }
+}
+
+/* On the ending the clouds carry their words, so each is a solid pale cloud
+   the size of its label, the words dark on it — readable over any part of the
+   sky, the sun included. */
+.ol-sky.is-tall .ol-cloud {
+  width: auto;
+  height: auto;
+  max-width: 44%;
+  padding: 8px 14px;
+  background: #f6f1fa;
+  opacity: 1;
+  box-shadow: 0 8px 18px rgba(10, 2, 30, 0.4);
+}
+.ol-sky.is-tall .ol-cloud::before {
+  width: 34px;
+  height: 34px;
+  left: 16%;
+  top: -16px;
+}
+.ol-sky.is-tall .ol-cloud::after {
+  width: 26px;
+  height: 26px;
+  left: 50%;
+  top: -11px;
+}
+.ol-sky.is-tall .ol-cloud b {
+  position: relative;
+  left: auto;
+  top: auto;
+  z-index: 1;
+  display: block;
+  width: auto;
+  max-width: none;
+  transform: none;
+  font-size: 11.5px;
+  color: #240446;
+}
+/* The hopes' words sit on a dark pill of their own, so white holds against
+   the brightest part of the dawn. */
+.ol-sky.is-tall .ol-light b {
+  max-width: 118px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(26, 4, 51, 0.72);
+  font-size: 11.5px;
+  text-shadow: none;
 }
