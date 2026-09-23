@@ -1,5 +1,6 @@
 <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="300" height="300" rx="150" fill="white"/>
+<g transform="translate(150 150) scale(1.0471) translate(-150 -150)">
 <path d="M70 67.5811H230V232.856H70V67.5811Z" fill="#240446"/>
 <path d="M70 67.5811H230V225.823H70V67.5811Z" fill="#077BFF"/>
 <path d="M70 67.5811H230V114.175H70V67.5811Z" fill="#240446"/>
@@ -28,4 +29,5 @@
 <path d="M197.473 122.089H219.451V144.067H197.473V122.089Z" fill="#A4E2FF"/>
 <path d="M197.473 158.133H219.451V184.507H197.473V158.133Z" fill="#240446"/>
 <path d="M197.473 158.133H219.451V180.111H197.473V158.133Z" fill="#A4E2FF"/>
+</g>
 </svg>

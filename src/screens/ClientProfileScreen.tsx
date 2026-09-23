@@ -1300,9 +1300,10 @@ export default function ClientProfileScreen({
                             if (k.key === 'Enter' || k.key === ' ') setOpenEvent(e)
                           }}
                         >
+                          {/* Its pill heads the whole row, over the icon and the name. */}
+                          <StatusTags tags={e.tags} advisorAdded={e.advisorAdded} />
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
-                            <StatusTags tags={e.tags} />
                             <span className="pp-event-head">
                               <span className="pp-event-kind">{e.kind}</span>
                             </span>
@@ -1313,7 +1314,7 @@ export default function ClientProfileScreen({
                               ) : (
                                 <span className="pp-event-date">{e.date}</span>
                               )}
-                              {e.advisorAdded && (
+                              {e.advisorAdded && !e.tags?.length && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}
                             </span>
