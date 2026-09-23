@@ -150,3 +150,65 @@
     margin-bottom: var(--space-8);
   }
 }
+
+/* ---------- the tooltip has to leave ----------
+   The readiness bars carry the dashboard's own hover bubble, and .modal clips
+   its children so the corners stay round under the plum header. The panel
+   stops clipping and the header rounds its own two corners instead, so the
+   bubble can hang below the panel where it belongs. */
+.goal-modal {
+  overflow: visible;
+}
+.goal-modal .modal-header {
+  border-radius: 9px 9px 0 0;
+}
+.goal-modal .modal-footer {
+  border-radius: 0 0 9px 9px;
+}
+
+/* ---------- inside a phone ----------
+   A goal opened on the phone belongs to the phone: the backdrop covers the
+   screen rather than the window, and the panel is the width of the device it
+   is on. .cx-screen is the positioned, clipping element the frame already
+   has — the panel needs nothing of its own to stay inside the bezel. */
+.cx-screen .modal-backdrop {
+  position: absolute;
+}
+.cx-screen .modal {
+  width: auto;
+  max-width: calc(100% - var(--space-24));
+  max-height: calc(100% - var(--space-40));
+  overflow: auto;
+  border-radius: var(--radius-xl);
+}
+.cx-screen .goal-modal .modal-header,
+.cx-screen .goal-modal .modal-footer {
+  border-radius: 0;
+}
+/* On a phone the bubble has nowhere to go, so the panel clips again. */
+.cx-screen .goal-modal {
+  overflow: auto;
+}
+.cx-screen .modal-header {
+  height: 52px;
+  padding: 0 var(--space-16);
+}
+.cx-screen .modal-title {
+  font-size: var(--text-2xl);
+}
+.cx-screen .modal-body {
+  padding: var(--space-16);
+}
+.cx-screen .goal-title,
+.cx-screen .goal-title-input {
+  font-size: var(--text-2xl);
+}
+.cx-screen .goal-rows {
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-10) var(--space-12);
+}
+.cx-screen .goal-rows dt,
+.cx-screen .goal-rows dd,
+.cx-screen .goal-complete {
+  font-size: var(--text-base);
+}

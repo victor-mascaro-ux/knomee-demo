@@ -367,8 +367,6 @@ export function useCollapsed<T>(items: T[], max: number) {
    on screen the panel carries it, and on paper there is nothing to click. Empty
    on a goal nobody went back to, which is most of them. */
 export function GoalDetail({ g }: { g: Goal }) {
-  const has = g.timeline || g.pros?.length || g.cons?.length || g.note
-  if (!has) return null
   return (
     <dl className="pp-goal-detail">
       {g.timeline && (
@@ -407,6 +405,13 @@ export function GoalDetail({ g }: { g: Goal }) {
           <dd>{g.updated}</dd>
         </>
       )}
+      {/* The same reading the panel gives it: the bars, and the stage they add
+          up to. Bars alone are a shape somebody has to know how to read. */}
+      <dt>Readiness</dt>
+      <dd className="pp-goal-stage">
+        <ReadinessLevel level={g.readiness} />
+        {TTM_STAGES[g.readiness - 1] ?? 'Not set'}
+      </dd>
     </dl>
   )
 }

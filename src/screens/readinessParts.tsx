@@ -413,14 +413,18 @@ export function StartersCard({
         ))}
       </div>
 
-      <h4 className="rd-sub-head">Strategic Recommendations Key</h4>
-      <div className="rd-key">
-        {keyRows.map((k) => (
-          <div className={`rd-key-row ${TAG_CLASS[k.tag]}`} key={k.tag}>
-            <span className="rd-key-tag">{k.tag}</span>
-            <p className="rd-key-meaning">{k.meaning}</p>
-          </div>
-        ))}
+      {/* Heading and key are one block: on paper they carry their own ground,
+          and a block is what can be kept whole across a page break. */}
+      <div className="rd-key-block">
+        <h4 className="rd-sub-head">Strategic Recommendations Key</h4>
+        <div className="rd-key">
+          {keyRows.map((k) => (
+            <div className={`rd-key-row ${TAG_CLASS[k.tag]}`} key={k.tag}>
+              <span className="rd-key-tag">{k.tag}</span>
+              <p className="rd-key-meaning">{k.meaning}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

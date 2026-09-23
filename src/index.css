@@ -6438,6 +6438,23 @@ button.name-link-btn:hover .name-text {
   .rd-card:has(.rd-key) {
     break-inside: auto;
     page-break-inside: auto;
+    /* And it gives up its own tray: a grey box that breaks paints to the foot
+       of the page with nothing in it, which is the grey half-page under the
+       last starter. Each block carries its own ground instead. */
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+  .rd-key-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-top: var(--space-20);
+    padding: var(--space-16) var(--space-18);
+    border-radius: var(--radius-xl);
+    background: #f1f3f7;
+  }
+  .rd-key-block .rd-sub-head {
+    margin-top: 0;
   }
   .rd-starter,
   .rd-ask,
@@ -6488,6 +6505,27 @@ button.name-link-btn:hover .name-text {
   }
   .pp-goal-caret {
     display: none !important;
+  }
+  /* The detail carries the readiness with its stage named, so the bars that
+     rode on the row itself would be the same reading printed twice. */
+  .pp-goal > .pp-readiness {
+    display: none !important;
+  }
+  .pp-goal-stage {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    font-weight: var(--weight-semibold);
+    color: var(--text-strong);
+  }
+  /* A goal fills the card it is in: two columns of goals on a screen is a use
+     of the width, and half a column on paper is a waste of it. */
+  .pp-goals,
+  .cp-goal-cols {
+    display: block !important;
+  }
+  .pp-goal {
+    width: 100% !important;
   }
 
   /* Badges are a screen's reward, not a document's content. */
