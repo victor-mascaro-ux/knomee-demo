@@ -1165,7 +1165,7 @@ function FlowPhone({
                 </div>
                 {/* Nothing to read until something is answered — an empty
                     report is worse than no way to it. */}
-                {!d.empty && (
+                {!d.empty && !viewing && (
                   <button
                     className="cx-sheet-item"
                     type="button"
@@ -1174,9 +1174,30 @@ function FlowPhone({
                       onReport()
                     }}
                   >
-                    {viewing ? 'Their readiness and toolkit' : 'My readiness and toolkit'}
+                    My readiness and toolkit
                     <ArrowRight />
                   </button>
+                )}
+                {/* Somebody else's phone, opened from the pipeline: the menu is
+                    the dashboard's own account menu — the rep is still signed
+                    in to the product, and the way back is the demo's switch. */}
+                {viewing && (
+                  <>
+                    <button
+                      className="cx-sheet-item"
+                      type="button"
+                      /* A mock, like Sign Out: it answers the tap and goes
+                         nowhere — this is a view of the product, not a way out. */
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Account Settings
+                      <ArrowRight />
+                    </button>
+                    <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
+                      Sign Out
+                      <ArrowRight />
+                    </button>
+                  </>
                 )}
                 {/* Restarting is how the phone gets handed to the next person —
                     or, under an invite, how one advisor starts their own answers
@@ -1257,16 +1278,14 @@ function FlowPhone({
                 )}
                 {/* Viewing has somewhere to go back to. An invite does not:
                     the flow is the whole of what that link is for. */}
-                {mode !== 'invited' && (
+                {mode !== 'invited' && !viewing && (
                   <>
                     <button className="cx-sheet-item" type="button" onClick={onExit}>
-                      {viewing ? 'Back to the directory' : 'Advisor Experience'}
+                      Advisor Experience
                       <ArrowRight />
                     </button>
                     <div className="cx-sheet-hint">
-                      {viewing
-                        ? 'Everyone who has taken the flow.'
-                        : 'Switches back to the advisor demo.'}
+                      Switches back to the advisor demo.
                     </div>
                   </>
                 )}
