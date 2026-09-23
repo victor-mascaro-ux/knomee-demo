@@ -1381,7 +1381,8 @@ svg.cx-tab-mark {
   opacity: 0;
   animation-name: cxConfettiFall;
   animation-timing-function: cubic-bezier(0.3, 0.1, 0.5, 1);
-  animation-fill-mode: both;
+  /* Forwards: hidden until each piece's turn, not waiting visibly at the top. */
+  animation-fill-mode: forwards;
 }
 @keyframes cxConfettiFall {
   0% {
