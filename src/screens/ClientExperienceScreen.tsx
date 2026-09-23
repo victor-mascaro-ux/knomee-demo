@@ -11,6 +11,7 @@ import JoyFlow, { sampleJoyAnswers, type JoyAnswers } from './JoyFlow'
 import ConfidenceFlow, { CONFIDENCE_STATEMENTS, type ConfidenceAnswers } from './ConfidenceFlow'
 import OutlookFlow, { SAMPLE_OUTLOOK, type OutlookAnswers } from './OutlookFlow'
 import FutureYouFlow, { SAMPLE_FUTURE, type FutureYouAnswers } from './FutureYouFlow'
+import GoalsFlow, { type GoalsAnswers } from './GoalsFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -1165,8 +1166,10 @@ export default function ClientExperienceScreen({
   const [outlook, setOutlook] = useState<OutlookAnswers | null>(null)
   /* And what Future You handed back. */
   const [future, setFuture] = useState<FutureYouAnswers | null>(null)
+  /* And the goals set in the Goals adventure. */
+  const [goalsDone, setGoalsDone] = useState<GoalsAnswers | null>(null)
   /* An adventure that has been built, and can be taken. */
-  const BUILT = ['financial-joy', 'confidence', 'outlook', 'future-you']
+  const BUILT = ['financial-joy', 'confidence', 'outlook', 'future-you', 'goals']
   /* Completing an adventure — the first time or again — makes the journey
      stand at it: everything before it complete, it complete, and everything
      after it waiting. */
@@ -1200,6 +1203,7 @@ export default function ClientExperienceScreen({
     setConf(null)
     setOutlook(null)
     setFuture(null)
+    setGoalsDone(null)
     setDone({})
     setCheckIn(null)
     setAdventure(null)
@@ -1333,7 +1337,33 @@ export default function ClientExperienceScreen({
             }`}
             ref={viewport}
           >
-            {adventure === 'future-you' ? (
+            {adventure === 'goals' ? (
+              <GoalsFlow
+                review={reviewing ? (goalsDone ?? { goals: financialId.goals.slice(0, 1) }) : undefined}
+                reward={
+                  reviewing
+                    ? {
+                        before: journey.filter((j) => j.core && done[j.id]).length,
+                        after: journey.filter((j) => j.core && done[j.id]).length,
+                        total: journey.filter((j) => j.core).length,
+                        next: journey.find((j) => !done[j.id])?.title ?? 'Life Events',
+                      }
+                    : {
+                        before: 4,
+                        after: 5,
+                        total: journey.filter((j) => j.core).length,
+                        next: 'Life Events',
+                      }
+                }
+                onComplete={(answers) => {
+                  if (reviewing) return leaveReview()
+                  setGoalsDone(answers)
+                  completeAt('goals')
+                  setAdventure(null)
+                  setTab('adventures')
+                }}
+              />
+            ) : adventure === 'future-you' ? (
               <FutureYouFlow
                 review={reviewing ? (future ?? SAMPLE_FUTURE) : undefined}
                 reward={
@@ -1459,7 +1489,7 @@ export default function ClientExperienceScreen({
               <ProspectProfileScreen
                 key={journeyRun}
                 prospect={SARAH}
-                fresh={{ joy, done, conf, outlook, future }}
+                fresh={{ joy, done, conf, outlook, future, goals: goalsDone }}
                 onOpenEnding={(id) => {
                   setReviewing(true)
                   setAdventure(id)
