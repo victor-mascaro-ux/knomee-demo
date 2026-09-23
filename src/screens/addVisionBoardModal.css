@@ -2,12 +2,8 @@
    shell, the plum header and the footer buttons are index.css's own; the board
    preview is the Board component's, styled by clientProfile.css. */
 
-/* The panel wears the cards' grey, so the white things on it — the fields,
-   the ways in, a composer, the photo tiles' controls — read as things on a
-   tray, the way a card's rows do. */
 .modal.vb-modal {
   position: relative;
-  background: #f1f3f7;
   width: 560px;
   display: flex;
   flex-direction: column;
@@ -192,13 +188,11 @@
    scrolls inside it rather than pushing the buttons off the panel. */
 .vb-dock {
   flex: none;
-  background: #f1f3f7;
   max-height: 58%;
   overflow-y: auto;
   /* Room under the three ways in, so they read as their own row and not as
      the top half of the footer's buttons. */
-  padding: var(--space-12) 24px var(--space-20);
-  border-top: var(--border-thin) solid var(--border-default);
+  padding: var(--space-16) 24px var(--space-20);
 }
 .vb-dock .vb-adds,
 .vb-dock .vb-compose {
@@ -631,4 +625,16 @@
   .vb-leave-card {
     animation: none;
   }
+}
+
+/* ── the board, as a thing on the panel ──
+   Only the board is the cards' grey: a tray with white around it, rounded,
+   lifted off the panel by a soft shadow. The ways in and the buttons below it
+   are the panel's own white. The board scrolls inside its tray. */
+.vb-body.vb-board-area {
+  margin: var(--space-16) var(--space-16) 0;
+  padding: var(--space-16);
+  border-radius: var(--radius-2xl);
+  background: #f1f3f7;
+  box-shadow: 0 1px 2px rgba(20, 10, 40, 0.06), 0 8px 22px rgba(20, 10, 40, 0.12);
 }
