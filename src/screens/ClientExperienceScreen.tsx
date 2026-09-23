@@ -1049,6 +1049,14 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
 /* Whose phone this is. Sarah Mitchell, the prospect whose answers the demo is
    built on — her Financial ID here is the one her advisor opens, carrying her
    content and her palette, rather than a client's page with her name on it. */
+/* The day an adventure is completed on her phone: the real one, in the
+   list's own MM.DD.YYYY. */
+const completedToday = () => {
+  const d = new Date()
+  const two = (n: number) => String(n).padStart(2, '0')
+  return `${two(d.getMonth() + 1)}.${two(d.getDate())}.${d.getFullYear()}`
+}
+
 const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0]
 
 /* The in-phone menu. The only way back to the advisor side lives here, so the
@@ -1140,7 +1148,7 @@ export default function ClientExperienceScreen({
     if (upTo < 0) return
     setDone((d) => {
       const next = { ...d }
-      for (const j of journey.slice(0, upTo)) if (!next[j.id]) next[j.id] = DEMO_TODAY
+      for (const j of journey.slice(0, upTo)) if (!next[j.id]) next[j.id] = completedToday()
       return next
     })
     if (!joy) setJoy(sampleJoyAnswers())
@@ -1283,13 +1291,23 @@ export default function ClientExperienceScreen({
           >
             {adventure ? (
               <JoyFlow
+                /* The reward says where she really is: one more when this is
+                   her first time through, the same count when she is taking it
+                   again, and whatever is truly next. */
+                reward={(() => {
+                  const core = journey.filter((j) => j.core)
+                  const before = core.filter((j) => done[j.id]).length
+                  const after = done['financial-joy'] ? before : before + 1
+                  const next = journey.find((j) => j.id !== 'financial-joy' && !done[j.id])
+                  return { before, after, total: core.length, next: next?.title ?? 'Financial Joy' }
+                })()}
                 onClose={() => setAdventure(null)}
                 onComplete={(answers) => {
                   /* Done: the answers go on her Financial ID, and she lands on
                      the list, where the adventure now reads as complete and the
                      next one has opened. */
                   setJoy(answers)
-                  setDone((d) => ({ ...d, 'financial-joy': d['financial-joy'] ?? DEMO_TODAY }))
+                  setDone((d) => ({ ...d, 'financial-joy': d['financial-joy'] ?? completedToday() }))
                   setAdventure(null)
                   setTab('adventures')
                 }}

@@ -43,12 +43,16 @@ const PIECES = seeded(90)
 
 export default function JoyReward({
   badge,
+  from,
   done,
   total,
   next,
   onNext,
 }: {
   badge: string
+  /** Adventures complete before this one — the same as `done` when it was
+      being taken again, and the bar has nothing to move. */
+  from: number
   /** Adventures complete, this one included. */
   done: number
   total: number
@@ -63,7 +67,7 @@ export default function JoyReward({
     const t = window.setTimeout(() => setMoved(true), 450)
     return () => window.clearTimeout(t)
   }, [])
-  const shown = moved ? done : done - 1
+  const shown = moved ? done : from
   const pct = Math.round((shown / total) * 100)
 
   return (
