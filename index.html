@@ -1762,11 +1762,10 @@
      somebody the longer-named of the two. The flow you answer yourself is the
      Advisor · Business ID now. The walkthrough is still at #/advisor-flow and
      still works; it is simply not listed, so this panel is no longer a way in. */
-  const JOURNEYS = [
-    ['client-exp', 'Client · Financial ID', '#/client-experience',
+  const DEMOS = [
+    ['advisor', 'Advisor Dashboards (Desktop)', '#/firm-candidates', DASHBOARDS[0][3]],
+    ['client-exp', 'Client Experience (Mobile)', '#/client-experience',
       v => v === 'client-experience'],
-    ['advisor-self', 'Advisor · Business ID', '#/advisor-self',
-      v => v === 'advisor-self']
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';
@@ -1981,8 +1980,9 @@
       });
       demoBody.appendChild(g);
     };
-    rows('Dashboards', ICONS.persona, DASHBOARDS);
-    rows('Client Journeys', ICONS.screens, JOURNEYS);
+    /* Two places to stand: the advisor's desktop dashboards, and the
+       client's own phone. Everything else is reached from inside them. */
+    rows('Demos', ICONS.screens, DEMOS);
   }
 
   function setDemoArmed(on) {
