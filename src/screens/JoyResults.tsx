@@ -158,15 +158,10 @@ export function AboutOverlay({
   second: ReactNode
   onClose: () => void
 }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  /* It closes on OK and nothing else: a tap beside the panel, or Escape, used
+     to dismiss it before it had been read. */
   return (
-    <div className="modal-backdrop jr-about-back" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="jr-about-title">
+    <div className="modal-backdrop jr-about-back" role="dialog" aria-modal="true" aria-labelledby="jr-about-title">
       <div className="modal jr-about" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header jr-about-head">
           <h2 className="modal-title" id="jr-about-title">
