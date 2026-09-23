@@ -373,3 +373,69 @@
     animation: none;
   }
 }
+
+/* Under the preview: how to size a photograph, said once. */
+.vb-hint {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* The library: Emily's board pictures as square thumbs, numbered in the order
+   they are picked, and her phone's own upload as the last square. */
+.vb-library {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+.vb-pick {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-sunken);
+  cursor: pointer;
+}
+.vb-pick img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+.vb-pick.is-on {
+  box-shadow: 0 0 0 3px var(--action-primary);
+}
+.vb-pick.is-on img {
+  transform: scale(0.92);
+  border-radius: var(--radius-sm);
+}
+.vb-pick-n {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circle);
+  background: var(--action-primary);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+}
+.vb-pick-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1.5px dashed var(--border-default);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}

@@ -18,9 +18,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import './addVisionBoardModal.css'
-import type { BoardTile, VisionBoard } from '../data/clientProfile'
+import { clientProfile, type BoardTile, type VisionBoard } from '../data/clientProfile'
 import { CloseIcon } from '../components/icons'
-import { Board } from './ClientProfileScreen'
+import { Board, type TileSize } from './ClientProfileScreen'
+
+/* The pictures on Emily's Future Vision Board, offered as the library to pick
+   from: a demo in a room has no camera roll, and these are the photographs the
+   prototype already has. Her own phone's upload stays at the end of the row. */
+const LIBRARY = clientProfile.boards.flatMap((b) =>
+  b.tiles.flatMap((t) => (t.kind === 'photo' ? [{ src: t.src, alt: t.alt }] : [])),
+)
 
 type NoteTile = Extract<BoardTile, { kind: 'note' }>
 type Tone = NoteTile['tone'] | undefined
@@ -77,7 +84,7 @@ const DropIcon = () => (
 )
 
 /* The composer under the board: nothing open, typing, or listening. */
-type Mode = null | 'text' | 'voice'
+type Mode = null | 'text' | 'voice' | 'photo'
 
 export default function AddVisionBoardModal({
   onClose,
@@ -125,6 +132,16 @@ export default function AddVisionBoardModal({
     ])
     setMode(null)
   }
+
+  /* A photograph dragged to a size: one cell, two across, or two down. */
+  const resize = (i: number, size: TileSize) =>
+    setTiles((ts) =>
+      ts.map((t, j) =>
+        j === i && t.kind === 'photo'
+          ? { ...t, wide: size === '2x1' || undefined, tall: size === '1x2' || undefined }
+          : t,
+      ),
+    )
 
   const save = () => {
     const name = title.trim()
@@ -198,7 +215,13 @@ export default function AddVisionBoardModal({
                 </div>
               ) : (
                 <div className="vb-preview">
-                  <Board board={{ title: title.trim(), blurb: blurb.trim(), tiles }} />
+                  <Board
+                    board={{ title: title.trim(), blurb: blurb.trim(), tiles }}
+                    onResize={resize}
+                  />
+                  {tiles.some((t) => t.kind === 'photo') && (
+                    <p className="vb-hint">Drag a photo's corner to make it wide or tall.</p>
+                  )}
                 </div>
               )}
 
@@ -231,6 +254,27 @@ export default function AddVisionBoardModal({
 
               {mode === 'text' && <TextComposer onAdd={add} onCancel={() => setMode(null)} />}
               {mode === 'voice' && <VoiceComposer onAdd={add} onCancel={() => setMode(null)} />}
+              {mode === 'photo' && (
+                <PhotoPicker
+                  onAdd={(picked) => {
+                    setTiles((ts) => [...ts, ...picked])
+                    setMode(null)
+                  }}
+                  onUpload={() => photoInput.current?.click()}
+                  onCancel={() => setMode(null)}
+                />
+              )}
+              <input
+                ref={photoInput}
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={(e) => {
+                  addPhotos(e.target.files)
+                  e.target.value = ''
+                }}
+              />
 
               {mode === null && (
                 <div className="vb-adds">
@@ -243,7 +287,7 @@ export default function AddVisionBoardModal({
                   <button
                     type="button"
                     className="vb-add"
-                    onClick={() => photoInput.current?.click()}
+                    onClick={() => setMode('photo')}
                   >
                     <span className="vb-add-ic">
                       <PhotoIcon />
@@ -256,17 +300,6 @@ export default function AddVisionBoardModal({
                     </span>
                     Speak
                   </button>
-                  <input
-                    ref={photoInput}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    hidden
-                    onChange={(e) => {
-                      addPhotos(e.target.files)
-                      e.target.value = ''
-                    }}
-                  />
                 </div>
               )}
             </div>
@@ -393,6 +426,72 @@ function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => void; onC
           onClick={() => onAdd({ kind: 'note', text: text.trim(), tone: 'lilac', voice: true })}
         >
           Add sticker
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* Photographs to put on the board: the library, any number of them at once,
+   and a way out to her own phone's pictures. */
+function PhotoPicker({
+  onAdd,
+  onUpload,
+  onCancel,
+}: {
+  onAdd: (tiles: BoardTile[]) => void
+  onUpload: () => void
+  onCancel: () => void
+}) {
+  const [picked, setPicked] = useState<string[]>([])
+  const toggle = (src: string) =>
+    setPicked((p) => (p.includes(src) ? p.filter((x) => x !== src) : [...p, src]))
+  return (
+    <div className="vb-compose">
+      <div className="vb-library">
+        {LIBRARY.map((ph) => {
+          const n = picked.indexOf(ph.src)
+          return (
+            <button
+              key={ph.src}
+              type="button"
+              className={`vb-pick${n >= 0 ? ' is-on' : ''}`}
+              aria-pressed={n >= 0}
+              aria-label={ph.alt}
+              onClick={() => toggle(ph.src)}
+            >
+              <img src={ph.src} alt="" draggable={false} />
+              {n >= 0 && <span className="vb-pick-n">{n + 1}</span>}
+            </button>
+          )
+        })}
+        <button type="button" className="vb-pick vb-pick-upload" onClick={onUpload}>
+          <PhotoIcon />
+          <span>Upload</span>
+        </button>
+      </div>
+      <div className="vb-compose-foot">
+        <span className="vb-voice-hint">
+          {picked.length ? `${picked.length} selected` : 'Pick one or more.'}
+        </span>
+        <button className="vb-link" type="button" onClick={onCancel}>
+          Cancel
+        </button>
+        <button
+          className="btn btn-primary vb-small"
+          type="button"
+          disabled={picked.length === 0}
+          onClick={() =>
+            onAdd(
+              picked.map((src) => ({
+                kind: 'photo',
+                src,
+                alt: LIBRARY.find((l) => l.src === src)?.alt ?? '',
+              })),
+            )
+          }
+        >
+          Add
         </button>
       </div>
     </div>
