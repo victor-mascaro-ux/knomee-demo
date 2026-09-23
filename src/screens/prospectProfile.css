@@ -1458,3 +1458,12 @@
 .pp-checkin {
   margin: 0 0 var(--space-16);
 }
+
+/* A badge not yet earned: there, so it is something to get, but in grey. */
+.pp-badge.is-locked .pp-badge-art {
+  filter: grayscale(1);
+  opacity: 0.28;
+}
+.pp-badge.is-locked:hover .pp-badge-disc {
+  transform: none;
+}

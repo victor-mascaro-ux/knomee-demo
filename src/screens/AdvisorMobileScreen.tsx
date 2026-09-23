@@ -16,7 +16,6 @@ import {
   DEVICE_H,
   DEVICE_W,
   IPhone,
-  TAB_EDGE,
   TabFinId,
   TabMark,
   TabQuestions,
@@ -25,6 +24,7 @@ import {
   useDarkGround,
   useFitToWindow,
   useZoom,
+  TabEdge,
 } from './ClientExperienceScreen'
 import AdventureList from './AdventureList'
 import { adventureStates, derive, sampleAnswers } from '../data/advisorAnswers'
@@ -202,17 +202,7 @@ export default function AdvisorMobileScreen({
               with. This page had no bar at all, so the other two were only
               reachable by walking the flow again. */}
           <nav className="cx-tabbar">
-            <svg
-              className="cx-tab-edge"
-              viewBox="0 0 390 96"
-              width="390"
-              height="96"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
-              <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
-            </svg>
+            <TabEdge />
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}

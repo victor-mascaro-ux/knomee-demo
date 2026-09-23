@@ -503,6 +503,26 @@
   height: 96px;
   pointer-events: none;
 }
+/* The flat edge: white from the hairline down, the full width of the bar. */
+.cx-tab-edge::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18px;
+  bottom: 0;
+  background: #fff;
+  border-top: 1.2px solid #e6e5ea;
+}
+/* The swell, at its own size and centred, over the hairline it interrupts. */
+.cx-tab-dome {
+  position: absolute;
+  top: 0.6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  overflow: visible;
+}
 .cx-tab {
   position: relative;
   z-index: 1;

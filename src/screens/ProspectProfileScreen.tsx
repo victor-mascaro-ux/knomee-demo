@@ -37,9 +37,13 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
+import type { JoyAnswers } from './JoyFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
+
+/* The five core adventures, in the order they are taken. */
+const BADGE_ORDER = ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals']
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -61,7 +65,11 @@ export default function ProspectProfileScreen({
   startFlow,
   onStartFlowDone,
   checkIn,
+  fresh,
 }: {
+  /** Her phone as a new client's: nothing on the page until an adventure has
+      put it there. `joy` is what Financial Joy handed back, once it has. */
+  fresh?: { joy: JoyAnswers | null }
   prospect: Prospect
   onBack: () => void
   onConvert?: (p: Prospect) => void
@@ -83,7 +91,44 @@ export default function ProspectProfileScreen({
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const { printing, print } = usePrintSheet()
-  const fi = financialId
+  /* A new client's page is empty, and fills as adventures are completed:
+     only Financial Joy can be taken yet, so only what it produces appears —
+     its card, a highlight drawn from the memory, and its badge. Everything
+     else keeps its heading and waits. */
+  const joy = fresh?.joy ?? null
+  const fi = fresh
+    ? {
+        ...financialId,
+        keyHighlights: joy
+          ? [
+              {
+                title: 'Joy & Motivation',
+                icon: 'financial-joy',
+                text: joy.notes.find((n) => n.trim()) ?? '',
+              },
+            ].filter((h) => h.text)
+          : [],
+        goals: [],
+        lifeEvents: [],
+        questions: [],
+        badges: joy ? ['Financial Joy'] : [],
+        financialJoy: {
+          ...financialId.financialJoy,
+          chips: joy ? [...joy.tools, ...(joy.other.trim() ? [joy.other.trim()] : [])] : [],
+        },
+        attention: {
+          more: joy ? Object.keys(joy.attention).filter((k) => joy.attention[k] === 1) : [],
+          less: joy ? Object.keys(joy.attention).filter((k) => joy.attention[k] === -1) : [],
+        },
+      }
+    : financialId
+  /* Which cards have anything in them yet. */
+  const has = {
+    joy: !fresh || !!joy,
+    futureYou: !fresh,
+    outlook: !fresh,
+    confidence: !fresh,
+  }
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
   const [confidence, setConfidence] = useState(false)
@@ -335,6 +380,8 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
                       <DateSelect />
                     </div>
+                    {has.joy && (
+                    <>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
                     <div className="pp-chips">
                       {fi.financialJoy.chips.map((c) => (
@@ -361,6 +408,8 @@ export default function ProspectProfileScreen({
                         ))}
                       </div>
                     </div>
+                    </>
+                    )}
                   </section>
 
                   <section className="pp-card">
@@ -368,6 +417,8 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
                       <DateSelect />
                     </div>
+                    {has.futureYou && (
+                    <>
                     {(
                       [
                         ['Where', fi.futureYou.where],
@@ -387,6 +438,8 @@ export default function ProspectProfileScreen({
                       </div>
                     ))}
                     <PostcardSection text={fi.postcard} />
+                    </>
+                    )}
                   </section>
 
                   <section className="pp-card">
@@ -394,6 +447,8 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
                       <DateSelect />
                     </div>
+                    {has.outlook && (
+                    <>
                     <span className="pp-fy-label">Concerns</span>
                     {fi.outlook.concerns.map((c) => (
                       <p className="pp-quote" key={c}>
@@ -406,6 +461,8 @@ export default function ProspectProfileScreen({
                         “{h}”
                       </p>
                     ))}
+                    </>
+                    )}
                   </section>
 
                   <section className="pp-card">
@@ -416,8 +473,13 @@ export default function ProspectProfileScreen({
                       </span>
                     </div>
                     <div className="pp-badges">
-                      {fi.badges.map((label) => (
-                        <div className="pp-badge" key={label}>
+                      {/* A new client sees all five, the ones not yet earned
+                          waiting in grey — what there is to get, not a blank. */}
+                      {(fresh ? BADGE_ORDER : fi.badges).map((label) => (
+                        <div
+                          className={`pp-badge${fi.badges.includes(label) ? '' : ' is-locked'}`}
+                          key={label}
+                        >
                           <BadgeMedallion label={label} icon={ADVENTURE_ICON[label]} />
                         </div>
                       ))}
@@ -445,6 +507,8 @@ export default function ProspectProfileScreen({
                       <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
                       <DateSelect />
                     </div>
+                    {has.confidence && (
+                    <>
                     <div className="pp-confidence">
                       <span className="pp-confidence-label">{fi.confidence}</span>
                       <Gauge label={fi.confidence} />
@@ -458,6 +522,8 @@ export default function ProspectProfileScreen({
                     >
                       {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
                     </button>
+                    </>
+                    )}
                   </section>
 
                   <section className="pp-card">

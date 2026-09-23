@@ -39,6 +39,7 @@ import {
   useDarkGround,
   useFitToWindow,
   useZoom,
+  TabEdge,
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import {
@@ -80,7 +81,6 @@ import './client-experience.css'
 import './advisor-flow.css'
 
 const ZOOM_STEP = 0.1
-const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
 const OTHER = 'Other'
 
 /* What this screen is being used for. `demo` is the flow as it has always been,
@@ -1093,17 +1093,7 @@ function FlowPhone({
             </div>
           ) : (
           <nav className="cx-tabbar">
-            <svg
-              className="cx-tab-edge"
-              viewBox="0 0 390 96"
-              width="390"
-              height="96"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
-              <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
-            </svg>
+            <TabEdge />
             {/* Business ID · the mark · Questions. The mark is the way back to
                 the adventures rather than an ornament in the middle of two
                 tabs — it is the one control on this bar that goes to them,
