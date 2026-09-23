@@ -8,7 +8,7 @@
  * authored one back.
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { VisionBoard } from '../data/clientProfile'
 import AddVisionBoardModal from './AddVisionBoardModal'
 import { Board } from './ClientProfileScreen'
@@ -23,23 +23,31 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
      changed. */
   const [open, setOpen] = useState<'new' | number | null>(null)
   const add = () => setOpen('new')
+  /* The width the board is drawn at on the page, handed to the panel so the
+     board being edited is laid out at exactly that width — the same columns,
+     the same notes wrapping the same way — and only then shrunk to fit. */
+  const bodyRef = useRef<HTMLDivElement>(null)
 
-  const body =
-    boards.length === 0 ? (
-      <EmptyState art={EMPTY_ART.visionBoard} label="Make a Vision Board" cta onClick={add} />
-    ) : (
-      <div className="cp-boards">
-        {boards.map((b, i) => (
-          <Board board={b} key={`${i}:${b.title}`} onEdit={() => setOpen(i)} />
-        ))}
-      </div>
-    )
+  const body = (
+    <div ref={bodyRef}>
+      {boards.length === 0 ? (
+        <EmptyState art={EMPTY_ART.visionBoard} label="Make a Vision Board" cta onClick={add} />
+      ) : (
+        <div className="cp-boards">
+          {boards.map((b, i) => (
+            <Board board={b} key={`${i}:${b.title}`} onEdit={() => setOpen(i)} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 
   const editing = typeof open === 'number' ? boards[open] : undefined
   const modal =
     open === null ? null : (
       <AddVisionBoardModal
         board={editing}
+        boardWidth={bodyRef.current?.clientWidth}
         onClose={() => setOpen(null)}
         onSave={(b) => {
           setBoards((bs) =>
