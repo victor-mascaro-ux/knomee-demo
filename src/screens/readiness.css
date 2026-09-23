@@ -1120,3 +1120,32 @@
   font-variant-numeric: tabular-nums;
   color: var(--text-strong);
 }
+
+/* In the panels a heading belongs to the text under it: close to that, and a
+   clear step away from the section above. */
+.rd-why-body {
+  gap: 0;
+}
+.rd-why-body > .rd-why-h {
+  margin: 18px 0 4px;
+}
+.rd-why-body > .rd-calc {
+  margin-top: 4px;
+}
+.rd-why-body > .rd-why-note {
+  margin-top: 14px;
+}
+
+/* A starter's strategic recommendations: its tags, in a row. */
+.rd-talk-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-top: 16px;
+}
+.rd-talk-key {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}

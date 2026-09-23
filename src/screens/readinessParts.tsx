@@ -540,8 +540,11 @@ function TalkModal({
   leadHead,
   points,
   source,
+  keys,
   onClose,
 }: {
+  /** The strategic recommendations the line uses, with what each means. */
+  keys?: { tag: TagName; meaning: string }[]
   kind: string
   quote: string
   lead: string
@@ -578,6 +581,15 @@ function TalkModal({
           )}
           <h3 className="rd-why-h">{leadHead}</h3>
           <p className="rd-talk-p">{lead}</p>
+          {keys && keys.length > 0 && (
+            <>
+              <div className="rd-talk-keys">
+                {keys.map((k) => (
+                  <Tag name={k.tag} key={k.tag} />
+                ))}
+              </div>
+            </>
+          )}
           {points && points.length > 0 && (
             <ul className="rd-why-rows">
               {points.map((x) => (
@@ -594,7 +606,15 @@ function TalkModal({
   )
 }
 
-function StarterRow({ s, i }: { s: Starter; i: number }) {
+function StarterRow({
+  s,
+  i,
+  keyRows,
+}: {
+  s: Starter
+  i: number
+  keyRows?: { tag: TagName; meaning: string }[]
+}) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -627,6 +647,7 @@ function StarterRow({ s, i }: { s: Starter; i: number }) {
         leadHead="Why this line"
         lead={s.why}
         source={s.source}
+        keys={s.tags.map((t) => ({ tag: t, meaning: keyRows?.find((k) => k.tag === t)?.meaning ?? '' }))}
         onClose={() => setOpen(false)}
       />
     )}
@@ -651,7 +672,7 @@ export function StartersCard({
         <Head icon={icStarters} title="Conversation Starters" />
         <div className="rd-starters">
           {starters.map((s, i) => (
-            <StarterRow s={s} i={i} key={s.quote} />
+            <StarterRow s={s} i={i} key={s.quote} keyRows={keyRows} />
           ))}
         </div>
       </section>
