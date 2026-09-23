@@ -31,6 +31,8 @@ export interface FamilyMemberId {
   questions: ProfileQuestion[]
   joy: string[]
   futureYou: { where: string[]; what: string[]; who: string[] }
+  /* The letter Future You writes back, where the member wrote one. */
+  postcard?: string
   outlook: { concerns: string[]; hopes: string[] }
   badges: string[]
   /* The one card a member can have several of, or none. */
@@ -50,6 +52,7 @@ const emily: FamilyMemberId = {
   questions: clientProfile.questions,
   joy: clientProfile.financialJoy.chips,
   futureYou: clientProfile.futureYou,
+  postcard: clientProfile.postcard,
   outlook: clientProfile.outlook,
   badges: clientProfile.badges,
   boards: clientProfile.boards,
@@ -84,6 +87,11 @@ const sebastian: FamilyMemberId = {
   lifeEvents: [],
   questions: [],
   joy: ['Enjoying the moment', 'Security', 'Supporting my family'],
+  postcard:
+    'Four days a week now, and the two I keep are the ones I actually like. ' +
+    'We got the place by the lake — smaller than we talked about, close enough to drive up on a ' +
+    'Friday. I taught the youngest to read the water this summer, badly, and she caught more than ' +
+    'I did. Two of the people I mentor have their own teams. Stop counting the years to it.',
   futureYou: {
     where: ['In the mountains', 'By a lake', 'Outdoors'],
     what: ['Working less', 'Spending more time outside', 'Fishing with family', 'Mentoring'],

@@ -269,6 +269,12 @@ export const clientProfile = {
     less: ['Day-to-day money admin', 'Worrying about the market'],
   },
 
+  /* Hers, from the far side of the plan. */
+  postcard:
+    'We are at the water for the whole of August and nobody is asking when we go back. ' +
+    'The kids come with people we have not met yet, which is the part I did not think to hope for. ' +
+    'The scholarship at my old school gave out its fourth one this year and I read every letter. ' +
+    'You spent a long time afraid of running out. You did not run out.',
   futureYou: {
     where: ['At the beach', 'Abroad'],
     what: ['Relaxing', 'Running a business', 'Helping others', 'Traveling'],
