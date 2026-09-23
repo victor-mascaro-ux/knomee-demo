@@ -1524,3 +1524,13 @@
   transform: translateX(3px);
   color: var(--text-link);
 }
+
+/* A goal's pros and cons, one to a line: read as a list, not a sentence. */
+.pp-goal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

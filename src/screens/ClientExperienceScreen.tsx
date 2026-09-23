@@ -515,6 +515,47 @@ function MeterSeg({ i, on, last, order }: { i: number; on: boolean; last: boolea
   )
 }
 
+/* All five core adventures done: confetti falls over the list, and a banner
+   says so, for a few seconds. It takes no taps — the list stays usable under
+   it. */
+const FALL = Array.from({ length: 44 }, (_, i) => ({
+  i,
+  x: (i * 37) % 100,
+  d: ((i * 53) % 90) / 100,
+  t: 2.2 + ((i * 29) % 12) / 10,
+  r: (i * 67) % 360,
+  s: ((i * 41) % 60) - 30,
+  c: ['#240446', '#7639a1', '#b98ddc', '#e9d9f4', '#affc41', '#3dbdaa'][i % 6],
+  w: 6 + (i % 3) * 2,
+}))
+function Celebration() {
+  return (
+    <div className="cx-celebrate" aria-live="polite">
+      <div className="cx-celebrate-fall" aria-hidden>
+        {FALL.map((b) => (
+          <i
+            key={b.i}
+            style={{
+              left: `${b.x}%`,
+              width: b.w,
+              height: b.w * 1.6,
+              background: b.c,
+              animationDelay: `${b.d}s`,
+              animationDuration: `${b.t}s`,
+              ['--r' as string]: `${b.r}deg`,
+              ['--sway' as string]: `${b.s}px`,
+            }}
+          />
+        ))}
+      </div>
+      <div className="cx-celebrate-banner" role="status">
+        <b>All five adventures complete!</b>
+        <span>Your Financial ID is complete.</span>
+      </div>
+    </div>
+  )
+}
+
 /* How far through the core adventures she is: one segment per adventure,
    each filling in turn with the brand's plum-to-lilac, a light running across
    what is done, and the percentage counting up to where she is. */
@@ -1239,6 +1280,14 @@ export default function ClientExperienceScreen({
   useEffect(() => {
     if (!adventure) setReviewing(false)
   }, [adventure])
+  /* The fifth adventure done: a moment on the list she comes back to, then
+     it clears itself. Keyed by when, so finishing again celebrates again. */
+  const [celebrate, setCelebrate] = useState(0)
+  useEffect(() => {
+    if (!celebrate) return
+    const t = window.setTimeout(() => setCelebrate(0), 4200)
+    return () => window.clearTimeout(t)
+  }, [celebrate])
   const leaveReview = () => {
     setReviewing(false)
     setAdventure(null)
@@ -1501,6 +1550,7 @@ export default function ClientExperienceScreen({
                   completeAt('goals')
                   setAdventure(null)
                   setTab('adventures')
+                  setCelebrate(Date.now())
                 }}
               />
             ) : adventure === 'future-you' ? (
@@ -1743,6 +1793,8 @@ export default function ClientExperienceScreen({
             )}
           </nav>
           )}
+
+          {celebrate > 0 && !adventure && tab === 'adventures' && <Celebration key={celebrate} />}
 
           <div className="cx-home-bar" />
 
