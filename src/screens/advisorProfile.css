@@ -273,6 +273,35 @@
 }
 
 
+/* A section of a card rather than a card: the rule above it is what says the
+   adventure has more to show, and the caret is what says it is shut. */
+.ap-sub {
+  margin-top: var(--space-12);
+  padding-top: var(--space-12);
+  border-top: var(--border-thin) solid var(--border-default);
+}
+.ap-sub-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-link);
+  cursor: pointer;
+}
+.ap-sub-head .pp-fy-label {
+  margin: 0;
+}
+.ap-sub-head svg {
+  color: var(--grey-text, #8b8598);
+}
+.ap-sub-head:hover svg {
+  color: var(--text-strong, #240446);
+}
+
 /* The postcard: a letter among lists, so it reads as one — wider measure, and
    the italic the profile gives every quoted voice. */
 .ap-postcard {
