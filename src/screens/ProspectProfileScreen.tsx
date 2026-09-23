@@ -39,6 +39,7 @@ import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
 import type { JoyAnswers } from './JoyFlow'
 import { CONFIDENCE_STATEMENTS, confidenceReading, type ConfidenceAnswers } from './ConfidenceFlow'
+import type { OutlookAnswers } from './OutlookFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
@@ -73,7 +74,12 @@ export default function ProspectProfileScreen({
   onOpenEnding?: (id: string) => void
   /** Her phone as a new client's: nothing on the page until an adventure has
       put it there. `joy` is what Financial Joy handed back, once it has. */
-  fresh?: { joy: JoyAnswers | null; done?: Record<string, string>; conf?: ConfidenceAnswers | null }
+  fresh?: {
+    joy: JoyAnswers | null
+    done?: Record<string, string>
+    conf?: ConfidenceAnswers | null
+    outlook?: OutlookAnswers | null
+  }
   prospect: Prospect
   onBack: () => void
   onConvert?: (p: Prospect) => void
@@ -127,6 +133,9 @@ export default function ProspectProfileScreen({
         confidence: fresh.conf
           ? confidenceReading(fresh.conf.values.map((v, i) => v ?? CONFIDENCE_STATEMENTS[i].sample))
           : financialId.confidence,
+        /* Her own worries and hopes when she has taken Outlook; the authored
+           ones when it was skipped past. */
+        outlook: fresh.outlook ?? financialId.outlook,
         badges: BADGE_ORDER.filter((b) => isDone(b.toLowerCase().replace(/ /g, '-'))),
         financialJoy: {
           ...financialId.financialJoy,
@@ -477,7 +486,22 @@ export default function ProspectProfileScreen({
 
                   <section className={`pp-card${has.outlook ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
-                      <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
+                      {fresh && has.outlook && onOpenEnding ? (
+                        <button
+                          type="button"
+                          className="pp-card-title pp-card-title-link"
+                          onClick={() => onOpenEnding('outlook')}
+                          aria-label="Outlook — see your results again"
+                        >
+                          <img className="pp-card-ic" src={icOutlook} alt="" />
+                          Outlook
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
+                      )}
                       {has.outlook && <DateSelect />}
                     </div>
                     {!has.outlook && <p className="pp-waiting">Complete the Outlook adventure</p>}
