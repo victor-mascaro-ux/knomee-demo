@@ -718,6 +718,11 @@
 }
 .pp-event-body {
   min-width: 0;
+  /* It takes the whole row rather than the width of its longest line, or the
+     date and the pill at the two ends of the meta line end up at the two ends
+     of the SENTENCE above them — which is why a short event kept its "Advisor
+     added" halfway across the card. */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -1372,12 +1377,17 @@
   display: none;
 }
 
-/* A goal row you can open: the whole row is the control, so it takes the
-   pointer and the outline a row you can act on has. */
-.pp-goal.is-open-able {
+/* A row you can open — a goal, a life event: the whole row is the control, so
+   it takes the pointer and the outline a row you can act on has. */
+.pp-goal.is-open-able,
+.pp-event.is-open-able {
   cursor: pointer;
 }
-.pp-goal.is-open-able:focus-visible {
+.pp-goal.is-open-able:focus-visible,
+.pp-event.is-open-able:focus-visible {
   outline: 2px solid var(--purple-bolt, #9b51e0);
   outline-offset: 2px;
+}
+.pp-event.is-open-able:hover {
+  background: var(--surface-sunken);
 }
