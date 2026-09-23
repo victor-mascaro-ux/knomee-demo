@@ -6532,19 +6532,16 @@ button.name-link-btn:hover .name-text {
     /* Laid out as blocks, the goals lost the gap their column gave them and
        sat on each other. A goal is kept whole; the card that holds them is
        not, so four of them may run over two sheets rather than being squeezed
-       onto one. */
+       onto one. The gap is what the grey around each of them fills. */
     margin-bottom: var(--space-16);
+    box-shadow: 0 0 0 var(--space-16) #f1f3f7 !important;
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-  .pp-goal:last-child {
-    margin-bottom: 0;
   }
   /* The cards that are allowed to run over a page break give up their grey
      tray while they do it. A tray paints to the foot of the sheet it breaks
      on, so a card carrying one goal and a page break under it printed half a
-     page of empty wash. What is inside them — a goal, a photograph, a note —
-     is a white card or a picture and holds its own shape on white. */
+     page of empty wash. */
   .pp-card:has(.pp-goals),
   .pp-card:has(.cp-goal-cols),
   .pp-card:has(.cp-boards) {
@@ -6553,6 +6550,29 @@ button.name-link-btn:hover .name-text {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
+  }
+
+  /* ── the goals' tray, rebuilt out of its own parts ──
+     Goals keep the grey the card gave them: the head wears the top of the
+     tray, and each goal carries the rest of it around itself as a spread
+     shadow rather than a background behind the lot. A shadow belongs to the
+     goal, so it goes where the goal goes — the grey follows a goal onto the
+     next sheet instead of running to the foot of this one, and two goals
+     16px apart with 16px of grey each meet in a single column of it. */
+  .pp-card:has(.pp-goals),
+  .pp-card:has(.cp-goal-cols) {
+    padding: 0 !important;
+  }
+  .pp-card:has(.pp-goals) > .pp-card-head,
+  .pp-card:has(.cp-goal-cols) > .pp-card-head {
+    margin: 0;
+    padding: var(--space-16) var(--space-18) var(--space-16);
+    border-radius: 14px 14px 0 0;
+    background: #f1f3f7;
+  }
+  .pp-goals,
+  .cp-goal-cols {
+    margin: 0 var(--space-16);
   }
 
   /* ── a vision board across a break ──
