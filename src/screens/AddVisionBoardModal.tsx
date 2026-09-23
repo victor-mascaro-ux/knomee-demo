@@ -102,6 +102,8 @@ export default function AddVisionBoardModal({
   const photoInput = useRef<HTMLInputElement>(null)
   /* Asking whether to leave a board that has not been saved. */
   const [leaving, setLeaving] = useState(false)
+  /* Asking before a board is deleted: it cannot be brought back. */
+  const [deleting, setDeleting] = useState(false)
 
   /* Anything different from what was opened is work that would be lost. */
   const dirty =
@@ -116,8 +118,9 @@ export default function AddVisionBoardModal({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      // Escape on the question is "go back", not a second way out.
-      if (leaving) setLeaving(false)
+      // Escape on a question is "go back", not a second way out.
+      if (deleting) setDeleting(false)
+      else if (leaving) setLeaving(false)
       else requestClose()
     }
     window.addEventListener('keydown', onKey)
@@ -305,7 +308,7 @@ export default function AddVisionBoardModal({
             </div>
             <div className="modal-footer vb-foot">
               {onDelete && (
-                <button className="vb-link vb-delete" type="button" onClick={onDelete}>
+                <button className="vb-link vb-delete" type="button" onClick={() => setDeleting(true)}>
                   Delete board
                 </button>
               )}
@@ -319,6 +322,32 @@ export default function AddVisionBoardModal({
               </button>
             </div>
           </>
+        )}
+
+        {deleting && onDelete && (
+          <div className="vb-leave" role="alertdialog" aria-labelledby="vb-delete-title">
+            <div className="vb-leave-card">
+              <h3 id="vb-delete-title" className="vb-leave-title">
+                Delete this board?
+              </h3>
+              <p className="vb-leave-note">
+                “{title || board?.title}” and everything on it will be removed. This can’t be undone.
+              </p>
+              <div className="vb-leave-acts">
+                <button className="btn btn-outline vb-delete-yes" type="button" onClick={onDelete}>
+                  Delete board
+                </button>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  autoFocus
+                  onClick={() => setDeleting(false)}
+                >
+                  Keep it
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {leaving && (
