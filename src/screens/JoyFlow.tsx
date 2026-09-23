@@ -20,7 +20,10 @@ import './joyFlow.css'
 import { JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
 import JoyResults from './JoyResults'
-import bgFinancialJoy from '../assets/badges/financial-joy.svg'
+import JoyReward from './JoyReward'
+/* The badge as the reward shows it: the same art with its lettering in white,
+   for the plum it sits on there. */
+import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
 
 export interface JoyAnswers {
   tools: string[]
@@ -279,18 +282,14 @@ export default function JoyFlow({
       )}
 
       {step.kind === 'badge' && (
-        <div className="jf-badge">
-          <img className="jf-badge-art" src={bgFinancialJoy} alt="" />
-          <h2 className="af-h1">{step.title}</h2>
-          <p className="af-body">{step.body}</p>
-        </div>
+        <JoyReward badge={bgFinancialJoy} done={1} total={5} next="Confidence" onNext={onCta} />
       )}
 
       {/* The advisor flow's segmented progress, one bar per screen, and the
           one thing to press beside it. There is no Back — the
           bar's cross is the way out, and a question is changed by answering it
           again. The intro carries its own Get Started, so it has no foot. */}
-      {step.kind !== 'intro' && step.kind !== 'done' && (
+      {step.kind !== 'intro' && step.kind !== 'done' && step.kind !== 'badge' && (
         <div className="jf-foot">
           {/* Where you are, and under it the way one question back; then the
               one thing to press. */}
