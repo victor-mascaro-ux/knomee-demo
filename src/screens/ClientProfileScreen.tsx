@@ -82,32 +82,102 @@ export function Portrait({ name, size }: { name: string; size: 'lg' | 'sm' }) {
    photograph in public/vision/ is 292×298 — is not read as landscape. */
 const LANDSCAPE = 1.15
 
+/* A photograph's cell, in columns × rows. */
+export type TileSize = '1x1' | '2x1' | '1x2'
+
+const KEY_SIZE: Partial<Record<string, TileSize>> = {
+  ArrowRight: '2x1',
+  ArrowDown: '1x2',
+  ArrowLeft: '1x1',
+  ArrowUp: '1x1',
+}
+
 function BoardPhoto({
   src,
   alt,
   tall,
   wide,
   style,
+  onResize,
 }: {
   src: string
   alt: string
   tall?: boolean
   wide?: boolean
   style?: CSSProperties
+  /** A board being made: the photograph carries a handle that drags it to one
+      cell, two across or two down. */
+  onResize?: (size: TileSize) => void
 }) {
   const [failed, setFailed] = useState(false)
+  const tile = useRef<HTMLDivElement>(null)
+  /* The size under the finger while the handle is held; null otherwise. */
+  const [draft, setDraft] = useState<TileSize | null>(null)
   /* A landscape photograph never takes the tall cell. The tile cannot know the
      file's shape until it loads, so the image reports it and the tall spans is
      dropped — the rule holds for photographs dropped in later too, without
-     anyone having to remember it. */
+     anyone having to remember it. A hand that drags one tall has chosen it,
+     though: the rule is for the authored boards, not for overruling her. */
   const [landscape, setLandscape] = useState(false)
-  const isTall = tall && !landscape
+  const size: TileSize =
+    draft ?? (wide ? '2x1' : tall && (onResize || !landscape) ? '1x2' : '1x1')
+
+  /* The drag is read in cells: the tile's size plus how far the handle has
+     travelled, snapped to one cell or two on each axis. Past halfway on both is
+     read as the axis it went further along — a photograph never takes four. */
+  const startDrag = (e: React.PointerEvent) => {
+    const el = tile.current
+    const grid = el?.parentElement
+    if (!el || !grid || !onResize) return
+    e.preventDefault()
+    e.stopPropagation()
+    const cs = getComputedStyle(grid)
+    const cols = cs.gridTemplateColumns.split(' ').length
+    const gap = parseFloat(cs.columnGap) || 0
+    const rowGap = parseFloat(cs.rowGap) || 0
+    const cellW = (grid.clientWidth - gap * (cols - 1)) / cols
+    const cellH = parseFloat(cs.gridAutoRows) || cellW
+    // The phone is drawn scaled; the pointer moves in screen pixels.
+    const scale = grid.getBoundingClientRect().width / grid.clientWidth || 1
+    const w0 = el.offsetWidth
+    const h0 = el.offsetHeight
+    const x0 = e.clientX
+    const y0 = e.clientY
+    const pick = (ev: PointerEvent): TileSize => {
+      const w = w0 + (ev.clientX - x0) / scale
+      const h = h0 + (ev.clientY - y0) / scale
+      const across = cols > 1 ? (w - cellW) / (cellW + gap) : 0
+      const down = (h - cellH) / (cellH + rowGap)
+      if (across < 0.5 && down < 0.5) return '1x1'
+      return across >= down ? '2x1' : '1x2'
+    }
+    let last = size
+    setDraft(size)
+    const move = (ev: PointerEvent) => {
+      last = pick(ev)
+      setDraft(last)
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      setDraft(null)
+      onResize(last)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
+
   return (
     <div
-      style={style}
-      className={`cp-tile cp-tile-photo ${isTall ? 'is-tall' : ''} ${wide ? 'is-wide' : ''} ${
-        failed ? 'is-missing' : ''
-      }`}
+      ref={tile}
+      /* While it is being sized, the stretch the board gave the last tile would
+         fight the hand, so it is set aside until she lets go. */
+      style={draft ? { ...style, gridColumn: undefined } : style}
+      className={`cp-tile cp-tile-photo ${size === '1x2' ? 'is-tall' : ''} ${
+        size === '2x1' ? 'is-wide' : ''
+      } ${failed ? 'is-missing' : ''}${onResize ? ' is-sizable' : ''}${draft ? ' is-sizing' : ''}`}
     >
       {failed ? (
         <span className="cp-tile-alt">{alt}</span>
@@ -115,12 +185,45 @@ function BoardPhoto({
         <img
           src={src}
           alt={alt}
+          draggable={false}
           onError={() => setFailed(true)}
           onLoad={(e) => {
             const im = e.currentTarget
             if (im.naturalHeight && im.naturalWidth / im.naturalHeight > LANDSCAPE) setLandscape(true)
           }}
         />
+      )}
+      {onResize && (
+        <>
+          {draft && <span className="cp-tile-size">{draft.replace('x', ' × ')}</span>}
+          <span
+            className="cp-tile-handle"
+            role="slider"
+            aria-label="Photo size"
+            aria-valuetext={size}
+            tabIndex={0}
+            data-no-drag-scroll
+            onPointerDown={startDrag}
+            onKeyDown={(e) => {
+              // The arrows do what the drag does, for a hand not on a mouse.
+              const next = KEY_SIZE[e.key]
+              if (next) {
+                e.preventDefault()
+                onResize(next)
+              }
+            }}
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
+              <path
+                d="M9.5 3.5h3v3M6.5 12.5h-3v-3M12.5 3.5 3.5 12.5"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </>
       )}
     </div>
   )
@@ -201,20 +304,6 @@ function BoardNote({
       }`}
     >
       <div className="cp-note-inner" ref={inner}>
-        {tile.voice && (
-          <span className="cp-note-voice" aria-label="Voice note">
-            <svg viewBox="0 0 20 20" width="11" height="11" fill="none" aria-hidden>
-              <rect x="7" y="2.5" width="6" height="10" rx="3" fill="currentColor" />
-              <path
-                d="M4.6 9.6a5.4 5.4 0 0 0 10.8 0M10 15v2.6"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-            Voice note
-          </span>
-        )}
         {tile.title && <span className="cp-note-title">{tile.title}</span>}
         {tile.text && <p className="cp-note-text">{tile.text}</p>}
         {tile.items && (
@@ -286,7 +375,14 @@ function trailingGap(grid: HTMLDivElement) {
 }
 
 /* Exported because the Family ID draws the same boards in its own column. */
-export function Board({ board }: { board: VisionBoard }) {
+export function Board({
+  board,
+  onResize,
+}: {
+  board: VisionBoard
+  /** A board being made: its photographs can be dragged to a size. */
+  onResize?: (i: number, size: TileSize) => void
+}) {
   const grid = useRef<HTMLDivElement>(null)
   const [fill, setFill] = useState<{ i: number; span: number } | null>(null)
   const [, bump] = useState(0)
@@ -338,6 +434,7 @@ export function Board({ board }: { board: VisionBoard }) {
               tall={t.tall}
               wide={t.wide}
               style={spanOf(i)}
+              onResize={onResize ? (size) => onResize(i, size) : undefined}
             />
           ) : (
             <BoardNote key={i} tile={t} style={spanOf(i)} onSpan={remeasure} />

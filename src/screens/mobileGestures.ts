@@ -42,6 +42,9 @@ export function useDragScroll<T extends HTMLElement>(ref: RefObject<T | null>) {
       // selecting your own sentence scroll the phone instead.
       if ((e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable]'))
         return
+      // A control that is itself dragged — a board tile's resize handle — keeps
+      // its drag rather than having the page scroll under it.
+      if ((e.target as Element | null)?.closest?.('[data-no-drag-scroll]')) return
       cancelAnimationFrame(raf)
       dragging = true
       pointer = e.pointerId
