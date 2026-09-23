@@ -350,6 +350,9 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
   /* The card opened to show how it was worked out, and the headline card. */
   const [why, setWhy] = useState<Snapshot['dimensions'][number] | null>(null)
   const [whyTotal, setWhyTotal] = useState(false)
+  const isOut = (d: Snapshot['dimensions'][number]) =>
+    score.abbr === 'KR' && d.key === 'Referenceability' && d.score === 0
+  const counted = s.dimensions.filter((d) => !isOut(d)).length
   // A prospect's KQ and an advisor's RQ; the client's KR keeps it full width.
   const tierInBreakdown = score.abbr !== 'KR'
   const tier = (
@@ -416,13 +419,13 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
             label: d.key,
             value: d.caption,
             points: d.score,
-            // The KR leaves a referral score out while there is no signal.
-            weight: score.abbr === 'KR' && d.key === 'Referenceability' && d.score === 0 ? 'not counted' : undefined,
+            // Each counted dimension an equal share of the average; the KR
+            // leaves a referral score out while there is no signal.
+            weight: isOut(d) ? 'not counted' : `${Math.round(100 / counted)}%`,
           }))}
           sumLabel={`${score.abbr} score`}
           sumCaption={verdictOf(s.kq, score.abbr)}
           sumScore={s.kq}
-          note={s.total}
           onClose={() => setWhyTotal(false)}
         />
       )}
