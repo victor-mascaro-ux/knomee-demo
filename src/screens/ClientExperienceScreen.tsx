@@ -634,10 +634,26 @@ function AdventuresScreen() {
   )
 }
 
+/* Which of the four quick actions opens a form on the Financial ID. Saving a
+   vision is not one of them yet: a vision board is pictures, and there is
+   nowhere on this prototype to put one. */
+const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question'>> = {
+  goals: 'goal',
+  'life-events': 'event',
+  questions: 'question',
+}
+
 /* ── quick access: one tap on the knomee mark ──────────────────────────────
    The next adventure, four things worth doing, and the mood arc — a flat plum
    disc that runs off the bottom of the screen, faces along its rim. */
-function KnomeeSheet({ onClose }: { onClose: () => void }) {
+function KnomeeSheet({
+  onClose,
+  onPick,
+}: {
+  onClose: () => void
+  /** One of the three things the Financial ID can actually add. */
+  onPick: (flow: 'goal' | 'event' | 'question') => void
+}) {
   const [mood, setMood] = useState<MoodId | null>(null)
   const { r, faceR, face } = MOOD_ARC
   const swipe = useSwipeDown(onClose)
@@ -660,6 +676,10 @@ function KnomeeSheet({ onClose }: { onClose: () => void }) {
             className="kx-action"
             type="button"
             style={{ animationDelay: `${i * 0.06}s` }}
+            onClick={() => {
+              const flow = QUICK_FLOW[q.art]
+              if (flow) onPick(flow)
+            }}
           >
             <span>
               <img className={q.raster ? 'is-raster' : undefined} src={art[q.art]} alt="" />
@@ -905,14 +925,17 @@ export default function ClientExperienceScreen({
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
+  /* What the quick-access sheet asked for, on its way to the Financial ID. */
+  const [flow, setFlow] = useState<'goal' | 'event' | 'question' | null>(null)
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   useDarkGround()
-  const { scale: fitScale, windowH } = useFitToWindow()
+  const { scale: fitScale, windowH, bare } = useFitToWindow()
   const { zoom, setZoom, reset: resetZoom } = useZoom()
-  const scale = fitScale * zoom
+  /* On a handset the frame is gone, so there is nothing to scale. */
+  const scale = bare ? 1 : fitScale * zoom
 
   // Long-press the centre mark to talk to Knomee; a plain tap opens quick
   // access. The gesture rides on the tab bar itself so the mark keeps being a
@@ -962,11 +985,19 @@ export default function ClientExperienceScreen({
     // be wrong here: inside the review iframe, which is sized to the document,
     // it grows every time the content does and never comes back down — leaving
     // the controls stranded below the fold after a zoom out.
-    <div className="cx-page" style={{ ...brandVars(brand), ...(windowH ? { minHeight: windowH } : null) }}>
+    <div
+      className={`cx-page${bare ? ' is-bare' : ''}`}
+      style={{ ...brandVars(brand), ...(windowH && !bare ? { minHeight: windowH } : null) }}
+    >
       {/* The scaled frame keeps its unscaled footprint, so the wrapper carries
-          the scaled height and the page never grows a phantom scrollbar. */}
-      <div className="cx-fit" style={{ height: DEVICE_H * scale, width: DEVICE_W * scale }}>
-        <IPhone scale={scale} dim={sheet || voiceOpen}>
+          the scaled height and the page never grows a phantom scrollbar. On a
+          handset there is no frame to carry: the screen is the window, the way
+          it already is on every other one of these. */}
+      <div
+        className="cx-fit"
+        style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
+      >
+        <IPhone scale={scale} bare={bare} dim={sheet || voiceOpen}>
           <header className="cx-appbar">
             <AppbarBrand brand={brand} />
             <button
@@ -998,6 +1029,8 @@ export default function ClientExperienceScreen({
               <ClientProfileScreen
                 client={EMILY}
                 mine
+                startFlow={flow}
+                onStartFlowDone={() => setFlow(null)}
                 onBack={() => setTab('adventures')}
                 ownerMenu={
                   <button
@@ -1022,7 +1055,18 @@ export default function ClientExperienceScreen({
             />
           )}
 
-          {sheet && <KnomeeSheet onClose={() => setSheet(false)} />}
+          {sheet && (
+            <KnomeeSheet
+              onClose={() => setSheet(false)}
+              onPick={(f) => {
+                /* The sheet closes, the Financial ID comes up, and the form is
+                   already open on it. */
+                setSheet(false)
+                setTab('finid')
+                setFlow(f)
+              }}
+            />
+          )}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
 
           <nav

@@ -96,13 +96,18 @@
   border-radius: var(--radius-md);
   transition: background var(--dur-base) var(--ease-out);
 }
-/* The chevron belongs to the name, not to the pair of lines — centred on the
-   row it floated between the name and the role. Pinned to the top and nudged
-   by half the difference between the name's line and its own 14px, it sits on
-   the name. */
+/* Neither the chevron nor the face belongs to the pair of lines — they belong
+   to the name. Centred on the row they floated between the name and the role.
+   Pinned to the top and nudged by half the difference between the name's line
+   and their own height, they sit on the name. */
 .cp-person > svg {
   align-self: flex-start;
   margin-top: calc((18px - 14px) / 2);
+}
+.cp-person > .avatar,
+.cp-person > .cp-person-av {
+  align-self: flex-start;
+  margin-top: calc((18px - 26px) / 2);
 }
 .cp-person.is-current {
   /* the member whose page this is */
