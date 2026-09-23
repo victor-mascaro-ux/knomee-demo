@@ -48,7 +48,16 @@ export type JoyStep =
       other: { label: string; hint: string; placeholder: string }
     }
   | { kind: 'split'; eyebrow: string; areas: string[] }
-  | { kind: 'reflect'; eyebrow: string; title: string; body: string; placeholder: string }
+  | {
+      kind: 'reflect'
+      eyebrow: string
+      title: string
+      body: string
+      placeholder: string
+      /** A believable answer the demo can type in, so a room is not watching
+          someone think of one. */
+      example: string
+    }
   | { kind: 'done'; title: string; body: string; cta: string }
   | { kind: 'badge'; title: string; body: string; cta: string }
 
@@ -133,13 +142,8 @@ export const joySteps: JoyStep[] = [
     title: 'When did money last buy you something that brought you joy?',
     body: 'A day, a thing, a trip — whatever comes to mind first.',
     placeholder: 'Write as much or as little as you like.',
-  },
-  {
-    kind: 'reflect',
-    eyebrow: 'Think back!',
-    title: 'When did money last get in the way of something you wanted?',
-    body: 'Naming it is the part that helps. Nothing here is graded.',
-    placeholder: 'Write as much or as little as you like.',
+    example:
+      'Taking the whole family to the coast last summer. A rented house, no plans, the kids in the water every day. It was the first trip we paid for without checking the account first.',
   },
   {
     kind: 'reflect',
@@ -147,6 +151,8 @@ export const joySteps: JoyStep[] = [
     title: 'What would you do tomorrow if money were taken care of?',
     body: 'The first answer is usually the honest one.',
     placeholder: 'Write as much or as little as you like.',
+    example:
+      'Move closer to my daughter, and spend the mornings painting. Travel with Vic while we both still can.',
   },
   {
     kind: 'done',
