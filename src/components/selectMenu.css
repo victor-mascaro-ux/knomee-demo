@@ -29,14 +29,25 @@ button.sm-trigger {
   color: var(--plum, #240446);
   transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-.sm-trigger.is-open .sm-caret {
+button.sm-trigger.is-open:not(.is-closing) .sm-caret {
   transform: rotate(180deg);
 }
-.sm-trigger.is-open {
+/* Open, the field and its list are one shape: the field gives up the corners
+   on the side the list comes out of, and both wear the accent edge. */
+button.sm-trigger.is-open {
   border-color: var(--purple-bolt, #9b51e0);
+  transition: border-radius 0.1s ease;
+}
+button.sm-trigger.is-open:not(.is-up) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+button.sm-trigger.is-open.is-up {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
-/* The list: the page's card, growing out of the field and folding back. */
+/* The list, unrolling out of the field and rolling back into it. */
 .sm-pop {
   position: fixed;
   z-index: 3000;
@@ -47,64 +58,57 @@ button.sm-trigger {
   gap: 2px;
   padding: 6px;
   background: #fff;
-  border: 1px solid var(--line, #e7e4ee);
-  border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(36, 4, 70, 0.16);
+  border: 1px solid var(--purple-bolt, #9b51e0);
+  border-top-color: var(--line, #e7e4ee);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 16px 30px -10px rgba(36, 4, 70, 0.22);
   font-family: inherit;
-  transform-origin: top center;
-  animation: smOpen 0.18s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: smOpen 0.22s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 .sm-pop.is-up {
-  transform-origin: bottom center;
+  border-top-color: var(--purple-bolt, #9b51e0);
+  border-bottom-color: var(--line, #e7e4ee);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -16px 30px -10px rgba(36, 4, 70, 0.22);
+  animation-name: smOpenUp;
 }
 .sm-pop.is-closing {
   animation: smClose 0.14s ease-in both;
   pointer-events: none;
 }
+.sm-pop.is-up.is-closing {
+  animation-name: smCloseUp;
+}
 @keyframes smOpen {
   from {
-    opacity: 0;
-    transform: translateY(-4px) scaleY(0.92);
+    clip-path: inset(0 -40px 100% -40px);
   }
   to {
-    opacity: 1;
-    transform: none;
+    clip-path: inset(0 -40px -60px -40px);
   }
 }
 @keyframes smClose {
   from {
-    opacity: 1;
-    transform: none;
+    clip-path: inset(0 -40px -60px -40px);
   }
   to {
-    opacity: 0;
-    transform: translateY(-4px) scaleY(0.92);
+    clip-path: inset(0 -40px 100% -40px);
   }
-}
-.sm-pop.is-up {
-  animation-name: smOpenUp;
-}
-.sm-pop.is-up.is-closing {
-  animation-name: smCloseUp;
 }
 @keyframes smOpenUp {
   from {
-    opacity: 0;
-    transform: translateY(4px) scaleY(0.92);
+    clip-path: inset(100% -40px 0 -40px);
   }
   to {
-    opacity: 1;
-    transform: none;
+    clip-path: inset(-60px -40px 0 -40px);
   }
 }
 @keyframes smCloseUp {
   from {
-    opacity: 1;
-    transform: none;
+    clip-path: inset(-60px -40px 0 -40px);
   }
   to {
-    opacity: 0;
-    transform: translateY(4px) scaleY(0.92);
+    clip-path: inset(100% -40px 0 -40px);
   }
 }
 

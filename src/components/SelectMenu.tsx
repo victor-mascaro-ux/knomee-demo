@@ -3,7 +3,8 @@
    square corners — and cannot be styled or animated, so inside a Knomee panel
    it looked like somebody else's control. This one keeps the field it replaces
    (the trigger wears that field's class) and opens its list on the page's own
-   card, growing out of the field and folding back into it when it closes.
+   card as one piece with the field: joined along its edge, unrolling out of
+   it and rolling back in when it closes.
 
    The list is portalled to <body> and placed against the trigger: inside a
    modal it would otherwise be clipped by the body's scroll box. It opens
@@ -72,8 +73,8 @@ export default function SelectMenu({
     const up = below < want + 12 && r.top > below
     setPlace(
       up
-        ? { left: r.left, width: r.width, bottom: window.innerHeight - r.top + 6, up }
-        : { left: r.left, width: r.width, top: r.bottom + 6, up },
+        ? { left: r.left, width: r.width, bottom: window.innerHeight - r.top - 1, up }
+        : { left: r.left, width: r.width, top: r.bottom - 1, up },
     )
   }, [state, opts.length])
 
@@ -137,7 +138,7 @@ export default function SelectMenu({
         id={id}
         ref={trigger}
         type="button"
-        className={`${className} sm-trigger${state === 'open' ? ' is-open' : ''}${picked ? '' : ' is-empty'}`}
+        className={`${className} sm-trigger${state !== 'shut' ? ' is-open' : ''}${state === 'closing' ? ' is-closing' : ''}${place?.up ? ' is-up' : ''}${picked ? '' : ' is-empty'}`}
         aria-haspopup="listbox"
         aria-expanded={state === 'open'}
         disabled={disabled}
