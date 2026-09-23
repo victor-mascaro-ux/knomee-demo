@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
-import JoyFlow from './JoyFlow'
+import JoyFlow, { type JoyAnswers } from './JoyFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -18,6 +18,7 @@ import {
   lockedAdventures,
   mobileTabs,
   moodQuestion,
+  journey,
   moods,
   quickActions,
   quickNext,
@@ -177,6 +178,20 @@ export const MARK_PARTS = [
    screen's exact 390px width so the arc is never distorted — chord 82, rise 18,
    a shallow swell the mark sits into rather than a dome around it. */
 export const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
+
+/* The tab bar's top edge and its swell around the centre mark. The swell is a
+   true circle at any width: it was one SVG stretched to the screen, and on a
+   screen wider than 390 the stretch flattened the circle into an ellipse. Now
+   the flat edge is the bar's own white with a hairline on top, full width, and
+   the swell is drawn separately at its own size, centred on it. */
+export const TabEdge = () => (
+  <span className="cx-tab-edge" aria-hidden>
+    <svg className="cx-tab-dome" viewBox="150 0 90 20" width="90" height="20">
+      <path d="M154 18.6a55.7 55.7 0 0 1 82 0Z" fill="#fff" />
+      <path d="M150 18h4a55.7 55.7 0 0 1 82 0h4" fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
+    </svg>
+  </span>
+)
 
 /* ── keep the whole device on screen ──────────────────────────────────────
    The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
@@ -618,11 +633,49 @@ export function LockedRow({
 function AdventuresScreen({
   onPick,
   onOpenAdventure,
+  done,
 }: {
   onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** An adventure that can actually be taken. */
   onOpenAdventure: (id: string) => void
+  /** Adventures completed, by id, with the day each was. Given, the list is
+      a new client's journey; absent, the authored five-of-five. */
+  done?: Record<string, string>
 }) {
+  if (done) {
+    /* The journey: what is done, the one thing next, and the rest waiting in
+       the order they come. The meter counts the five core adventures. */
+    const next = journey.find((j) => !done[j.id])
+    const coreDone = journey.filter((j) => j.core && done[j.id]).length
+    return (
+      <>
+        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
+        <h2 className="cx-screen-title">My Adventures</h2>
+        <div className="cx-adv-list">
+          {journey.map((j) =>
+            done[j.id] ? (
+              <CompletedRow
+                key={j.id}
+                title={j.title}
+                artKey={j.art!}
+                on={done[j.id]}
+                onRow={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+              />
+            ) : j === next ? (
+              <ActionRow
+                key={j.id}
+                a={{ title: j.title, art: j.art!, blurb: j.blurb, minutes: j.minutes, label: 'Start' }}
+                onAct={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+                onRow={j.id === 'financial-joy' ? () => onOpenAdventure('financial-joy') : undefined}
+              />
+            ) : (
+              <LockedRow key={j.id} title={j.title} artKey={j.art} />
+            ),
+          )}
+        </div>
+      </>
+    )
+  }
   return (
     <>
       {/* The page says what it is, then how far through it you are: a meter
@@ -991,7 +1044,16 @@ const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0
 
 /* The in-phone menu. The only way back to the advisor side lives here, so the
    demo is driven entirely from inside the device. */
-function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => void }) {
+function MobileMenu({
+  onExit,
+  onClose,
+  progress,
+}: {
+  onExit: () => void
+  onClose: () => void
+  /** Where she is on the five, said under her name. */
+  progress: string
+}) {
   return (
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
@@ -1003,7 +1065,7 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
           </span>
           <span>
             <b>{financialId.owner}</b>
-            <i>All five adventures complete</i>
+            <i>{progress}</i>
           </span>
           <SheetCredit />
         </div>
@@ -1039,6 +1101,11 @@ export default function ClientExperienceScreen({
   /* The adventure being taken, if any. It takes over the screen: the app bar
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
+  /* Her journey. She starts new: nothing done and an empty Financial ID, and
+     finishing Financial Joy completes it on the list, opens the next, and
+     puts its answers on the page. */
+  const [joy, setJoy] = useState<JoyAnswers | null>(null)
+  const done: Record<string, string> = joy ? { 'financial-joy': DEMO_TODAY } : {}
   const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
     setTab('finid')
@@ -1163,15 +1230,17 @@ export default function ClientExperienceScreen({
             {adventure ? (
               <JoyFlow
                 onClose={() => setAdventure(null)}
-                onComplete={() => {
-                  /* Their answers land on the Financial ID, which is where the
-                     adventure was always going. */
+                onComplete={(answers) => {
+                  /* Done: the answers go on her Financial ID, and she lands on
+                     the list, where the adventure now reads as complete and the
+                     next one has opened. */
+                  setJoy(answers)
                   setAdventure(null)
-                  setTab('finid')
+                  setTab('adventures')
                 }}
               />
             ) : tab === 'adventures' ? (
-              <AdventuresScreen onPick={openFlow} onOpenAdventure={setAdventure} />
+              <AdventuresScreen onPick={openFlow} onOpenAdventure={setAdventure} done={done} />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
                  answers — one artefact, not a second rendering of it. It was a
@@ -1179,6 +1248,7 @@ export default function ClientExperienceScreen({
                  built. */
               <ProspectProfileScreen
                 prospect={SARAH}
+                fresh={{ joy }}
                 mine
                 checkIn={
                   checkIn
@@ -1242,17 +1312,7 @@ export default function ClientExperienceScreen({
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
-            <svg
-              className="cx-tab-edge"
-              viewBox="0 0 390 96"
-              width="390"
-              height="96"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <path d={`${TAB_EDGE}V96H0Z`} fill="#fff" />
-              <path d={TAB_EDGE} fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
-            </svg>
+            <TabEdge />
             {mobileTabs.map((t) =>
               t.center ? (
                 <button
@@ -1299,7 +1359,13 @@ export default function ClientExperienceScreen({
 
           <div className="cx-home-bar" />
 
-          {menuOpen && <MobileMenu onExit={onExit} onClose={() => setMenuOpen(false)} />}
+          {menuOpen && (
+            <MobileMenu
+              onExit={onExit}
+              onClose={() => setMenuOpen(false)}
+              progress={`${joy ? 1 : 0} of 5 adventures complete`}
+            />
+          )}
         </IPhone>
       </div>
 

@@ -188,3 +188,31 @@ export const voices: VoiceScript[] = [
 
 /** Signed-in client, shown as the avatar initial in the in-phone menu. */
 export const clientInitial = 'D'
+
+/* ── a new client's journey ───────────────────────────────────────────────
+   Her phone starts where a new client starts: nothing done, Financial Joy
+   open, the rest waiting in the order they are taken. Finishing one opens the
+   next. Only Financial Joy is built, so the others open but go nowhere yet. */
+export interface JourneyStep {
+  id: string
+  title: string
+  art?: ArtKey
+  blurb: string
+  minutes: number
+  /** One of the five that make a complete Financial ID. */
+  core?: boolean
+}
+
+export const journey: JourneyStep[] = [
+  { id: 'financial-joy', title: 'Financial Joy', art: 'financial-joy', blurb: 'Discover what brings you joy.', minutes: 1, core: true },
+  { id: 'confidence', title: 'Confidence', art: 'confidence', blurb: 'See how sure you feel about money.', minutes: 3, core: true },
+  { id: 'outlook', title: 'Outlook', art: 'outlook', blurb: 'Name what you hope for, and what worries you.', minutes: 3, core: true },
+  { id: 'future-you', title: 'Future You', art: 'future-you', blurb: 'Picture where you want to be.', minutes: 3, core: true },
+  { id: 'goals', title: 'Goals', art: 'goals', blurb: 'Set what you are working toward.', minutes: 3, core: true },
+  { id: 'life-events', title: 'Life Events', art: 'life-events', blurb: 'Add what is changing in your life.', minutes: 3 },
+  { id: 'people', title: 'People', blurb: '', minutes: 3 },
+  { id: 'short-term-goals', title: 'Short Term Goals', blurb: '', minutes: 3 },
+  { id: 'values', title: 'Values', blurb: '', minutes: 3 },
+  { id: 'money-history', title: 'Money History', blurb: '', minutes: 3 },
+  { id: 'risk-tolerance', title: 'Risk Tolerance', blurb: '', minutes: 3 },
+]
