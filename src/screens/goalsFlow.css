@@ -294,10 +294,12 @@
 }
 /* The stage artwork as drawn: large in the hero, at text size in a summary. */
 .glr-ttm {
+  --ttm-w: 88px;
   display: block;
-  width: 88px;
+  width: var(--ttm-w);
   height: auto;
-  margin-top: 4px;
+  /* The marker hangs below the bars rather than counting as their height. */
+  margin: 4px 0 calc(var(--ttm-w) * -0.2879 + 18px);
 }
 .glr-stage b {
   font-size: 20px;

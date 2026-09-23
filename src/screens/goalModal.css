@@ -233,5 +233,5 @@
   align-self: center;
 }
 .goal-readiness .pp-ttm {
-  margin: 0;
+  margin: 0 0 calc(var(--ttm-w) * -0.2879);
 }

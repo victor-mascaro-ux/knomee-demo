@@ -519,11 +519,15 @@
 }
 /* The stage artwork, at the size the bars were drawn: 20px wide, with room
    for its marker below. */
+/* The drawing is the five bars (50 of its 69 units) and the marker under
+   them. Only the bars should count: the marker hangs below the box, so a row
+   centring the drawing centres its bars. (19/66 of the width is the marker.) */
 .pp-ttm {
+  --ttm-w: 20px;
   display: block;
-  width: 20px;
+  width: var(--ttm-w);
   height: auto;
-  margin: 5px 0;
+  margin: 5px 0 calc(5px - var(--ttm-w) * 0.2879);
 }
 .pp-bars {
   position: relative;
