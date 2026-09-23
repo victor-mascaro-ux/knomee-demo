@@ -141,6 +141,9 @@ export interface Word {
 
 export interface ToolkitTab {
   topAction: string
+  /** Why this is the move, and what it is built on — the Top Action's panel. */
+  topActionWhy?: string
+  topActionSource?: string
   starters: Starter[]
   key: { tag: TagName; meaning: string }[]
   questions: AskedQuestion[]
@@ -296,6 +299,10 @@ export const prospectReadiness: ReadinessTab = {
 
 export const prospectToolkit: ToolkitTab = {
   topAction: '“Worked since 13, ready for adventures”; lead with Future You vision.',
+  topActionSource:
+    'Sarah said she has worked since she was 13 and is ready for adventures; her Future You pictures her near loved ones, travelling and staying active.',
+  topActionWhy:
+    'Her motivation lives in that picture. Opening on it gets her talking positively about her future before any planning detail — which is what makes a prospect want the next conversation.',
   starters: [
     {
       quote:

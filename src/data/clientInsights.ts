@@ -147,6 +147,10 @@ export const CLIENT_RECOMMENDATIONS_KEY: ToolkitTab['key'] = [
 export const clientToolkit: ToolkitTab = {
   topAction:
     'Lead with her family-and-freedom vision, then help her prioritize college, health, and next-chapter decisions into one clear plan.',
+  topActionSource:
+    'Family and freedom are her core values; her biggest concern is balancing college, health and her aging parents; she is mid career change and separation.',
+  topActionWhy:
+    'Starting from the life she wants makes the hard choices read as steps toward it, not sacrifices — and one clear plan answers the weight of everything she is holding at once.',
 
   starters: [
     {

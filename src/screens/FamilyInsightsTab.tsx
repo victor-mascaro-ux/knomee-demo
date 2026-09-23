@@ -14,13 +14,12 @@
  */
 
 import './familyInsights.css'
-import { CommunicationRail, StartersCard } from './readinessParts'
+import { CommunicationRail, StartersCard, TopAction } from './readinessParts'
 import { AdventuresCard } from './ClientInsightsTab'
 import { FamilyCard, Who } from './familyParts'
 import { familyInsights } from '../data/familyInsights'
 import type { SharedStatement } from '../data/familyInsights'
 import type { HouseholdMember } from '../data/clientProfile'
-import icTopAction from '../assets/cards/top-action.svg'
 import icMotivators from '../assets/cards/motivators.svg'
 import icApprehensions from '../assets/cards/apprehensions.svg'
 import icOutlook from '../assets/adventures/outlook.svg'
@@ -122,11 +121,7 @@ export default function FamilyInsightsTab({ members }: { members: HouseholdMembe
 
   return (
     <div className="rd fin">
-      <div className="rd-top-action">
-        <img className="pp-card-ic rd-top-ic" src={icTopAction} alt="" />
-        <b>Top Action</b>
-        <span className="rd-top-text">{toolkit.topAction}</span>
-      </div>
+      <TopAction d={toolkit} />
 
       <div className="rd-kit-cols">
         <div className="rd-kit-main">

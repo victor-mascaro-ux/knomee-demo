@@ -56,6 +56,10 @@ export const FAMILY_RECOMMENDATIONS_KEY: ToolkitTab['key'] = [
 export const familyToolkit: ToolkitTab = {
   topAction:
     'Anchor them in their shared family-centered future, then help them sequence college, retirement, lifestyle-property goals, and time freedom into one coordinated household plan.',
+  topActionSource:
+    'Both name family first; Emily pictures a coastal home and freedom, Sebastian time outdoors with the kids; both worry about college without giving up retirement.',
+  topActionWhy:
+    'Their pictures overlap more than they differ. Beginning with what they share lets the tradeoffs — what comes first, what waits — be decided together rather than argued.',
 
   starters: [
     {
