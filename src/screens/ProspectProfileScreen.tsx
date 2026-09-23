@@ -38,6 +38,7 @@ import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventMod
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
 import type { JoyAnswers } from './JoyFlow'
+import { CONFIDENCE_STATEMENTS, confidenceReading, type ConfidenceAnswers } from './ConfidenceFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
@@ -69,7 +70,7 @@ export default function ProspectProfileScreen({
 }: {
   /** Her phone as a new client's: nothing on the page until an adventure has
       put it there. `joy` is what Financial Joy handed back, once it has. */
-  fresh?: { joy: JoyAnswers | null; done?: Record<string, string> }
+  fresh?: { joy: JoyAnswers | null; done?: Record<string, string>; conf?: ConfidenceAnswers | null }
   prospect: Prospect
   onBack: () => void
   onConvert?: (p: Prospect) => void
@@ -118,6 +119,11 @@ export default function ProspectProfileScreen({
         goals: isDone('goals') ? financialId.goals : [],
         lifeEvents: isDone('life-events') ? financialId.lifeEvents : [],
         questions: [],
+        /* Her own reading when she has taken Confidence; the authored one when
+           it was skipped past. */
+        confidence: fresh.conf
+          ? confidenceReading(fresh.conf.values.map((v, i) => v ?? CONFIDENCE_STATEMENTS[i].sample))
+          : financialId.confidence,
         badges: BADGE_ORDER.filter((b) => isDone(b.toLowerCase().replace(/ /g, '-'))),
         financialJoy: {
           ...financialId.financialJoy,
@@ -524,7 +530,19 @@ export default function ProspectProfileScreen({
                       <span className="pp-confidence-label">{fi.confidence}</span>
                       <Gauge label={fi.confidence} />
                     </div>
-                    <ConfidenceResults open={confidence} />
+                    <ConfidenceResults
+                      open={confidence}
+                      answers={
+                        fresh?.conf
+                          ? CONFIDENCE_STATEMENTS.map((s, i) => ({
+                              statement: s.statement,
+                              value: fresh.conf!.values[i] ?? s.sample,
+                              low: s.low,
+                              high: s.high,
+                            }))
+                          : undefined
+                      }
+                    />
                     <button
                       className="pp-show"
                       type="button"

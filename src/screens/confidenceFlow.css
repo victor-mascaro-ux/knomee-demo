@@ -1,0 +1,228 @@
+/* Confidence — what the adventure adds to Financial Joy's pieces: the sun
+   slider, the statement's entrance, and the reading. */
+
+.cf-hero-fallback {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  max-width: 342px;
+  aspect-ratio: 342 / 244;
+  background: radial-gradient(circle at 34% 60%, var(--k-plum) 0 58%, transparent 58.5%);
+}
+.cf-lead {
+  margin-top: var(--space-8);
+}
+
+/* ── a statement, as the card the screen is about ──
+   One at a time, set in the middle of the screen on its own card: the words
+   large enough to be the only thing to read, the slider under them with room
+   to be taken hold of. */
+.cf-q {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-24) 0;
+}
+.cf-card {
+  padding: 30px 22px 26px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 10, 40, 0.06), 0 16px 36px -14px rgba(20, 10, 40, 0.28);
+  animation: cfIn 0.38s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.cf-q.is-from-left .cf-card {
+  animation-name: cfInLeft;
+}
+.cf-count {
+  display: block;
+  margin-bottom: var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--k-grape);
+}
+@keyframes cfIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+@keyframes cfInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+.cf-statement {
+  margin: 0 0 34px;
+  font-size: 22px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+  text-wrap: pretty;
+  color: var(--text-strong);
+}
+
+/* ── the sun slider ── */
+.cf-slider {
+  padding: 0 4px;
+}
+.cf-track {
+  --v: 0;
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+.cf-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 9px;
+  border-radius: 5px;
+  background: #e8e7ec;
+}
+/* The part the sun has crossed warms up behind it. */
+.cf-fill {
+  position: absolute;
+  left: 0;
+  width: calc(var(--v) * 1%);
+  height: 9px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #ffe59a, #ffb020);
+  transition: width 0.08s linear;
+}
+.cf-sun {
+  position: absolute;
+  left: calc(var(--v) * 1%);
+  top: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1), filter 0.3s ease, box-shadow 0.2s ease;
+}
+.cf-sun img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* It turns as it is moved — a quarter of a revolution end to end. */
+  transform: rotate(calc(var(--v) * 1.8deg));
+}
+/* Untouched, it waits: paler, and it breathes to say it can be taken hold of. */
+.cf-slider.is-untouched .cf-sun {
+  filter: saturate(0.5) brightness(1.05);
+  animation: cfBeckon 1.8s ease-in-out 0.6s infinite;
+}
+@keyframes cfBeckon {
+  50% {
+    transform: scale(1.15);
+  }
+}
+.cf-slider.is-held .cf-sun {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 10px rgba(255, 176, 32, 0.18);
+}
+/* The input itself is the whole track, invisible, on top: the real control,
+   so a finger, a mouse and the arrow keys all move it. */
+.cf-track input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.cf-slider.is-held .cf-track input {
+  cursor: grabbing;
+}
+.cf-track input:focus-visible + .cf-sun,
+.cf-track:has(input:focus-visible) .cf-sun {
+  box-shadow: var(--ring-focus);
+}
+.cf-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-6);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+/* ── the reading ── */
+.cf-results {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) 0 var(--space-24);
+}
+.cf-reading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  margin: var(--space-8) 0 var(--space-28, 28px);
+  padding: var(--space-20) var(--space-16);
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(160deg, var(--k-plum-wash), #fff 70%);
+  text-align: center;
+  animation: jrDeal 0.55s cubic-bezier(0.2, 1.1, 0.4, 1) both;
+}
+.cf-gauge {
+  display: block;
+  transform-origin: center bottom;
+  animation: cfGauge 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) 0.15s both;
+}
+.cf-gauge .pp-gauge svg {
+  width: 150px;
+  height: 88px;
+}
+@keyframes cfGauge {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+  }
+}
+.cf-word {
+  font-size: 26px;
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+  animation: jrDeal 0.5s var(--ease-out) 0.45s both;
+}
+.cf-means {
+  margin: 0;
+  max-width: 290px;
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-strong);
+  animation: jrDeal 0.5s var(--ease-out) 0.6s both;
+}
+.cf-reward {
+  margin-top: var(--space-28, 28px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-card,
+  .cf-reading,
+  .cf-gauge,
+  .cf-word,
+  .cf-means,
+  .cf-slider.is-untouched .cf-sun {
+    animation: none;
+  }
+  .cf-sun,
+  .cf-fill {
+    transition: none;
+  }
+}
+
+/* The flow is a column the card can centre in. */
+.jf.cf {
+  display: flex;
+  flex-direction: column;
+}
