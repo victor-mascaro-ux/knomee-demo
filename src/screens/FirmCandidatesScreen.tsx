@@ -30,6 +30,7 @@ import {
 } from '../data/candidates'
 import { talkTo } from '../data/candidateInsights'
 import { advisor } from '../data/advisorFlow'
+import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
   ChartIcon,
@@ -650,8 +651,11 @@ export default function FirmCandidatesScreen({
   const [live, setLive] = useState<LiveCandidate[]>([])
   const [inviting, setInviting] = useState(false)
   const [trouble, setTrouble] = useState<Trouble>(null)
+  /* Until the sittings arrive, the page is waiting — not a pipeline of one. */
+  const [loaded, setLoaded] = useState(false)
   const loadLive = useCallback(async () => {
     const { values, trouble: t } = await listEntries()
+    setLoaded(true)
     setTrouble(t)
     const authored = new Set(candidates.map((c) => c.name))
     const rowsLive = values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry)
@@ -694,6 +698,14 @@ export default function FirmCandidatesScreen({
   const allNames = rows.map((c) => c.name)
   const allChecked = selected.size === allNames.length && allNames.length > 0
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
+
+  if (!loaded)
+    return (
+      <>
+        <h1 className="page-title">My Candidates</h1>
+        <KnomeeLoader title="Hold tight!" note="Gathering your candidates…" />
+      </>
+    )
 
   return (
     <>
