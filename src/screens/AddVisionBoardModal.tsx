@@ -318,7 +318,7 @@ export default function AddVisionBoardModal({
                 disabled={tiles.length === 0}
                 onClick={save}
               >
-                Save board
+                Save
               </button>
             </div>
           </>
