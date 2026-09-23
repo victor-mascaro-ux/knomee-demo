@@ -6635,6 +6635,13 @@ button.name-link-btn:hover .name-text {
      goes — onto the next sheet with it, rather than left as a stub at the
      foot of the one before. Square, and sized to meet the patch above and
      below exactly, so the column of grey has no seams in it. */
+  .pp-card:has(.pp-goals) > .pp-card-head,
+  .pp-card:has(.cp-goal-cols) > .pp-card-head {
+    /* A title at the foot of a page with its first goal on the next one is a
+       heading for nothing. It travels with what it names. */
+    break-after: avoid;
+    page-break-after: avoid;
+  }
   .pp-card:has(.pp-goals),
   .pp-card:has(.cp-goal-cols) {
     padding: 0 !important;

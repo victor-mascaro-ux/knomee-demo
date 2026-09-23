@@ -1421,3 +1421,9 @@
 .pp-event.is-open-able:hover {
   background: var(--surface-sunken);
 }
+
+/* Her check-in, at the head of her own page rather than in a rail she has to
+   open. Full width, above the first card. */
+.pp-checkin {
+  margin: 0 0 var(--space-16);
+}

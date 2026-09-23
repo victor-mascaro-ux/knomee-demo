@@ -548,22 +548,29 @@
   display: block;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
-/* One mark and nothing behind it. It used to need a white disc because the
-   quick-access sheet painted over the half of it that rises out of the bar;
-   the bar sits above that sheet now, so the disc was a second circle reading
-   as a second logo behind the first. */
-/* The <img> mark cannot be recoloured, so on the client's journey the centre
-   still says "pressed" by dimming — which is the right word there, since it
-   opens a sheet rather than going to a page. */
-.cx-tab-center:hover img.cx-tab-mark,
-.cx-tab-center.is-on img.cx-tab-mark {
-  opacity: 0.72;
+/* The mark is taller than the swell it sits in, so its top rises past the
+   bar's white and onto whatever is behind — the page, or the sheet's plum.
+   A white circle a few pixels wider than the mark, with no line around it,
+   continues the bar's own white up around it: one shape, not a badge sitting
+   on a bar. A hairline here reads as a second circle behind the first, which
+   is what it was doing before. */
+.cx-tab-center svg.cx-tab-mark,
+.cx-tab-center img.cx-tab-mark {
+  padding: 5px;
+  box-sizing: content-box;
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
 }
-/* The inline one takes the tab's own colour: muted while the adventures are not
-   the page you are on, plum when they are, like the two tabs beside it. */
+/* Both journeys draw the mark inline, so both say "pressed" the way the two
+   tabs beside it do — in colour. Dimming read as the logo being switched off.
+   Muted while the sheet is shut, plum while it is open. */
 svg.cx-tab-mark {
   fill: currentColor;
-  transition: fill var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  transition: fill var(--dur-fast) var(--ease-out);
+}
+.cx-tab-center:hover svg.cx-tab-mark,
+.cx-tab-center.is-on svg.cx-tab-mark {
+  fill: var(--k-plum);
 }
 .cx-tab-center:hover svg.cx-tab-mark {
   opacity: 0.72;
@@ -951,7 +958,10 @@ svg.cx-tab-mark {
     margin: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
-    background: #fff !important;
+    /* Transparent rather than white: the grey behind each goal is a patch that
+       sits BELOW the goal, and a white wrapper paints over it. The sheet's
+       white is the body's. */
+    background: transparent !important;
     box-shadow: none !important;
     transform: none !important;
     animation: none !important;
@@ -971,4 +981,54 @@ svg.cx-tab-mark {
   .cxm-rail-btn {
     display: none !important;
   }
+}
+
+/* A photograph in the account circle rather than a letter: the portrait
+   component brings its own disc, so the slot only has to hold it. */
+.cx-sheet-avatar:has(img),
+.cx-sheet-avatar:has(.pp-avatar) {
+  background: none;
+  padding: 0;
+  overflow: hidden;
+}
+.cx-sheet-avatar img,
+.cx-sheet-avatar .pp-avatar,
+.cx-sheet-avatar .cxm-rail-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-circle);
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- her page's own title ----------
+   On her phone "Sarah Mitchell's Financial ID" is the same kind of thing as
+   "My Adventures": the name of the page she is on. So it is set the same way,
+   with the rule under it — and her face leads it at the height of the line,
+   not as a portrait beside a heading. */
+.cx-screen .pp-title-row {
+  display: block;
+  margin-bottom: var(--space-14);
+}
+.cx-screen .pp-title-id {
+  align-items: center;
+  gap: var(--space-10);
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-thin) solid #ddd9e2;
+}
+.cx-screen .pp-title-id .cxm-rail-btn {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+.cx-screen .pp-title-row .btn-download {
+  margin-top: var(--space-12);
+}
+
+/* The same size as "My Adventures": on her phone these are two names for two
+   pages, not a heading and a page title. */
+.cx-screen .pp-title {
+  font-size: 27px;
+  letter-spacing: var(--tracking-title);
 }

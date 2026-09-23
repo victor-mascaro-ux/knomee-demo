@@ -1,5 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import './prospectProfile.css'
+import moodWorried from '../assets/moods/worried.svg'
+import moodUnsure from '../assets/moods/unsure.svg'
+import moodNeutral from '../assets/moods/neutral.svg'
+import moodGood from '../assets/moods/good.svg'
+import moodGreat from '../assets/moods/great.svg'
+
+/* Lowest to highest, the way every other reading of a mood is ordered here. */
+const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection } from './profileParts'
@@ -50,6 +58,7 @@ export default function ProspectProfileScreen({
   ownerMenu,
   startFlow,
   onStartFlowDone,
+  checkIn,
 }: {
   prospect: Prospect
   onBack: () => void
@@ -64,6 +73,9 @@ export default function ProspectProfileScreen({
       sheet on her phone asks for. */
   startFlow?: 'goal' | 'event' | 'question' | null
   onStartFlowDone?: () => void
+  /** How she last said she felt, tapped on her own phone. It reads as part of
+      who she is, so it sits with her name rather than over the page. */
+  checkIn?: { level: number; mood: string; note?: string; date: string }
   /** The app's own toast, for the two things this page can add to a list. */
   onToast?: (msg: string) => void
 }) {
@@ -162,6 +174,24 @@ export default function ProspectProfileScreen({
                 <MailIcon /> {prospect.email}
               </span>
             </div>
+            {checkIn && (
+              <div className="cp-checkin">
+                <span className="cp-checkin-face">
+                  <img src={MOOD_FACE[checkIn.level]} alt="" />
+                </span>
+                <span className="cp-checkin-main">
+                  <span className="cp-checkin-dots" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <i key={i} className={i <= checkIn.level ? 'is-on' : ''} />
+                    ))}
+                  </span>
+                  <span className="cp-checkin-mood">{checkIn.mood}</span>
+                </span>
+                <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
+                {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
+              </div>
+            )}
+
             {!mine && onConvert && (
               <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
                 Convert to Client
@@ -211,6 +241,28 @@ export default function ProspectProfileScreen({
               <DownloadIcon /> Download PDF
             </button>
           </div>
+
+          {/* How she last said she felt, at the top of the page she said it on.
+              The advisor's copy keeps it in the rail beside her name; on her
+              own phone the rail is a drawer, and a check-in nobody can see is
+              a check-in nobody made. */}
+          {checkIn && (
+            <div className="cp-checkin pp-checkin">
+              <span className="cp-checkin-face">
+                <img src={MOOD_FACE[checkIn.level]} alt="" />
+              </span>
+              <span className="cp-checkin-main">
+                <span className="cp-checkin-dots" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <i key={i} className={i <= checkIn.level ? 'is-on' : ''} />
+                  ))}
+                </span>
+                <span className="cp-checkin-mood">{checkIn.mood}</span>
+              </span>
+              <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
+              {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
+            </div>
+          )}
 
           {!printing && tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
