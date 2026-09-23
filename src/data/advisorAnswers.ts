@@ -592,6 +592,9 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
     readiness: { stage, note: STAGE_NOTE[stage], confidence: confidenceBand(a) },
     practiceJoy: { prompt: 'I want my practice to give me', chips: joy },
     attention: { more: graded('pj-q2', a, 'More'), less: graded('pj-q2', a, 'Less') },
+    /* Their own words, or nothing — a postcard nobody wrote is a card the
+       page leaves out rather than a blank one. */
+    postcard: said('fy-postcard', a),
     futureYou: {
       where: chosen('fy-q1', a),
       what: chosen('fy-q2', a),

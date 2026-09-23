@@ -711,6 +711,10 @@ export const businessId = {
     more: ['Business development', 'Team and hiring', 'Strategy and growth', 'Life outside the practice'],
     less: ['Operations and admin', 'Compliance'],
   },
+  /* What Future You wrote back. It is the one answer in the flow that is a
+     letter rather than a list, so it reads as one. */
+  postcard:
+    'You were right that the clients came. Not all of them — you lost four, and two of those still sting. But the ones who came, came because of you and not the letterhead, and that turned out to be the thing worth knowing. The office is smaller than you pictured. Ana runs it better than you ever did. Take the two weeks in July this year. Last year you didn’t.',
   futureYou: {
     where: ['At my own firm'],
     what: ['Advising clients', 'Running a business', 'Mentoring the next generation'],

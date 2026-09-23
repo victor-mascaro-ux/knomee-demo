@@ -34,7 +34,7 @@ import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
-import { printSheet } from '../printSheet'
+import { usePrintSheet } from '../printSheet'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -399,6 +399,7 @@ export default function ClientProfileScreen({
   mine?: boolean
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
+  const { printing, print } = usePrintSheet()
   /* Whose answers this page shows. Emily and Sebastian have their own; anyone
      else opens the built-out one, as the page always did. */
   const cp = profileFor(client.name)
@@ -584,15 +585,15 @@ export default function ClientProfileScreen({
             {/* The PDF is of the Financial ID — there is no insights document to
                 download, and a button that says there is would be a promise. */}
             {tab === 'id' && (
-              <button className="btn btn-download active" type="button" onClick={printSheet}>
+              <button className="btn btn-download active" type="button" onClick={print}>
                 <DownloadIcon /> Download PDF
               </button>
             )}
           </div>
 
-          {tab === 'insights' ? (
+          {!printing && tab === 'insights' ? (
             <ClientInsightsTab />
-          ) : tab === 'toolkit' ? (
+          ) : !printing && tab === 'toolkit' ? (
             <ClientToolkitTab />
           ) : (
             <>
@@ -867,6 +868,21 @@ export default function ClientProfileScreen({
                     {questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
                   </section>
                 </div>
+              </div>
+            </>
+          )}
+
+          {/* Printing takes the whole sheet: her Financial ID above, then the
+              insights and the toolkit, each starting its own page. */}
+          {printing && (
+            <>
+              <div className="print-page">
+                <h2 className="print-head">Client Insights</h2>
+                <ClientInsightsTab />
+              </div>
+              <div className="print-page">
+                <h2 className="print-head">Client Toolkit</h2>
+                <ClientToolkitTab />
               </div>
             </>
           )}

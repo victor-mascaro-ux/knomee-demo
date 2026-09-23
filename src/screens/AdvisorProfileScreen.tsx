@@ -14,7 +14,7 @@ import type { ReactNode } from 'react'
 import './prospectProfile.css'
 import './advisorProfile.css'
 import { marcusProfile, type AdvisorProfileData } from '../data/advisorProfile'
-import { printSheet } from '../printSheet'
+import { usePrintSheet } from '../printSheet'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import {
   AddButton,
@@ -97,6 +97,7 @@ export default function AdvisorProfileScreen({
   ownerMenu?: ReactNode
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
+  const { printing, print } = usePrintSheet()
   const [photoFailed, setPhotoFailed] = useState(false)
   const d = data.id
   const who = data.who
@@ -238,23 +239,31 @@ export default function AdvisorProfileScreen({
                 {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
               </h1>
             </div>
-            {/* The Business ID is what this button promises, so it is what
-                gets printed — whichever tab you were reading. */}
-            <button
-              className="btn btn-download active"
-              type="button"
-              onClick={() => {
-                setTab('id')
-                printSheet()
-              }}
-            >
+            {/* The sheet is all three tabs, so that is what downloads —
+                whichever one you were reading. */}
+            <button className="btn btn-download active" type="button" onClick={print}>
               <DownloadIcon /> Download PDF
             </button>
           </div>
 
-          {tab === 'id' && <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} />}
-          {tab === 'readiness' && <ReadinessTabView d={data.readiness} />}
-          {tab === 'toolkit' && <ToolkitTabView d={data.toolkit} />}
+          {/* On screen, the tab you chose. On paper, every tab: the Business
+              ID, then the readiness and the toolkit, each starting its own
+              page under its own heading. */}
+          {(printing || tab === 'id') && (
+            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} />
+          )}
+          {(printing || tab === 'readiness') && (
+            <div className={printing ? 'print-page' : undefined}>
+              <h2 className="print-head">{TAB_LABEL.readiness}</h2>
+              <ReadinessTabView d={data.readiness} />
+            </div>
+          )}
+          {(printing || tab === 'toolkit') && (
+            <div className={printing ? 'print-page' : undefined}>
+              <h2 className="print-head">{TAB_LABEL.toolkit}</h2>
+              <ToolkitTabView d={data.toolkit} />
+            </div>
+          )}
         </main>
       </div>
     </div>
@@ -433,6 +442,15 @@ function BusinessIdTab({
               </div>
             ))}
           </section>
+
+          {/* What Future You wrote back. Folded, because it is the longest
+              thing on the page and the cards around it are lists — and open on
+              paper, where there is nothing to scroll past. */}
+          {d.postcard && (
+            <FoldCard icon={icFutureYou} title="Postcard from Future Me">
+              <p className="ap-postcard">{d.postcard}</p>
+            </FoldCard>
+          )}
 
           <section className="pp-card">
             <div className="pp-card-head">
