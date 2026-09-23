@@ -397,6 +397,10 @@
   height: 26px;
 }
 .rd-top-action b {
+  /* The label keeps to one line: squeezed by a long action beside it, it
+     broke into "Top / Action". */
+  flex: none;
+  white-space: nowrap;
   color: var(--text-strong);
 }
 
