@@ -554,19 +554,15 @@
    continues the bar's own white up around it: one shape, not a badge sitting
    on a bar. A hairline here reads as a second circle behind the first, which
    is what it was doing before. */
-.cx-tab-center svg.cx-tab-mark,
-.cx-tab-center img.cx-tab-mark {
-  padding: 5px;
-  box-sizing: content-box;
-  border-radius: var(--radius-circle);
-  background: var(--surface-card);
-}
-/* Both journeys draw the mark inline, so both say "pressed" the way the two
-   tabs beside it do — in colour. Dimming read as the logo being switched off.
-   Muted while the sheet is shut, plum while it is open. */
+/* The mark, and nothing else: no disc, no ring, no fill behind it. It sits in
+   the swell the bar draws for it, and the only thing that changes when the
+   sheet is open is its colour. */
+/* Both journeys draw the mark inline, so both say "pressed" in colour rather
+   than by dimming, which read as the logo being switched off. Reversed out of
+   the disc, and the disc is what changes. */
 svg.cx-tab-mark {
   fill: currentColor;
-  transition: fill var(--dur-fast) var(--ease-out);
+  transition: fill var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 .cx-tab-center:hover svg.cx-tab-mark,
 .cx-tab-center.is-on svg.cx-tab-mark {
@@ -941,6 +937,11 @@ svg.cx-tab-mark {
    laid out by index.css's print rules like any other.
    ============================================================ */
 @media print {
+  /* The demo's stage is a dark room to stand a phone in. Paper is not. */
+  html.cx-dark-ground,
+  html.cx-dark-ground body {
+    background: #fff !important;
+  }
   .cx-page,
   .cx-fit,
   .cx-device,
@@ -1016,10 +1017,16 @@ svg.cx-tab-mark {
   padding-bottom: var(--space-12);
   border-bottom: var(--border-thin) solid #ddd9e2;
 }
+/* Her face is set to the line it sits on — the title's own line height, not a
+   token size — so it reads as the first word of the title rather than a dot
+   before it. On a name that wraps it stays with the first line. */
+.cx-screen .pp-title-id {
+  align-items: flex-start;
+}
 .cx-screen .pp-title-id .cxm-rail-btn {
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 37px;
+  height: 37px;
   padding: 0;
 }
 .cx-screen .pp-title-row .btn-download {

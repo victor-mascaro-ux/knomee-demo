@@ -395,7 +395,7 @@ export function GoalDetail({ g }: { g: Goal }) {
       )}
       {g.note && (
         <>
-          <dt>My goal</dt>
+          <dt>Because</dt>
           <dd>{g.note}</dd>
         </>
       )}

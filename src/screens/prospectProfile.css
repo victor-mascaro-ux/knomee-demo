@@ -913,14 +913,31 @@
     border-right: 0;
     border-bottom: 1px solid var(--line, #e7e4ee);
   }
+  /* Portrait on the left, and the two lines that are about the person stacked
+     beside it: her name, then when she joined and where to write to her. As a
+     wrapping row those two landed under the portrait instead of under the
+     name, which read as a caption on the photograph. */
   .pp-side-inner {
     position: static;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     text-align: left;
-    flex-wrap: wrap;
-    gap: 12px;
+    gap: 2px 12px;
     padding: 14px 0;
+  }
+  .pp-avatar {
+    grid-row: span 2;
+  }
+  .pp-name,
+  .pp-meta {
+    grid-column: 2;
+  }
+  .pp-checkin,
+  .pp-convert,
+  .pp-side-inner > .cp-checkin,
+  .pp-side-inner > .cp-side-block {
+    grid-column: 1 / -1;
   }
   .pp-avatar {
     width: 52px;

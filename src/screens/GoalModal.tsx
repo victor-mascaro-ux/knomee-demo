@@ -115,7 +115,7 @@ export default function GoalModal({
             )}
             {goal.note && (
               <>
-                <dt>My goal</dt>
+                <dt>Because</dt>
                 <dd>{goal.note}</dd>
               </>
             )}

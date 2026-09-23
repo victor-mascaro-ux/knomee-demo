@@ -213,10 +213,20 @@
 .kx-arc.is-asking .kx-mood,
 .kx-arc.is-asking .kx-ask{display:none}
 /* While a face is being explained the sheet is about that and nothing else:
-   the next adventure and the four actions step aside, and the panel takes the
-   room they were using. */
+   the next adventure and the four actions step aside, and the disc rises and
+   grows so the answer is given inside it rather than above it. */
 .kx-sheet.is-asking .kx-next,.kx-sheet.is-asking .kx-actions{display:none}
-.kx-mood-detail{align-self:center;width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:var(--space-10);text-align:center;animation:kxAsk 240ms var(--ease-out) both}
+/* The answer is given at the foot of the sheet, where a thumb is, and the disc
+   grows down over it rather than the answer climbing into the disc: its dome
+   sits just above the panel and its body carries it to the bottom. */
+.kx-sheet.is-asking .kx-arc{width:660px;height:660px;top:auto;bottom:-298px;transition:top 260ms var(--ease-out),bottom 260ms var(--ease-out),width 260ms var(--ease-out),height 260ms var(--ease-out)}
+/* Clear of the bump the knomee button sits in, so Save is never half behind
+   it. */
+.kx-sheet.is-asking .kx-mood-detail{position:relative;z-index:1;margin-top:auto;margin-bottom:42px}
+.kx-mood-detail{align-self:center;width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:var(--space-10);text-align:center;animation:kxDetail 240ms var(--ease-out) both}
+/* Its own entrance: kxAsk carries the question's translateX(-50%), which on a
+   flow item drags it half its width off the screen. */
+@keyframes kxDetail{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 .kx-mood-face{width:64px;height:64px;border-radius:var(--radius-circle);overflow:hidden}
 .kx-mood-face img{width:100%;height:100%;display:block}
 .kx-mood-word{font-size:23px;font-weight:var(--weight-bold);color:var(--text-inverse)}
