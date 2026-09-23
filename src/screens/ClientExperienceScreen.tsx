@@ -14,7 +14,6 @@ import {
   MOOD_ARC,
   adventureActions,
   adventureProgress,
-  clientInitial,
   completedAdventures,
   lockedAdventures,
   mobileTabs,
@@ -44,9 +43,9 @@ import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
-import ClientProfileScreen from './ClientProfileScreen'
-import { clientProfile } from '../data/clientProfile'
-import type { Client } from '../data/clients'
+import ProspectProfileScreen from './ProspectProfileScreen'
+import { prospects } from '../data/prospects'
+import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 
 const art: Record<ArtKey, string> = {
@@ -903,18 +902,10 @@ function VoiceSheet({ onClose }: { onClose: () => void }) {
   )
 }
 
-/* The page wants the client whose page it is. Hers, as her advisor's table
-   holds it. */
-const EMILY = {
-  name: clientProfile.owner,
-  email: 'emily.watson@email.com',
-  household: clientProfile.household,
-  kr: 82,
-  sentiment: 4,
-  status: 'complete',
-  lastSignIn: '05/03/2025',
-  tier: 'engaged',
-} as Client
+/* Whose phone this is. Sarah Mitchell, the prospect whose answers the demo is
+   built on — her Financial ID here is the one her advisor opens, carrying her
+   content and her palette, rather than a client's page with her name on it. */
+const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0]
 
 /* The in-phone menu. The only way back to the advisor side lives here, so the
    demo is driven entirely from inside the device. */
@@ -923,9 +914,9 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
         <div className="cx-sheet-account">
-          <span className="cx-sheet-avatar">{clientInitial}</span>
+          <span className="cx-sheet-avatar">{financialId.owner.charAt(0)}</span>
           <span>
-            <b>Client</b>
+            <b>{financialId.owner}</b>
             <i>All five adventures complete</i>
           </span>
           <SheetCredit />
@@ -1093,8 +1084,8 @@ export default function ClientExperienceScreen({
                  answers — one artefact, not a second rendering of it. It was a
                  "not built yet" card here long after the page itself was
                  built. */
-              <ClientProfileScreen
-                client={EMILY}
+              <ProspectProfileScreen
+                prospect={SARAH}
                 mine
                 startFlow={flow}
                 onStartFlowDone={() => setFlow(null)}
@@ -1107,7 +1098,7 @@ export default function ClientExperienceScreen({
                     aria-expanded={railOpen}
                     onClick={() => setRailOpen((o) => !o)}
                   >
-                    <RailFace name={EMILY.name} />
+                    <RailFace name={SARAH.name} fallback={SARAH.avatar} />
                   </button>
                 }
               />
