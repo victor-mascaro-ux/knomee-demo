@@ -1,0 +1,310 @@
+/* Financial Joy — the pieces the adventure adds to the phone. The headings,
+   the body copy and the eyebrow are advisor-flow.css's `.af-*`, which are the
+   flow screens' own and not the advisor's; this file adds the tile grid, the
+   attention pair, the note field and the finish. */
+
+.jf {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: var(--space-16);
+}
+
+/* ── the intro ── */
+.jf-intro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: var(--space-24);
+}
+.jf-art {
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--space-8);
+}
+.jf-art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.jf-min {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-16);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+/* ── what money is a tool for ──
+   A wall of words rather than a list of checkboxes: they are read at a glance
+   and chosen at a glance, and the chosen ones are filled rather than ticked. */
+.jf-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+  margin-top: var(--space-16);
+}
+.jf-tile {
+  min-height: 62px;
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+  text-align: left;
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.jf-tile:active {
+  transform: scale(0.985);
+}
+.jf-tile.is-on {
+  border-color: var(--k-grape);
+  background: var(--k-grape-light);
+  color: var(--text-strong);
+}
+
+/* ── where the attention goes ──
+   One area to a screen, with the two directions the same size: neither is the
+   recommended answer. */
+.jf-split {
+  text-align: left;
+}
+.jf-count {
+  margin-top: var(--space-8);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-secondary);
+}
+.jf-split-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+  margin-top: var(--space-24);
+}
+.jf-way {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.jf-way span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  background: var(--surface-sunken);
+  font-size: 26px;
+  line-height: 1;
+}
+.jf-less.is-on {
+  border-color: var(--k-crimson);
+  background: var(--k-crimson-light);
+}
+.jf-less.is-on span {
+  background: var(--k-crimson);
+  color: #fff;
+}
+.jf-more.is-on {
+  border-color: var(--k-grape);
+  background: var(--k-grape-light);
+}
+.jf-more.is-on span {
+  background: var(--k-grape);
+  color: #fff;
+}
+
+/* Which of the seven this is, and the way between them. */
+.jf-areas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-top: var(--space-24);
+}
+.jf-arrow {
+  width: 40px;
+  height: 40px;
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.jf-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.jf-dots {
+  display: flex;
+  gap: var(--space-6);
+}
+.jf-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-circle);
+  background: var(--border-default);
+}
+.jf-dots i.is-done {
+  background: var(--k-grape-light);
+}
+.jf-dots i.is-on {
+  background: var(--k-grape);
+}
+
+/* ── a memory, in their words ── */
+.jf-note {
+  width: 100%;
+  margin-top: var(--space-16);
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--text-strong);
+  resize: none;
+}
+.jf-note::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.jf-note:focus {
+  outline: none;
+  border-color: var(--k-grape);
+}
+
+/* ── what they said, handed back ── */
+.jf-done {
+  padding-top: var(--space-16);
+}
+.jf-recap {
+  margin-top: var(--space-20);
+  padding: var(--space-16);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-sunken);
+}
+.jf-recap-head {
+  display: block;
+  margin-top: var(--space-14);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.jf-recap-head:first-child {
+  margin-top: 0;
+}
+.jf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+.jf-chip {
+  padding: var(--space-6) var(--space-10);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-size: var(--text-base);
+  color: var(--text-table);
+}
+.jf-chip.is-more {
+  background: var(--k-grape-light);
+  color: var(--text-link);
+}
+.jf-chip.is-less {
+  background: var(--k-crimson-light);
+  color: var(--k-crimson);
+}
+.jf-none {
+  font-size: var(--text-base);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ── the badge ── */
+.jf-badge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: var(--space-24);
+}
+.jf-badge-art {
+  width: 200px;
+  height: 200px;
+  margin-bottom: var(--space-8);
+}
+
+/* ── the flow's own footer ──
+   Where you are, the way back, and the one thing to press. It replaces the tab
+   bar while an adventure is open, so it sits at the foot of the screen. */
+.jf-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-top: auto;
+  padding: var(--space-12) 0 var(--space-4);
+  background: var(--surface-card);
+}
+.jf-back {
+  padding: var(--space-8) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.jf-progress {
+  display: flex;
+  gap: 5px;
+}
+.jf-progress i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-circle);
+  background: var(--border-default);
+}
+.jf-progress i.is-on {
+  background: var(--k-grape);
+}
+.jf-ok {
+  padding: var(--space-12) var(--space-24);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--k-plum);
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: #fff;
+  cursor: pointer;
+}
+.jf-ok:active {
+  transform: scale(0.985);
+}
