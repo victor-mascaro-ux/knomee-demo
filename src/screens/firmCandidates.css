@@ -132,16 +132,20 @@
   color: var(--text-secondary);
   white-space: nowrap;
 }
-/* The tier legend in three even columns: sized by count, a tier with nobody
-   in it squeezed its own name into a sliver. The bar above still splits by
-   count. */
+/* The tier legend at fixed widths: sized by count, a tier with nobody in it
+   squeezed its own name into a sliver. The bar above still splits by count. */
 .dist-legend.dist-legend-bars {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-12);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-32, 32px);
 }
 .dist-legend.dist-legend-bars .dist-leg {
+  flex: none;
   min-width: 0;
+}
+/* Tier 1 at the left under its segment; the other two gathered at the right. */
+.dist-legend.dist-legend-bars .dist-leg:first-child {
+  margin-right: auto;
 }
 /* An empty tier keeps a segment wide enough to read its 0. */
 .cmd-dist-bar .seg {

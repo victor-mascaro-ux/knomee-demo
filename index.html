@@ -909,7 +909,7 @@
     'advisor-mobile': 'Business ID on mobile',
     'advisor-flow': 'Advisor Recruit · Sample',
     'advisor-self': 'Advisor Recruit · Business ID',
-    advisors: 'Advisor Recruit (Testing Entries)',
+    advisors: 'Advisor Recruit · Candidate report',
     flow: 'Advisor Flow · An invited advisor',
     'firm-candidates': 'Dynasty · My Candidates',
     'firm-analytics': 'Dynasty · Analytics',
@@ -1718,15 +1718,10 @@
     ['advisor', 'Advisor Prospects & Clients', '#/prospects',
       v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'advisor'],
     ['admin', 'Admin', '#/admin', v => v === 'admin'],
+    /* The advisors who took the flow live in this pipeline now, so a
+       candidate's report (#/advisors/<id>) is Advisor Recruit too. */
     ['firm', 'Advisor Recruit', '#/firm-candidates',
-      v => SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm'],
-    /* Who has answered the advisor flow, and where invite links are made. A
-       dashboard rather than a journey: it is a list somebody works from, not a
-       page anybody is asked questions on. It sits under Advisor Recruit because
-       it is the same product — the pipeline, and the entries being tested
-       against it. */
-    ['advisors', 'Advisor Recruit (Testing Entries)', '#/advisors',
-      v => v === 'advisors']
+      v => (SHELL_VIEWS.indexOf(v) !== -1 && personaOf(v) === 'firm') || v === 'advisors']
   ];
   /* Named for who takes the journey AND what it produces. "Advisor" on its own
      would read as the Advisor dashboard two rows up; the artefact says which
