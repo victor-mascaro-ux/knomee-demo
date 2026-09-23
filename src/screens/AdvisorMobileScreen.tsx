@@ -32,6 +32,7 @@ import { adventureStates, derive, sampleAnswers } from '../data/advisorAnswers'
 import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
 import { advisor } from '../data/advisorFlow'
+import { useDropdown } from '../components/useDropdown'
 
 const ZOOM_STEP = 0.1
 
@@ -59,7 +60,9 @@ export default function AdvisorMobileScreen({
   /* The rail — his portrait, the Recruitment Quotient, the route — sits at the foot
      of the page on a phone. His own portrait brings it up as a drawer. */
   const [menuOpen, setMenuOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
+  const account = useDropdown()
+  const accountOpen = account.open
+  const setAccountOpen = account.setOpen
   const [tab, setTab] = useState<'finid' | 'flow' | 'questions'>('finid')
   /* His finished sheet, read once. The adventures he completed and the three
      questions he came out with are both rules over these answers, so they are
@@ -123,8 +126,8 @@ export default function AdvisorMobileScreen({
               >
                 <BurgerMenu />
               </button>
-              {accountOpen && (
-                <div className="menu-pop cxm-menu-pop" role="menu">
+              {account.shown && (
+                <div className={`menu-pop cxm-menu-pop drop-anim${account.closing ? ' is-closing' : ''}`} role="menu">
                   <div className="menu-account">
                     <span className="menu-avatar">A</span>
                     <span className="menu-name">Alex Advisor</span>

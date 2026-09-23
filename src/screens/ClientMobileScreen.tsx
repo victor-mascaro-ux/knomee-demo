@@ -23,6 +23,7 @@ import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
 import { clientProfile } from '../data/clientProfile'
 import type { Client } from '../data/clients'
+import { useDropdown } from '../components/useDropdown'
 
 const ZOOM_STEP = 0.1
 
@@ -59,7 +60,9 @@ export default function ClientMobileScreen({
   const [menuOpen, setMenuOpen] = useState(false)
   /* The advisor's account menu is a separate thing from the client's rail, so
      it gets its own control on its own side of the bar. */
-  const [accountOpen, setAccountOpen] = useState(false)
+  const account = useDropdown()
+  const accountOpen = account.open
+  const setAccountOpen = account.setOpen
   const accountRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -110,8 +113,8 @@ export default function ClientMobileScreen({
               >
                 <BurgerMenu />
               </button>
-              {accountOpen && (
-                <div className="menu-pop cxm-menu-pop" role="menu">
+              {account.shown && (
+                <div className={`menu-pop cxm-menu-pop drop-anim${account.closing ? ' is-closing' : ''}`} role="menu">
                   <div className="menu-account">
                     <span className="menu-avatar">A</span>
                     <span className="menu-name">Alex Advisor</span>

@@ -62,15 +62,16 @@
   background: radial-gradient(circle, rgba(8, 99, 117, 0.05), rgba(8, 99, 117, 0.35));
 }
 .fy-ring-2 {
-  inset: 16%;
+  /* Even steps out from the core: each band the same 20px wide. */
+  inset: 9.2%;
   background: var(--k-ocean);
 }
 .fy-ring-1 {
-  inset: 22%;
+  inset: 17.5%;
   background: var(--k-teal);
 }
 .fy-core {
-  inset: 30%;
+  inset: 25.8%;
   display: grid;
   place-items: center;
   background: radial-gradient(circle at 40% 35%, #e9ffc0, var(--k-lime));

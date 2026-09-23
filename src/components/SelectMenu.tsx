@@ -29,6 +29,7 @@ export default function SelectMenu({
   placeholder,
   disabled,
   id,
+  variant = 'field',
 }: {
   value: string
   options: (SelectOption | string)[]
@@ -39,12 +40,23 @@ export default function SelectMenu({
   placeholder?: string
   disabled?: boolean
   id?: string
+  /** 'field': the list joins a form field's edge and matches its width.
+      'inline': a small text control (a card head's date) — the list drops
+      just under it, lined up with its right edge, as wide as its options. */
+  variant?: 'field' | 'inline'
 }) {
   const opts = options.map((o) => (typeof o === 'string' ? { value: o, label: o } : o))
   const picked = opts.find((o) => o.value === value)
   /* 'closing' keeps the list on screen for its fold-away. */
   const [state, setState] = useState<'shut' | 'open' | 'closing'>('shut')
-  const [place, setPlace] = useState<{ left: number; width: number; top?: number; bottom?: number; up: boolean } | null>(null)
+  const [place, setPlace] = useState<{
+    left?: number
+    right?: number
+    width?: number
+    top?: number
+    bottom?: number
+    up: boolean
+  } | null>(null)
   const [active, setActive] = useState(-1)
   const trigger = useRef<HTMLButtonElement>(null)
   const list = useRef<HTMLDivElement>(null)
@@ -71,12 +83,21 @@ export default function SelectMenu({
     const want = opts.length * 40 + 12
     const below = window.innerHeight - r.bottom
     const up = below < want + 12 && r.top > below
+    if (variant === 'inline') {
+      const right = document.documentElement.clientWidth - r.right
+      setPlace(
+        up
+          ? { right, bottom: window.innerHeight - r.top + 6, up }
+          : { right, top: r.bottom + 6, up },
+      )
+      return
+    }
     setPlace(
       up
         ? { left: r.left, width: r.width, bottom: window.innerHeight - r.top - 1, up }
         : { left: r.left, width: r.width, top: r.bottom - 1, up },
     )
-  }, [state, opts.length])
+  }, [state, opts.length, variant])
 
   /* Shut on a click elsewhere, on Escape, or when the page under it moves. */
   useEffect(() => {
@@ -138,7 +159,7 @@ export default function SelectMenu({
         id={id}
         ref={trigger}
         type="button"
-        className={`${className} sm-trigger${state !== 'shut' ? ' is-open' : ''}${state === 'closing' ? ' is-closing' : ''}${place?.up ? ' is-up' : ''}${picked ? '' : ' is-empty'}`}
+        className={`${className} sm-trigger sm-${variant}${state !== 'shut' ? ' is-open' : ''}${state === 'closing' ? ' is-closing' : ''}${place?.up ? ' is-up' : ''}${picked ? '' : ' is-empty'}`}
         aria-haspopup="listbox"
         aria-expanded={state === 'open'}
         disabled={disabled}
@@ -154,9 +175,15 @@ export default function SelectMenu({
         createPortal(
           <div
             ref={list}
-            className={`sm-pop${place.up ? ' is-up' : ''}${state === 'closing' ? ' is-closing' : ''}`}
+            className={`sm-pop sm-pop-${variant}${place.up ? ' is-up' : ''}${state === 'closing' ? ' is-closing' : ''}`}
             role="listbox"
-            style={{ left: place.left, width: place.width, top: place.top, bottom: place.bottom }}
+            style={{
+              left: place.left,
+              right: place.right,
+              width: place.width,
+              top: place.top,
+              bottom: place.bottom,
+            }}
           >
             {opts.map((o, i) => (
               <button
