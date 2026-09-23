@@ -93,20 +93,38 @@ function PointList({
         />
       </div>
       {items.length === 0 ? (
-        <p className="ag-hint">{hint}</p>
+        /* The line that says what goes here is also the way to start one: it
+           is the only thing under the heading, and it reads as the place to
+           write. */
+        <button className="ag-hint" type="button" onClick={() => onChange([...items, ''])}>
+          {hint}
+        </button>
       ) : (
         items.map((v, i) => (
-          <input
-            className="ag-input ag-point"
-            key={i}
-            value={v}
-            autoFocus={i === items.length - 1 && v === ''}
-            placeholder={hint}
-            onChange={(e) => onChange(items.map((o, j) => (j === i ? e.target.value : o)))}
-            onBlur={() => {
-              if (!v.trim()) onChange(items.filter((_, j) => j !== i))
-            }}
-          />
+          <div className="ag-point" key={i}>
+            <input
+              className="ag-input"
+              value={v}
+              autoFocus={i === items.length - 1 && v === ''}
+              placeholder={hint}
+              onChange={(e) => onChange(items.map((o, j) => (j === i ? e.target.value : o)))}
+            />
+            <button
+              className="ag-drop"
+              type="button"
+              aria-label={`Remove “${v || hint}”`}
+              onClick={() => onChange(items.filter((_, j) => j !== i))}
+            >
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </div>
         ))
       )}
     </div>
@@ -114,23 +132,28 @@ function PointList({
 }
 
 export default function AddGoalModal({
-  suggestions,
+  suggestions = [],
+  goal,
   onClose,
   onAdd,
 }: {
   /** What the journey so far suggests they might name. */
-  suggestions: string[]
+  suggestions?: string[]
+  /** A goal already on the page, opened to be changed. The panel is the same
+      one, minus the step that asks which goal this is — they are looking at
+      it — and every answer arrives filled in. */
+  goal?: Goal
   onClose: () => void
   onAdd: (goal: Goal) => void
 }) {
   /* Null until a goal has been named: the first step is choosing one, the
-     second is saying what it is. */
-  const [title, setTitle] = useState<string | null>(null)
+     second is saying what it is. An edit starts at the second. */
+  const [title, setTitle] = useState<string | null>(goal?.title ?? null)
   const [own, setOwn] = useState('')
-  const [timeline, setTimeline] = useState(TIMELINES[0])
-  const [pros, setPros] = useState<string[]>([])
-  const [cons, setCons] = useState<string[]>([])
-  const [note, setNote] = useState('')
+  const [timeline, setTimeline] = useState(goal?.timeline ?? TIMELINES[0])
+  const [pros, setPros] = useState<string[]>(goal?.pros ?? [])
+  const [cons, setCons] = useState<string[]>(goal?.cons ?? [])
+  const [note, setNote] = useState(goal?.note ?? '')
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -148,9 +171,12 @@ export default function AddGoalModal({
       return kept.length ? kept : undefined
     }
     onAdd({
+      /* Everything the goal already carries — its stage, whether it is done,
+         the rows only some goals have — and then what this panel asks. */
+      ...goal,
       title: name,
       /* Named, not yet moved on: the first stage, the way the app reads it. */
-      readiness: 1,
+      readiness: goal?.readiness ?? 1,
       updated: DEMO_TODAY,
       timeline,
       pros: keep(pros),
@@ -163,7 +189,7 @@ export default function AddGoalModal({
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal ag-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Add a Goal</h2>
+          <h2 className="modal-title">{goal ? 'Edit Goal' : 'Add a Goal'}</h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>

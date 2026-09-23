@@ -59,6 +59,9 @@ export default function ProspectProfileScreen({
   const [openGoal, setOpenGoal] = useState<string | null>(null)
   /* Adding one is the other thing this page can do to the list. */
   const [addingGoal, setAddingGoal] = useState(false)
+  /* The goal whose form is open. The same panel that adds one edits one. */
+  const [editingGoal, setEditingGoal] = useState<string | null>(null)
+  const editing = goalList.find((g) => g.title === editingGoal)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
@@ -453,14 +456,30 @@ export default function ProspectProfileScreen({
         />
       )}
 
+      {/* The same panel, on a goal that is already there: every answer filled
+          in, and what comes back replaces it in place. */}
+      {editing && (
+        <AddGoalModal
+          goal={editing}
+          onClose={() => setEditingGoal(null)}
+          onAdd={(g) => {
+            setGoalList((list) => list.map((o) => (o === editing ? g : o)))
+            setEditingGoal(null)
+            setOpenGoal(g.title)
+          }}
+        />
+      )}
+
       {/* The goal, opened. */}
       {goal && (
         <GoalModal
           goal={goal}
           onClose={() => setOpenGoal(null)}
-          onRename={(title) => {
-            setGoalList((list) => list.map((g) => (g === goal ? { ...g, title } : g)))
-            setOpenGoal(title)
+          onEdit={() => {
+            /* The form takes over from the panel: two panels stacked is two
+               copies of the same goal, one of them stale. */
+            setEditingGoal(goal.title)
+            setOpenGoal(null)
           }}
           onToggleComplete={() =>
             setGoalList((list) =>
