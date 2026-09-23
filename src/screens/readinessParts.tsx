@@ -726,16 +726,17 @@ export function StartersCard({
      in it. Each card is now the size of what it holds. */
   return (
     <>
-      <section className="pp-card rd-card">
+      <section className="pp-card rd-card rd-starters-card">
         <Head icon={icStarters} title="Conversation Starters" />
         <div className="rd-starters">
           {starters.map((s, i) => (
             <StarterRow s={s} i={i} key={s.quote} keyRows={keyRows} />
           ))}
         </div>
-      </section>
 
-      <section className="pp-card rd-card rd-key-card">
+        {/* The key to the pills above, in the same card: it explains them, so
+            it sits with them. On paper the card may break between the two. */}
+        <div className="rd-key-card">
         <h4 className="rd-sub-head">Strategic Recommendations Key</h4>
         <div className="rd-key">
           {keyRows.map((k) => (
@@ -746,6 +747,7 @@ export function StartersCard({
               <p className="rd-key-meaning">{k.meaning}</p>
             </div>
           ))}
+        </div>
         </div>
       </section>
     </>
