@@ -825,17 +825,8 @@
 .pp-event-added {
   margin-left: auto;
 }
-/* Provenance, not a call to action — so it takes the quietest pill in the set.
-   The lilac belongs to "New", which is asking to be looked at. */
-.pp-event-added {
-  font-size: 10px;
-  font-weight: var(--weight-medium, 500);
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--pearl, #efeef2);
-  color: var(--text-secondary, #6a6480);
-  white-space: nowrap;
-}
+/* Its look is the design system's badge, shared with every row pill in
+   clientProfile.css. */
 .pp-event-text {
   font-size: 12.5px;
   color: #4a4460;

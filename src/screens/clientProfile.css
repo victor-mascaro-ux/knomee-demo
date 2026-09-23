@@ -34,17 +34,6 @@
   --avatar-ink: var(--k-ocean, #086375);
   --add-ink: var(--k-ocean, #086375);
 }
-/* "New" takes the lime the tokens reserve for exactly this, which is also what
-   the Clients dashboard badges it with — one colour for "new" wherever it
-   lands. Sensitive keeps its amber: attention is not a brand colour. */
-.pp.cp .cp-goal-tag.is-new {
-  background: var(--k-lime);
-  color: var(--k-plum);
-}
-.pp.cp .cp-goal-tag.is-updated {
-  background: var(--k-mint);
-  color: var(--k-forest);
-}
 
 /* ---------- sidebar: household + advisory team ---------- */
 .cp-side-block {
@@ -239,36 +228,49 @@
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
-/* One pill, three states. They share a shape, a size and a medium weight — what
-   separates them is hue, drawn from the design system's own soft pairs rather
-   than the semibold green/grape/teal that shouted over the goal title. */
-/* One size for every pill on the page — the goal tags had drifted a step
-   larger than "Advisor added" beside them. */
-.cp-goal-tag {
-  font-size: 10px;
+/* The design system's badge — the same one the dashboards mark a fresh row
+   with (.new-tag): 16px tall, 11px medium type, a full pill, no border. Every
+   pill on a row or an opened card wears it, so "New" on a goal and "new" in
+   the Prospects table are one component in one size. */
+.cp-goal-tag,
+.pp-event-added,
+.le-advisor {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill, 999px);
+  font-size: 11px;
   font-weight: var(--weight-medium, 500);
+  line-height: 1;
   letter-spacing: 0;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--k-grape-light);
-  color: var(--k-grape);
+  white-space: nowrap;
 }
-/* "New" on the purple side, the bright violet the Prospects and Candidates
-   tables badge a fresh row with — one colour for "new" wherever it lands, and
-   one that does not disappear into the lilac chips around it. */
+/* New: the side's own "new" — grape with white among prospects and
+   candidates, lime with plum among clients — exactly as the tables badge it. */
 .cp-goal-tag.is-new {
-  background: var(--k-violet-new);
+  background: var(--k-grape);
+  color: #fff;
+}
+.pp.cp .cp-goal-tag.is-new {
+  background: var(--k-lime);
   color: var(--k-plum);
 }
+/* Updated: quieter than New — the brand's light purple with plum ink. */
 .cp-goal-tag.is-updated {
-  background: var(--k-mint);
-  color: var(--k-forest);
+  background: var(--k-grape-light);
+  color: var(--k-plum);
 }
-/* "Sensitive" is the one that has to catch the eye before the advisor opens
-   their mouth, so it takes the design system's warning pair. */
+/* Sensitive: the design system's warning pair. */
 .cp-goal-tag.is-sensitive {
   background: var(--k-amber-light);
   color: var(--k-amber-ink);
+}
+/* Advisor added: provenance, not news — the neutral pair. */
+.pp-event-added,
+.le-advisor {
+  background: var(--k-pearl, #eeeeee);
+  color: var(--text-secondary, #6a6480);
 }
 /* The disclosure that sits in a card header rather than its footer: compact and
    right-aligned, where .pp-show is full-width and centred. */
@@ -727,12 +729,7 @@
   box-shadow: 0 6px 18px -10px rgba(36, 4, 70, 0.18);
 }
 
-/* "Updated" wherever a row can be saved — the prospect's page as well as the
-   client's — and the pill sits on its own line above what it marks. */
-.pp .cp-goal-tag.is-updated {
-  background: var(--k-mint);
-  color: var(--k-forest);
-}
+/* A pill sits on its own line above what it marks. */
 .pp-event-body > .cp-goal-tags,
 .pp-q-text > .cp-goal-tags,
 .cp-board-title > .cp-goal-tags {
