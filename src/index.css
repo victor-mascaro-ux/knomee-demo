@@ -6738,7 +6738,9 @@ button.name-link-btn:hover .name-text {
    highlight's mark, the dashboard card heads, the suggested goals and
    adventures, and the empty trays. An icon on a coloured or grey card needs
    none — the ground already sets it off. */
-.cx-adv-done .cx-adv-art.has-img,
+.cx-adv-art.has-img,
+.pp-card-ic,
+.jw-next-ic,
 .pp-event-ic,
 .pp-hl-icon,
 .card-title > svg,
@@ -6746,6 +6748,13 @@ button.name-link-btn:hover .name-text {
 .ci-adv-ic,
 .pp-empty-disc {
   box-shadow: var(--disc-lift);
+}
+/* Every white circle icon, on whatever ground: the rule is no longer only for
+   white cards — a disc on grey read as a flat sticker beside the lifted ones. */
+.pp-card-ic,
+.jw-next-ic,
+.ci-adv-ic {
+  border-radius: 50%;
 }
 /* The tray's own hover shadow still wins over the resting one. */
 .pp-empty-cta:hover .pp-empty-disc {
@@ -6756,4 +6765,16 @@ button.name-link-btn:hover .name-text {
 .row-menu-pop.is-up {
   top: auto;
   bottom: calc(100% + 4px);
+}
+
+/* An empty tier: still on the bar so its slot and legend hold, but grey and
+   not a control — there is nobody in it to filter to. */
+.cmd-dist-bar .seg.is-zero,
+.cmd-dist-bar .seg.is-zero:hover {
+  background: var(--k-pearl, #eeeeee);
+  color: var(--k-ash, #afafaf);
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }

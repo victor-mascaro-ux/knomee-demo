@@ -1645,13 +1645,13 @@
      candidate's (#/advisor-mobile) is off the map: the toggle greys out on the
      recruitment side rather than offering a view that does not hold up. The
      route still exists; nothing points at it. */
-  const MOBILE_OF = {
-    'clients': '#/client-mobile',
-    'client-mobile': '#/client-mobile'
-  };
-  const BACK_FROM_MOBILE = {
-    'client-mobile': '#/clients/emily-watson'
-  };
+  /* The toggle lives on two kinds of page only: a candidate (whose mobile is
+     the phone they answered on) and Sarah (whose mobile is her own phone with
+     every adventure done, Life Events next). */
+  const MOBILE_OF = {};
+  const BACK_FROM_MOBILE = {};
+  const SARAH = 'sarah-mitchell';
+  const sarahComplete = () => /^#\/?client-experience\/complete/i.test(currentRoute || '');
   /* The recruit pages have a phone too: a candidate's report opens on the
      phone they answered on (#/advisors/<id>/phone), and Marcus's page on his
      Business ID on mobile. Read off the route, since the page is the person. */
@@ -1664,18 +1664,22 @@
     if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute() + '/phone';
     if (here === 'firm-candidates' && demoState.profile === 'marcus-hale') return '#/advisor-mobile';
     if (here === 'advisor-mobile') return '#/advisor-mobile';
+    if (here === 'prospects' && demoState.profile === SARAH) return '#/client-experience/complete';
+    if (here === 'client-experience' && sarahComplete()) return '#/client-experience/complete';
     return MOBILE_OF[here] || null;
   };
   const isMobileView = () => {
     const here = canon(demoState.view);
     if (here === 'advisors') return /\/phone$/i.test(currentRoute || '');
     if (here === 'advisor-mobile') return true;
+    if (here === 'client-experience') return sarahComplete();
     return !!BACK_FROM_MOBILE[here];
   };
   const desktopOf = () => {
     const here = canon(demoState.view);
     if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute();
     if (here === 'advisor-mobile') return '#/firm-candidates/marcus-hale';
+    if (here === 'client-experience' && sarahComplete()) return '#/prospects/' + SARAH;
     return null;
   };
   const CONTROLS = [
@@ -1697,7 +1701,9 @@
     // and its absence read as "this page has no mobile view" only if you
     // already knew the control existed. Pages without a phone show it inert.
     { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
-      views: SHELL_VIEWS.concat(['advisor-mobile']),
+      views: SHELL_VIEWS.concat(['advisor-mobile', 'client-experience']),
+      // Only where there is a phone to switch to: a candidate, or Sarah.
+      when: () => !!mobileOf() || isMobileView(),
       // Strictly whether THIS page has a phone. The old guard also let any
       // open profile through, which on a prospect meant the toggle offered a
       // mobile view that fell back to Emily's — a different person's page.

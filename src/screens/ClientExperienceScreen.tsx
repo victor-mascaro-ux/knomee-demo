@@ -1245,7 +1245,11 @@ function MobileMenu({
 
 export default function ClientExperienceScreen({
   brand,
+  complete,
 }: {
+  /** Open with all five adventures done and Life Events next — her page as the
+      advisor sees it, on her phone. */
+  complete?: boolean
   /** The way back to the advisor demo. Her menu no longer offers it — the demo
       menu does — so it is accepted and not used. */
   onExit?: () => void
@@ -1343,6 +1347,11 @@ export default function ClientExperienceScreen({
     })
     if (!joy) setJoy(sampleJoyAnswers())
   }
+  useEffect(() => {
+    if (complete) skipTo('life-events')
+    // Once, as the screen opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
     setTab('finid')
