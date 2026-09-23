@@ -450,3 +450,14 @@
   object-fit: cover;
   display: block;
 }
+
+/* What they wrote about how they feel, under the mood it belongs to. Their own
+   words, so the card quotes them rather than restating them. */
+.cp-checkin-note {
+  grid-column: 1 / -1;
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+  font-style: italic;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+}

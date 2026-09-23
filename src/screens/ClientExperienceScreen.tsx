@@ -41,11 +41,10 @@ import moodUnsure from '../assets/moods/unsure.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
-import knomeeMark from '../assets/knomee-mark.svg'
 import './client-experience.css'
 import ProspectProfileScreen from './ProspectProfileScreen'
 import { prospects } from '../data/prospects'
-import { financialId } from '../data/financialId'
+import { DEMO_TODAY, financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 
 const art: Record<ArtKey, string> = {
@@ -676,23 +675,69 @@ const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question'>> = {
 function KnomeeSheet({
   onClose,
   onPick,
+  onSaveMood,
 }: {
   onClose: () => void
   /** One of the three things the Financial ID can actually add. */
   onPick: (flow: 'goal' | 'event' | 'question') => void
+  /** How they feel, and why, on its way to the top of their Financial ID. */
+  onSaveMood: (mood: MoodId, note: string) => void
 }) {
   const [mood, setMood] = useState<MoodId | null>(null)
+  /* Once a face is tapped the arc becomes what that face means: its word, a
+     box for the reason, and the way back to the other four. */
+  const [why, setWhy] = useState('')
+  const picked = moods.find((m) => m.id === mood)
   const { r, faceR, face } = MOOD_ARC
   const swipe = useSwipeDown(onClose)
   return (
     <div
-      className="kx-sheet"
+      className={`kx-sheet ${picked ? 'is-asking' : ''}`}
       role="dialog"
       aria-modal="true"
       aria-label="Quick access"
       style={sheetStyle(swipe)}
     >
       <span className="kx-grip" aria-hidden {...swipe.handlers} />
+
+      {picked ? (
+        <div className="kx-mood-detail">
+          <span className="kx-mood-face">
+            <img src={moodArt[picked.id]} alt="" />
+          </span>
+          <span className="kx-mood-word">{picked.word}</span>
+          <label className="kx-mood-label" htmlFor="kx-why">
+            Why do you feel this way? <i>(optional)</i>
+          </label>
+          <textarea
+            id="kx-why"
+            className="kx-mood-note"
+            rows={3}
+            value={why}
+            placeholder="Say as much or as little as you like."
+            onChange={(e) => setWhy(e.target.value)}
+          />
+          <div className="kx-mood-foot">
+            <button
+              className="kx-mood-again"
+              type="button"
+              onClick={() => {
+                setMood(null)
+                setWhy('')
+              }}
+            >
+              Choose another
+            </button>
+            <button
+              className="kx-mood-save"
+              type="button"
+              onClick={() => onSaveMood(picked.id, why.trim())}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div className="kx-next">
         <ActionRow a={quickNext} />
       </div>
@@ -715,7 +760,7 @@ function KnomeeSheet({
           </button>
         ))}
       </div>
-      <div className="kx-arc">
+      <div className={`kx-arc ${mood ? 'is-asking' : ''}`}>
         {moods.map((m, i) => {
           const a = (MOOD_ANGLES[i] * Math.PI) / 180
           return (
@@ -736,7 +781,7 @@ function KnomeeSheet({
             </button>
           )
         })}
-        <div className="kx-ask">{moodQuestion}</div>
+        {!picked && <div className="kx-ask">{moodQuestion}</div>}
       </div>
     </div>
   )
@@ -916,7 +961,11 @@ function MobileMenu({ onExit, onClose }: { onExit: () => void; onClose: () => vo
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
         <div className="cx-sheet-account">
-          <span className="cx-sheet-avatar">{financialId.owner.charAt(0)}</span>
+          {/* Her face, the same one her advisor's page shows, falling back to
+              her letter if the photograph will not load. */}
+          <span className="cx-sheet-avatar">
+            <RailFace name={SARAH.name} fallback={SARAH.avatar} />
+          </span>
           <span>
             <b>{financialId.owner}</b>
             <i>All five adventures complete</i>
@@ -946,6 +995,9 @@ export default function ClientExperienceScreen({
   const [sheet, setSheet] = useState(false)
   /* What the quick-access sheet asked for, on its way to the Financial ID. */
   const [flow, setFlow] = useState<'goal' | 'event' | 'question' | null>(null)
+  /* The check-in she has just made, which her Financial ID carries at the top
+     of the page the way the advisor's copy of it does. */
+  const [checkIn, setCheckIn] = useState<{ mood: MoodId; note: string } | null>(null)
   /* Wherever one of the three is asked for — the quick sheet, a row on the
      adventures list — it is the same thing: the Financial ID, with that form
      already open on it. */
@@ -1089,6 +1141,16 @@ export default function ClientExperienceScreen({
               <ProspectProfileScreen
                 prospect={SARAH}
                 mine
+                checkIn={
+                  checkIn
+                    ? {
+                        level: moods.findIndex((m) => m.id === checkIn.mood),
+                        mood: moods.find((m) => m.id === checkIn.mood)?.word ?? '',
+                        note: checkIn.note,
+                        date: DEMO_TODAY,
+                      }
+                    : undefined
+                }
                 startFlow={flow}
                 onStartFlowDone={() => setFlow(null)}
                 onBack={() => setTab('adventures')}
@@ -1119,6 +1181,11 @@ export default function ClientExperienceScreen({
             <KnomeeSheet
               onClose={() => setSheet(false)}
               onPick={openFlow}
+              onSaveMood={(mood, note) => {
+                setCheckIn({ mood, note })
+                setSheet(false)
+                setTab('finid')
+              }}
             />
           )}
           {voiceOpen && <VoiceSheet onClose={() => setVoiceOpen(false)} />}
@@ -1150,7 +1217,10 @@ export default function ClientExperienceScreen({
                   aria-label={t.label}
                   onClick={() => pickTab(t.id)}
                 >
-                  <img className="cx-tab-mark" src={knomeeMark} alt="knomee" />
+                  {/* The mark takes the tab's own colour — muted while the
+                      sheet is shut, plum while it is open — rather than
+                      dimming, which read as the logo being turned off. */}
+                  <TabMark />
                 </button>
               ) : (
                 <button
