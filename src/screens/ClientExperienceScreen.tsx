@@ -1221,6 +1221,21 @@ export default function ClientExperienceScreen({
                       sheet is shut, plum while it is open — rather than
                       dimming, which read as the logo being turned off. */}
                   <TabMark />
+                  {/* The mark's five strokes fill to plum inside-out under the finger,
+                      and stay filled while either sheet is open. */}
+                  {(pressing || sheet || voiceOpen) && (
+                    <div
+                      key={pressing ? 'press' : 'static'}
+                      className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
+                      aria-hidden
+                    >
+                      <svg viewBox="0 0 288 288">
+                        {MARK_PARTS.map((d, i) => (
+                          <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
+                        ))}
+                      </svg>
+                    </div>
+                  )}
                 </button>
               ) : (
                 <button
@@ -1235,22 +1250,6 @@ export default function ClientExperienceScreen({
               ),
             )}
           </nav>
-          )}
-
-          {/* The mark's five strokes fill to plum inside-out under the finger,
-              and stay filled while either sheet is open. */}
-          {(pressing || sheet || voiceOpen) && (
-            <div
-              key={pressing ? 'press' : 'static'}
-              className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
-              aria-hidden
-            >
-              <svg viewBox="0 0 288 288">
-                {MARK_PARTS.map((d, i) => (
-                  <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
-                ))}
-              </svg>
-            </div>
           )}
 
           <div className="cx-home-bar" />

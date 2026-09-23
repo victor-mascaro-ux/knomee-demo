@@ -938,9 +938,15 @@ svg.cx-tab-mark {
    ============================================================ */
 @media print {
   /* The demo's stage is a dark room to stand a phone in. Paper is not. */
-  html.cx-dark-ground,
-  html.cx-dark-ground body {
+  /* The white goes on <html> alone. Painted on the body too, the body stops
+     handing its background to the canvas and becomes an ordinary white block
+     — one that paints over the grey patch each goal keeps behind itself at
+     z-index -1, which is why the goals printed without their tray. */
+  html.cx-dark-ground {
     background: #fff !important;
+  }
+  html.cx-dark-ground body {
+    background: transparent !important;
   }
   .cx-page,
   .cx-fit,
@@ -969,6 +975,9 @@ svg.cx-tab-mark {
     font-size: inherit;
   }
   /* The device's own furniture, and the demo's controls. */
+  /* The side buttons too: they hang off the frame's edge, and on paper they
+     were a dark sliver down the left margin beside the first card. */
+  .cx-key,
   .cx-statusbar,
   .cx-island,
   .cx-home-bar,

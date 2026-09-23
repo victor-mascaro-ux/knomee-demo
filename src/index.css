@@ -6597,10 +6597,14 @@ button.name-link-btn:hover .name-text {
   .pp-goal::before {
     content: '';
     position: absolute;
-    /* Deeper than half the gap, so neighbouring patches overlap rather than
-       meet: an inset is measured from the padding box, and a hairline border
-       between them was enough to leave a white seam down the tray. */
-    inset: -12px -18px;
+    /* The goal and the gap under it, and nothing above: the head's own grey
+       meets the first goal, and each patch runs down to the next. A patch
+       that reached above its goal left that reach behind at the foot of the
+       sheet before whenever the goal moved to a new one — a stray grey strip
+       under the page's last goal. A pixel over the goal's border at the top and
+       past the gap at the foot, because an inset is measured from the padding
+       box and the hairline between them otherwise shows as a white seam. */
+    inset: -1px -18px -22px;
     z-index: -1;
     background: #f1f3f7;
   }
