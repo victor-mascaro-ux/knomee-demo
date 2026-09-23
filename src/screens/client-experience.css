@@ -363,6 +363,13 @@
   padding: 13px var(--space-14);
   gap: var(--space-12);
 }
+/* Its art starts where its title does, not halfway down the card: with a
+   two-line blurb the disc hung beside the blurb rather than the name. The
+   title's line box starts a few pixels above its letters. */
+.cx-adv-open .cx-adv-art {
+  align-self: flex-start;
+  margin-top: 6px;
+}
 .cx-adv-main {
   flex: 1;
   min-width: 0;

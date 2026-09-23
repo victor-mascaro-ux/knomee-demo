@@ -6420,11 +6420,17 @@ button.name-link-btn:hover .name-text {
     margin: 0 !important;
   }
   /* The household and the advisory team are the client page's rail, and belong
-     on the sheet no more than the tab bar does. */
+     on the sheet no more than the tab bar does. A check-in still in a rail goes
+     with it; the sentiment card under the title, and each family member's, are
+     the page, and print — how they last said they felt is part of the sheet. */
   .cp-side-block,
   .cp-add-family,
-  .cp-checkin {
+  .pp-side .cp-checkin {
     display: none !important;
+  }
+  .cp-checkin {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   /* ── the cards ── */
