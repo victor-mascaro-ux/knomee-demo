@@ -31,6 +31,19 @@ export interface JoyAnswers {
   other: string
 }
 
+/* The answers OK records for a question left blank — the ones the design was
+   drawn with. */
+const SAMPLE_TOOLS = ['Comfort', 'Supporting my family']
+const SAMPLE_WAYS: Record<string, number> = {
+  'Work and career': 1,
+  'Financial planning and management': 1,
+  'Health and wellness': -1,
+  'Family and relationships': -1,
+  'Hobbies and interests': -1,
+  'Travel and adventure': -1,
+  'Home life': 0,
+}
+
 const emptyAnswers = (): JoyAnswers => ({
   tools: [],
   attention: {},
@@ -126,8 +139,21 @@ export default function JoyFlow({
           ? step.cta
           : 'OK'
 
+  /* OK on a question left unanswered records a sample answer and moves on —
+     so a demo can be clicked straight through and still arrive at a results
+     screen with something true-looking on it. What was answered is kept. */
   const onCta = () => {
     if (step.kind === 'badge') return onComplete(a)
+    window.clearInterval(typing.current)
+    if (step.kind === 'pick' && a.tools.length === 0 && !a.other.trim())
+      setA((prev) => ({ ...prev, tools: SAMPLE_TOOLS }))
+    if (step.kind === 'split')
+      setA((prev) => {
+        const attention = { ...prev.attention }
+        for (const c of JOY_AREA_CARDS) if (!(c.label in attention)) attention[c.label] = SAMPLE_WAYS[c.label] ?? 0
+        return { ...prev, attention }
+      })
+    if (step.kind === 'reflect' && !(a.notes[noteIndex] ?? '').trim()) setNote(step.example)
     next()
   }
 

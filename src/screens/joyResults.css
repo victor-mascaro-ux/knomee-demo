@@ -449,3 +449,126 @@
     animation: none;
   }
 }
+
+/* ── "Learn more", and what it opens ── */
+.jr-learn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: calc(-1 * var(--space-8)) 0 calc(-1 * var(--space-20));
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.jr-learn:hover {
+  color: var(--text-link);
+}
+.modal.jr-about {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 14px;
+}
+.modal .modal-header.jr-about-head {
+  height: auto;
+  padding: 10px 16px;
+  justify-content: center;
+}
+.jr-about-head .modal-title {
+  font-size: 20px;
+  font-weight: var(--weight-semibold);
+}
+.jr-about-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-20) var(--space-14) var(--space-8);
+}
+.jr-about-card {
+  width: 100%;
+  margin: 0;
+  padding: var(--space-14) var(--space-14);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  color: var(--text-strong);
+  opacity: 0;
+  animation: jrDeal 0.45s var(--ease-out) both;
+}
+.jr-about-card p {
+  margin: 0;
+}
+.jr-about-card p + p {
+  margin-top: var(--space-12);
+}
+.jr-about-body > .jr-about-card:nth-of-type(1) {
+  animation-delay: 0.25s;
+}
+.jr-about-body > .jr-about-card:nth-of-type(2),
+.jr-about-body > div.jr-about-card {
+  animation-delay: 0.55s;
+}
+/* The slice sweeps round to its share. */
+.jr-pie-rest {
+  animation: jrPie 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) 0.1s both;
+}
+@keyframes jrPie {
+  from {
+    stroke-dasharray: 100 100;
+  }
+}
+.jr-pie {
+  animation: jrPop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.jr-book {
+  animation: jrPop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 0.4s both;
+}
+@keyframes jrPop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+.jr-about-foot {
+  padding: var(--space-8) 0 var(--space-20);
+}
+.jr-about-foot .btn {
+  min-width: 88px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jr-about-card,
+  .jr-pie,
+  .jr-pie-rest,
+  .jr-book {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* The lens looks around the page — across, up, back — once as it arrives,
+   then rests where it began. Small moves, so it stays on the book. */
+.jr-lens {
+  animation: jrLook 1.6s ease-in-out 0.8s both;
+}
+@keyframes jrLook {
+  25% {
+    transform: translate(-7px, -3px);
+  }
+  55% {
+    transform: translate(-3px, -9px);
+  }
+  80% {
+    transform: translate(1px, 1px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jr-lens {
+    animation: none;
+  }
+}

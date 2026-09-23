@@ -92,6 +92,119 @@ const FALLBACK = {
   tools: ['Comfort', 'Supporting my family'],
 }
 
+/* The share of people who chose the same two things — a demo figure, stated
+   the way the design states it. */
+const SHARE = 55
+
+/* A number that counts up to itself when it arrives. */
+function CountUp({ to }: { to: number }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return setN(to)
+    const start = performance.now()
+    let raf = 0
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - start) / 900)
+      setN(Math.round(to * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [to])
+  return <>{n}</>
+}
+
+/* What this adventure means, said once when they arrive and again whenever
+   they ask: how many others want money for what they do, and why looking at
+   joy at all is worth their while. */
+function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  const named = tools.slice(0, 2).map((t) => t.toLowerCase().replace(/^supporting my /, 'supporting '))
+  return (
+    <div className="modal-backdrop jr-about-back" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="jr-about-title">
+      <div className="modal jr-about" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header jr-about-head">
+          <h2 className="modal-title" id="jr-about-title">
+            You found Financial Joy!
+          </h2>
+        </div>
+        <div className="modal-body jr-about-body">
+          {/* A share, drawn: the slice sweeps round to its size. */}
+          <svg className="jr-pie" viewBox="0 0 48 48" width="56" height="56" aria-hidden>
+            <circle cx="24" cy="24" r="20" fill="var(--k-teal)" />
+            <circle
+              className="jr-pie-rest"
+              cx="24"
+              cy="24"
+              r="10"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="20"
+              pathLength="100"
+              strokeDasharray={`${100 - SHARE} 100`}
+              transform="rotate(-90 24 24) scale(-1 1) translate(-48 0)"
+            />
+            <circle cx="24" cy="24" r="20" fill="none" stroke="var(--k-ocean)" strokeWidth="3.4" />
+            <path d="M24 4v20" stroke="var(--k-ocean)" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+          <p className="jr-about-card">
+            <b>
+              <CountUp to={SHARE} />%
+            </b>{' '}
+            of respondents want money to help with{' '}
+            {named.length === 2 ? (
+              <>
+                <b>{named[0]}</b> and <b>{named[1]}</b>
+              </>
+            ) : (
+              <b>{named[0] ?? 'the same things you do'}</b>
+            )}
+            .
+          </p>
+          <svg className="jr-book" viewBox="0 0 48 48" width="56" height="56" fill="none" aria-hidden>
+            {/* An open book, and a magnifier over its lower right corner —
+                ringed in white so it sits on top of the page rather than
+                tangling with its lines. */}
+            <path
+              d="M21 12.2c-4.4-2.8-10-3-15.6-1v23.6c5.6-2 11.2-1.8 15.6 1 4.4-2.8 10-3 15.6-1V11.2c-5.6-2-11.2-1.8-15.6 1Z"
+              stroke="var(--k-ocean)"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+            <path d="M21 12.2v23.6" stroke="var(--k-ocean)" strokeWidth="3" />
+            <g className="jr-lens">
+              <circle cx="34" cy="32" r="10" fill="#fff" />
+              <path d="m39.6 37.6 5.2 5.2" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
+              <circle cx="34" cy="32" r="6.6" fill="var(--k-teal)" stroke="var(--k-ocean)" strokeWidth="3" />
+              <path d="m39.2 37.2 5 5" stroke="var(--k-ocean)" strokeWidth="3.6" strokeLinecap="round" />
+            </g>
+          </svg>
+          <div className="jr-about-card">
+            <p>
+              Studies show that reflecting on <b>what sparks your joy</b> drives better outcomes.
+            </p>
+            <p>
+              When you see saving as <b>progress</b> toward what truly matters, you set yourself up
+              for a <b>brighter future</b>!
+            </p>
+          </div>
+        </div>
+        <div className="modal-footer jr-about-foot">
+          <button className="btn btn-primary" type="button" autoFocus onClick={onClose}>
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function JoyResults({
   answers,
   cta,
@@ -118,6 +231,14 @@ export default function JoyResults({
   const less = piles[1].cards.map((c) => c.label.toLowerCase())
 
   /* What it adds up to, in one line. */
+  /* Said once, a moment after they arrive — long enough to see the page it
+     is about — and again from "Learn more". */
+  const [about, setAbout] = useState(false)
+  useEffect(() => {
+    const t = window.setTimeout(() => setAbout(true), 700)
+    return () => window.clearTimeout(t)
+  }, [])
+
   const reading =
     more.length && less.length
       ? `You want your time to move toward ${list(more)}, and away from ${list(less)}. That is where your advisor will start.`
@@ -129,6 +250,15 @@ export default function JoyResults({
 
   return (
     <div className="jr">
+      <button className="jr-learn" type="button" onClick={() => setAbout(true)}>
+        Learn more
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+          <circle cx="8" cy="8" r="7" fill="currentColor" />
+          <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+          <circle cx="8" cy="4.7" r="1" fill="#fff" />
+        </svg>
+      </button>
+      {about && <AboutJoy tools={tools} onClose={() => setAbout(false)} />}
       <Reveal className="jr-found">
         <h2 className="jr-title">You found joy</h2>
         <p className="jr-sub">This was the last time you truly experienced joy:</p>
