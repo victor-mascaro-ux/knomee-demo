@@ -81,7 +81,7 @@ export const JOY_AREAS = [
   'Home life',
 ]
 
-const joyPhoto = (label: string, file: string): JoyPick => ({ label, src: `./joy/${file}.jpg` })
+const joyPhoto = (label: string, file: string): JoyPick => ({ label, src: `./joy/${file}.png` })
 
 /* The nine the phone shows, in the design's order. */
 export const JOY_PICKS: JoyPick[] = [
