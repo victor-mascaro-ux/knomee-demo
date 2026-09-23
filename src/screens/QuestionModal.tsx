@@ -18,6 +18,7 @@ import { DEMO_TODAY } from '../data/financialId'
 import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
 import SelectMenu from '../components/SelectMenu'
+import { StatusTags } from './profileParts'
 
 /* The openers, in the order the phone lists them. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
@@ -169,6 +170,7 @@ export default function QuestionModal({
         </div>
 
         <div className="modal-body qm-body">
+          <StatusTags tags={question.tags} />
           <div className="qm-head">
             <h3 className="qm-question">{question.q}</h3>
             {onEdit && (

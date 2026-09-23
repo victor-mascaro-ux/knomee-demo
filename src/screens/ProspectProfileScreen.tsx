@@ -10,7 +10,7 @@ import moodGreat from '../assets/moods/great.svg'
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -417,6 +417,7 @@ export default function ProspectProfileScreen({
                           }}
                         >
                           <div className="pp-goal-main">
+                            <StatusTags tags={g.tags} />
                             <span className="pp-goal-title">{g.title}</span>
                             {g.completed && (
                               <span className="pp-goal-done"><CheckIcon /> Completed: {g.completed}</span>
@@ -688,6 +689,7 @@ export default function ProspectProfileScreen({
                         >
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
+                            <StatusTags tags={e.tags} />
                             <span className="pp-event-head">
                               <span className="pp-event-kind">{e.kind}</span>
                             </span>
@@ -746,7 +748,10 @@ export default function ProspectProfileScreen({
                             if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
                           }}
                         >
-                          <span className="pp-q-text">{q.q}</span>
+                          <span className="pp-q-text">
+                            <StatusTags tags={q.tags} />
+                            {q.q}
+                          </span>
                           <span className="pp-q-date">
                             {q.resolved ? (
                               <>
@@ -801,7 +806,7 @@ export default function ProspectProfileScreen({
           }
           onClose={() => setAddingGoal(false)}
           onAdd={(g) => {
-            setGoalList((list) => [g, ...list])
+            setGoalList((list) => [withTag(g, 'New'), ...list])
             setAddingGoal(false)
             setOpenGoal(g.title)
             onToast?.('Goal added')
@@ -820,7 +825,7 @@ export default function ProspectProfileScreen({
           goal={editing}
           onClose={() => setEditingGoal(null)}
           onAdd={(g) => {
-            setGoalList((list) => list.map((o) => (o === editing ? g : o)))
+            setGoalList((list) => list.map((o) => (o === editing ? withTag(g, 'Updated') : o)))
             setEditingGoal(null)
             setOpenGoal(g.title)
           }}
@@ -856,7 +861,8 @@ export default function ProspectProfileScreen({
         <AddQuestionModal
           question={questionForm === 'edit' ? (openQuestion ?? undefined) : undefined}
           onClose={() => setQuestionForm(null)}
-          onSave={(q) => {
+          onSave={(saved) => {
+            const q = withTag(saved, questionForm === 'edit' ? 'Updated' : 'New')
             setQuestionList((list) =>
               questionForm === 'edit' && openQuestion
                 ? list.map((o) => (o === openQuestion ? q : o))
@@ -896,7 +902,8 @@ export default function ProspectProfileScreen({
           event={eventForm === 'edit' ? (openEvent ?? undefined) : undefined}
           client={mine}
           onClose={() => setEventForm(null)}
-          onSave={(e) => {
+          onSave={(saved) => {
+            const e = withTag(saved, eventForm === 'edit' ? 'Updated' : 'New')
             setEventList((list) =>
               eventForm === 'edit' && openEvent
                 ? list.map((o) => (o === openEvent ? e : o))
@@ -918,7 +925,7 @@ export default function ProspectProfileScreen({
           onClose={() => setAssessing(null)}
           onSave={(readiness) => {
             setGoalList((list) =>
-              list.map((g) => (g === assessed ? { ...g, readiness, updated: DEMO_TODAY } : g)),
+              list.map((g) => (g === assessed ? withTag({ ...g, readiness, updated: DEMO_TODAY }, 'Updated') : g)),
             )
             setAssessing(null)
             setOpenGoal(assessed.title)

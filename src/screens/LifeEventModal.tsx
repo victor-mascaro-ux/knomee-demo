@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react'
 import './lifeEventModal.css'
 import type { LifeEvent } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
-import { LifeEventIcon, lifeEventArt } from './profileParts'
+import { LifeEventIcon, StatusTags, lifeEventArt } from './profileParts'
 import { CaretIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
 import icCategoryPurchase from '../assets/life-events/category-purchase.svg'
@@ -307,7 +307,12 @@ export default function LifeEventModal({
         </div>
 
         <div className="modal-body le-body le-read">
-          {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
+          {(event.tags?.length || event.advisorAdded) && (
+            <div className="card-pills">
+              <StatusTags tags={event.tags} />
+              {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
+            </div>
+          )}
           <div className="le-head">
             <h3 className="le-title">{event.text}</h3>
             {onEdit && (

@@ -660,3 +660,47 @@
   border-color: var(--k-crimson, #c0264b);
   color: var(--k-crimson, #c0264b);
 }
+
+/* ── a board edited where it hangs ──
+   Cancel and Save where Edit was; Delete under the tiles; and the three ways
+   to add held to the foot of the screen while the board is on it — above the
+   phone's tab bar, never under it. */
+.cp-board-acts {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+.cp-board.is-editing {
+  border-color: var(--purple-bolt, #9b51e0);
+}
+.vb-inline-delete {
+  display: block;
+  margin: var(--space-12) 0 0;
+}
+.vb-inline-dock {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  margin: var(--space-12) calc(-1 * var(--space-8)) calc(-1 * var(--space-8));
+  padding: var(--space-8);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 28px -8px rgba(20, 10, 40, 0.22);
+}
+.vb-inline-dock .vb-adds,
+.vb-inline-dock .vb-compose {
+  margin-top: 0;
+}
+.vb-inline-dock .vb-library {
+  max-height: 210px;
+  overflow-y: auto;
+}
+/* On the phone the tab bar owns the last ~73px of the screen. */
+.cx-viewport .vb-inline-dock {
+  bottom: 92px;
+}
+.vb-delete-modal {
+  width: min(420px, calc(100vw - 32px));
+}

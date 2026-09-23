@@ -57,7 +57,7 @@ export type BoardTile =
      never shot for. It is `wide` or it is the plain square cell. BoardPhoto
      enforces that from the file's own dimensions, so a landscape image dropped
      into public/vision/ later cannot break the rule either. */
-  | { kind: 'photo'; src: string; alt: string; tall?: boolean; wide?: boolean }
+  | { kind: 'photo'; src: string; alt: string; tall?: boolean; wide?: boolean; sized?: boolean }
   /* `voice`: said rather than typed, and written down — the board shows the
      words, with a small mark for where they came from. */
   | {
@@ -70,6 +70,8 @@ export type BoardTile =
     }
 
 export interface VisionBoard {
+  /** "New" when just added, "Updated" when just saved — a pill on its row. */
+  tags?: string[]
   title: string
   blurb: string
   tiles: BoardTile[]

@@ -17,7 +17,7 @@
 import React, { useEffect } from 'react'
 import './goalModal.css'
 import type { Goal } from '../data/financialId'
-import { ReadinessLevel, TTM_STAGES } from './profileParts'
+import { ReadinessLevel, StatusTags, TTM_STAGES } from './profileParts'
 import { CloseIcon } from '../components/icons'
 
 export default function GoalModal({
@@ -60,6 +60,7 @@ export default function GoalModal({
         </div>
 
         <div className="modal-body goal-body">
+          <StatusTags tags={goal.tags} />
           <div className="goal-head">
             <h3 className="goal-title">{goal.title}</h3>
             {onEdit && (
