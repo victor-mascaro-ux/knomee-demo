@@ -624,8 +624,10 @@ function AdventuresScreen({
 }) {
   return (
     <>
-      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
+      {/* The page says what it is, then how far through it you are: a meter
+          above the title measures something that has not been named yet. */}
       <h2 className="cx-screen-title">My Adventures</h2>
+      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
       <div className="cx-adv-list">
         {completedAdventures.map((a) => (
           <CompletedRow
