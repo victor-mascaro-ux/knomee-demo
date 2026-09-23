@@ -58,7 +58,16 @@ export type BoardTile =
      enforces that from the file's own dimensions, so a landscape image dropped
      into public/vision/ later cannot break the rule either. */
   | { kind: 'photo'; src: string; alt: string; tall?: boolean; wide?: boolean }
-  | { kind: 'note'; title?: string; text?: string; items?: string[]; tone?: 'mint' | 'lilac' }
+  /* `voice`: said rather than typed, and written down — the board shows the
+     words, with a small mark for where they came from. */
+  | {
+      kind: 'note'
+      title?: string
+      text?: string
+      items?: string[]
+      tone?: 'mint' | 'lilac'
+      voice?: boolean
+    }
 
 export interface VisionBoard {
   title: string

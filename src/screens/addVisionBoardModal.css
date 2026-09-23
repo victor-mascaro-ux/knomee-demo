@@ -1,0 +1,375 @@
+/* Making a vision board — only what this panel adds to the app's modal. The
+   shell, the plum header and the footer buttons are index.css's own; the board
+   preview is the Board component's, styled by clientProfile.css. */
+
+.modal.vb-modal {
+  width: 560px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - 24px);
+}
+/* The board grows as it is made; the body scrolls, the header and the buttons
+   stay where a thumb left them. */
+.vb-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  overflow-y: auto;
+  min-height: 0;
+}
+.vb-foot {
+  flex: none;
+  justify-content: flex-end;
+  gap: var(--space-10);
+  padding-top: var(--space-12);
+}
+.vb-foot .btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── step one: the name ── */
+.vb-step-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.vb-step-note {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.vb-label {
+  margin-top: var(--space-8);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.vb-label i {
+  font-style: normal;
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
+}
+.vb-input {
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-strong);
+}
+.vb-input::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.vb-input:focus {
+  outline: none;
+  border-color: var(--text-link);
+}
+
+/* ── step two: the board ── */
+.vb-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-20) var(--space-16);
+  border: 1.5px dashed var(--border-default);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.vb-empty b {
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+}
+/* The preview is a board in its own right; the page's gap under a board's
+   title is what the modal already gives it. */
+.vb-preview .cp-board-title {
+  margin-top: 0;
+}
+
+/* What is on it, each with its cross. */
+.vb-tray {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.vb-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+}
+.vb-chip.is-photo img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  display: block;
+}
+.vb-chip-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 180px;
+  padding: 6px 22px 6px 10px;
+  border-radius: var(--radius-md);
+  background: var(--k-grape-light);
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vb-chip-note.is-mint {
+  background: var(--k-teal-light);
+}
+.vb-chip-note svg {
+  flex: none;
+  color: var(--text-secondary);
+}
+.vb-chip-x {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-circle);
+  background: var(--text-strong);
+  color: var(--text-inverse);
+  cursor: pointer;
+}
+.vb-chip-x:active {
+  transform: scale(0.9);
+}
+
+/* The three ways in, as three equal tiles across the foot of the board. */
+.vb-adds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+.vb-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-6);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+.vb-add:hover {
+  border-color: var(--text-link);
+  background: var(--surface-sunken);
+}
+.vb-add:active {
+  transform: scale(0.97);
+}
+.vb-add-ic {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circle);
+  background: var(--k-plum-wash);
+  color: var(--action-primary);
+}
+
+/* ── a sticker being written, or being said ── */
+.vb-compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+  padding: var(--space-12);
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  animation: vbIn 0.2s ease both;
+}
+@keyframes vbIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* The field is the sticker: it wears the paper it will be printed on. */
+.vb-note-field {
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--k-grape-light);
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-strong);
+  resize: none;
+}
+.vb-note-field.is-mint {
+  background: var(--k-teal-light);
+}
+.vb-note-field:focus {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.vb-note-field::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.vb-compose-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.vb-tones {
+  display: flex;
+  gap: var(--space-6);
+  margin-right: auto;
+}
+.vb-tone {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-circle);
+  background: var(--k-grape-light);
+  cursor: pointer;
+}
+.vb-tone.is-mint {
+  background: var(--k-teal-light);
+}
+.vb-tone.is-on {
+  border-color: var(--text-strong);
+}
+.vb-link {
+  padding: var(--space-6) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.modal .btn.vb-small {
+  padding: 8px 18px;
+  font-size: 14.5px;
+}
+.modal .btn.vb-small:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.vb-voice-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.vb-mic {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circle);
+  background: var(--action-primary);
+  color: var(--text-inverse);
+}
+.vb-mic.is-live {
+  animation: vbPulse 1.1s ease-in-out infinite;
+}
+@keyframes vbPulse {
+  50% {
+    box-shadow: 0 0 0 7px var(--k-plum-wash);
+  }
+}
+.vb-voice-cap {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.vb-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  margin-left: auto;
+}
+.vb-wave i {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--k-teal);
+  transform-origin: bottom center;
+  animation: vbWave 0.9s ease-in-out infinite;
+}
+@keyframes vbWave {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.vb-heard {
+  margin: 0;
+  min-height: 66px;
+  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-strong);
+}
+.vb-caret {
+  display: inline-block;
+  width: 2px;
+  height: 15px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--k-teal);
+  animation: vbCaret 0.9s steps(1) infinite;
+}
+@keyframes vbCaret {
+  50% {
+    opacity: 0;
+  }
+}
+.vb-voice-hint {
+  margin-right: auto;
+  font-size: var(--text-sm);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vb-compose,
+  .vb-mic.is-live,
+  .vb-wave i,
+  .vb-caret {
+    animation: none;
+  }
+}

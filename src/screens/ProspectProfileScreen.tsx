@@ -36,6 +36,10 @@ import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import AddVisionBoardModal from './AddVisionBoardModal'
+import { Board } from './ClientProfileScreen'
+import type { VisionBoard } from '../data/clientProfile'
+import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
 
@@ -71,7 +75,7 @@ export default function ProspectProfileScreen({
   ownerMenu?: ReactNode
   /** Open straight into one of the page's own forms — what the quick-access
       sheet on her phone asks for. */
-  startFlow?: 'goal' | 'event' | 'question' | null
+  startFlow?: 'goal' | 'event' | 'question' | 'vision' | null
   onStartFlowDone?: () => void
   /** How she last said she felt, tapped on her own phone. It reads as part of
       who she is, so it sits with her name rather than over the page. */
@@ -99,6 +103,9 @@ export default function ProspectProfileScreen({
   const [assessing, setAssessing] = useState<string | null>(null)
   const assessed = goalList.find((g) => g.title === assessing)
 
+  /* Her vision boards: none until she makes one, on her own phone. */
+  const [boards, setBoards] = useState<VisionBoard[]>([])
+  const [addingBoard, setAddingBoard] = useState(false)
   /* Handed in from her phone's quick-access sheet, and cleared as soon as it
      is honoured so closing the form does not reopen it. */
   useEffect(() => {
@@ -106,6 +113,7 @@ export default function ProspectProfileScreen({
     if (startFlow === 'goal') setAddingGoal(true)
     if (startFlow === 'event') setEventForm('add')
     if (startFlow === 'question') setQuestionForm('add')
+    if (startFlow === 'vision') setAddingBoard(true)
     onStartFlowDone?.()
   }, [startFlow, onStartFlowDone])
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
@@ -384,6 +392,34 @@ export default function ProspectProfileScreen({
                     <PostcardSection text={fi.postcard} />
                   </section>
 
+                  {/* Her boards, made on her phone. Only her own page has the
+                      card: a prospect's advisor has no board to show. */}
+                  {mine && (
+                    <section className="pp-card">
+                      <div className="pp-card-head">
+                        <span className="pp-card-title">
+                          <img className="pp-card-ic is-inset" src={icVision} alt="" />
+                          Future Vision Board
+                        </span>
+                        <AddButton label="Add a vision board" onClick={() => setAddingBoard(true)} />
+                      </div>
+                      {boards.length === 0 ? (
+                        <EmptyState
+                          art={EMPTY_ART.visionBoard}
+                          label="Make a Vision Board"
+                          cta
+                          onClick={() => setAddingBoard(true)}
+                        />
+                      ) : (
+                        <div className="cp-boards">
+                          {boards.map((b, i) => (
+                            <Board board={b} key={`${b.title}-${i}`} />
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  )}
+
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
@@ -593,6 +629,17 @@ export default function ProspectProfileScreen({
       )}
 
 
+
+      {addingBoard && (
+        <AddVisionBoardModal
+          onClose={() => setAddingBoard(false)}
+          onSave={(b) => {
+            setBoards((bs) => [...bs, b])
+            setAddingBoard(false)
+            onToast?.('Vision board saved')
+          }}
+        />
+      )}
 
       {/* A question, opened — and the form that asks or rewords one. */}
       {openQuestion && !questionForm && (

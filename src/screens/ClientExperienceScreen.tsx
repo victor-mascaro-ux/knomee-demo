@@ -617,7 +617,7 @@ function AdventuresScreen({
   onPick,
   onOpenAdventure,
 }: {
-  onPick: (flow: 'goal' | 'event' | 'question') => void
+  onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** An adventure that can actually be taken. */
   onOpenAdventure: (id: string) => void
 }) {
@@ -660,13 +660,13 @@ function AdventuresScreen({
   )
 }
 
-/* Which of the four quick actions opens a form on the Financial ID. Saving a
-   vision is not one of them yet: a vision board is pictures, and there is
-   nowhere on this prototype to put one. */
-const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question'>> = {
+/* Which of the four quick actions opens a form on the Financial ID — all four:
+   saving a vision builds a board, which lands on her Financial ID. */
+const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question' | 'vision'>> = {
   goals: 'goal',
   'life-events': 'event',
   questions: 'question',
+  vision: 'vision',
 }
 
 /* ── quick access: one tap on the knomee mark ──────────────────────────────
@@ -678,8 +678,8 @@ function KnomeeSheet({
   onSaveMood,
 }: {
   onClose: () => void
-  /** One of the three things the Financial ID can actually add. */
-  onPick: (flow: 'goal' | 'event' | 'question') => void
+  /** One of the four things the Financial ID can add. */
+  onPick: (flow: 'goal' | 'event' | 'question' | 'vision') => void
   /** How they feel, and why, on its way to the top of their Financial ID. */
   onSaveMood: (mood: MoodId, note: string) => void
 }) {
@@ -1006,7 +1006,7 @@ export default function ClientExperienceScreen({
   const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
   /* What the quick-access sheet asked for, on its way to the Financial ID. */
-  const [flow, setFlow] = useState<'goal' | 'event' | 'question' | null>(null)
+  const [flow, setFlow] = useState<'goal' | 'event' | 'question' | 'vision' | null>(null)
   /* The check-in she has just made, which her Financial ID carries at the top
      of the page the way the advisor's copy of it does. */
   const [checkIn, setCheckIn] = useState<{ mood: MoodId; note: string } | null>(null)
@@ -1016,7 +1016,7 @@ export default function ClientExperienceScreen({
   /* The adventure being taken, if any. It takes over the screen: the app bar
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
-  const openFlow = (f: 'goal' | 'event' | 'question') => {
+  const openFlow = (f: 'goal' | 'event' | 'question' | 'vision') => {
     setSheet(false)
     setTab('finid')
     setFlow(f)

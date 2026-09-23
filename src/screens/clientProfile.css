@@ -492,3 +492,14 @@
   --mood-from: #0f5b3c;
   --mood-to: #25865a;
 }
+
+/* A sticker that was said rather than typed: the words are the tile, and this
+   is only where they came from, at the size of the note's own title. */
+.cp-note-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--text-secondary);
+}

@@ -553,9 +553,12 @@ export function EmptyState({
   art,
   label,
   cta,
+  onClick,
 }: {
   art: string
   label: string
+  /** Where the call to action goes, for a tray that can be filled from here. */
+  onClick?: () => void
   /** Renders the box as a button with a leading "+", for the card that can
       actually be filled in. */
   cta?: boolean
@@ -582,7 +585,7 @@ export function EmptyState({
   )
   if (cta) {
     return (
-      <button type="button" className="pp-empty pp-empty-cta">
+      <button type="button" className="pp-empty pp-empty-cta" onClick={onClick}>
         {inner}
       </button>
     )
