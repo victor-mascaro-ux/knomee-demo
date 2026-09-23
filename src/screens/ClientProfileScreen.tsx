@@ -29,7 +29,9 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
-import icVision from '../assets/adventures/vision-board.svg'
+/* The client's own artwork for a vision, which is what her app calls it when
+   she saves one — rather than the abstract board the card used to wear. */
+import icVision from '../assets/adventures/vision.png'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -398,11 +400,18 @@ export default function ClientProfileScreen({
   onAddMember,
   mine,
   onToast,
+  startFlow,
+  onStartFlowDone,
 }: {
   client: Client
   onBack: () => void
   /** The app's own toast, for the two things this page can add to a list. */
   onToast?: (msg: string) => void
+  /** Open straight into one of the page's own forms. The client's phone has
+      the same three things on a quick-access sheet, and a sheet that lands you
+      on the right page with the form shut has not saved you the taps. */
+  startFlow?: 'goal' | 'event' | 'question' | null
+  onStartFlowDone?: () => void
   /* The phone frame hands in the control that opens the rail as a drawer. It
      belongs above the client's name, next to the person it is about, not in
      the app bar — the app bar's burger is the advisor's own menu, as it is on
@@ -476,6 +485,16 @@ export default function ClientProfileScreen({
   /* And the goal whose stage is being taken. */
   const [assessing, setAssessing] = useState<string | null>(null)
   const assessed = goalList.find((g) => g.title === assessing)
+
+  /* Handed in from outside — the quick-access sheet on the phone — and cleared
+     as soon as it is honoured, so closing the form does not reopen it. */
+  useEffect(() => {
+    if (!startFlow) return
+    if (startFlow === 'goal') setAddingGoal(true)
+    if (startFlow === 'event') setEventForm('add')
+    if (startFlow === 'question') setQuestionForm('add')
+    onStartFlowDone?.()
+  }, [startFlow, onStartFlowDone])
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   /* The life events are the page's second list it can change: added from the
