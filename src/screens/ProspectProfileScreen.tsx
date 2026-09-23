@@ -27,8 +27,9 @@ import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
+import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import { DEMO_TODAY, financialId } from '../data/financialId'
-import type { LifeEvent } from '../data/financialId'
+import type { LifeEvent, ProfileQuestion } from '../data/financialId'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -79,7 +80,11 @@ export default function ProspectProfileScreen({
   const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
   const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
   const events = useCollapsed(eventList, COLLAPSED_ROWS)
-  const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
+  /* And the questions, which behave the same way. */
+  const [questionList, setQuestionList] = useState<ProfileQuestion[]>(fi.questions)
+  const [openQuestion, setOpenQuestion] = useState<ProfileQuestion | null>(null)
+  const [questionForm, setQuestionForm] = useState<'add' | 'edit' | null>(null)
+  const questions = useCollapsed(questionList, COLLAPSED_ROWS)
 
   // Open the profile scrolled to the top, regardless of where the prospect's
   // row sat in the table when it was clicked. On the live site the app runs in
@@ -420,14 +425,28 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>
-                      <AddButton muted={questions.shown.length === 0} />
+                      <AddButton
+                        muted={questions.shown.length === 0}
+                        label="Ask a question"
+                        onClick={() => setQuestionForm('add')}
+                      />
                     </div>
                     {questions.shown.length === 0 ? (
                       <EmptyState art={EMPTY_ART.questions} label="No Questions Asked Yet" />
                     ) : (
                     <div className="pp-questions" ref={questions.box}>
                       {questions.shown.map((q, i) => (
-                        <div className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`} style={questions.delay(i)} key={i}>
+                        <div
+                          className={`pp-question is-open-able ${q.resolved ? 'is-resolved' : ''} ${questions.entering(i) ?? ''}`}
+                          style={questions.delay(i)}
+                          key={i}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOpenQuestion(q)}
+                          onKeyDown={(k) => {
+                            if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
+                          }}
+                        >
                           <span className="pp-q-text">{q.q}</span>
                           <span className="pp-q-date">
                             {q.resolved ? (
@@ -502,6 +521,45 @@ export default function ProspectProfileScreen({
         />
       )}
 
+
+
+      {/* A question, opened — and the form that asks or rewords one. */}
+      {openQuestion && !questionForm && (
+        <QuestionModal
+          question={openQuestion}
+          onClose={() => setOpenQuestion(null)}
+          onEdit={() => setQuestionForm('edit')}
+          onToggleResolved={() => {
+            const next = {
+              ...openQuestion,
+              resolved: openQuestion.resolved ? undefined : DEMO_TODAY,
+            }
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+            if (next.resolved) onToast?.('Question resolved')
+          }}
+          onDelete={() => {
+            setQuestionList((list) => list.filter((q) => q !== openQuestion))
+            setOpenQuestion(null)
+          }}
+        />
+      )}
+      {questionForm && (
+        <AddQuestionModal
+          question={questionForm === 'edit' ? (openQuestion ?? undefined) : undefined}
+          onClose={() => setQuestionForm(null)}
+          onSave={(q) => {
+            setQuestionList((list) =>
+              questionForm === 'edit' && openQuestion
+                ? list.map((o) => (o === openQuestion ? q : o))
+                : [q, ...list],
+            )
+            if (questionForm === 'add') onToast?.('Question added')
+            setQuestionForm(null)
+            setOpenQuestion(q)
+          }}
+        />
+      )}
 
       {/* A life event, opened — and the form that adds or changes one. */}
       {openEvent && !eventForm && (

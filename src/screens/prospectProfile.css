@@ -726,8 +726,10 @@
   right: 13px;
 }
 .pp-event-mood img {
-  width: 22px;
-  height: 22px;
+  /* Smaller than the panel's: on a row it is a note in the margin, not the
+     finding. */
+  width: 18px;
+  height: 18px;
   display: block;
 }
 .pp-event-body {
@@ -1398,11 +1400,13 @@
 /* A row you can open — a goal, a life event: the whole row is the control, so
    it takes the pointer and the outline a row you can act on has. */
 .pp-goal.is-open-able,
-.pp-event.is-open-able {
+.pp-event.is-open-able,
+.pp-question.is-open-able {
   cursor: pointer;
 }
 .pp-goal.is-open-able:focus-visible,
-.pp-event.is-open-able:focus-visible {
+.pp-event.is-open-able:focus-visible,
+.pp-question.is-open-able:focus-visible {
   outline: 2px solid var(--purple-bolt, #9b51e0);
   outline-offset: 2px;
 }
