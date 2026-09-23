@@ -20,10 +20,17 @@
 }
 .modal-footer.vb-foot {
   flex: none;
-  /* Back at one edge, Save at the other, whatever the panel's width. */
+  /* Delete at one edge, Save at the other, whatever the panel's width. */
   justify-content: space-between;
   gap: var(--space-10);
   padding-top: var(--space-12);
+}
+/* Save keeps the right edge, with or without Delete board on the left. */
+.modal-footer.vb-foot .btn-primary {
+  margin-left: auto;
+  /* A centring rule elsewhere gave it auto on the right too, and it sat in
+     the middle of the space rather than at the edge. */
+  margin-right: 0;
 }
 .vb-foot .btn:disabled {
   opacity: 0.45;

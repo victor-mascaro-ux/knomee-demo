@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -207,7 +207,13 @@ export default function ProspectProfileScreen({
   const [eventList, setEventList] = useState<LifeEvent[]>(fi.lifeEvents)
   const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
   const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
-  const events = useCollapsed(eventList, COLLAPSED_ROWS)
+  /* Done events go to the end, the way completed goals do; the rest keep
+     their order. */
+  const orderedEvents = useMemo(
+    () => [...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)],
+    [eventList],
+  )
+  const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
   /* And the questions, which behave the same way. */
   const [questionList, setQuestionList] = useState<ProfileQuestion[]>(fi.questions)
   const [openQuestion, setOpenQuestion] = useState<ProfileQuestion | null>(null)
@@ -657,7 +663,7 @@ export default function ProspectProfileScreen({
                     <div className="pp-events" ref={events.box}>
                       {events.shown.map((e, i) => (
                         <div
-                          className={`pp-event is-open-able ${events.entering(i) ?? ''}`}
+                          className={`pp-event is-open-able ${e.completed ? 'is-done' : ''} ${events.entering(i) ?? ''}`}
                           style={events.delay(i)}
                           key={i}
                           role="button"
@@ -674,7 +680,11 @@ export default function ProspectProfileScreen({
                             </span>
                             <span className="pp-event-text">{e.text}</span>
                             <span className="pp-event-meta">
-                              <span className="pp-event-date">{e.date}</span>
+                              {e.completed ? (
+                                <span className="pp-goal-done"><CheckIcon /> Completed: {e.completed}</span>
+                              ) : (
+                                <span className="pp-event-date">{e.date}</span>
+                              )}
                               {/* Who added it is the advisor's to know; her
                                   own phone is the client's flow. */}
                               {e.advisorAdded && !mine && (
