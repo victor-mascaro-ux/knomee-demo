@@ -1467,3 +1467,25 @@
 .pp-badge.is-locked:hover .pp-badge-disc {
   transform: none;
 }
+
+/* An adventure not yet taken: its card is there, so the page shows what it
+   will hold, but greyed — the heading faded and its art drained — until the
+   adventure is finished and its answers fill it. */
+.pp-card.is-waiting .pp-card-title {
+  color: var(--text-disabled, #b3b1ba);
+}
+.pp-card.is-waiting .pp-card-ic {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+/* Filled: it comes in from grey rather than appearing already there. */
+.pp-card:not(.is-waiting) .pp-card-ic {
+  transition: filter 0.5s ease, opacity 0.5s ease;
+}
+/* What fills a waiting card, said under its heading. */
+.pp-waiting {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
