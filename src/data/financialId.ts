@@ -46,10 +46,22 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
 // Demo content for a prospect's "Financial ID" profile page. All placeholder
 // data — one rich profile stands in for whichever prospect is opened.
 
+/** The demo's today — what a goal marked done from the panel is dated. */
+export const DEMO_TODAY = '06/12/2025'
+
 export interface Goal {
   title: string
   readiness: number // 1–5 bars
   completed?: string // date if the goal is done
+  /* What the goal card opens onto. Every field is optional: a goal somebody
+     named and never went back to is a title and a readiness, and the panel
+     shows what there is rather than a row of blanks. */
+  updated?: string
+  timeline?: string
+  pros?: string[]
+  cons?: string[]
+  /** The sentence they wrote about it, in their own words. */
+  note?: string
 }
 
 export interface LifeEvent {
@@ -86,9 +98,32 @@ export const financialId = {
     { icon: 'future-you', title: 'Future Vision', text: 'Near loved ones, traveling, and staying active with family in the years ahead' },
   ],
   goals: [
-    { title: 'Family Disney beach vacation to Oahu.', readiness: 4 },
-    { title: 'Buy a house by the beach', readiness: 2 },
-    { title: 'Save for a down payment on a second home', readiness: 3 },
+    {
+      title: 'Family Disney beach vacation to Oahu.',
+      readiness: 4,
+      updated: '05/06/2025',
+      timeline: '<6 months',
+      pros: ['Freedom', 'Adventure', 'Quality time with family and friends'],
+      cons: ['High cost', 'Scheduling'],
+      note: 'Family Disney beach vacation to Oahu.',
+    },
+    {
+      title: 'Buy a house by the beach',
+      readiness: 2,
+      updated: '04/18/2025',
+      timeline: '5–10 years',
+      pros: ['Somewhere the family gathers', 'A base for the next chapter'],
+      cons: ['Ties up capital', 'Upkeep from a distance'],
+      note: 'Somewhere near the water that the whole family comes back to.',
+    },
+    {
+      title: 'Save for a down payment on a second home',
+      readiness: 3,
+      updated: '04/18/2025',
+      timeline: '1–3 years',
+      pros: ['Makes the beach house possible', 'Forces a savings habit'],
+      cons: ['Competes with college funding'],
+    },
     { title: 'Add alternatives to portfolio - angel invest', readiness: 1 },
     { title: 'Purchase a new car', readiness: 5 },
     { title: 'Build a year of living expenses in cash', readiness: 5 },

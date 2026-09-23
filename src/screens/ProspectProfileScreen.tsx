@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import './prospectProfile.css'
-import { financialId } from '../data/financialId'
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -24,6 +23,8 @@ import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
+import GoalModal from './GoalModal'
+import { DEMO_TODAY, financialId } from '../data/financialId'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -51,7 +52,12 @@ export default function ProspectProfileScreen({
   // opens showing a few rows and grows on demand.
   const [confidence, setConfidence] = useState(false)
   const highlights = useCollapsed(fi.keyHighlights, COLLAPSED_ROWS)
-  const goals = useCollapsed(orderGoals(fi.goals), COLLAPSED_GOALS)
+  /* The goals are the one list this page can change — renamed, marked done or
+     thrown away from the panel a row opens — so the screen holds them. */
+  const [goalList, setGoalList] = useState(fi.goals)
+  const [openGoal, setOpenGoal] = useState<string | null>(null)
+  const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
+  const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(fi.questions, COLLAPSED_ROWS)
 
@@ -193,9 +199,20 @@ export default function ProspectProfileScreen({
                     <div className="pp-goals" ref={goals.box}>
                       {goals.shown.map((g, i) => (
                         <div
-                          className={`pp-goal ${g.completed ? 'is-done' : ''} ${goals.entering(i) ?? ''}`}
+                          className={`pp-goal is-open-able ${g.completed ? 'is-done' : ''} ${
+                            goals.entering(i) ?? ''
+                          }`}
                           style={goals.delay(i)}
                           key={g.title}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOpenGoal(g.title)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              setOpenGoal(g.title)
+                            }
+                          }}
                         >
                           <div className="pp-goal-main">
                             <span className="pp-goal-title">{g.title}</span>
@@ -207,6 +224,7 @@ export default function ProspectProfileScreen({
                           <span className="pp-goal-caret">
                             <RowChevron />
                           </span>
+                          <GoalDetail g={g} />
                         </div>
                       ))}
                     </div>
@@ -415,6 +433,28 @@ export default function ProspectProfileScreen({
           )}
         </main>
       </div>
+      {/* The goal, opened. */}
+      {goal && (
+        <GoalModal
+          goal={goal}
+          onClose={() => setOpenGoal(null)}
+          onRename={(title) => {
+            setGoalList((list) => list.map((g) => (g === goal ? { ...g, title } : g)))
+            setOpenGoal(title)
+          }}
+          onToggleComplete={() =>
+            setGoalList((list) =>
+              list.map((g) =>
+                g === goal ? { ...g, completed: g.completed ? undefined : DEMO_TODAY } : g,
+              ),
+            )
+          }
+          onDelete={() => {
+            setGoalList((list) => list.filter((g) => g !== goal))
+            setOpenGoal(null)
+          }}
+        />
+      )}
     </div>
   )
 }

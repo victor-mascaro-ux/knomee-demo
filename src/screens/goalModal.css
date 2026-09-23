@@ -1,0 +1,152 @@
+/* The goal panel — only what a goal adds to the app's modal. The shell, the
+   header, the close and the footer are index.css's own. Every value is a token,
+   and the accents read from the page underneath: on a client's page the modal
+   is green, on a prospect's purple, because --plum and --text-link are already
+   turned over there. */
+
+.goal-modal {
+  width: 560px;
+}
+.goal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The name, and the pencil that puts it in a field. */
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+.goal-title,
+.goal-title-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+  color: var(--text-strong);
+}
+.goal-title-input {
+  font-family: inherit;
+  padding: 2px var(--space-8);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.goal-title-input:focus {
+  outline: none;
+  border-color: var(--text-link);
+}
+.goal-edit {
+  flex: none;
+  margin-top: 4px;
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-link);
+  cursor: pointer;
+}
+.goal-edit:hover {
+  background: var(--surface-sunken);
+}
+.goal-updated {
+  margin: 0 0 var(--space-16);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Label and answer, in two columns: every row is the same question asked of
+   the goal, so the labels line up and the answers start on one edge. */
+.goal-rows {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: var(--space-12) var(--space-16);
+  margin: 0;
+  align-items: baseline;
+}
+.goal-rows dt {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}
+.goal-rows dd {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+/* A list that is not a bulleted list: these are the words they picked, one to a
+   line, and a bullet in front of each would make them look like instructions. */
+.goal-line {
+  display: block;
+}
+.goal-line + .goal-line {
+  margin-top: var(--space-6);
+}
+.goal-readiness {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.goal-stage {
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}
+
+.goal-complete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  margin-top: var(--space-20);
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.goal-complete input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--text-link);
+  cursor: pointer;
+}
+
+/* Deleting is the one thing here that cannot be undone, so it does not wear a
+   button: it is a line of text with the bin beside it, centred under the panel
+   where nothing else is. */
+.goal-foot {
+  justify-content: center !important;
+}
+.goal-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-10);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.goal-delete:hover {
+  color: var(--k-crimson);
+  background: var(--k-crimson-light);
+  text-decoration: none;
+}
+
+@media (max-width: 620px) {
+  .goal-rows {
+    grid-template-columns: 1fr;
+    gap: var(--space-4) 0;
+  }
+  .goal-rows dd {
+    margin-bottom: var(--space-8);
+  }
+}

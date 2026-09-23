@@ -5,7 +5,7 @@ import './clientProfile.css'
 import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -32,6 +32,8 @@ import moodNeutral from '../assets/moods/neutral.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
+import GoalModal from './GoalModal'
+import { DEMO_TODAY } from '../data/financialId'
 import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
@@ -335,13 +337,29 @@ function GoalRow({
   g,
   className,
   style,
+  onOpen,
 }: {
   g: ClientGoal
   className?: string
   style?: React.CSSProperties
+  /* Every goal row has had a chevron since the first one was drawn. This is
+     where it goes. */
+  onOpen: () => void
 }) {
   return (
-    <div className={`pp-goal ${g.completed ? 'is-done' : ''} ${className ?? ''}`} style={style}>
+    <div
+      className={`pp-goal is-open-able ${g.completed ? 'is-done' : ''} ${className ?? ''}`}
+      style={style}
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+    >
       <div className="pp-goal-main">
         {g.tags && g.tags.length > 0 && (
           <span className="cp-goal-tags">
@@ -357,8 +375,9 @@ function GoalRow({
       </div>
       <ReadinessLevel level={g.readiness} />
       <span className="pp-goal-caret">
-                            <RowChevron />
-                          </span>
+        <RowChevron />
+      </span>
+      <GoalDetail g={g} />
     </div>
   )
 }
@@ -434,7 +453,15 @@ export default function ClientProfileScreen({
   // across the rows (1 2 / 3 4) rather than down the columns (1 5 / 2 6).
   const [confidence, setConfidence] = useState(false)
   const highlights = useCollapsed(cp.keyHighlights, COLLAPSED_ROWS)
-  const goals = useCollapsed(orderGoals(cp.goals), COLLAPSED_GOALS)
+  /* The goals are the one list on this page that the page can change — a goal
+     can be renamed, marked done or thrown away from the panel it opens. So the
+     screen holds them, seeded from her profile and reset when another client's
+     page is opened over this one. */
+  const [goalList, setGoalList] = useState<ClientGoal[]>(cp.goals)
+  useEffect(() => setGoalList(cp.goals), [cp])
+  const [openGoal, setOpenGoal] = useState<string | null>(null)
+  const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
+  const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
   const questions = useCollapsed(cp.questions, COLLAPSED_ROWS)
 
@@ -641,6 +668,7 @@ export default function ClientProfileScreen({
                           key={g.title}
                           className={goals.entering(i)}
                           style={goals.delay(i)}
+                          onOpen={() => setOpenGoal(g.title)}
                         />
                       ))}
                     </div>
@@ -888,6 +916,30 @@ export default function ClientProfileScreen({
           )}
         </main>
       </div>
+
+      {/* The goal, opened. Renaming, marking done and deleting all land on the
+          list this page holds, so the card behind the panel changes with it. */}
+      {goal && (
+        <GoalModal
+          goal={goal}
+          onClose={() => setOpenGoal(null)}
+          onRename={(title) => {
+            setGoalList((list) => list.map((g) => (g === goal ? { ...g, title } : g)))
+            setOpenGoal(title)
+          }}
+          onToggleComplete={() =>
+            setGoalList((list) =>
+              list.map((g) =>
+                g === goal ? { ...g, completed: g.completed ? undefined : DEMO_TODAY } : g,
+              ),
+            )
+          }
+          onDelete={() => {
+            setGoalList((list) => list.filter((g) => g !== goal))
+            setOpenGoal(null)
+          }}
+        />
+      )}
     </div>
   )
 }
