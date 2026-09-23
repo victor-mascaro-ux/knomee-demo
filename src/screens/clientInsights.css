@@ -181,3 +181,12 @@
     transform: none;
   }
 }
+
+/* A client's (and a household's) tiers in the Clients dashboard's colours. */
+.pp.cp .rd,
+.rd.ci,
+.rd.fin {
+  --rd-t1: var(--client-1);
+  --rd-t2: var(--client-2);
+  --rd-t3: var(--client-3);
+}

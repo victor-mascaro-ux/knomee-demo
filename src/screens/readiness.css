@@ -1178,3 +1178,32 @@
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(20, 10, 40, 0.1);
 }
+
+/* ── tier colours, the dashboards' own ──
+   Each tier wears the colour of its band on the dashboard the person sits in:
+   prospects and recruit candidates in plum, grape and orchid; clients (below,
+   in clientInsights.css) in emerald, ocean and steel. The panel is a faint
+   wash of the same colour, the swatch the colour itself. */
+.rd {
+  --rd-t1: var(--prospect-1);
+  --rd-t2: var(--prospect-2);
+  --rd-t3: var(--prospect-3);
+}
+.rd .rd-tier-1 {
+  background: color-mix(in srgb, var(--rd-t1) 9%, #fff);
+}
+.rd .rd-tier-1 .rd-tier-swatch {
+  background: var(--rd-t1);
+}
+.rd .rd-tier-2 {
+  background: color-mix(in srgb, var(--rd-t2) 10%, #fff);
+}
+.rd .rd-tier-2 .rd-tier-swatch {
+  background: var(--rd-t2);
+}
+.rd .rd-tier-3 {
+  background: color-mix(in srgb, var(--rd-t3) 12%, #fff);
+}
+.rd .rd-tier-3 .rd-tier-swatch {
+  background: var(--rd-t3);
+}
