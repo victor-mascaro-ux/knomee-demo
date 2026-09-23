@@ -246,16 +246,12 @@
   letter-spacing: 0;
   white-space: nowrap;
 }
-/* New: the side's own "new" — grape with white among prospects and
-   candidates, lime with plum among clients — exactly as the tables badge it. */
+/* New: grape with white, on every page and in every table. */
 .cp-goal-tag.is-new {
   background: var(--k-grape);
   color: #fff;
 }
-.pp.cp .cp-goal-tag.is-new {
-  background: var(--k-lime);
-  color: var(--k-plum);
-}
+
 /* Updated: quieter than New — the brand's light purple with plum ink. */
 .cp-goal-tag.is-updated {
   background: var(--k-grape-light);
