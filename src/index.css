@@ -6313,6 +6313,22 @@ button.name-link-btn:hover .name-text {
     grid-area: meta;
     align-self: start;
   }
+  /* The advisor's rail wraps the name and the date in .ap-idline, which is
+     `display: contents` at full width and a flex column below it — and paper is
+     BELOW it, about 180mm of layout width, so every narrow rule in the app is
+     in force while printing. The wrapper is therefore made a real cell here,
+     spanning both rows of the middle column, and the two lines stack inside it
+     whichever rule won. */
+  .ap-idline {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 / -1 !important;
+    min-width: 0;
+  }
+  .ap-idline .pp-name,
+  .ap-idline .pp-meta {
+    grid-area: auto !important;
+  }
   .ap-side-stat {
     grid-area: score;
     justify-self: end;
