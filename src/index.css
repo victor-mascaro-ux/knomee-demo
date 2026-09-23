@@ -6540,10 +6540,38 @@ button.name-link-btn:hover .name-text {
   .pp-goal:last-child {
     margin-bottom: 0;
   }
+  /* The cards that are allowed to run over a page break give up their grey
+     tray while they do it. A tray paints to the foot of the sheet it breaks
+     on, so a card carrying one goal and a page break under it printed half a
+     page of empty wash. What is inside them — a goal, a photograph, a note —
+     is a white card or a picture and holds its own shape on white. */
   .pp-card:has(.pp-goals),
-  .pp-card:has(.cp-goal-cols) {
+  .pp-card:has(.cp-goal-cols),
+  .pp-card:has(.cp-boards) {
     break-inside: auto;
     page-break-inside: auto;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* ── a vision board across a break ──
+     A board is a title, a line under it and a wall of tiles, and it is kept
+     whole where it fits. Where it cannot fit — one board is taller than a
+     sheet — the title still goes with the tiles it names rather than being
+     left at the foot of the page on its own. */
+  .cp-board {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .cp-board-title,
+  .cp-board-blurb {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .cp-tile {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   /* Badges are a screen's reward, not a document's content. */
@@ -6581,5 +6609,5 @@ button.name-link-btn:hover .name-text {
   /* The sheet's whole margin, in one place. More at the head than the foot: a
      page that starts hard against the top edge reads as cut off, and every page
      after the first has only this. */
-  margin: 16mm 14mm 12mm;
+  margin: 20mm 14mm 12mm;
 }
