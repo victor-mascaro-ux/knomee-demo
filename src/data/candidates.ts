@@ -459,7 +459,6 @@ export const profileOwner = advisor.name
 
 /* ── pipeline totals, derived ───────────────────────────────────────────── */
 
-const scored = candidates.filter((c) => c.kq !== null)
 const round1 = (n: number) => Math.round(n * 10) / 10
 const mean = (xs: number[]) => (xs.length ? round1(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
 
@@ -471,27 +470,34 @@ export const STAGES: Stage[] = [
   'Maintenance',
 ]
 
-export const candidateStats = {
-  total: candidates.length,
-  scored: scored.length,
-  avgRQ: mean(scored.map((c) => c.kq as number)),
-  avgIntent: mean(scored.map((c) => c.intent as number)),
-  avgClarity: mean(scored.map((c) => c.clarity as number)),
-  avgReceptivity: mean(scored.map((c) => c.receptivity as number)),
-  aum: candidates.reduce((a, c) => a + c.aum, 0),
-  byTier: {
-    tier1: candidates.filter((c) => c.tier === 'tier1').length,
-    tier2: candidates.filter((c) => c.tier === 'tier2').length,
-    tier3: candidates.filter((c) => c.tier === 'tier3').length,
-    incomplete: candidates.filter((c) => c.tier === 'incomplete').length,
-  },
-  byStage: STAGES.map((s) => ({
-    stage: s,
-    count: scored.filter((c) => c.stage === s).length,
-    share: Math.round((scored.filter((c) => c.stage === s).length / scored.length) * 100),
-  })),
-  signed: candidates.filter((c) => c.progress === 'signed').length,
+/** The dashboard's figures over any list of rows — the authored pipeline, or
+    the pipeline with the live sittings in it. */
+export function statsOf(list: Candidate[]) {
+  const scored = list.filter((c) => c.kq !== null)
+  return {
+    total: list.length,
+    scored: scored.length,
+    avgRQ: mean(scored.map((c) => c.kq as number)),
+    avgIntent: mean(scored.map((c) => c.intent as number)),
+    avgClarity: mean(scored.map((c) => c.clarity as number)),
+    avgReceptivity: mean(scored.map((c) => c.receptivity as number)),
+    aum: list.reduce((a, c) => a + c.aum, 0),
+    byTier: {
+      tier1: list.filter((c) => c.tier === 'tier1').length,
+      tier2: list.filter((c) => c.tier === 'tier2').length,
+      tier3: list.filter((c) => c.tier === 'tier3').length,
+      incomplete: list.filter((c) => c.tier === 'incomplete').length,
+    },
+    byStage: STAGES.map((s) => ({
+      stage: s,
+      count: scored.filter((c) => c.stage === s).length,
+      share: Math.round((scored.filter((c) => c.stage === s).length / scored.length) * 100),
+    })),
+    signed: list.filter((c) => c.progress === 'signed').length,
+  }
 }
+
+export const candidateStats = statsOf(candidates)
 
 /** How far along the funnel a row is, as a number, so phase 3 can compare. */
 export const progressIndex = (p: Progress) => PROGRESS.indexOf(p)

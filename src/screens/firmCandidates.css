@@ -93,3 +93,47 @@
   text-align: left;
   line-height: 1.6;
 }
+
+/* Invite opens its panel under the button, not across the page. */
+.fc-invite {
+  position: relative;
+}
+.fc-invite-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(460px, calc(100vw - 32px));
+  border-radius: var(--radius-xl);
+  box-shadow: 0 18px 44px -12px rgba(20, 10, 40, 0.35);
+  animation: fcInviteIn 0.18s var(--ease-out) both;
+}
+.fc-invite-pop > * {
+  margin: 0;
+}
+.fc-invite-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+@keyframes fcInviteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+/* The toolbar sits above the table so the pop-over is not tucked under its
+   sticky header. */
+.toolbar:has(.fc-invite) {
+  position: relative;
+  z-index: 35;
+}
+.fc-invite-pop {
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-default);
+  overflow: hidden;
+}

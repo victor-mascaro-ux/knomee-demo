@@ -12,13 +12,17 @@
    `candidateInsights.ts`, which the table reads too, so the two halves of the
    screen cannot disagree. */
 
-import { Fragment, useState } from 'react'
+import { InvitePanel } from './AdvisorDirectoryScreen'
+import { listEntries, type Trouble } from '../data/advisorDirectory'
+import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
+import './advisorDirectory.css'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import CollapsibleCard from '../components/CollapsibleCard'
 import RowMenu from '../components/RowMenu'
 import './firmCandidates.css'
 import {
   candidates,
-  candidateStats,
+  statsOf,
   profileOwner,
   tierGroups,
   type Candidate,
@@ -61,8 +65,13 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   )
 }
 
+/* A row with a report behind it: the walkthrough's, or a live sitting that
+   finished the flow. */
+const opensProfile = (c: Candidate) =>
+  c.name === profileOwner || ('entryId' in c && c.kq !== null)
+
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
-  const isOwner = c.name === profileOwner
+  const isOwner = opensProfile(c)
   /* The "new" pill sits on the name's line, as it does in the advisor's tables. */
   const tag = c.isNew ? <span className="new-tag">new</span> : null
   return (
@@ -93,7 +102,14 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
    one next action always visible; the call-list and the reasoning are
    discoverable layers; the tier bar is the drill-in spine. */
 
-function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => void }) {
+function CommandCenter({
+  onOpenProfile,
+  stats,
+}: {
+  onOpenProfile: (c: Candidate) => void
+  /** The pipeline's figures, live sittings included. */
+  stats: ReturnType<typeof statsOf>
+}) {
   const [tier, setTier] = useState<TierKey | null>(null)
   const [listOpen, setListOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
@@ -139,14 +155,14 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
-                {candidateStats.avgRQ.toFixed(1)}
+                {stats.avgRQ.toFixed(1)}
               </span>
             </div>
           </div>
           <div className="metric-tile">
             <span className="metric-label">TOTAL CANDIDATES</span>
             <div className="metric-num">
-              <span className="metric-value">{candidateStats.total}</span>
+              <span className="metric-value">{stats.total}</span>
             </div>
           </div>
           <div className="metric-tile distribution">
@@ -179,7 +195,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
             </div>
             <div className="dist-bar cmd-dist-bar">
               {TIER_META.map((m) => {
-                const n = candidateStats.byTier[m.tierId]
+                const n = stats.byTier[m.tierId]
                 return (
                   <button
                     key={m.key}
@@ -203,7 +219,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                   className="dist-leg"
                   key={m.key}
                   /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: candidateStats.byTier[m.tierId] || 0.001 }}
+                  style={{ flexGrow: stats.byTier[m.tierId] || 0.001 }}
                 >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
@@ -213,10 +229,10 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile: (c: Candidate) => voi
                 </div>
               ))}
             </div>
-            {candidateStats.byTier.incomplete > 0 && (
+            {stats.byTier.incomplete > 0 && (
               <p className="dist-foot">
-                {candidateStats.byTier.incomplete} incomplete profile
-                {candidateStats.byTier.incomplete === 1 ? '' : 's'} not shown
+                {stats.byTier.incomplete} incomplete profile
+                {stats.byTier.incomplete === 1 ? '' : 's'} not shown
               </p>
             )}
           </div>
@@ -428,8 +444,8 @@ function Row({
                   { label: 'Add to Network', onClick: () => onAdd(c) },
                   {
                     label: 'View profile',
-                    disabled: c.name !== profileOwner,
-                    onClick: c.name === profileOwner ? () => onOpen(c) : undefined,
+                    disabled: !opensProfile(c),
+                    onClick: opensProfile(c) ? () => onOpen(c) : undefined,
                   },
                 ]
           }
@@ -580,18 +596,34 @@ function Table({
 
 export default function FirmCandidatesScreen({
   onOpenProfile,
+  onOpenEntry,
   onDownload,
-  onInvite,
   onAdd,
 }: {
   onOpenProfile: (c: Candidate) => void
+  /** A live sitting's row: opens the report built from its answers. */
+  onOpenEntry: (entryId: string) => void
   onDownload: () => void
-  onInvite: () => void
   onAdd: (c: Candidate) => void
 }) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
-  const rows = candidates.filter(
+  /* The advisors who have taken the flow for real, placed in the pipeline by
+     the same scoring as their reports. The walkthrough's own sitting is
+     already a row (Marcus), so it is not listed twice. */
+  const [live, setLive] = useState<LiveCandidate[]>([])
+  const [inviting, setInviting] = useState(false)
+  const [trouble, setTrouble] = useState<Trouble>(null)
+  const loadLive = useCallback(async () => {
+    const { values, trouble: t } = await listEntries()
+    setTrouble(t)
+    const authored = new Set(candidates.map((c) => c.name))
+    setLive(values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry))
+  }, [])
+  useEffect(() => {
+    void loadLive()
+  }, [loadLive])
+  const rows = [...live, ...candidates].filter(
     (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
   )
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -609,7 +641,7 @@ export default function FirmCandidatesScreen({
   return (
     <>
       <h1 className="page-title">My Candidates</h1>
-      <CommandCenter onOpenProfile={onOpenProfile} />
+      <CommandCenter onOpenProfile={onOpenProfile} stats={statsOf([...live, ...candidates])} />
 
       <div className="toolbar">
         <div className="search-box">
@@ -631,15 +663,39 @@ export default function FirmCandidatesScreen({
           >
             <DownloadIcon /> Download
           </button>
-          <button className="btn btn-primary" type="button" onClick={onInvite}>
-            <PlusIcon /> Invite
-          </button>
+          {/* The real invite, in the button's own pop-over: a link to the
+              advisor flow, sent under a brand, whose sitting lands in this
+              table when it is answered. */}
+          <div className="fc-invite">
+            <button
+              className="btn btn-primary"
+              type="button"
+              aria-expanded={inviting}
+              onClick={() => setInviting((v) => !v)}
+            >
+              <PlusIcon /> Invite
+            </button>
+            {inviting && (
+              <>
+                <button
+                  className="fc-invite-scrim"
+                  type="button"
+                  aria-label="Close the invite"
+                  onClick={() => setInviting(false)}
+                />
+                <div className="fc-invite-pop" role="dialog" aria-label="Invite a new advisor">
+                  <InvitePanel onDone={loadLive} onTrouble={setTrouble} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+      {trouble && <div className="adir-trouble">{trouble}</div>}
 
       <Table
         rows={rows}
-        onOpen={onOpenProfile}
+        onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
         onAdd={onAdd}
         selected={selected}
         onToggle={toggle}

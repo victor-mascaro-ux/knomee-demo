@@ -3869,7 +3869,9 @@ export default function App() {
      fetching. Both are read from Firestore on mount rather than held in the
      bundle: the whole point of them is that they were written by somebody on
      another device. Null while in flight, and the screens say so. */
-  const [directoryOpen, setDirectoryOpen] = useState(initialView === 'advisors' && !initialProfile)
+  /* The testing list is gone — its entries live in the firm's candidate table
+     — so the directory route lands there. */
+  const [directoryOpen, setDirectoryOpen] = useState(false)
   const [viewEntryId, setViewEntryId] = useState<string | null>(
     initialView === 'advisors' ? initialProfile : null,
   )
@@ -3920,7 +3922,9 @@ export default function App() {
   // replace the advisor's entirely while it is on.
   const isFirmRoute = (v: RouteView | null): v is FirmScreen =>
     v === 'firm-candidates' || v === 'firm-analytics'
-  const [firmView, setFirmView] = useState(isFirmRoute(initialView))
+  const [firmView, setFirmView] = useState(
+    isFirmRoute(initialView) || (initialView === 'advisors' && !initialProfile),
+  )
   const [firmScreen, setFirmScreen] = useState<FirmScreen>(
     isFirmRoute(initialView) ? initialView : 'firm-candidates',
   )
@@ -4038,14 +4042,15 @@ export default function App() {
       if (wantsHousehold) setFamily((f) => f ?? HOUSEHOLD_AS_BUILT)
       setHouseholdOpen(wantsHousehold)
       setAdminView(v === 'admin')
-      setFirmView(isFirmRoute(v))
+      setFirmView(isFirmRoute(v) || (v === 'advisors' && !slug))
       if (isFirmRoute(v)) setFirmScreen(v)
+      if (v === 'advisors' && !slug) setFirmScreen('firm-candidates')
       setCandidateOpen(v === 'firm-candidates' && slug === profileSlug(candidate.name))
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
       setAdvisorFlowOpen(v === 'advisor-flow')
       setAdvisorSelfOpen(v === 'advisor-self')
-      setDirectoryOpen(v === 'advisors' && !slug)
+      setDirectoryOpen(false)
       setViewEntryId(v === 'advisors' ? slug : null)
       setInviteToken(v === 'flow' ? slug : null)
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
@@ -4286,7 +4291,8 @@ export default function App() {
   if (viewEntryId) {
     const backToList = () => {
       setViewEntryId(null)
-      setDirectoryOpen(true)
+      setFirmScreen('firm-candidates')
+      setFirmView(true)
     }
     if (entryMissing) {
       return (
@@ -4395,8 +4401,11 @@ export default function App() {
             {firmScreen === 'firm-candidates' && (
               <FirmCandidatesScreen
                 onOpenProfile={() => setCandidateOpen(true)}
+                onOpenEntry={(id) => {
+                  setFirmView(false)
+                  setViewEntryId(id)
+                }}
                 onDownload={() => showToast('CSV downloaded')}
-                onInvite={() => setInviteKind('prospect')}
                 onAdd={() => showToast('Added to Network')}
               />
             )}
