@@ -35,11 +35,15 @@
 /* The centre mark enlarged so its padding inside the tab bar's white bump
    matches the padding on either side. */
 .cx-tab-mark{width:70px;height:70px}
-.px-fill{position:absolute;left:50%;bottom:29px;width:70px;height:70px;transform:translateX(-50%);z-index:8;pointer-events:none;animation:pxPulse .1s var(--ease-out) .19s both}
+/* Sits inside the centre button, over the mark, rather than being placed on
+   the screen by a fixed offset: that offset assumed the framed phone's home
+   bar, so on a handset the fill landed 16px above the mark — two marks, the
+   plum one poking out past the top of the white bump. */
+.px-fill{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;z-index:1;pointer-events:none;animation:pxPulse .1s var(--ease-out) .19s both}
 .px-fill svg{width:70px;height:70px;display:block;overflow:visible}
 .px-fill path{fill:var(--k-plum);transform-origin:50% 50%;transform-box:view-box;animation:pxFill .07s var(--ease-out) both}
 @keyframes pxFill{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes pxPulse{50%{transform:translateX(-50%) scale(1.09)}}
+@keyframes pxPulse{50%{transform:scale(1.09)}}
 .px-fill.is-static{animation:none}
 .px-fill.is-static path{animation:none}
 .cx-tab-center.is-on .cx-tab-mark{opacity:1}
@@ -181,7 +185,7 @@
 .cx-adv-more:active{transform:scale(.9)}
 .cx-tab:active{transform:scale(.94)}
 .cx-tab-center:active{transform:none}
-.cx-tab-center:active .cx-tab-mark{transform:scale(.94)}
+.cx-tab-center:active .cx-tab-mark,.cx-tab-center:active .px-fill svg{transform:scale(.94)}
 .cx-appbar-burger:active{transform:scale(.9)}
 .vx-dismiss:active,.vx-send:active,.cx-sheet-item:active{transform:scale(.97)}
 
