@@ -9,6 +9,12 @@
  * reward is an occasion and not a section.
  */
 
+import icFinancialJoy from '../assets/adventures/financial-joy.svg'
+import icConfidence from '../assets/adventures/confidence.svg'
+import icOutlook from '../assets/adventures/outlook.svg'
+import icFutureYou from '../assets/adventures/future-you.svg'
+import icGoals from '../assets/adventures/goals.svg'
+import icLifeEvents from '../assets/adventures/life-events.svg'
 import { useEffect, useState } from 'react'
 import './joyReward.css'
 
@@ -40,6 +46,17 @@ function seeded(n: number) {
   })
 }
 const PIECES = seeded(90)
+
+/* The next adventure's own mark, on the button that goes to it — the same
+   drawing its row wears on My Adventures. */
+const NEXT_ICON: Record<string, string> = {
+  'Financial Joy': icFinancialJoy,
+  Confidence: icConfidence,
+  Outlook: icOutlook,
+  'Future You': icFutureYou,
+  Goals: icGoals,
+  'Life Events': icLifeEvents,
+}
 
 export default function JoyReward({
   badge,
@@ -134,6 +151,7 @@ export default function JoyReward({
       <div className="jw-next">
         <p>Next adventure:</p>
         <button className="jw-next-btn" type="button" onClick={onNext}>
+          {NEXT_ICON[next] && <img className="jw-next-ic" src={NEXT_ICON[next]} alt="" />}
           {next}
         </button>
       </div>
