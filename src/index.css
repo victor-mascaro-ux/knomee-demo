@@ -6431,30 +6431,12 @@ button.name-link-btn:hover .name-text {
     page-break-inside: avoid;
     box-shadow: none !important;
   }
-  /* The starters and the key they are read against are two blocks in one card,
-     and together they are taller than a sheet. Held whole, the card threw
-     itself onto a page of its own and left the one before it half empty: it
-     may break between its blocks, and each block stays intact. */
-  .rd-card:has(.rd-key) {
+  /* The starters are taller than a sheet on their own, so that one card may
+     break between its rows; the key beside them is a card of its own now and
+     is kept whole. */
+  .rd-card:has(.rd-starters) {
     break-inside: auto;
     page-break-inside: auto;
-    /* And it gives up its own tray: a grey box that breaks paints to the foot
-       of the page with nothing in it, which is the grey half-page under the
-       last starter. Each block carries its own ground instead. */
-    background: transparent !important;
-    border: 0 !important;
-    padding: 0 !important;
-  }
-  .rd-key-block {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    margin-top: var(--space-20);
-    padding: var(--space-16) var(--space-18);
-    border-radius: var(--radius-xl);
-    background: #f1f3f7;
-  }
-  .rd-key-block .rd-sub-head {
-    margin-top: 0;
   }
   .rd-starter,
   .rd-ask,

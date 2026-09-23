@@ -492,6 +492,10 @@
   color: var(--tag-validate-ink);
 }
 
+/* Leading its own card, the heading takes the card's padding as its air. */
+.rd-key-card .rd-sub-head {
+  margin-top: 0;
+}
 .rd-sub-head {
   margin: var(--space-20) 0 var(--space-10);
   font-size: 13.5px;
