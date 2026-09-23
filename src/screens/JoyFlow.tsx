@@ -178,6 +178,12 @@ export default function JoyFlow({
     next()
   }
 
+  /* Every screen of the adventure starts at its top — the ending most of all,
+     which is long and was opening wherever the last screen had been scrolled. */
+  useEffect(() => {
+    document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+  }, [at])
+
   return (
     <div className="jf">
       {step.kind === 'intro' && (

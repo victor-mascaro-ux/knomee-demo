@@ -1496,7 +1496,8 @@
   padding: 0;
   border: 0;
   background: none;
-  font: inherit;
+  /* The typeface only: the title's own size and bold stay the title's. */
+  font-family: inherit;
   cursor: pointer;
 }
 .pp-card-title-link svg {

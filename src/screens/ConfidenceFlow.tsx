@@ -190,6 +190,12 @@ export default function ConfidenceFlow({
   const high = settled.indexOf(Math.max(...settled))
   const low = settled.indexOf(Math.min(...settled))
 
+  /* Every screen of the adventure starts at its top — the ending most of all,
+     which is long and was opening wherever the last screen had been scrolled. */
+  useEffect(() => {
+    document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+  }, [step])
+
   return (
     <div className="jf cf">
       {step === 'intro' && (
