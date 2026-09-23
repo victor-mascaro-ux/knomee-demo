@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import './prospectProfile.css'
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
@@ -46,10 +46,24 @@ export default function ProspectProfileScreen({
   onBack,
   onConvert,
   onToast,
+  mine,
+  ownerMenu,
+  startFlow,
+  onStartFlowDone,
 }: {
   prospect: Prospect
   onBack: () => void
-  onConvert: (p: Prospect) => void
+  onConvert?: (p: Prospect) => void
+  /** Her own copy, on her phone: no trail back to a list she cannot see, no
+      button that converts her, and none of the advisor's reading of her. */
+  mine?: boolean
+  /** The control her phone puts beside her name: her own face, opening her
+      rail as a drawer. */
+  ownerMenu?: ReactNode
+  /** Open straight into one of the page's own forms — what the quick-access
+      sheet on her phone asks for. */
+  startFlow?: 'goal' | 'event' | 'question' | null
+  onStartFlowDone?: () => void
   /** The app's own toast, for the two things this page can add to a list. */
   onToast?: (msg: string) => void
 }) {
@@ -72,6 +86,16 @@ export default function ProspectProfileScreen({
   /* And the goal whose stage is being taken. */
   const [assessing, setAssessing] = useState<string | null>(null)
   const assessed = goalList.find((g) => g.title === assessing)
+
+  /* Handed in from her phone's quick-access sheet, and cleared as soon as it
+     is honoured so closing the form does not reopen it. */
+  useEffect(() => {
+    if (!startFlow) return
+    if (startFlow === 'goal') setAddingGoal(true)
+    if (startFlow === 'event') setEventForm('add')
+    if (startFlow === 'question') setQuestionForm('add')
+    onStartFlowDone?.()
+  }, [startFlow, onStartFlowDone])
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   /* The life events are the page's second list it can change: added from the
@@ -112,14 +136,16 @@ export default function ProspectProfileScreen({
   }, [prospect.name])
 
   return (
-    <div className="pp">
-      <nav className="pp-crumb">
-        <button type="button" className="pp-crumb-link" onClick={onBack}>
-        My Prospects
-        </button>
-        <span className="pp-crumb-sep">›</span>
-        <span className="pp-crumb-cur">{prospect.name}</span>
-      </nav>
+    <div className={`pp ${mine ? 'cp-mine' : ''}`}>
+      {!mine && (
+        <nav className="pp-crumb">
+          <button type="button" className="pp-crumb-link" onClick={onBack}>
+            My Prospects
+          </button>
+          <span className="pp-crumb-sep">›</span>
+          <span className="pp-crumb-cur">{prospect.name}</span>
+        </nav>
+      )}
       <div className="pp-layout">
         {/* Left profile sidebar — a full-height static strip */}
         <aside className="pp-side">
@@ -136,14 +162,17 @@ export default function ProspectProfileScreen({
                 <MailIcon /> {prospect.email}
               </span>
             </div>
-            <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
-              Convert to Client
-            </button>
+            {!mine && onConvert && (
+              <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
+                Convert to Client
+              </button>
+            )}
           </div>
         </aside>
 
         {/* Main column */}
         <main className="pp-main">
+          {!mine && (
           <div className="pp-tabs">
             {(
               [
@@ -165,15 +194,19 @@ export default function ProspectProfileScreen({
               </button>
             ))}
           </div>
+          )}
 
           <div className="pp-title-row">
-            <h1 className="pp-title">
-              {tab === 'id'
-                ? `${prospect.name}’s Financial ID`
-                : tab === 'readiness'
-                  ? 'Prospect Readiness'
-                  : 'Prospect Toolkit'}
-            </h1>
+            <div className="pp-title-id">
+              {ownerMenu}
+              <h1 className="pp-title">
+                {tab === 'id'
+                  ? `${prospect.name}’s Financial ID`
+                  : tab === 'readiness'
+                    ? 'Prospect Readiness'
+                    : 'Prospect Toolkit'}
+              </h1>
+            </div>
             <button className="btn btn-download active" type="button" onClick={print}>
               <DownloadIcon /> Download PDF
             </button>
@@ -476,7 +509,7 @@ export default function ProspectProfileScreen({
 
           {/* Printing takes the whole sheet: the Financial ID above, then the
               two reads, each starting its own page. */}
-          {printing && (
+          {printing && !mine && (
             <>
               <div className="print-page">
                 <h2 className="print-head">Prospect Readiness</h2>
