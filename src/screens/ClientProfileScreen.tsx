@@ -448,6 +448,10 @@ export function Board({
   useLayoutEffect(() => {
     const g = grid.current
     if (!g) return
+    /* Not while a tile is being carried: re-stretching the last tile every time
+       the order changes resized tiles under the hand, which read as the board
+       blinking. It settles once, on the drop. */
+    if (carry.current) return
     const stretched = fill ? (g.children[fill.i] as HTMLElement | undefined) : undefined
     if (stretched) stretched.style.gridColumn = ''
     const next = trailingGap(g)
@@ -579,6 +583,7 @@ export function Board({
           })
       }
       setCarried(null)
+      remeasure()
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
@@ -615,6 +620,20 @@ export function Board({
       const now: Box = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }
       next.set(k, now)
       const was = boxes.current.get(k)
+      /* A tile the board has not had before grows into its cell. Played from
+         here rather than as a CSS animation, because the browser restarts a
+         CSS animation whenever a node is moved — and reordering moves them —
+         so every tile a drag passed flashed its entrance again. */
+      if (!was && boxes.current.size && !reduce) {
+        el.animate(
+          [
+            { opacity: 0, transform: 'scale(0.82)' },
+            { opacity: 1, transform: 'none' },
+          ],
+          { duration: 280, easing: 'cubic-bezier(0.2, 1.2, 0.4, 1)' },
+        )
+        return
+      }
       // The tile in hand is placed by the pointer, not by a glide.
       if (carry.current?.at === i) return
       if (reduce || !was || !now.w || !now.h) return

@@ -100,14 +100,29 @@ export default function AddVisionBoardModal({
   const [tiles, setTiles] = useState<BoardTile[]>(board?.tiles ?? [])
   const [mode, setMode] = useState<Mode>(null)
   const photoInput = useRef<HTMLInputElement>(null)
+  /* Asking whether to leave a board that has not been saved. */
+  const [leaving, setLeaving] = useState(false)
+
+  /* Anything different from what was opened is work that would be lost. */
+  const dirty =
+    title !== (board?.title ?? '') ||
+    blurb !== (board?.blurb ?? '') ||
+    tiles !== (board?.tiles ?? tiles) ||
+    (!board && tiles.length > 0)
+  /* Every way out — the backdrop, the cross, Escape, Cancel — asks first when
+     there is something to lose, and simply closes when there is not. */
+  const requestClose = () => (dirty ? setLeaving(true) : onClose())
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      // Escape on the question is "go back", not a second way out.
+      if (leaving) setLeaving(false)
+      else requestClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  })
 
   const add = (t: BoardTile) => {
     setTiles((ts) => [...ts, t])
@@ -151,11 +166,11 @@ export default function AddVisionBoardModal({
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" onClick={requestClose} role="dialog" aria-modal="true">
       <div className="modal vb-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{board ? 'Edit Vision Board' : 'Future Vision Board'}</h2>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" onClick={requestClose}>
             <CloseIcon />
           </button>
         </div>
@@ -193,7 +208,7 @@ export default function AddVisionBoardModal({
               />
             </div>
             <div className="modal-footer vb-foot">
-              <button className="btn btn-outline" type="button" onClick={onClose}>
+              <button className="btn btn-outline" type="button" onClick={requestClose}>
                 Cancel
               </button>
               <button
@@ -307,6 +322,34 @@ export default function AddVisionBoardModal({
               </button>
             </div>
           </>
+        )}
+
+        {leaving && (
+          <div className="vb-leave" role="alertdialog" aria-labelledby="vb-leave-title">
+            <div className="vb-leave-card">
+              <h3 id="vb-leave-title" className="vb-leave-title">
+                Leave without saving?
+              </h3>
+              <p className="vb-leave-note">
+                {board
+                  ? 'Your changes to this board won’t be saved.'
+                  : 'This board won’t be saved.'}
+              </p>
+              <div className="vb-leave-acts">
+                <button className="btn btn-outline" type="button" onClick={onClose}>
+                  Leave without saving
+                </button>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  autoFocus
+                  onClick={() => setLeaving(false)}
+                >
+                  Go back
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
