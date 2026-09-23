@@ -728,7 +728,7 @@ function KnomeeSheet({
               style={{
                 left: r + faceR * Math.sin(a) - face / 2,
                 top: r - faceR * Math.cos(a) - face / 2,
-                animationDelay: `${0.1 + i * 0.06}s`,
+                animationDelay: `${0.16 + i * 0.045}s`,
               }}
               onClick={() => setMood(m.id)}
             >

@@ -59,14 +59,25 @@
    raster art without one is inset to the same optical size. */
 .kx-action img{width:100%;height:100%;display:block}
 .kx-action img.is-raster{width:62%;height:62%}
-.kx-arc{position:absolute;left:50%;top:calc(100% - 228px);width:500px;height:500px;transform:translateX(-50%);border-radius:var(--radius-circle);background:var(--k-plum)}
-.kx-mood{position:absolute;width:46px;height:46px;padding:0;border:none;background:none;border-radius:var(--radius-circle);cursor:pointer;animation:cxDrop var(--dur-enter) var(--ease-out) both;transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+/* The mood disc arrives rather than appearing: it slides up from under the
+   screen's edge, the faces pop on along its rim one after another, and the
+   question fades in last. Quick — the whole thing is over in under half a
+   second, because it is the sheet's punctuation and not its content. */
+.kx-arc{position:absolute;left:50%;top:calc(100% - 228px);width:500px;height:500px;border-radius:var(--radius-circle);background:var(--k-plum);animation:kxArcUp 300ms cubic-bezier(.2,.85,.3,1) both}
+@keyframes kxArcUp{from{transform:translateX(-50%) translateY(90px)}to{transform:translateX(-50%) translateY(0)}}
+.kx-mood{position:absolute;width:46px;height:46px;padding:0;border:none;background:none;border-radius:var(--radius-circle);cursor:pointer;animation:kxFacePop 220ms cubic-bezier(.2,1.25,.4,1) both;transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out)}
+/* From nothing, with a little overshoot: they grow onto the rim rather than
+   dropping onto it, which is what the disc underneath is already doing. */
+@keyframes kxFacePop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
 .kx-mood svg{width:100%;height:100%;display:block}
 .kx-mood img{width:100%;height:100%;display:block}
 .kx-mood:hover{transform:translateY(-2px)}
 .kx-mood:active{transform:scale(.93)}
 .kx-mood.is-on{box-shadow:0 0 0 3px var(--k-white)}
-.kx-ask{position:absolute;left:50%;transform:translateX(-50%);top:144px;width:250px;text-align:center;color:var(--text-inverse);font-size:21px;font-weight:var(--weight-semibold);line-height:var(--leading-snug);text-wrap:pretty}
+.kx-ask{position:absolute;left:50%;top:144px;width:250px;text-align:center;color:var(--text-inverse);font-size:21px;font-weight:var(--weight-semibold);line-height:var(--leading-snug);text-wrap:pretty;animation:kxAsk 260ms var(--ease-out) 380ms both}
+/* Last, and only a fade: the question is what they read once the thing it is
+   about has finished arriving. */
+@keyframes kxAsk{from{transform:translateX(-50%) translateY(6px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 /* ---------- Long-press voice capture (ADDITION) ----------
    The mark's own concentric rings fill outward like a scanner, then the
    sheet listens. Ocean is the scanning colour; lime confirms. */
