@@ -653,9 +653,15 @@ You’re making great progress. Let’s keep going.`,
     kind: 'text',
     adventure: 'the-move',
     eyebrow: 'The Move · 10 of 10',
-    title: 'Which of them is hardest to bring along?',
+    /* Not who is hardest to convince — that read as an accusation of whoever
+       was named, and the honest answer is often somebody entirely supportive.
+       What stops the decision is the thing a recruiter can actually do
+       something about, and it is a different question from Q9: that one asks
+       what is bad about the move, this one asks what is unsettled. */
+    title: 'What’s holding you back from deciding?',
+    body: 'The one thing that would have to be settled first.',
     answer:
-      'My wife. She has watched me talk about this for three years and she has stopped believing I will actually do it.',
+      'Knowing whether the top relationships actually come with me. Until I have a number I believe, I am not putting my team through eighteen months of it.',
   },
   {
     id: 'mv-stage',
@@ -736,7 +742,7 @@ export const businessId = {
     worthIt: 'Ownership, my name on it, equity for Ana and Dev, choosing who we take on',
     challenging: 'Client attrition, eighteen months of disruption, deferred comp, telling the team before he is sure',
     stakeholders: 'My team · My spouse or family',
-    hardest: 'His wife. Three years of talking about it without moving.',
+    blocker: 'Whether the top relationships come across. He has no number he believes.',
   },
   badges: ['Practice Joy', 'Confidence', 'Outlook', 'Future You', 'The Move'],
   questions: [

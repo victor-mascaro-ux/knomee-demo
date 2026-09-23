@@ -376,8 +376,8 @@ function BusinessIdTab({
         ...(d.move.stakeholders
           ? [{ label: 'Who it involves', value: d.move.stakeholders }]
           : []),
-        ...(d.move.hardest
-          ? [{ label: 'Hardest to bring along', value: d.move.hardest }]
+        ...(d.move.blocker
+          ? [{ label: 'Holding the decision', value: d.move.blocker }]
           : []),
       ],
     },

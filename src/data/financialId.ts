@@ -63,7 +63,7 @@ export interface Goal {
   /** The sentence they wrote about it, in their own words. */
   note?: string
   /** Rows only some goals have. An advisor's move carries who it involves and
-      who is hardest to bring along, which no client's goal has a slot for and
+      what is holding the decision, which no client's goal has a slot for and
       neither of which is "My goal". */
   extra?: { label: string; value: string }[]
 }
