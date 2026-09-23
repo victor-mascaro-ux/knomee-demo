@@ -25,6 +25,8 @@
   --k-teal-deep:     #2fa896;  /* teal hover */
   --k-teal-light:    #e6f7f5;  /* teal wash surface */
   --k-mint:          #c0ffe7;  /* pale mint highlight */
+  --k-lime-light:    #f3fbe6;  /* its wash — the ground a reading sits on */
+  --k-lime-soft:     #e4f7c6;  /* the answer pills in the readiness flow */
   --k-ocean:         #086375;  /* deep teal — KQ tier 1, bar-chart icon, progress fill */
   --k-steel:         #6ba1ac;  /* muted teal — KQ tier 2 */
   --k-aqua:          #6bd6c4;  /* aqua tint (brand vector family) */

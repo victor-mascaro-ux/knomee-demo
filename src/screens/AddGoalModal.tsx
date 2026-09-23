@@ -175,8 +175,9 @@ export default function AddGoalModal({
          the rows only some goals have — and then what this panel asks. */
       ...goal,
       title: name,
-      /* Named, not yet moved on: the first stage, the way the app reads it. */
-      readiness: goal?.readiness ?? 1,
+      /* No rung until they take one: the panel that opens on a new goal asks
+         for it, and a stage nobody chose is not a reading. */
+      readiness: goal?.readiness ?? 0,
       updated: DEMO_TODAY,
       timeline,
       pros: keep(pros),

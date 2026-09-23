@@ -4419,6 +4419,7 @@ export default function App() {
             onBack={() => setProfileClient(null)}
             onOpenHousehold={openHousehold}
             onAddMember={openFamilyModal}
+            onToast={showToast}
           />
         </main>
       ) : profileProspect ? (
@@ -4427,6 +4428,7 @@ export default function App() {
             prospect={profileProspect}
             onBack={() => setProfileProspect(null)}
             onConvert={(p) => setConvertTarget(p)}
+            onToast={showToast}
           />
         </main>
       ) : directoryOpen ? (

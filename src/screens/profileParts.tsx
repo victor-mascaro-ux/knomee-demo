@@ -59,7 +59,7 @@ export function ReadinessLevel({ level }: { level: number }) {
   const label = stage ? `Readiness: ${stage}, stage ${level} of 5` : 'Readiness not set'
   return (
     <span
-      className={`pp-readiness${stage ? ' tt' : ''}`}
+      className={`pp-readiness${stage ? ' tt' : ' is-unset'}`}
       data-tip={stage ?? undefined}
       aria-label={label}
     >

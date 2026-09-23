@@ -536,6 +536,13 @@
 .pp-bar.on {
   background: var(--purple-bolt, #9b51e0);
 }
+/* A goal nobody has assessed keeps the shape of the reading and says nothing
+   with it: the five bars in the quietest grey the scale has, and no pointer,
+   because there is no rung to point at. */
+.pp-readiness.is-unset .pp-bar {
+  background: var(--border-default);
+  opacity: 0.7;
+}
 
 /* Chips */
 /* Section labels: purple and light. They name the question the answers below

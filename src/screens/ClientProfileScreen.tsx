@@ -5,6 +5,7 @@ import './clientProfile.css'
 import { avatarSources } from '../data/clientProfile'
 import { profileFor } from '../data/memberProfiles'
 import AddGoalModal from './AddGoalModal'
+import ReadinessModal from './ReadinessModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -393,9 +394,12 @@ export default function ClientProfileScreen({
   household,
   onAddMember,
   mine,
+  onToast,
 }: {
   client: Client
   onBack: () => void
+  /** The app's own toast, for the two things this page can add to a list. */
+  onToast?: (msg: string) => void
   /* The phone frame hands in the control that opens the rail as a drawer. It
      belongs above the client's name, next to the person it is about, not in
      the app bar — the app bar's burger is the advisor's own menu, as it is on
@@ -466,6 +470,9 @@ export default function ClientProfileScreen({
   /* The goal whose form is open. The same panel that adds one edits one. */
   const [editingGoal, setEditingGoal] = useState<string | null>(null)
   const editing = goalList.find((g) => g.title === editingGoal)
+  /* And the goal whose stage is being taken. */
+  const [assessing, setAssessing] = useState<string | null>(null)
+  const assessed = goalList.find((g) => g.title === assessing)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(cp.lifeEvents, COLLAPSED_ROWS)
@@ -937,6 +944,7 @@ export default function ClientProfileScreen({
             setGoalList((list) => [g, ...list])
             setAddingGoal(false)
             setOpenGoal(g.title)
+            onToast?.('Goal added')
             /* A goal at the first stage sorts to the end of the list, which is
                behind the fold on a page with four already. Open it, or the
                thing they just added is the one thing they cannot see. */
@@ -959,12 +967,34 @@ export default function ClientProfileScreen({
         />
       )}
 
+      {/* One question, and the rung it puts them on. It lands on the goal
+          and the page opens on it again, which is what the button at the end
+          of the reading promises. */}
+      {assessed && (
+        <ReadinessModal
+          goal={assessed}
+          onClose={() => setAssessing(null)}
+          onSave={(readiness) => {
+            setGoalList((list) =>
+              list.map((g) => (g === assessed ? { ...g, readiness, updated: DEMO_TODAY } : g)),
+            )
+            setAssessing(null)
+            setOpenGoal(assessed.title)
+            onToast?.('Readiness complete')
+          }}
+        />
+      )}
+
       {/* The goal, opened. Renaming, marking done and deleting all land on the
           list this page holds, so the card behind the panel changes with it. */}
       {goal && (
         <GoalModal
           goal={goal}
           onClose={() => setOpenGoal(null)}
+          onAssess={() => {
+            setAssessing(goal.title)
+            setOpenGoal(null)
+          }}
           onEdit={() => {
             /* The form takes over from the panel: two panels stacked is two
                copies of the same goal, one of them stale. */

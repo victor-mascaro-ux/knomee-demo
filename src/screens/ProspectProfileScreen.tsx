@@ -25,6 +25,7 @@ import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
 import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
+import ReadinessModal from './ReadinessModal'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 
 const ADVENTURE_ICON: Record<string, string> = {
@@ -41,10 +42,13 @@ export default function ProspectProfileScreen({
   prospect,
   onBack,
   onConvert,
+  onToast,
 }: {
   prospect: Prospect
   onBack: () => void
   onConvert: (p: Prospect) => void
+  /** The app's own toast, for the two things this page can add to a list. */
+  onToast?: (msg: string) => void
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const { printing, print } = usePrintSheet()
@@ -62,6 +66,9 @@ export default function ProspectProfileScreen({
   /* The goal whose form is open. The same panel that adds one edits one. */
   const [editingGoal, setEditingGoal] = useState<string | null>(null)
   const editing = goalList.find((g) => g.title === editingGoal)
+  /* And the goal whose stage is being taken. */
+  const [assessing, setAssessing] = useState<string | null>(null)
+  const assessed = goalList.find((g) => g.title === assessing)
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
   const goal = goalList.find((g) => g.title === openGoal)
   const events = useCollapsed(fi.lifeEvents, COLLAPSED_ROWS)
@@ -448,6 +455,7 @@ export default function ProspectProfileScreen({
             setGoalList((list) => [g, ...list])
             setAddingGoal(false)
             setOpenGoal(g.title)
+            onToast?.('Goal added')
             /* A goal at the first stage sorts to the end of the list, which is
                behind the fold on a page with four already. Open it, or the
                thing they just added is the one thing they cannot see. */
@@ -470,11 +478,33 @@ export default function ProspectProfileScreen({
         />
       )}
 
+      {/* One question, and the rung it puts them on. It lands on the goal
+          and the page opens on it again, which is what the button at the end
+          of the reading promises. */}
+      {assessed && (
+        <ReadinessModal
+          goal={assessed}
+          onClose={() => setAssessing(null)}
+          onSave={(readiness) => {
+            setGoalList((list) =>
+              list.map((g) => (g === assessed ? { ...g, readiness, updated: DEMO_TODAY } : g)),
+            )
+            setAssessing(null)
+            setOpenGoal(assessed.title)
+            onToast?.('Readiness complete')
+          }}
+        />
+      )}
+
       {/* The goal, opened. */}
       {goal && (
         <GoalModal
           goal={goal}
           onClose={() => setOpenGoal(null)}
+          onAssess={() => {
+            setAssessing(goal.title)
+            setOpenGoal(null)
+          }}
           onEdit={() => {
             /* The form takes over from the panel: two panels stacked is two
                copies of the same goal, one of them stale. */
