@@ -77,26 +77,27 @@ const TextIcon = () => (
     />
   </svg>
 )
-const DropIcon = () => (
-  <svg viewBox="0 0 16 16" width="11" height="11" fill="none" aria-hidden>
-    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-)
-
 /* The composer under the board: nothing open, typing, or listening. */
 type Mode = null | 'text' | 'voice' | 'photo'
 
 export default function AddVisionBoardModal({
+  board,
   onClose,
   onSave,
+  onDelete,
 }: {
+  /** A board already on the page, opened to be changed. It opens on the board
+      itself — they are changing what is on it — and Back still renames it. */
+  board?: VisionBoard
   onClose: () => void
   onSave: (board: VisionBoard) => void
+  /** Offered only on a board that exists. */
+  onDelete?: () => void
 }) {
-  const [named, setNamed] = useState(false)
-  const [title, setTitle] = useState('')
-  const [blurb, setBlurb] = useState('')
-  const [tiles, setTiles] = useState<BoardTile[]>([])
+  const [named, setNamed] = useState(!!board)
+  const [title, setTitle] = useState(board?.title ?? '')
+  const [blurb, setBlurb] = useState(board?.blurb ?? '')
+  const [tiles, setTiles] = useState<BoardTile[]>(board?.tiles ?? [])
   const [mode, setMode] = useState<Mode>(null)
   const photoInput = useRef<HTMLInputElement>(null)
 
@@ -153,7 +154,7 @@ export default function AddVisionBoardModal({
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal vb-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Future Vision Board</h2>
+          <h2 className="modal-title">{board ? 'Edit Vision Board' : 'Future Vision Board'}</h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
@@ -208,16 +209,16 @@ export default function AddVisionBoardModal({
         ) : (
           <>
             <div className="modal-body vb-body">
-              {tiles.length === 0 ? (
-                <div className="vb-empty">
-                  <b>{title}</b>
-                  <span>Add words, photos or a voice note. They appear here as you add them.</span>
-                </div>
-              ) : (
+              {/* The board's own name heads what is being made — a step under
+                  the panel's title, and the preview below drops its copy. */}
+              <h3 className="vb-board-name">{title.trim()}</h3>
+              {blurb.trim() && <p className="vb-board-blurb">{blurb.trim()}</p>}
+              {tiles.length > 0 && (
                 <div className="vb-preview">
                   <Board
                     board={{ title: title.trim(), blurb: blurb.trim(), tiles }}
                     onResize={resize}
+                    onRemove={(i) => setTiles((ts) => ts.filter((_, j) => j !== i))}
                   />
                   {tiles.some((t) => t.kind === 'photo') && (
                     <p className="vb-hint">Drag a photo's corner to make it wide or tall.</p>
@@ -225,33 +226,12 @@ export default function AddVisionBoardModal({
                 </div>
               )}
 
-              {/* What is on the board, each one removable: the board itself is
-                  a picture and has nowhere to put a cross. */}
-              {tiles.length > 0 && (
-                <ul className="vb-tray" aria-label="On your board">
-                  {tiles.map((t, i) => (
-                    <li key={i} className={`vb-chip${t.kind === 'photo' ? ' is-photo' : ''}`}>
-                      {t.kind === 'photo' ? (
-                        <img src={t.src} alt="" />
-                      ) : (
-                        <span className={`vb-chip-note ${t.tone ? `is-${t.tone}` : ''}`}>
-                          {t.voice && <MicIcon size={11} />}
-                          {t.text}
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        className="vb-chip-x"
-                        aria-label="Remove from board"
-                        onClick={() => setTiles((ts) => ts.filter((_, j) => j !== i))}
-                      >
-                        <DropIcon />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            </div>
 
+            {/* The ways in stay put under the board, whatever it has grown to:
+                the body above scrolls, this does not. A composer opens here
+                too, in their place. */}
+            <div className="vb-dock">
               {mode === 'text' && <TextComposer onAdd={add} onCancel={() => setMode(null)} />}
               {mode === 'voice' && <VoiceComposer onAdd={add} onCancel={() => setMode(null)} />}
               {mode === 'photo' && (
@@ -304,6 +284,11 @@ export default function AddVisionBoardModal({
               )}
             </div>
             <div className="modal-footer vb-foot">
+              {onDelete && (
+                <button className="vb-link vb-delete" type="button" onClick={onDelete}>
+                  Delete board
+                </button>
+              )}
               <button className="btn btn-outline" type="button" onClick={() => setNamed(false)}>
                 Back
               </button>

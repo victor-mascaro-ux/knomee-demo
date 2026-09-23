@@ -36,9 +36,7 @@ import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
-import AddVisionBoardModal from './AddVisionBoardModal'
-import { Board } from './ClientProfileScreen'
-import type { VisionBoard } from '../data/clientProfile'
+import { useVisionBoards } from './VisionBoards'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
@@ -103,9 +101,8 @@ export default function ProspectProfileScreen({
   const [assessing, setAssessing] = useState<string | null>(null)
   const assessed = goalList.find((g) => g.title === assessing)
 
-  /* Her vision boards: none until she makes one, on her own phone. */
-  const [boards, setBoards] = useState<VisionBoard[]>([])
-  const [addingBoard, setAddingBoard] = useState(false)
+  /* Their vision boards: none until they make one. */
+  const vision = useVisionBoards([], onToast)
   /* Handed in from her phone's quick-access sheet, and cleared as soon as it
      is honoured so closing the form does not reopen it. */
   useEffect(() => {
@@ -113,7 +110,7 @@ export default function ProspectProfileScreen({
     if (startFlow === 'goal') setAddingGoal(true)
     if (startFlow === 'event') setEventForm('add')
     if (startFlow === 'question') setQuestionForm('add')
-    if (startFlow === 'vision') setAddingBoard(true)
+    if (startFlow === 'vision') vision.add()
     onStartFlowDone?.()
   }, [startFlow, onStartFlowDone])
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
@@ -392,33 +389,18 @@ export default function ProspectProfileScreen({
                     <PostcardSection text={fi.postcard} />
                   </section>
 
-                  {/* Her boards, made on her phone. Only her own page has the
-                      card: a prospect's advisor has no board to show. */}
-                  {mine && (
-                    <section className="pp-card">
-                      <div className="pp-card-head">
-                        <span className="pp-card-title">
-                          <img className="pp-card-ic is-inset" src={icVision} alt="" />
-                          Future Vision Board
-                        </span>
-                        <AddButton label="Add a vision board" onClick={() => setAddingBoard(true)} />
-                      </div>
-                      {boards.length === 0 ? (
-                        <EmptyState
-                          art={EMPTY_ART.visionBoard}
-                          label="Make a Vision Board"
-                          cta
-                          onClick={() => setAddingBoard(true)}
-                        />
-                      ) : (
-                        <div className="cp-boards">
-                          {boards.map((b, i) => (
-                            <Board board={b} key={`${b.title}-${i}`} />
-                          ))}
-                        </div>
-                      )}
-                    </section>
-                  )}
+                  {/* Their boards: none until they make one — on her phone, or
+                      here with the advisor. */}
+                  <section className="pp-card">
+                    <div className="pp-card-head">
+                      <span className="pp-card-title">
+                        <img className="pp-card-ic is-inset" src={icVision} alt="" />
+                        Future Vision Board
+                      </span>
+                      <AddButton label="Add a vision board" onClick={vision.add} />
+                    </div>
+                    {vision.body}
+                  </section>
 
                   <section className="pp-card">
                     <div className="pp-card-head">
@@ -630,16 +612,7 @@ export default function ProspectProfileScreen({
 
 
 
-      {addingBoard && (
-        <AddVisionBoardModal
-          onClose={() => setAddingBoard(false)}
-          onSave={(b) => {
-            setBoards((bs) => [...bs, b])
-            setAddingBoard(false)
-            onToast?.('Vision board saved')
-          }}
-        />
-      )}
+      {vision.modal}
 
       {/* A question, opened — and the form that asks or rewords one. */}
       {openQuestion && !questionForm && (

@@ -13,6 +13,7 @@
  */
 
 import { useState } from 'react'
+import { MemberVisionBoards } from './VisionBoards'
 import './familyId.css'
 import { familyId } from '../data/familyId'
 import type { FamilyMemberId } from '../data/familyId'
@@ -35,7 +36,6 @@ import {
   orderGoals,
   useCollapsed,
 } from './profileParts'
-import { Board } from './ClientProfileScreen'
 import { FamilyCard, Who } from './familyParts'
 import GoalModal from './GoalModal'
 import { CaretIcon, CheckIcon, RowChevron } from '../components/profileIcons'
@@ -409,17 +409,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         members={members}
         icon={icVision}
         title="Future Vision Board"
-        render={(m) =>
-          m.boards.length === 0 ? (
-            <EmptyState art={EMPTY_ART.visionBoard} label="Add a Vision Board" cta />
-          ) : (
-            <div className="cp-boards">
-              {m.boards.map((b) => (
-                <Board board={b} key={b.title} />
-              ))}
-            </div>
-          )
-        }
+        render={(m) => <MemberVisionBoards key={m.name} initial={m.boards} />}
       />
 
       <FamilyCard

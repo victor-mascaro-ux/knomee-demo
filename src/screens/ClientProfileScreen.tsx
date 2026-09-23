@@ -29,9 +29,6 @@ import icGoals from '../assets/adventures/goals.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
-/* The design system's vision board, which is what her own app puts on "Save a
-   vision" too. One mark wherever a vision is named. */
-import icVision from '../assets/adventures/vision-board.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import GoalModal from './GoalModal'
 import { DEMO_TODAY } from '../data/financialId'
@@ -39,6 +36,7 @@ import type { LifeEvent, ProfileQuestion } from '../data/financialId'
 import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
+import { VisionBoardCard } from './VisionBoards'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -85,6 +83,23 @@ const LANDSCAPE = 1.15
 /* A photograph's cell, in columns × rows. */
 export type TileSize = '1x1' | '2x1' | '1x2'
 
+/* A board being made: the cross that takes a tile off it, on the tile itself. */
+function TileRemove({ onRemove }: { onRemove: () => void }) {
+  return (
+    <button
+      type="button"
+      className="cp-tile-x"
+      aria-label="Remove from board"
+      data-no-drag-scroll
+      onClick={onRemove}
+    >
+      <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
+        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      </svg>
+    </button>
+  )
+}
+
 const KEY_SIZE: Partial<Record<string, TileSize>> = {
   ArrowRight: '2x1',
   ArrowDown: '1x2',
@@ -99,12 +114,14 @@ function BoardPhoto({
   wide,
   style,
   onResize,
+  onRemove,
 }: {
   src: string
   alt: string
   tall?: boolean
   wide?: boolean
   style?: CSSProperties
+  onRemove?: () => void
   /** A board being made: the photograph carries a handle that drags it to one
       cell, two across or two down. */
   onResize?: (size: TileSize) => void
@@ -177,7 +194,9 @@ function BoardPhoto({
       style={draft ? { ...style, gridColumn: undefined } : style}
       className={`cp-tile cp-tile-photo ${size === '1x2' ? 'is-tall' : ''} ${
         size === '2x1' ? 'is-wide' : ''
-      } ${failed ? 'is-missing' : ''}${onResize ? ' is-sizable' : ''}${draft ? ' is-sizing' : ''}`}
+      } ${failed ? 'is-missing' : ''}${onResize || onRemove ? ' is-sizable' : ''}${
+        draft ? ' is-sizing' : ''
+      }`}
     >
       {failed ? (
         <span className="cp-tile-alt">{alt}</span>
@@ -193,6 +212,7 @@ function BoardPhoto({
           }}
         />
       )}
+      {onRemove && !draft && <TileRemove onRemove={onRemove} />}
       {onResize && (
         <>
           {draft && <span className="cp-tile-size">{draft.replace('x', ' × ')}</span>}
@@ -244,9 +264,11 @@ function BoardNote({
   tile,
   style,
   onSpan,
+  onRemove,
 }: {
   tile: Extract<BoardTile, { kind: 'note' }>
   style?: CSSProperties
+  onRemove?: () => void
   /* The board has to re-measure when a note claims a second cell, and a note's
      own state change does not re-render its parent. It says so instead. */
   onSpan?: () => void
@@ -301,8 +323,9 @@ function BoardNote({
       style={style}
       className={`cp-tile cp-tile-note ${tile.tone ? `is-${tile.tone}` : ''} ${
         measuring ? '' : span
-      }`}
+      }${onRemove ? ' is-sizable' : ''}`}
     >
+      {onRemove && <TileRemove onRemove={onRemove} />}
       <div className="cp-note-inner" ref={inner}>
         {tile.title && <span className="cp-note-title">{tile.title}</span>}
         {tile.text && <p className="cp-note-text">{tile.text}</p>}
@@ -378,10 +401,16 @@ function trailingGap(grid: HTMLDivElement) {
 export function Board({
   board,
   onResize,
+  onRemove,
+  onEdit,
 }: {
   board: VisionBoard
+  /** A board that can be changed: an Edit beside its title opens it. */
+  onEdit?: () => void
   /** A board being made: its photographs can be dragged to a size. */
   onResize?: (i: number, size: TileSize) => void
+  /** A board being made: every tile carries a cross that takes it off. */
+  onRemove?: (i: number) => void
 }) {
   const grid = useRef<HTMLDivElement>(null)
   const [fill, setFill] = useState<{ i: number; span: number } | null>(null)
@@ -422,22 +451,49 @@ export function Board({
 
   return (
     <div className="cp-board">
-      <h4 className="cp-board-title">{board.title}</h4>
+      {onEdit ? (
+        <div className="cp-board-head">
+          <h4 className="cp-board-title">{board.title}</h4>
+          <button type="button" className="cp-board-edit" onClick={onEdit}>
+            <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
+              <path
+                d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Edit
+          </button>
+        </div>
+      ) : (
+        <h4 className="cp-board-title">{board.title}</h4>
+      )}
       <p className="cp-board-blurb">{board.blurb}</p>
       <div className="cp-board-grid" ref={grid}>
+        {/* Keyed by what the tile is as well as where: a tile taken off the
+            middle shifts the rest, and a note that moved must measure itself
+            again rather than keep the shape of the one that was there. */}
         {board.tiles.map((t, i) =>
           t.kind === 'photo' ? (
             <BoardPhoto
-              key={i}
+              key={`${i}:${t.src}`}
               src={t.src}
               alt={t.alt}
               tall={t.tall}
               wide={t.wide}
               style={spanOf(i)}
               onResize={onResize ? (size) => onResize(i, size) : undefined}
+              onRemove={onRemove ? () => onRemove(i) : undefined}
             />
           ) : (
-            <BoardNote key={i} tile={t} style={spanOf(i)} onSpan={remeasure} />
+            <BoardNote
+              key={`${i}:${t.title ?? ''}${t.text ?? ''}`}
+              tile={t}
+              style={spanOf(i)}
+              onSpan={remeasure}
+              onRemove={onRemove ? () => onRemove(i) : undefined}
+            />
           ),
         )}
       </div>
@@ -928,19 +984,9 @@ export default function ClientProfileScreen({
                     </div>
                   </section>
 
-                  <section className="pp-card">
-                    <div className="pp-card-head">
-                      <span className="pp-card-title">
-                        <img className="pp-card-ic is-inset" src={icVision} alt="" />
-                        Future Vision Board
-                      </span>
-                    </div>
-                    <div className="cp-boards">
-                      {cp.boards.map((b) => (
-                        <Board board={b} key={b.title} />
-                      ))}
-                    </div>
-                  </section>
+                  {/* Keyed by who, so another client's page starts from their
+                      own boards rather than the last one's edits. */}
+                  <VisionBoardCard key={client.name} initial={cp.boards} onToast={onToast} />
                 </div>
 
                 {/* Right rail */}
