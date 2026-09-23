@@ -121,8 +121,3 @@
   text-decoration: underline;
   cursor: pointer;
 }
-.qm-cta {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-20);
-}
