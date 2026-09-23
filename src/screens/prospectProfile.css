@@ -1489,3 +1489,25 @@
   font-style: italic;
   color: var(--text-secondary);
 }
+
+/* A completed adventure's heading opens its ending again: the heading is the
+   way in, with a chevron that says so and moves on hover. */
+.pp-card-title-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.pp-card-title-link svg {
+  margin-left: 2px;
+  color: var(--text-secondary);
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.pp-card-title-link:hover {
+  color: var(--text-link);
+}
+.pp-card-title-link:hover svg {
+  transform: translateX(3px);
+  color: var(--text-link);
+}

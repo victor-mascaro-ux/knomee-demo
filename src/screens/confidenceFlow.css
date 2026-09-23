@@ -229,3 +229,186 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ============================================================
+   THE ENDING — Financial Joy's shape, Confidence's colours
+   ============================================================ */
+.cfr {
+  /* The Financial ID's own dial, in its own purples. */
+  --dial-1: #e9d9f4;
+  --dial-2: #b98ddc;
+  --dial-3: #7639a1;
+}
+/* A sunrise rather than a sunset: the sun's own oranges and golds over the
+   plum, still drifting. */
+.cfr-sky {
+  background: linear-gradient(160deg, #240446 0%, #6a2d8f 34%, #ff9525 76%, #ffd166 100%);
+  background-size: 160% 160%;
+}
+.cfr-hero {
+  justify-content: center;
+  gap: var(--space-16);
+  padding: 30px 22px 26px;
+}
+/* The Financial ID's confidence row, as it sits on her page — word and dial —
+   set large on the sky and lifted off it. */
+.cfr-dial.pp-confidence {
+  align-self: stretch;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -12px rgba(20, 10, 40, 0.55);
+  animation: jrDeal 0.55s cubic-bezier(0.2, 1.1, 0.4, 1) 0.15s both;
+}
+.cfr-dial .pp-confidence-label {
+  font-size: 26px;
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.cfr-gauge .pp-gauge svg {
+  width: 96px;
+  height: 56px;
+}
+/* The needle swings in from the left of the dial to where she landed. */
+.cfr-gauge .pp-gauge g {
+  transform-box: view-box;
+  transform-origin: 36px 36px;
+  animation: cfrNeedle 1.1s cubic-bezier(0.25, 1.4, 0.4, 1) 0.4s both;
+}
+@keyframes cfrNeedle {
+  from {
+    rotate: -150deg;
+  }
+}
+.cfr-means {
+  min-height: 3.2em;
+  font-size: 18px;
+}
+
+/* ── what she said: six cards, dealt in ── */
+.cfr-answers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.cfr-answer {
+  position: relative;
+  padding: 14px 16px 12px;
+  border: var(--border-thin) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  opacity: 0;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+.jr-sec.is-in .cfr-answer {
+  animation: jrDeal 0.5s cubic-bezier(0.2, 1.1, 0.4, 1) both;
+  animation-delay: calc(0.15s + var(--i) * 0.09s);
+}
+.cfr-answer:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elev-2);
+}
+.cfr-answer p {
+  margin: 0 0 var(--space-10);
+  font-size: var(--text-base);
+  line-height: 1.4;
+  color: var(--text-strong);
+}
+.cfr-answer.is-high {
+  border-color: var(--k-teal);
+  background: var(--k-teal-light);
+}
+.cfr-answer.is-low {
+  border-color: #ffc27a;
+  background: #fff6eb;
+}
+.cfr-flag {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--k-teal-deep);
+}
+.cfr-answer.is-low .cfr-flag {
+  background: #e07a12;
+}
+.cfr-track {
+  position: relative;
+  display: block;
+  height: 22px;
+}
+.cfr-track::before,
+.cfr-fill {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 3px;
+}
+.cfr-track::before {
+  right: 0;
+  background: #e8e7ec;
+}
+/* The fill runs out to where she left the sun, once the card is in. */
+.cfr-fill {
+  width: 0;
+  background: linear-gradient(90deg, #ffe59a, #ffb020);
+}
+.jr-sec.is-in .cfr-fill {
+  animation: cfrFill 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) both;
+  animation-delay: calc(0.35s + var(--i) * 0.09s);
+}
+@keyframes cfrFill {
+  to {
+    width: calc(var(--v) * 1%);
+  }
+}
+.cfr-sun {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  filter: drop-shadow(0 1px 2px rgba(20, 10, 40, 0.3));
+}
+.jr-sec.is-in .cfr-sun {
+  animation: cfrSun 0.9s cubic-bezier(0.3, 0.8, 0.3, 1) both;
+  animation-delay: calc(0.35s + var(--i) * 0.09s);
+}
+@keyframes cfrSun {
+  to {
+    left: calc(var(--v) * 1%);
+    transform: rotate(calc(var(--v) * 1.8deg));
+  }
+}
+.cfr-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cfr-dial,
+  .cfr-gauge .pp-gauge g,
+  .cfr-answer {
+    opacity: 1;
+    animation: none !important;
+  }
+  .cfr-fill {
+    width: calc(var(--v) * 1%);
+    animation: none !important;
+  }
+  .cfr-sun {
+    left: calc(var(--v) * 1%);
+    animation: none !important;
+  }
+}

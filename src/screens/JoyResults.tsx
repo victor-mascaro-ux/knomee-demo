@@ -21,7 +21,7 @@ import type { JoyAnswers } from './JoyFlow'
 import './joyResults.css'
 
 /* A section that animates in the first time it is scrolled into view. */
-function Reveal({ children, className }: { children: ReactNode; className?: string }) {
+export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLElement>(null)
   const [seen, setSeen] = useState(false)
   useEffect(() => {
@@ -48,7 +48,7 @@ function Reveal({ children, className }: { children: ReactNode; className?: stri
 }
 
 /* Their words, written onto the card a few letters at a time. */
-function Typed({ text }: { text: string }) {
+export function Typed({ text }: { text: string }) {
   const [n, setN] = useState(0)
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return setN(text.length)
@@ -97,7 +97,7 @@ const FALLBACK = {
 const SHARE = 55
 
 /* A number that counts up to itself when it arrives. */
-function CountUp({ to }: { to: number }) {
+export function CountUp({ to }: { to: number }) {
   const [n, setN] = useState(0)
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return setN(to)
@@ -117,7 +117,26 @@ function CountUp({ to }: { to: number }) {
 /* What this adventure means, said once when they arrive and again whenever
    they ask: how many others want money for what they do, and why looking at
    joy at all is worth their while. */
-function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) {
+/* The overlay an adventure's ending opens with, and "Learn more" opens again:
+   a share of people, drawn as a pie that sweeps round to it, and why the
+   adventure is worth taking, under a book whose magnifier looks around the
+   page. Shared, so every adventure's ending says it the same way. */
+export function AboutOverlay({
+  title,
+  share,
+  first,
+  second,
+  onClose,
+}: {
+  title: string
+  /** The share the pie shows, 0-100. */
+  share: number
+  /** The line under the pie. */
+  first: ReactNode
+  /** The card under the book. */
+  second: ReactNode
+  onClose: () => void
+}) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -125,13 +144,12 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
-  const named = tools.slice(0, 2).map((t) => t.toLowerCase().replace(/^supporting my /, 'supporting '))
   return (
     <div className="modal-backdrop jr-about-back" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="jr-about-title">
       <div className="modal jr-about" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header jr-about-head">
           <h2 className="modal-title" id="jr-about-title">
-            You found Financial Joy!
+            {title}
           </h2>
         </div>
         <div className="modal-body jr-about-body">
@@ -150,9 +168,9 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
               stroke="var(--k-teal)"
               strokeWidth="20"
               pathLength="100"
-              strokeDasharray={`${SHARE} 100`}
+              strokeDasharray={`${share} 100`}
               transform="rotate(-90 24 24)"
-              style={{ ['--share' as string]: SHARE }}
+              style={{ ['--share' as string]: share }}
             />
             <path d="M24 24V4" stroke="var(--k-ocean)" strokeWidth="3" strokeLinecap="round" />
             <path
@@ -161,24 +179,11 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
               stroke="var(--k-ocean)"
               strokeWidth="3"
               strokeLinecap="round"
-              style={{ ['--turn' as string]: `${SHARE * 3.6}deg` }}
+              style={{ ['--turn' as string]: `${share * 3.6}deg` }}
             />
             <circle cx="24" cy="24" r="20" fill="none" stroke="var(--k-ocean)" strokeWidth="3.4" />
           </svg>
-          <p className="jr-about-card">
-            <b>
-              <CountUp to={SHARE} />%
-            </b>{' '}
-            of respondents want money to help with{' '}
-            {named.length === 2 ? (
-              <>
-                <b>{named[0]}</b> and <b>{named[1]}</b>
-              </>
-            ) : (
-              <b>{named[0] ?? 'the same things you do'}</b>
-            )}
-            .
-          </p>
+                    <p className="jr-about-card">{first}</p>
           <svg className="jr-book" viewBox="0 0 48 48" width="56" height="56" fill="none" aria-hidden>
             {/* An open book, and a magnifier over its lower right corner —
                 ringed in white so it sits on top of the page rather than
@@ -197,15 +202,7 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
               <path d="m39.2 37.2 5 5" stroke="var(--k-ocean)" strokeWidth="3.6" strokeLinecap="round" />
             </g>
           </svg>
-          <div className="jr-about-card">
-            <p>
-              Studies show that reflecting on <b>what sparks your joy</b> drives better outcomes.
-            </p>
-            <p>
-              When you see saving as <b>progress</b> toward what truly matters, you set yourself up
-              for a <b>brighter future</b>!
-            </p>
-          </div>
+          <div className="jr-about-card">{second}</div>
         </div>
         <div className="modal-footer jr-about-foot">
           <button className="btn btn-primary" type="button" autoFocus onClick={onClose}>
@@ -214,6 +211,45 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
         </div>
       </div>
     </div>
+  )
+}
+
+/* Financial Joy's: the share who want money for what she chose. */
+function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) {
+  const named = tools.slice(0, 2).map((t) => t.toLowerCase().replace(/^supporting my /, 'supporting '))
+  return (
+    <AboutOverlay
+      title="You found Financial Joy!"
+      share={SHARE}
+      onClose={onClose}
+      first={
+        <>
+          <b>
+            <CountUp to={SHARE} />%
+          </b>{' '}
+          of respondents want money to help with{' '}
+          {named.length === 2 ? (
+            <>
+              <b>{named[0]}</b> and <b>{named[1]}</b>
+            </>
+          ) : (
+            <b>{named[0] ?? 'the same things you do'}</b>
+          )}
+          .
+        </>
+      }
+      second={
+        <>
+          <p>
+            Studies show that reflecting on <b>what sparks your joy</b> drives better outcomes.
+          </p>
+          <p>
+            When you see saving as <b>progress</b> toward what truly matters, you set yourself up
+            for a <b>brighter future</b>!
+          </p>
+        </>
+      }
+    />
   )
 }
 

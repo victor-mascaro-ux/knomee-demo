@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { useDragScroll, useSwipeDown } from './mobileGestures'
 import JoyFlow, { sampleJoyAnswers, type JoyAnswers } from './JoyFlow'
-import ConfidenceFlow, { type ConfidenceAnswers } from './ConfidenceFlow'
+import ConfidenceFlow, { CONFIDENCE_STATEMENTS, type ConfidenceAnswers } from './ConfidenceFlow'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -1138,6 +1138,19 @@ export default function ClientExperienceScreen({
   /* The adventure being taken, if any. It takes over the screen: the app bar
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
+  /* Reopened from her Financial ID: the adventure's ending again, with her
+     answers, and back to the page after — nothing on the journey changes. */
+  const [reviewing, setReviewing] = useState(false)
+  /* However an adventure is left — its end, or the bar's cross — a replay is
+     over with it, so the next one opened is taken for real. */
+  useEffect(() => {
+    if (!adventure) setReviewing(false)
+  }, [adventure])
+  const leaveReview = () => {
+    setReviewing(false)
+    setAdventure(null)
+    setTab('finid')
+  }
   /* Her journey. She starts new: nothing done and an empty Financial ID, and
      finishing Financial Joy completes it on the list, opens the next, and
      puts its answers on the page. */
@@ -1314,13 +1327,24 @@ export default function ClientExperienceScreen({
           >
             {adventure === 'confidence' ? (
               <ConfidenceFlow
-                reward={{
-                  before: 1,
-                  after: 2,
-                  total: journey.filter((j) => j.core).length,
-                  next: 'Outlook',
-                }}
+                review={reviewing ? (conf ?? { values: CONFIDENCE_STATEMENTS.map((s) => s.sample) }) : undefined}
+                reward={
+                  reviewing
+                    ? {
+                        before: journey.filter((j) => j.core && done[j.id]).length,
+                        after: journey.filter((j) => j.core && done[j.id]).length,
+                        total: journey.filter((j) => j.core).length,
+                        next: journey.find((j) => !done[j.id])?.title ?? 'Outlook',
+                      }
+                    : {
+                        before: 1,
+                        after: 2,
+                        total: journey.filter((j) => j.core).length,
+                        next: 'Outlook',
+                      }
+                }
                 onComplete={(answers) => {
+                  if (reviewing) return leaveReview()
                   setConf(answers)
                   completeAt('confidence')
                   setAdventure(null)
@@ -1329,10 +1353,21 @@ export default function ClientExperienceScreen({
               />
             ) : adventure ? (
               <JoyFlow
+                review={reviewing ? (joy ?? sampleJoyAnswers()) : undefined}
                 /* Financial Joy is the first adventure, and taking it — the first
                    time or again — is where the journey starts: the reward always
-                   reads 0 to 1 of 5, with Confidence next. */
-                reward={{ before: 0, after: 1, total: journey.filter((j) => j.core).length, next: 'Confidence' }}
+                   reads 0 to 1 of 5, with Confidence next. Reopened from her
+                   Financial ID it is only a look back, and says where she is. */
+                reward={
+                  reviewing
+                    ? {
+                        before: journey.filter((j) => j.core && done[j.id]).length,
+                        after: journey.filter((j) => j.core && done[j.id]).length,
+                        total: journey.filter((j) => j.core).length,
+                        next: journey.find((j) => !done[j.id])?.title ?? 'Confidence',
+                      }
+                    : { before: 0, after: 1, total: journey.filter((j) => j.core).length, next: 'Confidence' }
+                }
                 onClose={() => setAdventure(null)}
                 onComplete={(answers) => {
                   /* Done: the answers go on her Financial ID, and she lands on
@@ -1341,6 +1376,7 @@ export default function ClientExperienceScreen({
                   /* Taken again, it starts the journey over from itself: only
                      Financial Joy is complete, Confidence is next, and what
                      came after goes back to waiting. */
+                  if (reviewing) return leaveReview()
                   setJoy(answers)
                   completeAt('financial-joy')
                   setAdventure(null)
@@ -1364,6 +1400,10 @@ export default function ClientExperienceScreen({
                 key={journeyRun}
                 prospect={SARAH}
                 fresh={{ joy, done, conf }}
+                onOpenEnding={(id) => {
+                  setReviewing(true)
+                  setAdventure(id)
+                }}
                 mine
                 checkIn={
                   checkIn

@@ -84,7 +84,11 @@ const ClockIcon = () => (
 export default function JoyFlow({
   onComplete,
   reward = { before: 0, after: 1, total: 5, next: 'Confidence' },
+  review,
 }: {
+  /** Her answers, to open straight on the ending with — reopened from her
+      Financial ID rather than taken. */
+  review?: JoyAnswers
   /** Leaving is the bar's cross, which the shell owns; kept for the caller. */
   onClose?: () => void
   /** Where her journey stands, for the reward: the count before and after
@@ -94,12 +98,12 @@ export default function JoyFlow({
   /** Their answers, on the way to the Financial ID. */
   onComplete: (a: JoyAnswers) => void
 }) {
-  const [at, setAt] = useState(0)
+  const [at, setAt] = useState(() => (review ? joySteps.findIndex((s) => s.kind === 'done') : 0))
   /* Which of the seven areas the attention screen is on. It is one step in the
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */
   const [area, setArea] = useState(0)
-  const [a, setA] = useState<JoyAnswers>(emptyAnswers)
+  const [a, setA] = useState<JoyAnswers>(() => review ?? emptyAnswers())
   const step = joySteps[at]
 
   const next = () => {
