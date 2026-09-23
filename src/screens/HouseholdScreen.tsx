@@ -174,7 +174,7 @@ export default function HouseholdScreen({
                        live on knomee, and whether their Financial ID is
                        finished. A household with an invitation outstanding
                        shows it here rather than on nobody's page. */
-                    const pending = row?.status === 'pending'
+                    const pending = row?.status === 'pending' || !!m.invited
                     const profile = row?.status === 'complete' ? 'complete' : 'incomplete'
                     return (
                       <div className="hh-member" key={m.name}>
