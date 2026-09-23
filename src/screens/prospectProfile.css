@@ -1559,6 +1559,11 @@
   width: 75px;
   height: 75px;
 }
+/* The board's drawing fills more of its file, so it needs less. */
+.pp-empty-disc img.pp-empty-colour.is-board {
+  width: 66px;
+  height: 66px;
+}
 .pp-empty-cta:hover .pp-empty-disc {
   box-shadow: 0 10px 22px -8px rgba(36, 4, 70, 0.3);
 }

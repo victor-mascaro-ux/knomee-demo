@@ -604,7 +604,13 @@ export function EmptyState({
     <>
       <span className="pp-empty-disc">
         <img src={art} alt="" />
-        {cta && EMPTY_COLOUR[art] && <img className="pp-empty-colour" src={EMPTY_COLOUR[art]} alt="" />}
+        {cta && EMPTY_COLOUR[art] && (
+          <img
+            className={`pp-empty-colour${art === emptyVisionBoard ? ' is-board' : ''}`}
+            src={EMPTY_COLOUR[art]}
+            alt=""
+          />
+        )}
       </span>
       <span className="pp-empty-label">
         {cta && (
