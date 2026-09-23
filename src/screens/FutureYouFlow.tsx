@@ -18,7 +18,7 @@ import './joyResults.css'
 import './futureYouFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { Reveal, Typed } from './JoyResults'
+import { Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
 interface Pick {
@@ -186,6 +186,39 @@ function Road({
   still?: boolean
 }) {
   const at = value ? WHEN.indexOf(value) : -1
+  /* The pin can be taken hold of and slid along the road — or the road
+     pressed anywhere — and it snaps to the nearest stop as it goes. */
+  const road = useRef<HTMLDivElement>(null)
+  const [dragging, setDragging] = useState(false)
+  const stopAt = (clientX: number) => {
+    const r = road.current?.getBoundingClientRect()
+    if (!r || !r.width) return 0
+    const k = Math.min(1, Math.max(0, (clientX - r.left) / r.width))
+    return Math.round(k * (WHEN.length - 1))
+  }
+  const onDown = (e: React.PointerEvent) => {
+    if (still || !onChange || e.button !== 0) return
+    e.preventDefault()
+    setDragging(true)
+    let last = stopAt(e.clientX)
+    onChange(WHEN[last])
+    const move = (ev: PointerEvent) => {
+      const i = stopAt(ev.clientX)
+      if (i !== last) {
+        last = i
+        onChange(WHEN[i])
+      }
+    }
+    const up = () => {
+      setDragging(false)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
   return (
     <div className={`fy-when${still ? ' is-still' : ''}`}>
       {!still && (
@@ -194,7 +227,13 @@ function Road({
           <p className="fy-sub">Pick the stretch of road it sits on.</p>
         </>
       )}
-      <div className="fy-road" style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: WHEN.length - 1 }}>
+      <div
+        ref={road}
+        className={`fy-road${dragging ? ' is-dragging' : ''}`}
+        style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: WHEN.length - 1 }}
+        onPointerDown={onDown}
+        {...(still ? {} : { 'data-no-drag-scroll': '' })}
+      >
         <i className="fy-road-line" />
         <i className={`fy-road-done${at < 0 ? ' is-empty' : ''}`} />
         <span className={`fy-pin${at < 0 ? ' is-waiting' : ''}`} aria-hidden>
@@ -588,7 +627,8 @@ export default function FutureYouFlow({
                 ✦ POSTED ✦
               </span>
               <p className="fyr-words">
-                <Typed text={a.postcard || SAMPLE_FUTURE.postcard} />
+                {/* Whole, not typed: the card arriving is the motion. */}
+                {a.postcard || SAMPLE_FUTURE.postcard}
               </p>
             </div>
             <p className="jr-reading">
