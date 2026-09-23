@@ -206,12 +206,6 @@ export default function QuestionModal({
               Reopen this question
             </button>
           )}
-
-          <div className="qm-cta">
-            <button className="btn btn-primary" type="button" onClick={onClose}>
-              See it in my Financial ID
-            </button>
-          </div>
         </div>
 
         {onDelete && (
