@@ -401,13 +401,25 @@ export function GoalDetail({ g }: { g: Goal }) {
       {g.pros && g.pros.length > 0 && (
         <>
           <dt>Pros</dt>
-          <dd>{g.pros.join(' · ')}</dd>
+          <dd>
+            <ul className="pp-goal-list">
+              {g.pros.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </dd>
         </>
       )}
       {g.cons && g.cons.length > 0 && (
         <>
           <dt>Cons</dt>
-          <dd>{g.cons.join(' · ')}</dd>
+          <dd>
+            <ul className="pp-goal-list">
+              {g.cons.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </dd>
         </>
       )}
       {g.note && (
