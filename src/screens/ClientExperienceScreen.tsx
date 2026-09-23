@@ -1291,23 +1291,20 @@ export default function ClientExperienceScreen({
           >
             {adventure ? (
               <JoyFlow
-                /* The reward says where she really is: one more when this is
-                   her first time through, the same count when she is taking it
-                   again, and whatever is truly next. */
-                reward={(() => {
-                  const core = journey.filter((j) => j.core)
-                  const before = core.filter((j) => done[j.id]).length
-                  const after = done['financial-joy'] ? before : before + 1
-                  const next = journey.find((j) => j.id !== 'financial-joy' && !done[j.id])
-                  return { before, after, total: core.length, next: next?.title ?? 'Financial Joy' }
-                })()}
+                /* Financial Joy is the first adventure, and taking it — the first
+                   time or again — is where the journey starts: the reward always
+                   reads 0 to 1 of 5, with Confidence next. */
+                reward={{ before: 0, after: 1, total: journey.filter((j) => j.core).length, next: 'Confidence' }}
                 onClose={() => setAdventure(null)}
                 onComplete={(answers) => {
                   /* Done: the answers go on her Financial ID, and she lands on
                      the list, where the adventure now reads as complete and the
                      next one has opened. */
+                  /* Taken again, it starts the journey over from itself: only
+                     Financial Joy is complete, Confidence is next, and what
+                     came after goes back to waiting. */
                   setJoy(answers)
-                  setDone((d) => ({ ...d, 'financial-joy': d['financial-joy'] ?? completedToday() }))
+                  setDone({ 'financial-joy': completedToday() })
                   setAdventure(null)
                   setTab('adventures')
                 }}
