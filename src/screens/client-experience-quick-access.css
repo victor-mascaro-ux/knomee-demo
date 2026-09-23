@@ -73,7 +73,9 @@
 .kx-mood img{width:100%;height:100%;display:block}
 .kx-mood:hover{transform:translateY(-2px)}
 .kx-mood:active{transform:scale(.93)}
-.kx-mood.is-on{box-shadow:0 0 0 3px var(--k-white)}
+/* The chosen face says so by standing up out of the row, not by wearing a
+   ring: a stroke round a drawing that already has an outline reads as two. */
+.kx-mood.is-on{transform:scale(1.14)}
 .kx-ask{position:absolute;left:50%;top:144px;width:250px;text-align:center;color:var(--text-inverse);font-size:21px;font-weight:var(--weight-semibold);line-height:var(--leading-snug);text-wrap:pretty;animation:kxAsk 260ms var(--ease-out) 380ms both}
 /* Last, and only a fade: the question is what they read once the thing it is
    about has finished arriving. */

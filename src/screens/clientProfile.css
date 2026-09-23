@@ -163,13 +163,18 @@
 .cp-checkin {
   align-self: stretch;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  /* The face, what they said, and the day it was said — the day in the corner,
+     where a date goes. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
   gap: var(--space-4) var(--space-10);
   margin-top: var(--space-4);
   padding: var(--space-12);
   border-radius: var(--radius-xl);
-  background: linear-gradient(100deg, var(--k-ocean), var(--k-teal));
+  /* Each mood carries its own pair, running dark to light across the card the
+     way the green one does. Both ends are chosen to hold white text: the light
+     end is the one that has to earn it. */
+  background: linear-gradient(100deg, var(--mood-from, var(--k-ocean)), var(--mood-to, var(--k-teal)));
   color: var(--text-inverse);
   text-align: left;
 }
@@ -178,7 +183,8 @@
   width: 38px;
   height: 38px;
   border-radius: var(--radius-circle);
-  background: var(--k-grape-vivid);
+  /* No disc behind it: the face is a coloured circle already, and a second one
+     under it reads as a ring around the first. */
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -211,7 +217,10 @@
   font-weight: var(--weight-semibold);
 }
 .cp-checkin-date {
-  grid-column: 1 / -1;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  white-space: nowrap;
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.8);
 }
@@ -454,10 +463,32 @@
 /* What they wrote about how they feel, under the mood it belongs to. Their own
    words, so the card quotes them rather than restating them. */
 .cp-checkin-note {
-  grid-column: 1 / -1;
-  margin: var(--space-6) 0 0;
+  margin: var(--space-4) 0 0;
   font-size: var(--text-sm);
   font-style: italic;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.92);
+}
+
+/* Lowest to highest. Worried is a deep rose, unsure a burnt amber, neutral a
+   slate, good the ocean-to-teal the card was built on, great a forest green. */
+.cp-checkin.is-mood-0 {
+  --mood-from: #7a1027;
+  --mood-to: #b8394f;
+}
+.cp-checkin.is-mood-1 {
+  --mood-from: #7a3a06;
+  --mood-to: #a8661b;
+}
+.cp-checkin.is-mood-2 {
+  --mood-from: #333f5c;
+  --mood-to: #5c6f8c;
+}
+.cp-checkin.is-mood-3 {
+  --mood-from: var(--k-ocean);
+  --mood-to: var(--k-teal);
+}
+.cp-checkin.is-mood-4 {
+  --mood-from: #0f5b3c;
+  --mood-to: #25865a;
 }

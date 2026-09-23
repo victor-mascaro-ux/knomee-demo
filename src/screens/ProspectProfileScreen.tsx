@@ -10,7 +10,7 @@ import moodGreat from '../assets/moods/great.svg'
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
 import { DownloadIcon } from '../components/icons'
 import {
@@ -246,23 +246,7 @@ export default function ProspectProfileScreen({
               The advisor's copy keeps it in the rail beside her name; on her
               own phone the rail is a drawer, and a check-in nobody can see is
               a check-in nobody made. */}
-          {checkIn && (
-            <div className="cp-checkin pp-checkin">
-              <span className="cp-checkin-face">
-                <img src={MOOD_FACE[checkIn.level]} alt="" />
-              </span>
-              <span className="cp-checkin-main">
-                <span className="cp-checkin-dots" aria-hidden>
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <i key={i} className={i <= checkIn.level ? 'is-on' : ''} />
-                  ))}
-                </span>
-                <span className="cp-checkin-mood">{checkIn.mood}</span>
-              </span>
-              <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
-              {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
-            </div>
-          )}
+          {checkIn && <CheckInCard checkIn={checkIn} />}
 
           {!printing && tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
@@ -422,7 +406,7 @@ export default function ProspectProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icBadges} alt="" />
+                        <img className="pp-card-ic is-inset" src={icBadges} alt="" />
                         Badges
                       </span>
                     </div>

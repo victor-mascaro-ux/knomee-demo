@@ -5,6 +5,14 @@
 
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaretIcon, CheckIcon } from '../components/profileIcons'
+import moodWorried from '../assets/moods/worried.svg'
+import moodUnsure from '../assets/moods/unsure.svg'
+import moodNeutral from '../assets/moods/neutral.svg'
+import moodGood from '../assets/moods/good.svg'
+import moodGreat from '../assets/moods/great.svg'
+
+/* Lowest to highest, the order every reading of a mood uses here. */
+const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { isPrinting } from '../printSheet'
 import type { Goal } from '../data/financialId'
 import icCareerChange from '../assets/life-events/career-change.svg'
@@ -447,6 +455,30 @@ export function PostcardSection({ text }: { text?: string }) {
           <p className="ap-postcard">{text}</p>
         </div>
       </div>
+    </div>
+  )
+}
+
+/* How they last said they felt. One card wherever a profile shows it: the
+   face, the stage it sits at on the five, what they wrote about it beside the
+   mood it explains, and the day underneath. */
+export function CheckInCard({
+  checkIn,
+}: {
+  checkIn: { level: number; mood: string; note?: string; date: string }
+}) {
+  return (
+    <div className={`cp-checkin pp-checkin is-mood-${checkIn.level}`}>
+      <span className="cp-checkin-face">
+        <img src={MOOD_FACE[checkIn.level]} alt="" />
+      </span>
+      {/* The mood, then the words under it. The face already says where on the
+          five this sits, so the row of dots was the same fact drawn twice. */}
+      <span className="cp-checkin-main">
+        <span className="cp-checkin-mood">{checkIn.mood}</span>
+        {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
+      </span>
+      <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
     </div>
   )
 }

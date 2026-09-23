@@ -9,7 +9,7 @@ import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
 import QuestionModal, { AddQuestionModal } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
-import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection } from './profileParts'
+import { AddButton, EMPTY_ART, EmptyState, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { DownloadIcon } from '../components/icons'
@@ -32,11 +32,6 @@ import icLifeEvents from '../assets/adventures/life-events.svg'
 /* The design system's vision board, which is what her own app puts on "Save a
    vision" too. One mark wherever a vision is named. */
 import icVision from '../assets/adventures/vision-board.svg'
-import moodGood from '../assets/moods/good.svg'
-import moodGreat from '../assets/moods/great.svg'
-import moodNeutral from '../assets/moods/neutral.svg'
-import moodUnsure from '../assets/moods/unsure.svg'
-import moodWorried from '../assets/moods/worried.svg'
 import ClientInsightsTab, { ClientToolkitTab } from './ClientInsightsTab'
 import GoalModal from './GoalModal'
 import { DEMO_TODAY } from '../data/financialId'
@@ -55,7 +50,6 @@ const ADVENTURE_ICON: Record<string, string> = {
 
 // The mobile app's own mood ramp, reused so the check-in the client tapped on
 // their phone is the very same face the advisor sees here.
-const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 
 /* A person's portrait, or their initial while there is no file for them.
    Exported because the family page draws the same household in the same
@@ -551,25 +545,6 @@ export default function ClientProfileScreen({
               </span>
             </div>
 
-            {/* How she last said she felt, tapped on her phone. It reads as part of
-                who she is rather than as a banner over whichever tab is open —
-                which is why it sits with her name and her email, not above the
-                page. */}
-            <div className="cp-checkin">
-              <span className="cp-checkin-face">
-                <img src={MOOD_FACE[cp.checkIn.level]} alt="" />
-              </span>
-              <span className="cp-checkin-main">
-                <span className="cp-checkin-dots" aria-hidden>
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <i key={i} className={i <= cp.checkIn.level ? 'is-on' : ''} />
-                  ))}
-                </span>
-                <span className="cp-checkin-mood">{cp.checkIn.mood}</span>
-              </span>
-              <span className="cp-checkin-date">Last check-in: {cp.checkIn.date}</span>
-            </div>
-
             {household ? (
               <div className="cp-side-block">
                 <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
@@ -670,6 +645,10 @@ export default function ClientProfileScreen({
               </button>
             )}
           </div>
+
+          {/* How she last said she felt, under the name of the page she said it
+              on — the same card her own phone shows her, in the same place. */}
+          <CheckInCard checkIn={cp.checkIn} />
 
           {!printing && tab === 'insights' ? (
             <ClientInsightsTab />
@@ -824,7 +803,7 @@ export default function ClientProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icBadges} alt="" />
+                        <img className="pp-card-ic is-inset" src={icBadges} alt="" />
                         Badges
                       </span>
                       <DateSelect />
@@ -841,7 +820,7 @@ export default function ClientProfileScreen({
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
-                        <img className="pp-card-ic" src={icVision} alt="" />
+                        <img className="pp-card-ic is-inset" src={icVision} alt="" />
                         Future Vision Board
                       </span>
                     </div>
