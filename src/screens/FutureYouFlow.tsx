@@ -290,17 +290,19 @@ function Postcard({
   onChange,
   onSample,
   stamped,
+  sent,
 }: {
   text: string
   onChange: (v: string) => void
   onSample: () => void
   stamped: boolean
+  sent?: boolean
 }) {
   return (
     <div className="fy-post">
       <h2 className="fy-h fy-h-sm">Now step into the shoes of Future You.</h2>
       <p className="fy-sub">Write a postcard to yourself, right now, from Future You.</p>
-      <div className={`fy-card${stamped ? ' is-stamped' : ''}`}>
+      <div className={`fy-card${stamped ? ' is-stamped' : ''}${sent ? ' is-sent' : ''}`}>
         <span className="fy-stamp" aria-hidden>
           <i>✈</i>
         </span>
@@ -342,6 +344,8 @@ export default function FutureYouFlow({
   const [other, setOther] = useState<Record<string, string>>({})
   const [extra, setExtra] = useState<Record<string, string[]>>({})
   const [stamped, setStamped] = useState(false)
+  /* After the postmark: the card is sent — it slides away to the right. */
+  const [sent, setSent] = useState(false)
   /* A print tapped on the ending: shown large, as a phone shows a photograph
      — a tap is what a hover is on a mouse. */
   const [zoom, setZoom] = useState<Pick | null>(null)
@@ -380,8 +384,10 @@ export default function FutureYouFlow({
     if (step === 'postcard') {
       window.clearInterval(typing.current)
       if (!a.postcard.trim()) setA((p) => ({ ...p, postcard: SAMPLE_FUTURE.postcard }))
-      /* Posted: the postmark lands, then the ending. */
+      /* Posted: the postmark lands, the card goes off to the right as if it
+         had been dropped in the box, then the ending. */
       setStamped(true)
+      window.setTimeout(() => setSent(true), 750)
       window.setTimeout(() => {
         setA((p) => ({
           ...p,
@@ -390,7 +396,7 @@ export default function FutureYouFlow({
           with: withOther('with'),
         }))
         setStep('results')
-      }, 900)
+      }, 1450)
       return
     }
     setStep(QUESTIONS[qi + 1])
@@ -479,6 +485,7 @@ export default function FutureYouFlow({
           onChange={(v) => setA((p) => ({ ...p, postcard: v }))}
           onSample={writeSample}
           stamped={stamped}
+          sent={sent}
         />
       )}
 
@@ -486,7 +493,7 @@ export default function FutureYouFlow({
         <div className="jr fyr">
           <Reveal>
             <h2 className="jr-title">You visualized Future You</h2>
-            <p className="jr-sub">This is the life you are saving for:</p>
+            <p className="jr-sub">This is the life you are preparing for:</p>
             {/* The vision as a poster: the living sky, and on it where, what,
                 with whom and when, each stamped on in turn. */}
             <figure className="jr-memory fyr-poster">
@@ -496,7 +503,6 @@ export default function FutureYouFlow({
                 <i className="jr-glow jr-glow-b" />
                 <i className="jr-glow jr-glow-c" />
               </span>
-              <span className="fyr-kicker">Future You · {a.when ?? 'someday'}</span>
               {/* Where, doing, with: the words, and beside them the pictures
                   she chose for them, dropped on like photographs, each at its
                   own angle. When: the road, her pin at her stretch of it. */}
