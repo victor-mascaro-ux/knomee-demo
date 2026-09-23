@@ -17,6 +17,7 @@ import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
 import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
+import SelectMenu from '../components/SelectMenu'
 
 /* The openers, in the order the phone lists them. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
@@ -76,21 +77,16 @@ export function AddQuestionModal({
           <label className="qm-label" htmlFor="qm-starter">
             Pick a question starter
           </label>
-          <select
+          <SelectMenu
             id="qm-starter"
-            className="qm-input qm-select"
+            className="qm-input"
             value={starter}
-            onChange={(e) => setStarter(e.target.value)}
-          >
-            <option value="">Choose one option</option>
-            {STARTERS.map((s) => (
-              /* The ellipsis is the list saying "carry on", not part of what
-                 they are asking — so it is in the label and not the value. */
-              <option key={s} value={s}>
-                {s}…
-              </option>
-            ))}
-          </select>
+            placeholder="Choose one option"
+            /* The ellipsis is the list saying "carry on", not part of what
+               they are asking — so it is in the label and not the value. */
+            options={STARTERS.map((s) => ({ value: s, label: `${s}…` }))}
+            onChange={setStarter}
+          />
 
           <label className="qm-label" htmlFor="qm-rest">
             Add the rest of your question

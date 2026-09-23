@@ -20,6 +20,7 @@ import type { Goal } from '../data/financialId'
 import { CloseIcon } from '../components/icons'
 import { AddButton, ReadinessLevel, TTM_STAGES } from './profileParts'
 import ReadinessModal from './ReadinessModal'
+import SelectMenu from '../components/SelectMenu'
 
 /* The horizons the profiles already speak in. Kept in one list so a goal added
    here reads like the ones that came out of the app. */
@@ -277,15 +278,7 @@ export default function AddGoalModal({
               </div>
 
               <span className="ag-label">Timeline</span>
-              <select
-                className="ag-input ag-select"
-                value={timeline}
-                onChange={(e) => setTimeline(e.target.value)}
-              >
-                {TIMELINES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+              <SelectMenu className="ag-input" value={timeline} options={TIMELINES} onChange={setTimeline} />
 
               <div className="ag-cols">
                 <PointList

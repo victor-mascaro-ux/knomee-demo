@@ -1,0 +1,152 @@
+/* The product's dropdown. Shut, it is the field it replaced — that field's
+   class draws the box — with its value on the left and a chevron on the right
+   that turns over while the list is open. */
+button.sm-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  /* The native select's drawn caret, if the field class carries one. */
+  background-image: none;
+  appearance: none;
+}
+.sm-trigger:disabled {
+  cursor: default;
+}
+.sm-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sm-trigger.is-empty .sm-value {
+  color: var(--text-placeholder, #8b8598);
+}
+.sm-caret {
+  flex: none;
+  color: var(--plum, #240446);
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+button.sm-trigger.is-open:not(.is-closing) .sm-caret {
+  transform: rotate(180deg);
+}
+/* Open, the field and its list are one shape: the field gives up the corners
+   on the side the list comes out of, and both wear the accent edge. */
+button.sm-trigger.is-open {
+  border-color: var(--purple-bolt, #9b51e0);
+  transition: border-radius 0.1s ease;
+}
+button.sm-trigger.is-open:not(.is-up) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+button.sm-trigger.is-open.is-up {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* The list, unrolling out of the field and rolling back into it. */
+.sm-pop {
+  position: fixed;
+  z-index: 3000;
+  box-sizing: border-box;
+  /* Every option in view at once: a list this short never scrolls. */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--purple-bolt, #9b51e0);
+  border-top-color: var(--line, #e7e4ee);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 16px 30px -10px rgba(36, 4, 70, 0.22);
+  font-family: inherit;
+  animation: smOpen 0.22s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.sm-pop.is-up {
+  border-top-color: var(--purple-bolt, #9b51e0);
+  border-bottom-color: var(--line, #e7e4ee);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -16px 30px -10px rgba(36, 4, 70, 0.22);
+  animation-name: smOpenUp;
+}
+.sm-pop.is-closing {
+  animation: smClose 0.14s ease-in both;
+  pointer-events: none;
+}
+.sm-pop.is-up.is-closing {
+  animation-name: smCloseUp;
+}
+@keyframes smOpen {
+  from {
+    clip-path: inset(0 -40px 100% -40px);
+  }
+  to {
+    clip-path: inset(0 -40px -60px -40px);
+  }
+}
+@keyframes smClose {
+  from {
+    clip-path: inset(0 -40px -60px -40px);
+  }
+  to {
+    clip-path: inset(0 -40px 100% -40px);
+  }
+}
+@keyframes smOpenUp {
+  from {
+    clip-path: inset(100% -40px 0 -40px);
+  }
+  to {
+    clip-path: inset(-60px -40px 0 -40px);
+  }
+}
+@keyframes smCloseUp {
+  from {
+    clip-path: inset(-60px -40px 0 -40px);
+  }
+  to {
+    clip-path: inset(100% -40px 0 -40px);
+  }
+}
+
+.sm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base, 14px);
+  color: var(--text-strong, #240446);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.sm-item.is-active {
+  background: var(--k-lavender-mist, #f3eefc);
+}
+.sm-item.is-on {
+  font-weight: 600;
+  color: var(--plum, #240446);
+}
+.sm-item svg {
+  flex: none;
+  color: var(--purple-bolt, #9b51e0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-pop,
+  .sm-pop.is-closing {
+    animation-duration: 0.01ms;
+  }
+  .sm-caret {
+    transition: none;
+  }
+}
