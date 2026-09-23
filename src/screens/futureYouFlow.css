@@ -346,6 +346,7 @@
   color: var(--text-strong);
   resize: none;
   outline: none;
+  overflow: hidden;
 }
 .fy-card-field::placeholder {
   font-style: italic;
