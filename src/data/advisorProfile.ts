@@ -14,6 +14,7 @@
 
 import { advisor, businessId, steps, type BusinessId } from './advisorFlow'
 import { RECOMMENDATIONS_KEY, type ToolkitTab, type ReadinessTab } from './readiness'
+import { rqFromSheet } from './rqSheet'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
 
@@ -59,18 +60,42 @@ export interface Dimension {
   read: string
 }
 
-// Intent is weighted heaviest because it is the dimension that decides whether
-// the other two are worth a meeting this quarter.
+// The scoring sheet's RQ is the plain average of the three (rqSheet.ts).
 export const RQ_WEIGHTS: Record<Dimension['key'], number> = {
-  Intent: 0.45,
-  Clarity: 0.3,
-  Receptivity: 0.25,
+  Intent: 1 / 3,
+  Clarity: 1 / 3,
+  Receptivity: 1 / 3,
 }
+
+/* His answers through the sheet's calculator: the stage from The Move's
+   Q5–Q7, the two Confidence statements, Future You's clarity, and whether he
+   wants support. */
+const rankOf = (id: string) => {
+  const st = step(id)
+  return st?.options && st.chosen?.[0] ? st.options.indexOf(st.chosen[0]) : -1
+}
+const ttmOf = () => {
+  const thought = rankOf('mv-q5')
+  const knows = rankOf('mv-q6')
+  const acting = rankOf('mv-q7')
+  if (acting === 3) return 5
+  if (acting >= 1 || thought >= 2) return 4
+  if (knows >= 2) return 3
+  if (thought >= 1 || knows >= 1) return 2
+  return 1
+}
+export const rq = rqFromSheet({
+  ttm: ttmOf(),
+  firm: statement(0)?.value,
+  clarity: step('fy-clarity')?.scale?.value,
+  platform: statement(5)?.value,
+  support: rankOf('mv-q4') === 1 ? 'yes' : rankOf('mv-q4') === 0 ? 'no' : undefined,
+})
 
 export const dimensions: Dimension[] = [
   {
     key: 'Intent',
-    score: 45,
+    score: rq.intent,
     question: 'Is this a live decision, or a recurring mood?',
     measures: 'Whether this is a live decision or a recurring mood.',
     source: 'The Move · Q5–Q7 (the readiness stage)',
@@ -84,7 +109,7 @@ export const dimensions: Dimension[] = [
   },
   {
     key: 'Clarity',
-    score: 78,
+    score: rq.clarity,
     question: 'Do they know what kind of independence they want?',
     measures: 'Whether he knows what kind of independence he wants.',
     source: 'Future You · the vision and its clarity rating (Q7)',
@@ -97,7 +122,7 @@ export const dimensions: Dimension[] = [
   },
   {
     key: 'Receptivity',
-    score: 85,
+    score: rq.receptivity,
     question: 'Would they let a platform help?',
     measures: 'Whether he would let a platform help, or insists on doing it alone.',
     source: 'Confidence · item 6, and The Move · Q4',
@@ -109,10 +134,8 @@ export const dimensions: Dimension[] = [
   },
 ]
 
-const weighted = dimensions.reduce((sum, d) => sum + d.score * RQ_WEIGHTS[d.key], 0)
-
-/** The composite score, computed from the three dimensions above. */
-export const kq = Math.round(weighted)
+/** The composite score: the sheet's average of the three dimensions. */
+export const kq = rq.rq
 
 /* Tier bands are the engine's, shared with the retail side: 70–100 ready now,
    40–69 considering, 0–39 nurture. */
@@ -215,6 +238,8 @@ export interface Starter {
   tag: StarterTag
   line: string
   why: string
+  /** What he said that the line is built on, and where. */
+  source?: string
 }
 
 export const starters: Starter[] = [
@@ -222,21 +247,25 @@ export const starters: Starter[] = [
     tag: 'Acknowledge and Validate',
     line: 'You said the only question that matters is whether the clients come. Let’s start there, and not move off it until you’re satisfied.',
     why: 'Uses his own sentence back. It makes the meeting his agenda before it is Dynasty’s.',
+    source: 'Outlook — Marcus said the only question that matters is whether his clients come with him.',
   },
   {
     tag: 'Demonstrate Curiosity',
     line: 'What did Ana and Dev say the last time you talked about equity — or has that conversation not happened yet?',
     why: 'The second seat is the blocker he has not tested. His answer tells you which meeting you are actually in.',
+    source: 'The Move — his juniors, Ana and Dev, are the second seat he has not yet talked to.',
   },
   {
     tag: 'Self-Reinforcement',
     line: 'A client of eleven years brought her daughter in to meet you. That relationship isn’t with the letterhead.',
     why: 'His own evidence against the thing he is most afraid of. He is more persuasive on it than you are.',
+    source: 'Practice Joy — a client of eleven years brought her daughter in to meet him.',
   },
   {
     tag: 'Positive Talk',
     line: 'You already know what you want it to look like — equity you own, a team you built, someone else running ops. Most people at this stage don’t.',
     why: 'Clarity is his strongest dimension. Naming it moves the conversation off whether and onto when.',
+    source: 'Future You — equity he owns, a team he built, someone else running operations.',
   },
 ]
 
@@ -321,9 +350,11 @@ export const readinessTab: ReadinessTab = {
       question: d.question,
       score: d.score,
       caption: d.read,
-      // The answers behind the number, so hovering it shows its own working.
+      // The answers behind the number, so opening it shows its own working.
       evidence: [d.source, ...d.evidence],
+      calc: rq.calc[d.key],
     })),
+    total: rq.total,
     tier: {
       n: tier.tier,
       name: tier.name,
@@ -344,9 +375,10 @@ export const readinessTab: ReadinessTab = {
 
 export const toolkitTab: ToolkitTab = {
   topAction: topAction.title,
-  starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag] })),
+  starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag], source: s.source })),
   key: RECOMMENDATIONS_KEY,
   questions: questionsTheyAsk.map((q) => ({
+    source: 'The Business ID — one of the three questions the flow handed him to bring to this meeting.',
     quote: q.q,
     guidance: q.guidance,
     points: q.points,

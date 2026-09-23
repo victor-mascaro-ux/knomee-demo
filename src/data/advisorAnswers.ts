@@ -12,6 +12,7 @@
  * someone actually answered.
  */
 
+import { rqFromSheet } from './rqSheet'
 import {
   advisor,
   advisorAdventures,
@@ -444,40 +445,18 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
 
 /* ── the three scores ───────────────────────────────────────────────────────
    Intent, Clarity, Receptivity — the same three dimensions the client side
-   scores, asked of a business decision. Every ramp below is a straight read of
-   one screen, so a number can always be walked back to a tap. */
-
-const ramp = (i: number, ladder: number[]) => (i < 0 ? 0 : (ladder[i] ?? 0))
-
-/** Have they done anything, or is this a recurring mood? */
-function intentScore(a: Answers) {
-  const thought = ramp(rank('mv-q5', a), [10, 45, 80, 95])
-  const knows = ramp(rank('mv-q6', a), [10, 40, 80, 95])
-  const acting = ramp(rank('mv-q7', a), [15, 55, 80, 100])
-  const soon = ramp(rank('mv-q2', a), [100, 65, 40, 25, 15])
-  return Math.round(thought * 0.3 + knows * 0.2 + acting * 0.3 + soon * 0.2)
+   scores, asked of a business decision, and scored the way the sheet's RQ
+   calculator does it (rqSheet.ts), so a number can be walked back to a tap. */
+function rqOf(a: Answers) {
+  const w = rank('mv-q4', a)
+  return rqFromSheet({
+    ttm: STAGES.indexOf(stageOf(a)) + 1,
+    firm: a.scaleSet['cf-q']?.[0],
+    clarity: a.scale['fy-clarity'],
+    platform: a.scaleSet['cf-q']?.[5],
+    support: w === 1 ? 'yes' : w === 0 ? 'no' : undefined,
+  })
 }
-
-/** Do they know what kind of independence they want? */
-function clarityScore(a: Answers) {
-  const rated = a.scale['fy-clarity'] ? ((a.scale['fy-clarity'] - 1) / 4) * 100 : 0
-  // Breadth of the practice they described, against eight — about the point at
-  // which a vision is specific rather than a shrug.
-  const drawn = (Math.min(chosen('fy-q5', a).length, 8) / 8) * 100
-  const placed = rank('fy-q1', a) >= 0 && rank('fy-q4', a) >= 0 ? 100 : 40
-  return Math.round(rated * 0.5 + drawn * 0.3 + placed * 0.2)
-}
-
-/** Would they let a platform help, or do they insist on doing it alone? */
-function receptivityScore(a: Answers) {
-  const item6 = a.scaleSet['cf-q']?.[5] ?? 0
-  const believes = item6 ? ((item6 - 1) / 4) * 100 : 0
-  const wants = rank('mv-q4', a)
-  const asks = wants === 1 ? 100 : wants === 0 ? 25 : 0
-  return Math.round(believes * 0.5 + asks * 0.5)
-}
-
-export const RQ_WEIGHTS = { Intent: 0.45, Clarity: 0.3, Receptivity: 0.25 }
 
 /* The engine's own bands, shared with the retail side: 70–100 ready now,
    40–69 considering, 0–39 nurture. */
@@ -751,7 +730,7 @@ const HABIT_WORDS: { word: string; test: RegExp; hint: string }[] = [
 ]
 
 function starters(a: Answers, themes: ThemeKey[], clarity: number) {
-  const out: { quote: string; why: string; tags: TagName[] }[] = []
+  const out: { quote: string; why: string; tags: TagName[]; source?: string }[] = []
   // The card these land on sets a starter inside double quotes, so anything
   // quoted back to the advisor INSIDE one takes single ones. Nested doubles
   // read as a typo, and a rep is meant to say this line out loud.
@@ -762,6 +741,7 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
       quote: `You told us the thing that matters most is this — ${quoted(concern, 150)} Let’s start there, and not move off it until you’re satisfied.`,
       why: 'Their own sentence, back. It makes the meeting their agenda before it is the firm’s.',
       tags: ['Acknowledge and Validate'],
+      source: 'Outlook · Q1 — what they said matters most.',
     })
   const blocker = said('mv-q10b', a)
   if (blocker)
@@ -769,12 +749,14 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
       quote: `You said this is what is holding the decision — ${quoted(blocker, 130)} What would settle it?`,
       why: 'The one thing standing between them and a decision. Their answer tells you which meeting you are actually in.',
       tags: ['Demonstrate Curiosity'],
+      source: 'The Move · what they said is holding the decision.',
     })
   else if (themes[0])
     out.push({
       quote: `Before we talk about us — where has ${THEME_QUESTIONS[themes[0]].label} landed for you so far?`,
       why: 'Opens on their first question rather than the firm’s pitch, and tells you what they already believe.',
       tags: ['Demonstrate Curiosity'],
+      source: `Their answers — ${THEME_QUESTIONS[themes[0]].label} comes up first.`,
     })
   const why = said('pj-q3', a)
   if (why)
@@ -782,6 +764,7 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
       quote: `${quoted(why, 160)} That happened because of you, not the name on the wall.`,
       why: 'Their own evidence against the thing they are most afraid of. They are more persuasive on it than you are.',
       tags: ['Self-Reinforcement'],
+      source: 'Practice Joy · Q3 — the moment they told us about.',
     })
   const vision = chosen('fy-q5', a)
   if (vision.length)
@@ -792,6 +775,7 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
           ? 'Clarity is their strongest dimension. Naming it moves the conversation off whether and onto when.'
           : 'Says back the part of the picture they were sure about, and gives them somewhere firm to stand.',
       tags: ['Positive Talk'],
+      source: 'Future You · Q5 — what their practice includes.',
     })
   return out
 }
@@ -808,6 +792,7 @@ function buildToolkit(a: Answers, themes: ThemeKey[], clarity: number): ToolkitT
     key: RECOMMENDATIONS_KEY,
     questions: themes.slice(0, 3).map((k) => ({
       quote: THEME_QUESTIONS[k].question,
+      source: `Their answers — ${THEME_QUESTIONS[k].label} is among the things they wrote about most.`,
       guidance: THEME_QUESTIONS[k].guidance,
       points: THEME_QUESTIONS[k].points,
     })),
@@ -846,12 +831,9 @@ export interface Derived extends AdvisorProfileData {
 
 export function derive(a: Answers): Derived {
   const themes = rankThemes(a)
-  const intent = intentScore(a)
-  const clarity = clarityScore(a)
-  const receptivity = receptivityScore(a)
-  const kq = Math.round(
-    intent * RQ_WEIGHTS.Intent + clarity * RQ_WEIGHTS.Clarity + receptivity * RQ_WEIGHTS.Receptivity,
-  )
+  const rq = rqOf(a)
+  const { intent, clarity, receptivity } = rq
+  const kq = rq.rq
   const tier = TIERS.find((t) => kq >= t.min)!
   const id = buildBusinessId(a, themes)
   const stage = stageOf(a)
@@ -889,6 +871,7 @@ export function derive(a: Answers): Derived {
             `Started acting: “${picked('mv-q7', a) || '—'}”`,
             `Timeline: ${picked('mv-q2', a) || '—'}`,
           ],
+          calc: rq.calc.Intent,
         },
         {
           key: 'Clarity',
@@ -906,6 +889,7 @@ export function derive(a: Answers): Derived {
             `Where: ${picked('fy-q1', a) || '—'}`,
             `Practice includes: ${picked('fy-q5', a) || '—'}`,
           ],
+          calc: rq.calc.Clarity,
         },
         {
           key: 'Receptivity',
@@ -922,9 +906,11 @@ export function derive(a: Answers): Derived {
             `“${statements[5]?.text ?? '—'}” — ${a.scaleSet['cf-q']?.[5] ?? '—'} of 5`,
             `Wants support: “${picked('mv-q4', a) || '—'}”`,
           ],
+          calc: rq.calc.Receptivity,
         },
       ],
       tier: { n: tier.tier, name: tier.name, body: TIER_BODY[tier.tier] },
+      total: rq.total,
     },
     velocity: velocity(a, intent, id),
     motivators: motivators(a),

@@ -901,3 +901,188 @@
     zoom: 0.78;
   }
 }
+
+/* ── a score card, opened: how it was worked out ── */
+.rd-dim.is-open-able {
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.rd-dim.is-open-able:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover, #cfc8dc);
+  box-shadow: 0 8px 18px rgba(20, 10, 40, 0.12);
+}
+.rd-dim.is-open-able:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+.rd-why {
+  width: min(480px, calc(100vw - 32px));
+}
+.rd-why-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.rd-why-q {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.rd-why-h {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+/* The working: each line a metric and its answer, its points at the right. */
+.rd-why-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rd-why-rows li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: 9px 0;
+  border-bottom: var(--border-thin) solid var(--border-default);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--text-table, #3d3948);
+}
+.rd-why-rows li::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 6px;
+  align-self: flex-start;
+  border-radius: 50%;
+  background: var(--action-primary);
+}
+.rd-why-label {
+  flex: 1;
+  min-width: 0;
+}
+.rd-why-label b {
+  color: var(--text-strong);
+}
+.rd-why-pts {
+  flex: none;
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+.rd-why-pts i {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.rd-why-rows li.rd-why-sum {
+  border-bottom: 0;
+  padding-top: 12px;
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.rd-why-rows li.rd-why-sum::before {
+  visibility: hidden;
+}
+.rd-why-rows li.rd-why-sum .rd-why-pts {
+  font-size: 22px;
+}
+.rd-why-note {
+  margin: var(--space-8) 0 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+/* Starters and questions open their panel: the row lifts like any other. */
+.rd-starter.is-open-able,
+.rd-ask.is-open-able {
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.rd-starter.is-open-able:hover,
+.rd-ask.is-open-able:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(20, 10, 40, 0.1);
+}
+.rd-quiet {
+  display: contents;
+}
+.rd-talk-quote {
+  margin: 0;
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-xl);
+  background: #f1f3f7;
+  font-size: var(--text-base);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-strong);
+}
+.rd-talk-source,
+.rd-talk-p {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--text-table, #3d3948);
+}
+.rd-talk-source {
+  padding-left: 10px;
+  border-left: 3px solid var(--action-primary);
+}
+
+/* ── the working, as a score sheet ── */
+.rd-calc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.rd-calc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rd-calc-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--text-base);
+  color: var(--text-strong);
+}
+.rd-calc-line > span,
+.rd-calc-line > b {
+  flex: none;
+  max-width: 78%;
+}
+.rd-calc-line > :last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* The space between a metric and its points: empty, it pushes the points to
+   the right edge. */
+.rd-calc-line > i {
+  flex: 1;
+  min-width: 16px;
+}
+.rd-calc-line.is-head {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.rd-calc-item.is-total {
+  margin-top: var(--space-4);
+  padding-top: var(--space-12);
+  border-top: var(--border-thin) solid var(--border-default);
+}
+.rd-calc-score {
+  font-size: 24px;
+}
+.rd-calc-caption {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}

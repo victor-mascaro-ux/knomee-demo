@@ -10,7 +10,8 @@
  * and everything is off under prefers-reduced-motion.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import './readiness.css'
 import type {
   AskedQuestion,
@@ -22,8 +23,9 @@ import type {
   TagName,
   Velocity,
   Word as WordT,
+  CalcRow,
 } from '../data/readiness'
-import { CheckIcon } from '../components/icons'
+import { CheckIcon, CloseIcon } from '../components/icons'
 import { isPrinting } from '../printSheet'
 import icScore from '../assets/cards/readiness-score.svg'
 import icVelocity from '../assets/cards/velocity.svg'
@@ -184,21 +186,115 @@ function ScoreRing({ value, label }: { value: number; label: string }) {
   )
 }
 
-function DimensionCard({ d, i }: { d: Snapshot['dimensions'][number]; i: number }) {
+function DimensionCard({
+  d,
+  i,
+  onOpen,
+}: {
+  d: Snapshot['dimensions'][number]
+  i: number
+  onOpen: () => void
+}) {
   const { ref, seen } = useSeen<HTMLDivElement>()
   const shown = useCountUp(seen ? d.score : 0)
   return (
     <div
-      className={`rd-dim${d.evidence?.length ? ' tt tt-up' : ''}`}
-      data-tip={d.evidence?.join(' · ')}
+      className="rd-dim is-open-able"
       ref={ref}
       style={{ animationDelay: `${0.06 + i * 0.06}s` }}
+      role="button"
+      tabIndex={0}
+      aria-label={`${d.key}: ${d.score}. How it is calculated`}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
     >
       <span className="rd-dim-key">{d.key}</span>
       <span className="rd-dim-q">{d.question}</span>
       <span className="rd-dim-score">{shown}</span>
       <span className="rd-dim-caption">{d.caption}</span>
     </div>
+  )
+}
+
+/* A dimension, opened: its score and its working as one list — each thing it
+   counts, what they answered, and the points that earned — then how the
+   dimensions add up. Where a side has no worked calculation, its evidence is
+   the list. */
+function DimensionModal({
+  d,
+  total,
+  onClose,
+}: {
+  d: Snapshot['dimensions'][number]
+  total?: string
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  const rows: CalcRow[] =
+    d.calc ??
+    (d.evidence ?? []).map((line) => {
+      const at = line.indexOf(': ')
+      return at > 0 ? { label: line.slice(0, at), value: line.slice(at + 2) } : { label: line, value: '' }
+    })
+  /* On the page's own root, not inside the card: a card that animates in
+     would otherwise become the fixed backdrop's frame. */
+  return createPortal(
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="rd-why-title">
+      <div className="modal rd-why" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title" id="rd-why-title">
+            {d.key}
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body rd-why-body">
+          <p className="rd-why-q">{d.question}</p>
+          <h3 className="rd-why-h">How it’s calculated</h3>
+          {/* Each metric as a two-line entry, the way a score sheet reads:
+              what was measured against what it scores, then their answer
+              against the points it earned. */}
+          <div className="rd-calc">
+            {rows.map((r) => (
+              <div className="rd-calc-item" key={r.label + r.value}>
+                <div className="rd-calc-line is-head">
+                  <span>{r.label}</span>
+                  <i aria-hidden />
+                  <span>{r.points !== undefined ? (r.weight ? `${r.weight} of ${d.key} score` : `${d.key} score`) : ''}</span>
+                </div>
+                <div className="rd-calc-line">
+                  <b>{r.value || '—'}</b>
+                  <i aria-hidden />
+                  <b>{r.points ?? ''}</b>
+                </div>
+              </div>
+            ))}
+            <div className="rd-calc-item is-total">
+              <div className="rd-calc-line">
+                <b>{d.key} score</b>
+                <i aria-hidden />
+                <b className="rd-calc-score">{d.score}</b>
+              </div>
+              <span className="rd-calc-caption">{d.caption}</span>
+            </div>
+          </div>
+          {total && <p className="rd-why-note">{total}</p>}
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -223,7 +319,10 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
   /* Six read as two rows of three; a fourth column only for seven or more. */
   const wide = s.dimensions.length > 6
-  const tierInBreakdown = score.abbr === 'KQ'
+  /* The card opened to show how it was worked out. */
+  const [why, setWhy] = useState<Snapshot['dimensions'][number] | null>(null)
+  // A prospect's KQ and an advisor's RQ; the client's KR keeps it full width.
+  const tierInBreakdown = score.abbr !== 'KR'
   const tier = (
     <div className={`rd-tier rd-tier-${s.tier.n}${tierInBreakdown ? ' is-in-breakdown' : ''}`}>
       <span className="rd-tier-swatch" aria-hidden />
@@ -255,7 +354,7 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
           <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
             {s.dimensions.map((d, i) => (
-              <DimensionCard d={d} i={i} key={d.key} />
+              <DimensionCard d={d} i={i} key={d.key} onOpen={() => setWhy(d)} />
             ))}
           </div>
           {/* A prospect's three cards leave the column's lower half empty: the
@@ -266,6 +365,9 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
       {/* The tier is a reading of every number above it, so on the client's
           relationship card it runs under the whole card. */}
       {!tierInBreakdown && tier}
+      {why && (
+        <DimensionModal d={why} total={s.total} onClose={() => setWhy(null)} />
+      )}
     </section>
   )
 }
@@ -404,9 +506,101 @@ function CopyLine({ text, label }: { text: string; label: string }) {
   )
 }
 
-function StarterRow({ s, i }: { s: Starter; i: number }) {
+/* Row props for a card that opens its panel: the whole row is the control. */
+const opens = (onOpen: () => void) => ({
+  role: 'button' as const,
+  tabIndex: 0,
+  onClick: onOpen,
+  onKeyDown: (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onOpen()
+    }
+  },
+})
+
+/* Copy answers for itself; it does not also open the card it sits on. */
+function Quiet({ children }: { children: ReactNode }) {
   return (
-    <div className="rd-starter" style={{ animationDelay: `${i * 0.05}s` }}>
+    <span className="rd-quiet" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+      {children}
+    </span>
+  )
+}
+
+/* A starter or a question, opened: the line, what it is for, and where it
+   comes from — what they said that it is built on. */
+function TalkModal({
+  kind,
+  quote,
+  lead,
+  leadHead,
+  points,
+  source,
+  onClose,
+}: {
+  kind: string
+  quote: string
+  lead: string
+  leadHead: string
+  points?: string[]
+  source?: string
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return createPortal(
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="rd-talk-title">
+      <div className="modal rd-why" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title" id="rd-talk-title">
+            {kind}
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body rd-why-body">
+          <p className="rd-talk-quote">“{quote}”</p>
+          {source && (
+            <>
+              <h3 className="rd-why-h">Where it comes from</h3>
+              <p className="rd-talk-source">{source}</p>
+            </>
+          )}
+          <h3 className="rd-why-h">{leadHead}</h3>
+          <p className="rd-talk-p">{lead}</p>
+          {points && points.length > 0 && (
+            <ul className="rd-why-rows">
+              {points.map((x) => (
+                <li key={x}>
+                  <span className="rd-why-label">{x}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+function StarterRow({ s, i }: { s: Starter; i: number }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+    <div
+      className="rd-starter is-open-able"
+      style={{ animationDelay: `${i * 0.05}s` }}
+      aria-label="Conversation starter — where it comes from"
+      {...opens(() => setOpen(true))}
+    >
       <span className="rd-starter-ic" aria-hidden>
         <ChatGlyph />
       </span>
@@ -419,8 +613,21 @@ function StarterRow({ s, i }: { s: Starter; i: number }) {
           ))}
         </div>
       </div>
-      <CopyLine text={s.quote} label="this conversation starter" />
+      <Quiet>
+        <CopyLine text={s.quote} label="this conversation starter" />
+      </Quiet>
     </div>
+    {open && (
+      <TalkModal
+        kind="Conversation Starter"
+        quote={s.quote}
+        leadHead="Why this line"
+        lead={s.why}
+        source={s.source}
+        onClose={() => setOpen(false)}
+      />
+    )}
+    </>
   )
 }
 
@@ -462,8 +669,15 @@ export function StartersCard({
 }
 
 function QuestionRow({ q, i }: { q: AskedQuestion; i: number }) {
+  const [open, setOpen] = useState(false)
   return (
-    <div className="rd-ask" style={{ animationDelay: `${i * 0.05}s` }}>
+    <>
+    <div
+      className="rd-ask is-open-able"
+      style={{ animationDelay: `${i * 0.05}s` }}
+      aria-label="Question they may ask — where it comes from"
+      {...opens(() => setOpen(true))}
+    >
       <span className="rd-ask-ic" aria-hidden>
         <ChatGlyph />
       </span>
@@ -481,11 +695,25 @@ function QuestionRow({ q, i }: { q: AskedQuestion; i: number }) {
       {/* A question carries its answer with it: the line they may ask, and the
           three openings it creates — which is what a rep pastes into their
           notes before the call, not the question on its own. */}
-      <CopyLine
-        text={[q.quote, q.guidance, ...q.points].join('\n')}
-        label="this question and how to answer it"
-      />
+      <Quiet>
+        <CopyLine
+          text={[q.quote, q.guidance, ...q.points].join('\n')}
+          label="this question and how to answer it"
+        />
+      </Quiet>
     </div>
+    {open && (
+      <TalkModal
+        kind="Question They May Ask"
+        quote={q.quote}
+        leadHead="How to answer it"
+        lead={q.guidance}
+        points={q.points}
+        source={q.source}
+        onClose={() => setOpen(false)}
+      />
+    )}
+    </>
   )
 }
 

@@ -15,6 +15,16 @@ import { confidenceAnswers, financialId } from './financialId'
 
 /* ── the shape ──────────────────────────────────────────────────────────── */
 
+/** One line of a dimension's working, as the scoring sheet lays it out: the
+    metric, what they answered, and the points it earns on the 0–100 scale. */
+export interface CalcRow {
+  label: string
+  value: string
+  points?: number
+  /** Its share of the dimension, where the sheet splits one (e.g. 50%). */
+  weight?: string
+}
+
 export interface KqDimension {
   /** Intent · Clarity · Receptivity. */
   key: string
@@ -26,6 +36,8 @@ export interface KqDimension {
   /** The answers the score was computed from. Shown on hover, so the number
       can always be traced back to something the person actually said. */
   evidence?: string[]
+  /** The working, line by line (the KQ / KR calculators). */
+  calc?: CalcRow[]
 }
 
 export interface Snapshot {
@@ -48,6 +60,8 @@ export interface Snapshot {
     /** Only the firm side carries this: what the score is NOT. */
     note?: string
   }
+  /** How the dimensions add up to the headline score, said once. */
+  total?: string
 }
 
 export interface Velocity {
@@ -102,6 +116,8 @@ export interface Starter {
   /** Why this line, in the rep's own interest. */
   why: string
   tags: TagName[]
+  /** Where the line comes from: what they said, and in which adventure. */
+  source?: string
 }
 
 export interface AskedQuestion {
@@ -111,6 +127,8 @@ export interface AskedQuestion {
   /** What the advisor or the firm could tackle using the question — three
       openings it creates, not a script for answering it. */
   points: string[]
+  /** Why they may ask it: what they said that points to it. */
+  source?: string
 }
 
 /** A word the rep should reach for, or avoid. The firm side carries the reason
@@ -168,7 +186,6 @@ export const RECOMMENDATIONS_KEY: { tag: TagName; meaning: string }[] = [
 /* Goals carry the readiness stage; the ones already at the top of the scale
    are what makes her Intent read high. */
 const goalsAtTop = financialId.goals.filter((g) => !g.completed && g.readiness === 5)
-const goalsDone = financialId.goals.filter((g) => g.completed).length
 const conf = (needle: string) => confidenceAnswers.find((a) => a.statement.includes(needle))
 const believesInGoals = conf('achieve my financial goals')
 const spendsOnJoy = conf('bring me joy')
@@ -183,40 +200,54 @@ export const prospectReadiness: ReadinessTab = {
       {
         key: 'Intent',
         question: 'Are they actively working toward a goal?',
-        score: 83,
+        score: 80,
         caption: 'Actively pursuing a meaningful goal',
         evidence: [
-          'Goals · the readiness stage she set on each one',
           `At the top of the scale: ${goalsAtTop.map((g) => g.title.replace(/\.$/, '')).join(' · ')}`,
-          `${goalsDone} goals already finished and logged`,
-          'Her lead goal — the Oahu family trip — sits one stage off the top',
+        ],
+        calc: [
+          { label: 'Readiness stage of her lead goal', value: 'Action', points: 80 },
         ],
       },
       {
         key: 'Clarity',
         question: 'Can they articulate what they want?',
-        score: 62,
+        score: 65,
         caption: 'Vision present, not fully formed',
         evidence: [
-          'Future You · where, what and who',
           `Where: ${financialId.futureYou.where.join(', ')}`,
           `Doing: ${financialId.futureYou.what.join(', ')}`,
-          'Four things at once and two places — the picture is there, the edges are not',
+        ],
+        calc: [
+          { label: 'How clear was the picture of Future You?', value: '3 of 5', points: 65 },
         ],
       },
       {
         key: 'Receptivity',
         question: 'Are they open to guidance?',
-        score: 100,
-        caption: 'Explicitly open, support-seeking',
+        score: 97,
+        caption: 'Explicitly open, actively wants support',
         evidence: [
-          `Confidence · the ${confidenceAnswers.length} statements behind the dial`,
           `“${believesInGoals?.statement}” — ${believesInGoals?.value} of 100`,
           `“${spendsOnJoy?.statement}” — ${spendsOnJoy?.value} of 100`,
-          'She says outright that working with an advisor improves her confidence',
+        ],
+        calc: [
+          {
+            label: '“I believe that working with a financial advisor improves my confidence.”',
+            value: '5 of 5',
+            points: 95,
+            weight: '50%',
+          },
+          {
+            label: 'Do you want support from your financial advisor on this goal?',
+            value: 'Yes',
+            points: 98,
+            weight: '50%',
+          },
         ],
       },
     ],
+    total: 'The KQ is the average of Intent, Clarity and Receptivity: (80 + 65 + 97) ÷ 3 = 81.',
     tier: {
       n: 1,
       name: 'Ready Now',
@@ -270,24 +301,28 @@ export const prospectToolkit: ToolkitTab = {
       quote:
         'You mentioned wanting to leave a lasting legacy for your child. I’d love to hear more about what that means to you — is it financial security, values you want to pass on, or something else entirely?',
       why: 'Get Sarah talking positively about her future and what’s possible.',
+      source: 'Outlook · her hopes — Sarah said she wants to leave a lasting legacy for her child.',
       tags: ['Positive Talk'],
     },
     {
       quote:
         'I noticed you said you sometimes feel guilty enjoying things, even though you know you’ve earned them. That tension is more common than you might think, and it tells me you care deeply about doing the right thing. What if we built a plan that gave you full permission to enjoy life — because you’d know the important things are covered?',
       why: 'Show genuine interest through follow-up questions. Curiosity is a predictor of likeability.',
+      source: 'Outlook · her worries — Sarah said she sometimes feels guilty enjoying things she has earned (Apprehensions: spending guilt).',
       tags: ['Demonstrate Curiosity', 'Acknowledge and Validate'],
     },
     {
       quote:
         'You mentioned that you want to be wise with your income and that working with an advisor improves your confidence. Can you tell me more about what that confidence would look like for you day-to-day? What would change?',
       why: 'Get Sarah to convince herself that financial planning and a long-term advisor relationship matter.',
+      source: 'Confidence — Sarah agreed an advisor improves her confidence, and said she wants to be wise with her income.',
       tags: ['Self-Reinforcement', 'Positive Talk'],
     },
     {
       quote:
         'You wrote that your greatest financial joy was seeing the smiles on your kids’ faces and how hard they worked. That’s a beautiful way to think about what money can do. What other moments like that do you want to create?',
       why: 'Use what Sarah shared to make her feel heard, and help her see the value of advice.',
+      source: 'Financial Joy — the last time Sarah felt financial joy: the smiles on her kids’ faces, and how hard they worked.',
       tags: ['Acknowledge and Validate'],
     },
   ],
@@ -297,6 +332,7 @@ export const prospectToolkit: ToolkitTab = {
       quote: 'Can you show me how I can realistically work less in the next 1–5 years?',
       guidance:
         'Lead with her desired lifestyle outcome, then translate it into timelines, tradeoffs, and what would need to be true financially to make that possible.',
+      source: 'Future You · her picture of more time for travel and family, and a timeline that points to working less within five years.',
       points: [
         'Talk about work-optional planning and phased retirement',
         'Explore cash flow, savings, and income replacement needs',
@@ -307,6 +343,7 @@ export const prospectToolkit: ToolkitTab = {
       quote: 'How would keeping two homes fit into a long-term plan like mine?',
       guidance:
         'Frame the second home as part of the life she wants to build, then help her evaluate how it fits alongside family, health, and future priorities.',
+      source: 'Goals — “Save for a down payment on a second home” is on her list, beside the beach house she already owns.',
       points: [
         'Talk about goal prioritization and tradeoffs',
         'Explore how real estate fits into her broader wealth picture',
@@ -317,6 +354,7 @@ export const prospectToolkit: ToolkitTab = {
       quote: 'Can we afford private school tuition?',
       guidance:
         'Answer with empathy and clarity, treating this as a family-values question as much as a financial one.',
+      source: 'Questions — Sarah has already asked her advisor whether she can afford college; her kids’ education is on her mind.',
       points: [
         'Talk about education funding and family priorities',
         'Explore what affordability means across multiple goals',
