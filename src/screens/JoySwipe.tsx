@@ -29,7 +29,7 @@ const FLY_MS = 320
 
 function Glyph({ way }: { way: Way }) {
   return (
-    <svg viewBox="0 0 32 32" width="30" height="30" fill="none" aria-hidden>
+    <svg viewBox="0 0 32 32" width="34" height="34" fill="none" aria-hidden>
       {way === -1 && <path d="M7 16h18" stroke="currentColor" strokeWidth="4.2" strokeLinecap="round" />}
       {way === 0 && (
         <path d="M7 11.5h18M7 20.5h18" stroke="currentColor" strokeWidth="4.2" strokeLinecap="round" />
