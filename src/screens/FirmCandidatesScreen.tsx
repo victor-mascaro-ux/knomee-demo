@@ -28,13 +28,14 @@ import {
   type Candidate,
   type Tier,
 } from '../data/candidates'
-import { insights, talkTo } from '../data/candidateInsights'
+import { talkTo } from '../data/candidateInsights'
 import { advisor } from '../data/advisorFlow'
 import {
   CaretDown,
   ChartIcon,
   ChevronDown,
   ChevronRight,
+  CloseIcon,
   DownloadIcon,
   LightningIcon,
   PlusIcon,
@@ -105,22 +106,21 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
 function CommandCenter({
   onOpenProfile,
   stats,
+  names,
 }: {
   onOpenProfile: (c: Candidate) => void
-  /** The pipeline's figures, live sittings included. */
+  /** The pipeline's figures, over the rows on the page. */
   stats: ReturnType<typeof statsOf>
+  /** Who is on the page: the call-list only names people who are. */
+  names: Set<string>
 }) {
   const [tier, setTier] = useState<TierKey | null>(null)
   const [listOpen, setListOpen] = useState(false)
-  const [whyOpen, setWhyOpen] = useState(false)
 
-  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
+  const onPage = talkTo.filter((t) => names.has(t.name))
+  const flagged = tier ? onPage.filter((t) => t.tier === tier) : onPage
   const lead = flagged[0]
   const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
-  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
-  const orderedInsights = tierInsight
-    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
-    : insights
 
   const pickTier = (k: TierKey) =>
     setTier((prev) => {
@@ -215,12 +215,7 @@ function CommandCenter({
             </div>
             <div className="dist-legend dist-legend-bars">
               {TIER_META.map((m) => (
-                <div
-                  className="dist-leg"
-                  key={m.key}
-                  /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: stats.byTier[m.tierId] || 0.001 }}
-                >
+                <div className="dist-leg" key={m.key}>
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}
@@ -323,38 +318,6 @@ function CommandCenter({
           </div>
         </div>
 
-        {/* Layer 1 — the evidence */}
-        <div className="cmd-why">
-          <button
-            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
-            type="button"
-            aria-expanded={whyOpen}
-            onClick={() => setWhyOpen((o) => !o)}
-          >
-            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
-          </button>
-          {meta && tierInsight && !whyOpen && (
-            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
-              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
-              <span className="cmd-why-peek-more">Read more →</span>
-            </button>
-          )}
-          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
-            <div className="collapse-inner">
-              <div className="cmd-insights">
-                {orderedInsights.map((ins) => (
-                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
-                    <div className="insight-num">{ins.n}</div>
-                    <div className="insight-text">
-                      <div className="insight-title">{ins.title}</div>
-                      <p className="insight-body">{ins.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
     </CollapsibleCard>
   )
 }
@@ -408,9 +371,32 @@ function Row({
           <span className={`score-badge score-${c.tier}`}>{c.kq}</span>
         )}
       </td>
-      <td className="col-num col-intent">{c.intent ?? '–'}</td>
-      <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
-      <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
+      {/* A sitting still under way has no scores yet: its three score cells
+          are one, showing how far through the flow it is. */}
+      {incomplete && 'entryId' in c ? (
+        <td className="col-progress" colSpan={3}>
+          {(() => {
+            const { answered, total } = c as LiveCandidate
+            const pct = total ? Math.round((answered / total) * 100) : 0
+            return (
+              <div className="fc-progress" aria-label={`${answered} of ${total} answered`}>
+                <span className="fc-progress-track">
+                  <i style={{ width: `${pct}%` }} />
+                </span>
+                <span className="fc-progress-label">
+                  {answered} of {total} answered
+                </span>
+              </div>
+            )
+          })()}
+        </td>
+      ) : (
+        <>
+          <td className="col-num col-intent">{c.intent ?? '–'}</td>
+          <td className="col-num col-clarity">{c.clarity ?? '–'}</td>
+          <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
+        </>
+      )}
       <td className="col-action">
         <div className="top-action">
           <div className="top-action-text">{c.topAction}</div>
@@ -594,6 +580,41 @@ function Table({
 
 /* ── the screen ─────────────────────────────────────────────────────────── */
 
+function InviteAdvisorModal({
+  onClose,
+  onDone,
+  onTrouble,
+}: {
+  onClose: () => void
+  onDone: () => void
+  onTrouble: (t: Trouble) => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="fc-invite-title">
+      <div className="modal invite-modal fc-invite-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title" id="fc-invite-title">
+            Invite Advisor
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body invite-body">
+          <InvitePanel onDone={onDone} onTrouble={onTrouble} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function FirmCandidatesScreen({
   onOpenProfile,
   onOpenEntry,
@@ -623,7 +644,10 @@ export default function FirmCandidatesScreen({
   useEffect(() => {
     void loadLive()
   }, [loadLive])
-  const rows = [...live, ...candidates].filter(
+  /* The pipeline is the people who actually took the flow, and Marcus — the
+     worked example whose report the demo walks through. No invented rows. */
+  const pipeline = [...live, ...candidates.filter((c) => c.name === profileOwner)]
+  const rows = pipeline.filter(
     (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
   )
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -641,7 +665,11 @@ export default function FirmCandidatesScreen({
   return (
     <>
       <h1 className="page-title">My Candidates</h1>
-      <CommandCenter onOpenProfile={onOpenProfile} stats={statsOf([...live, ...candidates])} />
+      <CommandCenter
+        onOpenProfile={onOpenProfile}
+        stats={statsOf(pipeline)}
+        names={new Set(pipeline.map((c) => c.name))}
+      />
 
       <div className="toolbar">
         <div className="search-box">
@@ -663,34 +691,17 @@ export default function FirmCandidatesScreen({
           >
             <DownloadIcon /> Download
           </button>
-          {/* The real invite, in the button's own pop-over: a link to the
-              advisor flow, sent under a brand, whose sitting lands in this
-              table when it is answered. */}
-          <div className="fc-invite">
-            <button
-              className="btn btn-primary"
-              type="button"
-              aria-expanded={inviting}
-              onClick={() => setInviting((v) => !v)}
-            >
-              <PlusIcon /> Invite
-            </button>
-            {inviting && (
-              <>
-                <button
-                  className="fc-invite-scrim"
-                  type="button"
-                  aria-label="Close the invite"
-                  onClick={() => setInviting(false)}
-                />
-                <div className="fc-invite-pop" role="dialog" aria-label="Invite a new advisor">
-                  <InvitePanel onDone={loadLive} onTrouble={setTrouble} />
-                </div>
-              </>
-            )}
-          </div>
+          <button className="btn btn-primary" type="button" onClick={() => setInviting(true)}>
+            <PlusIcon /> Invite
+          </button>
         </div>
       </div>
+      {/* The real invite, in the same modal the advisor dashboards open: a link
+          to the advisor flow, sent under a brand, whose sitting lands in this
+          table when it is answered. */}
+      {inviting && (
+        <InviteAdvisorModal onClose={() => setInviting(false)} onDone={loadLive} onTrouble={setTrouble} />
+      )}
       {trouble && <div className="adir-trouble">{trouble}</div>}
 
       <Table

@@ -16,6 +16,9 @@ import type { Candidate, Stage, Tier } from './candidates'
 export interface LiveCandidate extends Candidate {
   /** The sitting behind the row: opening it opens that report. */
   entryId: string
+  /** How far through the flow they are, for a row still unfinished. */
+  answered: number
+  total: number
 }
 
 const STAGE: Record<string, Stage> = {
@@ -42,6 +45,8 @@ export function candidateFromEntry(e: Entry): LiveCandidate {
   const scored = done && !d.empty
   return {
     entryId: e.id,
+    answered: e.answered,
+    total: e.total,
     name: e.name || 'Advisor',
     firm: [e.role, e.firm].filter(Boolean).join(' · ') || '—',
     kq: scored ? d.readiness.snapshot.kq : null,
