@@ -84,11 +84,14 @@ export default function ReadinessModal({
   goal,
   onClose,
   onSave,
+  saveLabel = 'See it in my Financial ID',
 }: {
   goal: Goal
   onClose: () => void
   /** The stage the answers put them on, 1–5. */
   onSave: (level: number) => void
+  /** What the last button says it leads to. */
+  saveLabel?: string
 }) {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<(Answer | null)[]>([null, null, null, null])
@@ -163,7 +166,7 @@ export default function ReadinessModal({
               <p className="rm-statement">{stage ? TTM_STATEMENTS[stage] : ''}</p>
               <div className="rm-foot">
                 <button className="btn btn-primary" type="button" onClick={() => onSave(level)}>
-                  See it in my Financial ID
+                  {saveLabel}
                 </button>
               </div>
             </>

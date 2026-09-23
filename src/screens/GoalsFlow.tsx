@@ -214,6 +214,7 @@ export default function GoalsFlow({
       {step === 'readiness' && current && (
         <ReadinessModal
           goal={current}
+          saveLabel="See my Goal Summary"
           onClose={() => setStep('added')}
           onSave={(lv) => {
             setGoals((gs) => gs.map((g, i) => (i === gs.length - 1 ? { ...g, readiness: lv } : g)))
