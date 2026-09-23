@@ -21,6 +21,7 @@ import { baseClients } from '../data/clients'
 import type { Client } from '../data/clients'
 import { Portrait } from './ClientProfileScreen'
 import FamilyIdTab from './FamilyIdTab'
+import RemoveMemberModal from './RemoveMemberModal'
 import FamilyInsightsTab from './FamilyInsightsTab'
 import RowMenu from '../components/RowMenu'
 import { RowChevron } from '../components/profileIcons'
@@ -36,6 +37,7 @@ export default function HouseholdScreen({
   onBack,
   onOpenMember,
   onAddMember,
+  onRemoveMember,
   onAction,
 }: {
   /* The family as it stands — its name and who is in it. It is state rather
@@ -47,10 +49,14 @@ export default function HouseholdScreen({
   onOpenMember: (c: Client) => void
   /* The same flow the client's rail opens, with the family already made. */
   onAddMember: () => void
+  /* Takes them off the household and nothing else. */
+  onRemoveMember: (name: string) => void
   /* The prototype's stand-in for the things this page would really do. */
   onAction: (msg: string) => void
 }) {
   const [tab, setTab] = useState<FamilyTab>('members')
+  /* Who is being removed, while the panel that asks about it is open. */
+  const [removing, setRemoving] = useState<string | null>(null)
   const cp = clientProfile
   const members = household.members
 
@@ -215,8 +221,9 @@ export default function HouseholdScreen({
                               disabled: !pending,
                             },
                             {
-                              label: 'Remove from household',
-                              onClick: () => onAction('Removed from household'),
+                              label: 'Remove from family',
+                              danger: true,
+                              onClick: () => setRemoving(m.name),
                             },
                           ]}
                         />
@@ -243,6 +250,19 @@ export default function HouseholdScreen({
           )}
         </main>
       </div>
+
+      {/* The one thing on this page that cannot be undone from it. */}
+      {removing && (
+        <RemoveMemberModal
+          name={removing}
+          familyName={household.name}
+          onClose={() => setRemoving(null)}
+          onRemove={() => {
+            onRemoveMember(removing)
+            setRemoving(null)
+          }}
+        />
+      )}
     </div>
   )
 }

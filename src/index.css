@@ -2514,6 +2514,46 @@ button.name-link-btn:hover .name-text {
   background: #f5f2fa;
   color: var(--plum);
 }
+/* The item that takes something away, in the colour that says so — before it
+   is pressed, not after. */
+.row-menu-item.is-danger {
+  color: var(--k-crimson);
+}
+.row-menu-item.is-danger:hover:not(:disabled) {
+  background: var(--k-crimson-light);
+  color: var(--k-crimson);
+}
+
+/* A primary button for the one action that removes something. Same shape as
+   .btn-primary, the warning colour instead of the brand's. */
+.btn-danger {
+  background: var(--k-crimson);
+  border: var(--border-thin) solid var(--k-crimson);
+  color: #fff;
+}
+.btn-danger:hover {
+  filter: brightness(0.94);
+}
+
+/* The panel that asks before it does it. */
+.hh-remove {
+  width: 420px;
+}
+.hh-remove-line {
+  margin: 0 0 var(--space-12);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-table);
+}
+.hh-remove-line:last-child {
+  margin-bottom: 0;
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}
+.hh-remove-foot {
+  justify-content: flex-end;
+  gap: var(--space-10);
+}
 .row-menu-item:disabled {
   color: var(--ash);
   cursor: default;

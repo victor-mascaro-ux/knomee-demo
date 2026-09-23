@@ -9,6 +9,9 @@ export interface MenuItem {
   label: string
   onClick?: () => void
   disabled?: boolean
+  /** The one that takes something away. It reads in the warning colour, so a
+      menu of four actions does not hide the one that cannot be undone. */
+  danger?: boolean
 }
 
 export default function RowMenu({ items }: { items: MenuItem[] }) {
@@ -41,7 +44,7 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
             <button
               key={it.label}
               type="button"
-              className="row-menu-item"
+              className={`row-menu-item${it.danger ? ' is-danger' : ''}`}
               disabled={it.disabled}
               onClick={(e) => {
                 e.stopPropagation()
