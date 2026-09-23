@@ -267,3 +267,19 @@
 .vx-acts .vx-second {
   white-space: nowrap;
 }
+
+/* The record's art rides the top of its words, as every icon beside text in
+   the system does — a wrapped title hung it between the lines. */
+.vx-card {
+  align-items: flex-start;
+}
+.vx-card .cx-adv-art {
+  margin-top: 2px;
+}
+/* One optical size for every record's art: the drawn ones fill the disc with
+   their own margin; a raster one is inset to match. */
+.vx-card .cx-adv-art img.is-raster {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+}

@@ -955,7 +955,13 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
               client is looking at the record itself, not a receipt for it. */}
           <div className="vx-card">
             <span className="cx-adv-art has-img is-open">
-              <img src={art[script.result.art]} alt="" />
+              <img
+                /* Raster art has no disc of its own, so it is inset to the
+                   size the drawn ones reach — the quick sheet's rule. */
+                className={/\.png($|\?)/.test(art[script.result.art]) ? 'is-raster' : undefined}
+                src={art[script.result.art]}
+                alt=""
+              />
             </span>
             <div className="vx-card-main">
               <span className="vx-card-tag">{script.result.tag}</span>

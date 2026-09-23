@@ -15,9 +15,38 @@
  * them back.
  */
 
+/* A thing money can be a tool for, with the photograph the phone shows it as.
+   Photographs live in public/joy/ and are dropped in by hand; a missing one
+   falls back to a tint, so the grid keeps its shape either way. */
+export interface JoyPick {
+  label: string
+  src: string
+}
+
 export type JoyStep =
-  | { kind: 'intro'; title: string; body: string; cta: string; minutes: number }
-  | { kind: 'pick'; eyebrow: string; title: string; body: string; options: string[] }
+  | {
+      kind: 'intro'
+      /** The picture beside the quote: a portrait on the brand's teal disc. */
+      image: string
+      quote: string
+      source: string
+      title: string
+      body: string
+      /** The line under the body that says what happens next. */
+      lead: string
+      cta: string
+      minutes: number
+    }
+  | {
+      kind: 'pick'
+      eyebrow: string
+      title: string
+      body: string
+      options: JoyPick[]
+      /** How many can be chosen at once. */
+      max: number
+      other: { label: string; hint: string; placeholder: string }
+    }
   | { kind: 'split'; eyebrow: string; areas: string[] }
   | { kind: 'reflect'; eyebrow: string; title: string; body: string; placeholder: string }
   | { kind: 'done'; title: string; body: string; cta: string }
@@ -52,21 +81,42 @@ export const JOY_AREAS = [
   'Home life',
 ]
 
+const joyPhoto = (label: string, file: string): JoyPick => ({ label, src: `./joy/${file}.jpg` })
+
+/* The nine the phone shows, in the design's order. */
+export const JOY_PICKS: JoyPick[] = [
+  joyPhoto('Choice', 'choice'),
+  joyPhoto('Comfort', 'comfort'),
+  joyPhoto('Independence', 'independence'),
+  joyPhoto('Enjoying the moment', 'enjoying-the-moment'),
+  joyPhoto('Security', 'security'),
+  joyPhoto('Supporting my family', 'supporting-my-family'),
+  joyPhoto('Control', 'control'),
+  joyPhoto('Status', 'status'),
+  joyPhoto('Simplicity', 'simplicity'),
+]
+
 export const joySteps: JoyStep[] = [
   {
     kind: 'intro',
+    image: './joy/intro.png',
+    quote:
+      'Aligning daily activities with core values and priorities leads to greater life satisfaction and wellbeing.',
+    source: "From 'Build the Life You Want' by Arthur C. Brooks and Oprah Winfrey",
     title: 'What brings you joy?',
-    body:
-      'Money is never just money. It is what it lets you do, and who it lets you do it with.\n\nThree minutes on what makes you happy, and your advisor stops guessing.',
-    cta: 'Get started',
-    minutes: 3,
+    body: 'Wealth is more than money—it’s about fulfillment, joy, and meaningful experiences.',
+    lead: 'Let’s explore what makes you happy.',
+    cta: 'Get Started',
+    minutes: 1,
   },
   {
     kind: 'pick',
-    eyebrow: 'Money is a tool',
-    title: 'I want money to help me with:',
-    body: 'Choose as many as feel true. There is no wrong number.',
-    options: JOY_OPTIONS,
+    eyebrow: 'Money is a tool!',
+    title: 'I want money to help me with…',
+    body: 'Choose up to 3.',
+    options: JOY_PICKS,
+    max: 3,
+    other: { label: 'Other', hint: 'Or write your answer.', placeholder: 'Philanthropy and giving' },
   },
   { kind: 'split', eyebrow: 'Where your attention goes', areas: JOY_AREAS },
   {

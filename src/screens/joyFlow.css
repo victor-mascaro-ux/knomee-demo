@@ -259,52 +259,278 @@
 }
 
 /* ── the flow's own footer ──
-   Where you are, the way back, and the one thing to press. It replaces the tab
-   bar while an adventure is open, so it sits at the foot of the screen. */
+   The advisor flow's: the one thing to press, right, and under it the same
+   segmented progress. No Back — the bar's cross is the way out. */
 .jf-foot {
   position: sticky;
   bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
+  z-index: 2;
   margin-top: auto;
   padding: var(--space-12) 0 var(--space-4);
   background: var(--surface-card);
+  /* The scroller has padding under its content, and a sticky foot stops at
+     that padding — so whatever scrolled past showed through beneath it. Its
+     white carries on down past the edge, and a soft rise above says there is
+     more under it. */
+  box-shadow: 0 28px 0 0 var(--surface-card), 0 -10px 16px -12px rgba(20, 10, 40, 0.18);
 }
-.jf-back {
-  padding: var(--space-8) 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.jf-progress {
+.jf-nav {
   display: flex;
-  gap: 5px;
-}
-.jf-progress i {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-circle);
-  background: var(--border-default);
-}
-.jf-progress i.is-on {
-  background: var(--k-grape);
+  justify-content: flex-end;
 }
 .jf-ok {
-  padding: var(--space-12) var(--space-24);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--k-plum);
-  font: inherit;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: #fff;
-  cursor: pointer;
+  min-width: 96px;
 }
 .jf-ok:active {
   transform: scale(0.985);
+}
+
+
+/* ── the intro, as designed ──
+   The portrait on its teal disc bleeds off the left of the screen with the
+   quote beside it; then the question, big; then the two lines; and Get
+   Started centred at the foot with how long it takes under it. */
+.jf-intro {
+  padding-top: var(--space-16);
+  align-items: stretch;
+}
+.jf-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58% 1fr;
+  align-items: start;
+  margin: 0 calc(-1 * var(--space-16)) var(--space-24) calc(-1 * var(--space-16));
+  min-height: 244px;
+}
+.jf-hero-img,
+.jf-hero-fallback {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  max-width: 342px;
+  height: auto;
+  display: block;
+}
+/* Until the portrait is dropped in: the teal disc on its own, cut by the
+   screen's left edge the way the picture is. */
+.jf-hero-fallback {
+  aspect-ratio: 342 / 244;
+  background: radial-gradient(circle at 34% 60%, var(--k-teal) 0 58%, transparent 58.5%);
+}
+.jf-quote {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  z-index: 1;
+  margin: var(--space-16) var(--space-16) 0 0;
+  padding: var(--space-4) 0 var(--space-12) var(--space-8);
+  border-radius: 0 0 0 var(--radius-xl);
+  background: var(--surface-card);
+}
+.jf-quote blockquote {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  color: var(--text-strong);
+}
+.jf-quote figcaption {
+  margin-top: var(--space-6);
+  font-size: 11.5px;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+.jf-title {
+  margin: 0 0 var(--space-12);
+  font-size: 31px;
+  font-weight: var(--weight-bold);
+  line-height: 1.12;
+  letter-spacing: var(--tracking-title);
+  color: var(--text-strong);
+}
+.jf-body {
+  margin: 0 0 var(--space-16);
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  color: var(--text-strong);
+}
+.jf-lead {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: 1.45;
+  color: var(--text-strong);
+}
+.jf-start {
+  margin-top: auto;
+  padding: var(--space-24) 0 var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-10);
+}
+.jf-go {
+  padding: 13px 30px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--action-primary);
+  font: inherit;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.jf-go:hover {
+  background: var(--action-primary-hover);
+}
+.jf-go:active {
+  transform: scale(0.97);
+}
+.jf-start .jf-min {
+  margin: 0;
+  color: var(--action-primary);
+}
+
+/* ── money is a tool, as designed ──
+   Photographs two to a row, the word under each; chosen ones wear a thick
+   lime ring and their word goes bold. An odd last one sits in the middle. */
+.jf-pick {
+  padding-top: var(--space-16);
+}
+.jf-pick-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
+.jf-pick-sub {
+  margin: 2px 0 0;
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+}
+.jf-pick-note {
+  margin: 2px 0 var(--space-10);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.jf-photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12) var(--space-14);
+}
+.jf-photos > .jf-photo:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc(50% - var(--space-14) / 2);
+}
+.jf-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.jf-photo-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  /* The ring is drawn inside the frame, so choosing one does not move the
+     grid by a pixel. */
+  box-shadow: inset 0 0 0 0 var(--k-lime);
+  transition: box-shadow 0.18s var(--ease-out), transform 0.18s var(--ease-out);
+}
+.jf-photo-frame img,
+.jf-photo-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.24s var(--ease-out);
+}
+.jf-photo-fallback {
+  background: linear-gradient(135deg, var(--k-teal-light), var(--k-grape-light));
+}
+/* The ring sits over the picture, not under it. */
+.jf-photo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0 var(--k-lime);
+  transition: box-shadow 0.18s var(--ease-out);
+  pointer-events: none;
+}
+.jf-photo.is-on .jf-photo-frame::after {
+  box-shadow: inset 0 0 0 7px var(--k-lime);
+}
+.jf-photo.is-on .jf-photo-frame img {
+  transform: scale(1.04);
+}
+.jf-photo:active .jf-photo-frame {
+  transform: scale(0.97);
+}
+.jf-photo-label {
+  font-size: var(--text-lg);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-strong);
+}
+.jf-photo.is-on .jf-photo-label {
+  font-weight: var(--weight-bold);
+}
+/* Three are chosen: the rest wait, and say so. */
+.jf-photo.is-full {
+  opacity: 0.45;
+  cursor: default;
+}
+.jf-other-label {
+  display: block;
+  margin-top: var(--space-24);
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+}
+.jf-other-hint {
+  display: block;
+  margin: 2px 0 var(--space-6);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.jf-other {
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-strong);
+}
+.jf-other::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+.jf-other:focus {
+  outline: none;
+  border-color: var(--text-link);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jf-photo-frame,
+  .jf-photo-frame::after,
+  .jf-photo-frame img,
+  .jf-go {
+    transition: none;
+  }
 }
