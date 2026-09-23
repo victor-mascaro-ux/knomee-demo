@@ -301,8 +301,8 @@ export const prospects: Prospect[] = [...featuredProspects, ...randomProspects(3
 // drift from the table below them. Every tab that talks about the standing
 // prospect book reads these, so the numbers agree everywhere.
 const scored = prospects.filter((p) => p.kq !== null)
-const round1 = (n: number) => Math.round(n * 10) / 10
-const mean = (xs: number[]) => (xs.length ? round1(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
+/* Scores are whole numbers wherever they are shown — averages included. */
+const mean = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
 const tierKQ = (t: Tier) => mean(prospects.filter((p) => p.tier === t && p.kq !== null).map((p) => p.kq as number))
 
 export const prospectStats = {

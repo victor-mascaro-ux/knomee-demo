@@ -327,7 +327,7 @@ export const clientInsights: ClientInsight[] = baseClients
 // Headline metric shown in the Clients "Top Line Metrics" card — the KR average
 // implied by the tier mix, so it moves with the book instead of being fixed.
 export const AVG_KR_SCORE = scoredClients
-  ? Math.round((scoredTiers.reduce((a, t) => a + clientCount(t) * KR_MID[t], 0) / scoredClients) * 10) / 10
+  ? Math.round(scoredTiers.reduce((a, t) => a + clientCount(t) * KR_MID[t], 0) / scoredClients)
   : 0
 
 // A converted prospect becomes a freshly-onboarded ENGAGED client.

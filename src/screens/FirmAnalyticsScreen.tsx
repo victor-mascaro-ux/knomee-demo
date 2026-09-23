@@ -96,7 +96,7 @@ function SegmentView({ title, rows, note }: { title: string; rows: FirmSegment[]
 export default function FirmAnalyticsScreen() {
   return (
     <>
-      <h1 className="page-title">Analytics</h1>
+      <h1 className="page-title">Candidate Analytics</h1>
 
       {/* 1 ── the header */}
       <section className="card analytics-card">
