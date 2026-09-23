@@ -78,16 +78,23 @@ function Photo({ src, className, fallback }: { src: string; className?: string; 
 
 /* The breath: in for four, out for four, while they picture it. */
 function Breathe() {
-  const [inhale, setInhale] = useState(true)
+  /* It starts small and begins breathing in at once: starting full-size on
+     "Inhale" left four still seconds before anything moved. */
+  const [phase, setPhase] = useState<'start' | 'in' | 'out'>('start')
   useEffect(() => {
-    const t = window.setInterval(() => setInhale((v) => !v), 4000)
-    return () => window.clearInterval(t)
+    const go = window.setTimeout(() => setPhase('in'), 60)
+    const t = window.setInterval(() => setPhase((p) => (p === 'out' ? 'in' : 'out')), 4000)
+    return () => {
+      window.clearTimeout(go)
+      window.clearInterval(t)
+    }
   }, [])
+  const inhale = phase !== 'out'
   return (
     <div className="fy-breathe">
       <h2 className="fy-h">This is your future.</h2>
       <p className="fy-sub">Take a moment to visualize what it looks like for you.</p>
-      <div className={`fy-orb${inhale ? ' is-in' : ' is-out'}`} aria-live="polite">
+      <div className={`fy-orb${phase === 'in' ? ' is-in' : ' is-out'}`} aria-live="polite">
         <i className="fy-ring fy-ring-3" />
         <i className="fy-ring fy-ring-2" />
         <i className="fy-ring fy-ring-1" />
