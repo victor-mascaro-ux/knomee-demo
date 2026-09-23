@@ -57,10 +57,27 @@
 .ag-suggestion:hover {
   background: var(--surface-sunken);
 }
+/* The sparkle sits in a white disc, like every other icon in the system, and
+   rides the first line of its suggestion rather than the middle of the row —
+   a two-line goal otherwise hung its sparkle between the lines. The hairline
+   is what makes a white disc visible on the modal's white. */
 .ag-spark {
   flex: none;
-  display: inline-flex;
+  align-self: flex-start;
+  width: 28px;
+  height: 28px;
+  /* Centred on the first line: the text's line box is 1.4em tall. */
+  margin-top: calc((1.4em - 28px) / 2);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circle);
+  background: var(--surface-card);
+  border: var(--border-thin) solid var(--border-default);
   color: var(--text-link);
+}
+.ag-spark svg {
+  width: 15px;
+  height: 15px;
 }
 .ag-suggestion-text {
   flex: 1;
