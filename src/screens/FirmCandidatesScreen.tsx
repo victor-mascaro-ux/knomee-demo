@@ -155,7 +155,7 @@ function CommandCenter({
             </span>
             <div className="metric-num">
               <span className="metric-value metric-value-kq">
-                {stats.avgRQ.toFixed(1)}
+                {Math.round(stats.avgRQ)}
               </span>
             </div>
           </div>
