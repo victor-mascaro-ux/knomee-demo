@@ -6331,10 +6331,15 @@ button.name-link-btn:hover .name-text {
   .rd-kit-rail > * {
     margin-bottom: var(--space-16) !important;
   }
+  /* The sheet's own inset, on top of whatever margin the dialog is set to.
+     A print dialog remembers "Margins: None" from the last thing somebody
+     printed, and a document flush to the edge of the paper is the complaint
+     this is here to answer — so the page carries part of its own margin and
+     @page carries the rest. */
   .content,
   .content-profile,
   .pp-main {
-    padding: 0 !important;
+    padding: 4mm 8mm !important;
     max-width: none !important;
   }
   .pp-card,
@@ -6388,8 +6393,9 @@ button.name-link-btn:hover .name-text {
 .print-head {
   display: none;
 }
-/* The sheet's own margin. A document is read with a hand's width of paper
-   around it; 14mm was the page bleeding into its own edges. */
+/* The rest of it. Split with the padding above rather than taken all at once,
+   so a dialog set to "None" still leaves 8mm of paper and the usual case lands
+   at about 18mm. */
 @page {
-  margin: 18mm;
+  margin: 10mm;
 }

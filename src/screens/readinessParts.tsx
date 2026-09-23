@@ -24,6 +24,7 @@ import type {
   Word as WordT,
 } from '../data/readiness'
 import { CheckIcon } from '../components/icons'
+import { isPrinting } from '../printSheet'
 import icScore from '../assets/cards/readiness-score.svg'
 import icVelocity from '../assets/cards/velocity.svg'
 import icMotivators from '../assets/cards/motivators.svg'
@@ -44,10 +45,10 @@ const reduceMotion = () =>
     sit frozen part-way up until someone looked at it: when the page is not
     visible it simply arrives at its value. */
 function useCountUp(target: number, ms = 700) {
-  const [n, setN] = useState(() => (reduceMotion() ? target : 0))
+  const [n, setN] = useState(() => (reduceMotion() || isPrinting() ? target : 0))
   const raf = useRef<number>()
   useEffect(() => {
-    if (reduceMotion() || (typeof document !== 'undefined' && document.hidden)) {
+    if (reduceMotion() || isPrinting() || (typeof document !== 'undefined' && document.hidden)) {
       setN(target)
       return
     }
@@ -70,11 +71,11 @@ function useCountUp(target: number, ms = 700) {
 /** True once the element has been on screen, so bars draw when they arrive. */
 function useSeen<T extends HTMLElement>() {
   const ref = useRef<T>(null)
-  const [seen, setSeen] = useState(false)
+  const [seen, setSeen] = useState(() => isPrinting())
   useEffect(() => {
     const el = ref.current
     if (!el || seen) return
-    if (reduceMotion() || !('IntersectionObserver' in window)) {
+    if (reduceMotion() || isPrinting() || !('IntersectionObserver' in window)) {
       setSeen(true)
       return
     }
