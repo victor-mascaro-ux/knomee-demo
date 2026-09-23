@@ -30,6 +30,7 @@ import {
 } from '../data/candidates'
 import { talkTo } from '../data/candidateInsights'
 import { advisor } from '../data/advisorFlow'
+import { segFlex } from '../components/segFlex'
 import {
   CaretDown,
   ChartIcon,
@@ -107,14 +108,19 @@ function CommandCenter({
   onOpenProfile,
   stats,
   names,
+  tier,
+  setTier,
 }: {
+  /** The tier the bar is focused on — held by the page, because it filters
+      the table under the card too, as the Clients dashboard's bar does. */
+  tier: TierKey | null
+  setTier: (t: TierKey | null | ((prev: TierKey | null) => TierKey | null)) => void
   onOpenProfile: (c: Candidate) => void
   /** The pipeline's figures, over the rows on the page. */
   stats: ReturnType<typeof statsOf>
   /** Who is on the page: the call-list only names people who are. */
   names: Set<string>
 }) {
-  const [tier, setTier] = useState<TierKey | null>(null)
   const [listOpen, setListOpen] = useState(false)
 
   const onPage = talkTo.filter((t) => names.has(t.name))
@@ -200,8 +206,9 @@ function CommandCenter({
                   <button
                     key={m.key}
                     type="button"
-                    style={{ flex: n || 0.001 }}
-                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
+                    disabled={n === 0}
+                    style={{ flex: segFlex(n, TIER_META.map((t) => stats.byTier[t.tierId])) }}
+                    className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${tier === m.key ? 'is-sel' : ''} ${
                       tier && tier !== m.key ? 'is-dim' : ''
                     }`}
                     onClick={() => pickTier(m.key)}
@@ -215,7 +222,11 @@ function CommandCenter({
             </div>
             <div className="dist-legend dist-legend-bars">
               {TIER_META.map((m) => (
-                <div className="dist-leg" key={m.key}>
+                <div
+                  className="dist-leg"
+                  key={m.key}
+                  style={{ flexGrow: segFlex(stats.byTier[m.tierId], TIER_META.map((t) => stats.byTier[t.tierId])) }}
+                >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
                     {m.key} · {m.name}
@@ -669,8 +680,13 @@ export default function FirmCandidatesScreen({
   /* The pipeline is the people who actually took the flow, and Marcus — the
      worked example whose report the demo walks through. No invented rows. */
   const pipeline = [...live, ...candidates.filter((c) => c.name === profileOwner)]
+  /* The tier bar's focus narrows the table as well as the call-list. */
+  const [tier, setTier] = useState<TierKey | null>(null)
+  const tierId = tier ? TIER_META.find((m) => m.key === tier)!.tierId : null
   const rows = pipeline.filter(
-    (c) => !q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q),
+    (c) =>
+      (!tierId || c.tier === tierId) &&
+      (!q || c.name.toLowerCase().includes(q) || c.firm.toLowerCase().includes(q)),
   )
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const toggle = (name: string) =>
@@ -691,6 +707,8 @@ export default function FirmCandidatesScreen({
         onOpenProfile={onOpenProfile}
         stats={statsOf(pipeline)}
         names={new Set(pipeline.map((c) => c.name))}
+        tier={tier}
+        setTier={setTier}
       />
 
       <div className="toolbar">

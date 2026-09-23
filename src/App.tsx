@@ -118,6 +118,7 @@ import { CLIENT_BRANDS } from './components/clientBrands'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
+import { segFlex } from './components/segFlex'
 
 /* Under this share, a bar is narrower than the label it would have to hold,
    so the label steps outside it instead of going white on a pale track. */
@@ -212,6 +213,7 @@ const TIER_META = [
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
+
 // The single layered dashboard: pulse (state) + the one next action always
 // visible; the full call-list and the evidence are discoverable layers. The
 // tier bar is the drill-in spine — focusing a tier filters the call-list and
@@ -293,8 +295,9 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                   <button
                     key={m.key}
                     type="button"
-                    style={{ flex: n || 0.001 }}
-                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
+                    disabled={n === 0}
+                    style={{ flex: segFlex(n, TIER_META.map((t) => prospectStats.byTier[t.tierId])) }}
+                    className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${tier === m.key ? 'is-sel' : ''} ${
                       tier && tier !== m.key ? 'is-dim' : ''
                     }`}
                     onClick={() => pickTier(m.key)}
@@ -312,7 +315,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                   className="dist-leg"
                   key={m.key}
                   /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: prospectStats.byTier[m.tierId] || 0.001 }}
+                  style={{ flexGrow: segFlex(prospectStats.byTier[m.tierId], TIER_META.map((t) => prospectStats.byTier[t.tierId])) }}
                 >
                   <span className="dist-leg-name">
                     <i className={`dot ${m.dot}`} />
@@ -1151,10 +1154,11 @@ function ClientsMetrics({
                 <button
                   key={m.tierId}
                   type="button"
-                  className={`seg ${m.seg} tt ${filterTier === m.tierId ? 'is-sel' : ''} ${
+                  disabled={n === 0}
+                  className={`seg ${m.seg} tt ${n === 0 ? 'is-zero' : ''} ${filterTier === m.tierId ? 'is-sel' : ''} ${
                     filterTier && filterTier !== m.tierId ? 'is-dim' : ''
                   }`}
-                  style={{ flex: n || 0.001 }}
+                  style={{ flex: segFlex(n, CLIENT_TIER_META.map((t) => count(t.tierId))) }}
                   onClick={() => onPickTier(m.tierId)}
                   aria-pressed={filterTier === m.tierId}
                   data-tip={`${m.label} · ${n}`}
@@ -1166,7 +1170,11 @@ function ClientsMetrics({
           </div>
           <div className="dist-legend dist-legend-bars">
             {CLIENT_TIER_META.map((m) => (
-              <div className="dist-leg" key={m.tierId} style={{ flex: count(m.tierId) || 0.001 }}>
+              <div
+                className="dist-leg"
+                key={m.tierId}
+                style={{ flex: segFlex(count(m.tierId), CLIENT_TIER_META.map((t) => count(t.tierId))) }}
+              >
                 <span className="dist-leg-name"><i className={`dot ${m.dot}`} />{m.label}</span>
                 <span className="dist-leg-range">{m.range}</span>
               </div>
@@ -3879,6 +3887,11 @@ export default function App() {
   const [viewEntryPhone, setViewEntryPhone] = useState(
     () => typeof window !== 'undefined' && /^#\/?advisors\/[^/]+\/phone/i.test(window.location.hash),
   )
+  /* #/client-experience/complete: Sarah's phone with all five adventures done
+     and Life Events up next — the demo controls' Mobile side of her page. */
+  const [clientExpComplete, setClientExpComplete] = useState(
+    () => typeof window !== 'undefined' && /^#\/?client-experience\/complete/i.test(window.location.hash),
+  )
   const [viewEntry, setViewEntry] = useState<Entry | null>(null)
   const [inviteToken, setInviteToken] = useState<string | null>(
     initialView === 'flow' ? initialProfile : null,
@@ -4073,6 +4086,7 @@ export default function App() {
       setInviteToken(v === 'flow' ? slug : null)
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
+      setClientExpComplete(v === 'client-experience' && /^#\/?client-experience\/complete/i.test(window.location.hash))
       setClientMobileOpen(v === 'client-mobile')
       setAdvisorMobileOpen(v === 'advisor-mobile')
       if (v === 'welcome') setLandingVersion('a')
@@ -4114,7 +4128,9 @@ export default function App() {
               ? viewEntryId + (viewEntryPhone ? '/phone' : '')
               : currentView === 'flow' && inviteToken
                 ? inviteToken
-                : null
+                : currentView === 'client-experience' && clientExpComplete
+                  ? 'complete'
+                  : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
@@ -4136,6 +4152,7 @@ export default function App() {
     viewEntryId,
     viewEntryPhone,
     inviteToken,
+    clientExpComplete,
   ])
 
   // Esc closes the convert modal.
@@ -4215,7 +4232,12 @@ export default function App() {
   if (clientExpOpen) {
     return (
       <>
-        <ClientExperienceScreen brand={brand} onExit={() => setClientExpOpen(false)} />
+        <ClientExperienceScreen
+          key={clientExpComplete ? 'complete' : 'fresh'}
+          brand={brand}
+          complete={clientExpComplete}
+          onExit={() => setClientExpOpen(false)}
+        />
       </>
     )
   }
