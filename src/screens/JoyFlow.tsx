@@ -15,7 +15,7 @@
  * is their Financial ID.
  */
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './joyFlow.css'
 import { JOY_AREAS, JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
@@ -71,7 +71,10 @@ export default function JoyFlow({
   const [a, setA] = useState<JoyAnswers>(emptyAnswers)
   const step = joySteps[at]
 
-  const next = () => setAt((n) => Math.min(n + 1, joySteps.length - 1))
+  const next = () => {
+    window.clearInterval(typing.current)
+    setAt((n) => Math.min(n + 1, joySteps.length - 1))
+  }
   /* One question back. Inside the deck that is the card before this one, put
      back on top to be sorted again; out of it, the screen before — and a deck
      come back to opens on its last card, the one answered last. */
@@ -91,6 +94,25 @@ export default function JoyFlow({
   const noteIndex = joySteps.slice(0, at).filter((s) => s.kind === 'reflect').length
   const setNote = (v: string) =>
     setA((prev) => ({ ...prev, notes: prev.notes.map((n, i) => (i === noteIndex ? v : n)) }))
+
+  /* Types an example into this question's box a few letters at a time. Stops
+     if the screen changes under it, so it never writes into the next box. */
+  const typing = useRef(0)
+  useEffect(() => () => window.clearInterval(typing.current), [])
+  const typeIn = (text: string) => {
+    window.clearInterval(typing.current)
+    const into = noteIndex
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    let n = reduce ? text.length : 0
+    const put = (v: string) =>
+      setA((prev) => ({ ...prev, notes: prev.notes.map((x, i) => (i === into ? v : x)) }))
+    if (reduce) return put(text)
+    typing.current = window.setInterval(() => {
+      n = Math.min(text.length, n + 3)
+      put(text.slice(0, n))
+      if (n >= text.length) window.clearInterval(typing.current)
+    }, 16)
+  }
 
   /* The footer is the flow's own: the one thing to press, and where you are.
      The last screen hands the answers over and leaves. */
@@ -213,6 +235,17 @@ export default function JoyFlow({
             placeholder={step.placeholder}
             onChange={(e) => setNote(e.target.value)}
           />
+          {/* For a demo: the answer typed in, as if she were writing it. Only
+              while the box is empty — it is a way to start, not to overwrite. */}
+          {!(a.notes[noteIndex] ?? '').trim() && (
+            <button
+              type="button"
+              className="jf-example"
+              onClick={() => typeIn(step.example)}
+            >
+              <span aria-hidden>✦</span> Fill with an example
+            </button>
+          )}
         </div>
       )}
 
