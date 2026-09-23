@@ -1141,7 +1141,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-6);
-  margin-top: var(--space-10);
+  margin-top: 16px;
 }
 .rd-talk-key {
   display: flex;
