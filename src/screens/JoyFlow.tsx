@@ -298,22 +298,21 @@ export default function JoyFlow({
         </div>
       )}
 
-      {/* The advisor flow's own foot: the one thing to press, and under it the
-          same segmented progress, one bar per screen. There is no Back — the
+      {/* The advisor flow's segmented progress, one bar per screen, and the
+          one thing to press beside it. There is no Back — the
           bar's cross is the way out, and a question is changed by answering it
           again. The intro carries its own Get Started, so it has no foot. */}
       {step.kind !== 'intro' && (
         <div className="jf-foot">
-          <div className="jf-nav">
-            <button className="cx-start jf-ok" type="button" onClick={onCta}>
-              {cta}
-            </button>
-          </div>
+          {/* Where you are, then the one thing to press, on one line. */}
           <div className="af-progress" aria-hidden>
             {joySteps.slice(1).map((_, i) => (
               <i key={i} className={i < at ? 'is-on' : ''} />
             ))}
           </div>
+          <button className="cx-start jf-ok" type="button" onClick={onCta}>
+            {cta}
+          </button>
         </div>
       )}
     </div>

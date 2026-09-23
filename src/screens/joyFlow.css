@@ -259,8 +259,8 @@
 }
 
 /* ── the flow's own footer ──
-   The advisor flow's: the one thing to press, right, and under it the same
-   segmented progress. No Back — the bar's cross is the way out. */
+   The advisor flow's segmented progress, with the one thing to press at its
+   right. No Back — the bar's cross is the way out. */
 .jf-foot {
   position: sticky;
   bottom: 0;
@@ -274,11 +274,18 @@
      more under it. */
   box-shadow: 0 28px 0 0 var(--surface-card), 0 -10px 16px -12px rgba(20, 10, 40, 0.18);
 }
-.jf-nav {
+/* Progress takes the row, OK keeps its own width at the end of it. */
+.jf-foot {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-16);
+}
+.jf-foot .af-progress {
+  flex: 1;
+  margin: 0;
 }
 .jf-ok {
+  flex: none;
   min-width: 96px;
 }
 .jf-ok:active {
