@@ -530,11 +530,11 @@
   font-weight: var(--weight-bold);
 }
 /* The centre mark sits INTO the swell, label-free and sized to fill the space
-   the label used to take. The arc rises 18 above the bar's flat edge, and the
-   mark has to rise with it: at -8 its top was level with the flat edge and the
-   swell was empty air above it. */
+   the label used to take. The arc rises 18 above the bar's flat edge and the
+   mark rises with it, less the air the two tabs beside it keep above their own
+   icons — so the gap over the mark reads as the same gap. */
 .cx-tab-center {
-  margin-top: -24px;
+  margin-top: -17px;
   justify-content: center;
 }
 .cx-tab-mark {
