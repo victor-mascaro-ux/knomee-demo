@@ -98,10 +98,11 @@
   background: var(--k-lime-light);
 }
 /* The rung, drawn at the size of a finding rather than a table cell. */
-.rm-result .pp-readiness {
-  transform: scale(2.1);
-  transform-origin: center bottom;
-  margin-bottom: var(--space-12);
+/* The stage artwork drawn at size rather than the inline one scaled up: a
+   transform left its layout box small, so it rode up over the panel's top. */
+.rm-result .pp-ttm {
+  width: 56px;
+  margin: 0;
 }
 .rm-stage {
   font-size: var(--text-2xl);
@@ -123,7 +124,7 @@
 }
 
 @media (max-width: 620px) {
-  .rm-result .pp-readiness {
-    transform: scale(1.7);
+  .rm-result .pp-ttm {
+    width: 48px;
   }
 }
