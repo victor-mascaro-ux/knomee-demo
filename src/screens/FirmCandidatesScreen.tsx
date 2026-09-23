@@ -74,7 +74,7 @@ const opensProfile = (c: Candidate) =>
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
   const isOwner = opensProfile(c)
   /* The "new" pill sits on the name's line, as it does in the advisor's tables. */
-  const tag = c.isNew ? <span className="new-tag">new</span> : null
+  const tag = c.isNew ? <span className="new-tag">New</span> : null
   return (
     <div className="name-block">
       {isOwner ? (

@@ -730,7 +730,6 @@
 }
 
 /* A pill sits on its own line above what it marks. */
-.pp-event-body > .cp-goal-tags,
 .pp-q-text > .cp-goal-tags,
 .cp-board-title > .cp-goal-tags {
   display: flex;
@@ -746,4 +745,17 @@
 }
 .card-pills > .cp-goal-tags {
   margin-bottom: 0;
+}
+
+/* A life event's pill sits on its own line across the top of the row, above
+   the icon and the name together. */
+.pp-event:has(> .cp-goal-tags) {
+  flex-wrap: wrap;
+}
+.pp-event > .cp-goal-tags {
+  flex-basis: 100%;
+  margin-bottom: -4px;
+}
+.cp-goal-tags > .pp-event-added {
+  margin-left: 0;
 }

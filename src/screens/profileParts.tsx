@@ -752,7 +752,7 @@ export function withTag<T extends { tags?: string[] }>(x: T, tag: 'New' | 'Updat
 }
 
 /* A row's pills. */
-export function StatusTags({ tags }: { tags?: string[] }) {
+export function StatusTags({ tags, advisorAdded }: { tags?: string[]; advisorAdded?: boolean }) {
   if (!tags?.length) return null
   return (
     <span className="cp-goal-tags">
@@ -761,6 +761,8 @@ export function StatusTags({ tags }: { tags?: string[] }) {
           {t}
         </span>
       ))}
+      {/* On a row that has a pill line, "Advisor added" joins it. */}
+      {advisorAdded && <span className="pp-event-added">Advisor added</span>}
     </span>
   )
 }

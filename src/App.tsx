@@ -157,7 +157,7 @@ function NameLink({
           ›
         </span>
       </span>
-      {isNew && <span className="new-tag">new</span>}
+      {isNew && <span className="new-tag">New</span>}
     </>
   )
   if (onClick) {

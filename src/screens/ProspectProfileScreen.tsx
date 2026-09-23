@@ -687,9 +687,10 @@ export default function ProspectProfileScreen({
                             if (k.key === 'Enter' || k.key === ' ') setOpenEvent(e)
                           }}
                         >
+                          {/* Its pill heads the whole row, over the icon and the name. */}
+                          <StatusTags tags={e.tags} advisorAdded={e.advisorAdded} />
                           <LifeEventIcon kind={e.kind} text={e.text} />
                           <span className="pp-event-body">
-                            <StatusTags tags={e.tags} />
                             <span className="pp-event-head">
                               <span className="pp-event-kind">{e.kind}</span>
                             </span>
@@ -702,7 +703,7 @@ export default function ProspectProfileScreen({
                               )}
                               {/* Who added it, on her phone too: she sees what
                                   her advisor has put on her page. */}
-                              {e.advisorAdded && (
+                              {e.advisorAdded && !e.tags?.length && (
                                 <span className="pp-event-added">Advisor added</span>
                               )}
                             </span>
