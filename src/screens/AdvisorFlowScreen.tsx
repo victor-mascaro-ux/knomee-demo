@@ -45,6 +45,7 @@ import {
   type Step,
 } from '../data/advisorFlow'
 import './client-experience.css'
+import './joyFlow.css'
 import './advisor-flow.css'
 
 const ZOOM_STEP = 0.1
@@ -101,9 +102,22 @@ function StepBody({
   switch (step.kind) {
     case 'welcome':
       return (
-        <div className="af-welcome">
-          <h2 className="af-h1">{step.title}</h2>
-          <Paras text={step.body} />
+        <div className={`af-welcome${step.image ? ' is-hero' : ''}`}>
+          {step.image && (
+            <div className="af-hero">
+              <img src={step.image} alt="" draggable={false} />
+            </div>
+          )}
+          <h2 className={step.image ? 'jf-title' : 'af-h1'}>{step.title}</h2>
+          {step.image ? (
+            step.body?.split('\n\n').map((p) => (
+              <p key={p} className="jf-body">
+                {p}
+              </p>
+            ))
+          ) : (
+            <Paras text={step.body} />
+          )}
           {step.aside && <p className="af-aside">{step.aside}</p>}
           <div className="af-getlist-title">What you’ll get</div>
           <ol className="af-getlist">
@@ -501,11 +515,15 @@ export default function AdvisorFlowScreen({
                   </button>
                 )}
               </div>
-              <div className="af-progress" aria-hidden>
-                {steps.map((s, n) => (
-                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                ))}
-              </div>
+              {/* Nothing to measure yet on the welcome screen — the bar starts
+                  with the first thing asked of them. */}
+              {step.kind !== 'welcome' && (
+                <div className="af-progress" aria-hidden>
+                  {steps.map((s, n) => (
+                    <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
           <nav className="cx-tabbar">
