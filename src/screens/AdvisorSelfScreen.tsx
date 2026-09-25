@@ -23,7 +23,6 @@ import { useDragScroll } from './mobileGestures'
 import {
   ArrowRight,
   CheckIcon,
-  ClockIcon,
   DEVICE_H,
   DEVICE_W,
   IPhone,
@@ -86,6 +85,7 @@ import './client-experience.css'
 /* The adventures' open fields — the identity form and the free-text boxes
    wear them too. */
 import './joyFlow.css'
+import AdvisorWelcome from './AdvisorWelcome'
 import './advisor-flow.css'
 
 const ZOOM_STEP = 0.1
@@ -320,21 +320,6 @@ function GridQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
           ))}
         </div>
       ))}
-    </div>
-  )
-}
-
-/** A hero picture that may not be in public/ yet: until it is, the teal disc
-    on its own holds the shape. */
-function HeroImage({ src }: { src: string }) {
-  const [missing, setMissing] = useState(false)
-  return (
-    <div className="af-hero">
-      {missing ? (
-        <span className="jf-hero-fallback" aria-hidden />
-      ) : (
-        <img src={src} alt="" draggable={false} onError={() => setMissing(true)} />
-      )}
     </div>
   )
 }
@@ -662,43 +647,7 @@ function StepBody({
 }) {
   switch (step.kind) {
     case 'welcome':
-      return (
-        <div className={`af-welcome${step.image ? ' is-hero' : ''}`}>
-          {/* The climber on the teal disc, bleeding off the left edge the way
-              the client's adventure intros do; then the welcome, set in the
-              intros' own type. */}
-          {step.image && <HeroImage src={step.image} />}
-          <h2 className={step.image ? 'jf-title' : 'af-h1'}>{step.title}</h2>
-          {step.image ? (
-            step.body?.split('\n\n').map((p) => (
-              <p key={p} className="jf-body">
-                {p}
-              </p>
-            ))
-          ) : (
-            <Paras text={step.body} />
-          )}
-          {step.aside && (
-            <p className="af-aside">
-              <LockIcon />
-              {step.aside}
-            </p>
-          )}
-          <div className="af-getlist-title">What you’ll get</div>
-          <ol className="af-getlist">
-            {step.lines?.map((l) => (
-              <li key={l.label}>
-                <span className="af-getnum">{l.label}</span>
-                <span>{l.value}</span>
-              </li>
-            ))}
-          </ol>
-          <div className="af-est">
-            <ClockIcon />
-            {step.stat}
-          </div>
-        </div>
-      )
+      return <AdvisorWelcome step={step} />
 
     case 'identity':
       return <IdentityForm step={step} a={a} edit={edit} />
@@ -1355,9 +1304,9 @@ function FlowPhone({
                     </button>
                   ))}
               </div>
-              {/* Nothing to measure yet on the welcome screen — the bar starts
+              {/* Nothing to measure yet on the welcome or the identity screen — the bar starts
                   with the first thing asked of them. */}
-              {step.kind !== 'welcome' && (
+              {step.kind !== 'welcome' && step.kind !== 'identity' && (
                 <div className="af-progress" aria-hidden>
                   {steps.map((s, n) => (
                     <i key={s.id} className={n <= i ? 'is-on' : ''} />

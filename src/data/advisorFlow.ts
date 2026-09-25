@@ -69,9 +69,6 @@ export interface Step {
   private?: boolean
   /** A line under the welcome's body, set apart: what happens to the answers. */
   aside?: string
-  /** The picture a screen opens on — the welcome's hero, cut out on the
-      brand's teal disc the way the client's adventure intros are. */
-  image?: string
 }
 
 /* ── the respondent ──────────────────────────────────────────────────────── */
@@ -163,7 +160,6 @@ export const steps: Step[] = [
     title: 'Welcome',
     body: 'Finding the right partner for the practice you built is one of the most emotional decisions you will make.\n\nBefore your next conversation, take a few minutes to get clear on what you actually want — in your own words. It makes for a better conversation, and a better decision.',
     aside: 'Anything marked private stays with you. It is only shared if you choose to share it.',
-    image: './advisor/welcome.png',
     lines: [
       { label: '1', value: 'Get clear on what matters most. Five short adventures about you, your practice and the move you are weighing.' },
       { label: '2', value: 'Get your Business ID. A one-page summary of everything you tell us — yours to keep.' },
