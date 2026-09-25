@@ -599,3 +599,10 @@
 .jr.is-held *:not(.jr-about-back):not(.jr-about-back *)::after {
   animation-play-state: paused !important;
 }
+
+/* A photograph not dropped in yet leaves its slot as a tint rather than a
+   broken image — the same tint the question screens use. */
+.jr-tool-photo,
+.jr-card-photo {
+  background: linear-gradient(135deg, var(--k-teal-light), var(--k-grape-light));
+}

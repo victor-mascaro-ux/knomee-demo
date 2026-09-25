@@ -13,13 +13,17 @@
  *
  * Nothing here is scored. What comes out is what they said, and where it goes
  * is their Financial ID.
+ *
+ * The mechanism is shared: the advisor's Practice Joy is this same flow handed
+ * different `content` — its own questions, photographs, results copy and badge
+ * — so the two cannot drift apart. The client's is the default.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
-import { JOY_AREA_CARDS, joySteps } from '../data/joyFlow'
+import { JOY_AREA_CARDS, JOY_PICKS, joySteps, type JoyPick, type JoyStep } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
-import JoyResults from './JoyResults'
+import JoyResults, { type JoyResultsCopy } from './JoyResults'
 import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
    for the plum it sits on there. */
@@ -32,6 +36,26 @@ export interface JoyAnswers {
   notes: string[]
   /** Their own word for what money is for, if none of the nine is it. */
   other: string
+}
+
+/** Everything that makes this Financial Joy rather than another adventure of
+    the same shape. */
+export interface JoyContent {
+  steps: JoyStep[]
+  /** Every photograph a pick can be, so the results can show the chosen ones. */
+  picks: JoyPick[]
+  /** The deck's cards, in order. */
+  areas: JoyPick[]
+  /** The answers OK records for a question left blank, for a demo clicked
+      straight through. Leave it out and a blank question is skipped instead —
+      the honest behaviour for somebody actually answering. */
+  sample?: { tools: string[]; ways: Record<string, number> }
+  badge: string
+  badgeName: string
+  /** The line over the deck. */
+  splitAsk?: ReactNode
+  /** The ending's words. Left out, it reads as the client's. */
+  results?: JoyResultsCopy
 }
 
 /* The answers OK records for a question left blank — the ones the design was
@@ -47,6 +71,15 @@ const SAMPLE_WAYS: Record<string, number> = {
   'Home life': 0,
 }
 
+export const CLIENT_JOY: JoyContent = {
+  steps: joySteps,
+  picks: JOY_PICKS,
+  areas: JOY_AREA_CARDS,
+  sample: { tools: SAMPLE_TOOLS, ways: SAMPLE_WAYS },
+  badge: bgFinancialJoy,
+  badgeName: 'Financial Joy',
+}
+
 /* Financial Joy answered entirely with the samples — what clicking OK through
    every screen records, and what the adventures list's shortcut records. */
 export const sampleJoyAnswers = (): JoyAnswers => ({
@@ -56,10 +89,10 @@ export const sampleJoyAnswers = (): JoyAnswers => ({
   other: '',
 })
 
-const emptyAnswers = (): JoyAnswers => ({
+const emptyAnswers = (steps: JoyStep[]): JoyAnswers => ({
   tools: [],
   attention: {},
-  notes: ['', '', ''],
+  notes: steps.filter((s) => s.kind === 'reflect').map(() => ''),
   other: '',
 })
 
@@ -81,10 +114,22 @@ const ClockIcon = () => (
   </svg>
 )
 
+const CLIENT_SPLIT_ASK = (
+  <>
+    Would you like to direct <b className="is-more">more</b>, <b className="is-same">the same</b>, or{' '}
+    <b className="is-less">less</b> of your attention to…
+  </>
+)
+
+type Reward = { before: number; after: number; total: number; next: string }
+
 export default function JoyFlow({
   onComplete,
-  reward = { before: 0, after: 1, total: 5, next: 'Confidence' },
+  reward: rewardFor = { before: 0, after: 1, total: 5, next: 'Confidence' },
   review,
+  content = CLIENT_JOY,
+  initial,
+  reflectSlot,
 }: {
   /** Her answers, to open straight on the ending with — reopened from her
       Financial ID rather than taken. */
@@ -94,21 +139,37 @@ export default function JoyFlow({
   /** Where her journey stands, for the reward: the count before and after
       this adventure (the same when it is being taken again), and what is
       next. */
-  reward?: { before: number; after: number; total: number; next: string }
+  reward?: Reward | ((a: JoyAnswers) => Reward)
   /** Their answers, on the way to the Financial ID. */
   onComplete: (a: JoyAnswers) => void
+  content?: JoyContent
+  /** Answers already given, to take the adventure again from the start with. */
+  initial?: JoyAnswers
+  /** What a caller adds around a free-text question — the advisor's privacy
+      switch above the box, and the microphone below it. */
+  reflectSlot?: (
+    step: Extract<JoyStep, { kind: 'reflect' }>,
+    value: string,
+    set: (v: string) => void,
+  ) => { above?: ReactNode; below?: ReactNode }
 }) {
-  const [at, setAt] = useState(() => (review ? joySteps.findIndex((s) => s.kind === 'done') : 0))
+  const steps = content.steps
+  const areas = content.areas
+  const sample = content.sample
+  const [at, setAt] = useState(() => (review ? steps.findIndex((s) => s.kind === 'done') : 0))
   /* Which of the seven areas the attention screen is on. It is one step in the
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */
   const [area, setArea] = useState(0)
-  const [a, setA] = useState<JoyAnswers>(() => review ?? emptyAnswers())
-  const step = joySteps[at]
+  const [a, setA] = useState<JoyAnswers>(() => review ?? initial ?? emptyAnswers(steps))
+  const step = steps[at]
+  /* The reward can depend on what was answered: an advisor's adventure only
+     counts as complete once every question in it is. */
+  const reward = typeof rewardFor === 'function' ? rewardFor(a) : rewardFor
 
   const next = () => {
     window.clearInterval(typing.current)
-    setAt((n) => Math.min(n + 1, joySteps.length - 1))
+    setAt((n) => Math.min(n + 1, steps.length - 1))
   }
   /* One question back. Inside the deck that is the card before this one, put
      back on top to be sorted again; out of it, the screen before — and a deck
@@ -116,7 +177,7 @@ export default function JoyFlow({
   const previous = () => {
     if (step.kind === 'split' && area > 0) return setArea(area - 1)
     const to = Math.max(0, at - 1)
-    if (joySteps[to]?.kind === 'split') setArea(JOY_AREA_CARDS.length - 1)
+    if (steps[to]?.kind === 'split') setArea(areas.length - 1)
     setAt(to)
   }
 
@@ -126,7 +187,7 @@ export default function JoyFlow({
       tools: prev.tools.includes(o) ? prev.tools.filter((t) => t !== o) : [...prev.tools, o],
     }))
 
-  const noteIndex = joySteps.slice(0, at).filter((s) => s.kind === 'reflect').length
+  const noteIndex = steps.slice(0, at).filter((s) => s.kind === 'reflect').length
   const setNote = (v: string) =>
     setA((prev) => ({ ...prev, notes: prev.notes.map((n, i) => (i === noteIndex ? v : n)) }))
 
@@ -149,16 +210,20 @@ export default function JoyFlow({
     }, 16)
   }
 
+  /* Nothing given on this screen yet. Without samples to fall back on, the
+     button says what pressing it does: skips the question. */
+  const blank =
+    (step.kind === 'pick' && a.tools.length === 0 && !a.other.trim()) ||
+    (step.kind === 'reflect' && !(a.notes[noteIndex] ?? '').trim())
+
   /* The footer is the flow's own: the one thing to press, and where you are.
      The last screen hands the answers over and leaves. */
   const cta =
-    step.kind === 'intro'
+    step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge' || step.kind === 'pause'
       ? step.cta
-      : step.kind === 'done'
-        ? step.cta
-        : step.kind === 'badge'
-          ? step.cta
-          : 'OK'
+      : blank && !sample
+        ? 'Skip'
+        : 'OK'
 
   /* OK on a question left unanswered records a sample answer and moves on —
      so a demo can be clicked straight through and still arrive at a results
@@ -166,15 +231,17 @@ export default function JoyFlow({
   const onCta = () => {
     if (step.kind === 'badge') return onComplete(a)
     window.clearInterval(typing.current)
-    if (step.kind === 'pick' && a.tools.length === 0 && !a.other.trim())
-      setA((prev) => ({ ...prev, tools: SAMPLE_TOOLS }))
-    if (step.kind === 'split')
-      setA((prev) => {
-        const attention = { ...prev.attention }
-        for (const c of JOY_AREA_CARDS) if (!(c.label in attention)) attention[c.label] = SAMPLE_WAYS[c.label] ?? 0
-        return { ...prev, attention }
-      })
-    if (step.kind === 'reflect' && !(a.notes[noteIndex] ?? '').trim()) setNote(step.example)
+    if (sample) {
+      if (step.kind === 'pick' && a.tools.length === 0 && !a.other.trim())
+        setA((prev) => ({ ...prev, tools: sample.tools }))
+      if (step.kind === 'split')
+        setA((prev) => {
+          const attention = { ...prev.attention }
+          for (const c of areas) if (!(c.label in attention)) attention[c.label] = sample.ways[c.label] ?? 0
+          return { ...prev, attention }
+        })
+      if (step.kind === 'reflect' && !(a.notes[noteIndex] ?? '').trim()) setNote(step.example)
+    }
     next()
   }
 
@@ -183,6 +250,8 @@ export default function JoyFlow({
   useEffect(() => {
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
   }, [at])
+
+  const slot = step.kind === 'reflect' ? reflectSlot?.(step, a.notes[noteIndex] ?? '', setNote) : undefined
 
   return (
     <div className="jf">
@@ -254,23 +323,26 @@ export default function JoyFlow({
         </div>
       )}
 
+      {step.kind === 'pause' && (
+        <div className="af-reflect">
+          <h2 className="af-h2">{step.title}</h2>
+          <p className="af-body">{step.body}</p>
+        </div>
+      )}
+
       {step.kind === 'split' && (
         <div className="jf-split">
           <div className="jf-count">
-            {Math.min(area + 1, JOY_AREA_CARDS.length)} / {JOY_AREA_CARDS.length}
+            {Math.min(area + 1, areas.length)} / {areas.length}
           </div>
-          <p className="jf-split-ask">
-            Would you like to direct <b className="is-more">more</b>,{' '}
-            <b className="is-same">the same</b>, or <b className="is-less">less</b> of your
-            attention to…
-          </p>
+          <p className="jf-split-ask">{content.splitAsk ?? CLIENT_SPLIT_ASK}</p>
           <JoySwipe
-            areas={JOY_AREA_CARDS}
+            areas={areas}
             at={area}
             onAnswer={(name, way) => {
               setA((prev) => ({ ...prev, attention: { ...prev.attention, [name]: way } }))
               /* The last card thrown is the question answered. */
-              if (area + 1 >= JOY_AREA_CARDS.length) next()
+              if (area + 1 >= areas.length) next()
               else setArea(area + 1)
             }}
           />
@@ -282,6 +354,7 @@ export default function JoyFlow({
           <div className="af-eyebrow">{step.eyebrow}</div>
           <h2 className="af-h2">{step.title}</h2>
           <p className="af-body">{step.body}</p>
+          {slot?.above}
           {/* For a demo, and invisible to the room: a single click is the box
               as any box — she writes what she likes. A double-click on the
               empty box types in the sample answer, as if she were writing it.
@@ -298,16 +371,44 @@ export default function JoyFlow({
               typeIn(step.example)
             }}
           />
+          {slot?.below}
+          {step.hints && (
+            <div className="af-hints">
+              <div className="af-hints-title">Here are some prompts to help you start</div>
+              {step.hints.map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  className="af-hint"
+                  onClick={() => {
+                    const seed = h.replace(/^[“"]|[”"]$/g, '')
+                    const had = a.notes[noteIndex] ?? ''
+                    setNote(had ? `${had} ${seed}` : seed)
+                  }}
+                >
+                  {h}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {step.kind === 'done' && (
-        <JoyResults answers={a} cta={step.cta} onClaim={next} />
+        <JoyResults
+          answers={a}
+          cta={step.cta}
+          onClaim={next}
+          picks={content.picks}
+          areas={areas}
+          copy={content.results}
+        />
       )}
 
       {step.kind === 'badge' && (
         <JoyReward
-          badge={bgFinancialJoy}
+          badge={content.badge}
+          name={content.badgeName}
           from={reward.before}
           done={reward.after}
           total={reward.total}
@@ -326,7 +427,7 @@ export default function JoyFlow({
               one thing to press. */}
           <div className="jf-where">
             <div className="af-progress" aria-hidden>
-              {joySteps.slice(1).map((_, i) => (
+              {steps.slice(1).map((_, i) => (
                 <i key={i} className={i < at ? 'is-on' : ''} />
               ))}
             </div>
@@ -343,7 +444,7 @@ export default function JoyFlow({
               Previous question
             </button>
           </div>
-          <button className="cx-start jf-ok" type="button" onClick={onCta}>
+          <button className={`cx-start jf-ok${cta === 'Skip' ? ' is-skip' : ''}`} type="button" onClick={onCta}>
             {cta}
           </button>
         </div>

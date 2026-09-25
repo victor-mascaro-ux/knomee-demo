@@ -41,7 +41,10 @@ import {
   TabEdge,
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
+import JoyFlow from './JoyFlow'
+import { ADVISOR_JOY, joyFromSheet, sheetWithJoy } from './advisorJoy'
 import {
+  adventureDone,
   adventureStates,
   clearAnswers,
   derive,
@@ -149,6 +152,8 @@ interface Edit {
   scaleAt: (stepId: string, index: number, value: number) => void
   identity: (patch: Partial<Answers['identity']>) => void
   share: (stepId: string, on: boolean) => void
+  /** A whole adventure's answers at once, from a flow that keeps its own. */
+  apply: (fn: (a: Answers) => Answers) => void
 }
 
 function useEdit(set: React.Dispatch<React.SetStateAction<Answers>>): Edit {
@@ -182,6 +187,7 @@ function useEdit(set: React.Dispatch<React.SetStateAction<Answers>>): Edit {
         }),
       identity: (patch) => set((a) => ({ ...a, identity: { ...a.identity, ...patch } })),
       share: (stepId, on) => set((a) => ({ ...a, shared: { ...a.shared, [stepId]: on } })),
+      apply: (fn) => set(fn),
     }),
     [set],
   )
@@ -417,11 +423,9 @@ function MicIcon() {
   )
 }
 
-/** Free text. The prompts under the box are the spec's, and tapping one drops
-    it into the box as an opening — which is what a prompt is for. */
-function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
-  const value = a.text[step.id] ?? ''
-  const box = useRef<HTMLTextAreaElement>(null)
+/** The microphone under a free-text box: what is said is added to what is
+    there. Nothing at all where the browser cannot listen. */
+function MicButton({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const latest = useRef(value)
   latest.current = value
   const mic = useDictation((heard) => {
@@ -429,8 +433,28 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     const had = latest.current.trim()
     const next = had ? `${had} ${heard}` : heard.charAt(0).toUpperCase() + heard.slice(1)
     latest.current = next
-    edit.text(step.id, next)
+    onChange(next)
   })
+  if (!mic.supported) return null
+  return (
+    <button
+      type="button"
+      className={`af-mic${mic.on ? ' is-on' : ''}`}
+      aria-pressed={mic.on}
+      onClick={mic.toggle}
+    >
+      {mic.on ? <i className="af-mic-dot" aria-hidden /> : <MicIcon />}
+      {mic.on ? 'Listening… tap to stop' : 'Say your answer'}
+    </button>
+  )
+}
+
+/** Free text. The prompts under the box are the spec's, and tapping one drops
+    it into the box as an opening — which is what a prompt is for. */
+function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
+  const value = a.text[step.id] ?? ''
+  const box = useRef<HTMLTextAreaElement>(null)
+  const canListen = !!speechCtor()
   // Grow to the answer rather than scrolling inside a four-line window: on a
   // phone, a box that hides the top of your own sentence is unreadable.
   useEffect(() => {
@@ -445,20 +469,10 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
         ref={box}
         className="af-field af-textarea"
         value={value}
-        placeholder={mic.supported ? 'Type your answer, or tap the mic and say it' : 'Type your answer'}
+        placeholder={canListen ? 'Type your answer, or tap the mic and say it' : 'Type your answer'}
         onChange={(e) => edit.text(step.id, e.target.value)}
       />
-      {mic.supported && (
-        <button
-          type="button"
-          className={`af-mic${mic.on ? ' is-on' : ''}`}
-          aria-pressed={mic.on}
-          onClick={mic.toggle}
-        >
-          {mic.on ? <i className="af-mic-dot" aria-hidden /> : <MicIcon />}
-          {mic.on ? 'Listening… tap to stop' : 'Say your answer'}
-        </button>
-      )}
+      <MicButton value={value} onChange={(v) => edit.text(step.id, v)} />
       {step.hints && (
         <div className="af-hints">
           <div className="af-hints-title">Here are some prompts to help you start</div>
@@ -824,7 +838,12 @@ export default function AdvisorSelfScreen({
   invite = null,
   entry = null,
   phone = false,
+  rich = false,
 }: {
+  /** The adventures on the client's own mechanism — photo picks, the swipe
+      deck, the reveal and the reward — wherever one has been built for the
+      advisor. The rest stay on the plain screens. */
+  rich?: boolean
   onExit: () => void
   brand?: FlowBrand | null
   mode?: SelfMode
@@ -941,6 +960,7 @@ export default function AdvisorSelfScreen({
       steps={steps}
       mode={mode}
       brand={brand}
+      rich={rich}
       onExit={onExit}
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
@@ -969,7 +989,9 @@ function FlowPhone({
   onRecord,
   onSend,
   brand,
+  rich = false,
 }: {
+  rich?: boolean
   answers: Answers
   edit: Edit
   d: Derived
@@ -1049,11 +1071,24 @@ function FlowPhone({
     toTop()
   }
 
+  /* An adventure running on the client's own mechanism. It keeps its answers
+     while it runs and hands them to the sheet when it ends, the way the
+     client's do — so it takes over the screen, bar to foot. */
+  const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
+  const RICH: AdventureId[] = rich ? ['practice-joy'] : []
+
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
+    if (RICH.includes(id)) {
+      setTab('flow')
+      setRichOpen(id)
+      toTop()
+      return
+    }
     const at = steps.findIndex((s) => s.adventure === id)
     if (at >= 0) go(at)
   }
+  const joyWasDone = adventureDone('practice-joy', answers)
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
@@ -1064,9 +1099,11 @@ function FlowPhone({
 
   // Inside an adventure the app bar carries its name and a way out, in place
   // of the wordmark and the burger.
-  const adventure = step.adventure
-    ? advisorAdventures.find((a) => a.id === step.adventure)
-    : undefined
+  const adventure = richOpen
+    ? advisorAdventures.find((a) => a.id === richOpen)
+    : step.adventure
+      ? advisorAdventures.find((a) => a.id === step.adventure)
+      : undefined
 
   return (
     <div
@@ -1088,7 +1125,10 @@ function FlowPhone({
                   className="cx-appbar-burger"
                   type="button"
                   aria-label="Close this adventure and go back to My Adventures"
-                  onClick={closeToList}
+                  onClick={() => {
+                    setRichOpen(null)
+                    closeToList()
+                  }}
                 >
                   <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2">
                     <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
@@ -1117,7 +1157,33 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {tab === 'questions' ? (
+            {richOpen === 'practice-joy' ? (
+              <JoyFlow
+                content={ADVISOR_JOY}
+                initial={joyFromSheet(answers)}
+                reward={(j) => ({
+                  before: d.progress.done,
+                  after:
+                    !joyWasDone && adventureDone('practice-joy', sheetWithJoy(answers, j))
+                      ? d.progress.done + 1
+                      : d.progress.done,
+                  total: d.progress.required,
+                  next: 'Confidence',
+                })}
+                reflectSlot={(s, value, set) => {
+                  const flowStep = steps.find((x) => x.id === s.id)
+                  return {
+                    above: flowStep ? <PrivateNote step={flowStep} a={answers} edit={edit} /> : null,
+                    below: <MicButton value={value} onChange={set} />,
+                  }
+                }}
+                onComplete={(j) => {
+                  edit.apply((a) => sheetWithJoy(a, j))
+                  setRichOpen(null)
+                  closeToList()
+                }}
+              />
+            ) : tab === 'questions' ? (
               /* The three questions are rules over the answers, like the
                  Business ID — so before anything is answered there is nothing
                  to ask, and saying so is better than printing three questions
@@ -1230,7 +1296,7 @@ function FlowPhone({
               are always on screen however long the question runs. The tab bar
               comes back on the two destinations: the adventures list and the
               Business ID. */}
-          {inFlow ? (
+          {richOpen ? null : inFlow ? (
             <div className="af-foot">
               <div className="af-nav">
                 {/* Two controls, never three: Back is a small arrow, and the

@@ -3722,6 +3722,9 @@ const ROUTE_VIEWS = [
   'advisor-mobile',
   'advisor-flow',
   'advisor-self',
+  /* The advisor flow on the client's own mechanism, adventure by adventure
+     as each is built. A page of its own until it replaces the one above. */
+  'advisor-journey',
   /* Two halves of the same feature. `advisors` is the directory — who has taken
      the flow — and `advisors/<sitting id>` is one of them, their Business ID on
      the phone. `flow/<token>` is the other end: the link an invited advisor
@@ -3886,6 +3889,7 @@ export default function App() {
   // Marcus's and stays pre-filled; this one starts empty and computes its
   // Business ID, readiness and Toolkit from whatever is typed into it.
   const [advisorSelfOpen, setAdvisorSelfOpen] = useState(initialView === 'advisor-self')
+  const [advisorJourneyOpen, setAdvisorJourneyOpen] = useState(initialView === 'advisor-journey')
   /* The directory, and whichever of the two things behind a route we are still
      fetching. Both are read from Firestore on mount rather than held in the
      bundle: the whole point of them is that they were written by somebody on
@@ -3985,6 +3989,8 @@ export default function App() {
             ? 'flow'
             : directoryOpen || viewEntryId
             ? 'advisors'
+            : advisorJourneyOpen
+            ? 'advisor-journey'
             : advisorSelfOpen
             ? 'advisor-self'
             : advisorFlowOpen
@@ -4094,6 +4100,7 @@ export default function App() {
       setSegmentationOpen(v === 'segmentation')
       setAdvisorFlowOpen(v === 'advisor-flow')
       setAdvisorSelfOpen(v === 'advisor-self')
+      setAdvisorJourneyOpen(v === 'advisor-journey')
       setDirectoryOpen(false)
       setViewEntryId(v === 'advisors' ? slug : null)
       setViewEntryPhone(v === 'advisors' && /^#\/?advisors\/[^/]+\/phone/i.test(window.location.hash))
@@ -4284,6 +4291,15 @@ export default function App() {
             setFirmScreen('firm-candidates')
           }}
         />
+        {brand && <PoweredBy />}
+      </>
+    )
+  }
+
+  if (advisorJourneyOpen) {
+    return (
+      <>
+        <AdvisorSelfScreen key="self-journey" rich onExit={() => setAdvisorJourneyOpen(false)} brand={brand} />
         {brand && <PoweredBy />}
       </>
     )

@@ -16,9 +16,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { JOY_AREA_CARDS, JOY_PICKS } from '../data/joyFlow'
+import { JOY_AREA_CARDS, JOY_PICKS, type JoyPick } from '../data/joyFlow'
 import type { JoyAnswers } from './JoyFlow'
 import './joyResults.css'
+
+/** The ending's words, for an adventure that is this one in another voice —
+    the advisor's Practice Joy. The client's are the defaults below. */
+export interface JoyResultsCopy {
+  title: string
+  memoryLead: string
+  memoryTag: string
+  toolsTitle: string
+  toolsLead: string
+  prefLead: string
+  /** What the piles add up to, in one line. */
+  reading: (more: string, less: string) => string
+  /** The overlay that opens on arrival: a share, and why it matters. */
+  about: { title: string; share: number; want: string; why: string[] }
+}
 
 /* A section that animates in the first time it is scrolled into view. */
 export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
@@ -269,27 +284,71 @@ function AboutJoy({ tools, onClose }: { tools: string[]; onClose: () => void }) 
   )
 }
 
+/* The same overlay in another adventure's words. */
+function AboutCopy({ about, tools, onClose }: { about: JoyResultsCopy['about']; tools: string[]; onClose: () => void }) {
+  const named = tools.slice(0, 2).map((t) => t.toLowerCase())
+  return (
+    <AboutOverlay
+      title={about.title}
+      share={about.share}
+      onClose={onClose}
+      first={
+        <>
+          <b>
+            <CountUp to={about.share} />%
+          </b>{' '}
+          of respondents {about.want}{' '}
+          {named.length === 2 ? (
+            <>
+              <b>{named[0]}</b> and <b>{named[1]}</b>
+            </>
+          ) : (
+            <b>{named[0] ?? 'the same things you do'}</b>
+          )}
+          .
+        </>
+      }
+      second={
+        <>
+          {about.why.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </>
+      }
+    />
+  )
+}
+
 export default function JoyResults({
   answers,
   cta,
   onClaim,
+  picks: allPicks = JOY_PICKS,
+  areas = JOY_AREA_CARDS,
+  copy,
 }: {
   answers: JoyAnswers
   cta: string
   onClaim: () => void
+  picks?: JoyPick[]
+  areas?: JoyPick[]
+  /** Another adventure's words. Without them the page is the client's, and
+      an unanswered one is shown the design's sample answers; with them, an
+      unanswered part of the page simply is not there. */
+  copy?: JoyResultsCopy
 }) {
-  const memory = answers.notes.find((n) => n.trim())?.trim() || FALLBACK.memory
-  const tools = answers.tools.length ? answers.tools : FALLBACK.tools
+  const memory = answers.notes.find((n) => n.trim())?.trim() || (copy ? '' : FALLBACK.memory)
+  const tools = answers.tools.length ? answers.tools : copy ? [] : FALLBACK.tools
   const picks = tools
-    .map((t) => JOY_PICKS.find((p) => p.label === t))
-    .filter((p): p is (typeof JOY_PICKS)[number] => !!p)
+    .map((t) => allPicks.find((p) => p.label === t))
+    .filter((p): p is JoyPick => !!p)
   const other = answers.other.trim()
 
   /* Anything unanswered sits with "the same": not moved is not moving. */
   const wayOf = (label: string) => answers.attention[label] ?? 0
   const piles = PILES.map((p) => ({
     ...p,
-    cards: JOY_AREA_CARDS.filter((c) => wayOf(c.label) === p.way),
+    cards: areas.filter((c) => wayOf(c.label) === p.way),
   }))
   const more = piles[0].cards.map((c) => c.label.toLowerCase())
   const less = piles[1].cards.map((c) => c.label.toLowerCase())
@@ -299,8 +358,9 @@ export default function JoyResults({
      is about — and again from "Learn more". */
   const ending = useEndingOverlay()
 
-  const reading =
-    more.length && less.length
+  const reading = copy
+    ? copy.reading(list(more), list(less))
+    : more.length && less.length
       ? `You want your time to move toward ${list(more)}, and away from ${list(less)}. That is where your advisor will start.`
       : more.length
         ? `You want more of your time for ${list(more)}. That is where your advisor will start.`
@@ -318,10 +378,17 @@ export default function JoyResults({
           <circle cx="8" cy="4.7" r="1" fill="#fff" />
         </svg>
       </button>
-      {ending.about && <AboutJoy tools={tools} onClose={ending.close} />}
+      {ending.about &&
+        (copy ? (
+          <AboutCopy about={copy.about} tools={tools} onClose={ending.close} />
+        ) : (
+          <AboutJoy tools={tools} onClose={ending.close} />
+        ))}
       <Reveal className="jr-found">
-        <h2 className="jr-title">You found joy</h2>
-        <p className="jr-sub">This was the last time you truly experienced joy:</p>
+        <h2 className="jr-title">{copy?.title ?? 'You found joy'}</h2>
+        {memory && (
+          <>
+        <p className="jr-sub">{copy?.memoryLead ?? 'This was the last time you truly experienced joy:'}</p>
         {/* The memory, as the picture: a warm light that moves, and the words
             written onto it. */}
         <figure className="jr-memory">
@@ -337,18 +404,21 @@ export default function JoyResults({
           <blockquote className="jr-words">
             <Typed text={memory} />
           </blockquote>
-          <figcaption className="jr-tag">Your memory</figcaption>
+          <figcaption className="jr-tag">{copy?.memoryTag ?? 'Your memory'}</figcaption>
         </figure>
+          </>
+        )}
       </Reveal>
 
+      {(picks.length > 0 || other) && (
       <Reveal>
-        <h3 className="jr-h">Money is a tool</h3>
-        <p className="jr-sub">You want money to help you with:</p>
+        <h3 className="jr-h">{copy?.toolsTitle ?? 'Money is a tool'}</h3>
+        <p className="jr-sub">{copy?.toolsLead ?? 'You want money to help you with:'}</p>
         <div className="jr-tools">
           {picks.map((p, i) => (
             <figure className="jr-tool" key={p.label} style={{ ['--i' as string]: i }}>
               <span className="jr-tool-photo">
-                <img src={p.src} alt="" draggable={false} />
+                <img src={p.src} alt="" draggable={false} onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
               </span>
               <figcaption className="jr-pill">{p.label}</figcaption>
             </figure>
@@ -361,10 +431,11 @@ export default function JoyResults({
           )}
         </div>
       </Reveal>
+      )}
 
       <Reveal>
         <h3 className="jr-h">Preferences</h3>
-        <p className="jr-sub">This is how you prefer to allocate your time today.</p>
+        <p className="jr-sub">{copy?.prefLead ?? 'This is how you prefer to allocate your time today.'}</p>
         <div className="jr-piles">
           {piles
             .filter((p) => p.cards.length)
@@ -380,7 +451,7 @@ export default function JoyResults({
                   {p.cards.map((c, i) => (
                     <figure className="jr-card" key={c.label} style={{ ['--i' as string]: i }}>
                       <span className="jr-card-photo">
-                        <img src={c.src} alt="" draggable={false} />
+                        <img src={c.src} alt="" draggable={false} onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
                       </span>
                       <figcaption>{c.label}</figcaption>
                     </figure>

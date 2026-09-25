@@ -57,7 +57,15 @@ export type JoyStep =
       /** A believable answer the demo can type in, so a room is not watching
           someone think of one. */
       example: string
+      /** Which question this is on an answer sheet that keys by id — the
+          advisor's. The client's flow does not need one. */
+      id?: string
+      /** Openings to tap into the box, as the advisor's text questions have. */
+      hints?: string[]
     }
+  /* A breath between questions: one thought, and a button to carry on. The
+     advisor's Practice Joy has one after the first question. */
+  | { kind: 'pause'; title: string; body: string; cta: string }
   | { kind: 'done'; title: string; body: string; cta: string }
   | { kind: 'badge'; title: string; body: string; cta: string }
 
