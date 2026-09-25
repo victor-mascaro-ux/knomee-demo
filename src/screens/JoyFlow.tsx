@@ -197,6 +197,7 @@ export default function JoyFlow({
   /* Types an example into this question's box a few letters at a time. Stops
      if the screen changes under it, so it never writes into the next box. */
   const typing = useRef(0)
+  const note = useRef<HTMLTextAreaElement>(null)
   useEffect(() => () => window.clearInterval(typing.current), [])
   const typeIn = (text: string) => {
     window.clearInterval(typing.current)
@@ -364,6 +365,7 @@ export default function JoyFlow({
               With words already there a double-click does what it always
               does, and selects one. */}
           <textarea
+            ref={note}
             className="jf-note"
             rows={5}
             value={a.notes[noteIndex] ?? ''}
@@ -384,9 +386,17 @@ export default function JoyFlow({
                   type="button"
                   className="af-hint"
                   onClick={() => {
-                    const seed = h.replace(/^[“"]|[”"]$/g, '')
-                    const had = a.notes[noteIndex] ?? ''
-                    setNote(had ? `${had} ${seed}` : seed)
+                    /* The opening without its quotes or its dots, and a space
+                       after it — the cursor waits at the end for the rest. */
+                    const seed = h.replace(/^[“"]|[”"]$/g, '').replace(/\s*(…|\.\.\.)$/, '')
+                    const had = (a.notes[noteIndex] ?? '').trimEnd()
+                    const next = had ? `${had} ${seed} ` : `${seed} `
+                    setNote(next)
+                    const el = note.current
+                    if (el) {
+                      el.focus()
+                      requestAnimationFrame(() => el.setSelectionRange(next.length, next.length))
+                    }
                   }}
                 >
                   {h}
