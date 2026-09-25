@@ -986,3 +986,18 @@ button.af-opt:hover {
   text-decoration: none;
   cursor: default;
 }
+
+/* The identity form, on the adventures' open fields (joyFlow.css). The first
+   label sits closer to the copy above it than the ones between fields. */
+.af-idform {
+  margin-top: var(--space-8, 8px);
+}
+.af-idform .af-idfield:first-child .jf-other-label {
+  margin-top: var(--space-16, 16px);
+}
+/* A free-text box grows with its answer, so it keeps its floor and never
+   shows a scrollbar of its own. */
+.af-q .jf-note.af-textarea {
+  min-height: 120px;
+  overflow: hidden;
+}
