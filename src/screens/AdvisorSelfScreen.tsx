@@ -324,6 +324,21 @@ function GridQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
   )
 }
 
+/** A hero picture that may not be in public/ yet: until it is, the teal disc
+    on its own holds the shape. */
+function HeroImage({ src }: { src: string }) {
+  const [missing, setMissing] = useState(false)
+  return (
+    <div className="af-hero">
+      {missing ? (
+        <span className="jf-hero-fallback" aria-hidden />
+      ) : (
+        <img src={src} alt="" draggable={false} onError={() => setMissing(true)} />
+      )}
+    </div>
+  )
+}
+
 function LockIcon() {
   return (
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
@@ -648,9 +663,21 @@ function StepBody({
   switch (step.kind) {
     case 'welcome':
       return (
-        <div className="af-welcome">
-          <h2 className="af-h1">{step.title}</h2>
-          <Paras text={step.body} />
+        <div className={`af-welcome${step.image ? ' is-hero' : ''}`}>
+          {/* The climber on the teal disc, bleeding off the left edge the way
+              the client's adventure intros do; then the welcome, set in the
+              intros' own type. */}
+          {step.image && <HeroImage src={step.image} />}
+          <h2 className={step.image ? 'jf-title' : 'af-h1'}>{step.title}</h2>
+          {step.image ? (
+            step.body?.split('\n\n').map((p) => (
+              <p key={p} className="jf-body">
+                {p}
+              </p>
+            ))
+          ) : (
+            <Paras text={step.body} />
+          )}
           {step.aside && (
             <p className="af-aside">
               <LockIcon />
@@ -1328,11 +1355,15 @@ function FlowPhone({
                     </button>
                   ))}
               </div>
-              <div className="af-progress" aria-hidden>
-                {steps.map((s, n) => (
-                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                ))}
-              </div>
+              {/* Nothing to measure yet on the welcome screen — the bar starts
+                  with the first thing asked of them. */}
+              {step.kind !== 'welcome' && (
+                <div className="af-progress" aria-hidden>
+                  {steps.map((s, n) => (
+                    <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
           <nav className="cx-tabbar">

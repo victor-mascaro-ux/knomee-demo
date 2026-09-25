@@ -1001,3 +1001,54 @@ button.af-opt:hover {
   min-height: 120px;
   overflow: hidden;
 }
+
+/* ── the welcome, on its hero ──────────────────────────────────────────────
+   The client's adventure intros open on a cut-out photograph on the brand's
+   teal disc, bleeding off the screen's left edge; the welcome opens the same
+   way. Then the title and body in the intros' own type (joyFlow.css), and
+   each part rising in after the one before, the way the intros arrive. */
+.af-welcome.is-hero {
+  padding-top: var(--space-12, 12px);
+}
+.af-hero {
+  margin: 0 calc(-1 * var(--space-16, 16px)) var(--space-20, 20px);
+}
+.af-hero img,
+.af-hero .jf-hero-fallback {
+  display: block;
+  width: 100%;
+  max-width: 342px;
+  height: auto;
+}
+.af-welcome.is-hero .jf-body {
+  margin-bottom: var(--space-12, 12px);
+}
+.af-welcome.is-hero > * {
+  animation: afRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.af-welcome.is-hero > .af-hero {
+  animation-name: afHeroIn;
+  animation-duration: 0.8s;
+}
+.af-welcome.is-hero > :nth-child(2) { animation-delay: 0.12s; }
+.af-welcome.is-hero > :nth-child(3) { animation-delay: 0.2s; }
+.af-welcome.is-hero > :nth-child(4) { animation-delay: 0.28s; }
+.af-welcome.is-hero > :nth-child(5) { animation-delay: 0.36s; }
+.af-welcome.is-hero > :nth-child(n + 6) { animation-delay: 0.44s; }
+@keyframes afRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes afHeroIn {
+  from {
+    opacity: 0;
+    transform: translateX(-18px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-welcome.is-hero > * {
+    animation: none;
+  }
+}
