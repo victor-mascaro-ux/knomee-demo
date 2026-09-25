@@ -47,6 +47,9 @@ export interface Answers {
   text: Record<string, string>
   scale: Record<string, number>
   scaleSet: Record<string, number[]>
+  /** Private questions the advisor has chosen to share, keyed by step id. A
+      private answer with no entry here never leaves the device. */
+  shared: Record<string, boolean>
   /** The date the sheet was opened — the sitting every card is dated by. */
   completed: string
   /** Which sitting this is, on the record in `advisorRecord.ts`. A restart
@@ -81,6 +84,7 @@ export function emptyAnswers(): Answers {
     text: {},
     scale: {},
     scaleSet: {},
+    shared: {},
     completed: today(),
     sittingId: newSittingId(),
   }
@@ -105,8 +109,34 @@ export function sampleAnswers(): Answers {
     if (s.answer) a.text[s.id] = s.answer
     if (s.scale) a.scale[s.id] = s.scale.value
     if (s.statements?.length) a.scaleSet[s.id] = s.statements.map((st) => st.value)
+    // The worked example is a demo of the firm's side as much as his, so he
+    // has shared everything he was asked to keep private.
+    if (s.private) a.shared[s.id] = true
   }
   return a
+}
+
+/* ── private answers ─────────────────────────────────────────────────────
+   Advisors hold their concerns close — it is a negotiation, and they may be
+   talking to two or three firms at once. So the questions marked `private`
+   stay on the device unless the advisor turns sharing on for that one answer,
+   and everything that leaves the device goes through `redact` first. */
+
+export const privateSteps = steps.filter((s) => s.private)
+
+export const isShared = (id: string, a: Answers) => !!a.shared[id]
+
+/** The sheet as the firm is allowed to see it: every private answer the
+    advisor has not chosen to share is taken out, as though it were skipped. */
+export function redact(a: Answers): Answers {
+  const out: Answers = { ...a, text: { ...a.text }, choice: { ...a.choice }, other: { ...a.other } }
+  for (const s of privateSteps) {
+    if (a.shared[s.id]) continue
+    delete out.text[s.id]
+    delete out.choice[s.id]
+    delete out.other[`${s.id}:other`]
+  }
+  return out
 }
 
 /* ── where the sheet lives ──────────────────────────────────────────────── */
@@ -295,9 +325,11 @@ const allProse = (a: Answers) => Object.values(a.text).join(' \n ').toLowerCase(
    much of what they wrote lands in each theme, and everything downstream reads
    that ranking rather than guessing again. */
 
-export type ThemeKey = 'clients' | 'team' | 'economics' | 'transition' | 'brand' | 'family'
+export type ThemeKey = 'clients' | 'team' | 'economics' | 'transition' | 'brand' | 'family' | 'purpose'
 
 const THEME_WORDS: Record<ThemeKey, RegExp> = {
+  purpose:
+    /give back|giving back|why I do this|\blegacy\b|mission|purpose|community|charit|nonprofit|my way|how I serve|the way I serve/i,
   clients:
     /\bclients?\b|attrition|\bbook\b|relationships?|come with me|follow me|stay with me|retention/i,
   team: /\bteam\b|juniors?\b|associates?\b|\bstaff\b|hiring|employees?|successor/i,
@@ -314,11 +346,11 @@ const THEME_WORDS: Record<ThemeKey, RegExp> = {
     each pick lends its theme a lighter vote. */
 const JOY_THEME: Record<string, ThemeKey> = {
   Ownership: 'brand',
-  'Control over how I serve': 'brand',
+  'Control over how I serve': 'purpose',
   Independence: 'brand',
-  'Enterprise value': 'brand',
+  'Enterprise value': 'economics',
   Reputation: 'brand',
-  Legacy: 'brand',
+  Legacy: 'purpose',
   'My team’s future': 'team',
   Income: 'economics',
   Security: 'economics',
@@ -329,9 +361,43 @@ const JOY_THEME: Record<string, ThemeKey> = {
 /** When the sheet says nothing either way, this is the order a recruiting
     conversation goes in anyway. It also breaks ties, which is why it is a list
     rather than a set. */
-const THEME_ORDER: ThemeKey[] = ['clients', 'transition', 'team', 'economics', 'brand', 'family']
+const THEME_ORDER: ThemeKey[] = ['clients', 'transition', 'team', 'economics', 'brand', 'family', 'purpose']
 
 const hits = (text: string, key: ThemeKey) => (THEME_WORDS[key].test(text) ? 1 : 0)
+
+/* What the tapped answers say about the shape of the decision. Reading prose
+   alone handed nearly everybody the same three — almost every concern mentions
+   clients, the team or the transition — so the choices they made carry votes
+   of their own, and those differ from advisor to advisor far more than the
+   words do. */
+const CHOICE_VOTES: Record<string, Partial<Record<string, [ThemeKey, number][]>>> = {
+  'mv-brand': {
+    'Keeping my brand is a must': [['brand', 5]],
+    'Not sure yet': [['brand', 4]],
+    'Open to it, depending on the terms': [['brand', 2]],
+  },
+  'mv-q1': {
+    'Go independent with my team': [['team', 1], ['transition', 1]],
+    'Join an existing RIA': [['transition', 1], ['brand', 1]],
+    'Buy another practice': [['economics', 2]],
+    'Sell or merge my book': [['economics', 3]],
+    'Bring in a successor': [['team', 3]],
+    'Change nothing, but fix the parts that don’t work': [['purpose', 2]],
+  },
+  'mv-q10': {
+    'My spouse or family': [['family', 2]],
+    'My team': [['team', 1]],
+    'A business partner': [['economics', 1]],
+    'My clients': [['clients', 1]],
+  },
+  'fy-q5': {
+    'A brand with my name on it': [['brand', 1]],
+    'A named successor': [['team', 1]],
+    'Equity I own': [['economics', 1]],
+    'Someone else running ops': [['transition', 1]],
+    'Time away from the desk': [['family', 1]],
+  },
+}
 
 function rankThemes(a: Answers): ThemeKey[] {
   const score = new Map<ThemeKey, number>(THEME_ORDER.map((k) => [k, 0]))
@@ -342,8 +408,10 @@ function rankThemes(a: Answers): ThemeKey[] {
     [said('ol-q1', a), 3],
     [said('ol-q2', a), 2],
     [said('mv-q9', a), 2],
+    [said('pj-q5', a), 2],
     [said('mv-q10b', a), 1],
     [said('mv-q3', a), 1],
+    [said('mv-q8', a), 1],
   ]
   for (const [text, w] of weighted) {
     if (!text) continue
@@ -353,28 +421,127 @@ function rankThemes(a: Answers): ThemeKey[] {
     const k = JOY_THEME[pick]
     if (k) add(k, 1)
   }
+  for (const [id, votes] of Object.entries(CHOICE_VOTES)) {
+    for (const pick of a.choice[id] ?? []) for (const [k, n] of votes[pick] ?? []) add(k, n)
+  }
+  if (a.grid['pj-q2']?.['Operations and admin'] === 'Less') add('transition', 1)
+  if (a.grid['pj-q2']?.['Life outside the practice'] === 'More') add('family', 1)
   // A stable sort leaves THEME_ORDER as the tie-break, which is what makes an
   // empty sheet still produce a sensible three.
   return [...THEME_ORDER].sort((x, y) => (score.get(y) ?? 0) - (score.get(x) ?? 0))
 }
 
-/* The three questions each theme hands the advisor, and what a rep should do
-   when one arrives. One bank, read by both the phone (the questions screen)
-   and the Toolkit — so the three the advisor is told to ask are provably the
-   three the firm is told to expect. */
+/* ── the three questions, in their own words ────────────────────────────────
+   A question is the theme's, but the wording is the advisor's situation: the
+   move they named, when, the size of the book, who on the team they wrote
+   about, how they feel about their brand — and it changes with how far along
+   they are, because someone still weighing it and someone lining up the
+   paperwork need different answers from a firm. */
+
+interface Ask {
+  a: Answers
+  /** Past weighing it: preparing, acting or already moved. */
+  later: boolean
+  move: string
+  when: string
+  book: string
+}
+
+/** Who on the team they wrote about, in the words they used for them. */
+function teamWord(a: Answers): string {
+  const prose = allProse(a)
+  if (/junior/i.test(prose)) return 'my junior advisors'
+  if (/successor/i.test(prose) || chosen('mv-q1', a).includes('Bring in a successor')) return 'my successor'
+  if (/associates?\b/i.test(prose)) return 'my associates'
+  if (/\bstaff\b|employees?/i.test(prose)) return 'my staff'
+  return 'my team'
+}
+
+/** "in 1–5 years", "within the year" — the timeline, mid-sentence. */
+function whenPhrase(when: string): string {
+  if (!when) return ''
+  if (when.startsWith('<')) return ' within the next year'
+  return ` in ${when.replace(/ from now$/, '')}`
+}
+
+const ASK: Record<ThemeKey, (x: Ask) => string> = {
+  clients: ({ later, when, book }) =>
+    later
+      ? `If I make my move${whenPhrase(when)}, what is your plan for my top client relationships in the first 90 days — and who on your side owns it?`
+      : book
+        ? `For a book like mine, around ${book}, how many clients actually come across in the first year — and what happened in the moves where they didn’t?`
+        : 'When advisors like me move to you, how many of their clients actually come with them — and what happened in the moves where they didn’t?',
+  team: ({ a, later }) => {
+    const who = teamWord(a)
+    return later
+      ? `What can I promise ${who} on day one that you will actually put in writing?`
+      : `What could ${who} own with you that they can’t own where we are now?`
+  },
+  economics: ({ move, later }) =>
+    move === 'Sell or merge my book'
+      ? 'What would my practice be worth to you, and how would you pay for it — upfront, over time, or tied to how many clients stay?'
+      : move === 'Buy another practice'
+        ? 'How would you help me finance buying another practice, and what would you want in return?'
+        : later
+          ? 'Can you build me a model of my first two years with my own numbers in it — what I walk away from, what it costs, and when I come out ahead?'
+          : 'What do my first two years look like with you — what I walk away from, what it costs me, and when I come out ahead?',
+  transition: ({ later, when }) =>
+    later
+      ? `Can you show me a dated plan for my move${whenPhrase(when)}, with a name next to every step?`
+      : 'How long does a move like mine really take, and who runs operations while it’s happening?',
+  brand: ({ a }) => {
+    const feel = (a.choice['mv-brand'] ?? [])[0]
+    if (feel === 'Keeping my brand is a must')
+      return 'Can I keep my own brand with you — and if I do, what exactly would you own?'
+    if (feel === 'Not sure yet')
+      return 'If I take on your brand, what do I gain that I can’t get under my own — and what do I give up?'
+    if (feel === 'Open to it, depending on the terms')
+      return 'On what terms could I keep my own name — and what would change for my clients if I didn’t?'
+    return 'When I’m done, what will my practice be worth — and whose name will be on it?'
+  },
+  family: () =>
+    'What does the first year of a move ask of my family — and can I talk to someone who has been through it?',
+  purpose: ({ move }) =>
+    move === 'Change nothing, but fix the parts that don’t work'
+      ? 'What would you change about how I work today — and what would you leave alone?'
+      : 'Will I still be able to serve my clients my way — and what would you never ask me to change?',
+}
+
+function askFor(k: ThemeKey, a: Answers): string {
+  const stage = stageOf(a)
+  return ASK[k]({
+    a,
+    later: stage === 'Preparation' || stage === 'Action' || stage === 'Maintenance',
+    move: (a.choice['mv-q1'] ?? [])[0] ?? '',
+    when: (a.choice['mv-q2'] ?? [])[0] ?? '',
+    book: a.identity.book.trim(),
+  })
+}
+
+/* What a rep should do when each theme's question arrives. The question itself
+   is `askFor` above, read by both the phone (the questions screen) and the
+   Toolkit — so the three the advisor is told to ask are provably the three the
+   firm is told to expect. */
 interface ThemeQuestion {
   /** How the top action names this theme, mid-sentence. */
   label: string
-  question: string
   guidance: string
   points: string[]
 }
 
 const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
+  purpose: {
+    label: 'how they get to serve',
+    guidance:
+      'They are moving for a reason bigger than the business — how they serve, and what they want to give back. Answer about what stays theirs, not about the platform.',
+    points: [
+      'Name what the firm would never ask them to change about how they serve clients',
+      'Ask what first drew them to this work, and listen before pitching anything',
+      'Show how other advisors kept their way of working, in their words rather than yours',
+    ],
+  },
   clients: {
     label: 'the attrition question',
-    question:
-      'In the ten teams most like mine that you have moved, what share of the top 25 relationships came across — and what happened in the two that went worst?',
     guidance:
       'They are asking for evidence, not reassurance, and they have already named its shape: teams like theirs, the top relationships, and the ones that went badly. Answer with the page, not a figure.',
     points: [
@@ -385,7 +552,6 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
   },
   team: {
     label: 'what the team owns',
-    question: 'What can the people on my team own on day one that they cannot own where I am now?',
     guidance:
       'This is the promise they cannot keep where they are. Answer with mechanics rather than intention — a grant, a schedule, a number.',
     points: [
@@ -396,8 +562,6 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
   },
   economics: {
     label: 'the economics of the first two years',
-    question:
-      'What do my first two years actually look like — what I walk away from, what I spend, and when the economics cross over?',
     guidance:
       'Answer with a model they can keep and check, not a headline number. The credibility is in the year-one costs, not the year-five upside.',
     points: [
@@ -408,8 +572,6 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
   },
   transition: {
     label: 'how long the transition takes',
-    question:
-      'How short can the transition actually be, and who carries operations while it is happening?',
     guidance:
       'They named the disruption itself as the hard part, so the honest answer is a dated plan with an owner against each part — not an average.',
     points: [
@@ -420,9 +582,8 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
   },
   brand: {
     label: 'whose name is on the door',
-    question: 'Whose name is on the door in year three — and what will it be worth when I am done with it?',
     guidance:
-      'They are buying ownership rather than a platform. Answer about what they end up holding, and be exact about what the platform takes.',
+      'Their brand is something they built, and letting go of it may be a non-starter. Answer about what they end up holding, and be exact about what the platform takes — including whether they can keep their name.',
     points: [
       'Show three firms who kept their own brand, and what the platform is visibly responsible for',
       'Walk an actual enterprise-value outcome, with the multiple and what drove it',
@@ -431,8 +592,6 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
   },
   family: {
     label: 'what the first year costs at home',
-    question:
-      'What does the first year cost the people at home, and what have other advisors told you afterwards?',
     guidance:
       'The hesitation here is not commercial, and a commercial answer will not touch it. Answer it as a person.',
     points: [
@@ -538,6 +697,12 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
       title: 'My business “why”',
       text: trim(firstSentence(said('pj-q3', a), 200), 200),
     })
+  if (said('pj-q5', a))
+    highlights.push({
+      icon: 'financial-joy',
+      title: 'Why now',
+      text: trim(firstSentence(said('pj-q5', a), 200), 200),
+    })
   if (concerns.length)
     highlights.push({
       icon: 'outlook',
@@ -587,9 +752,10 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
       challenging: said('mv-q9', a),
       stakeholders: chosen('mv-q10', a).join(' · '),
       blocker: said('mv-q10b', a),
+      brand: picked('mv-brand', a),
     },
     badges: advisorAdventures.filter((r) => adventureDone(r.id, a)).map((r) => r.title),
-    questions: themes.slice(0, 3).map((k) => THEME_QUESTIONS[k].question),
+    questions: themes.slice(0, 3).map((k) => askFor(k, a)),
   }
 }
 
@@ -632,6 +798,7 @@ const APPREHENSION_LABEL: Record<ThemeKey, string> = {
   transition: 'The disruption of the move itself',
   brand: 'Building the name from scratch',
   family: 'The people at home',
+  purpose: 'Losing the way they serve',
 }
 
 function apprehensions(a: Answers) {
@@ -797,7 +964,7 @@ function buildToolkit(a: Answers, themes: ThemeKey[], clarity: number): ToolkitT
     starters: starters(a, themes, clarity),
     key: RECOMMENDATIONS_KEY,
     questions: themes.slice(0, 3).map((k) => ({
-      quote: THEME_QUESTIONS[k].question,
+      quote: askFor(k, a),
       source: `Their answers — ${THEME_QUESTIONS[k].label} is among the things they wrote about most.`,
       guidance: THEME_QUESTIONS[k].guidance,
       points: THEME_QUESTIONS[k].points,
@@ -1096,7 +1263,7 @@ export function unlockView(id: string, a: Answers): UnlockView {
         title: stage.toUpperCase(),
         body: STAGE_BODY[stage],
         lines: [
-          { label: 'The change I’m weighing', value: picked('mv-q1', a) || DASH },
+          { label: 'The move I’m considering', value: picked('mv-q1', a) || DASH },
           { label: 'When', value: picked('mv-q2', a) || DASH },
           { label: 'Who else has a say', value: chosen('mv-q10', a).join(' · ') || DASH },
         ],
