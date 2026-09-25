@@ -1159,3 +1159,21 @@ button.af-opt:hover {
     display: none;
   }
 }
+
+/* "What you'll get" and the time it takes share a row: the row carries the
+   spacing (space-between), so neither piece brings its own margin into it. */
+.af-gets-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4, 4px) var(--space-12, 12px);
+  margin-top: 22px;
+}
+.af-gets-head .af-getlist-title,
+.af-gets-head .af-est {
+  margin: 0;
+}
+.af-gets-head .af-est {
+  white-space: nowrap;
+}
