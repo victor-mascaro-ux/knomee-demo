@@ -44,6 +44,8 @@ import JoyFlow from './JoyFlow'
 import { ADVISOR_JOY, sheetWithJoy } from './advisorJoy'
 import ConfidenceFlow from './ConfidenceFlow'
 import { ADVISOR_CONFIDENCE, sheetWithConfidence } from './advisorConfidence'
+import OutlookFlow from './OutlookFlow'
+import { ADVISOR_OUTLOOK, sheetWithOutlook } from './advisorOutlook'
 import {
   adventureDone,
   adventureStates,
@@ -1061,7 +1063,7 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
-  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence'] : []
+  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
@@ -1076,6 +1078,17 @@ function FlowPhone({
   }
   const joyWasDone = adventureDone('practice-joy', answers)
   const confWasDone = adventureDone('confidence', answers)
+  const outlookWasDone = adventureDone('outlook', answers)
+  /* The concerns screen answers both private concern questions at once, so
+     its one switch shares — or keeps back — both. */
+  const concernStep = steps.find((s) => s.id === 'ol-q1')
+  const shareConcerns: Edit = {
+    ...edit,
+    share: (_id, on) => {
+      edit.share('ol-q1', on)
+      edit.share('ol-q2', on)
+    },
+  }
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
@@ -1155,7 +1168,32 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {richOpen === 'confidence' ? (
+            {richOpen === 'outlook' ? (
+              <OutlookFlow
+                content={ADVISOR_OUTLOOK}
+                reward={(o) => ({
+                  before: d.progress.done,
+                  after:
+                    !outlookWasDone && adventureDone('outlook', sheetWithOutlook(answers, o))
+                      ? d.progress.done + 1
+                      : d.progress.done,
+                  total: d.progress.required,
+                  next: 'Future You',
+                })}
+                askSlot={(kind, text, setText) => ({
+                  above:
+                    kind === 'concern' && concernStep ? (
+                      <PrivateNote step={concernStep} a={answers} edit={shareConcerns} />
+                    ) : null,
+                  below: <MicButton value={text} onChange={setText} />,
+                })}
+                onComplete={(o) => {
+                  edit.apply((a) => sheetWithOutlook(a, o))
+                  setRichOpen(null)
+                  closeToList()
+                }}
+              />
+            ) : richOpen === 'confidence' ? (
               <ConfidenceFlow
                 content={ADVISOR_CONFIDENCE}
                 reward={(c) => ({
