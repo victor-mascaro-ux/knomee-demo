@@ -861,11 +861,13 @@ button.af-opt:hover {
 }
 
 /* Say it rather than type it. */
+/* Under the box's right-hand corner, where the thumb already is. */
 .af-mic {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
+  margin: 10px 0 0 auto;
   padding: 8px 14px;
   border: 1.5px solid var(--k-grape-light, #e9d9f4);
   border-radius: 20px;

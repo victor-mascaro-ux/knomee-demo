@@ -161,19 +161,7 @@ export const ADVISOR_JOY: JoyContent = {
 
 /* ── the sheet, both ways ─────────────────────────────────────────────── */
 
-const WAY_OF: Record<Grade, number> = { More: 1, Same: 0, Less: -1 }
 const GRADE_OF = (n: number): Grade => (n > 0 ? 'More' : n < 0 ? 'Less' : 'Same')
-
-/** What the sheet already holds, to open the adventure on. */
-export function joyFromSheet(a: Answers): JoyAnswers {
-  const picks = a.choice['pj-q1'] ?? []
-  return {
-    tools: picks.filter((p) => p !== OTHER),
-    attention: Object.fromEntries(Object.entries(a.grid['pj-q2'] ?? {}).map(([k, g]) => [k, WAY_OF[g]])),
-    notes: REFLECT_IDS.map((id) => a.text[id] ?? ''),
-    other: picks.includes(OTHER) ? (a.other['pj-q1:other'] ?? '') : '',
-  }
-}
 
 /** The sheet with Practice Joy's answers written onto it. */
 export function sheetWithJoy(a: Answers, j: JoyAnswers): Answers {

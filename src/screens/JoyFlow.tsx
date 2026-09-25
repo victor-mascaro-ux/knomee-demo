@@ -128,7 +128,6 @@ export default function JoyFlow({
   reward: rewardFor = { before: 0, after: 1, total: 5, next: 'Confidence' },
   review,
   content = CLIENT_JOY,
-  initial,
   reflectSlot,
 }: {
   /** Her answers, to open straight on the ending with — reopened from her
@@ -143,8 +142,6 @@ export default function JoyFlow({
   /** Their answers, on the way to the Financial ID. */
   onComplete: (a: JoyAnswers) => void
   content?: JoyContent
-  /** Answers already given, to take the adventure again from the start with. */
-  initial?: JoyAnswers
   /** What a caller adds around a free-text question — the advisor's privacy
       switch above the box, and the microphone below it. */
   reflectSlot?: (
@@ -161,7 +158,9 @@ export default function JoyFlow({
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */
   const [area, setArea] = useState(0)
-  const [a, setA] = useState<JoyAnswers>(() => review ?? initial ?? emptyAnswers(steps))
+  /* Always opened empty, the client's way: taking an adventure again is
+     answering it again, not editing what the device remembers. */
+  const [a, setA] = useState<JoyAnswers>(() => review ?? emptyAnswers(steps))
   const step = steps[at]
   /* The reward can depend on what was answered: an advisor's adventure only
      counts as complete once every question in it is. */
