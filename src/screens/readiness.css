@@ -724,7 +724,6 @@
     box-shadow var(--dur-mid) var(--ease-out),
     border-color var(--dur-mid) var(--ease-out);
 }
-.rd-dim:hover,
 .rd-starter:hover,
 .rd-ask:hover {
   transform: translateY(-2px);
@@ -733,12 +732,8 @@
 }
 /* The dial is the page's one big number: it lifts but keeps its border, so it
    reads as a panel rather than a row. */
-.rd-kq:hover {
-  box-shadow: var(--elev-2);
-}
-.rd-kq:hover .rd-ring-num {
-  color: var(--rd-strong);
-}
+/* The score cards are readings, not controls: they no longer open the
+   working, so they no longer answer the pointer. */
 
 /* Words nudge and tint the way the profile chips do. */
 .rd-word {

@@ -23,7 +23,6 @@ import type {
   TagName,
   Velocity,
   Word as WordT,
-  CalcRow,
 } from '../data/readiness'
 import { CheckIcon, CloseIcon } from '../components/icons'
 import { isPrinting } from '../printSheet'
@@ -189,140 +188,19 @@ function ScoreRing({ value, label }: { value: number; label: string }) {
 function DimensionCard({
   d,
   i,
-  onOpen,
 }: {
   d: Snapshot['dimensions'][number]
   i: number
-  onOpen: () => void
 }) {
   const { ref, seen } = useSeen<HTMLDivElement>()
   const shown = useCountUp(seen ? d.score : 0)
   return (
-    <div
-      className="rd-dim is-open-able"
-      ref={ref}
-      style={{ animationDelay: `${0.06 + i * 0.06}s` }}
-      role="button"
-      tabIndex={0}
-      aria-label={`${d.key}: ${d.score}. How it is calculated`}
-      onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onOpen()
-        }
-      }}
-    >
+    <div className="rd-dim" ref={ref} style={{ animationDelay: `${0.06 + i * 0.06}s` }}>
       <span className="rd-dim-key">{d.key}</span>
       <span className="rd-dim-q">{d.question}</span>
       <span className="rd-dim-score">{shown}</span>
       <span className="rd-dim-caption">{d.caption}</span>
     </div>
-  )
-}
-
-/* A score's working as one list — each thing it counts, what they answered,
-   and the points that earned — then the score they add up to, set apart.
-   Used for a dimension card and for the headline score card alike. */
-function WorkModal({
-  title,
-  question,
-  colLeft,
-  rows,
-  sumLabel,
-  sumCaption,
-  sumScore,
-  note,
-  onClose,
-}: {
-  title: string
-  question: string
-  colLeft: string
-  rows: CalcRow[]
-  sumLabel: string
-  sumCaption: string
-  sumScore: number
-  note?: string
-  onClose: () => void
-}) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-  /* On the page's own root, not inside the card: a card that animates in
-     would otherwise become the fixed backdrop's frame. */
-  return createPortal(
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="rd-why-title">
-      <div className="modal rd-why" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title" id="rd-why-title">
-            {title}
-          </h2>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            <CloseIcon />
-          </button>
-        </div>
-        <div className="modal-body rd-why-body">
-          <p className="rd-why-q">{question}</p>
-          <h3 className="rd-why-h">How it’s calculated</h3>
-          <div className="rd-calc">
-            <div className="rd-calc-cols" aria-hidden>
-              <span>{colLeft}</span>
-              <span>Points</span>
-            </div>
-            {rows.map((r) => (
-              <div className={`rd-calc-item${r.weight === 'not counted' ? ' is-out' : ''}`} key={r.label + r.value}>
-                <div className="rd-calc-main">
-                  <span className="rd-calc-metric">{r.label}</span>
-                  {r.value && <span className="rd-calc-answer">{r.value}</span>}
-                </div>
-                {r.points !== undefined && (
-                  <div className="rd-calc-side">
-                    <b>{r.points}</b>
-                    {r.weight && <i>{r.weight === 'not counted' ? r.weight : `counts ${r.weight}`}</i>}
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="rd-calc-total">
-              <div className="rd-calc-main">
-                <span className="rd-calc-metric">{sumLabel}</span>
-                <span className="rd-calc-answer">{sumCaption}</span>
-              </div>
-              <b className="rd-calc-score">{sumScore}</b>
-            </div>
-          </div>
-          {note && <p className="rd-why-note">{note}</p>}
-        </div>
-      </div>
-    </div>,
-    document.body,
-  )
-}
-
-/* A dimension, opened. Where a side has no worked calculation, its evidence is
-   the list. */
-function DimensionModal({ d, onClose }: { d: Snapshot['dimensions'][number]; onClose: () => void }) {
-  const rows: CalcRow[] =
-    d.calc ??
-    (d.evidence ?? []).map((line) => {
-      const at = line.indexOf(': ')
-      return at > 0 ? { label: line.slice(0, at), value: line.slice(at + 2) } : { label: line, value: '' }
-    })
-  return (
-    <WorkModal
-      title={d.key}
-      question={d.question}
-      colLeft="What they answered"
-      rows={rows}
-      sumLabel={`${d.key} score`}
-      sumCaption={d.caption}
-      sumScore={d.score}
-      onClose={onClose}
-    />
   )
 }
 
@@ -347,12 +225,6 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
   /* Six read as two rows of three; a fourth column only for seven or more. */
   const wide = s.dimensions.length > 6
-  /* The card opened to show how it was worked out, and the headline card. */
-  const [why, setWhy] = useState<Snapshot['dimensions'][number] | null>(null)
-  const [whyTotal, setWhyTotal] = useState(false)
-  const isOut = (d: Snapshot['dimensions'][number]) =>
-    score.abbr === 'KR' && d.key === 'Referenceability' && d.score === 0
-  const counted = s.dimensions.filter((d) => !isOut(d)).length
   // A prospect's KQ and an advisor's RQ; the client's KR keeps it full width.
   const tierInBreakdown = score.abbr !== 'KR'
   const tier = (
@@ -369,19 +241,7 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
     <section className="pp-card rd-card rd-snapshot">
       <Head icon={icScore} title={title ?? 'Conversion Readiness Snapshot'} />
       <div className="rd-snapshot-body">
-        <div
-          className={`rd-kq is-open-able${tierInBreakdown ? ' is-fit' : ''}`}
-          role="button"
-          tabIndex={0}
-          aria-label={`${score.name}: ${s.kq}. How it is calculated`}
-          onClick={() => setWhyTotal(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setWhyTotal(true)
-            }
-          }}
-        >
+        <div className={`rd-kq${tierInBreakdown ? ' is-fit' : ''}`}>
           <span className="rd-kq-title">
             {score.name} ({score.abbr})
           </span>
@@ -398,7 +258,7 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
           <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
             {s.dimensions.map((d, i) => (
-              <DimensionCard d={d} i={i} key={d.key} onOpen={() => setWhy(d)} />
+              <DimensionCard d={d} i={i} key={d.key} />
             ))}
           </div>
           {/* A prospect's three cards leave the column's lower half empty: the
@@ -409,26 +269,6 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
       {/* The tier is a reading of every number above it, so on the client's
           relationship card it runs under the whole card. */}
       {!tierInBreakdown && tier}
-      {why && <DimensionModal d={why} onClose={() => setWhy(null)} />}
-      {whyTotal && (
-        <WorkModal
-          title={`${score.name} (${score.abbr})`}
-          question={s.question}
-          colLeft="Dimension"
-          rows={s.dimensions.map((d) => ({
-            label: d.key,
-            value: d.caption,
-            points: d.score,
-            // Each counted dimension an equal share of the average; the KR
-            // leaves a referral score out while there is no signal.
-            weight: isOut(d) ? 'not counted' : `${Math.round(100 / counted)}%`,
-          }))}
-          sumLabel={`${score.abbr} score`}
-          sumCaption={verdictOf(s.kq, score.abbr)}
-          sumScore={s.kq}
-          onClose={() => setWhyTotal(false)}
-        />
-      )}
     </section>
   )
 }
