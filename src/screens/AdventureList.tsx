@@ -32,7 +32,11 @@ export default function AdventureList({
   onOpen,
   title = 'My Adventures',
   foot,
+  lockedOpens = true,
 }: {
+  /** Whether a locked row opens its adventure. The journey page closes them,
+      as the client's phone does; the plain flow's rows all open. */
+  lockedOpens?: boolean
   rows: AdventureRow[]
   done: number
   required: number
@@ -82,7 +86,9 @@ export default function AdventureList({
               />
             )
           }
-          return <LockedRow key={row.id} title={row.title} artKey={row.art} onRow={open} />
+          return (
+            <LockedRow key={row.id} title={row.title} artKey={row.art} onRow={lockedOpens ? open : undefined} />
+          )
         })}
       </div>
       {foot}
