@@ -769,3 +769,220 @@ button.af-opt:hover {
   opacity: 0.45;
   cursor: default;
 }
+
+/* ── feedback round: privacy, dictation, one clear action ───────────────── */
+
+/* The welcome's line about private answers, set apart from the body. */
+.af-aside {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f2fc;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-strong, #240446);
+}
+.af-aside svg,
+.af-private svg,
+.af-private-sum svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--k-grape, #7639a1);
+}
+
+/* On a private question, before anything is typed: stays with you, and a
+   switch to share it. */
+.af-private {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--k-grape-light, #e9d9f4);
+  border-radius: 12px;
+  background: #fbf9fd;
+}
+.af-private.is-shared {
+  border-style: solid;
+  border-color: #cfe6d8;
+  background: #f4faf6;
+}
+.af-private.is-shared svg {
+  color: #2f7a4f;
+}
+.af-private-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #55525e;
+}
+.af-switch {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #55525e;
+  cursor: pointer;
+}
+.af-switch i {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: #d9d6df;
+  transition: background 0.15s;
+}
+.af-switch i::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s;
+}
+.af-switch[aria-checked='true'] i {
+  background: #2f7a4f;
+}
+.af-switch[aria-checked='true'] i::after {
+  transform: translateX(14px);
+}
+
+/* Say it rather than type it. */
+.af-mic {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 20px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+}
+.af-mic.is-on {
+  border-color: #d64545;
+  color: #b83232;
+  background: #fff5f5;
+}
+.af-mic-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d64545;
+  animation: af-mic-pulse 1.1s ease-in-out infinite;
+}
+@keyframes af-mic-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-mic-dot {
+    animation: none;
+  }
+}
+
+.af-field-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #8a8792;
+}
+
+/* The bottom bar: a small Back arrow and one wide button. Unanswered, that
+   button is Skip in outline; answered, it is the filled OK. */
+.af-nav .af-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+.af-next-skip {
+  padding: 11px 18px;
+  border: 1.5px solid #ddd9e2;
+  border-radius: 26px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #55525e;
+  cursor: pointer;
+}
+
+/* The end screen: the Business ID named before it is opened. */
+.af-idcard {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f7f2fc;
+}
+.af-idcard-k {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong, #240446);
+}
+.af-idcard-body {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #55525e;
+}
+.af-idcard .af-wide {
+  margin-top: 14px;
+}
+.af-private-sum {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #55525e;
+}
+.af-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin-top: 16px;
+}
+.af-link {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--k-grape, #7639a1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.af-link:disabled {
+  color: #8a8792;
+  text-decoration: none;
+  cursor: default;
+}

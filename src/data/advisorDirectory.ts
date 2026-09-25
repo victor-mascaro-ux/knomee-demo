@@ -230,7 +230,11 @@ export async function touchInvite(token: string, answered: boolean) {
 /** One sitting, as the directory holds it. The counts come from `sittingOf` so
     "answered 9 of 26" means the same thing here as it does on the spreadsheet
     row and in the flow's own progress meter. */
-export function entryOf(a: Answers, token: string | null, fallbackName: string): Entry {
+/** `visible` is the sheet as the firm may see it — private answers the advisor
+    kept back taken out. The progress count still reads the whole sheet, so an
+    advisor who answered everything is not listed as unfinished for keeping
+    something to themselves. */
+export function entryOf(a: Answers, token: string | null, fallbackName: string, visible: Answers = a): Entry {
   const counted = sittingOf(a, a.sittingId)
   return {
     id: a.sittingId,
@@ -245,7 +249,7 @@ export function entryOf(a: Answers, token: string | null, fallbackName: string):
     at: new Date().toISOString(),
     answered: counted.answered,
     total: counted.total,
-    answers: a,
+    answers: visible,
   }
 }
 

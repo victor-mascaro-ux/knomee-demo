@@ -104,6 +104,7 @@ function StepBody({
         <div className="af-welcome">
           <h2 className="af-h1">{step.title}</h2>
           <Paras text={step.body} />
+          {step.aside && <p className="af-aside">{step.aside}</p>}
           <div className="af-getlist-title">What you’ll get</div>
           <ol className="af-getlist">
             {step.lines?.map((l) => (

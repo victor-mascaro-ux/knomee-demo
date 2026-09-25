@@ -48,7 +48,10 @@ import {
   emptyAnswers,
   isAnswered,
   isQuestion,
+  isShared,
   loadAnswers,
+  privateSteps,
+  redact,
   sampleAnswers,
   saveAnswers,
   unlockView,
@@ -95,7 +98,7 @@ export type SelfMode = 'demo' | 'invited' | 'view'
    headed with. It is inserted here rather than in the flow data, because the
    walkthrough is somebody whose name the demo already knows. */
 const IDENTITY_HEAD =
-  'Your Business ID is headed with this. Leave a field blank and it simply drops out of the line.'
+  'This heads your Business ID. Check it and change anything that’s off — every field can be edited, and a blank one simply drops out.'
 
 /* Where the answers actually go, said on the screen that collects the name.
    This used to read "Nothing is sent anywhere — the answers stay in this
@@ -103,15 +106,16 @@ const IDENTITY_HEAD =
    shared directory. Telling somebody their answers are private while posting
    them is the one line on this page that is not allowed to be out of date. */
 const IDENTITY_WHERE: Record<SelfMode, string> = {
-  demo: 'Kept on this device, and listed in the advisor directory as a sitting.',
-  invited: 'Whoever sent you this link can see what you answer.',
+  demo: 'Kept on this device and listed in the advisor directory — except the answers marked private, unless you choose to share them.',
+  invited:
+    'The firm that invited you sees your answers — except the ones marked private, which stay with you unless you choose to share them.',
   view: 'These are their answers, read from the directory.',
 }
 
 const IDENTITY: Step = {
   id: 'you',
   kind: 'identity',
-  title: 'Who’s answering?',
+  title: 'A little about you',
   body: `${IDENTITY_HEAD}
 
 ${IDENTITY_WHERE.demo}`,
@@ -144,6 +148,7 @@ interface Edit {
   scale: (stepId: string, value: number) => void
   scaleAt: (stepId: string, index: number, value: number) => void
   identity: (patch: Partial<Answers['identity']>) => void
+  share: (stepId: string, on: boolean) => void
 }
 
 function useEdit(set: React.Dispatch<React.SetStateAction<Answers>>): Edit {
@@ -176,6 +181,7 @@ function useEdit(set: React.Dispatch<React.SetStateAction<Answers>>): Edit {
           return { ...a, scaleSet: { ...a.scaleSet, [stepId]: had } }
         }),
       identity: (patch) => set((a) => ({ ...a, identity: { ...a.identity, ...patch } })),
+      share: (stepId, on) => set((a) => ({ ...a, shared: { ...a.shared, [stepId]: on } })),
     }),
     [set],
   )
@@ -309,11 +315,122 @@ function GridQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
   )
 }
 
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <rect x="3" y="7" width="10" height="7" rx="1.6" />
+      <path d="M5.5 7V5a2.5 2.5 0 015 0v2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Said on the question itself, before anything is typed: this answer stays
+    with you. Sharing is one switch per answer, and off unless you turn it on —
+    an advisor weighing two or three firms may well want to keep it back. */
+function PrivateNote({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
+  if (!step.private) return null
+  const on = isShared(step.id, a)
+  return (
+    <div className={`af-private${on ? ' is-shared' : ''}`}>
+      <LockIcon />
+      <span className="af-private-text">
+        {on
+          ? 'You’re sharing this answer with the firm.'
+          : 'Private. Only you see this answer, unless you choose to share it.'}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        className="af-switch"
+        onClick={() => edit.share(step.id, !on)}
+      >
+        <span>Share</span>
+        <i aria-hidden />
+      </button>
+    </div>
+  )
+}
+
+/* Speaking a long answer is easier than typing it on a phone. The browser's own
+   speech recognition, where it has one (Chrome, Safari, Edge); where it does
+   not, the button is simply not there and the keyboard's dictation still is. */
+interface Recognition {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+}
+
+function speechCtor(): (new () => Recognition) | undefined {
+  if (typeof window === 'undefined') return undefined
+  const w = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition }
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition
+}
+
+function useDictation(onFinal: (text: string) => void) {
+  const Ctor = speechCtor()
+  const [on, setOn] = useState(false)
+  const rec = useRef<Recognition | null>(null)
+  const cb = useRef(onFinal)
+  cb.current = onFinal
+  useEffect(() => () => rec.current?.stop(), [])
+  const toggle = () => {
+    if (!Ctor) return
+    if (on) {
+      rec.current?.stop()
+      return
+    }
+    const r = new Ctor()
+    r.continuous = true
+    r.interimResults = false
+    r.lang = navigator.language || 'en-US'
+    r.onresult = (e) => {
+      for (let n = e.resultIndex; n < e.results.length; n++) {
+        const res = e.results[n]
+        if (res.isFinal) cb.current(res[0].transcript.trim())
+      }
+    }
+    r.onend = () => setOn(false)
+    r.onerror = () => setOn(false)
+    rec.current = r
+    try {
+      r.start()
+      setOn(true)
+    } catch {
+      setOn(false)
+    }
+  }
+  return { supported: !!Ctor, on, toggle }
+}
+
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <rect x="5.5" y="1.8" width="5" height="8" rx="2.5" />
+      <path d="M3.2 7.6a4.8 4.8 0 009.6 0M8 12.4v2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 /** Free text. The prompts under the box are the spec's, and tapping one drops
     it into the box as an opening — which is what a prompt is for. */
 function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
   const value = a.text[step.id] ?? ''
   const box = useRef<HTMLTextAreaElement>(null)
+  const latest = useRef(value)
+  latest.current = value
+  const mic = useDictation((heard) => {
+    if (!heard) return
+    const had = latest.current.trim()
+    const next = had ? `${had} ${heard}` : heard.charAt(0).toUpperCase() + heard.slice(1)
+    latest.current = next
+    edit.text(step.id, next)
+  })
   // Grow to the answer rather than scrolling inside a four-line window: on a
   // phone, a box that hides the top of your own sentence is unreadable.
   useEffect(() => {
@@ -328,9 +445,20 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
         ref={box}
         className="af-field af-textarea"
         value={value}
-        placeholder="Type your answer"
+        placeholder={mic.supported ? 'Type your answer, or tap the mic and say it' : 'Type your answer'}
         onChange={(e) => edit.text(step.id, e.target.value)}
       />
+      {mic.supported && (
+        <button
+          type="button"
+          className={`af-mic${mic.on ? ' is-on' : ''}`}
+          aria-pressed={mic.on}
+          onClick={mic.toggle}
+        >
+          {mic.on ? <i className="af-mic-dot" aria-hidden /> : <MicIcon />}
+          {mic.on ? 'Listening… tap to stop' : 'Say your answer'}
+        </button>
+      )}
       {step.hints && (
         <div className="af-hints">
           <div className="af-hints-title">Here are some prompts to help you start</div>
@@ -357,18 +485,18 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
 /** Who the Business ID is headed with. Four fields, none of them required —
     an unanswered one just drops out of the header line. */
 function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
-  const fields: [keyof Answers['identity'], string, string][] = [
+  const fields: [keyof Answers['identity'], string, string, string?][] = [
     ['name', 'Your name', 'Alex Rivera'],
-    ['role', 'Your role', 'Lead advisor · team of four'],
-    ['book', 'Assets you advise on', '$840M'],
-    ['firm', 'Where you are today', 'Wirehouse'],
+    ['role', 'Your role', 'Lead advisor · team of four', 'Your title, and the size of your team'],
+    ['book', 'Assets you advise on', '$840M', 'A rough figure is fine'],
+    ['firm', 'Where you are today', 'Wirehouse', 'The kind of firm, or its name'],
   ]
   return (
     <div className="af-welcome">
       <h2 className="af-h1">{step.title}</h2>
       <Paras text={step.body} />
       <div className="af-form">
-        {fields.map(([key, label, placeholder]) => (
+        {fields.map(([key, label, placeholder, hint]) => (
           <label className="af-label" key={key}>
             {label}
             <input
@@ -377,6 +505,7 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
               placeholder={placeholder}
               onChange={(e) => edit.identity({ [key]: e.target.value })}
             />
+            {hint && <span className="af-field-hint">{hint}</span>}
           </label>
         ))}
       </div>
@@ -390,12 +519,14 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     been handed to the spreadsheet yet. */
 function EndQuestions({
   d,
+  a,
   onHome,
   onReport,
   onSend,
   onRecord,
 }: {
   d: Derived
+  a: Answers
   onHome: () => void
   onReport: () => void
   onSend: () => void
@@ -403,10 +534,11 @@ function EndQuestions({
 }) {
   const [sent, setSent] = useState(false)
   const wired = !!endpoint()
+  const kept = privateSteps.filter((s) => isAnswered(s, a) && !isShared(s.id, a)).length
   return (
     <div className="af-unlock">
       <h2 className="af-h1">My Three Questions</h2>
-      <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
+      <p className="af-body">Put these to every firm you’re considering — including this one. They come from your own answers, so what you hear back tells you whether a firm is right for you.</p>
       <ol className="af-qs">
         {d.id.questions.map((q, i) => (
           <li key={q}>
@@ -415,35 +547,54 @@ function EndQuestions({
           </li>
         ))}
       </ol>
-      <button className="cx-start af-wide" type="button" onClick={onHome}>
-        View my Business ID
-      </button>
-      {/* The other half of the same eight minutes: the read a platform gets
-          handed. It is the thing the flow is actually for, and hiding it from
-          the person who answered would be the wrong way round. */}
-      <button className="af-secondary" type="button" onClick={onReport}>
-        See my readiness and toolkit
-      </button>
-      {/* What became of the answers. Said plainly, including the part we
-          cannot promise: a post to the spreadsheet comes back opaque, so this
-          claims it was sent and never that it arrived. */}
-      {wired ? (
-        <button
-          className="af-secondary"
-          type="button"
-          disabled={sent}
-          onClick={() => {
-            onSend()
-            setSent(true)
-          }}
-        >
-          {sent ? 'Sent to the spreadsheet' : 'Send my answers to the spreadsheet'}
+      {/* One thing to do next, and it says what it is. Testers did not realise
+          the Business ID was the thing the eight minutes had produced for
+          them, so the card names it before the button opens it. */}
+      <div className="af-idcard">
+        <div className="af-idcard-k">Your Business ID is ready</div>
+        <p className="af-idcard-body">
+          The one-page summary of everything you told us — what your practice is for, your hopes
+          and concerns, and the move you’re weighing. It’s yours to keep.
+        </p>
+        <button className="cx-start af-wide" type="button" onClick={onHome}>
+          View my Business ID
         </button>
-      ) : (
-        <button className="af-secondary" type="button" onClick={onRecord}>
-          Where my answers are kept
-        </button>
+      </div>
+      {kept > 0 && (
+        <p className="af-private-sum">
+          <LockIcon />
+          {kept === 1
+            ? 'You kept 1 answer private. You can share it from its question.'
+            : `You kept ${kept} answers private. You can share any of them from its question.`}
+        </p>
       )}
+      <div className="af-links">
+        {/* The read a firm gets handed, minus anything kept private — the
+            thing the flow is for, and hiding it from the person who answered
+            would be the wrong way round. */}
+        <button className="af-link" type="button" onClick={onReport}>
+          See what the firm sees
+        </button>
+        {/* What became of the answers. A post to the spreadsheet comes back
+            opaque, so this claims it was sent and never that it arrived. */}
+        {wired ? (
+          <button
+            className="af-link"
+            type="button"
+            disabled={sent}
+            onClick={() => {
+              onSend()
+              setSent(true)
+            }}
+          >
+            {sent ? 'Sent to the spreadsheet' : 'Send to the spreadsheet'}
+          </button>
+        ) : (
+          <button className="af-link" type="button" onClick={onRecord}>
+            Where my answers are kept
+          </button>
+        )}
+      </div>
       <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
     </div>
   )
@@ -478,6 +629,12 @@ function StepBody({
         <div className="af-welcome">
           <h2 className="af-h1">{step.title}</h2>
           <Paras text={step.body} />
+          {step.aside && (
+            <p className="af-aside">
+              <LockIcon />
+              {step.aside}
+            </p>
+          )}
           <div className="af-getlist-title">What you’ll get</div>
           <ol className="af-getlist">
             {step.lines?.map((l) => (
@@ -533,6 +690,7 @@ function StepBody({
           <Eyebrow text={step.eyebrow} />
           <h2 className="af-h2">{step.title}</h2>
           <Paras text={step.body} />
+          <PrivateNote step={step} a={a} edit={edit} />
           <Choices step={step} a={a} edit={edit} />
         </div>
       )
@@ -552,7 +710,8 @@ function StepBody({
           <Eyebrow text={step.eyebrow} />
           <h2 className="af-h2">{step.title}</h2>
           <Paras text={step.body} />
-          <TextQuestion step={step} a={a} edit={edit} />
+          <PrivateNote step={step} a={a} edit={edit} />
+          <TextQuestion key={step.id} step={step} a={a} edit={edit} />
         </div>
       )
 
@@ -626,7 +785,8 @@ function StepBody({
         <div className="af-unlock">
           <h2 className="af-h1">Congratulations</h2>
           <p className="af-body">
-            You’re taking a meaningful step. Here’s your personalized summary.
+            You’re taking a meaningful step. Here’s a first look at your Business ID — the summary
+            of everything you told us. The full page is under Business ID at the foot of the app.
           </p>
           <div className="af-lines">
             {d.id.highlights.map((h) => (
@@ -647,7 +807,7 @@ function StepBody({
 
     case 'questions':
       return (
-        <EndQuestions d={d} onHome={onHome} onReport={onReport} onSend={onSend} onRecord={onRecord} />
+        <EndQuestions d={d} a={a} onHome={onHome} onReport={onReport} onSend={onSend} onRecord={onRecord} />
       )
 
     default:
@@ -702,6 +862,11 @@ export default function AdvisorSelfScreen({
   const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing && !phone ? 'report' : 'flow')
   const edit = useEdit(setAnswers)
   const d = useMemo(() => derive(answers), [answers])
+  /* The sheet as the firm sees it: private answers the advisor has not chosen
+     to share are left out of everything that leaves this device, and out of
+     the report that shows them what a firm reads. */
+  const visible = useMemo(() => redact(answers), [answers])
+  const dFirm = useMemo(() => derive(visible), [visible])
   const steps = useMemo(
     () => stepsFor(mode === 'invited' && invite ? greeting(invite.name) : null, mode),
     [mode, invite],
@@ -718,8 +883,8 @@ export default function AdvisorSelfScreen({
   const answered = !d.empty || Object.keys(answers.text).length > 0 ||
     Object.keys(answers.choice).length > 0 || !!answers.identity.name.trim()
   useEffect(() => {
-    if (answered && !viewing) noteSitting(answers, answers.sittingId)
-  }, [answers, answered, viewing])
+    if (answered && !viewing) noteSitting(visible, answers.sittingId)
+  }, [visible, answers.sittingId, answered, viewing])
 
   /* And the third store: the shared directory, so the person who sent the link
      can see that it was answered. The ledger above is this device's; this one
@@ -734,11 +899,11 @@ export default function AdvisorSelfScreen({
     if (viewing || !answered) return
     const fallback = invite?.name ?? ''
     const id = window.setTimeout(() => {
-      void putEntry(entryOf(answers, invite?.token ?? null, fallback))
+      void putEntry(entryOf(answers, invite?.token ?? null, fallback, visible))
       if (invite) void touchInvite(invite.token, true)
     }, 1000)
     return () => window.clearTimeout(id)
-  }, [answers, answered, viewing, invite])
+  }, [answers, visible, answered, viewing, invite])
 
   /* An opened link is worth knowing about on its own: it separates "has not
      looked at it yet" from "looked, and did not answer", which are two
@@ -756,16 +921,16 @@ export default function AdvisorSelfScreen({
      under a new id — a new person, a new Business ID. The row it just sent
      stays on the record whether or not the post got anywhere. */
   const close = useCallback(() => {
-    if (answered) void pushSitting(noteSitting(answers, answers.sittingId))
+    if (answered) void pushSitting(noteSitting(visible, answers.sittingId))
     /* A restart under an invite is the same person starting over, not the next
        person in the room — so it keeps the token and the name on the link, and
        lands in the directory as a second sitting rather than overwriting the
        first. Nothing they already answered is lost. */
     restart(emptyAnswers())
-  }, [answered, answers, restart])
+  }, [answered, answers.sittingId, visible, restart])
 
   if (view === 'report')
-    return <FlowReport d={d} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
+    return <FlowReport d={viewing ? d : dFirm} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -780,7 +945,7 @@ export default function AdvisorSelfScreen({
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
       onSend={() => {
-        if (answered) void pushSitting(noteSitting(answers, answers.sittingId))
+        if (answered) void pushSitting(noteSitting(visible, answers.sittingId))
       }}
       onRestart={close}
       onSample={() => restart(sampleAnswers())}
@@ -1068,26 +1233,26 @@ function FlowPhone({
           {inFlow ? (
             <div className="af-foot">
               <div className="af-nav">
+                {/* Two controls, never three: Back is a small arrow, and the
+                    one wide button is Skip until the question has an answer,
+                    then OK. Three buttons in a row read as three choices. */}
                 {trail.length > 1 && (
-                  <button className="af-back" type="button" onClick={back}>
-                    Back
+                  <button className="af-back" type="button" aria-label="Back" onClick={back}>
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <path d="M10 3L5 8l5 5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                 )}
-                {!last && (
-                  <button
-                    className="cx-start af-next"
-                    type="button"
-                    disabled={asks && !answered}
-                    onClick={() => go(i + 1)}
-                  >
-                    {cta}
-                  </button>
-                )}
-                {asks && !answered && !last && (
-                  <button className="af-skip" type="button" onClick={() => go(i + 1)}>
-                    Skip
-                  </button>
-                )}
+                {!last &&
+                  (asks && !answered ? (
+                    <button className="af-next af-next-skip" type="button" onClick={() => go(i + 1)}>
+                      Skip this question
+                    </button>
+                  ) : (
+                    <button className="cx-start af-next" type="button" onClick={() => go(i + 1)}>
+                      {cta}
+                    </button>
+                  ))}
               </div>
               <div className="af-progress" aria-hidden>
                 {steps.map((s, n) => (
@@ -1262,7 +1427,7 @@ function FlowReport({
             ‹ Back to the flow
           </button>
           <span className="af-report-note">
-            What a platform reads from your answers — the same page, the same three tabs.
+            What the firm reads from your answers. Private answers you haven’t shared are left out.
           </span>
         </header>
       )}

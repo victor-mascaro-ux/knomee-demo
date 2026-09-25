@@ -384,6 +384,9 @@ function BusinessIdTab({
         ...(d.move.blocker
           ? [{ label: 'Holding the decision', value: d.move.blocker }]
           : []),
+        ...(d.move.brand
+          ? [{ label: 'Letting go of their brand', value: d.move.brand }]
+          : []),
       ],
     },
   ]
