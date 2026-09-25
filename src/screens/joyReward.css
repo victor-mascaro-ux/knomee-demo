@@ -260,3 +260,19 @@
   height: 34px;
   display: block;
 }
+
+/* A badge whose top lettering is set here rather than in the art. */
+.jw-badge-titled > img,
+.jw-badge-titled > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.jw-arc-text {
+  fill: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 118px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}

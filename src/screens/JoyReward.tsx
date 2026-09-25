@@ -66,7 +66,12 @@ export default function JoyReward({
   total,
   next,
   onNext,
+  arcTitle,
 }: {
+  /** Lettering for the badge's top arc, for a badge drawn without its own —
+      the advisor's Practice Joy wears the Financial Joy art under its own
+      name. Set in the page's type, so it matches the arc underneath. */
+  arcTitle?: string
   badge: string
   /** The adventure the badge is for. */
   name?: string
@@ -145,7 +150,23 @@ export default function JoyReward({
           ))}
         </div>
         <span className="jw-halo" aria-hidden />
-        <img className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
+        {arcTitle ? (
+          /* The lettering rides inside the badge's own box, so it spins in and
+             floats with the art rather than beside it. */
+          <div className="jw-badge jw-badge-titled" role="img" aria-label={`${name} — adventure complete`}>
+            <img src={badge} alt="" />
+            <svg viewBox="0 0 1000 1000" aria-hidden>
+              <path id="jw-arc" d="M 150 520 A 350 350 0 0 1 850 520" fill="none" />
+              <text className="jw-arc-text">
+                <textPath href="#jw-arc" startOffset="50%" textAnchor="middle">
+                  {arcTitle.toUpperCase()}
+                </textPath>
+              </text>
+            </svg>
+          </div>
+        ) : (
+          <img className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
+        )}
       </div>
 
       <div className="jw-next">

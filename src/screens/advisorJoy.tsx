@@ -19,7 +19,7 @@ import type { JoyPick, JoyStep } from '../data/joyFlow'
 import { steps as flowSteps, type Step } from '../data/advisorFlow'
 import type { Answers, Grade } from '../data/advisorAnswers'
 import type { JoyAnswers, JoyContent } from './JoyFlow'
-import bgPracticeJoy from '../assets/badges/financial-joy-on-plum.svg'
+import bgPracticeJoy from '../assets/badges/joy-on-plum-untitled.svg'
 
 const OTHER = 'Other'
 const REFLECT_IDS = ['pj-q3', 'pj-q4', 'pj-q5'] as const
@@ -126,6 +126,8 @@ export const ADVISOR_JOY: JoyContent = {
   // No samples: an advisor answering for real skips what they leave blank.
   badge: bgPracticeJoy,
   badgeName: 'Practice Joy',
+  // The Financial Joy art, its top lettering set to this adventure's name.
+  badgeArcTitle: 'Practice Joy',
   splitAsk: (
     <>
       Right now, would you direct <b className="is-more">more</b>, <b className="is-same">the same</b>, or{' '}

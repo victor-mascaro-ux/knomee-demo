@@ -215,7 +215,7 @@
   font-size: 12px;
   font-weight: 700;
   color: #55525e;
-  margin-bottom: 7px;
+  margin-bottom: 9px;
 }
 .af-hint {
   font-size: 13.5px;
@@ -424,18 +424,76 @@ button.af-radio {
   padding: 0;
   background: #fff;
 }
+/* A prompt you can tap: an outlined chip with a plus, which drops the
+   opening into the answer box. It lifts under the pointer, fills under a
+   finger, and wraps with the others rather than running as a list. */
 button.af-hint {
-  display: block;
-  width: 100%;
-  padding: 3px 0;
-  border: 0;
-  background: none;
-  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 6px 6px 0;
+  padding: 6px 12px 6px 9px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 999px;
+  background: var(--surface-card, #fff);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-strong, #240446);
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
 }
-button.af-hint:hover,
+button.af-hint::before {
+  content: '+';
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f4ecfa;
+  color: var(--k-grape, #7639a1);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+button.af-hint:hover {
+  border-color: var(--k-grape, #7639a1);
+  box-shadow: 0 3px 10px rgba(36, 4, 70, 0.08);
+  transform: translateY(-1px);
+}
+button.af-hint:hover::before {
+  background: var(--k-grape, #7639a1);
+  color: #fff;
+  transform: rotate(90deg);
+}
+button.af-hint:active {
+  background: #f7f2fc;
+  transform: scale(0.97);
+  box-shadow: none;
+  transition-duration: 0.06s;
+}
+button.af-hint:focus-visible {
+  outline: 2px solid var(--k-grape, #7639a1);
+  outline-offset: 2px;
+}
 button.af-opt:hover {
   color: var(--k-grape, #7639a1);
+}
+@media (prefers-reduced-motion: reduce) {
+  button.af-hint,
+  button.af-hint::before {
+    transition: none;
+  }
 }
 
 .af-field {
@@ -1178,4 +1236,15 @@ button.af-opt:hover {
 }
 .af-gets-head .af-est {
   white-space: nowrap;
+}
+
+/* The plain screens' step meter, at the top: a strip between the app bar and
+   the scroller, so it never scrolls away. */
+.af-top {
+  flex: none;
+  padding: 10px 16px 8px;
+  background: #fff;
+}
+.af-top .af-progress {
+  margin: 0;
 }

@@ -736,3 +736,71 @@
   color: #55525e;
   box-shadow: inset 0 0 0 1.5px #ddd9e2;
 }
+
+/* ── the footer as a bar ───────────────────────────────────────────────────
+   Every adventure's foot — Financial Joy, Confidence, Outlook, Future You, and
+   the advisor's Practice Joy — is the advisor flow's bar: a round Back arrow,
+   and one wide button. The step meter is not down here: it sits at the top. The markup is unchanged;
+   "Previous question" keeps its words for screen readers and loses them on
+   screen. */
+.jf-foot {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  grid-template-areas: 'prev ok';
+  align-items: center;
+  gap: var(--space-14, 14px) var(--space-10, 10px);
+}
+.jf-where {
+  display: contents;
+}
+.jf-prev {
+  grid-area: prev;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid #ddd9e2;
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: #55525e;
+  font-size: 0;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+.jf-prev svg {
+  width: 16px;
+  height: 16px;
+}
+.jf-prev:hover {
+  border-color: var(--k-grape-light, #c9b3dd);
+  color: var(--text-strong);
+}
+.jf-prev:active {
+  transform: scale(0.94);
+}
+.jf-ok {
+  grid-area: ok;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The step meter, at the top of the adventure just under the app bar. It is
+   rendered beside the foot, and `order` lifts it to the top of the column;
+   sticky, so it stays in view while a long question scrolls under it. */
+.jf-top {
+  order: -1;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 calc(-1 * var(--space-16)) var(--space-4);
+  padding: var(--space-10, 10px) var(--space-16) var(--space-8);
+  background: var(--surface-card);
+  /* A soft edge, so what scrolls under it reads as passing beneath. */
+  box-shadow: 0 8px 10px -10px rgba(20, 10, 40, 0.35);
+}
+.jf-top .af-progress {
+  margin: 0;
+}

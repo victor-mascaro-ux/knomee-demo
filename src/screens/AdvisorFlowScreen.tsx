@@ -414,6 +414,17 @@ export default function AdvisorFlowScreen({
             )}
           </header>
 
+          {/* Where you are in the flow, at the top under the bar. Nothing to
+              measure yet before the first question, so no strip until then. */}
+          {inFlow && step.kind !== 'welcome' && (
+            <div className="af-top">
+              <div className="af-progress" aria-hidden>
+                {steps.map((s, n) => (
+                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                ))}
+              </div>
+            </div>
+          )}
           <div
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
@@ -483,15 +494,6 @@ export default function AdvisorFlowScreen({
                   </button>
                 )}
               </div>
-              {/* Nothing to measure yet on the welcome screen — the bar starts
-                  with the first thing asked of them. */}
-              {step.kind !== 'welcome' && (
-                <div className="af-progress" aria-hidden>
-                  {steps.map((s, n) => (
-                    <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                  ))}
-                </div>
-              )}
             </div>
           ) : (
           <nav className="cx-tabbar">
