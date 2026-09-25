@@ -47,7 +47,6 @@ import { ADVISOR_CONFIDENCE, sheetWithConfidence } from './advisorConfidence'
 import OutlookFlow from './OutlookFlow'
 import { ADVISOR_OUTLOOK, sheetWithOutlook } from './advisorOutlook'
 import {
-  adventureDone,
   adventureStates,
   clearAnswers,
   derive,
@@ -55,6 +54,10 @@ import {
   isAnswered,
   isQuestion,
   isShared,
+  journeyDone,
+  journeyProgress,
+  journeyStates,
+  withFinished,
   loadAnswers,
   privateSteps,
   redact,
@@ -638,7 +641,11 @@ function StepBody({
   onRecord,
   onSend,
   onAdventure,
+  journey = false,
 }: {
+  /** The journey page: the list counts an adventure taken to its end as
+      complete, and a locked row does not open. */
+  journey?: boolean
   step: Step
   a: Answers
   edit: Edit
@@ -659,11 +666,12 @@ function StepBody({
     case 'home':
       return (
         <AdventureList
-          rows={adventureStates(a)}
-          done={d.progress.done}
+          rows={journey ? journeyStates(a) : adventureStates(a)}
+          done={journey ? journeyProgress(a).done : d.progress.done}
           required={d.progress.required}
           completedOn={a.completed}
           onOpen={onAdventure}
+          lockedOpens={!journey}
         />
       )
 
@@ -1044,6 +1052,13 @@ function FlowPhone({
   // followed by a short one would otherwise open half-way down.
   const toTop = () => viewport.current?.scrollTo({ top: 0 })
   const go = (n: number) => {
+    /* On the journey page, passing an adventure's closing card is finishing
+       it, the client's way — so the next one opens even with a question
+       skipped. */
+    if (rich && (step.kind === 'unlock' || step.kind === 'stage') && step.adventure) {
+      const id = step.adventure
+      edit.apply((a) => withFinished(a, id))
+    }
     setTrail((t) => [...t, n])
     toTop()
   }
@@ -1076,9 +1091,21 @@ function FlowPhone({
     const at = steps.findIndex((s) => s.adventure === id)
     if (at >= 0) go(at)
   }
-  const joyWasDone = adventureDone('practice-joy', answers)
-  const confWasDone = adventureDone('confidence', answers)
-  const outlookWasDone = adventureDone('outlook', answers)
+  /* The reward counts the way the list does on this page: an adventure is
+     complete once it has been taken to its end, so finishing one for the
+     first time always moves the bar on — as it does on the client's phone. */
+  const jp = journeyProgress(answers)
+  const rewardFor = (id: AdventureId, next: string) => ({
+    before: jp.done,
+    after: journeyDone(id, answers) ? jp.done : jp.done + 1,
+    total: jp.required,
+    next,
+  })
+  const finish = (id: AdventureId, write: (a: Answers) => Answers) => {
+    edit.apply((a) => withFinished(write(a), id))
+    setRichOpen(null)
+    closeToList()
+  }
   /* The concerns screen answers both private concern questions at once, so
      its one switch shares — or keeps back — both. */
   const concernStep = steps.find((s) => s.id === 'ol-q1')
@@ -1171,15 +1198,7 @@ function FlowPhone({
             {richOpen === 'outlook' ? (
               <OutlookFlow
                 content={ADVISOR_OUTLOOK}
-                reward={(o) => ({
-                  before: d.progress.done,
-                  after:
-                    !outlookWasDone && adventureDone('outlook', sheetWithOutlook(answers, o))
-                      ? d.progress.done + 1
-                      : d.progress.done,
-                  total: d.progress.required,
-                  next: 'Future You',
-                })}
+                reward={rewardFor('outlook', 'Future You')}
                 askSlot={(kind, text, setText) => ({
                   above:
                     kind === 'concern' && concernStep ? (
@@ -1187,42 +1206,18 @@ function FlowPhone({
                     ) : null,
                   below: <MicButton value={text} onChange={setText} />,
                 })}
-                onComplete={(o) => {
-                  edit.apply((a) => sheetWithOutlook(a, o))
-                  setRichOpen(null)
-                  closeToList()
-                }}
+                onComplete={(o) => finish('outlook', (a) => sheetWithOutlook(a, o))}
               />
             ) : richOpen === 'confidence' ? (
               <ConfidenceFlow
                 content={ADVISOR_CONFIDENCE}
-                reward={(c) => ({
-                  before: d.progress.done,
-                  after:
-                    !confWasDone && adventureDone('confidence', sheetWithConfidence(answers, c))
-                      ? d.progress.done + 1
-                      : d.progress.done,
-                  total: d.progress.required,
-                  next: 'Outlook',
-                })}
-                onComplete={(c) => {
-                  edit.apply((a) => sheetWithConfidence(a, c))
-                  setRichOpen(null)
-                  closeToList()
-                }}
+                reward={rewardFor('confidence', 'Outlook')}
+                onComplete={(c) => finish('confidence', (a) => sheetWithConfidence(a, c))}
               />
             ) : richOpen === 'practice-joy' ? (
               <JoyFlow
                 content={ADVISOR_JOY}
-                reward={(j) => ({
-                  before: d.progress.done,
-                  after:
-                    !joyWasDone && adventureDone('practice-joy', sheetWithJoy(answers, j))
-                      ? d.progress.done + 1
-                      : d.progress.done,
-                  total: d.progress.required,
-                  next: 'Confidence',
-                })}
+                reward={rewardFor('practice-joy', 'Confidence')}
                 reflectSlot={(s, value, set) => {
                   const flowStep = steps.find((x) => x.id === s.id)
                   return {
@@ -1230,11 +1225,7 @@ function FlowPhone({
                     below: <MicButton value={value} onChange={set} />,
                   }
                 }}
-                onComplete={(j) => {
-                  edit.apply((a) => sheetWithJoy(a, j))
-                  setRichOpen(null)
-                  closeToList()
-                }}
+                onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j))}
               />
             ) : tab === 'questions' ? (
               /* The three questions are rules over the answers, like the
@@ -1340,6 +1331,7 @@ function FlowPhone({
                 onRecord={onRecord}
                 onSend={onSend}
                 onAdventure={openAdventure}
+                journey={rich}
               />
             )}
           </div>

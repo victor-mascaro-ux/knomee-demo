@@ -50,6 +50,10 @@ export interface Answers {
   /** Private questions the advisor has chosen to share, keyed by step id. A
       private answer with no entry here never leaves the device. */
   shared: Record<string, boolean>
+  /** Adventures taken to their end on the journey page, with the day — the
+      client's rule for "complete", where reaching the end is finishing even
+      with a question skipped. Absent on sheets from the plain flow. */
+  finished?: Record<string, string>
   /** The date the sheet was opened — the sitting every card is dated by. */
   completed: string
   /** Which sitting this is, on the record in `advisorRecord.ts`. A restart
@@ -238,6 +242,36 @@ export function adventureStates(a: Answers) {
     return { ...row, count, state: 'locked' as const }
   })
 }
+
+/* ── the journey page's list ──────────────────────────────────────────────
+   On `#/advisor-journey` an adventure is complete once it has been taken to
+   its end, as on the client's phone — and a locked row does not open, so the
+   next one has to be reachable even with a question skipped. The plain flow
+   keeps `adventureStates` above, where every question must be answered. */
+
+export const journeyDone = (id: AdventureId, a: Answers) => adventureDone(id, a) || !!a.finished?.[id]
+
+export function journeyStates(a: Answers) {
+  let openTaken = false
+  return advisorAdventures.map((row) => {
+    const count = adventureCount(row.id, a)
+    if (journeyDone(row.id, a)) return { ...row, count, state: 'done' as const }
+    if (!openTaken) {
+      openTaken = true
+      return { ...row, count, state: 'open' as const }
+    }
+    return { ...row, count, state: 'locked' as const }
+  })
+}
+
+export const journeyProgress = (a: Answers) => ({
+  done: advisorAdventures.filter((r) => journeyDone(r.id, a)).length,
+  required: advisorAdventures.length,
+})
+
+/** The sheet with an adventure marked as taken to its end. */
+export const withFinished = (a: Answers, id: AdventureId): Answers =>
+  a.finished?.[id] ? a : { ...a, finished: { ...(a.finished ?? {}), [id]: today() } }
 
 /** A picked option, with the words typed into "Other" standing in for the word
     "Other" — nobody's Business ID should read "Other". */
