@@ -48,6 +48,7 @@ import OutlookFlow from './OutlookFlow'
 import { ADVISOR_OUTLOOK, sheetWithOutlook } from './advisorOutlook'
 import {
   adventureStates,
+  anonymized,
   clearAnswers,
   derive,
   emptyAnswers,
@@ -672,6 +673,7 @@ function StepBody({
           completedOn={a.completed}
           onOpen={onAdventure}
           lockedOpens={!journey}
+          doneLast={journey}
         />
       )
 
@@ -876,12 +878,16 @@ export default function AdvisorSelfScreen({
      the report a rep reads — not on their phone. */
   const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing && !phone ? 'report' : 'flow')
   const edit = useEdit(setAnswers)
-  const d = useMemo(() => derive(answers), [answers])
+  /* On the journey page, and reading somebody else's sitting, the person is
+     shown by their initials. Only what is drawn changes: the sheet — and what
+     reaches the directory — keeps the name they typed. */
+  const anon = rich || viewing
+  const d = useMemo(() => derive(anon ? anonymized(answers) : answers), [answers, anon])
   /* The sheet as the firm sees it: private answers the advisor has not chosen
      to share are left out of everything that leaves this device, and out of
      the report that shows them what a firm reads. */
   const visible = useMemo(() => redact(answers), [answers])
-  const dFirm = useMemo(() => derive(visible), [visible])
+  const dFirm = useMemo(() => derive(anon ? anonymized(visible) : visible), [visible, anon])
   const steps = useMemo(
     () => stepsFor(mode === 'invited' && invite ? greeting(invite.name) : null, mode),
     [mode, invite],
@@ -945,7 +951,7 @@ export default function AdvisorSelfScreen({
   }, [answered, answers.sittingId, visible, restart])
 
   if (view === 'report')
-    return <FlowReport d={viewing ? d : dFirm} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
+    return <FlowReport d={viewing ? d : dFirm} rich={rich} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -1124,6 +1130,14 @@ function FlowPhone({
     reset(HOME_AT)
   }
 
+  /* The meter under the bar. On the journey page it counts only the screens
+     of the adventure you are in, as the client's do; the plain flow keeps its
+     count of the whole flow. */
+  /* Nothing to show on the Business ID yet. On the journey page that is
+     "no adventure taken to its end" — the rule its list uses. */
+  const idEmpty = rich ? journeyProgress(answers).done === 0 : d.empty
+  const meterSteps = rich && step.adventure ? steps.filter((s) => s.adventure === step.adventure) : steps
+  const meterAt = rich && step.adventure ? meterSteps.findIndex((s) => s.id === step.id) : i
   // Inside an adventure the app bar carries its name and a way out, in place
   // of the wordmark and the burger.
   const adventure = richOpen
@@ -1185,8 +1199,8 @@ function FlowPhone({
           {inFlow && !richOpen && step.kind !== 'welcome' && step.kind !== 'identity' && (
             <div className="af-top">
               <div className="af-progress" aria-hidden>
-                {steps.map((s, n) => (
-                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                {meterSteps.map((s, n) => (
+                  <i key={s.id} className={n <= meterAt ? 'is-on' : ''} />
                 ))}
               </div>
             </div>
@@ -1232,7 +1246,7 @@ function FlowPhone({
                  Business ID — so before anything is answered there is nothing
                  to ask, and saying so is better than printing three questions
                  nobody earned. */
-              d.empty ? (
+              idEmpty ? (
                 <div className="af-blank">
                   <h2 className="af-h1">My Three Questions</h2>
                   <p className="af-body">
@@ -1268,7 +1282,7 @@ function FlowPhone({
                 </div>
               )
             ) : tab === 'finid' ? (
-              d.empty ? (
+              idEmpty ? (
                 /* Nothing answered yet. An empty page of empty cards would read
                    as a broken Business ID rather than an unearned one.
 
@@ -1303,6 +1317,7 @@ function FlowPhone({
                    here, so the two drifted every time one of them was touched. */
                 <AdvisorProfileScreen
                   mine
+                  noBadges={rich}
                   data={d}
                   onBack={() => setTab('flow')}
                   ownerMenu={
@@ -1485,12 +1500,15 @@ function FlowPhone({
 
 function FlowReport({
   d,
+  rich = false,
   onBack,
   mode,
   onList,
   brand,
 }: {
   d: Derived
+  /** The journey page: no badges. */
+  rich?: boolean
   onBack: () => void
   mode: SelfMode
   /** The firm's colours and logo, for the product bar. */
@@ -1541,6 +1559,7 @@ function FlowReport({
         <AdvisorProfileScreen
           mine={!viewing}
           tabs
+          noBadges={rich}
           data={d}
           /* The crumb goes where it says it goes: to the list this person was
              opened from, not back one step to their phone. */

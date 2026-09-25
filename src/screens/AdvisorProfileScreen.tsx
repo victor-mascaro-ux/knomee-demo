@@ -95,7 +95,10 @@ export default function AdvisorProfileScreen({
   tabs,
   backLabel,
   data = marcusProfile,
+  noBadges = false,
 }: {
+  /** Leave out the Badges card — the advisor journey page does without badges. */
+  noBadges?: boolean
   onBack: () => void
   onAdd?: () => void
   /** What the breadcrumb calls the list behind this page. A candidate opened
@@ -276,7 +279,7 @@ export default function AdvisorProfileScreen({
               ID, then the readiness and the toolkit, each starting its own
               page under its own heading. */}
           {(printing || tab === 'id') && (
-            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} />
+            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} />
           )}
           {(printing || tab === 'readiness') && (
             <div className={printing ? 'print-page' : undefined}>
@@ -348,7 +351,9 @@ function BusinessIdTab({
   d,
   confidence: answers,
   stageLevel,
+  noBadges = false,
 }: {
+  noBadges?: boolean
   d: AdvisorProfileData['id']
   confidence: AdvisorProfileData['confidence']
   stageLevel: number
@@ -569,6 +574,7 @@ function BusinessIdTab({
             ))}
           </section>
 
+          {!noBadges && (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -584,6 +590,7 @@ function BusinessIdTab({
               ))}
             </div>
           </section>
+          )}
 
         </div>
 

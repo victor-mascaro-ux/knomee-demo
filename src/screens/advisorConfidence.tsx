@@ -14,7 +14,6 @@ import { steps as flowSteps } from '../data/advisorFlow'
 import { confidenceBandOf, type Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { ConfidenceAnswers, ConfidenceContent } from './ConfidenceFlow'
-import bgConfidence from '../assets/badges/confidence-on-plum.svg'
 
 const flow = flowSteps.find((s) => s.id === 'cf-q')
 const reflect = flowSteps.find((s) => s.id === 'cf-reflect')
@@ -74,8 +73,6 @@ export const ADVISOR_CONFIDENCE: ConfidenceContent = {
       ),
     },
   },
-  badge: bgConfidence,
-  badgeName: 'Confidence',
 }
 
 /** The sheet with Confidence's answers written onto it. A statement left

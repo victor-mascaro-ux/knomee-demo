@@ -89,8 +89,10 @@ export interface OutlookContent {
     line: (firstConcern: string, firstHope: string) => string
     about: { title: string; share: number; first: ReactNode; second: ReactNode }
   }
-  badge: string
-  badgeName: string
+  /** The badge the reward screen hands over. Left out, there is no reward
+      screen: the ending's button is Continue and finishes the adventure. */
+  badge?: string
+  badgeName?: string
 }
 
 export const CLIENT_OUTLOOK: OutlookContent = {
@@ -567,15 +569,19 @@ export default function OutlookFlow({
           </Reveal>
 
           <Reveal className="jr-reward">
-            <p className="jr-reward-line">You got a reward!</p>
-            <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
-              <span>Claim Badge</span>
+            {content.badge && <p className="jr-reward-line">You got a reward!</p>}
+            <button
+              className="jr-claim"
+              type="button"
+              onClick={() => (content.badge ? setStep('badge') : onComplete(a))}
+            >
+              <span>{content.badge ? 'Claim Badge' : 'Continue'}</span>
             </button>
           </Reveal>
         </div>
       )}
 
-      {step === 'badge' && (
+      {step === 'badge' && content.badge && (
         <JoyReward
           badge={content.badge}
           name={content.badgeName}
