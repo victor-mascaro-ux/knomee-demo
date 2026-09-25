@@ -728,3 +728,11 @@
     transition: none;
   }
 }
+
+/* A question left blank, with no sample to fall back on: the button says it
+   skips, in outline, and turns solid the moment there is an answer. */
+.jf-ok.is-skip {
+  background: #fff;
+  color: #55525e;
+  box-shadow: inset 0 0 0 1.5px #ddd9e2;
+}
