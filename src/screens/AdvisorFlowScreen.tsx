@@ -17,7 +17,6 @@ import { useDragScroll } from './mobileGestures'
 import {
   ArrowRight,
   CheckIcon,
-  ClockIcon,
   DEVICE_H,
   DEVICE_W,
   IPhone,
@@ -46,6 +45,7 @@ import {
 } from '../data/advisorFlow'
 import './client-experience.css'
 import './joyFlow.css'
+import AdvisorWelcome from './AdvisorWelcome'
 import './advisor-flow.css'
 
 const ZOOM_STEP = 0.1
@@ -101,39 +101,7 @@ function StepBody({
 }) {
   switch (step.kind) {
     case 'welcome':
-      return (
-        <div className={`af-welcome${step.image ? ' is-hero' : ''}`}>
-          {step.image && (
-            <div className="af-hero">
-              <img src={step.image} alt="" draggable={false} />
-            </div>
-          )}
-          <h2 className={step.image ? 'jf-title' : 'af-h1'}>{step.title}</h2>
-          {step.image ? (
-            step.body?.split('\n\n').map((p) => (
-              <p key={p} className="jf-body">
-                {p}
-              </p>
-            ))
-          ) : (
-            <Paras text={step.body} />
-          )}
-          {step.aside && <p className="af-aside">{step.aside}</p>}
-          <div className="af-getlist-title">What you’ll get</div>
-          <ol className="af-getlist">
-            {step.lines?.map((l) => (
-              <li key={l.label}>
-                <span className="af-getnum">{l.label}</span>
-                <span>{l.value}</span>
-              </li>
-            ))}
-          </ol>
-          <div className="af-est">
-            <ClockIcon />
-            {step.stat}
-          </div>
-        </div>
-      )
+      return <AdvisorWelcome step={step} />
 
     case 'home':
       return (
