@@ -52,6 +52,8 @@ export interface JoyContent {
   sample?: { tools: string[]; ways: Record<string, number> }
   badge: string
   badgeName: string
+  /** Lettering for the badge's top arc, when the badge art has none of its own. */
+  badgeArcTitle?: string
   /** The line over the deck. */
   splitAsk?: ReactNode
   /** The ending's words. Left out, it reads as the client's. */
@@ -221,7 +223,7 @@ export default function JoyFlow({
     step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge' || step.kind === 'pause'
       ? step.cta
       : blank && !sample
-        ? 'Skip'
+        ? 'Skip this question'
         : 'OK'
 
   /* OK on a question left unanswered records a sample answer and moves on —
@@ -373,7 +375,7 @@ export default function JoyFlow({
           {slot?.below}
           {step.hints && (
             <div className="af-hints">
-              <div className="af-hints-title">Here are some prompts to help you start</div>
+              <div className="af-hints-title">Tap a prompt to start your answer</div>
               {step.hints.map((h) => (
                 <button
                   key={h}
@@ -408,6 +410,7 @@ export default function JoyFlow({
         <JoyReward
           badge={content.badge}
           name={content.badgeName}
+          arcTitle={content.badgeArcTitle}
           from={reward.before}
           done={reward.after}
           total={reward.total}
@@ -421,15 +424,20 @@ export default function JoyFlow({
           bar's cross is the way out, and a question is changed by answering it
           again. The intro carries its own Get Started, so it has no foot. */}
       {step.kind !== 'intro' && step.kind !== 'done' && step.kind !== 'badge' && (
-        <div className="jf-foot">
-          {/* Where you are, and under it the way one question back; then the
-              one thing to press. */}
-          <div className="jf-where">
+        <>
+          {/* Where you are, at the top under the bar — the foot is only
+              Back and the one thing to press. */}
+          <div className="jf-top">
             <div className="af-progress" aria-hidden>
               {steps.slice(1).map((_, i) => (
                 <i key={i} className={i < at ? 'is-on' : ''} />
               ))}
             </div>
+          </div>
+        <div className="jf-foot">
+          {/* Where you are, and under it the way one question back; then the
+              one thing to press. */}
+          <div className="jf-where">
             <button className="jf-prev" type="button" onClick={previous}>
               <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
                 <path
@@ -443,10 +451,11 @@ export default function JoyFlow({
               Previous question
             </button>
           </div>
-          <button className={`cx-start jf-ok${cta === 'Skip' ? ' is-skip' : ''}`} type="button" onClick={onCta}>
+          <button className={`cx-start jf-ok${cta === 'Skip this question' ? ' is-skip' : ''}`} type="button" onClick={onCta}>
             {cta}
           </button>
         </div>
+        </>
       )}
     </div>
   )

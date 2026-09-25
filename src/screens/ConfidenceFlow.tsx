@@ -355,13 +355,18 @@ export default function ConfidenceFlow({
       )}
 
       {typeof step === 'number' && (
-        <div className="jf-foot">
-          <div className="jf-where">
+        <>
+          {/* Where you are, at the top under the bar — the foot is only
+              Back and the one thing to press. */}
+          <div className="jf-top">
             <div className="af-progress" aria-hidden>
               {CONFIDENCE_STATEMENTS.map((_, i) => (
                 <i key={i} className={i <= at ? 'is-on' : ''} />
               ))}
             </div>
+          </div>
+        <div className="jf-foot">
+          <div className="jf-where">
             <button className="jf-prev" type="button" onClick={previous}>
               <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
                 <path
@@ -379,6 +384,7 @@ export default function ConfidenceFlow({
             OK
           </button>
         </div>
+        </>
       )}
     </div>
   )

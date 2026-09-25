@@ -478,7 +478,7 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
       <MicButton value={value} onChange={(v) => edit.text(step.id, v)} />
       {step.hints && (
         <div className="af-hints">
-          <div className="af-hints-title">Here are some prompts to help you start</div>
+          <div className="af-hints-title">Tap a prompt to start your answer</div>
           {step.hints.map((h) => (
             <button
               key={h}
@@ -1137,6 +1137,17 @@ function FlowPhone({
             )}
           </header>
 
+          {/* Where you are in the flow, at the top under the bar. Nothing to
+              measure yet before the first question, so no strip until then. */}
+          {inFlow && !richOpen && step.kind !== 'welcome' && step.kind !== 'identity' && (
+            <div className="af-top">
+              <div className="af-progress" aria-hidden>
+                {steps.map((s, n) => (
+                  <i key={s.id} className={n <= i ? 'is-on' : ''} />
+                ))}
+              </div>
+            </div>
+          )}
           <div
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
@@ -1303,15 +1314,6 @@ function FlowPhone({
                     </button>
                   ))}
               </div>
-              {/* Nothing to measure yet on the welcome or the identity screen — the bar starts
-                  with the first thing asked of them. */}
-              {step.kind !== 'welcome' && step.kind !== 'identity' && (
-                <div className="af-progress" aria-hidden>
-                  {steps.map((s, n) => (
-                    <i key={s.id} className={n <= i ? 'is-on' : ''} />
-                  ))}
-                </div>
-              )}
             </div>
           ) : (
           <nav className="cx-tabbar">
