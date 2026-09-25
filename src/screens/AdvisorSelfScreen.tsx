@@ -42,6 +42,8 @@ import {
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
 import { ADVISOR_JOY, sheetWithJoy } from './advisorJoy'
+import ConfidenceFlow from './ConfidenceFlow'
+import { ADVISOR_CONFIDENCE, sheetWithConfidence } from './advisorConfidence'
 import {
   adventureDone,
   adventureStates,
@@ -1059,7 +1061,7 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
-  const RICH: AdventureId[] = rich ? ['practice-joy'] : []
+  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
@@ -1073,6 +1075,7 @@ function FlowPhone({
     if (at >= 0) go(at)
   }
   const joyWasDone = adventureDone('practice-joy', answers)
+  const confWasDone = adventureDone('confidence', answers)
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
@@ -1152,7 +1155,25 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {richOpen === 'practice-joy' ? (
+            {richOpen === 'confidence' ? (
+              <ConfidenceFlow
+                content={ADVISOR_CONFIDENCE}
+                reward={(c) => ({
+                  before: d.progress.done,
+                  after:
+                    !confWasDone && adventureDone('confidence', sheetWithConfidence(answers, c))
+                      ? d.progress.done + 1
+                      : d.progress.done,
+                  total: d.progress.required,
+                  next: 'Outlook',
+                })}
+                onComplete={(c) => {
+                  edit.apply((a) => sheetWithConfidence(a, c))
+                  setRichOpen(null)
+                  closeToList()
+                }}
+              />
+            ) : richOpen === 'practice-joy' ? (
               <JoyFlow
                 content={ADVISOR_JOY}
                 reward={(j) => ({

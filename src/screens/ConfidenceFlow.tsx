@@ -8,9 +8,14 @@
  * The foot is the flow's own, the same as Financial Joy's: the progress, the
  * way one question back, and OK — which, on a statement left where it
  * started, records a sample answer so a demo can be clicked straight through.
+ *
+ * The mechanism is shared: the advisor's Confidence is this same flow handed
+ * different `content` — its own statements, reading and words — and without
+ * samples, so a statement left alone is skipped rather than filled in. The
+ * client's is the default.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './confidenceFlow.css'
@@ -67,11 +72,78 @@ const lower = (st: string) =>
     .replace(/\bI\b/g, 'you')
     .replace(/\bme\b/g, 'you')
 
-/* What the reading means, in a line. */
-const MEANS: Record<string, string> = {
-  Strong: 'You feel sure of where you stand, and of where you are going. That is a strength to build a plan on.',
-  Moderate: 'You feel steady in some places and less so in others. Your advisor will start where it feels least sure.',
-  Weak: 'Money feels uncertain right now. That is what a plan is for, and your advisor will start there with you.',
+/** Everything that makes this the client's Confidence rather than another
+    adventure of the same shape. */
+export interface ConfidenceContent {
+  statements: ConfidenceStatement[]
+  intro: { image: string; quote: string; source: string; lead: string; minutes: number }
+  /** Whether OK on an untouched slider records its sample (a demo clicked
+      straight through) or skips it (somebody actually answering). */
+  samples: boolean
+  /** The dial's word, from the statements that were answered. */
+  reading: (values: number[]) => string
+  /** What that word means, in a line. */
+  means: Record<string, string>
+  results: {
+    title: string
+    sub: string
+    tag: string
+    /** The line under the answers: what the strongest and softest add up to. */
+    line: (strongest: string, softest: string) => string
+    about: { title: string; share: number; first: ReactNode; second: ReactNode }
+  }
+  badge: string
+  badgeName: string
+}
+
+export const CLIENT_CONFIDENCE: ConfidenceContent = {
+  statements: CONFIDENCE_STATEMENTS,
+  intro: {
+    image: './confidence/intro.png',
+    quote: 'Confidence in your abilities directly influences your performance, motivation, and behavior.',
+    source: 'Albert Bandura, psychologist and self-efficacy pioneer',
+    lead: 'Let’s explore how you feel about your finances and what brings you peace of mind.',
+    minutes: 1,
+  },
+  samples: true,
+  reading: confidenceReading,
+  means: {
+    Strong: 'You feel sure of where you stand, and of where you are going. That is a strength to build a plan on.',
+    Moderate: 'You feel steady in some places and less so in others. Your advisor will start where it feels least sure.',
+    Weak: 'Money feels uncertain right now. That is what a plan is for, and your advisor will start there with you.',
+  },
+  results: {
+    title: 'You found your confidence',
+    sub: 'This is how you feel about your money today:',
+    tag: 'Your confidence',
+    line: (hi, lo) =>
+      `You feel most sure that ${hi} You feel least sure that ${lo} That is where your advisor will start.`,
+    about: {
+      title: 'Money confidence matters!',
+      share: 21,
+      first: (
+        <>
+          <b>
+            <CountUp to={21} />%
+          </b>{' '}
+          of US adults are <b>confident</b> in budgeting, saving, and investing.
+        </>
+      ),
+      second: (
+        <>
+          <p>
+            Pew Research says that only <b>27%</b> of Americans are <b>confident</b> in their ability
+            to create an investment plan to build wealth.
+          </p>
+          <p>
+            <b>Knowing your confidence</b> is a powerful insight.
+          </p>
+        </>
+      ),
+    },
+  },
+  badge: bgConfidence,
+  badgeName: 'Confidence',
 }
 
 const ClockIcon = () => (
@@ -141,19 +213,22 @@ export default function ConfidenceFlow({
   reward,
   onComplete,
   review,
+  content = CLIENT_CONFIDENCE,
 }: {
   /** Her answers, to open straight on the ending with. */
   review?: ConfidenceAnswers
-  reward: { before: number; after: number; total: number; next: string }
+  reward: { before: number; after: number; total: number; next: string } | ((a: ConfidenceAnswers) => { before: number; after: number; total: number; next: string })
   onComplete: (a: ConfidenceAnswers) => void
+  content?: ConfidenceContent
 }) {
-  const n = CONFIDENCE_STATEMENTS.length
+  const statements = content.statements
+  const n = statements.length
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
   /* The ending's overlay: said once a moment after it arrives, as Financial
      Joy's is, and again from "Learn more". */
   const ending = useEndingOverlay(step === 'results')
   const [values, setValues] = useState<(number | null)[]>(() =>
-    review ? review.values : CONFIDENCE_STATEMENTS.map(() => null),
+    review ? review.values : statements.map(() => null),
   )
   /* Which way the last move went, so a statement slides in from that side. */
   const dir = useRef<1 | -1>(1)
@@ -164,12 +239,13 @@ export default function ConfidenceFlow({
     setStep(s)
   }
 
+  const untouched = typeof step === 'number' && values[step] === null
   const onOk = () => {
     if (typeof step === 'number') {
       /* Left where it started: the sample goes in, so the demo can be clicked
-         through and still arrive at a reading. */
-      if (values[step] === null)
-        setValues((vs) => vs.map((x, i) => (i === step ? CONFIDENCE_STATEMENTS[i].sample : x)))
+         through and still arrive at a reading. Without samples it is skipped. */
+      if (values[step] === null && content.samples)
+        setValues((vs) => vs.map((x, i) => (i === step ? statements[i].sample : x)))
       return go(step + 1 < n ? step + 1 : 'results')
     }
     if (step === 'results') return go('badge')
@@ -179,11 +255,15 @@ export default function ConfidenceFlow({
     if (step === 'results') return go(n - 1, -1)
   }
 
-  const settled = values.map((x, i) => x ?? CONFIDENCE_STATEMENTS[i].sample)
-  const reading = confidenceReading(settled)
+  /* What there is to read: every statement with a value — its sample, for a
+     demo; only the ones moved, for somebody answering. */
+  const settled = values.map((x, i) => x ?? (content.samples ? statements[i].sample : null))
+  const given = settled.filter((x): x is number => x !== null)
+  const reading = content.reading(given)
   /* Her strongest and her softest, for the flags and the line under them. */
-  const high = settled.indexOf(Math.max(...settled))
-  const low = settled.indexOf(Math.min(...settled))
+  const high = given.length ? settled.indexOf(Math.max(...given)) : -1
+  const low = given.length ? settled.indexOf(Math.min(...given)) : -1
+  const rewardNow = typeof reward === 'function' ? reward({ values: settled }) : reward
 
   /* Every screen of the adventure starts at its top — the ending most of all,
      which is long and was opening wherever the last screen had been scrolled. */
@@ -196,24 +276,19 @@ export default function ConfidenceFlow({
       {step === 'intro' && (
         <div className="jf-intro">
           <div className="jf-hero">
-            <Photo className="jf-hero-img" src="./confidence/intro.png" fallback="cf-hero-fallback" />
+            <Photo className="jf-hero-img" src={content.intro.image} fallback="cf-hero-fallback" />
             <figure className="jf-quote">
-              <blockquote>
-                Confidence in your abilities directly influences your performance, motivation, and
-                behavior.
-              </blockquote>
-              <figcaption>Albert Bandura, psychologist and self-efficacy pioneer</figcaption>
+              <blockquote>{content.intro.quote}</blockquote>
+              <figcaption>{content.intro.source}</figcaption>
             </figure>
           </div>
-          <p className="jf-lead cf-lead">
-            Let’s explore how you feel about your finances and what brings you peace of mind.
-          </p>
+          <p className="jf-lead cf-lead">{content.intro.lead}</p>
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => go(0)}>
               Get Started
             </button>
             <span className="jf-min">
-              <ClockIcon /> Takes 1 min
+              <ClockIcon /> Takes {content.intro.minutes} min
             </span>
           </div>
         </div>
@@ -225,12 +300,12 @@ export default function ConfidenceFlow({
           <span className="cf-count">
             {step + 1} of {n}
           </span>
-          <p className="cf-statement">{CONFIDENCE_STATEMENTS[step].statement}</p>
+          <p className="cf-statement">{statements[step].statement}</p>
           <SunSlider
             value={values[step]}
-            low={CONFIDENCE_STATEMENTS[step].low}
-            high={CONFIDENCE_STATEMENTS[step].high}
-            label={CONFIDENCE_STATEMENTS[step].statement}
+            low={statements[step].low}
+            high={statements[step].high}
+            label={statements[step].statement}
             onChange={(v) => setValues((vs) => vs.map((x, i) => (i === step ? v : x)))}
           />
           </div>
@@ -249,33 +324,16 @@ export default function ConfidenceFlow({
           </button>
           {ending.about && (
             <AboutOverlay
-              title="Money confidence matters!"
-              share={21}
+              title={content.results.about.title}
+              share={content.results.about.share}
               onClose={ending.close}
-              first={
-                <>
-                  <b>
-                    <CountUp to={21} />%
-                  </b>{' '}
-                  of US adults are <b>confident</b> in budgeting, saving, and investing.
-                </>
-              }
-              second={
-                <>
-                  <p>
-                    Pew Research says that only <b>27%</b> of Americans are <b>confident</b> in their
-                    ability to create an investment plan to build wealth.
-                  </p>
-                  <p>
-                    <b>Knowing your confidence</b> is a powerful insight.
-                  </p>
-                </>
-              }
+              first={content.results.about.first}
+              second={content.results.about.second}
             />
           )}
           <Reveal>
-            <h2 className="jr-title">You found your confidence</h2>
-            <p className="jr-sub">This is how you feel about your money today:</p>
+            <h2 className="jr-title">{content.results.title}</h2>
+            <p className="jr-sub">{content.results.sub}</p>
             {/* The reading as the picture: a warm sky that keeps moving, and on
                 it the Financial ID's own confidence row — her word and the dial,
                 its needle swinging round to where she landed. */}
@@ -293,24 +351,26 @@ export default function ConfidenceFlow({
                 </span>
               </div>
               <blockquote className="jr-words cfr-means">
-                <Typed text={MEANS[reading]} />
+                <Typed text={content.means[reading] ?? ''} />
               </blockquote>
-              <figcaption className="jr-tag">Your confidence</figcaption>
+              <figcaption className="jr-tag">{content.results.tag}</figcaption>
             </figure>
           </Reveal>
 
+          {given.length > 0 && (
           <Reveal>
             <h3 className="jr-h">What you said</h3>
             <p className="jr-sub">Where you left each one:</p>
             <div className="cfr-answers">
-              {CONFIDENCE_STATEMENTS.map((st, i) => (
+              {statements.map((st, i) =>
+                settled[i] === null ? null : (
                 <div
                   className={`cfr-answer${i === high ? ' is-high' : ''}${i === low ? ' is-low' : ''}`}
                   key={st.statement}
                   style={{ ['--i' as string]: i, ['--v' as string]: settled[i] }}
                 >
                   {i === high && <span className="cfr-flag">Your strongest</span>}
-                  {i === low && <span className="cfr-flag">Where to start</span>}
+                  {i === low && i !== high && <span className="cfr-flag">Where to start</span>}
                   <p>{st.statement}</p>
                   <span className="cfr-track">
                     <i className="cfr-fill" />
@@ -321,17 +381,20 @@ export default function ConfidenceFlow({
                     <span>{st.high}</span>
                   </span>
                 </div>
-              ))}
+                ),
+              )}
             </div>
             {/* What it adds up to: the line a conversation can open with. */}
-            <p className="jr-reading">
-              <span className="jr-reading-mark" aria-hidden>
-                ✦
-              </span>
-              You feel most sure that {lower(CONFIDENCE_STATEMENTS[high].statement)} You feel least sure
-              that {lower(CONFIDENCE_STATEMENTS[low].statement)} That is where your advisor will start.
-            </p>
+            {high >= 0 && low >= 0 && high !== low && (
+              <p className="jr-reading">
+                <span className="jr-reading-mark" aria-hidden>
+                  ✦
+                </span>
+                {content.results.line(lower(statements[high].statement), lower(statements[low].statement))}
+              </p>
+            )}
           </Reveal>
+          )}
 
           <Reveal className="jr-reward">
             <p className="jr-reward-line">You got a reward!</p>
@@ -344,12 +407,12 @@ export default function ConfidenceFlow({
 
       {step === 'badge' && (
         <JoyReward
-          badge={bgConfidence}
-          name="Confidence"
-          from={reward.before}
-          done={reward.after}
-          total={reward.total}
-          next={reward.next}
+          badge={content.badge}
+          name={content.badgeName}
+          from={rewardNow.before}
+          done={rewardNow.after}
+          total={rewardNow.total}
+          next={rewardNow.next}
           onNext={() => onComplete({ values: settled })}
         />
       )}
@@ -360,7 +423,7 @@ export default function ConfidenceFlow({
               Back and the one thing to press. */}
           <div className="jf-top">
             <div className="af-progress" aria-hidden>
-              {CONFIDENCE_STATEMENTS.map((_, i) => (
+              {statements.map((_, i) => (
                 <i key={i} className={i <= at ? 'is-on' : ''} />
               ))}
             </div>
@@ -380,8 +443,12 @@ export default function ConfidenceFlow({
               Previous question
             </button>
           </div>
-          <button className="cx-start jf-ok" type="button" onClick={onOk}>
-            OK
+          <button
+            className={`cx-start jf-ok${untouched && !content.samples ? ' is-skip' : ''}`}
+            type="button"
+            onClick={onOk}
+          >
+            {untouched && !content.samples ? 'Skip this question' : 'OK'}
           </button>
         </div>
         </>

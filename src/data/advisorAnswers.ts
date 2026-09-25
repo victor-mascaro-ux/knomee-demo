@@ -669,7 +669,13 @@ const CONFIDENCE_BANDS = [
 ] as const
 
 function confidenceBand(a: Answers) {
-  const set = (a.scaleSet['cf-q'] ?? []).filter(Boolean)
+  return confidenceBandOf(a.scaleSet['cf-q'] ?? [])
+}
+
+/** The same band from the 1–5 values alone — what the phone's Confidence
+    ending reads before the answers have reached the sheet. */
+export function confidenceBandOf(values: number[]) {
+  const set = values.filter(Boolean)
   if (!set.length) return 'Balanced'
   /* A Business ID can be built from a half-filled sheet — the directory lists
      people at "9 of 27" — and there a bare sum would read as strain purely for
