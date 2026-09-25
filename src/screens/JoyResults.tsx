@@ -323,6 +323,7 @@ export default function JoyResults({
   answers,
   cta,
   onClaim,
+  rewardLine = 'You got a reward!',
   picks: allPicks = JOY_PICKS,
   areas = JOY_AREA_CARDS,
   copy,
@@ -330,6 +331,8 @@ export default function JoyResults({
   answers: JoyAnswers
   cta: string
   onClaim: () => void
+  /** The line over the button; null for an ending with no reward to claim. */
+  rewardLine?: string | null
   picks?: JoyPick[]
   areas?: JoyPick[]
   /** Another adventure's words. Without them the page is the client's, and
@@ -470,7 +473,7 @@ export default function JoyResults({
       </Reveal>
 
       <Reveal className="jr-reward">
-        <p className="jr-reward-line">You got a reward!</p>
+        {rewardLine && <p className="jr-reward-line">{rewardLine}</p>}
         <button className="jr-claim" type="button" onClick={onClaim}>
           <span>{cta}</span>
         </button>

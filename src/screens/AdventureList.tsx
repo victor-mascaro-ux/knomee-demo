@@ -33,7 +33,10 @@ export default function AdventureList({
   title = 'My Adventures',
   foot,
   lockedOpens = true,
+  doneLast = false,
 }: {
+  /** Completed rows sink to the foot of the list, under what is still to do. */
+  doneLast?: boolean
   /** Whether a locked row opens its adventure. The journey page closes them,
       as the client's phone does; the plain flow's rows all open. */
   lockedOpens?: boolean
@@ -53,7 +56,7 @@ export default function AdventureList({
       <ProgressMeter done={done} required={required} />
       <h2 className="cx-screen-title">{title}</h2>
       <div className="cx-adv-list">
-        {rows.map((row) => {
+        {(doneLast ? [...rows.filter((r) => r.state !== 'done'), ...rows.filter((r) => r.state === 'done')] : rows).map((row) => {
           // Every row opens its adventure — the state a row wears is a look,
           // not a gate, on all three of these screens.
           const open = () => onOpen(row.id)

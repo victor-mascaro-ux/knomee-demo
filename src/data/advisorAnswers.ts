@@ -243,6 +243,23 @@ export function adventureStates(a: Answers) {
   })
 }
 
+/** A name shown as its initials — "Mary Jane" reads "M. J." — so the people
+    who took the flow are not named on screen. The sheet keeps what they typed;
+    only what is displayed changes. A blank name stays blank. */
+export const initials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => `${w.charAt(0).toUpperCase()}.`)
+    .join(' ')
+
+/** The sheet with its name shown as initials, for display. */
+export const anonymized = (a: Answers): Answers => ({
+  ...a,
+  identity: { ...a.identity, name: initials(a.identity.name) },
+})
+
 /* ── the journey page's list ──────────────────────────────────────────────
    On `#/advisor-journey` an adventure is complete once it has been taken to
    its end, as on the client's phone — and a locked row does not open, so the

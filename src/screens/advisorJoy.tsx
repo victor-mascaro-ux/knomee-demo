@@ -19,7 +19,6 @@ import type { JoyPick, JoyStep } from '../data/joyFlow'
 import { steps as flowSteps, type Step } from '../data/advisorFlow'
 import type { Answers, Grade } from '../data/advisorAnswers'
 import type { JoyAnswers, JoyContent } from './JoyFlow'
-import bgPracticeJoy from '../assets/badges/joy-on-plum-untitled.svg'
 
 const OTHER = 'Other'
 const REFLECT_IDS = ['pj-q3', 'pj-q4', 'pj-q5'] as const
@@ -109,12 +108,7 @@ const STEPS: JoyStep[] = [
     kind: 'done',
     title: 'What the work is for',
     body: 'Here is what you said. It is on your Business ID now.',
-    cta: 'Claim badge',
-  },
-  {
-    kind: 'badge',
-    title: 'Practice Joy',
-    body: 'Adventure complete. Four more to go.',
+    // No badges on the advisor journey: the ending's button finishes it.
     cta: 'Continue',
   },
 ]
@@ -124,10 +118,6 @@ export const ADVISOR_JOY: JoyContent = {
   picks: PICKS,
   areas: AREAS,
   // No samples: an advisor answering for real skips what they leave blank.
-  badge: bgPracticeJoy,
-  badgeName: 'Practice Joy',
-  // The Financial Joy art, its top lettering set to this adventure's name.
-  badgeArcTitle: 'Practice Joy',
   splitAsk: (
     <>
       Right now, would you direct <b className="is-more">more</b>, <b className="is-same">the same</b>, or{' '}

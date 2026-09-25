@@ -50,8 +50,10 @@ export interface JoyContent {
       straight through. Leave it out and a blank question is skipped instead —
       the honest behaviour for somebody actually answering. */
   sample?: { tools: string[]; ways: Record<string, number> }
-  badge: string
-  badgeName: string
+  /** The badge the reward screen hands over. Left out, there is no reward
+      screen: the ending's button is Continue and finishes the adventure. */
+  badge?: string
+  badgeName?: string
   /** Lettering for the badge's top arc, when the badge art has none of its own. */
   badgeArcTitle?: string
   /** The line over the deck. */
@@ -399,14 +401,15 @@ export default function JoyFlow({
         <JoyResults
           answers={a}
           cta={step.cta}
-          onClaim={next}
+          onClaim={content.badge ? next : () => onComplete(a)}
+          rewardLine={content.badge ? undefined : null}
           picks={content.picks}
           areas={areas}
           copy={content.results}
         />
       )}
 
-      {step.kind === 'badge' && (
+      {step.kind === 'badge' && content.badge && (
         <JoyReward
           badge={content.badge}
           name={content.badgeName}

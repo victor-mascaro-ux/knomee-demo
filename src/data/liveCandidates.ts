@@ -9,7 +9,7 @@
  * value rather than being invented.
  */
 
-import { derive } from './advisorAnswers'
+import { derive, initials } from './advisorAnswers'
 import type { Entry } from './advisorDirectory'
 import type { Candidate, Stage, Tier } from './candidates'
 
@@ -53,7 +53,8 @@ export function candidateFromEntry(e: Entry): LiveCandidate {
     total: e.total,
     token: e.token,
     at: e.at,
-    name: e.name || 'Advisor',
+    // Shown as initials: the people who took the flow are not named on screen.
+    name: initials(e.name) || 'Advisor',
     firm: [e.role, e.firm].filter(Boolean).join(' · ') || '—',
     kq: scored ? d.readiness.snapshot.kq : null,
     intent: scored ? d.scores.intent : null,

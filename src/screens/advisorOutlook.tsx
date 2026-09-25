@@ -18,7 +18,6 @@ import { steps as flowSteps } from '../data/advisorFlow'
 import type { Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { OutlookAnswers, OutlookContent } from './OutlookFlow'
-import bgOutlook from '../assets/badges/outlook-on-plum.svg'
 
 const step = (id: string) => flowSteps.find((s) => s.id === id)
 
@@ -98,8 +97,6 @@ export const ADVISOR_OUTLOOK: OutlookContent = {
       second: <p>{step('ol-unlock')?.body}</p>,
     },
   },
-  badge: bgOutlook,
-  badgeName: 'Outlook',
 }
 
 /* A list as one answer: each item a sentence of its own. */
