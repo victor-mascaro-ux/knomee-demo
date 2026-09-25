@@ -344,17 +344,40 @@ function LockIcon() {
 /** Said on the question itself, before anything is typed: this answer stays
     with you. Sharing is one switch per answer, and off unless you turn it on —
     an advisor weighing two or three firms may well want to keep it back. */
-function PrivateNote({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
+function PrivateNote({
+  step,
+  a,
+  edit,
+  stacked = false,
+}: {
+  step: Step
+  a: Answers
+  edit: Edit
+  /** The journey page's version: the state as a bold word in the lock's
+      colour, and what it means on a line of its own under it. */
+  stacked?: boolean
+}) {
   if (!step.private) return null
   const on = isShared(step.id, a)
   return (
-    <div className={`af-private${on ? ' is-shared' : ''}`}>
+    <div className={`af-private${on ? ' is-shared' : ''}${stacked ? ' is-stacked' : ''}`}>
       <LockIcon />
-      <span className="af-private-text">
-        {on
-          ? 'You’re sharing this answer with the firm.'
-          : 'Private. Only you see this answer, unless you choose to share it.'}
-      </span>
+      {stacked ? (
+        <span className="af-private-text">
+          <b className="af-private-k">{on ? 'Shared' : 'Private'}</b>
+          <span>
+            {on
+              ? 'The firm will see this answer.'
+              : 'Only you see this answer, unless you choose to share it.'}
+          </span>
+        </span>
+      ) : (
+        <span className="af-private-text">
+          {on
+            ? 'You’re sharing this answer with the firm.'
+            : 'Private. Only you see this answer, unless you choose to share it.'}
+        </span>
+      )}
       <button
         type="button"
         role="switch"
@@ -702,7 +725,7 @@ function StepBody({
           <Eyebrow text={step.eyebrow} />
           <h2 className="af-h2">{step.title}</h2>
           <Paras text={step.body} />
-          <PrivateNote step={step} a={a} edit={edit} />
+          <PrivateNote step={step} a={a} edit={edit} stacked={journey} />
           <Choices step={step} a={a} edit={edit} />
         </div>
       )
@@ -722,7 +745,7 @@ function StepBody({
           <Eyebrow text={step.eyebrow} />
           <h2 className="af-h2">{step.title}</h2>
           <Paras text={step.body} />
-          <PrivateNote step={step} a={a} edit={edit} />
+          <PrivateNote step={step} a={a} edit={edit} stacked={journey} />
           <TextQuestion key={step.id} step={step} a={a} edit={edit} />
         </div>
       )
@@ -1148,7 +1171,7 @@ function FlowPhone({
 
   return (
     <div
-      className={`cx-page${bare ? ' is-bare' : ''}`}
+      className={`cx-page${bare ? ' is-bare' : ''}${rich ? ' is-journey' : ''}`}
       style={windowH ? { minHeight: windowH } : undefined}
     >
       <div
@@ -1216,7 +1239,7 @@ function FlowPhone({
                 askSlot={(kind, text, setText) => ({
                   above:
                     kind === 'concern' && concernStep ? (
-                      <PrivateNote step={concernStep} a={answers} edit={shareConcerns} />
+                      <PrivateNote step={concernStep} a={answers} edit={shareConcerns} stacked />
                     ) : null,
                   below: <MicButton value={text} onChange={setText} />,
                 })}
@@ -1235,7 +1258,7 @@ function FlowPhone({
                 reflectSlot={(s, value, set) => {
                   const flowStep = steps.find((x) => x.id === s.id)
                   return {
-                    above: flowStep ? <PrivateNote step={flowStep} a={answers} edit={edit} /> : null,
+                    above: flowStep ? <PrivateNote step={flowStep} a={answers} edit={edit} stacked /> : null,
                     below: <MicButton value={value} onChange={set} />,
                   }
                 }}

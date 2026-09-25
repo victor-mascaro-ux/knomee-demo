@@ -1248,3 +1248,30 @@ button.af-opt:hover {
 .af-top .af-progress {
   margin: 0;
 }
+
+/* On the journey page the lock sits with the first line of its note, the
+   switch stays centred on the row. */
+.is-journey .af-private {
+  align-items: flex-start;
+}
+.is-journey .af-private svg {
+  margin-top: 1px;
+}
+.is-journey .af-private .af-switch {
+  align-self: center;
+}
+
+/* The journey page's privacy note: the state in bold, in the lock's colour,
+   and what it means on the line under it. */
+.af-private.is-stacked .af-private-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.af-private-k {
+  font-weight: 700;
+  color: var(--k-grape, #7639a1);
+}
+.af-private.is-shared .af-private-k {
+  color: #2f7a4f;
+}
