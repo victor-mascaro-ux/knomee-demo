@@ -41,7 +41,7 @@ import {
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
-import { ADVISOR_JOY, joyFromSheet, sheetWithJoy } from './advisorJoy'
+import { ADVISOR_JOY, sheetWithJoy } from './advisorJoy'
 import {
   adventureDone,
   adventureStates,
@@ -1144,7 +1144,6 @@ function FlowPhone({
             {richOpen === 'practice-joy' ? (
               <JoyFlow
                 content={ADVISOR_JOY}
-                initial={joyFromSheet(answers)}
                 reward={(j) => ({
                   before: d.progress.done,
                   after:
