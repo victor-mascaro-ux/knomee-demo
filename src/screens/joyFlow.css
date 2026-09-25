@@ -753,10 +753,15 @@
 .jf-where {
   display: contents;
 }
+/* Centred in its circle: a flex row, so the hidden words take no room of
+   their own (as a grid they took a second row and lifted the arrow). */
 .jf-prev {
   grid-area: prev;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  line-height: 0;
   width: 44px;
   height: 44px;
   padding: 0;
