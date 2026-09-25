@@ -10,9 +10,14 @@
  *
  * The house rules hold: OK on a question left blank records her sample
  * answer, and a double-click on the empty postcard writes hers in.
+ *
+ * The mechanism is shared: the advisor's Future You is this same flow handed
+ * different `content` — its own questions, photographs, road and detail, a
+ * clarity question the client's does not ask — and without samples, so a
+ * question left blank is skipped. The client's is the default.
  */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './futureYouFlow.css'
@@ -21,7 +26,7 @@ import JoyReward from './JoyReward'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
-interface Pick {
+export interface Pick {
   label: string
   src: string
 }
@@ -36,7 +41,8 @@ const TILT = [-6, 4, -3, 7, -8, 2, 5, -4, 3, -7, 6, -2]
 const WHEN = ['1–5 years', '5–10 years', '10–15 years', '15–20 years', 'Over 20 years']
 
 /* The detail of the life, the design's five kinds. */
-const DETAIL: { group: string; icon: string; items: string[] }[] = [
+export type DetailGroup = { group: string; icon: string; items: string[] }
+const DETAIL: DetailGroup[] = [
   { group: 'Activities', icon: '✺', items: ['Cooking', 'Art', 'Entertaining', 'Gardening', 'Reading', 'Music', 'Gaming', 'Dancing'] },
   { group: 'Culture', icon: '♫', items: ['Theater', 'Concerts', 'Museums', 'Cinema', 'Festivals', 'History'] },
   { group: 'Travel', icon: '✈', items: ['International', 'Road trips', 'Cruises', 'Camping', 'Solo', 'Adventure'] },
@@ -51,6 +57,8 @@ export interface FutureYouAnswers {
   when: string | null
   detail: string[]
   postcard: string
+  /** 1–5, where a flow asks how clear the picture was. */
+  clarity?: number | null
 }
 
 /* Her authored answers: the samples OK records and a double-click writes. */
@@ -61,6 +69,119 @@ export const SAMPLE_FUTURE: FutureYouAnswers = {
   when: '5–10 years',
   detail: ['Cooking', 'Entertaining', 'Concerts', 'International', 'Road trips', 'Volunteer', 'Walking', 'Yoga'],
   postcard: `Dear Me,\n\n${financialId.postcard}\n\nWith love,\nFuture You`,
+}
+
+type AskKey = 'where' | 'doing' | 'with'
+
+interface PhotoQuestion {
+  title: string
+  sub: string
+  options: Pick[]
+  otherPlaceholder: string
+  /** One answer rather than several. */
+  single?: boolean
+}
+
+/** Everything that makes this the client's Future You rather than another
+    adventure of the same shape. */
+export interface FutureYouContent {
+  intro: { image: string; title: string; body: string; minutes: number }
+  breathe: { title: string; sub: string; prompts: string[] }
+  ask: Record<AskKey, PhotoQuestion>
+  when: { title: string; sub: string; stops: string[] }
+  detail: { title: string; sub: string; groups: DetailGroup[] }
+  /** A 1–5 question after the detail, where the flow asks one. */
+  clarity?: { title: string; sub?: string; low: string; high: string }
+  postcard: { title: string; sub: string; placeholder: string }
+  sample: FutureYouAnswers
+  /** Whether OK on a question left blank records the sample (a demo) or
+      skips it (somebody actually answering). */
+  fill: boolean
+  results: {
+    title: string
+    sub: string
+    detailTitle: string
+    postcardSub: string
+    line: (a: FutureYouAnswers) => string
+    about: (a: FutureYouAnswers) => { title: string; share: number; first: ReactNode; second: ReactNode }
+  }
+  /** The badge the reward hands over. Left out, there is no reward screen:
+      the ending's button is Continue and finishes the adventure. */
+  badge?: string
+  badgeName?: string
+}
+
+export const CLIENT_FUTURE: FutureYouContent = {
+  intro: {
+    image: './future-you/intro.png',
+    title: 'Let’s materialize your vision for Future You!',
+    body: 'The clearer your vision, the more likely you are to achieve it.',
+    minutes: 1,
+  },
+  breathe: {
+    title: 'This is your future.',
+    sub: 'Take a moment to visualize what it looks like for you.',
+    prompts: ['Where are you?', 'What are you doing?', 'Who are you with?', 'How do you feel in the future you see?'],
+  },
+  ask: {
+    where: { title: 'Let’s materialize your vision!', sub: 'Where is Future You?', options: WHERE, otherPlaceholder: 'In the desert somewhere' },
+    doing: { title: 'Let’s materialize your vision!', sub: 'What is Future You doing?', options: DOING, otherPlaceholder: 'Writing a memoir' },
+    with: { title: 'Let’s materialize your vision!', sub: 'Who is Future You with?', options: WITH, otherPlaceholder: 'My grandchildren' },
+  },
+  when: { title: 'How far in the future is your vision?', sub: 'Pick the stretch of road it sits on.', stops: WHEN },
+  detail: {
+    title: 'Share more detail about what Future You’s life will include.',
+    sub: 'Tap everything that belongs in it, or add your own.',
+    groups: DETAIL,
+  },
+  postcard: {
+    title: 'Now step into the shoes of Future You.',
+    sub: 'Write a postcard to yourself, right now, from Future You.',
+    placeholder: 'Dear Me,',
+  },
+  sample: SAMPLE_FUTURE,
+  fill: true,
+  results: {
+    title: 'You visualized Future You',
+    sub: 'This is the life you are preparing for:',
+    detailTitle: 'What it includes',
+    postcardSub: 'Sent back from there:',
+    line: (a) =>
+      `${a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself ${a.where[0]?.toLowerCase() ?? 'somewhere new'}${
+        a.with[0] ? `, with ${a.with[0].toLowerCase()}` : ''
+      }. Your advisor will build the plan toward exactly that.`,
+    about: (a) => ({
+      title: 'You visualized Future You!',
+      share: 80,
+      first: (
+        <>
+          <b>
+            <CountUp to={80} />%
+          </b>{' '}
+          of respondents share your vision of{' '}
+          <b>
+            {[
+              (a.doing[0] ?? 'living well').toLowerCase(),
+              (a.where[0] ?? '').toLowerCase(),
+              a.with[0] ? `with ${a.with[0].toLowerCase().replace(/^a /, 'a ')}` : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          </b>
+          .
+        </>
+      ),
+      second: (
+        <p>
+          Research proves that when you vividly <b>connect with your future self</b>, you bridge the
+          gap between today’s choices and tomorrow’s well-being. You just took a{' '}
+          <b>powerful and actionable step</b> toward the life you want.
+        </p>
+      ),
+    }),
+  },
+  badge: bgFutureYou,
+  badgeName: 'Future You',
 }
 
 const ClockIcon = () => (
@@ -77,7 +198,7 @@ function Photo({ src, className, fallback }: { src: string; className?: string; 
 }
 
 /* The breath: in for four, out for four, while they picture it. */
-function Breathe() {
+function Breathe({ title, sub, prompts }: FutureYouContent['breathe']) {
   /* It starts small and begins breathing in at once: starting full-size on
      "Inhale" left four still seconds before anything moved. */
   const [phase, setPhase] = useState<'start' | 'in' | 'out'>('start')
@@ -92,8 +213,8 @@ function Breathe() {
   const inhale = phase !== 'out'
   return (
     <div className="fy-breathe">
-      <h2 className="fy-h">This is your future.</h2>
-      <p className="fy-sub">Take a moment to visualize what it looks like for you.</p>
+      <h2 className="fy-h">{title}</h2>
+      <p className="fy-sub">{sub}</p>
       <div className={`fy-orb${phase === 'in' ? ' is-in' : ' is-out'}`} aria-live="polite">
         <i className="fy-ring fy-ring-3" />
         <i className="fy-ring fy-ring-2" />
@@ -103,13 +224,12 @@ function Breathe() {
         </span>
       </div>
       <p className="fy-prompts">
-        Where are you?
-        <br />
-        What are you doing?
-        <br />
-        Who are you with?
-        <br />
-        How do you feel in the future you see?
+        {prompts.map((p, i) => (
+          <span key={p}>
+            {i > 0 && <br />}
+            {p}
+          </span>
+        ))}
       </p>
     </div>
   )
@@ -123,6 +243,7 @@ function PhotoAsk({
   chosen,
   other,
   otherPlaceholder,
+  single,
   onToggle,
   onOther,
 }: {
@@ -132,6 +253,7 @@ function PhotoAsk({
   chosen: string[]
   other: string
   otherPlaceholder: string
+  single?: boolean
   onToggle: (label: string) => void
   onOther: (v: string) => void
 }) {
@@ -139,7 +261,7 @@ function PhotoAsk({
     <div className="jf-pick fy-ask">
       <h2 className="jf-pick-title">{title}</h2>
       <p className="jf-pick-sub">{sub}</p>
-      <p className="jf-pick-note">Choose as many as you see.</p>
+      <p className="jf-pick-note">{single ? 'Choose the one that fits best.' : 'Choose as many as you see.'}</p>
       <div className="jf-photos">
         {options.map((o) => {
           const on = chosen.includes(o.label)
@@ -179,13 +301,19 @@ function Road({
   value,
   onChange,
   still,
+  stops = WHEN,
+  title,
+  sub,
 }: {
   value: string | null
   onChange?: (v: string) => void
   /** On the ending: the road as she left it, not a question. */
   still?: boolean
+  stops?: string[]
+  title?: string
+  sub?: string
 }) {
-  const at = value ? WHEN.indexOf(value) : -1
+  const at = value ? stops.indexOf(value) : -1
   /* The pin can be taken hold of and slid along the road — or the road
      pressed anywhere — and it snaps to the nearest stop as it goes. */
   const road = useRef<HTMLDivElement>(null)
@@ -194,19 +322,19 @@ function Road({
     const r = road.current?.getBoundingClientRect()
     if (!r || !r.width) return 0
     const k = Math.min(1, Math.max(0, (clientX - r.left) / r.width))
-    return Math.round(k * (WHEN.length - 1))
+    return Math.round(k * (stops.length - 1))
   }
   const onDown = (e: React.PointerEvent) => {
     if (still || !onChange || e.button !== 0) return
     e.preventDefault()
     setDragging(true)
     let last = stopAt(e.clientX)
-    onChange(WHEN[last])
+    onChange(stops[last])
     const move = (ev: PointerEvent) => {
       const i = stopAt(ev.clientX)
       if (i !== last) {
         last = i
-        onChange(WHEN[i])
+        onChange(stops[i])
       }
     }
     const up = () => {
@@ -223,14 +351,14 @@ function Road({
     <div className={`fy-when${still ? ' is-still' : ''}`}>
       {!still && (
         <>
-          <h2 className="fy-h">How far in the future is your vision?</h2>
-          <p className="fy-sub">Pick the stretch of road it sits on.</p>
+          <h2 className="fy-h">{title}</h2>
+          <p className="fy-sub">{sub}</p>
         </>
       )}
       <div
         ref={road}
         className={`fy-road${dragging ? ' is-dragging' : ''}`}
-        style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: WHEN.length - 1 }}
+        style={{ ['--at' as string]: Math.max(0, at), ['--n' as string]: stops.length - 1 }}
         onPointerDown={onDown}
         {...(still ? {} : { 'data-no-drag-scroll': '' })}
       >
@@ -243,7 +371,7 @@ function Road({
           </svg>
         </span>
         <div className="fy-stops">
-          {WHEN.map((w, i) => (
+          {stops.map((w, i) => (
             <button
               key={w}
               type="button"
@@ -268,19 +396,21 @@ function Detail({
   onToggle,
   extra,
   onAdd,
+  content,
 }: {
   chosen: string[]
   onToggle: (v: string) => void
   extra: Record<string, string[]>
   onAdd: (group: string, v: string) => void
+  content: FutureYouContent['detail']
 }) {
   const [adding, setAdding] = useState<string | null>(null)
   const [text, setText] = useState('')
   return (
     <div className="fy-detail">
-      <h2 className="fy-h fy-h-sm">Share more detail about what Future You’s life will include.</h2>
-      <p className="fy-sub">Tap everything that belongs in it, or add your own.</p>
-      {DETAIL.map((d, gi) => (
+      <h2 className="fy-h fy-h-sm">{content.title}</h2>
+      <p className="fy-sub">{content.sub}</p>
+      {content.groups.map((d, gi) => (
         <section className="fy-group" key={d.group} style={{ ['--g' as string]: gi }}>
           <h3>
             <span aria-hidden>{d.icon}</span> {d.group}
@@ -329,6 +459,45 @@ function Detail({
   )
 }
 
+/* How clear the picture was: five stops, from blurry to vivid, the chosen one
+   in focus and the ones before it filling in. */
+function Clarity({
+  value,
+  onChange,
+  content,
+}: {
+  value: number | null
+  onChange: (n: number) => void
+  content: NonNullable<FutureYouContent['clarity']>
+}) {
+  return (
+    <div className="fy-clarity">
+      <h2 className="fy-h fy-h-sm">{content.title}</h2>
+      {content.sub && <p className="fy-sub">{content.sub}</p>}
+      <div className="fy-clarity-row" role="radiogroup" aria-label={content.title}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={value === n}
+            className={`fy-clarity-dot${value === n ? ' is-on' : ''}${value !== null && n < value ? ' is-past' : ''}`}
+            style={{ ['--blur' as string]: `${(5 - n) * 1.2}px` }}
+            onClick={() => onChange(n)}
+          >
+            <i aria-hidden />
+            <span>{n}</span>
+          </button>
+        ))}
+      </div>
+      <div className="fy-clarity-ends">
+        <span>{content.low}</span>
+        <span>{content.high}</span>
+      </div>
+    </div>
+  )
+}
+
 /* The postcard on the ending: it slides in only once she has scrolled down
    to it — watched against the phone's own scrolling page, and only when a
    good part of the card is showing, so it does not arrive unseen on load. */
@@ -368,12 +537,16 @@ function Postcard({
   onSample,
   stamped,
   sent,
+  content,
+  below,
 }: {
   text: string
   onChange: (v: string) => void
   onSample: () => void
   stamped: boolean
   sent?: boolean
+  content: FutureYouContent['postcard']
+  below?: ReactNode
 }) {
   /* The card grows with what is written on it — a postcard does not scroll. */
   const field = useRef<HTMLTextAreaElement>(null)
@@ -385,8 +558,8 @@ function Postcard({
   }, [text])
   return (
     <div className="fy-post">
-      <h2 className="fy-h fy-h-sm">Now step into the shoes of Future You.</h2>
-      <p className="fy-sub">Write a postcard to yourself, right now, from Future You.</p>
+      <h2 className="fy-h fy-h-sm">{content.title}</h2>
+      <p className="fy-sub">{content.sub}</p>
       <div className={`fy-card${stamped ? ' is-stamped' : ''}${sent ? ' is-sent' : ''}`}>
         <span className="fy-stamp" aria-hidden>
           <i>✈</i>
@@ -400,32 +573,60 @@ function Postcard({
           ref={field}
           className="fy-card-field"
           value={text}
-          placeholder="Dear Me,"
+          placeholder={content.placeholder}
           onChange={(e) => onChange(e.target.value)}
           onDoubleClick={(e) => {
             if (!e.currentTarget.value.trim()) onSample()
           }}
         />
       </div>
+      {below}
     </div>
   )
 }
 
-type Step = 'intro' | 'breathe' | 'where' | 'doing' | 'with' | 'when' | 'detail' | 'postcard' | 'results' | 'badge'
-const QUESTIONS: Step[] = ['breathe', 'where', 'doing', 'with', 'when', 'detail', 'postcard']
+type Step =
+  | 'intro'
+  | 'breathe'
+  | 'where'
+  | 'doing'
+  | 'with'
+  | 'when'
+  | 'detail'
+  | 'clarity'
+  | 'postcard'
+  | 'results'
+  | 'badge'
+
+type Reward = { before: number; after: number; total: number; next: string }
 
 export default function FutureYouFlow({
   reward,
   onComplete,
   review,
+  content = CLIENT_FUTURE,
+  postcardSlot,
 }: {
-  reward: { before: number; after: number; total: number; next: string }
+  reward: Reward | ((a: FutureYouAnswers) => Reward)
   onComplete: (a: FutureYouAnswers) => void
   review?: FutureYouAnswers
+  content?: FutureYouContent
+  /** What a caller adds under the postcard — the advisor's microphone. */
+  postcardSlot?: (text: string, set: (v: string) => void) => ReactNode
 }) {
+  const QUESTIONS: Step[] = [
+    'breathe',
+    'where',
+    'doing',
+    'with',
+    'when',
+    'detail',
+    ...(content.clarity ? (['clarity'] as Step[]) : []),
+    'postcard',
+  ]
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
   const [a, setA] = useState<FutureYouAnswers>(
-    () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '' },
+    () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '', clarity: null },
   )
   const [other, setOther] = useState<Record<string, string>>({})
   const [extra, setExtra] = useState<Record<string, string[]>>({})
@@ -445,11 +646,15 @@ export default function FutureYouFlow({
   }, [step])
 
   const toggle = (key: 'where' | 'doing' | 'with' | 'detail', v: string) =>
-    setA((p) => ({ ...p, [key]: p[key].includes(v) ? p[key].filter((x) => x !== v) : [...p[key], v] }))
+    setA((p) => {
+      if (key !== 'detail' && content.ask[key].single)
+        return { ...p, [key]: p[key].includes(v) ? [] : [v] }
+      return { ...p, [key]: p[key].includes(v) ? p[key].filter((x) => x !== v) : [...p[key], v] }
+    })
 
   const writeSample = () => {
     window.clearInterval(typing.current)
-    const full = SAMPLE_FUTURE.postcard
+    const full = content.sample.postcard
     let n = 0
     typing.current = window.setInterval(() => {
       n = Math.min(full.length, n + 4)
@@ -459,30 +664,51 @@ export default function FutureYouFlow({
   }
 
   const qi = QUESTIONS.indexOf(step)
-  const withOther = (key: 'where' | 'doing' | 'with') =>
-    other[key]?.trim() ? [...a[key], other[key].trim()] : a[key]
+  const withOther = (key: AskKey) => (other[key]?.trim() ? [...a[key], other[key].trim()] : a[key])
+
+  /* Nothing given on this screen yet. Without samples to fall back on, the
+     button says what pressing it does. */
+  const blank =
+    ((step === 'where' || step === 'doing' || step === 'with') && !withOther(step).length) ||
+    (step === 'when' && !a.when) ||
+    (step === 'detail' && !a.detail.length) ||
+    (step === 'clarity' && !a.clarity) ||
+    (step === 'postcard' && !a.postcard.trim())
+  const skipping = blank && !content.fill
 
   const onOk = () => {
     /* Left blank: the sample goes in, so a demo still arrives at a vision. */
-    if (step === 'where' && !withOther('where').length) setA((p) => ({ ...p, where: SAMPLE_FUTURE.where }))
-    if (step === 'doing' && !withOther('doing').length) setA((p) => ({ ...p, doing: SAMPLE_FUTURE.doing }))
-    if (step === 'with' && !withOther('with').length) setA((p) => ({ ...p, with: SAMPLE_FUTURE.with }))
-    if (step === 'when' && !a.when) setA((p) => ({ ...p, when: SAMPLE_FUTURE.when }))
-    if (step === 'detail' && !a.detail.length) setA((p) => ({ ...p, detail: SAMPLE_FUTURE.detail }))
+    if (content.fill) {
+      const s = content.sample
+      if (step === 'where' && !withOther('where').length) setA((p) => ({ ...p, where: s.where }))
+      if (step === 'doing' && !withOther('doing').length) setA((p) => ({ ...p, doing: s.doing }))
+      if (step === 'with' && !withOther('with').length) setA((p) => ({ ...p, with: s.with }))
+      if (step === 'when' && !a.when) setA((p) => ({ ...p, when: s.when }))
+      if (step === 'detail' && !a.detail.length) setA((p) => ({ ...p, detail: s.detail }))
+    }
     if (step === 'postcard') {
       window.clearInterval(typing.current)
-      if (!a.postcard.trim()) setA((p) => ({ ...p, postcard: SAMPLE_FUTURE.postcard }))
-      /* Posted: the postmark lands, the card goes off to the right as if it
-         had been dropped in the box, then the ending. */
-      setStamped(true)
-      window.setTimeout(() => setSent(true), 750)
-      window.setTimeout(() => {
+      if (content.fill && !a.postcard.trim()) setA((p) => ({ ...p, postcard: content.sample.postcard }))
+      const settle = () =>
         setA((p) => ({
           ...p,
           where: withOther('where'),
           doing: withOther('doing'),
           with: withOther('with'),
         }))
+      /* A card left blank by somebody answering is not posted: straight on
+         to the ending, without the stamp. */
+      if (!content.fill && !a.postcard.trim()) {
+        settle()
+        setStep('results')
+        return
+      }
+      /* Posted: the postmark lands, the card goes off to the right as if it
+         had been dropped in the box, then the ending. */
+      setStamped(true)
+      window.setTimeout(() => setSent(true), 750)
+      window.setTimeout(() => {
+        settle()
         setStep('results')
       }, 1450)
       return
@@ -494,70 +720,63 @@ export default function FutureYouFlow({
     setStep('intro')
   }
 
+  const pools: Record<AskKey, Pick[]> = {
+    where: content.ask.where.options,
+    doing: content.ask.doing.options,
+    with: content.ask.with.options,
+  }
+  const about = content.results.about(a)
+  const rewardNow = typeof reward === 'function' ? reward(a) : reward
+  const postcardText = a.postcard || (content.fill ? content.sample.postcard : '')
 
   return (
     <div className="jf fy">
       {step === 'intro' && (
         <div className="jf-intro">
           <div className="jf-hero">
-            <Photo className="jf-hero-img" src="./future-you/intro.png" fallback="fy-hero-fallback" />
+            <Photo className="jf-hero-img" src={content.intro.image} fallback="fy-hero-fallback" />
           </div>
-          <h2 className="jf-title">Let’s materialize your vision for Future You!</h2>
-          <p className="jf-body">
-            The clearer your vision, the more likely you are to achieve it.
-          </p>
+          <h2 className="jf-title">{content.intro.title}</h2>
+          <p className="jf-body">{content.intro.body}</p>
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => setStep('breathe')}>
               Get Started
             </button>
             <span className="jf-min">
-              <ClockIcon /> Takes 1 min
+              <ClockIcon /> Takes {content.intro.minutes} min
             </span>
           </div>
         </div>
       )}
 
-      {step === 'breathe' && <Breathe />}
+      {step === 'breathe' && <Breathe {...content.breathe} />}
 
-      {step === 'where' && (
+      {(step === 'where' || step === 'doing' || step === 'with') && (
         <PhotoAsk
-          title="Let’s materialize your vision!"
-          sub="Where is Future You?"
-          options={WHERE}
-          chosen={a.where}
-          other={other.where ?? ''}
-          otherPlaceholder="In the desert somewhere"
-          onToggle={(v) => toggle('where', v)}
-          onOther={(v) => setOther((o) => ({ ...o, where: v }))}
+          key={step}
+          title={content.ask[step].title}
+          sub={content.ask[step].sub}
+          options={content.ask[step].options}
+          single={content.ask[step].single}
+          chosen={a[step]}
+          other={other[step] ?? ''}
+          otherPlaceholder={content.ask[step].otherPlaceholder}
+          onToggle={(v) => toggle(step, v)}
+          onOther={(v) => setOther((o) => ({ ...o, [step]: v }))}
         />
       )}
-      {step === 'doing' && (
-        <PhotoAsk
-          title="Let’s materialize your vision!"
-          sub="What is Future You doing?"
-          options={DOING}
-          chosen={a.doing}
-          other={other.doing ?? ''}
-          otherPlaceholder="Writing a memoir"
-          onToggle={(v) => toggle('doing', v)}
-          onOther={(v) => setOther((o) => ({ ...o, doing: v }))}
+      {step === 'when' && (
+        <Road
+          value={a.when}
+          stops={content.when.stops}
+          title={content.when.title}
+          sub={content.when.sub}
+          onChange={(v) => setA((p) => ({ ...p, when: v }))}
         />
       )}
-      {step === 'with' && (
-        <PhotoAsk
-          title="Let’s materialize your vision!"
-          sub="Who is Future You with?"
-          options={WITH}
-          chosen={a.with}
-          other={other.with ?? ''}
-          otherPlaceholder="My grandchildren"
-          onToggle={(v) => toggle('with', v)}
-          onOther={(v) => setOther((o) => ({ ...o, with: v }))}
-        />
-      )}
-      {step === 'when' && <Road value={a.when} onChange={(v) => setA((p) => ({ ...p, when: v }))} />}
       {step === 'detail' && (
         <Detail
+          content={content.detail}
           chosen={a.detail}
           onToggle={(v) => toggle('detail', v)}
           extra={extra}
@@ -567,13 +786,22 @@ export default function FutureYouFlow({
           }}
         />
       )}
+      {step === 'clarity' && content.clarity && (
+        <Clarity
+          content={content.clarity}
+          value={a.clarity ?? null}
+          onChange={(n) => setA((p) => ({ ...p, clarity: n }))}
+        />
+      )}
       {step === 'postcard' && (
         <Postcard
+          content={content.postcard}
           text={a.postcard}
           onChange={(v) => setA((p) => ({ ...p, postcard: v }))}
           onSample={writeSample}
           stamped={stamped}
           sent={sent}
+          below={postcardSlot?.(a.postcard, (v) => setA((p) => ({ ...p, postcard: v })))}
         />
       )}
 
@@ -589,39 +817,16 @@ export default function FutureYouFlow({
           </button>
           {ending.about && (
             <AboutOverlay
-              title="You visualized Future You!"
-              share={80}
+              title={about.title}
+              share={about.share}
               onClose={ending.close}
-              first={
-                <>
-                  <b>
-                    <CountUp to={80} />%
-                  </b>{' '}
-                  of respondents share your vision of{' '}
-                  <b>
-                    {[
-                      (a.doing[0] ?? 'living well').toLowerCase(),
-                      (a.where[0] ?? '').toLowerCase(),
-                      a.with[0] ? `with ${a.with[0].toLowerCase().replace(/^a /, 'a ')}` : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                  </b>
-                  .
-                </>
-              }
-              second={
-                <p>
-                  Research proves that when you vividly <b>connect with your future self</b>, you
-                  bridge the gap between today’s choices and tomorrow’s well-being. You just took a{' '}
-                  <b>powerful and actionable step</b> toward the life you want.
-                </p>
-              }
+              first={about.first}
+              second={about.second}
             />
           )}
           <Reveal>
-            <h2 className="jr-title">You visualized Future You</h2>
-            <p className="jr-sub">This is the life you are preparing for:</p>
+            <h2 className="jr-title">{content.results.title}</h2>
+            <p className="jr-sub">{content.results.sub}</p>
             {/* The vision as a poster: the living sky, and on it where, what,
                 with whom and when, each stamped on in turn. */}
             <figure className="jr-memory fyr-poster">
@@ -637,9 +842,9 @@ export default function FutureYouFlow({
               <div className="fyr-lines">
                 {(
                   [
-                    ['Where', a.where, WHERE],
-                    ['Doing', a.doing, DOING],
-                    ['With', a.with, WITH],
+                    ['Where', a.where, pools.where],
+                    ['Doing', a.doing, pools.doing],
+                    ['With', a.with, pools.with],
                   ] as [string, string[], Pick[]][]
                 )
                   .filter(([, v]) => v.length)
@@ -676,7 +881,7 @@ export default function FutureYouFlow({
                       <span>When</span>
                       <b>{a.when}</b>
                     </p>
-                    <Road value={a.when} still />
+                    <Road value={a.when} stops={content.when.stops} still />
                   </div>
                 )}
               </div>
@@ -685,7 +890,7 @@ export default function FutureYouFlow({
 
           {a.detail.length > 0 && (
             <Reveal>
-              <h3 className="jr-h">What it includes</h3>
+              <h3 className="jr-h">{content.results.detailTitle}</h3>
               <div className="fyr-chips">
                 {a.detail.map((d, i) => (
                   <span key={d} className="fyr-chip" style={{ ['--i' as string]: i }}>
@@ -697,36 +902,44 @@ export default function FutureYouFlow({
           )}
 
           <Reveal>
-            <h3 className="jr-h">Your postcard</h3>
-            <p className="jr-sub">Sent back from there:</p>
-            <ArrivingCard>
-              <span className="fy-stamp" aria-hidden>
-                <i>✈</i>
-              </span>
-              <span className="fy-postmark" aria-hidden>
-                FUTURE YOU
-                <br />
-                ✦ POSTED ✦
-              </span>
-              <p className="fyr-words">
-                {/* Whole, not typed: the card arriving is the motion. */}
-                {a.postcard || SAMPLE_FUTURE.postcard}
+            {postcardText && (
+              <>
+                <h3 className="jr-h">Your postcard</h3>
+                <p className="jr-sub">{content.results.postcardSub}</p>
+                <ArrivingCard>
+                  <span className="fy-stamp" aria-hidden>
+                    <i>✈</i>
+                  </span>
+                  <span className="fy-postmark" aria-hidden>
+                    FUTURE YOU
+                    <br />
+                    ✦ POSTED ✦
+                  </span>
+                  <p className="fyr-words">
+                    {/* Whole, not typed: the card arriving is the motion. */}
+                    {postcardText}
+                  </p>
+                </ArrivingCard>
+              </>
+            )}
+            {(content.fill || a.where.length > 0) && (
+              <p className="jr-reading">
+                <span className="jr-reading-mark" aria-hidden>
+                  ✦
+                </span>
+                {content.results.line(a)}
               </p>
-            </ArrivingCard>
-            <p className="jr-reading">
-              <span className="jr-reading-mark" aria-hidden>
-                ✦
-              </span>
-              {a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself {a.where[0]?.toLowerCase() ?? 'somewhere new'}
-              {a.with[0] ? `, with ${a.with[0].toLowerCase()}` : ''}. Your advisor will build the plan
-              toward exactly that.
-            </p>
+            )}
           </Reveal>
 
           <Reveal className="jr-reward">
-            <p className="jr-reward-line">You got a reward!</p>
-            <button className="jr-claim" type="button" onClick={() => setStep('badge')}>
-              <span>Claim Badge</span>
+            {content.badge && <p className="jr-reward-line">You got a reward!</p>}
+            <button
+              className="jr-claim"
+              type="button"
+              onClick={() => (content.badge ? setStep('badge') : onComplete(a))}
+            >
+              <span>{content.badge ? 'Claim Badge' : 'Continue'}</span>
             </button>
           </Reveal>
         </div>
@@ -743,14 +956,14 @@ export default function FutureYouFlow({
         </div>
       )}
 
-      {step === 'badge' && (
+      {step === 'badge' && content.badge && (
         <JoyReward
-          badge={bgFutureYou}
-          name="Future You"
-          from={reward.before}
-          done={reward.after}
-          total={reward.total}
-          next={reward.next}
+          badge={content.badge}
+          name={content.badgeName}
+          from={rewardNow.before}
+          done={rewardNow.after}
+          total={rewardNow.total}
+          next={rewardNow.next}
           onNext={() => onComplete(a)}
         />
       )}
@@ -781,8 +994,13 @@ export default function FutureYouFlow({
               Previous question
             </button>
           </div>
-          <button className="cx-start jf-ok" type="button" onClick={onOk} disabled={stamped}>
-            {step === 'postcard' ? 'Send' : 'OK'}
+          <button
+            className={`cx-start jf-ok${skipping ? ' is-skip' : ''}`}
+            type="button"
+            onClick={onOk}
+            disabled={stamped}
+          >
+            {skipping ? 'Skip this question' : step === 'postcard' ? 'Send' : 'OK'}
           </button>
         </div>
         </>

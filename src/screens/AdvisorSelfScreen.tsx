@@ -46,6 +46,8 @@ import ConfidenceFlow from './ConfidenceFlow'
 import { ADVISOR_CONFIDENCE, sheetWithConfidence } from './advisorConfidence'
 import OutlookFlow from './OutlookFlow'
 import { ADVISOR_OUTLOOK, sheetWithOutlook } from './advisorOutlook'
+import FutureYouFlow from './FutureYouFlow'
+import { ADVISOR_FUTURE, sheetWithFuture } from './advisorFuture'
 import {
   adventureStates,
   anonymized,
@@ -1107,7 +1109,7 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
-  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook'] : []
+  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
@@ -1232,7 +1234,14 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {richOpen === 'outlook' ? (
+            {richOpen === 'future-you' ? (
+              <FutureYouFlow
+                content={ADVISOR_FUTURE}
+                reward={rewardFor('future-you', 'The Move')}
+                postcardSlot={(text, set) => <MicButton value={text} onChange={set} />}
+                onComplete={(f) => finish('future-you', (a) => sheetWithFuture(a, f))}
+              />
+            ) : richOpen === 'outlook' ? (
               <OutlookFlow
                 content={ADVISOR_OUTLOOK}
                 reward={rewardFor('outlook', 'Future You')}
