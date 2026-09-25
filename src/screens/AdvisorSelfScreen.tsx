@@ -83,6 +83,9 @@ import {
   type Sitting,
 } from '../data/advisorRecord'
 import './client-experience.css'
+/* The adventures' open fields — the identity form and the free-text boxes
+   wear them too. */
+import './joyFlow.css'
 import './advisor-flow.css'
 
 const ZOOM_STEP = 0.1
@@ -277,7 +280,7 @@ function Choices({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
       </div>
       {picks.includes(OTHER) && (
         <input
-          className="af-field af-other"
+          className="jf-other af-other"
           value={typed}
           placeholder="In your own words"
           onChange={(e) => edit.other(step.id, e.target.value)}
@@ -467,7 +470,7 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     <>
       <textarea
         ref={box}
-        className="af-field af-textarea"
+        className="jf-note af-textarea"
         value={value}
         placeholder={canListen ? 'Type your answer, or tap the mic and say it' : 'Type your answer'}
         onChange={(e) => edit.text(step.id, e.target.value)}
@@ -509,18 +512,23 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     <div className="af-welcome">
       <h2 className="af-h1">{step.title}</h2>
       <Paras text={step.body} />
-      <div className="af-form">
+      {/* The adventures' own open field — label, italic hint, input — so the
+          first thing an advisor types into looks like everything after it. */}
+      <div className="af-idform">
         {fields.map(([key, label, placeholder, hint]) => (
-          <label className="af-label" key={key}>
-            {label}
+          <div className="af-idfield" key={key}>
+            <label className="jf-other-label" htmlFor={`af-id-${key}`}>
+              {label}
+            </label>
+            {hint && <span className="jf-other-hint">{hint}</span>}
             <input
-              className="af-field"
+              id={`af-id-${key}`}
+              className="jf-other"
               value={a.identity[key]}
               placeholder={placeholder}
               onChange={(e) => edit.identity({ [key]: e.target.value })}
             />
-            {hint && <span className="af-field-hint">{hint}</span>}
-          </label>
+          </div>
         ))}
       </div>
     </div>
