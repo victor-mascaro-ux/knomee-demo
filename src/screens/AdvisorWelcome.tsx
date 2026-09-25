@@ -46,7 +46,17 @@ export default function AdvisorWelcome({ step }: { step: Step }) {
           {step.aside}
         </p>
       )}
-      <div className="af-getlist-title">What you’ll get</div>
+      {/* The heading and how long it takes, on one line: the time is pushed
+          to the far edge by the row itself rather than by a fixed gap. */}
+      <div className="af-gets-head">
+        <div className="af-getlist-title">What you’ll get</div>
+        {step.stat && (
+          <div className="af-est">
+            <ClockIcon />
+            {step.stat}
+          </div>
+        )}
+      </div>
       <ol className="af-gets">
         {step.lines?.map((l, i) => {
           const { title, body } = split(l.value)
@@ -65,12 +75,6 @@ export default function AdvisorWelcome({ step }: { step: Step }) {
           )
         })}
       </ol>
-      {step.stat && (
-        <div className="af-est">
-          <ClockIcon />
-          {step.stat}
-        </div>
-      )}
     </div>
   )
 }
