@@ -101,7 +101,13 @@ const STEPS: JoyStep[] = [
     max: q1.max ?? 3,
     other: { label: 'Other', hint: 'Or write your answer.', placeholder: 'Freedom to choose my clients' },
   },
-  { kind: 'pause', title: pause.title ?? '', body: pause.body ?? '', cta: pause.cta ?? 'Continue' },
+  {
+    kind: 'pause',
+    title: pause.title ?? '',
+    body: pause.body ?? '',
+    cta: pause.cta ?? 'Continue',
+    image: './advisor/joy/pause-and-reflect.png',
+  },
   { kind: 'split', eyebrow: 'Where your attention goes', areas: AREAS.map((a) => a.label) },
   ...REFLECT_IDS.map(reflect),
   {
