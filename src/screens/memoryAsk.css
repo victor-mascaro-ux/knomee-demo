@@ -19,6 +19,9 @@
   background: #fff;
   font: inherit;
   font-size: 13px;
+  /* A button centres its text, which only shows once a prompt wraps: the
+     second line then sits in the middle. Prompts read from the left. */
+  text-align: left;
   color: var(--text-strong);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
