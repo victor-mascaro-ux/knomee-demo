@@ -87,6 +87,25 @@ function CardHead({
   )
 }
 
+/** Which of the Business ID's cards are still waiting for their adventure. */
+export type WaitingCards = Partial<Record<'move' | 'joy' | 'future' | 'outlook' | 'confidence', boolean>>
+
+/* A card whose adventure is still to come: its head, greyed, and the line the
+   client's Financial ID says in the same place. */
+function Waiting({ icon, title, adventure }: { icon: string; title: string; adventure: string }) {
+  return (
+    <section className="pp-card is-waiting">
+      <div className="pp-card-head">
+        <span className="pp-card-title">
+          <img className="pp-card-ic" src={icon} alt="" />
+          {title}
+        </span>
+      </div>
+      <p className="pp-waiting">Complete {/^The /.test(adventure) ? adventure : `the ${adventure}`} adventure</p>
+    </section>
+  )
+}
+
 export default function AdvisorProfileScreen({
   onBack,
   onAdd,
@@ -96,9 +115,13 @@ export default function AdvisorProfileScreen({
   backLabel,
   data = marcusProfile,
   noBadges = false,
+  waiting,
 }: {
   /** Leave out the Badges card — the advisor journey page does without badges. */
   noBadges?: boolean
+  /** Cards still waiting for their adventure, as the client's Financial ID
+      has them: the title greyed, and "Complete the … adventure". */
+  waiting?: WaitingCards
   onBack: () => void
   onAdd?: () => void
   /** What the breadcrumb calls the list behind this page. A candidate opened
@@ -265,7 +288,7 @@ export default function AdvisorProfileScreen({
             <div className="pp-title-id">
               {ownerMenu}
               <h1 className="pp-title">
-                {tab === 'id' ? `${who.name}’s Business ID` : TAB_LABEL[tab]}
+                {tab === 'id' ? (who.name === 'You' ? 'Your Business ID' : `${who.name}’s Business ID`) : TAB_LABEL[tab]}
               </h1>
             </div>
             {/* The sheet is all three tabs, so that is what downloads —
@@ -279,7 +302,7 @@ export default function AdvisorProfileScreen({
               ID, then the readiness and the toolkit, each starting its own
               page under its own heading. */}
           {(printing || tab === 'id') && (
-            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} />
+            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
           )}
           {(printing || tab === 'readiness') && (
             <div className={printing ? 'print-page' : undefined}>
@@ -352,8 +375,10 @@ function BusinessIdTab({
   confidence: answers,
   stageLevel,
   noBadges = false,
+  waiting = {},
 }: {
   noBadges?: boolean
+  waiting?: WaitingCards
   d: AdvisorProfileData['id']
   confidence: AdvisorProfileData['confidence']
   stageLevel: number
@@ -427,6 +452,9 @@ function BusinessIdTab({
       <div className="pp-cols">
         {/* Left content column */}
         <div className="pp-col-main">
+          {waiting.move ? (
+            <Waiting icon={icTheMove} title="Goals" adventure="The Move" />
+          ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -462,7 +490,11 @@ function BusinessIdTab({
               ))}
             </div>
           </section>
+          )}
 
+          {waiting.joy ? (
+            <Waiting icon={icPracticeJoy} title="Practice Joy" adventure="Practice Joy" />
+          ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -501,7 +533,11 @@ function BusinessIdTab({
               </div>
             </div>
           </section>
+          )}
 
+          {waiting.future ? (
+            <Waiting icon={icFutureYou} title="Future You" adventure="Future You" />
+          ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -551,7 +587,11 @@ function BusinessIdTab({
               </div>
             )}
           </section>
+          )}
 
+          {waiting.outlook ? (
+            <Waiting icon={icOutlook} title="Outlook" adventure="Outlook" />
+          ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -573,6 +613,7 @@ function BusinessIdTab({
               </p>
             ))}
           </section>
+          )}
 
           {!noBadges && (
           <section className="pp-card">
@@ -596,6 +637,9 @@ function BusinessIdTab({
 
         {/* Right rail */}
         <div className="pp-rail">
+          {waiting.confidence ? (
+            <Waiting icon={icConfidence} title="Confidence" adventure="Confidence" />
+          ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -618,6 +662,7 @@ function BusinessIdTab({
               {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
             </button>
           </section>
+          )}
 
           {/* The two cards nobody arrives for, under the dial where the rail
               has room for them — folded, so two empty trays do not carry the
