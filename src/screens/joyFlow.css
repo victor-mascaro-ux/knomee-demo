@@ -854,3 +854,22 @@
     transition: none;
   }
 }
+
+/* ── the foot's spacing ─────────────────────────────────────────────────────
+   The phone's scroller keeps 22px of padding under its content, and a sticky
+   foot stops above it — so the bar floated over an empty white band. It now
+   sits into that padding, on the screen's edge, with its own room under it.
+   And whatever the screen ends on — the last row of photographs, a box —
+   keeps a clear gap above the bar instead of running into it. */
+.jf-foot {
+  bottom: -22px;
+  margin-bottom: -22px;
+  padding: var(--space-12) 0 var(--space-16);
+}
+.jf > :has(+ .jf-top) {
+  margin-bottom: var(--space-32, 32px);
+}
+/* With a foot, the adventure's own bottom padding is the foot's to give. */
+.jf:has(> .jf-foot) {
+  padding-bottom: 0;
+}
