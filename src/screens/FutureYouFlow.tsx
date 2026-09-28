@@ -23,6 +23,7 @@ import './joyResults.css'
 import './futureYouFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
+import { OtherField, OtherTile } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
@@ -257,6 +258,8 @@ function PhotoAsk({
   onToggle: (label: string) => void
   onOther: (v: string) => void
 }) {
+  const [otherOpen, setOtherOpen] = useState(!!other.trim())
+  const showOther = otherOpen || !!other.trim()
   return (
     <div className="jf-pick fy-ask">
       <h2 className="jf-pick-title">{title}</h2>
@@ -271,7 +274,14 @@ function PhotoAsk({
               type="button"
               className={`jf-photo${on ? ' is-on' : ''}`}
               aria-pressed={on}
-              onClick={() => onToggle(o.label)}
+              onClick={() => {
+                /* One answer only: a photograph chosen replaces their own words. */
+                if (single && !on) {
+                  setOtherOpen(false)
+                  onOther('')
+                }
+                onToggle(o.label)
+              }}
             >
               <span className="jf-photo-frame">
                 <Photo src={o.src} fallback="jf-photo-fallback" />
@@ -280,17 +290,28 @@ function PhotoAsk({
             </button>
           )
         })}
+        <OtherTile
+          open={showOther}
+          filled={!!other.trim()}
+          onToggle={() => {
+            /* Closing it takes the words with it. */
+            if (showOther) {
+              setOtherOpen(false)
+              onOther('')
+            } else {
+              setOtherOpen(true)
+              /* One answer only: their own words replace a chosen photograph. */
+              if (single) chosen.forEach(onToggle)
+            }
+          }}
+        />
       </div>
-      <label className="jf-other-label" htmlFor="fy-other">
-        Other
-      </label>
-      <span className="jf-other-hint">Or write your answer.</span>
-      <input
+      <OtherField
         id="fy-other"
-        className="jf-other"
+        open={showOther}
         value={other}
         placeholder={otherPlaceholder}
-        onChange={(e) => onOther(e.target.value)}
+        onChange={onOther}
       />
     </div>
   )
