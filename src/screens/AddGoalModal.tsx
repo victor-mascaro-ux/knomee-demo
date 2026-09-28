@@ -34,7 +34,7 @@ const TIMELINES = [
   'Ongoing',
 ]
 
-const Sparkle = () => (
+export const Sparkle = () => (
   <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
     <path
       d="M10 2.6l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5 1.5-4Z"
@@ -45,7 +45,7 @@ const Sparkle = () => (
   </svg>
 )
 
-const ArrowGo = () => (
+export const ArrowGo = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden>
     <circle cx="12" cy="12" r="11" fill="currentColor" />
     <path

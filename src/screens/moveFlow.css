@@ -1,0 +1,78 @@
+/* The Move, on the Goals flow's parts. Everything it wears is borrowed —
+   goalsFlow, addGoalModal, readinessModal, futureYouFlow — and this file only
+   sets them in a page rather than a panel, and adds the one state the pills
+   did not need in a panel that closed on the tap: chosen. */
+
+.mv-q {
+  padding-top: var(--space-16);
+}
+.mv-q .ag-suggestions {
+  margin-top: var(--space-16);
+}
+.mv-q .ag-suggestion {
+  animation: mvIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mv-q li:nth-child(2) .ag-suggestion { animation-delay: 0.04s; }
+.mv-q li:nth-child(3) .ag-suggestion { animation-delay: 0.08s; }
+.mv-q li:nth-child(4) .ag-suggestion { animation-delay: 0.12s; }
+.mv-q li:nth-child(5) .ag-suggestion { animation-delay: 0.16s; }
+.mv-q li:nth-child(n + 6) .ag-suggestion { animation-delay: 0.2s; }
+.mv-q .ag-suggestion.is-on {
+  border-color: var(--k-lime);
+  box-shadow: 0 0 0 3px var(--k-lime-soft, #eafdcf);
+}
+.mv-q .ag-own-title {
+  margin-top: var(--space-20);
+}
+.mv-q .jf-note {
+  margin-top: var(--space-16);
+}
+.mv-q .ag-points {
+  margin-top: var(--space-16);
+}
+
+/* The readiness panel's pills, in the page: they arrive one after another,
+   and the one tapped fills lime and holds for a beat before the next screen. */
+.mv-pills {
+  margin-top: var(--space-20);
+}
+.mv-pills li {
+  animation: mvIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.05s);
+}
+.mv-pills .rm-option.is-on {
+  background: var(--k-lime);
+  transform: scale(1.02);
+}
+.mv-pills .rm-option:active {
+  transform: scale(0.97);
+}
+
+.mv-chips {
+  margin-top: var(--space-20);
+}
+
+.mv-ready {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-top: var(--space-20);
+  animation: mvIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mv-ready .rm-rule {
+  margin-bottom: var(--space-4);
+}
+
+@keyframes mvIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-q .ag-suggestion,
+  .mv-pills li,
+  .mv-ready {
+    animation: none;
+  }
+}
