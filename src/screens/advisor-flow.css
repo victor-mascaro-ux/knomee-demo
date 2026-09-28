@@ -1310,3 +1310,9 @@ button.af-opt:hover {
 .is-journey .af-get-icon {
   transition: transform calc(var(--lift) * 0.7) var(--lift-ease);
 }
+
+/* Room under the privacy card, before whatever the question asks next —
+   the prompts, the box, the pills. */
+.is-journey .af-private {
+  margin-bottom: var(--space-16, 16px);
+}
