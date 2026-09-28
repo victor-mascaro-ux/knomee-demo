@@ -128,14 +128,16 @@ export function sampleAnswers(): Answers {
 
 export const privateSteps = steps.filter((s) => s.private)
 
-export const isShared = (id: string, a: Answers) => !!a.shared[id]
+/* Sittings saved before answers could be kept private have no `shared` at
+   all — read it as empty rather than falling over on it. */
+export const isShared = (id: string, a: Answers) => !!a.shared?.[id]
 
 /** The sheet as the firm is allowed to see it: every private answer the
     advisor has not chosen to share is taken out, as though it were skipped. */
 export function redact(a: Answers): Answers {
   const out: Answers = { ...a, text: { ...a.text }, choice: { ...a.choice }, other: { ...a.other } }
   for (const s of privateSteps) {
-    if (a.shared[s.id]) continue
+    if (a.shared?.[s.id]) continue
     delete out.text[s.id]
     delete out.choice[s.id]
     delete out.other[`${s.id}:other`]
