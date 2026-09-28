@@ -26,7 +26,6 @@ import {
   type Trouble,
 } from '../data/advisorDirectory'
 import { advisor } from '../data/advisorFlow'
-import { initials } from '../data/advisorAnswers'
 import { CLIENT_BRANDS } from '../components/clientBrands'
 import './advisorDirectory.css'
 
@@ -95,8 +94,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
   const claimed = new Set(entries.map((e) => e.token).filter(Boolean) as string[])
   const fromEntries: Row[] = entries.map((e) => ({
     key: `e:${e.id}`,
-    // Initials only on screen; the sitting keeps the name they typed.
-    name: initials(e.name) || 'Advisor',
+    name: e.name,
     meta: [e.role, e.book, e.firm].filter(Boolean).join(' · '),
     entryId: e.id,
     answered: e.answered,
@@ -111,7 +109,7 @@ function rowsFrom(entries: Entry[], invites: Invite[]): Row[] {
     .filter((i) => !claimed.has(i.token))
     .map((i) => ({
       key: `i:${i.token}`,
-      name: initials(i.name) || 'Advisor (no name)',
+      name: i.name.trim() || 'Advisor (no name)',
       meta: i.name.trim() ? 'Invited' : 'Invited without a name',
       entryId: null,
       answered: 0,

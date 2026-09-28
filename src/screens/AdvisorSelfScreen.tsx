@@ -799,7 +799,10 @@ export default function AdvisorSelfScreen({
   // losing them to a reload is not a thing to do to anyone. Viewing is the
   // exception — those answers are somebody else's and arrive with the entry.
   const [answers, setAnswers] = useState<Answers>(() => {
-    if (viewing && entry) return entry.answers
+    /* Someone else's sitting, over a fresh sheet: one saved before a field
+       existed (`shared`, say) arrives without it, and every rule below reads
+       it. The same merge `loadAnswers` gives a stored sheet. */
+    if (viewing && entry) return { ...emptyAnswers(), ...entry.answers }
     const loaded = loadAnswers(scope)
     /* The name the link was made for arrives already in the field. The page has
        just greeted them by it, so asking them to type it is asking them to tell
@@ -819,7 +822,7 @@ export default function AdvisorSelfScreen({
   /* On the journey page, and reading somebody else's sitting, the person is
      shown by their initials. Only what is drawn changes: the sheet — and what
      reaches the directory — keeps the name they typed. */
-  const anon = rich || viewing
+  const anon = rich
   const d = useMemo(() => derive(anon ? anonymized(answers) : answers), [answers, anon])
   /* The sheet as the firm sees it: private answers the advisor has not chosen
      to share are left out of everything that leaves this device, and out of
