@@ -873,3 +873,25 @@
 .jf:has(> .jf-foot) {
   padding-bottom: 0;
 }
+
+/* Skip is an outline button, so it hovers as the design system's outline
+   button does (.btn-outline:hover): it stays white, its edge darkens, and it
+   lifts a pixel on a soft shadow — rather than taking the filled button's
+   dark hover under grey words. */
+.jf-ok.is-skip {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.18s ease,
+    background 0.2s ease;
+}
+.jf-ok.is-skip:hover {
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1.5px var(--grey-text, #8a8792),
+    0 4px 12px rgba(16, 24, 40, 0.1);
+  transform: translateY(-1px);
+}
+.jf-ok.is-skip:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: inset 0 0 0 1.5px var(--grey-text, #8a8792);
+}
