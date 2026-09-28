@@ -52,7 +52,7 @@ const pick = (label: string): JoyPick => ({
 const PICKS: JoyPick[] = (stepOf('pj-q1').options ?? []).filter((o) => o !== OTHER).map(pick)
 const AREAS: JoyPick[] = (stepOf('pj-q2').rows ?? []).map((r) => ({
   label: r.label,
-  src: `./advisor/joy/areas/${slug(r.label)}.png`,
+  src: `./advisor/joy/areas/${slug(r.label)}.jpg`,
 }))
 
 const intro = stepOf('pj-intro')
