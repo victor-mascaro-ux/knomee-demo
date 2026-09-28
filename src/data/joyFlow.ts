@@ -65,7 +65,14 @@ export type JoyStep =
     }
   /* A breath between questions: one thought, and a button to carry on. The
      advisor's Practice Joy has one after the first question. */
-  | { kind: 'pause'; title: string; body: string; cta: string }
+  | {
+      kind: 'pause'
+      title: string
+      body: string
+      cta: string
+      /** A picture under the thought, the screen's full width. */
+      image?: string
+    }
   | { kind: 'done'; title: string; body: string; cta: string }
   | { kind: 'badge'; title: string; body: string; cta: string }
 

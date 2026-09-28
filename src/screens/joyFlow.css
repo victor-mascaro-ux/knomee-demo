@@ -895,3 +895,43 @@
   transform: translateY(0) scale(0.985);
   box-shadow: inset 0 0 0 1.5px var(--grey-text, #8a8792);
 }
+
+/* The pause's picture: under the thought, bleeding off both edges of the
+   screen the way the intros' portraits bleed off one, and easing in after
+   the words so the eye reads them first. */
+.jf-pause-img,
+.jf-pause-fallback {
+  display: block;
+  width: calc(100% + 2 * var(--space-16));
+  max-width: none;
+  height: auto;
+  margin: var(--space-24) calc(-1 * var(--space-16)) 0;
+  animation: jfPauseIn 0.7s var(--ease-out, ease) 0.15s both;
+}
+.jf-pause-fallback {
+  aspect-ratio: 1;
+}
+@keyframes jfPauseIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jf-pause-img {
+    animation: none;
+  }
+}
+
+/* The bar's buttons ease the same way: a slower, softer rise and fall on
+   hover, rather than a click-quick change. */
+.jf-ok,
+.jf-ok.is-skip,
+.jf-prev {
+  transition:
+    transform 0.35s cubic-bezier(0.45, 0.05, 0.25, 1),
+    box-shadow 0.35s cubic-bezier(0.45, 0.05, 0.25, 1),
+    background 0.35s cubic-bezier(0.45, 0.05, 0.25, 1),
+    border-color 0.35s cubic-bezier(0.45, 0.05, 0.25, 1),
+    color 0.35s cubic-bezier(0.45, 0.05, 0.25, 1);
+}

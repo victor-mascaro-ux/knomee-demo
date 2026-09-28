@@ -343,6 +343,7 @@ export default function JoyFlow({
         <div className="af-reflect">
           <h2 className="af-h2">{step.title}</h2>
           <p className="af-body">{step.body}</p>
+          {step.image && <JoyImage className="jf-pause-img" src={step.image} fallback="jf-pause-fallback" />}
         </div>
       )}
 

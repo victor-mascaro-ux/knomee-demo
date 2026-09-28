@@ -1306,3 +1306,13 @@ button.af-opt:hover {
 .is-journey .af-get:hover .af-get-icon {
   transform: rotate(-4deg) scale(1.04);
 }
+
+/* Flowier still: the cards rise and settle over 0.45s on a soft ease-in-out,
+   so the lift reads as a glide rather than a jump; the shadow blooms with it
+   and the icon leans in on the same curve. */
+.is-journey .af-get,
+.is-journey .af-get:active,
+.is-journey .af-get-icon {
+  transition-duration: 0.45s;
+  transition-timing-function: cubic-bezier(0.45, 0.05, 0.25, 1);
+}
