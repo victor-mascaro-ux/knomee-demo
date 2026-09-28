@@ -1326,3 +1326,16 @@ button.af-opt:hover {
 .is-journey .af-get-icon {
   transition: transform 0.45s cubic-bezier(0.45, 0.05, 0.25, 1);
 }
+
+/* The turn is back, and now it glides. It used to jump because the icon's
+   pop-in (and the card's rise-in) held their end state with fill-mode
+   "both", and a held animation owns `transform` — so hover changed it
+   instantly instead of transitioning. They now fill backwards only: they
+   hold the start until they play, then let go, and hover eases over 0.45s. */
+.is-journey .af-get,
+.is-journey .af-get-icon {
+  animation-fill-mode: backwards;
+}
+.is-journey .af-get:hover .af-get-icon {
+  transform: rotate(-8deg) scale(1.06);
+}
