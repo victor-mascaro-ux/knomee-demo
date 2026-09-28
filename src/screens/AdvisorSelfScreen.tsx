@@ -1314,7 +1314,7 @@ function FlowPhone({
                 </div>
               )
             ) : tab === 'finid' ? (
-              idEmpty ? (
+              !rich && idEmpty ? (
                 /* Nothing answered yet. An empty page of empty cards would read
                    as a broken Business ID rather than an unearned one.
 
@@ -1350,6 +1350,19 @@ function FlowPhone({
                 <AdvisorProfileScreen
                   mine
                   noBadges={rich}
+                  /* On the journey page the Business ID is there from the start,
+                     each card waiting for its adventure, as the client's is. */
+                  waiting={
+                    rich
+                      ? {
+                          joy: !journeyDone('practice-joy', answers),
+                          confidence: !journeyDone('confidence', answers),
+                          outlook: !journeyDone('outlook', answers),
+                          future: !journeyDone('future-you', answers),
+                          move: !journeyDone('the-move', answers),
+                        }
+                      : undefined
+                  }
                   data={d}
                   onBack={() => setTab('flow')}
                   ownerMenu={
