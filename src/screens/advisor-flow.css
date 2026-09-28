@@ -1316,3 +1316,13 @@ button.af-opt:hover {
   transition-duration: 0.45s;
   transition-timing-function: cubic-bezier(0.45, 0.05, 0.25, 1);
 }
+
+/* No turn at all: a rotating icon — and its number turning with it — read as
+   a flick however slowly it went. On hover the disc only swells a touch,
+   over the card's own 0.45s, and the number stays put. */
+.is-journey .af-get:hover .af-get-icon {
+  transform: scale(1.05);
+}
+.is-journey .af-get-icon {
+  transition: transform 0.45s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
