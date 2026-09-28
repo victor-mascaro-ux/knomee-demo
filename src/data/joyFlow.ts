@@ -62,6 +62,12 @@ export type JoyStep =
       id?: string
       /** Openings to tap into the box, as the advisor's text questions have. */
       hints?: string[]
+      /** Beginnings shown as pills over the box, one tap each. */
+      starters?: string[]
+      /** Openings the empty box types to itself, faintly, one after another. */
+      ghosts?: string[]
+      /** Said once there is a real answer. */
+      cheer?: string
     }
   /* A breath between questions: one thought, and a button to carry on. The
      advisor's Practice Joy has one after the first question. */
@@ -157,6 +163,12 @@ export const joySteps: JoyStep[] = [
     title: 'When did money last buy you something that brought you joy?',
     body: 'A day, a thing, a trip — whatever comes to mind first.',
     placeholder: 'Write as much or as little as you like.',
+    starters: ['This year…', 'Years ago…', 'On a trip…', 'At home…'],
+    ghosts: [
+      'Taking the whole family to the coast, no plans…',
+      'The day we finally paid off the house…',
+      'A dinner out that turned into the best night of the year…',
+    ],
     example:
       'Taking the whole family to the coast last summer. A rented house, no plans, the kids in the water every day. It was the first trip we paid for without checking the account first.',
   },

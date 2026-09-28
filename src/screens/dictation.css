@@ -41,3 +41,67 @@
     animation: none;
   }
 }
+
+/* The memory screen's microphone: the whole width under the card, a warmer
+   invitation than a pill in the corner, with a sound wave that lies still at
+   rest and moves while it listens. */
+.af-mic.af-mic-big {
+  width: 100%;
+  justify-content: center;
+  gap: 10px;
+  margin: var(--space-12, 12px) 0 0;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: var(--text-base, 15px);
+  background: #faf6fd;
+  transition:
+    background 0.35s var(--ease-out, ease),
+    border-color 0.35s var(--ease-out, ease),
+    box-shadow 0.35s var(--ease-out, ease),
+    transform 0.35s var(--ease-out, ease);
+}
+.af-mic.af-mic-big:hover {
+  border-color: var(--k-grape, #7639a1);
+  box-shadow: 0 4px 12px rgba(36, 4, 70, 0.1);
+  transform: translateY(-1px);
+}
+.af-mic.af-mic-big:active {
+  transform: scale(0.985);
+}
+.af-mic.af-mic-big.is-on {
+  background: #fff5f5;
+}
+.af-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+.af-wave i {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.45;
+  transition: opacity 0.35s var(--ease-out, ease);
+}
+.af-mic-big.is-on .af-wave i {
+  opacity: 1;
+  animation: afWave 0.9s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.13s);
+}
+@keyframes afWave {
+  0%,
+  100% {
+    height: 5px;
+  }
+  50% {
+    height: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-mic-big.is-on .af-wave i {
+    animation: none;
+    height: 12px;
+  }
+}

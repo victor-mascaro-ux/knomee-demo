@@ -24,6 +24,7 @@ import './joyFlow.css'
 import { JOY_AREA_CARDS, JOY_PICKS, joySteps, type JoyPick, type JoyStep } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
 import { OtherField, OtherTile } from './PhotoOther'
+import MemoryAsk from './MemoryAsk'
 import JoyResults, { type JoyResultsCopy } from './JoyResults'
 import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
@@ -200,7 +201,6 @@ export default function JoyFlow({
   /* Types an example into this question's box a few letters at a time. Stops
      if the screen changes under it, so it never writes into the next box. */
   const typing = useRef(0)
-  const note = useRef<HTMLTextAreaElement>(null)
   useEffect(() => () => window.clearInterval(typing.current), [])
   const typeIn = (text: string) => {
     window.clearInterval(typing.current)
@@ -372,51 +372,20 @@ export default function JoyFlow({
           <h2 className="af-h2">{step.title}</h2>
           <p className="af-body">{step.body}</p>
           {slot?.above}
-          {/* For a demo, and invisible to the room: a single click is the box
-              as any box — she writes what she likes. A double-click on the
-              empty box types in the sample answer, as if she were writing it.
-              With words already there a double-click does what it always
-              does, and selects one. */}
-          <textarea
-            ref={note}
-            className="jf-note"
-            rows={5}
+          {/* The memory screen: the box on its warming sky, ghost openings,
+              starters to tap, the microphone under it. For a demo, a
+              double-click on the empty box still types the sample in. */}
+          <MemoryAsk
+            key={noteIndex}
             value={a.notes[noteIndex] ?? ''}
+            onChange={setNote}
             placeholder={step.placeholder}
-            onChange={(e) => setNote(e.target.value)}
-            onDoubleClick={(e) => {
-              if (e.currentTarget.value.trim()) return
-              typeIn(step.example)
-            }}
+            ghosts={step.ghosts}
+            starters={step.starters ?? step.hints ?? []}
+            cheer={step.cheer}
+            onDemoFill={() => typeIn(step.example)}
+            below={slot?.below}
           />
-          {slot?.below}
-          {step.hints && (
-            <div className="af-hints">
-              <div className="af-hints-title">Tap a prompt to start your answer</div>
-              {step.hints.map((h) => (
-                <button
-                  key={h}
-                  type="button"
-                  className="af-hint"
-                  onClick={() => {
-                    /* The opening without its quotes or its dots, and a space
-                       after it — the cursor waits at the end for the rest. */
-                    const seed = h.replace(/^[“"]|[”"]$/g, '').replace(/\s*(…|\.\.\.)$/, '')
-                    const had = (a.notes[noteIndex] ?? '').trimEnd()
-                    const next = had ? `${had} ${seed} ` : `${seed} `
-                    setNote(next)
-                    const el = note.current
-                    if (el) {
-                      el.focus()
-                      requestAnimationFrame(() => el.setSelectionRange(next.length, next.length))
-                    }
-                  }}
-                >
-                  {h}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
 

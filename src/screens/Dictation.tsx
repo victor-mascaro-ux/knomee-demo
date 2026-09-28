@@ -73,7 +73,17 @@ function MicIcon() {
 
 /** The microphone under a free-text box: what is said is added to what is
     there. Nothing at all where the browser cannot listen. */
-export function MicButton({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function MicButton({
+  value,
+  onChange,
+  big = false,
+}: {
+  value: string
+  onChange: (v: string) => void
+  /** The memory screen's version: full width, "Tell it instead", and a sound
+      wave that moves while it listens. */
+  big?: boolean
+}) {
   const latest = useRef(value)
   latest.current = value
   const mic = useDictation((heard) => {
@@ -84,6 +94,24 @@ export function MicButton({ value, onChange }: { value: string; onChange: (v: st
     onChange(next)
   })
   if (!mic.supported) return null
+  if (big)
+    return (
+      <button
+        type="button"
+        className={`af-mic af-mic-big${mic.on ? ' is-on' : ''}`}
+        aria-pressed={mic.on}
+        onClick={mic.toggle}
+      >
+        <MicIcon />
+        <span>{mic.on ? 'Listening… tap to stop' : 'Tell it instead'}</span>
+        {/* The sound wave: still bars at rest, moving while it listens. */}
+        <span className="af-wave" aria-hidden>
+          {Array.from({ length: 7 }, (_, i) => (
+            <i key={i} style={{ ['--i' as string]: i }} />
+          ))}
+        </span>
+      </button>
+    )
   return (
     <button
       type="button"
