@@ -65,17 +65,47 @@ const REFLECT_EYEBROW: Record<(typeof REFLECT_IDS)[number], string> = {
   'pj-q5': 'Why now',
 }
 
+/* The memory screen's starters and ghost openings, per question. Where the
+   flow already has prompts for a question, they are its starters. */
+const MEMORY: Record<(typeof REFLECT_IDS)[number], { starters: string[]; ghosts: string[] }> = {
+  'pj-q3': {
+    starters: ['Last week…', 'A client who…', 'The day we…', 'When a family…'],
+    ghosts: [
+      'A client brought her daughter in to meet me…',
+      'A widow called, just to say thank you…',
+      'We got a family through the worst year of their lives…',
+    ],
+  },
+  'pj-q4': {
+    starters: ['It mattered because…', 'It reminded me…', 'Nobody else could…'],
+    ghosts: [
+      'It had nothing to do with whose name is on the wall…',
+      'It was the whole point of doing this…',
+    ],
+  },
+  'pj-q5': {
+    starters: [],
+    ghosts: [
+      'Turning fifty-five made me ask who looks after my clients…',
+      'My father lost his savings to a broker who never called back…',
+    ],
+  },
+}
+
 const reflect = (id: (typeof REFLECT_IDS)[number]): JoyStep => {
   const s = stepOf(id)
   return {
     kind: 'reflect',
     id,
     eyebrow: REFLECT_EYEBROW[id],
-    title: s.title ?? '',
+    /* The eyebrow already says 'Think back!', so the question does not open
+       by saying it again. */
+    title: (s.title ?? '').replace(/^Think back\s*[—–-]\s*(\w)/, (_m, c: string) => c.toUpperCase()),
     body: s.body ?? 'Write as much or as little as you like.',
     placeholder: 'Write it, or tap the mic and say it.',
     example: s.answer ?? '',
-    hints: s.hints,
+    starters: s.hints?.length ? s.hints : MEMORY[id].starters,
+    ghosts: MEMORY[id].ghosts,
   }
 }
 

@@ -1,0 +1,198 @@
+/* The memory question — see MemoryAsk.tsx. Motion uses the design system's
+   ease and runs slow; everything stops for reduced motion. */
+
+.mem {
+  margin-top: var(--space-16);
+}
+
+/* Starters: pills that drop a beginning into the box. */
+.mem-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6, 6px);
+  margin-bottom: var(--space-12);
+}
+.mem-starter {
+  padding: 7px 13px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-strong);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: memIn 0.5s var(--ease-out, ease) both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+  animation-fill-mode: backwards;
+  transition:
+    border-color 0.35s var(--ease-out, ease),
+    box-shadow 0.35s var(--ease-out, ease),
+    transform 0.35s var(--ease-out, ease),
+    background 0.35s var(--ease-out, ease);
+}
+.mem-starter:hover {
+  border-color: var(--k-grape, #7639a1);
+  box-shadow: 0 3px 10px rgba(36, 4, 70, 0.08);
+  transform: translateY(-1px);
+}
+.mem-starter:active {
+  background: #f7f2fc;
+  transform: scale(0.97);
+}
+
+/* The card on its sky. The sky's warmth follows what has been written:
+   --warm runs 0 (dusk) to 1 (full light). */
+.mem-card {
+  --warm: 0;
+  position: relative;
+  border-radius: var(--radius-2xl, 20px);
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(36, 4, 70, 0.06),
+    0 10px 24px -12px rgba(36, 4, 70, 0.25);
+  transition: box-shadow 0.45s var(--ease-out, ease);
+}
+.mem-card.is-focused {
+  box-shadow:
+    0 0 0 2px var(--k-grape-light, #e9d9f4),
+    0 14px 30px -12px rgba(36, 4, 70, 0.3);
+}
+.mem-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, #fff4e6 calc(var(--warm) * 100%), #f3effa),
+    color-mix(in srgb, #ffe2c6 calc(var(--warm) * 100%), #ece6f6)
+  );
+  transition: background 0.8s var(--ease-out, ease);
+}
+.mem-sun {
+  position: absolute;
+  right: -30px;
+  bottom: -40px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 120, 0.95), rgba(255, 196, 120, 0) 70%);
+  opacity: calc(0.25 + var(--warm) * 0.75);
+  transform: translateY(calc((1 - var(--warm)) * 36px)) scale(calc(0.85 + var(--warm) * 0.35));
+  transition:
+    opacity 0.8s var(--ease-out, ease),
+    transform 0.8s var(--ease-out, ease);
+}
+.mem-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  filter: blur(18px);
+  opacity: 0.55;
+  animation: memDrift 14s ease-in-out infinite alternate;
+}
+.mem-glow-a {
+  left: -30px;
+  top: -40px;
+  background: rgba(233, 217, 244, 0.9);
+}
+.mem-glow-b {
+  left: 40%;
+  bottom: -60px;
+  background: rgba(175, 252, 65, calc(0.12 + var(--warm) * 0.25));
+  animation-duration: 18s;
+  animation-delay: -6s;
+}
+
+.mem-field,
+.mem-ghost {
+  position: relative;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-16);
+  font: inherit;
+  font-size: var(--text-lg);
+  line-height: 1.5;
+}
+.mem-field {
+  min-height: 132px;
+  border: 0;
+  background: transparent;
+  color: var(--text-strong);
+  resize: none;
+  overflow: hidden;
+}
+.mem-field:focus {
+  outline: none;
+}
+.mem-field::placeholder {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+/* The ghost opening: written over the box while it is empty, faint and in
+   italics, with a caret that blinks after it. */
+.mem-ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  font-style: italic;
+  color: color-mix(in srgb, var(--text-secondary) 80%, transparent);
+  pointer-events: none;
+}
+.mem-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--k-grape, #7639a1);
+  animation: memBlink 1s steps(1) infinite;
+}
+
+/* Said once there is a real answer. */
+.mem-cheer {
+  min-height: 1.4em;
+  margin: var(--space-10, 10px) 0 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--k-grape, #7639a1);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.6s var(--ease-out, ease),
+    transform 0.6s var(--ease-out, ease);
+}
+.mem-cheer.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes memIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes memDrift {
+  to {
+    transform: translate(26px, 14px) scale(1.12);
+  }
+}
+@keyframes memBlink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mem-starter,
+  .mem-glow,
+  .mem-caret {
+    animation: none;
+  }
+  .mem-sky,
+  .mem-sun,
+  .mem-cheer {
+    transition: none;
+  }
+}

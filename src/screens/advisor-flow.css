@@ -1298,3 +1298,15 @@ button.af-opt:hover {
 .is-journey .af-get:hover .af-get-icon {
   transform: rotate(-8deg) scale(1.06);
 }
+
+/* The icon's turn lands with the card's lift. Both ran 0.45s on one curve,
+   but a 2px rise reads as finished long before an 8° turn does, so the turn
+   seemed to trail the card. It now runs on the lift's clock — one value both
+   read — cut to the part of it the eye sees the card move. */
+.is-journey .af-get {
+  --lift: 0.45s;
+  --lift-ease: cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+.is-journey .af-get-icon {
+  transition: transform calc(var(--lift) * 0.7) var(--lift-ease);
+}
