@@ -12,6 +12,7 @@ import ConfidenceFlow, { CONFIDENCE_STATEMENTS, type ConfidenceAnswers } from '.
 import OutlookFlow, { SAMPLE_OUTLOOK, type OutlookAnswers } from './OutlookFlow'
 import FutureYouFlow, { SAMPLE_FUTURE, type FutureYouAnswers } from './FutureYouFlow'
 import GoalsFlow, { type GoalsAnswers } from './GoalsFlow'
+import { MicButton } from './Dictation'
 import { RailFace } from './profileParts'
 import {
   MOOD_ANGLES,
@@ -1547,6 +1548,9 @@ export default function ClientExperienceScreen({
             ) : adventure === 'future-you' ? (
               <FutureYouFlow
                 review={reviewing ? (future ?? SAMPLE_FUTURE) : undefined}
+                /* Say it rather than write it — the same microphone the
+                   advisor's questions have. */
+                postcardSlot={(text, set) => <MicButton value={text} onChange={set} />}
                 reward={
                   reviewing
                     ? {
@@ -1573,6 +1577,7 @@ export default function ClientExperienceScreen({
             ) : adventure === 'outlook' ? (
               <OutlookFlow
                 review={reviewing ? (outlook ?? SAMPLE_OUTLOOK) : undefined}
+                askSlot={(_kind, text, setText) => ({ below: <MicButton value={text} onChange={setText} /> })}
                 reward={
                   reviewing
                     ? {
@@ -1625,6 +1630,7 @@ export default function ClientExperienceScreen({
             ) : adventure ? (
               <JoyFlow
                 review={reviewing ? (joy ?? sampleJoyAnswers()) : undefined}
+                reflectSlot={(_s, value, set) => ({ below: <MicButton value={value} onChange={set} /> })}
                 /* Financial Joy is the first adventure, and taking it — the first
                    time or again — is where the journey starts: the reward always
                    reads 0 to 1 of 5, with Confidence next. Reopened from her

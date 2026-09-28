@@ -1,0 +1,43 @@
+/* The microphone button — see Dictation.tsx. */
+
+/* Say it rather than type it. */
+/* Under the box's right-hand corner, where the thumb already is. */
+.af-mic {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0 auto;
+  padding: 8px 14px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 20px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+}
+.af-mic.is-on {
+  border-color: #d64545;
+  color: #b83232;
+  background: #fff5f5;
+}
+.af-mic-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d64545;
+  animation: af-mic-pulse 1.1s ease-in-out infinite;
+}
+@keyframes af-mic-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-mic-dot {
+    animation: none;
+  }
+}
