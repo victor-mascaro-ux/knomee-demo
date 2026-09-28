@@ -34,7 +34,12 @@ export default function AdventureList({
   foot,
   lockedOpens = true,
   doneLast = false,
+  clientLayout = false,
 }: {
+  /** Laid out exactly as the client's list: the title and its rule first,
+      the meter under it, and the card up next saying what the adventure is
+      with Start — never a count of questions answered. */
+  clientLayout?: boolean
   /** Completed rows sink to the foot of the list, under what is still to do. */
   doneLast?: boolean
   /** Whether a locked row opens its adventure. The journey page closes them,
@@ -53,8 +58,17 @@ export default function AdventureList({
 }) {
   return (
     <>
-      <ProgressMeter done={done} required={required} />
-      <h2 className="cx-screen-title">{title}</h2>
+      {clientLayout ? (
+        <>
+          <h2 className="cx-screen-title">{title}</h2>
+          <ProgressMeter done={done} required={required} />
+        </>
+      ) : (
+        <>
+          <ProgressMeter done={done} required={required} />
+          <h2 className="cx-screen-title">{title}</h2>
+        </>
+      )}
       <div className="cx-adv-list">
         {(doneLast ? [...rows.filter((r) => r.state !== 'done'), ...rows.filter((r) => r.state === 'done')] : rows).map((row) => {
           // Every row opens its adventure — the state a row wears is a look,
@@ -78,11 +92,12 @@ export default function AdventureList({
                 a={{
                   title: row.title,
                   art: row.art,
-                  blurb: row.count?.done
-                    ? `${row.count.done} of ${row.count.total} questions answered`
-                    : row.blurb,
+                  blurb:
+                    row.count?.done && !clientLayout
+                      ? `${row.count.done} of ${row.count.total} questions answered`
+                      : row.blurb,
                   minutes: row.minutes,
-                  label: row.count?.done ? 'Continue' : 'Start',
+                  label: row.count?.done && !clientLayout ? 'Continue' : 'Start',
                 }}
                 onAct={open}
                 onRow={open}
