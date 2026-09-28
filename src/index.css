@@ -285,8 +285,12 @@ body {
   width: auto;
 }
 @media (max-width: 720px) {
+  /* Tucked into the corner on a narrow window — the left one, since the phone
+     pages keep Fit to screen at the right. Pinned to one edge only: pinned to
+     both it stretched into a bar across the page. */
   .powered-by {
-    right: 12px;
+    left: 12px;
+    right: auto;
     bottom: 10px;
   }
 }

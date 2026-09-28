@@ -68,6 +68,7 @@ export default function MemoryAsk({
   starters = [],
   cheer = 'That’s a good one ✦',
   onDemoFill,
+  onEnter,
   below,
 }: {
   value: string
@@ -81,10 +82,13 @@ export default function MemoryAsk({
   cheer?: string
   /** For a demo: a double-click on the empty box writes the sample in. */
   onDemoFill?: () => void
+  /** Enter (without Shift) hands the answer on — Outlook adds it to its list. */
+  onEnter?: () => void
   /** Under the card — the microphone. */
   below?: ReactNode
 }) {
   const box = useRef<HTMLTextAreaElement>(null)
+  const card = useRef<HTMLDivElement>(null)
   const [focused, setFocused] = useState(false)
   const empty = !value.trim()
   const ghost = useGhost(ghosts, empty && !focused)
@@ -106,8 +110,14 @@ export default function MemoryAsk({
     onChange(next)
     const el = box.current
     if (el) {
-      el.focus()
-      requestAnimationFrame(() => el.setSelectionRange(next.length, next.length))
+      /* Straight to the box with the words in it: the page glides down to
+         it (the focus itself does not scroll, which would jump), and the
+         cursor waits at the end. */
+      el.focus({ preventScroll: true })
+      requestAnimationFrame(() => {
+        el.setSelectionRange(next.length, next.length)
+        card.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      })
     }
   }
 
@@ -129,7 +139,11 @@ export default function MemoryAsk({
         </div>
       )}
 
-      <div className={`mem-card${focused ? ' is-focused' : ''}`} style={{ ['--warm' as string]: warm }}>
+      <div
+        ref={card}
+        className={`mem-card${focused ? ' is-focused' : ''}`}
+        style={{ ['--warm' as string]: warm }}
+      >
         <span className="mem-sky" aria-hidden>
           <i className="mem-sun" />
           <i className="mem-glow mem-glow-a" />
@@ -152,6 +166,12 @@ export default function MemoryAsk({
           onChange={(e) => onChange(e.target.value)}
           onDoubleClick={(e) => {
             if (!e.currentTarget.value.trim()) onDemoFill?.()
+          }}
+          onKeyDown={(e) => {
+            if (onEnter && e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              onEnter()
+            }
           }}
         />
       </div>

@@ -60,7 +60,7 @@ type ProfileTab = 'id' | 'readiness' | 'toolkit'
 const TAB_LABEL: Record<ProfileTab, string> = {
   id: 'Business ID',
   readiness: 'Advisor Readiness',
-  toolkit: 'Recruiting Toolkit',
+  toolkit: 'Recruiting Playbook',
 }
 
 function CardHead({

@@ -268,6 +268,307 @@
   outline: none;
 }
 
+/* ── the detail, in colour ──
+   Each kind is a card of its own colour; its icon sits on a disc of it and
+   a count beside the name bumps with every pick. A picked chip fills with the
+   colour, a check pops in and a ring bursts off it. Above them all, a tally
+   that gains a dot of the kind's colour for everything picked. */
+[data-tone='0'] { --acc: var(--k-grape); --acc-ink: #fff; --acc-wash: #f7f0fc; --acc-line: #dcc8ec; }
+[data-tone='1'] { --acc: var(--k-ocean); --acc-ink: #fff; --acc-wash: #eaf7f5; --acc-line: #b7e1da; }
+[data-tone='2'] { --acc: var(--k-lime, #bff65b); --acc-ink: var(--k-plum); --acc-wash: #f3fbe6; --acc-line: #cfe9a6; }
+[data-tone='3'] { --acc: var(--k-bolt); --acc-ink: #fff; --acc-wash: #f5eefd; --acc-line: #dac5f4; }
+[data-tone='4'] { --acc: var(--k-plum); --acc-ink: #fff; --acc-wash: #f3f1f6; --acc-line: #d2ccdc; }
+
+.fy-tally {
+  position: sticky;
+  top: 28px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-4);
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 1px var(--k-line), 0 6px 16px rgba(36, 4, 70, 0.06);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  animation: jrDeal 0.4s var(--ease-out) both;
+}
+.fy-tally-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 10px;
+  flex: 1;
+  order: 2;
+}
+.fy-tally:not(.has-some) .fy-tally-dots::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px dashed #c6c1d0;
+}
+.fy-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 0 1.5px #fff;
+  animation: fyDotIn 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.fy-tally-text {
+  order: 1;
+  white-space: nowrap;
+}
+.fy-tally-n {
+  display: inline-block;
+  font-size: var(--text-base);
+  color: var(--text-strong);
+  animation: fyBump 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+@keyframes fyDotIn {
+  from {
+    transform: scale(0) translateY(-6px);
+  }
+}
+@keyframes fyBump {
+  40% {
+    transform: scale(1.35);
+  }
+}
+
+.fy-detail .fy-group {
+  margin-top: var(--space-12);
+  padding: 12px 12px 14px;
+  border-radius: 20px;
+  background: var(--acc-wash);
+  animation: fyCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(0.08s + var(--g) * 0.08s);
+}
+@keyframes fyIconPop {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-30deg);
+  }
+}
+@keyframes fyCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+.fy-detail .fy-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.fy-detail .fy-group h3 .fy-group-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-size: 13px;
+  line-height: 1;
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--acc) 35%, transparent);
+  animation: fyIconPop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  animation-delay: calc(0.25s + var(--g) * 0.08s);
+}
+.fy-detail .fy-group h3 .fy-group-name {
+  color: var(--text-strong);
+  flex: 1;
+}
+.fy-detail .fy-group h3 .fy-group-n {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-size: 12px;
+  font-weight: var(--weight-bold);
+  animation: fyBump 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.fy-detail .fy-chips {
+  gap: 8px;
+}
+.fy-detail .fy-chip,
+.fy-detail .fy-chip-input {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  border: 1.5px solid var(--acc-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--k-plum);
+  box-shadow: 0 1px 2px rgba(36, 4, 70, 0.05);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.fy-detail .fy-chip:hover {
+  border-color: var(--acc);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(36, 4, 70, 0.08);
+}
+.fy-detail .fy-chip:active {
+  transform: scale(0.94);
+}
+.fy-chip-check {
+  display: inline-grid;
+  place-items: center;
+  width: 0;
+  margin-right: 0;
+  overflow: hidden;
+  transition: width 0.22s cubic-bezier(0.2, 1.4, 0.4, 1), margin 0.22s ease;
+}
+.fy-chip-check svg {
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.2, 1.6, 0.4, 1) 0.05s;
+}
+.fy-detail .fy-chip.is-on {
+  border-color: var(--acc);
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-weight: var(--weight-semibold);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--acc) 40%, transparent);
+  animation: fyPop 0.32s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.fy-chip.is-on .fy-chip-check {
+  width: 14px;
+  margin-right: 5px;
+}
+.fy-chip.is-on .fy-chip-check svg {
+  transform: scale(1);
+}
+/* The burst: a ring of the colour thrown off the chip as it is picked. */
+.fy-detail .fy-chip.is-on::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--acc);
+  pointer-events: none;
+  animation: fyBurst 0.5s ease-out both;
+}
+@keyframes fyBurst {
+  to {
+    transform: scale(1.25, 1.6);
+    opacity: 0;
+  }
+}
+.fy-detail .fy-chip-add {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--acc) 55%, #fff);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-secondary);
+}
+.fy-detail .fy-chip-add:hover {
+  background: #fff;
+  color: var(--k-plum);
+}
+.fy-detail .fy-chip-input {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+/* The way to the next kind: a dashed card in that kind's colour, waiting
+   under the last one, its arrow nudging to be tapped. */
+.fy-next-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: var(--space-12);
+  padding: 12px 14px;
+  border: 1.5px dashed color-mix(in srgb, var(--acc) 60%, #fff);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--acc-wash) 55%, #fff);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  animation: fyCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.fy-next-group:hover {
+  border-style: solid;
+  border-color: var(--acc);
+  background: var(--acc-wash);
+}
+.fy-next-group:active {
+  transform: scale(0.98);
+}
+.fy-next-group b {
+  color: var(--text-strong);
+}
+.fy-next-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--acc) 22%, #fff);
+  color: var(--k-plum);
+  font-size: 13px;
+}
+.fy-next-text {
+  flex: 1;
+}
+.fy-next-arrow {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-weight: var(--weight-bold);
+  animation: fyNudge 1.6s ease-in-out 0.8s infinite;
+}
+@keyframes fyNudge {
+  0%,
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fy-next-group,
+  .fy-next-arrow,
+  .fy-tally,
+  .fy-dot,
+  .fy-tally-n,
+  .fy-detail .fy-group,
+  .fy-detail .fy-group h3 .fy-group-icon,
+  .fy-group-n,
+  .fy-detail .fy-chip.is-on,
+  .fy-detail .fy-chip.is-on::after {
+    animation: none;
+    opacity: 1;
+  }
+  .fy-detail .fy-chip.is-on::after {
+    display: none;
+  }
+}
+
 /* ── the postcard ── */
 .fy-card {
   position: relative;
@@ -738,14 +1039,54 @@
    Five stops from blurry to vivid. Each dot is drawn out of focus in
    proportion to how far it sits from vivid, and comes sharp as it is chosen;
    the ones before it fill in, as the road's stops do. */
+/* The question on its own card, centred in the screen — Confidence's card:
+   a small grape count over the words set large, the five orbs under them. */
 .fy-clarity {
-  padding-top: var(--space-16);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-24) 0;
+}
+.fy-clarity-card {
+  padding: 30px 20px 24px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 10, 40, 0.06), 0 16px 36px -14px rgba(20, 10, 40, 0.28);
+  animation: fyClarityIn 0.38s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes fyClarityIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+.fy-clarity-count {
+  display: block;
+  margin-bottom: var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--k-grape);
+}
+.fy-clarity-q {
+  margin: 0;
+  font-size: 22px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+  text-wrap: pretty;
+  color: var(--text-strong);
+}
+.fy-clarity-card .fy-sub {
+  margin: var(--space-8) 0 0;
 }
 .fy-clarity-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-8);
-  margin-top: var(--space-24);
+  gap: var(--space-6);
+  margin-top: 30px;
 }
 .fy-clarity-dot {
   display: grid;
@@ -782,11 +1123,25 @@
 .fy-clarity-dot.is-past i {
   opacity: 0.7;
 }
+/* Picked: the orb keeps its own blur — that is the answer — and says it is
+   the one in colour instead, a deeper purple filling in, with the lime ring
+   on the sharp disc around it rather than on the blurred orb itself. */
+.fy-clarity-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transition: box-shadow 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fy-clarity-dot.is-on .fy-clarity-orb {
+  box-shadow: 0 0 0 3px var(--k-lime, #affc41);
+  transform: scale(1.1);
+}
 .fy-clarity-dot.is-on i {
   opacity: 1;
-  filter: none;
-  transform: scale(1.14);
-  box-shadow: 0 0 0 4px var(--k-lime, #affc41);
+  background: radial-gradient(circle at 35% 35%, var(--k-orchid, #a855d6), var(--k-bolt-deep, #7c3aed) 55%, var(--k-plum, #240446));
 }
 .fy-clarity-dot.is-on span {
   color: var(--text-strong);
@@ -804,5 +1159,33 @@
 @media (prefers-reduced-motion: reduce) {
   .fy-clarity-dot i {
     transition: none;
+  }
+}
+
+/* ── the breath in waves ───────────────────────────────────────────────────
+   Each ring now moves a beat after the one inside it, so a breath ripples
+   through the orb: out from the core on the in-breath, in from the edge on
+   the out-breath. What made staggered rings drift before was delay on top of
+   a full-length move, which ran past the 4-second breath; here each ring's
+   move is shortened by its delay, so every ring still lands on the beat and
+   the next breath starts in step. */
+.fy-ring,
+.fy-core {
+  transition-duration: 3.1s;
+}
+/* In: the core leads, the rings follow outward. */
+.fy-orb.is-in .fy-core { transition-delay: 0s; }
+.fy-orb.is-in .fy-ring-1 { transition-delay: 0.3s; }
+.fy-orb.is-in .fy-ring-2 { transition-delay: 0.6s; }
+.fy-orb.is-in .fy-ring-3 { transition-delay: 0.9s; }
+/* Out: the edge leads, the rings follow inward. */
+.fy-orb.is-out .fy-ring-3 { transition-delay: 0s; }
+.fy-orb.is-out .fy-ring-2 { transition-delay: 0.3s; }
+.fy-orb.is-out .fy-ring-1 { transition-delay: 0.6s; }
+.fy-orb.is-out .fy-core { transition-delay: 0.9s; }
+@media (prefers-reduced-motion: reduce) {
+  .fy-ring,
+  .fy-core {
+    transition-delay: 0s !important;
   }
 }

@@ -196,3 +196,10 @@
     transition: none;
   }
 }
+
+/* Scrolled to from a starter, the card stops clear of the bar over the foot
+   of the screen, with room for the row under it. */
+.mem-card {
+  scroll-margin-bottom: 150px;
+  scroll-margin-top: 230px;
+}
