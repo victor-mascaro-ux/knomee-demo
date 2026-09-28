@@ -87,10 +87,14 @@
   flex: 1;
   min-height: 0;
 }
+/* Where the deck is, set to the right and quiet: a count to glance at, not
+   a heading to read before the question. */
 .jf-count {
+  text-align: right;
   font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--text-strong);
+  font-weight: var(--weight-regular, 400);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
 .jf-split-ask {
   margin: 2px 0 0;
