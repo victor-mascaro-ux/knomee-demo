@@ -683,10 +683,10 @@ const TIER_BODY: Record<1 | 2 | 3, string> = {
 }
 
 /** The five stages of change, read off The Move's three progress screens. */
-const STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance'] as const
-type Stage = (typeof STAGES)[number]
+export const STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance'] as const
+export type Stage = (typeof STAGES)[number]
 
-function stageOf(a: Answers): Stage {
+export function stageOf(a: Answers): Stage {
   const thought = rank('mv-q5', a)
   const knows = rank('mv-q6', a)
   const acting = rank('mv-q7', a)
@@ -1186,7 +1186,7 @@ export function derive(a: Answers): Derived {
 
 const DASH = '—'
 
-const STAGE_BODY: Record<Stage, string> = {
+export const STAGE_BODY: Record<Stage, string> = {
   'Pre-Contemplation': 'I’m not thinking about changing anything right now.',
   Contemplation:
     'I feel like some changes are needed, but I’m not actually planning on doing anything anytime soon.',
@@ -1196,7 +1196,7 @@ const STAGE_BODY: Record<Stage, string> = {
 }
 
 /* Invented demo shares — how much company each stage has. */
-const STAGE_SHARE: Record<Stage, string> = {
+export const STAGE_SHARE: Record<Stage, string> = {
   'Pre-Contemplation': '11% of respondents are also in this stage.',
   Contemplation: '34% of respondents are also in this stage.',
   Preparation: '27% of respondents are also in this stage.',

@@ -71,7 +71,7 @@ const PencilTip = () => (
 
 /* A pro or a con: a line they are typing, or one they have typed. The list is
    the thing, so an empty last line is simply not saved. */
-function PointList({
+export function PointList({
   label,
   hint,
   items,

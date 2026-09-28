@@ -809,3 +809,48 @@
 .jf-top .af-progress {
   margin: 0;
 }
+
+/* "Other" as a tile in the photo grid: a square in the grid's own tint, a
+   pencil in the middle. It fills in under the pointer, wears the lime ring
+   once there are words in it, and opens its field under the grid. */
+.jf-other-tile {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--k-teal-light), var(--k-grape-light));
+  color: var(--k-grape, #7639a1);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.jf-other-tile svg {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.jf-photo-other:hover .jf-other-tile svg,
+.jf-photo-other.is-open .jf-other-tile svg {
+  transform: rotate(-12deg) scale(1.08);
+}
+.jf-photo-other.is-open .jf-other-tile {
+  background: linear-gradient(135deg, #f4ecfa, var(--k-grape-light));
+}
+.jf-other-open {
+  margin-top: var(--space-16);
+  animation: jfOtherIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.jf-other-open .jf-other-label {
+  margin: 0 0 var(--space-6);
+}
+@keyframes jfOtherIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jf-other-open,
+  .jf-other-tile svg {
+    animation: none;
+    transition: none;
+  }
+}

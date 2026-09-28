@@ -23,6 +23,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import { JOY_AREA_CARDS, JOY_PICKS, joySteps, type JoyPick, type JoyStep } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
+import { OtherField, OtherTile } from './PhotoOther'
 import JoyResults, { type JoyResultsCopy } from './JoyResults'
 import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
@@ -162,6 +163,8 @@ export default function JoyFlow({
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */
   const [area, setArea] = useState(0)
+  /* Whether the Other tile has been opened, before anything is typed in it. */
+  const [otherOpen, setOtherOpen] = useState(false)
   /* Always opened empty, the client's way: taking an adventure again is
      answering it again, not editing what the device remembers. */
   const [a, setA] = useState<JoyAnswers>(() => review ?? emptyAnswers(steps))
@@ -295,7 +298,8 @@ export default function JoyFlow({
           <div className="jf-photos">
             {step.options.map((o) => {
               const on = a.tools.includes(o.label)
-              const full = !on && a.tools.length >= step.max
+              /* Their own words count toward the limit, like a photograph. */
+              const full = !on && a.tools.length + (a.other.trim() ? 1 : 0) >= step.max
               return (
                 <button
                   key={o.label}
@@ -312,17 +316,25 @@ export default function JoyFlow({
                 </button>
               )
             })}
+            <OtherTile
+              open={otherOpen || !!a.other.trim()}
+              filled={!!a.other.trim()}
+              disabled={!otherOpen && !a.other.trim() && a.tools.length >= step.max}
+              onToggle={() => {
+                /* Closing it takes the words with it. */
+                if (otherOpen || a.other.trim()) {
+                  setOtherOpen(false)
+                  setA((prev) => ({ ...prev, other: '' }))
+                } else setOtherOpen(true)
+              }}
+            />
           </div>
-          <label className="jf-other-label" htmlFor="jf-other">
-            {step.other.label}
-          </label>
-          <span className="jf-other-hint">{step.other.hint}</span>
-          <input
+          <OtherField
             id="jf-other"
-            className="jf-other"
+            open={otherOpen || !!a.other.trim()}
             value={a.other}
             placeholder={step.other.placeholder}
-            onChange={(e) => setA((prev) => ({ ...prev, other: e.target.value }))}
+            onChange={(v) => setA((prev) => ({ ...prev, other: v }))}
           />
         </div>
       )}
