@@ -700,6 +700,7 @@ function StepBody({
           onOpen={onAdventure}
           lockedOpens={!journey}
           doneLast={journey}
+          clientLayout={journey}
         />
       )
 
