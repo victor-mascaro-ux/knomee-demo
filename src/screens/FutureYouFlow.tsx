@@ -12,8 +12,8 @@
  * answer, and a double-click on the empty postcard writes hers in.
  *
  * The mechanism is shared: the advisor's Future You is this same flow handed
- * different `content` — its own questions, photographs, road and detail, a
- * clarity question the client's does not ask — and without samples, so a
+ * different `content` — its own questions, photographs, road and detail —
+ * and without samples, so a
  * question left blank is skipped. The client's is the default.
  */
 
@@ -70,6 +70,7 @@ export const SAMPLE_FUTURE: FutureYouAnswers = {
   when: '5–10 years',
   detail: ['Cooking', 'Entertaining', 'Concerts', 'International', 'Road trips', 'Volunteer', 'Walking', 'Yoga'],
   postcard: `Dear Me,\n\n${financialId.postcard}\n\nWith love,\nFuture You`,
+  clarity: 4,
 }
 
 type AskKey = 'where' | 'doing' | 'with'
@@ -135,6 +136,7 @@ export const CLIENT_FUTURE: FutureYouContent = {
     sub: 'Tap everything that belongs in it, or add your own.',
     groups: DETAIL,
   },
+  clarity: { title: 'How clear was the picture of Future You?', low: 'Very blurry', high: 'Vividly clear' },
   postcard: {
     title: 'Now step into the shoes of Future You.',
     sub: 'Write a postcard to yourself, right now, from Future You.',
@@ -411,6 +413,49 @@ export function Road({
   )
 }
 
+/* Drawn icons a kind can name instead of a glyph: what you own is a key, your
+   clients a handshake. Anything else is shown as the character it is. */
+const GROUP_ICONS: Record<string, JSX.Element> = {
+  key: (
+    <>
+      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="m21 2-9.6 9.6" />
+      <path d="m15.5 7.5 3 3L22 7l-3-3" />
+    </>
+  ),
+  handshake: (
+    <>
+      <path d="m11 17 2 2a1 1 0 1 0 3-3" />
+      <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" />
+      <path d="m21 3 1 11h-2" />
+      <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" />
+      <path d="M3 4h8" />
+    </>
+  ),
+  people: (
+    <>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  plane: (
+    <>
+      <path d="M2 22h20" />
+      <path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z" />
+    </>
+  ),
+}
+const GroupIcon = ({ icon }: { icon: string }) =>
+  GROUP_ICONS[icon] ? (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {GROUP_ICONS[icon]}
+    </svg>
+  ) : (
+    <>{icon}</>
+  )
+
 /* The detail: five kinds, each with its own and a way to add theirs. */
 function Detail({
   chosen,
@@ -427,17 +472,72 @@ function Detail({
 }) {
   const [adding, setAdding] = useState<string | null>(null)
   const [text, setText] = useState('')
+  /* Each kind in its own colour, and what is picked in it — the tally at the
+     top gains a dot of that colour for every pick. */
+  const groups = content.groups.map((d, gi) => {
+    const items = [...d.items, ...(extra[d.group] ?? [])]
+    return { ...d, tone: gi % 5, items, picked: items.filter((it) => chosen.includes(it)) }
+  })
+  const total = groups.reduce((n, d) => n + d.picked.length, 0)
+  /* One kind at a time, each added under the ones before, which stay. Coming
+     back to the screen opens as far as the last kind with a pick in it. */
+  const [shown, setShown] = useState(() => {
+    let last = 0
+    groups.forEach((d, i) => {
+      if (d.picked.length) last = i
+    })
+    return last + 1
+  })
+  const newest = useRef<HTMLElement>(null)
+  const revealed = useRef(false)
+  useEffect(() => {
+    if (!revealed.current) return
+    const t = window.setTimeout(() => newest.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60)
+    return () => window.clearTimeout(t)
+  }, [shown])
+  const next = groups[shown]
   return (
     <div className="fy-detail">
       <h2 className="fy-h fy-h-sm">{content.title}</h2>
       <p className="fy-sub">{content.sub}</p>
-      {content.groups.map((d, gi) => (
-        <section className="fy-group" key={d.group} style={{ ['--g' as string]: gi }}>
+      <div className={`fy-tally${total ? ' has-some' : ''}`} aria-live="polite">
+        <span className="fy-tally-dots" aria-hidden>
+          {groups.flatMap((d) => d.picked.map((it) => <i key={it} className="fy-dot" data-tone={d.tone} />))}
+        </span>
+        <span className="fy-tally-text">
+          {total ? (
+            <>
+              <b key={total} className="fy-tally-n">
+                {total}
+              </b>{' '}
+              picked
+            </>
+          ) : (
+            'Nothing picked yet'
+          )}
+        </span>
+      </div>
+      {groups.slice(0, shown).map((d, gi) => (
+        <section
+          className="fy-group"
+          key={d.group}
+          ref={gi === shown - 1 ? newest : undefined}
+          data-tone={d.tone}
+          style={{ ['--g' as string]: revealed.current ? 0 : gi }}
+        >
           <h3>
-            <span aria-hidden>{d.icon}</span> {d.group}
+            <span className="fy-group-icon" aria-hidden>
+              <GroupIcon icon={d.icon} />
+            </span>
+            <span className="fy-group-name">{d.group}</span>
+            {d.picked.length > 0 && (
+              <span key={d.picked.length} className="fy-group-n">
+                {d.picked.length}
+              </span>
+            )}
           </h3>
           <div className="fy-chips">
-            {[...d.items, ...(extra[d.group] ?? [])].map((it) => (
+            {d.items.map((it) => (
               <button
                 key={it}
                 type="button"
@@ -445,6 +545,11 @@ function Detail({
                 aria-pressed={chosen.includes(it)}
                 onClick={() => onToggle(it)}
               >
+                <span className="fy-chip-check" aria-hidden>
+                  <svg viewBox="0 0 12 12" width="12" height="12">
+                    <path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
                 {it}
               </button>
             ))}
@@ -476,6 +581,28 @@ function Detail({
           </div>
         </section>
       ))}
+      {next && (
+        <button
+          key={next.group}
+          type="button"
+          className="fy-next-group"
+          data-tone={next.tone}
+          onClick={() => {
+            revealed.current = true
+            setShown((s) => s + 1)
+          }}
+        >
+          <span className="fy-next-icon" aria-hidden>
+            <GroupIcon icon={next.icon} />
+          </span>
+          <span className="fy-next-text">
+            Next: <b>{next.group}</b>
+          </span>
+          <span className="fy-next-arrow" aria-hidden>
+            →
+          </span>
+        </button>
+      )}
     </div>
   )
 }
@@ -493,7 +620,11 @@ function Clarity({
 }) {
   return (
     <div className="fy-clarity">
-      <h2 className="fy-h fy-h-sm">{content.title}</h2>
+      {/* On a card of its own in the middle of the screen, the way
+          Confidence asks its statements. */}
+      <div className="fy-clarity-card">
+      <span className="fy-clarity-count">Clarity check</span>
+      <h2 className="fy-clarity-q">{content.title}</h2>
       {content.sub && <p className="fy-sub">{content.sub}</p>}
       <div className="fy-clarity-row" role="radiogroup" aria-label={content.title}>
         {[1, 2, 3, 4, 5].map((n) => (
@@ -506,7 +637,9 @@ function Clarity({
             style={{ ['--blur' as string]: `${(5 - n) * 1.2}px` }}
             onClick={() => onChange(n)}
           >
-            <i aria-hidden />
+            <b className="fy-clarity-orb" aria-hidden>
+              <i />
+            </b>
             <span>{n}</span>
           </button>
         ))}
@@ -514,6 +647,7 @@ function Clarity({
       <div className="fy-clarity-ends">
         <span>{content.low}</span>
         <span>{content.high}</span>
+      </div>
       </div>
     </div>
   )
@@ -706,6 +840,7 @@ export default function FutureYouFlow({
       if (step === 'with' && !withOther('with').length) setA((p) => ({ ...p, with: s.with }))
       if (step === 'when' && !a.when) setA((p) => ({ ...p, when: s.when }))
       if (step === 'detail' && !a.detail.length) setA((p) => ({ ...p, detail: s.detail }))
+      if (step === 'clarity' && !a.clarity) setA((p) => ({ ...p, clarity: s.clarity ?? null }))
     }
     if (step === 'postcard') {
       window.clearInterval(typing.current)

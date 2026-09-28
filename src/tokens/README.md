@@ -26,10 +26,19 @@ layer that would collide with the shipped rules in `index.css`) and
 Fonts in `app.html`).
 
 Added here rather than synced down: `--k-azure`/`--k-crimson` and their washes,
-the four `--tag-*` pairs the Readiness and Toolkit tabs hang their behavioural
+the four `--tag-*` pairs the Readiness and Playbook tabs hang their behavioural
 tags on, and `--signal-motivator`/`--signal-concern`. The ramp had no blue and
-no concern red; both are sampled from the Prospect Toolkit design. Push them up
+no concern red; both are sampled from the Prospect Playbook design. Push them up
 on the next sync.
 
 To re-sync, read the project with the `DesignSync` tool — the token files are
 small and diffable.
+
+## Rules
+
+- **An icon, avatar or badge beside text aligns to the top of the text, never
+  to the middle of the block.** Next to one line the two agree; once the text
+  runs to two lines or more (a name over a date, a title over a caption), a
+  centred icon floats between them and stops belonging to either. In a flex
+  row use `align-items: flex-start`; in a grid, `align-self: start` on the
+  icon's cell. Nudge it down only to meet the first line's cap height.

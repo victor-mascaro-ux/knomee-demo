@@ -35,6 +35,22 @@ import { Road } from './FutureYouFlow'
 import { MARK_PARTS } from './ClientExperienceScreen'
 import { GoalDetail, TTM_ART } from './profileParts'
 import { Reveal } from './JoyResults'
+import MemoryAsk from './MemoryAsk'
+
+/* The two questions The Move asks in their own words, on the memory screen:
+   openings that type themselves into the empty box, and beginnings to tap. */
+const WHY_GHOSTS = [
+  'I want what I build to finally belong to me…',
+  'My clients deserve more than my firm lets me give them…',
+  'I’ve outgrown the platform I’m on…',
+]
+const WHY_STARTERS = ['What pulls me is…', 'What pushes me is…', 'I’m tired of…', 'I want to own…']
+const BLOCKER_GHOSTS = [
+  'I need to know my clients will come with me…',
+  'I can’t decide until I understand the deal…',
+  'My team has to be taken care of first…',
+]
+const BLOCKER_STARTERS = ['I need to know…', 'I’m worried about…', 'Before I decide…']
 
 const OTHER = 'Other'
 const step = (id: string) => flowSteps.find((s) => s.id === id)
@@ -304,6 +320,21 @@ export default function MoveFlow({
         </div>
       )}
 
+      {/* The move they picked, held at the top of every question after it, so
+          each one is plainly about that move. Outside the screens, so it
+          arrives once and stays put while the questions change under it. */}
+      {m.move && (qi > 0 || ri >= 0) && (
+        <div className="mv-goal">
+          <span className="mv-goal-spark" aria-hidden>
+            <Sparkle />
+          </span>
+          <span className="mv-goal-text">
+            <span className="mv-goal-label">Your move</span>
+            <b>{m.move}</b>
+          </span>
+        </div>
+      )}
+
       {at === 'pick' && (
         <div className="mv-q">
           <h2 className="fy-h fy-h-sm">{title('mv-q1')}</h2>
@@ -372,14 +403,15 @@ export default function MoveFlow({
         <div className="mv-q">
           <h2 className="fy-h fy-h-sm">{title('mv-q3')}</h2>
           <p className="fy-sub">{body('mv-q3')}</p>
-          <textarea
-            className="jf-note"
-            rows={5}
+          <MemoryAsk
             value={m.why}
+            onChange={(v) => set('why', v)}
             placeholder="Write it, or tap the mic and say it."
-            onChange={(e) => set('why', e.target.value)}
+            ghosts={WHY_GHOSTS}
+            starters={WHY_STARTERS}
+            cheer="That’s the heart of it ✦"
+            below={mic?.(m.why, (v) => set('why', v))}
           />
-          {mic?.(m.why, (v) => set('why', v))}
         </div>
       )}
 
@@ -438,14 +470,15 @@ export default function MoveFlow({
           <h2 className="fy-h fy-h-sm">{title('mv-q10b')}</h2>
           <p className="fy-sub">{body('mv-q10b')}</p>
           {privateNote?.('mv-q10b')}
-          <textarea
-            className="jf-note"
-            rows={5}
+          <MemoryAsk
             value={m.blocker}
+            onChange={(v) => set('blocker', v)}
             placeholder="Write it, or tap the mic and say it."
-            onChange={(e) => set('blocker', e.target.value)}
+            ghosts={BLOCKER_GHOSTS}
+            starters={BLOCKER_STARTERS}
+            cheer="Now it can be worked on ✦"
+            below={mic?.(m.blocker, (v) => set('blocker', v))}
           />
-          {mic?.(m.blocker, (v) => set('blocker', v))}
         </div>
       )}
 

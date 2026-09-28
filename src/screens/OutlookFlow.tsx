@@ -24,6 +24,7 @@ import './joyResults.css'
 import './outlookFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
+import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
 
@@ -57,7 +58,6 @@ const HOPE_STARTS = [
   'I’m excited about…',
   'I want to…',
 ]
-const stem = (c: string) => c.replace(/…$/, '')
 
 /* The samples a demo types in, and OK records: her authored answers. */
 export const SAMPLE_OUTLOOK: OutlookAnswers = {
@@ -213,40 +213,123 @@ function Sky({
   hopes,
   dawn,
   tall,
+  label,
+  onRemove,
 }: {
   concerns: string[]
   hopes: string[]
   dawn: boolean
   tall?: boolean
+  /** While answering: which of the two carry their words on the sky. */
+  label?: { clouds?: boolean; lights?: boolean }
+  /** Take one back off the sky. */
+  onRemove?: (kind: Kind, i: number) => void
 }) {
+  const named = !!(label?.clouds && concerns.length) || !!(label?.lights && hopes.length)
+  /* The label that has been tapped open to its whole sentence. */
+  const [open, setOpen] = useState<string | null>(null)
+  const toggle = (key: string) => setOpen((o) => (o === key ? null : key))
+  /* A caption belongs to a label that can be read on this screen: moving on
+     from the concerns to the hopes closes a cloud's, whose words are no
+     longer on the sky. */
+  const cloudsNamed = !tall && !!label?.clouds
+  const lightsNamed = !tall && !!label?.lights
+  useEffect(() => {
+    setOpen(null)
+  }, [cloudsNamed, lightsNamed])
+  const shown = open && (open.startsWith('c') ? cloudsNamed : lightsNamed) ? open : null
+  const X = ({ kind, i, text }: { kind: Kind; i: number; text: string }) =>
+    onRemove ? (
+      <button type="button" className="ol-x" aria-label={`Remove “${text}”`} onClick={(e) => {
+          e.stopPropagation()
+          setOpen(null)
+          onRemove(kind, i)
+        }}>
+        <svg viewBox="0 0 16 16" width="8" height="8" fill="none" aria-hidden>
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+      </button>
+    ) : null
   return (
-    <div className={`ol-sky${dawn ? ' is-dawn' : ''}${tall ? ' is-tall' : ''}`} aria-hidden>
+    <div
+      className={`ol-sky${dawn ? ' is-dawn' : ''}${tall ? ' is-tall' : ''}${named ? ' is-named' : ''}`}
+      aria-hidden={!named}
+    >
       <i className="ol-sun" />
       <i className="ol-haze" />
       {concerns.slice(0, CLOUD_SPOTS.length).map((c, i) => {
         const p = CLOUD_SPOTS[i]
+        const words = tall || label?.clouds
         return (
           <span
-            className="ol-cloud"
+            className={`ol-cloud${words ? ' has-words' : ''}`}
             key={`c${i}:${c}`}
-            style={{ left: `${p.x}%`, top: `${tall ? p.y * 0.4 + 30 : p.y}%`, ['--s' as string]: p.s, ['--i' as string]: i }}
+            style={{
+              left: `${p.x}%`,
+              top: `${tall ? p.y * 0.4 + 30 : named ? 10 + p.y * 0.6 : p.y}%`,
+              ['--s' as string]: p.s,
+              ['--i' as string]: i,
+            }}
           >
-            {tall && <b>{short(c)}</b>}
+            {words && (
+              <b
+                /* Tappable while answering; on the ending the sky is only read. */
+                {...(tall
+                  ? {}
+                  : {
+                      className: open === `c${i}` ? 'is-open' : undefined,
+                      role: 'button',
+                      tabIndex: 0,
+                      'aria-expanded': open === `c${i}`,
+                      onClick: () => toggle(`c${i}`),
+                      onKeyDown: (e: React.KeyboardEvent) =>
+                        (e.key === 'Enter' || e.key === ' ') && toggle(`c${i}`),
+                    })}
+              >
+                {short(c)}
+                {!tall && label?.clouds && <X kind="concern" i={i} text={c} />}
+              </b>
+            )}
           </span>
         )
       })}
       {hopes.slice(0, LIGHT_SPOTS.length).map((h, i) => {
-        const p = (tall ? LIGHT_SPOTS_TALL : LIGHT_SPOTS)[i]
+        const p = (tall || named ? LIGHT_SPOTS_TALL : LIGHT_SPOTS)[i]
+        const words = tall || label?.lights
         return (
           <span
-            className="ol-light"
+            className={`ol-light${words ? ' has-words' : ''}`}
             key={`h${i}:${h}`}
             style={{ left: `${p.x}%`, top: `${p.y}%`, ['--i' as string]: i }}
           >
-            {tall && <b>{short(h)}</b>}
+            {words && (
+              <b
+                /* Tappable while answering; on the ending the sky is only read. */
+                {...(tall
+                  ? {}
+                  : {
+                      className: open === `h${i}` ? 'is-open' : undefined,
+                      role: 'button',
+                      tabIndex: 0,
+                      'aria-expanded': open === `h${i}`,
+                      onClick: () => toggle(`h${i}`),
+                      onKeyDown: (e: React.KeyboardEvent) =>
+                        (e.key === 'Enter' || e.key === ' ') && toggle(`h${i}`),
+                    })}
+              >
+                {short(h)}
+                {!tall && label?.lights && <X kind="hope" i={i} text={h} />}
+              </b>
+            )}
           </span>
         )
       })}
+      {/* The tapped one, whole: the sentence across the foot of the sky. */}
+      {shown && (
+        <p className="ol-full" aria-live="polite">
+          {shown.startsWith('c') ? concerns[Number(shown.slice(1))] : hopes[Number(shown.slice(1))]}
+        </p>
+      )}
     </div>
   )
 }
@@ -268,7 +351,6 @@ function Ask({
   setText,
   content,
   onAdd,
-  onRemove,
   slot,
 }: {
   kind: Kind
@@ -277,7 +359,6 @@ function Ask({
   setText: (t: string) => void
   content: OutlookContent
   onAdd: (s: string) => void
-  onRemove: (i: number) => void
   slot?: { above?: ReactNode; below?: ReactNode }
 }) {
   const box = useRef<HTMLTextAreaElement>(null)
@@ -313,67 +394,29 @@ function Ask({
       <h2 className="ol-q">{content.question(kind, items.length)}</h2>
       <p className="ol-note">{content.note}</p>
       {slot?.above}
-      <div className="ol-chips">
-        {starts.map((c, i) => (
-          <button
-            key={c}
-            type="button"
-            className={`ol-chip${text.startsWith(stem(c)) ? ' is-on' : ''}`}
-            style={{ ['--i' as string]: i }}
-            onClick={() => {
-              setText(`${stem(c)} `)
-              const el = box.current
-              if (el) {
-                el.focus()
-                /* The cursor waits at the end, ready for the rest. */
-                requestAnimationFrame(() => el.setSelectionRange(el.value.length, el.value.length))
-              }
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-      <textarea
-        ref={box}
-        className="jf-note ol-box"
-        rows={3}
+      {/* The memory screen Practice Joy asks its long questions on: the box
+          on its warming sky, ghost openings, starters to tap — and under it
+          one action line, the microphone at its start and Add at its end. */}
+      <MemoryAsk
         value={text}
+        onChange={setText}
         placeholder={content.placeholder[kind]}
-        onChange={(e) => setText(e.target.value)}
-        onDoubleClick={(e) => {
-          if (!e.currentTarget.value.trim()) typeIn()
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault()
-            add()
-          }
-        }}
+        ghosts={samples}
+        starters={starts}
+        onDemoFill={typeIn}
+        onEnter={add}
+        below={
+          /* Add and the microphone as one matched pair of pills: Add at the
+             start, the mic at the end — where it sits on every other screen. */
+          <div className={`ol-add-row${slot?.below ? ' has-mic' : ''}`}>
+            <button className="ol-add ol-add-pill" type="button" disabled={!text.trim()} onClick={add}>
+              <span aria-hidden>+</span>
+              {concern ? 'Add Concern' : 'Add Hope'}
+            </button>
+            {slot?.below}
+          </div>
+        }
       />
-      {slot?.below}
-      <div className="ol-add-row">
-        <button className="ol-add" type="button" disabled={!text.trim()} onClick={add}>
-          {concern ? 'Add Concern' : 'Add Hope'}
-        </button>
-      </div>
-      {items.length > 0 && (
-        <div className="ol-list">
-          <span className="ol-list-head">{concern ? 'Concerns' : 'Hopes'}</span>
-          <ul>
-            {items.map((it, i) => (
-              <li key={`${i}:${it}`} className={concern ? 'is-concern' : 'is-hope'}>
-                <span>{it}</span>
-                <button type="button" aria-label="Remove" onClick={() => onRemove(i)}>
-                  <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
-                    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   )
 }
@@ -470,7 +513,21 @@ export default function OutlookFlow({
 
       {(step === 'concerns' || step === 'hopes') && (
         <>
-          <Sky concerns={a.concerns} hopes={step === 'hopes' ? a.hopes : []} dawn={step === 'hopes'} />
+          {/* What is added goes onto the sky with its words — concerns as
+              clouds, hopes as lights — and comes off it with its ×. */}
+          <Sky
+            concerns={a.concerns}
+            hopes={step === 'hopes' ? a.hopes : []}
+            dawn={step === 'hopes'}
+            label={step === 'hopes' ? { lights: true } : { clouds: true }}
+            onRemove={(k, i) =>
+              setA((p) =>
+                k === 'concern'
+                  ? { ...p, concerns: p.concerns.filter((_, j) => j !== i) }
+                  : { ...p, hopes: p.hopes.filter((_, j) => j !== i) },
+              )
+            }
+          />
           <Ask
             key={step}
             kind={kind}
@@ -482,13 +539,6 @@ export default function OutlookFlow({
             onAdd={(s) =>
               setA((p) =>
                 step === 'concerns' ? { ...p, concerns: [...p.concerns, s] } : { ...p, hopes: [...p.hopes, s] },
-              )
-            }
-            onRemove={(i) =>
-              setA((p) =>
-                step === 'concerns'
-                  ? { ...p, concerns: p.concerns.filter((_, j) => j !== i) }
-                  : { ...p, hopes: p.hopes.filter((_, j) => j !== i) },
               )
             }
           />

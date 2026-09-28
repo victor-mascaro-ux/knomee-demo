@@ -308,7 +308,7 @@ export default function ProspectProfileScreen({
               [
                 ['id', 'Financial ID'],
                 ['readiness', 'Prospect Readiness'],
-                ['toolkit', 'Prospect Toolkit'],
+                ['toolkit', 'Prospect Playbook'],
               ] as [ProfileTab, string][]
             ).map(([id, label]) => (
               <button
@@ -334,7 +334,7 @@ export default function ProspectProfileScreen({
                   ? `${prospect.name}’s Financial ID`
                   : tab === 'readiness'
                     ? 'Prospect Readiness'
-                    : 'Prospect Toolkit'}
+                    : 'Prospect Playbook'}
               </h1>
             </div>
             <button className="btn btn-download active" type="button" onClick={print}>
@@ -789,7 +789,7 @@ export default function ProspectProfileScreen({
                 <ReadinessTabView d={prospectReadiness} />
               </div>
               <div className="print-page">
-                <h2 className="print-head">Prospect Toolkit</h2>
+                <h2 className="print-head">Prospect Playbook</h2>
                 <ToolkitTabView d={prospectToolkit} />
               </div>
             </>

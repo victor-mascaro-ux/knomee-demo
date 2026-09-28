@@ -1027,7 +1027,7 @@ export default function ClientProfileScreen({
                 [
                   ['id', 'Financial ID'],
                   ['insights', 'Client Insights'],
-                  ['toolkit', 'Client Toolkit'],
+                  ['toolkit', 'Client Playbook'],
                 ] as [ClientTab, string][]
               ).map(([id, label]) => (
                 <button
@@ -1054,7 +1054,7 @@ export default function ClientProfileScreen({
               {ownerMenu}
               <h1 className="pp-title">
                 {client.name}’s{' '}
-                {tab === 'id' ? 'Financial ID' : tab === 'insights' ? 'Insights' : 'Toolkit'}
+                {tab === 'id' ? 'Financial ID' : tab === 'insights' ? 'Insights' : 'Playbook'}
               </h1>
             </div>
             {/* The PDF is of the Financial ID — there is no insights document to
@@ -1405,7 +1405,7 @@ export default function ClientProfileScreen({
                 <ClientInsightsTab name={client.name} />
               </div>
               <div className="print-page">
-                <h2 className="print-head">Client Toolkit</h2>
+                <h2 className="print-head">Client Playbook</h2>
                 <ClientToolkitTab />
               </div>
             </>

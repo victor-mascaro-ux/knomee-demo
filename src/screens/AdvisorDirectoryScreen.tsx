@@ -454,7 +454,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
 
       <p className="adir-note">
         A name opens that person's Business ID on the phone, the way they saw it — their readiness
-        and toolkit are in its menu. Rows marked “walked in” were answered from the demo menu
+        and playbook are in its menu. Rows marked “walked in” were answered from the demo menu
         rather than through a link. Removing a row throws away the answers behind it and stops
         their link working; the device they answered on keeps its own copy.
       </p>

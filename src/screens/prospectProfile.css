@@ -945,8 +945,11 @@
        reads as set in rather than as a second margin. */
     padding: 14px var(--space-8);
   }
+  /* Top-aligned with the name, never centred on the block beside it: the
+     design system's rule for an icon or portrait next to text. */
   .pp-avatar {
     grid-row: span 2;
+    align-self: start;
   }
   .pp-name,
   .pp-meta {

@@ -76,3 +76,61 @@
     animation: none;
   }
 }
+
+/* ── the move, held at the top ──
+   The move they picked sits over every question after it: a small card on
+   the lime wash, its sparkle on a plum disc, "Your move" over the move. */
+.mv-goal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10, 10px);
+  margin-top: var(--space-12, 12px);
+  padding: 10px 14px 10px 10px;
+  border-radius: 16px;
+  background: linear-gradient(120deg, var(--k-lime-light, #f3fbe6), #fff 80%);
+  box-shadow: inset 0 0 0 1.5px var(--k-lime-soft, #e4f7c6);
+  animation: mvGoalIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mv-goal-spark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--k-plum, #240446);
+  color: var(--k-lime, #bff65b);
+}
+.mv-goal-spark svg {
+  width: 15px;
+  height: 15px;
+}
+.mv-goal-text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+.mv-goal-label {
+  font-size: 11px;
+  font-weight: var(--weight-bold, 700);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--k-grape, #7639a1);
+}
+.mv-goal b {
+  font-size: var(--text-base, 15px);
+  font-weight: var(--weight-semibold, 600);
+  color: var(--text-strong, #240446);
+  text-wrap: pretty;
+}
+@keyframes mvGoalIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-goal {
+    animation: none;
+  }
+}
