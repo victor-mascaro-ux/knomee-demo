@@ -69,12 +69,18 @@ export function OtherField({
   id: string
 }) {
   const box = useRef<HTMLInputElement>(null)
+  const wrap = useRef<HTMLDivElement>(null)
+  /* Opened: the field glides up into view above the bar — the focus itself
+     does not scroll, which would jump — and takes the cursor. */
   useEffect(() => {
-    if (open) box.current?.focus()
+    if (!open) return
+    box.current?.focus({ preventScroll: true })
+    const id = requestAnimationFrame(() => wrap.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+    return () => cancelAnimationFrame(id)
   }, [open])
   if (!open) return null
   return (
-    <div className="jf-other-open">
+    <div className="jf-other-open" ref={wrap}>
       <label className="jf-other-label" htmlFor={id}>
         Your own answer
       </label>
