@@ -318,7 +318,7 @@ function PhotoAsk({
 }
 
 /* How far away: a road, and her pin travels along it to the band chosen. */
-function Road({
+export function Road({
   value,
   onChange,
   still,

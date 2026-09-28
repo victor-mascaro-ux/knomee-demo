@@ -48,6 +48,7 @@ import OutlookFlow from './OutlookFlow'
 import { ADVISOR_OUTLOOK, sheetWithOutlook } from './advisorOutlook'
 import FutureYouFlow from './FutureYouFlow'
 import { ADVISOR_FUTURE, sheetWithFuture } from './advisorFuture'
+import MoveFlow, { sheetWithMove } from './MoveFlow'
 import {
   adventureStates,
   anonymized,
@@ -1109,7 +1110,7 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
-  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you'] : []
+  const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
@@ -1234,7 +1235,23 @@ function FlowPhone({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {richOpen === 'future-you' ? (
+            {richOpen === 'the-move' ? (
+              <MoveFlow
+                privateNote={(id) => {
+                  const s = steps.find((x) => x.id === id)
+                  return s ? <PrivateNote step={s} a={answers} edit={edit} stacked /> : null
+                }}
+                mic={(value, set) => <MicButton value={value} onChange={set} />}
+                onComplete={(m) => {
+                  edit.apply((a) => withFinished(sheetWithMove(a, m), 'the-move'))
+                  setRichOpen(null)
+                  /* The last adventure hands on to the flow's own ending: the
+                     summary, then the three questions. */
+                  setTab('flow')
+                  reset(steps.findIndex((x) => x.kind === 'summary'))
+                }}
+              />
+            ) : richOpen === 'future-you' ? (
               <FutureYouFlow
                 content={ADVISOR_FUTURE}
                 reward={rewardFor('future-you', 'The Move')}
