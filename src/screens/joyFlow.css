@@ -945,3 +945,28 @@
 .jf-other-open {
   scroll-margin-bottom: 120px;
 }
+
+/* One hover for the whole bar. The filled button darkens (.cx-start:hover);
+   the two outline buttons beside it — Skip and the round Back — do the same
+   thing as each other: the edge takes the brand's purple, the words darken,
+   and a faint lilac fills in. Nothing lifts or casts a shadow, because the
+   filled button does not either. */
+.jf-ok.is-skip:hover,
+.jf-prev:hover {
+  background: #faf6fd;
+  color: var(--text-strong);
+  transform: none;
+}
+.jf-ok.is-skip:hover {
+  box-shadow: inset 0 0 0 1.5px var(--k-grape, #7639a1);
+}
+.jf-prev:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+.jf-ok.is-skip:active,
+.jf-prev:active {
+  transform: scale(0.97);
+}
+.jf-ok.is-skip:active {
+  box-shadow: inset 0 0 0 1.5px var(--k-grape, #7639a1);
+}
