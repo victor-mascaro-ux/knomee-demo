@@ -37,6 +37,16 @@ import { GoalDetail, TTM_ART } from './profileParts'
 import { Reveal } from './JoyResults'
 import MemoryAsk from './MemoryAsk'
 
+/* The sparkle on the move card's disc. The Goals one leans up and to the left
+   — drawn to sit beside text, not inside a circle — so this pair is balanced
+   on the centre of its box: the big star low left, the small one high right. */
+const DiscSparkle = () => (
+  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+    <path d="M8.5 5.5Q9.3 10.7 14.5 11.5 9.3 12.3 8.5 17.5 7.7 12.3 2.5 11.5 7.7 10.7 8.5 5.5Z" />
+    <path d="M15.5 1.9Q15.9 4.1 18.1 4.5 15.9 4.9 15.5 7.1 15.1 4.9 12.9 4.5 15.1 4.1 15.5 1.9Z" />
+  </svg>
+)
+
 /* The two questions The Move asks in their own words, on the memory screen:
    openings that type themselves into the empty box, and beginnings to tap. */
 const WHY_GHOSTS = [
@@ -152,9 +162,10 @@ const BITS = Array.from({ length: 36 }, (_, i) => ({
   r: (i * 47) % 360,
 }))
 
-/* One answer from a list of pills — the readiness panel's, tapped once. The
-   pill tapped holds its colour a moment before the next screen comes in, so
-   the choice is seen being made. */
+/* One answer from a list, tapped once. Each answer is a card with a disc at
+   its first line; the tapped one fills lime, a ripple spreads from the finger,
+   the disc turns plum and draws its check, and the others step back — held a
+   beat before the next screen comes in, so the choice is seen being made. */
 function Pills({
   options,
   value,
@@ -164,21 +175,64 @@ function Pills({
   value: string | null
   onPick: (v: string) => void
 }) {
+  const [tapped, setTapped] = useState<string | null>(null)
+  const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null)
+  const picked = tapped ?? value
   return (
-    <ul className="rm-options mv-pills">
+    <ul className={`mv-choices${tapped ? ' is-chosen' : ''}`}>
       {options.map((o, i) => (
         <li key={o} style={{ ['--i' as string]: i }}>
           <button
-            className={`rm-option${value === o ? ' is-on' : ''}`}
+            className={`mv-choice${picked === o ? ' is-on' : ''}`}
             type="button"
-            aria-pressed={value === o}
-            onClick={() => onPick(o)}
+            aria-pressed={picked === o}
+            onClick={(e) => {
+              const r = e.currentTarget.getBoundingClientRect()
+              setRipple({ x: e.clientX - r.left, y: e.clientY - r.top, k: Date.now() })
+              setTapped(o)
+              onPick(o)
+            }}
           >
-            {o}
+            {tapped === o && ripple && (
+              <i
+                key={ripple.k}
+                className="mv-ripple"
+                style={{ left: ripple.x, top: ripple.y }}
+                aria-hidden
+              />
+            )}
+            <span className="mv-disc" aria-hidden>
+              <svg viewBox="0 0 16 16">
+                <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+              </svg>
+            </span>
+            <span className="mv-choice-text">{o}</span>
           </button>
         </li>
       ))}
     </ul>
+  )
+}
+
+/* How far through the three readiness questions: three stops on a track,
+   the ones answered filled, the current one glowing. */
+function Track({ at, of }: { at: number; of: number }) {
+  return (
+    <div className="mv-track" role="img" aria-label={`Question ${at + 1} of ${of}`}>
+      <span className="mv-track-line" aria-hidden>
+        <i style={{ width: `${(at / (of - 1)) * 100}%` }} />
+      </span>
+      {Array.from({ length: of }, (_, i) => (
+        <span
+          key={i}
+          className={`mv-stop${i < at ? ' is-done' : i === at ? ' is-now' : ''}`}
+          style={{ left: `${(i / (of - 1)) * 100}%` }}
+          aria-hidden
+        >
+          {i < at ? '✓' : i + 1}
+        </span>
+      ))}
+    </div>
   )
 }
 
@@ -247,7 +301,8 @@ export default function MoveFlow({
   /* A pill tapped: it holds its colour for a beat, then the next screen. */
   const pickAndGo = <K extends keyof MoveAnswers>(k: K, v: MoveAnswers[K]) => {
     set(k, v)
-    window.setTimeout(next, 260)
+    // Long enough for the answer card's check to draw before the page turns.
+    window.setTimeout(next, 560)
   }
 
   const blank =
@@ -326,7 +381,7 @@ export default function MoveFlow({
       {m.move && (qi > 0 || ri >= 0) && (
         <div className="mv-goal">
           <span className="mv-goal-spark" aria-hidden>
-            <Sparkle />
+            <DiscSparkle />
           </span>
           <span className="mv-goal-text">
             <span className="mv-goal-label">Your move</span>
@@ -525,11 +580,9 @@ export default function MoveFlow({
           for how far through, the move's name, the question and its pills. */}
       {ri >= 0 && (
         <div className="mv-ready" key={at}>
-          <span className="rm-rule" aria-hidden>
-            <i style={{ width: `${(ri / READY.length) * 100}%` }} />
-          </span>
-          <p className="rm-goal">{goal.title}</p>
-          <p className="rm-ask">{title(READY_ID[at])}</p>
+          <Track at={ri} of={READY.length} />
+          <p className="mv-ready-count">Question {ri + 1} of {READY.length}</p>
+          <h2 className="fy-h fy-h-sm">{title(READY_ID[at])}</h2>
           <Pills
             options={opts(READY_ID[at])}
             value={m[at as 'thought' | 'knows' | 'acting']}

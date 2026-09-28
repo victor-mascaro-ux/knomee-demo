@@ -102,8 +102,8 @@
   color: var(--k-lime, #bff65b);
 }
 .mv-goal-spark svg {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
 }
 .mv-goal-text {
   display: grid;
@@ -132,5 +132,226 @@
 @media (prefers-reduced-motion: reduce) {
   .mv-goal {
     animation: none;
+  }
+}
+
+/* ── the answers, as cards ──
+   One tap each. The card's disc sits at its first line, the words read from
+   the left. Tapped: lime fills from the finger, the disc turns plum and draws
+   its check, the others step back while the next screen comes in. */
+.mv-choices {
+  list-style: none;
+  margin: var(--space-20) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10, 10px);
+}
+.mv-choices li {
+  animation: mvIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.08s + var(--i, 0) * 0.07s);
+}
+.mv-choice {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12, 12px);
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 18px;
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-base, 15px);
+  line-height: 1.4;
+  text-align: left;
+  color: var(--text-strong);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease),
+    transform 0.3s var(--ease-out, ease),
+    opacity 0.3s var(--ease-out, ease);
+}
+.mv-choice:hover {
+  border-color: var(--k-grape, #7639a1);
+  box-shadow: 0 6px 16px -8px rgba(36, 4, 70, 0.3);
+  transform: translateY(-1px);
+}
+.mv-choice:active {
+  transform: scale(0.98);
+}
+.mv-choice-text {
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+/* The disc: an empty ring, then plum with a lime check drawn into it. Nudged
+   down so its middle meets the first line of the answer. */
+.mv-disc {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: -1px;
+  border: 1.5px solid var(--k-grape-light, #d9c4ea);
+  border-radius: 50%;
+  background: #fff;
+  transition:
+    background 0.25s var(--ease-out, ease),
+    border-color 0.25s var(--ease-out, ease),
+    transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.mv-disc svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--k-lime, #bff65b);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+}
+.mv-choice:hover .mv-disc {
+  border-color: var(--k-grape, #7639a1);
+}
+
+.mv-choice.is-on {
+  border-color: var(--k-lime, #bff65b);
+  background: var(--k-lime-soft, #eafdcf);
+  box-shadow: 0 0 0 3px var(--k-lime-soft, #eafdcf);
+  transform: none;
+}
+.mv-choice.is-on .mv-disc {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-plum, #240446);
+  transform: scale(1.12);
+}
+.mv-choice.is-on .mv-disc svg {
+  animation: mvCheck 0.32s 0.08s ease-out forwards;
+}
+.mv-choice.is-on .mv-choice-text {
+  font-weight: var(--weight-semibold, 600);
+}
+.mv-choices.is-chosen .mv-choice:not(.is-on) {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+
+/* Lime spreading out from where the finger landed. */
+.mv-ripple {
+  position: absolute;
+  z-index: -1;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  background: var(--k-lime, #bff65b);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: mvRipple 0.6s ease-out forwards;
+}
+@keyframes mvRipple {
+  to {
+    transform: scale(28);
+    opacity: 0;
+  }
+}
+@keyframes mvCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── the readiness track ──
+   Three stops for the three questions: answered ones plum with a check, the
+   current one lime and glowing, the line between them filling as they go. */
+.mv-track {
+  position: relative;
+  height: 26px;
+  margin: var(--space-4) 13px 0;
+}
+.mv-track-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  background: var(--k-grape-light, #e9d9f4);
+  overflow: hidden;
+}
+.mv-track-line i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--k-grape, #7639a1), var(--k-plum, #240446));
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mv-stop {
+  position: absolute;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 50%;
+  background: #fff;
+  font-size: 12px;
+  font-weight: var(--weight-bold, 700);
+  color: var(--k-grape, #7639a1);
+}
+.mv-stop.is-done {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-plum, #240446);
+  color: var(--k-lime, #bff65b);
+}
+.mv-stop.is-now {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-lime, #bff65b);
+  color: var(--k-plum, #240446);
+  animation:
+    mvStopIn 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) 0.15s backwards,
+    mvGlow 2.4s ease-in-out 0.6s infinite;
+}
+@keyframes mvStopIn {
+  from {
+    transform: scale(0.6);
+  }
+}
+@keyframes mvGlow {
+  50% {
+    box-shadow: 0 0 0 6px rgba(191, 246, 91, 0.35);
+  }
+}
+.mv-ready-count {
+  margin: var(--space-8) 0 0;
+  font-size: 11px;
+  font-weight: var(--weight-bold, 700);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--k-grape, #7639a1);
+}
+.mv-ready .fy-h {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-choices li,
+  .mv-stop.is-now,
+  .mv-ripple {
+    animation: none;
+  }
+  .mv-choice.is-on .mv-disc svg {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
