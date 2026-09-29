@@ -874,6 +874,15 @@ const QUICK_FLOW: Partial<Record<ArtKey, 'goal' | 'event' | 'question' | 'vision
 /* ── quick access: one tap on the knomee mark ──────────────────────────────
    The next adventure, four things worth doing, and the mood arc — a flat plum
    disc that runs off the bottom of the screen, faces along its rim. */
+/* What each face might say, for the demo's double-click. */
+const MOOD_SAMPLE: Record<MoodId, string> = {
+  worried: 'The markets have been rough and I keep checking the accounts at night.',
+  unsure: 'I think we are on track, but I am not sure the plan still fits us.',
+  neutral: 'Nothing big has changed since we last talked. Just steady.',
+  good: 'We finally set up the kids’ college accounts, and it feels like progress.',
+  great: 'We paid off the car and booked the family trip without worrying about it.',
+}
+
 function KnomeeSheet({
   onClose,
   onPick,
@@ -894,6 +903,21 @@ function KnomeeSheet({
      box for the reason, and the way back to the other four. */
   const [why, setWhy] = useState('')
   const picked = moods.find((m) => m.id === mood)
+  /* A double-click on the empty box types in a reason that fits the face —
+     the demo's way of answering, as every other box in the app has. */
+  const typing = useRef(0)
+  useEffect(() => () => window.clearInterval(typing.current), [])
+  const sampleWhy = () => {
+    if (!picked) return
+    const full = MOOD_SAMPLE[picked.id]
+    window.clearInterval(typing.current)
+    let n = 0
+    typing.current = window.setInterval(() => {
+      n = Math.min(full.length, n + 3)
+      setWhy(full.slice(0, n))
+      if (n >= full.length) window.clearInterval(typing.current)
+    }, 16)
+  }
   const { r, faceR, face } = MOOD_ARC
   const swipe = useSwipeDown(onClose)
   return (
@@ -922,6 +946,9 @@ function KnomeeSheet({
             value={why}
             placeholder="Say as much or as little as you like."
             onChange={(e) => setWhy(e.target.value)}
+            onDoubleClick={(e) => {
+              if (!e.currentTarget.value.trim()) sampleWhy()
+            }}
           />
           <div className="kx-mood-foot">
             <button
