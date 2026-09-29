@@ -4506,6 +4506,7 @@ export default function App() {
                 }}
                 onDownload={() => showToast('CSV downloaded')}
                 onAdd={() => showToast('Added to Network')}
+                onCopied={() => showToast('Link copied')}
               />
             )}
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}

@@ -328,3 +328,16 @@
 .jw.has-card::-webkit-scrollbar {
   display: none;
 }
+
+/* The way on, always at the foot: pushed down when the card is short, and
+   held there on a plum fade when the card is long enough to scroll. */
+.jw.has-card .jw-next,
+.jw.has-card .mv-end {
+  position: sticky;
+  bottom: -32px;
+  z-index: 3;
+  margin-top: auto;
+  margin-bottom: -32px;
+  padding: var(--space-24, 24px) 0 32px;
+  background: linear-gradient(180deg, rgba(36, 4, 70, 0) 0%, var(--k-plum) 28%);
+}

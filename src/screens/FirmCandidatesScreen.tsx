@@ -13,7 +13,7 @@
    screen cannot disagree. */
 
 import { InvitePanel } from './AdvisorDirectoryScreen'
-import { deleteEntry, deleteInvite, listEntries, type Trouble } from '../data/advisorDirectory'
+import { deleteEntry, deleteInvite, inviteLink, listEntries, type Trouble } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useState } from 'react'
@@ -336,12 +336,15 @@ function Row({
   onOpen,
   onAdd,
   onRemove,
+  onCopied,
   checked,
   onToggle,
 }: {
   c: Candidate
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
+  /** Said once a row's link is on the clipboard. */
+  onCopied?: () => void
   /** Only a live sitting can be removed; the worked example cannot. */
   onRemove?: (c: LiveCandidate) => void
   checked: boolean
@@ -444,6 +447,19 @@ function Row({
                     onClick: opensProfile(c) ? () => onOpen(c) : undefined,
                   },
                 ]),
+            /* The link they were sent, to send again: only a sitting that came
+               in through one has it. */
+            ...('entryId' in c && (c as LiveCandidate).token
+              ? [
+                  {
+                    label: 'Copy link',
+                    onClick: () => {
+                      void navigator.clipboard?.writeText(inviteLink((c as LiveCandidate).token as string))
+                      onCopied?.()
+                    },
+                  },
+                ]
+              : []),
             ...('entryId' in c && onRemove
               ? [{ label: 'Remove entry', danger: true, onClick: () => onRemove(c as LiveCandidate) }]
               : []),
@@ -459,6 +475,7 @@ function Table({
   onOpen,
   onAdd,
   onRemove,
+  onCopied,
   selected,
   onToggle,
   allChecked,
@@ -467,6 +484,7 @@ function Table({
   rows: Candidate[]
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
+  onCopied?: () => void
   onRemove: (c: LiveCandidate) => void
   selected: Set<string>
   onToggle: (name: string) => void
@@ -578,6 +596,7 @@ function Table({
                       onOpen={onOpen}
                       onAdd={onAdd}
                       onRemove={onRemove}
+                      onCopied={onCopied}
                       checked={selected.has(c.name)}
                       onToggle={() => onToggle(c.name)}
                     />
@@ -636,7 +655,10 @@ export default function FirmCandidatesScreen({
   onOpenEntry,
   onDownload,
   onAdd,
+  onCopied,
 }: {
+  /** A row's invite link copied from its menu. */
+  onCopied?: () => void
   onOpenProfile: (c: Candidate) => void
   /** A live sitting's row: opens the report built from its answers. */
   onOpenEntry: (entryId: string) => void
@@ -783,6 +805,7 @@ export default function FirmCandidatesScreen({
         rows={rows}
         onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
         onRemove={setRemoving}
+        onCopied={onCopied}
         onAdd={onAdd}
         selected={selected}
         onToggle={toggle}
