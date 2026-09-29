@@ -70,7 +70,10 @@ export default function MemoryAsk({
   onDemoFill,
   onEnter,
   below,
+  disabled,
 }: {
+  /** Nothing more can go in: the box is shut and says why, in its own words. */
+  disabled?: string
   value: string
   onChange: (v: string) => void
   placeholder: string
@@ -91,7 +94,7 @@ export default function MemoryAsk({
   const card = useRef<HTMLDivElement>(null)
   const [focused, setFocused] = useState(false)
   const empty = !value.trim()
-  const ghost = useGhost(ghosts, empty && !focused)
+  const ghost = useGhost(ghosts, empty && !focused && !disabled)
   /* How warm the sky is: nothing yet is dusk, a few lines is full light. */
   const warm = Math.min(1, value.trim().length / 160)
 
@@ -131,6 +134,7 @@ export default function MemoryAsk({
               type="button"
               className="mem-starter"
               style={{ ['--i' as string]: i }}
+              disabled={!!disabled}
               onClick={() => start(s)}
             >
               {s.replace(/^[“"]|[”"]$/g, '')}
@@ -141,7 +145,7 @@ export default function MemoryAsk({
 
       <div
         ref={card}
-        className={`mem-card${focused ? ' is-focused' : ''}`}
+        className={`mem-card${focused ? ' is-focused' : ''}${disabled ? ' is-disabled' : ''}`}
         style={{ ['--warm' as string]: warm }}
       >
         <span className="mem-sky" aria-hidden>
@@ -149,7 +153,7 @@ export default function MemoryAsk({
           <i className="mem-glow mem-glow-a" />
           <i className="mem-glow mem-glow-b" />
         </span>
-        {empty && !focused && ghost && (
+        {!disabled && empty && !focused && ghost && (
           <span className="mem-ghost" aria-hidden>
             {ghost}
             <i className="mem-caret" />
@@ -158,9 +162,10 @@ export default function MemoryAsk({
         <textarea
           ref={box}
           className="mem-field"
-          value={value}
-          aria-label={placeholder}
-          placeholder={empty && !focused && ghost ? '' : placeholder}
+          value={disabled ? '' : value}
+          disabled={!!disabled}
+          aria-label={disabled ?? placeholder}
+          placeholder={disabled ?? (empty && !focused && ghost ? '' : placeholder)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onChange={(e) => onChange(e.target.value)}

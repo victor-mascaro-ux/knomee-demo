@@ -206,3 +206,27 @@
   scroll-margin-bottom: 150px;
   scroll-margin-top: 230px;
 }
+
+/* Shut: nothing more can go in. Greyed, flat, the reason in the box. */
+.mem-card.is-disabled {
+  filter: grayscale(1);
+  opacity: 0.7;
+  box-shadow: none;
+}
+.mem-card.is-disabled .mem-sky {
+  opacity: 0.4;
+}
+.mem-card.is-disabled .mem-field {
+  cursor: not-allowed;
+}
+.mem-card.is-disabled .mem-field::placeholder {
+  color: var(--k-grape, #7639a1);
+  font-style: normal;
+  opacity: 1;
+}
+.mem-starter:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
