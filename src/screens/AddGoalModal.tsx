@@ -24,7 +24,7 @@ import SelectMenu from '../components/SelectMenu'
 
 /* The horizons the profiles already speak in. Kept in one list so a goal added
    here reads like the ones that came out of the app. */
-const TIMELINES = [
+export const TIMELINES = [
   '<6 months',
   '6–12 months',
   '1–3 years',

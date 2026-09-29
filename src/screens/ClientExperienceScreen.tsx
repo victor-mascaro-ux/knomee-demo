@@ -1549,6 +1549,7 @@ export default function ClientExperienceScreen({
             {adventure === 'goals' ? (
               <GoalsFlow
                 review={reviewing ? (goalsDone ?? { goals: financialId.goals.slice(0, 1) }) : undefined}
+                mic={(value, set) => <MicButton value={value} onChange={set} />}
                 reward={
                   reviewing
                     ? {
