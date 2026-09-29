@@ -577,9 +577,6 @@ export function JourneyQuestions({
   d,
   a,
   onHome,
-  onReport,
-  onSend,
-  onRecord,
 }: {
   d: Derived
   a: Answers
@@ -588,9 +585,7 @@ export function JourneyQuestions({
   onSend: () => void
   onRecord: () => void
 }) {
-  const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState<number | 'all' | null>(null)
-  const wired = !!endpoint()
   const kept = privateSteps.filter((s) => isAnswered(s, a) && !isShared(s.id, a)).length
   const qs = d.id.questions
   const copy = (text: string, which: number | 'all') => {
@@ -682,28 +677,6 @@ export function JourneyQuestions({
             : `You kept ${kept} answers private. You can share any of them from its question.`}
         </p>
       )}
-      <div className="af-links aq-links">
-        <button className="af-link" type="button" onClick={onReport}>
-          See what the firm sees
-        </button>
-        {wired ? (
-          <button
-            className="af-link"
-            type="button"
-            disabled={sent}
-            onClick={() => {
-              onSend()
-              setSent(true)
-            }}
-          >
-            {sent ? 'Sent to the spreadsheet' : 'Send to the spreadsheet'}
-          </button>
-        ) : (
-          <button className="af-link" type="button" onClick={onRecord}>
-            Where my answers are kept
-          </button>
-        )}
-      </div>
       <div className="af-stat">If you’d like to talk it through with Acme, book a time.</div>
     </div>
   )
