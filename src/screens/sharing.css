@@ -1,0 +1,255 @@
+/* Who sees it — the Financial ID's sharing face. The cards are the ID's own
+   (.pp-card, its head, its icon); what is new is the team, the chips and the
+   private state. */
+
+/* The switch between the two faces, under the page's title. */
+.sh-lens {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0 0 var(--space-16);
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--k-grape-soft, #f3ebfa);
+}
+.sh-lens button {
+  padding: 7px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm, 13px);
+  font-weight: var(--weight-semibold, 600);
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+  transition:
+    background 0.3s var(--ease-out, ease),
+    color 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease);
+}
+.sh-lens button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--k-plum, #240446);
+  box-shadow: 0 2px 8px -3px rgba(36, 4, 70, 0.3);
+}
+
+.sh {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+}
+.sh-lead {
+  margin: 0 0 var(--space-4, 4px);
+  font-size: var(--text-sm, 13px);
+  line-height: 1.5;
+  color: var(--text-secondary, #6b6478);
+}
+.sh .pp-card {
+  margin: 0;
+  animation: shIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.06s + var(--i, 0) * 0.05s);
+}
+@keyframes shIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ── the team ── */
+.sh-team-ic {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--k-grape, #7639a1);
+}
+.sh-add {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--k-lime, #bff65b);
+  color: var(--k-plum, #240446);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.sh-add:hover {
+  transform: rotate(90deg) scale(1.06);
+}
+.sh-people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sh-person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10, 10px);
+  padding: 8px 8px 8px 10px;
+  border-radius: 14px;
+  background: #fff;
+  animation: shIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.1s + var(--i, 0) * 0.05s);
+}
+.sh-avatar,
+.sh-chip-av {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--k-grape-light, #e9d9f4);
+  color: var(--k-plum, #240446);
+  font-size: 14px;
+  font-weight: var(--weight-bold, 700);
+}
+.sh-name,
+.sh-name-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: var(--text-base, 15px);
+  color: var(--text-strong);
+}
+.sh-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: text;
+}
+.sh-name svg {
+  color: var(--text-secondary, #8a8792);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.sh-person:hover .sh-name svg,
+.sh-name:focus-visible svg {
+  opacity: 1;
+}
+.sh-name-input {
+  padding: 5px 10px;
+  border: 1.5px solid var(--k-grape, #7639a1);
+  border-radius: 10px;
+  outline: none;
+}
+.sh-role {
+  flex: none;
+  max-width: 44%;
+  padding: 7px 28px 7px 12px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 999px;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%237639a1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 10px center / 12px;
+  font: inherit;
+  font-size: var(--text-sm, 13px);
+  color: var(--text-strong);
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease-out, ease);
+}
+.sh-role:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+
+.sh-count {
+  margin: var(--space-4, 4px) 0 0;
+  font-size: var(--text-sm, 13px);
+  color: var(--text-secondary, #6b6478);
+}
+.sh-count b {
+  color: var(--k-plum, #240446);
+}
+
+/* ── a card, with the people it goes to ── */
+.sh-switch {
+  margin-left: auto;
+}
+.sh-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8, 8px);
+  margin-top: var(--space-6, 6px);
+}
+.sh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    border-color 0.3s var(--ease-out, ease),
+    opacity 0.3s var(--ease-out, ease),
+    transform 0.3s var(--ease-out, ease);
+}
+.sh-chip:active {
+  transform: scale(0.96);
+}
+.sh-chip .sh-chip-av {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  background: #ece9f1;
+  color: #8a8792;
+  transition:
+    background 0.3s var(--ease-out, ease),
+    color 0.3s var(--ease-out, ease);
+}
+.sh-chip.is-on {
+  opacity: 1;
+  border-color: var(--k-lime, #bff65b);
+}
+.sh-chip.is-on .sh-chip-av {
+  background: var(--k-plum, #240446);
+  color: var(--k-lime, #bff65b);
+}
+.sh-chip-text {
+  display: grid;
+  line-height: 1.15;
+}
+.sh-chip-text b {
+  font-size: 13px;
+  font-weight: var(--weight-semibold, 600);
+  color: var(--text-strong);
+}
+.sh-chip-text span {
+  font-size: 11px;
+  color: var(--text-secondary, #6b6478);
+}
+.sh-card.is-private .pp-card-title {
+  opacity: 0.7;
+}
+.sh-private {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--text-sm, 13px);
+  color: var(--text-secondary, #6b6478);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh .pp-card,
+  .sh-person {
+    animation: none;
+  }
+}
