@@ -1660,7 +1660,7 @@ export default function ClientExperienceScreen({
             ) : adventure ? (
               <JoyFlow
                 review={reviewing ? (joy ?? sampleJoyAnswers()) : undefined}
-                reflectSlot={(_s, value, set) => ({ below: <MicButton big value={value} onChange={set} /> })}
+                reflectSlot={(_s, value, set) => ({ below: <MicButton value={value} onChange={set} /> })}
                 /* Financial Joy is the first adventure, and taking it — the first
                    time or again — is where the journey starts: the reward always
                    reads 0 to 1 of 5, with Confidence next. Reopened from her

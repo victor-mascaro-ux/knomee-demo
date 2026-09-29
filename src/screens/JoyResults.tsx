@@ -349,6 +349,8 @@ export default function JoyResults({
 
   /* Anything unanswered sits with "the same": not moved is not moving. */
   const wayOf = (label: string) => answers.attention[label] ?? 0
+  /* A preference card tapped opens larger, as Future You's pictures do. */
+  const [zoom, setZoom] = useState<{ src: string; label: string } | null>(null)
   const piles = PILES.map((p) => ({
     ...p,
     cards: areas.filter((c) => wayOf(c.label) === p.way),
@@ -452,12 +454,19 @@ export default function JoyResults({
                 </span>
                 <div className="jr-cards">
                   {p.cards.map((c, i) => (
-                    <figure className="jr-card" key={c.label} style={{ ['--i' as string]: i }}>
+                    <button
+                      type="button"
+                      className="jr-card jr-card-open"
+                      key={c.label}
+                      style={{ ['--i' as string]: i }}
+                      aria-label={`${c.label} — see it larger`}
+                      onClick={() => setZoom(c)}
+                    >
                       <span className="jr-card-photo">
                         <img src={c.src} alt="" draggable={false} onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
                       </span>
-                      <figcaption>{c.label}</figcaption>
-                    </figure>
+                      <span className="jr-card-label">{c.label}</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -471,6 +480,17 @@ export default function JoyResults({
           {reading}
         </p>
       </Reveal>
+
+      {zoom && (
+        <div className="modal-backdrop fyr-zoom" role="dialog" aria-modal="true" aria-label={zoom.label} onClick={() => setZoom(null)}>
+          <figure className="fyr-zoom-print">
+            <span className="fyr-zoom-img">
+              <img src={zoom.src} alt="" draggable={false} />
+            </span>
+            <figcaption>{zoom.label}</figcaption>
+          </figure>
+        </div>
+      )}
 
       <Reveal className="jr-reward">
         {rewardLine && <p className="jr-reward-line">{rewardLine}</p>}

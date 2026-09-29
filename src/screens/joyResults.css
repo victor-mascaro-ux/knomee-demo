@@ -606,3 +606,41 @@
 .jr-card-photo {
   background: linear-gradient(135deg, var(--k-teal-light), var(--k-grape-light));
 }
+
+/* A preference card is a button that opens it larger: the card's own look,
+   a lift on hover, a press on tap. */
+.jr-card-open {
+  padding: 0;
+  border: 0;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease);
+}
+.jr-card-open:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(36, 4, 70, 0.35);
+}
+.jr-card-open:active {
+  transform: scale(0.97);
+}
+.jr-card-open .jr-card-label {
+  display: block;
+}
+.jr-card-open .jr-card-label {
+  padding-top: 5px;
+  font-size: 10.5px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-strong);
+}
+/* Thrown in without holding the end frame, so the hover can move it. */
+.jr-sec.is-in .jr-card-open {
+  opacity: 1;
+  animation-fill-mode: backwards;
+}
+.jr-card-open {
+  background: #eeeef0;
+}
