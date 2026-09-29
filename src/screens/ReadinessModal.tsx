@@ -25,10 +25,10 @@ import { ReadinessLevel, TTM_STAGES } from './profileParts'
 import { CloseIcon } from '../components/icons'
 
 /* Each answer carries the rung it argues for, where it argues for one. */
-type Answer = { label: string; level?: number }
-type Question = { lead: string; strong: string; tail: string; options: Answer[] }
+export type Answer = { label: string; level?: number }
+export type Question = { lead: string; strong: string; tail: string; options: Answer[] }
 
-const QUESTIONS: Question[] = [
+export const QUESTIONS: Question[] = [
   {
     lead: 'How do you envision ',
     strong: 'support',
@@ -73,7 +73,7 @@ const QUESTIONS: Question[] = [
    outright in the last question, so that answer wins wherever it is given;
    otherwise the stage is as far as the thinking has got, and thinking alone
    stops at Preparation however sure of it they are. */
-function stageOf(answers: (Answer | null)[]) {
+export function stageOf(answers: (Answer | null)[]) {
   const acted = answers[3]?.level
   if (acted) return acted
   const thought = Math.max(answers[1]?.level ?? 1, answers[2]?.level ?? 1)

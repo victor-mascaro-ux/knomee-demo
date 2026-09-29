@@ -18,6 +18,9 @@ import ReadinessModal from './ReadinessModal'
 import JoyReward from './JoyReward'
 import { Reveal } from './JoyResults'
 import { MARK_PARTS } from './ClientExperienceScreen'
+import MoveFlow, { type MoveAnswers, type MoveContent } from './MoveFlow'
+import { TIMELINES } from './AddGoalModal'
+import { QUESTIONS as READINESS, stageOf as readinessStageOf } from './ReadinessModal'
 import { GoalDetail, TTM_ART, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
 
@@ -89,7 +92,128 @@ const BITS = Array.from({ length: 36 }, (_, i) => ({
 
 type Step = 'intro' | 'loading' | 'add' | 'added' | 'readiness' | 'results' | 'badge'
 
+/* ── the client's words for the one flow ──────────────────────────────────
+   Goals is The Move's flow in her words: a goal to work toward, when, why,
+   whether she wants her advisor in it (pictured), what lifts it and what
+   weighs it down, then the three readiness questions the Financial ID's panel
+   asks. The stage comes out the way that panel works it out. */
+const [, THOUGHT, KNOWS, ACTING] = READINESS
+const answerOf = (q: typeof THOUGHT, label: string | null) => q.options.find((o) => o.label === label) ?? null
+export const CLIENT_GOALS: MoveContent = {
+  word: 'goal',
+  intro: {
+    title: 'Welcome to Your Goals Adventure!',
+    body: 'Let’s turn your aspirations into action by setting a meaningful long-term goal.',
+    minutes: 3,
+  },
+  loading: 'Generating recommended Goals just for you…',
+  pick: {
+    title: 'What goal would you like to work on?',
+    sub: 'We lined these up from what you’ve shared. Pick one, or write your own.',
+    options: financialId.suggestedGoals,
+    ownPlaceholder: 'Buy a lake house',
+  },
+  when: { title: 'When would you like to reach it?', sub: 'Pick the stretch of road it sits on.', stops: TIMELINES },
+  why: {
+    title: 'Why do you want this?',
+    sub: 'In your own words — this is what your advisor reads first.',
+    ghosts: [
+      'I want the kids to remember a summer we spent together…',
+      'I want to be there for her, every appointment I can…',
+      'I want our giving to mean something to our family…',
+    ],
+    starters: ['I want to…', 'It matters because…', 'For my family…', 'I’ve always wanted…'],
+    cheer: 'That’s the heart of it ✦',
+  },
+  support: {
+    title: 'How do you want to reach your goal?',
+    options: READINESS[0].options.map((o) => o.label),
+    pictures: ['./advisor/move/on-my-own.png', './advisor/future-you/clients-i-chose.jpg'],
+    labels: { 'I want to do it on my own': 'On my own', 'I want help from my advisor': 'With my advisor' },
+  },
+  pros: {
+    title: 'What makes it worth it?',
+    sub: 'Every reason is a balloon — add them and watch your goal lift.',
+    placeholder: 'A reason it’s worth it…',
+    ghosts: ['Quality time with my family…', 'Peace of mind…', 'Something to look forward to…'],
+    starters: ['It would let me…', 'My family would…', 'I’d finally…', 'It would feel…'],
+  },
+  cons: {
+    title: 'What could get in the way?',
+    sub: 'Every obstacle is a sandbag. Name them — that’s how you drop them later.',
+    placeholder: 'Something that could get in the way…',
+    ghosts: ['The cost of it…', 'Finding the time around work…', 'Less to save each month…'],
+    starters: ['It would cost…', 'I’m worried about…', 'It’s hard to…', 'I’d have to give up…'],
+  },
+  questions: ['pick', 'when', 'why', 'support', 'pros', 'cons'],
+  added: 'Goal Added Successfully!',
+  ready: {
+    thought: { title: `${THOUGHT.lead}${THOUGHT.strong}${THOUGHT.tail}`, options: THOUGHT.options.map((o) => o.label) },
+    knows: { title: `${KNOWS.lead}${KNOWS.strong}${KNOWS.tail}`, options: KNOWS.options.map((o) => o.label) },
+    acting: { title: `${ACTING.lead}${ACTING.strong}${ACTING.tail}`, options: ACTING.options.map((o) => o.label) },
+  },
+  reading: (m) => {
+    const level = readinessStageOf([null, answerOf(THOUGHT, m.thought), answerOf(KNOWS, m.knows), answerOf(ACTING, m.acting)])
+    return { level, name: TTM_STAGES[level - 1], line: STAGE_LINE[level - 1] }
+  },
+  results: { title: 'Goal Readiness', kicker: 'My readiness stage for my goal is' },
+  badge: { art: bgGoals, name: 'Goals' },
+}
+
+/* Her answers as the goal the Financial ID keeps: dated today, at the stage
+   the readiness questions put it on — and, left bare, filled with the sample
+   that fits it, so a demo never lands on an empty summary. */
+export function goalFrom(m: MoveAnswers): Goal {
+  const d = new Date()
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  const title = m.move ?? 'My goal'
+  const pros = m.pros.map((p) => p.trim()).filter(Boolean)
+  const cons = m.cons.map((p) => p.trim()).filter(Boolean)
+  const note = m.why.trim() || undefined
+  const bare = !pros.length && !cons.length && !note
+  const sample = SAMPLE_DETAIL[title] ?? SAMPLE_OWN
+  return {
+    title,
+    readiness: CLIENT_GOALS.reading(m).level,
+    updated: `${p2(d.getMonth() + 1)}/${p2(d.getDate())}/${d.getFullYear()}`,
+    timeline: m.when ?? undefined,
+    ...(bare ? sample : { pros, cons, note }),
+    extra: m.support ? [{ label: 'Support', value: m.support }] : [],
+  }
+}
+
+type GoalsReward = { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string }
+
 export default function GoalsFlow({
+  reward,
+  onComplete,
+  review,
+  mic,
+}: {
+  /** The microphone, under a free-text box. */
+  mic?: (value: string, set: (v: string) => void) => ReactNode
+  reward: GoalsReward | ((a: GoalsAnswers) => GoalsReward)
+  onComplete: (a: GoalsAnswers) => void
+  review?: GoalsAnswers
+}) {
+  /* Taken: The Move's flow, in her words. Looked back at: the ending as it
+     was, below. */
+  if (!review)
+    return (
+      <MoveFlow
+        content={CLIENT_GOALS}
+        mic={mic}
+        reward={(m) => {
+          const a = { goals: [goalFrom(m)] }
+          return typeof reward === 'function' ? reward(a) : reward
+        }}
+        onComplete={(m) => onComplete({ goals: [goalFrom(m)] })}
+      />
+    )
+  return <GoalsReview reward={reward} onComplete={onComplete} review={review} />
+}
+
+function GoalsReview({
   reward,
   onComplete,
   review,

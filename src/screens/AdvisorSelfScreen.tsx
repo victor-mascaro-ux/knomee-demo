@@ -563,7 +563,7 @@ function EndQuestions({
           </button>
         )}
       </div>
-      <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
+      <div className="af-stat">If you’d like to talk it through with Acme, book a time.</div>
     </div>
   )
 }

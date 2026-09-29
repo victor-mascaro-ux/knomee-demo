@@ -612,14 +612,104 @@ type Step =
   | 'results'
   | 'badge'
 
-/* The screens that ask something, in order, with the foot and the meter. */
-const QUESTIONS: Step[] = ['pick', 'when', 'why', 'support', 'brand', 'pros', 'cons', 'who', 'blocker']
 /* The readiness questions: one tap each, on their own rule, as the client's
    readiness panel asks them. */
 const READY: Step[] = ['thought', 'knows', 'acting']
-const READY_ID: Record<string, string> = { thought: 'mv-q5', knows: 'mv-q6', acting: 'mv-q7' }
 
-type MoveReward = { before: number; after: number; total: number; card?: ReactNode }
+type MoveReward = { before: number; after: number; total: number; next?: string; card?: ReactNode; idName?: string }
+
+/* ── what the flow says ───────────────────────────────────────────────────
+   The Move and the client's Goals are one flow: a thing to work toward, when,
+   why, how, what lifts it and what weighs it down, then how ready. The
+   advisor's words come from the advisor flow; the client's are the Goals
+   adventure's. Questions a side does not ask are left out of `questions`. */
+type Ask = { title: string; sub?: string }
+type Written = Ask & { ghosts: string[]; starters: string[]; placeholder?: string; cheer?: string }
+export interface MoveContent {
+  /** What the thing is called in a label: "move", "goal". */
+  word: string
+  intro: { title: string; body: string; minutes: number }
+  loading: string
+  pick: Ask & { options: string[]; ownPlaceholder: string }
+  when: Ask & { stops: string[] }
+  why: Written
+  support: Ask & { options: string[]; pictures: string[]; labels: Record<string, string> }
+  brand?: Ask & { options: string[] }
+  pros: Written
+  cons: Written
+  who?: Ask & { options: string[] }
+  blocker?: Written
+  questions: Step[]
+  added: string
+  ready: Record<'thought' | 'knows' | 'acting', Ask & { options: string[] }>
+  /** Where the answers put them: the stage, 1-5, its name and its line. */
+  reading: (m: MoveAnswers) => { level: number; name: string; line: string }
+  results: { title: string; kicker: string }
+  badge: { art: string; name: string; arcTitle?: string }
+  /** The last adventure: its celebration ends on the Business ID and the
+      questions rather than on a next adventure. */
+  last?: boolean
+}
+
+export const ADVISOR_MOVE: MoveContent = {
+  word: 'move',
+  intro: { title: title('mv-intro'), body: body('mv-intro'), minutes: 3 },
+  loading: 'Lining up the moves that fit what you’ve told us…',
+  pick: { title: title('mv-q1'), sub: body('mv-q1'), options: opts('mv-q1'), ownPlaceholder: 'Open a second office' },
+  when: { title: title('mv-q2'), sub: 'Pick the stretch of road it sits on.', stops: opts('mv-q2') },
+  why: {
+    title: title('mv-q3'),
+    sub: body('mv-q3'),
+    ghosts: WHY_GHOSTS,
+    starters: WHY_STARTERS,
+    cheer: 'That’s the heart of it ✦',
+  },
+  support: {
+    /* Asked as a how rather than a yes or no, so it is answered by the two
+       pictures under it. Here only: the invite flow keeps its own wording. */
+    title: 'How do you want to make your move?',
+    options: opts('mv-q4'),
+    pictures: SUPPORT_PICTURES,
+    labels: SUPPORT_LABELS,
+  },
+  brand: { title: title('mv-brand'), sub: body('mv-brand'), options: opts('mv-brand') },
+  pros: {
+    title: title('mv-q8'),
+    sub: 'Every reason is a balloon — add them and watch your move lift.',
+    placeholder: 'A reason it’s worth it…',
+    ghosts: PRO_GHOSTS,
+    starters: PRO_STARTERS,
+  },
+  cons: {
+    title: title('mv-q9'),
+    sub: 'Every obstacle is a sandbag. Name them — that’s how you drop them later.',
+    placeholder: 'Something that could get in the way…',
+    ghosts: CON_GHOSTS,
+    starters: CON_STARTERS,
+  },
+  who: { title: title('mv-q10'), sub: body('mv-q10'), options: opts('mv-q10') },
+  blocker: {
+    title: title('mv-q10b'),
+    sub: body('mv-q10b'),
+    ghosts: BLOCKER_GHOSTS,
+    starters: BLOCKER_STARTERS,
+    cheer: 'Now it can be worked on ✦',
+  },
+  questions: ['pick', 'when', 'why', 'support', 'brand', 'pros', 'cons', 'who', 'blocker'],
+  added: 'Your move is written down!',
+  ready: {
+    thought: { title: title('mv-q5'), options: opts('mv-q5') },
+    knows: { title: title('mv-q6'), options: opts('mv-q6') },
+    acting: { title: title('mv-q7'), options: opts('mv-q7') },
+  },
+  reading: (m) => {
+    const stage = stageOf(sheetWithMove(emptyAnswers(), m))
+    return { level: STAGES.indexOf(stage) + 1, name: stage, line: STAGE_BODY[stage] }
+  },
+  results: { title: 'Your readiness', kicker: 'My readiness stage for my move is' },
+  badge: { art: bgMove, name: 'The Move', arcTitle: 'The Move' },
+  last: true,
+}
 
 /* Where the last adventure's celebration can send you. */
 export type MoveEnd = 'id' | 'questions'
@@ -629,7 +719,10 @@ export default function MoveFlow({
   privateNote,
   mic,
   reward,
+  content = ADVISOR_MOVE,
 }: {
+  /** The words it asks in: the advisor's move, or the client's goal. */
+  content?: MoveContent
   /** The Move taken to its end; `to` is the card chosen on the celebration,
       when there is one. */
   onComplete: (m: MoveAnswers, to?: MoveEnd) => void
@@ -662,6 +755,9 @@ export default function MoveFlow({
     }
   }, [at])
 
+  const c = content
+  /* The screens that ask something, in order, with the foot and the meter. */
+  const QUESTIONS = c.questions
   const qi = QUESTIONS.indexOf(at)
   const ri = READY.indexOf(at)
   const go = (s: Step) => setAt(s)
@@ -704,7 +800,7 @@ export default function MoveFlow({
 
   /* The move as the Goals flow's summary reads a goal. */
   const goal: Goal = {
-    title: m.move ?? 'My move',
+    title: m.move ?? `My ${c.word}`,
     readiness: 0,
     timeline: m.when ?? undefined,
     pros: m.pros.map((p) => p.trim()).filter(Boolean),
@@ -717,8 +813,7 @@ export default function MoveFlow({
   }
 
   const rewardNow = typeof reward === 'function' ? reward(m) : reward
-  const stage = stageOf(sheetWithMove(emptyAnswers(), m))
-  const level = STAGES.indexOf(stage) + 1
+  const { level, name: stage, line: stageLine } = c.reading(m)
 
   return (
     <div className="jf gl mv">
@@ -727,14 +822,14 @@ export default function MoveFlow({
           <div className="jf-hero">
             <Photo className="jf-hero-img" src="./goals/intro.png" fallback="gl-hero-fallback" />
           </div>
-          <h2 className="jf-title">{title('mv-intro')}</h2>
-          <p className="jf-body">{body('mv-intro')}</p>
+          <h2 className="jf-title">{c.intro.title}</h2>
+          <p className="jf-body">{c.intro.body}</p>
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => go('loading')}>
               Get Started
             </button>
             <span className="jf-min">
-              <ClockIcon /> Takes 3 min
+              <ClockIcon /> Takes {c.intro.minutes} min
             </span>
           </div>
         </div>
@@ -752,7 +847,7 @@ export default function MoveFlow({
             ))}
           </svg>
           <h2 className="gl-hold">Hold tight!</h2>
-          <p>Lining up the moves that fit what you’ve told us…</p>
+          <p>{c.loading}</p>
         </div>
       )}
 
@@ -765,7 +860,7 @@ export default function MoveFlow({
             <DiscSparkle />
           </span>
           <span className="mv-goal-text">
-            <span className="mv-goal-label">Your move</span>
+            <span className="mv-goal-label">Your {c.word}</span>
             <b>{m.move}</b>
           </span>
         </div>
@@ -773,10 +868,10 @@ export default function MoveFlow({
 
       {at === 'pick' && (
         <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q1')}</h2>
-          <p className="fy-sub">{body('mv-q1')}</p>
+          <h2 className="fy-h fy-h-sm">{c.pick.title}</h2>
+          {c.pick.sub && <p className="fy-sub">{c.pick.sub}</p>}
           <ul className="ag-suggestions">
-            {opts('mv-q1').map((o) => (
+            {c.pick.options.map((o) => (
               <li key={o}>
                 <button
                   className={`ag-suggestion${m.move === o ? ' is-on' : ''}`}
@@ -803,10 +898,10 @@ export default function MoveFlow({
             <input
               className="ag-input"
               value={own}
-              placeholder="Open a second office"
+              placeholder={c.pick.ownPlaceholder}
               onChange={(e) => {
                 setOwn(e.target.value)
-                if (m.move && !opts('mv-q1').includes(m.move)) set('move', null)
+                if (m.move && !c.pick.options.includes(m.move)) set('move', null)
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && own.trim()) pickAndGo('move', own.trim())
@@ -815,7 +910,7 @@ export default function MoveFlow({
             <button
               className="ag-go ag-go-btn"
               type="button"
-              aria-label="Use this move"
+              aria-label={`Use this ${c.word}`}
               disabled={!own.trim()}
               onClick={() => pickAndGo('move', own.trim())}
             >
@@ -828,9 +923,9 @@ export default function MoveFlow({
       {at === 'when' && (
         <Road
           value={m.when}
-          stops={opts('mv-q2')}
-          title={title('mv-q2')}
-          sub="Pick the stretch of road it sits on."
+          stops={c.when.stops}
+          title={c.when.title}
+          sub={c.when.sub}
           onChange={(v) => set('when', v)}
           onSettle={() => window.setTimeout(next, 560)}
         />
@@ -838,15 +933,15 @@ export default function MoveFlow({
 
       {at === 'why' && (
         <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q3')}</h2>
-          <p className="fy-sub">{body('mv-q3')}</p>
+          <h2 className="fy-h fy-h-sm">{c.why.title}</h2>
+          {c.why.sub && <p className="fy-sub">{c.why.sub}</p>}
           <MemoryAsk
             value={m.why}
             onChange={(v) => set('why', v)}
-            placeholder="Write it, or tap the mic and say it."
-            ghosts={WHY_GHOSTS}
-            starters={WHY_STARTERS}
-            cheer="That’s the heart of it ✦"
+            placeholder={c.why.placeholder ?? 'Write it, or tap the mic and say it.'}
+            ghosts={c.why.ghosts}
+            starters={c.why.starters}
+            cheer={c.why.cheer}
             below={mic?.(m.why, (v) => set('why', v))}
           />
         </div>
@@ -854,27 +949,24 @@ export default function MoveFlow({
 
       {at === 'support' && (
         <div className="mv-q mv-q-pair">
-          {/* Asked as a how rather than a yes or no, so it is answered by the
-              two pictures under it. Here only: the invite flow keeps its own
-              wording of the question. */}
-          <h2 className="fy-h fy-h-sm">How do you want to make your move?</h2>
+          <h2 className="fy-h fy-h-sm">{c.support.title}</h2>
           <PhotoPair
-            options={opts('mv-q4')}
-            pictures={SUPPORT_PICTURES}
-            labels={SUPPORT_LABELS}
+            options={c.support.options}
+            pictures={c.support.pictures}
+            labels={c.support.labels}
             value={m.support}
             onPick={(v) => pickAndGo('support', v)}
           />
         </div>
       )}
 
-      {at === 'brand' && (
+      {at === 'brand' && c.brand && (
         <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-brand')}</h2>
-          <p className="fy-sub">{body('mv-brand')}</p>
+          <h2 className="fy-h fy-h-sm">{c.brand.title}</h2>
+          {c.brand.sub && <p className="fy-sub">{c.brand.sub}</p>}
           {privateNote?.('mv-brand')}
           <Pills
-            options={opts('mv-brand')}
+            options={c.brand.options}
             icons={BRAND_ICONS}
             value={m.brand}
             onPick={(v) => pickAndGo('brand', v)}
@@ -893,19 +985,15 @@ export default function MoveFlow({
             naming={at}
             onRemove={(k, i) => set(k, m[k].filter((x) => x.trim()).filter((_, j) => j !== i))}
           />
-          <h2 className="fy-h fy-h-sm">{title(at === 'pros' ? 'mv-q8' : 'mv-q9')}</h2>
-          <p className="fy-sub">
-            {at === 'pros'
-              ? 'Every reason is a balloon — add them and watch your move lift.'
-              : 'Every obstacle is a sandbag. Name them — that’s how you drop them later.'}
-          </p>
+          <h2 className="fy-h fy-h-sm">{c[at].title}</h2>
+          {c[at].sub && <p className="fy-sub">{c[at].sub}</p>}
           <MemoryAsk
             key={at}
             value={draft}
             onChange={setDraft}
-            placeholder={at === 'pros' ? 'A reason it’s worth it…' : 'Something that could get in the way…'}
-            ghosts={at === 'pros' ? PRO_GHOSTS : CON_GHOSTS}
-            starters={at === 'pros' ? PRO_STARTERS : CON_STARTERS}
+            placeholder={c[at].placeholder ?? ''}
+            ghosts={c[at].ghosts}
+            starters={c[at].starters}
             onEnter={() => {
               addTo(at, draft)
               setDraft('')
@@ -931,26 +1019,26 @@ export default function MoveFlow({
         </div>
       )}
 
-      {at === 'who' && (
+      {at === 'who' && c.who && (
         <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q10')}</h2>
-          <p className="fy-sub">{body('mv-q10')}</p>
-          <Circle options={opts('mv-q10')} value={m.who} onChange={(v) => set('who', v)} />
+          <h2 className="fy-h fy-h-sm">{c.who.title}</h2>
+          {c.who.sub && <p className="fy-sub">{c.who.sub}</p>}
+          <Circle options={c.who.options} value={m.who} onChange={(v) => set('who', v)} />
         </div>
       )}
 
-      {at === 'blocker' && (
+      {at === 'blocker' && c.blocker && (
         <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q10b')}</h2>
-          <p className="fy-sub">{body('mv-q10b')}</p>
+          <h2 className="fy-h fy-h-sm">{c.blocker.title}</h2>
+          {c.blocker.sub && <p className="fy-sub">{c.blocker.sub}</p>}
           {privateNote?.('mv-q10b')}
           <MemoryAsk
             value={m.blocker}
             onChange={(v) => set('blocker', v)}
-            placeholder="Write it, or tap the mic and say it."
-            ghosts={BLOCKER_GHOSTS}
-            starters={BLOCKER_STARTERS}
-            cheer="Now it can be worked on ✦"
+            placeholder={c.blocker.placeholder ?? 'Write it, or tap the mic and say it.'}
+            ghosts={c.blocker.ghosts}
+            starters={c.blocker.starters}
+            cheer={c.blocker.cheer}
             below={mic?.(m.blocker, (v) => set('blocker', v))}
           />
         </div>
@@ -978,9 +1066,9 @@ export default function MoveFlow({
               <path d="M5 12.5 10 17.5 19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
-          <h2 className="gl-title">Your move is written down!</h2>
+          <h2 className="gl-title">{c.added}</h2>
           <div className="gl-summary">
-            <span className="gl-summary-head">Your move</span>
+            <span className="gl-summary-head">Your {c.word}</span>
             <b className="gl-summary-title">{goal.title}</b>
             <GoalDetail g={goal} />
           </div>
@@ -988,7 +1076,7 @@ export default function MoveFlow({
             <button className="jf-go" type="button" onClick={() => go('thought')}>
               Assess My Readiness
             </button>
-            <button className="gl-link" type="button" onClick={() => go('blocker')}>
+            <button className="gl-link" type="button" onClick={() => go(QUESTIONS[QUESTIONS.length - 1])}>
               Back
             </button>
           </div>
@@ -1001,9 +1089,9 @@ export default function MoveFlow({
         <div className="mv-ready" key={at}>
           <Track at={ri} of={READY.length} />
           <p className="mv-ready-count">Question {ri + 1} of {READY.length}</p>
-          <h2 className="fy-h fy-h-sm">{title(READY_ID[at])}</h2>
+          <h2 className="fy-h fy-h-sm">{c.ready[at as 'thought' | 'knows' | 'acting'].title}</h2>
           <Pills
-            options={opts(READY_ID[at])}
+            options={c.ready[at as 'thought' | 'knows' | 'acting'].options}
             value={m[at as 'thought' | 'knows' | 'acting']}
             onPick={(v) => pickAndGo(at as 'thought' | 'knows' | 'acting', v)}
           />
@@ -1012,17 +1100,17 @@ export default function MoveFlow({
 
       {at === 'badge' && rewardNow && (
         <JoyReward
-          badge={bgMove}
-          arcTitle="The Move"
-          name="The Move"
+          badge={c.badge.art}
+          arcTitle={c.badge.arcTitle}
+          name={c.badge.name}
           from={rewardNow.before}
           done={rewardNow.after}
           total={rewardNow.total}
           card={rewardNow.card}
-          idName="Business ID"
-          next=""
+          idName={rewardNow.idName ?? 'Business ID'}
+          next={rewardNow.next ?? ''}
           onNext={() => onComplete(m)}
-          ending={
+          ending={c.last ? (
             <div className="mv-end">
               <h2 className="mv-end-title">Every adventure, done!</h2>
               <p className="mv-end-sub">Your Business ID is complete. Where to next?</p>
@@ -1051,14 +1139,14 @@ export default function MoveFlow({
                 </span>
               </button>
             </div>
-          }
+          ) : undefined}
         />
       )}
 
       {at === 'results' && (
         <div className="jr glr">
           <Reveal>
-            <h2 className="jr-title">Your readiness</h2>
+            <h2 className="jr-title">{c.results.title}</h2>
             <p className="jr-sub">{goal.title}</p>
             {/* The stage as the picture: the readiness art on a living sky, and
                 the stage's name — the Goals flow's ending. */}
@@ -1069,17 +1157,17 @@ export default function MoveFlow({
                 <i className="jr-glow jr-glow-b" />
                 <i className="jr-glow jr-glow-c" />
               </span>
-              <span className="glr-kicker">My readiness stage for my move is</span>
+              <span className="glr-kicker">{c.results.kicker}</span>
               <div className="glr-stage">
                 <img className="glr-ttm" src={TTM_ART[Math.max(1, level) - 1]} alt="" draggable={false} />
                 <b>{stage.toUpperCase()}</b>
               </div>
-              <p className="glr-line">{STAGE_BODY[stage]}</p>
+              <p className="glr-line">{stageLine}</p>
             </figure>
           </Reveal>
 
           <Reveal>
-            <h3 className="jr-h">Your move</h3>
+            <h3 className="jr-h">Your {c.word}</h3>
             <div className="glr-summaries">
               <div className="gl-summary glr-summary">
                 <b className="gl-summary-title">{goal.title}</b>
