@@ -1133,10 +1133,13 @@ button.af-opt:hover {
   font-size: 10px;
   font-weight: 700;
 }
-/* A title on its own is one line, so it sits level with its icon; the
-   top-align rule is for a heading with a body under it. */
-.af-get:not(:has(.af-get-body)) {
-  align-items: center;
+/* A title with no body under it takes the icon's height and centres in it:
+   one line sits level with the icon, two lines fill it from the icon's top,
+   and anything longer runs down from there — the icon never centres on a
+   block of text. */
+.af-get:not(:has(.af-get-body)) .af-get-text {
+  min-height: 44px;
+  justify-content: center;
 }
 .af-get-text {
   display: flex;

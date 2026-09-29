@@ -161,8 +161,8 @@ export const steps: Step[] = [
     body: 'Get clear on what you want — in your own words — before your next conversation.',
     lines: [
       { label: '1', value: 'Five short adventures' },
-      { label: '2', value: 'Your Business ID' },
-      { label: '3', value: 'Your 3 key questions' },
+      { label: '2', value: 'A Business ID profile of what you want' },
+      { label: '3', value: '3 key questions to ask about your move' },
     ],
     stat: 'Est time: 8 min',
     cta: 'Get started',
