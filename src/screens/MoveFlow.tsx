@@ -39,6 +39,7 @@ import MemoryAsk from './MemoryAsk'
 import JoyReward from './JoyReward'
 import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
+import { afterPrompt } from './OutlookFlow'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -111,9 +112,10 @@ const BALLOON_HUES = ['#bff65b', '#f25a7a', '#ffb547', '#6bd6c4', '#c77dff', '#f
 const BASKET_TOP = 138
 const BASKET_FOOT = 152
 
-/* A reason or an obstacle in a few words, for its pill. */
-const brief = (s: string) => {
-  const t = s.replace(/[.…?!]+$/, '')
+/* A reason or an obstacle in a few words, for its pill: what comes after the
+   prompt it was started with, as Outlook's sky labels do. */
+const brief = (s: string, prompts?: string[]) => {
+  const t = afterPrompt(s, prompts).replace(/[.…?!]+$/, '')
   const words = t.split(/\s+/)
   return words.length > 4 ? `${words.slice(0, 4).join(' ')}…` : t
 }
@@ -123,7 +125,10 @@ function Balloon({
   cons,
   naming,
   onRemove,
+  prompts,
 }: {
+  /** The prompts a reason or an obstacle may start with. */
+  prompts?: string[]
   pros: string[]
   cons: string[]
   /** Which of the two carry their words right now. */
@@ -152,7 +157,7 @@ function Balloon({
         onClick={toggle}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle()}
       >
-        {brief(text)}
+        {brief(text, prompts)}
         <button
           type="button"
           className="ol-x mv-tag-x"
@@ -983,6 +988,7 @@ export default function MoveFlow({
             pros={m.pros.filter((p) => p.trim())}
             cons={m.cons.filter((c) => c.trim())}
             naming={at}
+            prompts={[...c.pros.starters, ...c.cons.starters]}
             onRemove={(k, i) => set(k, m[k].filter((x) => x.trim()).filter((_, j) => j !== i))}
           />
           <h2 className="fy-h fy-h-sm">{c[at].title}</h2>
