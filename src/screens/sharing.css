@@ -451,3 +451,14 @@
 .sh-role {
   min-width: 132px;
 }
+
+/* The team tray: its one drawing grey at rest and in colour on hover — the
+   shared tray draws only the colour mark for a tray that can be filled. */
+.sh-team .pp-empty-cta .pp-empty-colour {
+  opacity: 1;
+  filter: grayscale(1) opacity(0.55);
+  transition: filter 0.25s ease;
+}
+.sh-team .pp-empty-cta:hover .pp-empty-colour {
+  filter: none;
+}

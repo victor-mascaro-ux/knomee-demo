@@ -13,9 +13,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
-import { AddButton, EmptyState } from './profileParts'
+import { AddButton, EmptyState, EMPTY_ART } from './profileParts'
 import icTeam from '../assets/adventures/my-team.svg'
-import emptyTeam from '../assets/empty/team.svg'
 
 export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent']
 /* An advisor's team is the practice's: the people a Business ID goes to. */
@@ -135,7 +134,7 @@ export default function SharingView({
           <AddButton label="Add someone to your team" onClick={addPerson} />
         </div>
         {team.length === 0 && (
-          <EmptyState art={emptyTeam} label="Add someone to your team" cta onClick={addPerson} />
+          <EmptyState art={EMPTY_ART.team} label="Add someone to your team" cta onClick={addPerson} />
         )}
         <ul className="sh-people">
           {team.map((p, i) => (
