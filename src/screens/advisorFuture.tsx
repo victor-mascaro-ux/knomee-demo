@@ -39,17 +39,33 @@ const BORROWED: Record<string, string> = {
 const photos = (id: string): Pick[] =>
   options(id).map((label) => ({ label, src: BORROWED[label] ?? `./advisor/future-you/${slug(label)}.jpg` }))
 
-/* What the practice includes, the flow's one long list, in four kinds. Anything
+/* What the practice includes, the flow's one long list, in three kinds. Anything
    the flow adds later that none of these name goes in the last. */
 const KINDS: { group: string; icon: string; items: string[] }[] = [
-  { group: 'What you own', icon: 'key', items: ['Equity I own', 'A brand with my name on it', 'An exit'] },
-  { group: 'Your people', icon: 'people', items: ['A named successor', 'A team I built', 'Someone else running ops'] },
+  /* No "What you own": ownership is equity, and the group read as a riddle.
+     Equity sits with succession and the team; the exit is time. */
+  {
+    group: 'Your people',
+    icon: 'people',
+    items: ['A named successor', 'A team I built', 'Someone else running ops', 'Equity I own'],
+  },
   {
     group: 'Your clients',
     icon: 'handshake',
     items: ['Fewer, better clients', 'More clients', 'A niche I’m known for', 'Predictable revenue'],
   },
-  { group: 'Your time', icon: 'plane', items: ['Time away from the desk', 'Board or industry work'] },
+  {
+    group: 'Your time',
+    icon: 'plane',
+    items: [
+      'Time away from the desk',
+      'A shorter work week',
+      'Time with family',
+      'Room to travel',
+      'Board or industry work',
+      'An exit',
+    ],
+  },
 ]
 const includes = options('fy-q5')
 const placed = new Set(KINDS.flatMap((k) => k.items))

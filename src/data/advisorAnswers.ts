@@ -444,11 +444,11 @@ const CHOICE_VOTES: Record<string, Partial<Record<string, [ThemeKey, number][]>>
     'My clients': [['clients', 1]],
   },
   'fy-q5': {
-    'A brand with my name on it': [['brand', 1]],
     'A named successor': [['team', 1]],
     'Equity I own': [['economics', 1]],
     'Someone else running ops': [['transition', 1]],
     'Time away from the desk': [['family', 1]],
+    'Time with family': [['family', 1]],
   },
 }
 
