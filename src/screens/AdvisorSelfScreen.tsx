@@ -1298,7 +1298,11 @@ function FlowPhone({
 
           {/* Where you are in the flow, at the top under the bar. Nothing to
               measure yet before the first question, so no strip until then. */}
-          {inFlow && !richOpen && step.kind !== 'welcome' && step.kind !== 'identity' && (
+          {inFlow &&
+            !richOpen &&
+            step.kind !== 'welcome' &&
+            step.kind !== 'identity' &&
+            !(rich && step.kind === 'questions') && (
             <div className="af-top">
               <div className="af-progress" aria-hidden>
                 {meterSteps.map((s, n) => (
@@ -1331,8 +1335,14 @@ function FlowPhone({
                     toTop()
                     return
                   }
+                  if (to === 'questions') {
+                    reset(HOME_AT)
+                    setTab('questions')
+                    toTop()
+                    return
+                  }
                   setTab('flow')
-                  reset(steps.findIndex((x) => x.kind === (to === 'questions' ? 'questions' : 'summary')))
+                  reset(steps.findIndex((x) => x.kind === 'summary'))
                 }}
               />
             ) : richOpen === 'future-you' ? (
@@ -1397,6 +1407,18 @@ function FlowPhone({
                     </button>
                   )}
                 </div>
+              ) : rich && !viewing ? (
+                /* On the journey page the tab is the designed page, the same
+                   one The Move's celebration opens — with the app's own bar
+                   under it rather than the flow's. */
+                <JourneyQuestions
+                  d={d}
+                  a={answers}
+                  onHome={() => setTab('finid')}
+                  onReport={onReport}
+                  onSend={onSend}
+                  onRecord={onRecord}
+                />
               ) : (
                 <div className="af-unlock">
                   {/* His page, in the words he reads it in — the directory shows

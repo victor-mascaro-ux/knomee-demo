@@ -1465,7 +1465,7 @@ button.af-opt:hover {
   stroke-width: 2.4;
 }
 .aq-copy-all {
-  align-self: flex-start;
+  align-self: flex-end;
   margin: 2px 0 var(--space-8, 8px);
   padding: 8px 16px;
   border: 1.5px solid var(--k-grape-light, #e9d9f4);
