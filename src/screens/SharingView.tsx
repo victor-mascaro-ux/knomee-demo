@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react'
 import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
+import { AddButton, EmptyState } from './profileParts'
 import icTeam from '../assets/adventures/my-team.svg'
 
 export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent']
@@ -121,12 +122,11 @@ export default function SharingView({
             <img className="pp-card-ic" src={icTeam} alt="" />
             My Team
           </span>
-          <button className="sh-add" type="button" aria-label="Add someone to your team" onClick={addPerson}>
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
-              <path d="M8 3v10M3 8h10" strokeLinecap="round" />
-            </svg>
-          </button>
+          <AddButton label="Add someone to your team" onClick={addPerson} />
         </div>
+        {team.length === 0 && (
+          <EmptyState art={icTeam} label="Add someone to your team" cta onClick={addPerson} />
+        )}
         <ul className="sh-people">
           {team.map((p, i) => (
             <li className="sh-person" key={p.id} style={{ ['--i' as string]: i }}>
@@ -196,6 +196,9 @@ export default function SharingView({
             <div className={`sh-fold${a.on ? ' is-open' : ''}`}>
               <div className="sh-fold-in">
                 <span className="pp-fy-label">Shared with</span>
+                {team.length === 0 && (
+                  <p className="sh-none">Add the people on your team, then choose who sees this.</p>
+                )}
                 <div className="sh-chips">
                   {team.map((p, k) => {
                     const on = !a.off.includes(p.id)

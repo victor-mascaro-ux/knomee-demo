@@ -401,3 +401,19 @@
     animation: none;
   }
 }
+
+/* The role pill keeps its top corners when its menu opens: a fixed radius of
+   half its height, where 999px would grow once the bottom ones go square. */
+.sh-role,
+.sh-role.sm-trigger.is-open {
+  border-top-left-radius: 17px;
+  border-top-right-radius: 17px;
+}
+.sh-role:not(.is-open) {
+  border-radius: 17px;
+}
+.sh-none {
+  margin: var(--space-4, 4px) 0 0;
+  font-size: var(--text-sm, 13px);
+  color: var(--text-secondary, #6b6478);
+}
