@@ -102,6 +102,7 @@ import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
+import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
 import RowMenu from './components/RowMenu'
 import { scrollPageToTop } from './reviewBridge'
@@ -220,6 +221,7 @@ type TierKey = (typeof TIER_META)[number]['key']
 // surfaces that tier's insight.
 function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => void }) {
   const [tier, setTier] = useState<TierKey | null>(null)
+  const tierBar = useRef<HTMLDivElement>(null)
   const [listOpen, setListOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
 
@@ -288,7 +290,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                 </span>
               )}
             </div>
-            <div className="dist-bar cmd-dist-bar">
+            <div className="dist-bar cmd-dist-bar" ref={tierBar}>
               {/* A tier with nobody in it is left off the bar and its legend. */}
               {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => {
                 const n = prospectStats.byTier[m.tierId]
@@ -309,22 +311,15 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                 )
               })}
             </div>
-            <div className="dist-legend dist-legend-bars">
-              {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => (
-                <div
-                  className="dist-leg"
-                  key={m.key}
-                  /* Grow only — the basis is the segment's own padding, set in CSS. */
-                  style={{ flexGrow: prospectStats.byTier[m.tierId] }}
-                >
-                  <span className="dist-leg-name">
-                    <i className={`dot ${m.dot}`} />
-                    {m.key} · {m.name}
-                  </span>
-                  <span className="dist-leg-range">{m.range}</span>
-                </div>
-              ))}
-            </div>
+            <TierLegend
+              bar={tierBar}
+              items={TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => ({
+                key: m.key,
+                dot: m.dot,
+                name: `${m.key} · ${m.name}`,
+                range: m.range,
+              }))}
+            />
             {prospectStats.byTier.incomplete > 0 && (
               <p className="dist-foot">
                 {prospectStats.byTier.incomplete} incomplete profile
@@ -1112,6 +1107,7 @@ function ClientsMetrics({
   onPickSentiment: (level: number) => void
 }) {
   const count = (t: ClientTier) => clients.filter((c) => c.tier === t).length
+  const tierBar = useRef<HTMLDivElement>(null)
   const incomplete = count('incomplete')
   const total = clients.length
 
@@ -1163,7 +1159,7 @@ function ClientsMetrics({
               </span>
             )}
           </div>
-          <div className="dist-bar cmd-dist-bar">
+          <div className="dist-bar cmd-dist-bar" ref={tierBar}>
             {CLIENT_TIER_META.filter((m) => count(m.tierId) > 0).map((m) => {
               const n = count(m.tierId)
               return (
@@ -1183,14 +1179,15 @@ function ClientsMetrics({
               )
             })}
           </div>
-          <div className="dist-legend dist-legend-bars">
-            {CLIENT_TIER_META.filter((m) => count(m.tierId) > 0).map((m) => (
-              <div className="dist-leg" key={m.tierId} style={{ flex: count(m.tierId) }}>
-                <span className="dist-leg-name"><i className={`dot ${m.dot}`} />{m.label}</span>
-                <span className="dist-leg-range">{m.range}</span>
-              </div>
-            ))}
-          </div>
+          <TierLegend
+            bar={tierBar}
+            items={CLIENT_TIER_META.filter((m) => count(m.tierId) > 0).map((m) => ({
+              key: m.tierId,
+              dot: m.dot,
+              name: m.label,
+              range: m.range,
+            }))}
+          />
           {incomplete > 0 && (
             <p className="dist-foot">
               {incomplete} incomplete profile{incomplete === 1 ? '' : 's'} not shown

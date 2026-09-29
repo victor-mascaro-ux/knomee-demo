@@ -16,7 +16,8 @@ import { InvitePanel } from './AdvisorDirectoryScreen'
 import { deleteEntry, deleteInvite, inviteLink, listEntries, type Trouble } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import TierLegend from '../components/TierLegend'
 import CollapsibleCard from '../components/CollapsibleCard'
 import RowMenu from '../components/RowMenu'
 import './firmCandidates.css'
@@ -121,6 +122,7 @@ function CommandCenter({
   /** Who is on the page: the call-list only names people who are. */
   names: Set<string>
 }) {
+  const tierBar = useRef<HTMLDivElement>(null)
   const [listOpen, setListOpen] = useState(false)
 
   const onPage = talkTo.filter((t) => names.has(t.name))
@@ -199,7 +201,7 @@ function CommandCenter({
                 </span>
               )}
             </div>
-            <div className="dist-bar cmd-dist-bar">
+            <div className="dist-bar cmd-dist-bar" ref={tierBar}>
               {/* A tier with nobody in it is left off the bar and its legend. */}
               {TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => {
                 const n = stats.byTier[m.tierId]
@@ -220,17 +222,15 @@ function CommandCenter({
                 )
               })}
             </div>
-            <div className="dist-legend dist-legend-bars">
-              {TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => (
-                <div className="dist-leg" key={m.key} style={{ flexGrow: stats.byTier[m.tierId] }}>
-                  <span className="dist-leg-name">
-                    <i className={`dot ${m.dot}`} />
-                    {m.key} · {m.name}
-                  </span>
-                  <span className="dist-leg-range">{m.range}</span>
-                </div>
-              ))}
-            </div>
+            <TierLegend
+              bar={tierBar}
+              items={TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => ({
+                key: m.key,
+                dot: m.dot,
+                name: `${m.key} · ${m.name}`,
+                range: m.range,
+              }))}
+            />
             {stats.byTier.incomplete > 0 && (
               <p className="dist-foot">
                 {stats.byTier.incomplete} incomplete profile
