@@ -326,6 +326,7 @@ function PhotoAsk({
 export function Road({
   value,
   onChange,
+  onSettle,
   still,
   stops = WHEN,
   title,
@@ -333,6 +334,9 @@ export function Road({
 }: {
   value: string | null
   onChange?: (v: string) => void
+  /** The stop the pin was let go on — the answer given, where `onChange`
+      follows the pin as it slides past each stop. */
+  onSettle?: (v: string) => void
   /** On the ending: the road as she left it, not a question. */
   still?: boolean
   stops?: string[]
@@ -365,6 +369,7 @@ export function Road({
     }
     const up = () => {
       setDragging(false)
+      onSettle?.(stops[last])
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
@@ -404,7 +409,11 @@ export function Road({
               className={`fy-stop${i === at ? ' is-on' : ''}${i < at ? ' is-past' : ''}`}
               aria-pressed={i === at}
               disabled={still}
-              onClick={() => onChange?.(w)}
+              onClick={(e) => {
+                onChange?.(w)
+                /* From the keyboard there was no pointer to let go of. */
+                if (e.detail === 0) onSettle?.(w)
+              }}
             >
               <i />
               <span>{w}</span>
@@ -799,8 +808,13 @@ export default function FutureYouFlow({
   const typing = useRef(0)
   useEffect(() => () => window.clearInterval(typing.current), [])
 
+  /* A one-tap answer moves on by itself, after the beat it takes to see the
+     choice land — the same beat as The Move's. A step changed any other way
+     (Back, OK) cancels one still waiting. */
+  const auto = useRef(0)
   useEffect(() => {
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+    return () => window.clearTimeout(auto.current)
   }, [step])
 
   const toggle = (key: 'where' | 'doing' | 'with' | 'detail', v: string) =>
@@ -878,6 +892,10 @@ export default function FutureYouFlow({
     if (qi > 0) return setStep(QUESTIONS[qi - 1])
     setStep('intro')
   }
+  /* The OK of the latest render, for a timer set before the answer it moves
+     on from had landed. */
+  const okLatest = useRef(onOk)
+  okLatest.current = onOk
 
   const pools: Record<AskKey, Pick[]> = {
     where: content.ask.where.options,
@@ -920,7 +938,14 @@ export default function FutureYouFlow({
           chosen={a[step]}
           other={other[step] ?? ''}
           otherPlaceholder={content.ask[step].otherPlaceholder}
-          onToggle={(v) => toggle(step, v)}
+          onToggle={(v) => {
+            const picking = !a[step].includes(v)
+            toggle(step, v)
+            if (content.ask[step].single && picking) {
+              window.clearTimeout(auto.current)
+              auto.current = window.setTimeout(() => okLatest.current(), 560)
+            }
+          }}
           onOther={(v) => setOther((o) => ({ ...o, [step]: v }))}
         />
       )}
@@ -931,6 +956,10 @@ export default function FutureYouFlow({
           title={content.when.title}
           sub={content.when.sub}
           onChange={(v) => setA((p) => ({ ...p, when: v }))}
+          onSettle={() => {
+            window.clearTimeout(auto.current)
+            auto.current = window.setTimeout(() => okLatest.current(), 560)
+          }}
         />
       )}
       {step === 'detail' && (
@@ -949,7 +978,11 @@ export default function FutureYouFlow({
         <Clarity
           content={content.clarity}
           value={a.clarity ?? null}
-          onChange={(n) => setA((p) => ({ ...p, clarity: n }))}
+          onChange={(n) => {
+            setA((p) => ({ ...p, clarity: n }))
+            window.clearTimeout(auto.current)
+            auto.current = window.setTimeout(() => okLatest.current(), 560)
+          }}
         />
       )}
       {step === 'postcard' && (
