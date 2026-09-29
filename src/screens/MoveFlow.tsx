@@ -475,7 +475,7 @@ function PhotoPair({
 
 /* The support question's two answers, pictured: the advisor on their own,
    and a table they would have beside them. */
-const SUPPORT_PICTURES = ['./advisor/future-you/at-my-own-firm.jpg', './advisor/future-you/at-a-firm-i-joined.jpg']
+const SUPPORT_PICTURES = ['./advisor/move/on-my-own.png', './advisor/move/platform-partner.png']
 const SUPPORT_LABELS: Record<string, string> = {
   'I want to do it on my own.': 'On my own',
   'I want help from a platform partner.': 'With a platform partner',
