@@ -316,12 +316,18 @@ export default function AdvisorProfileScreen({
               who={`advisor-${who.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}
               idName="Business ID"
               roles={ADVISOR_ROLES}
-              team={[
-                { id: 'p1', name: 'Ana', role: 'junior advisor' },
-                { id: 'p2', name: 'Dev', role: 'associate' },
-                { id: 'p3', name: 'Rachel', role: 'spouse' },
-                { id: 'p4', name: 'Tom', role: 'accountant' },
-              ]}
+              /* Marcus, the worked example, arrives with his team; everybody
+                 else's is theirs to add. */
+              team={
+                who.name === 'Marcus Hale'
+                  ? [
+                      { id: 'p1', name: 'Ana', role: 'junior advisor' },
+                      { id: 'p2', name: 'Dev', role: 'associate' },
+                      { id: 'p3', name: 'Rachel', role: 'spouse' },
+                      { id: 'p4', name: 'Tom', role: 'accountant' },
+                    ]
+                  : []
+              }
               cards={[
                 { id: 'the-move', title: 'The Move', icon: icTheMove },
                 { id: 'practice-joy', title: 'Practice Joy', icon: icPracticeJoy },
