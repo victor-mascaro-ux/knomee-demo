@@ -6868,16 +6868,18 @@ button.name-link-btn:hover .name-text {
 @media print {
   /* ── vision boards on paper ──
      A board printed from a phone kept the phone's two columns of tall rows and
-     came out taller than a sheet; held whole, it printed its title over an
-     empty page. On paper every board is the desktop's three columns, and one
-     that still runs past a sheet may break between its rows. */
+     came out taller than a sheet. On paper every board is the desktop's three
+     columns, which keeps one well inside a sheet — and it is kept whole. Chrome
+     only breaks a grid between rows no tile spans, and a collage's tall and
+     wide tiles span nearly all of them, so a board allowed to break left its
+     title and blurb at the foot of one page and moved every tile to the next. */
   .cp-board-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     grid-auto-rows: 104px !important;
   }
   .cp-board {
-    break-inside: auto;
-    page-break-inside: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   /* The card's heading goes with its first board, not alone at a page's foot. */
   .pp-card:has(.cp-boards) .pp-card-head,
