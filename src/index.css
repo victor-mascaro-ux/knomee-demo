@@ -6864,3 +6864,29 @@ button.name-link-btn:hover .name-text {
   background: var(--k-grape);
   color: #fff;
 }
+
+@media print {
+  /* ── vision boards on paper ──
+     A board printed from a phone kept the phone's two columns of tall rows and
+     came out taller than a sheet; held whole, it printed its title over an
+     empty page. On paper every board is the desktop's three columns, and one
+     that still runs past a sheet may break between its rows. */
+  .cp-board-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-auto-rows: 104px !important;
+  }
+  .cp-board {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+  /* The card's heading goes with its first board, not alone at a page's foot. */
+  .pp-card:has(.cp-boards) .pp-card-head,
+  .pp-card:has(.cp-boards) .pp-card-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  /* The My ID | Who sees it switch is a screen's control. */
+  .sh-lens {
+    display: none !important;
+  }
+}
