@@ -18,6 +18,7 @@ import { steps as flowSteps } from '../data/advisorFlow'
 import type { Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { OutlookAnswers, OutlookContent } from './OutlookFlow'
+import bgBadge from '../assets/badges/outlook-on-plum.svg'
 
 const step = (id: string) => flowSteps.find((s) => s.id === id)
 
@@ -42,6 +43,10 @@ const titled = (text: string, bold: string) => {
 }
 
 export const ADVISOR_OUTLOOK: OutlookContent = {
+  /* The celebration every adventure ends on, the client's badge: the
+     adventure has the same name on both sides. */
+  badge: bgBadge,
+  badgeName: 'Outlook',
   intro: {
     image: './outlook/intro.png',
     title: step('ol-intro')?.title ?? 'What’s on your mind?',

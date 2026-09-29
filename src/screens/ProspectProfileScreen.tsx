@@ -60,7 +60,10 @@ const ADVENTURE_ICON: Record<string, string> = {
 
 type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
+export type FinIdCard = 'goals' | 'joy' | 'future' | 'outlook' | 'confidence'
+
 export default function ProspectProfileScreen({
+  only,
   prospect,
   onBack,
   onConvert,
@@ -103,6 +106,9 @@ export default function ProspectProfileScreen({
   checkIn?: { level: number; mood: string; note?: string; date: string }
   /** The app's own toast, for the two things this page can add to a list. */
   onToast?: (msg: string) => void
+  /** Just this one adventure's card, as the page draws it — for the
+      celebration at the end of that adventure. */
+  only?: FinIdCard
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const { printing, print } = usePrintSheet()
@@ -245,117 +251,14 @@ export default function ProspectProfileScreen({
     }
   }, [prospect.name])
 
-  return (
-    <div className={`pp ${mine ? 'cp-mine' : ''}`}>
-      {!mine && (
-        <nav className="pp-crumb">
-          <button type="button" className="pp-crumb-link" onClick={onBack}>
-            My Prospects
-          </button>
-          <span className="pp-crumb-sep">›</span>
-          <span className="pp-crumb-cur">{prospect.name}</span>
-        </nav>
-      )}
-      <div className="pp-layout">
-        {/* Left profile sidebar — a full-height static strip */}
-        <aside className="pp-side">
-          <div className="pp-side-inner">
-            <div className="pp-avatar">
-              <RailFace name={prospect.name} fallback={prospect.avatar} />
-            </div>
-            <h2 className="pp-name">{prospect.name}</h2>
-            <div className="pp-meta">
-              <span className="pp-meta-row">
-                <CalendarIcon /> Joined {fi.joined}
-              </span>
-              <span className="pp-meta-row">
-                <MailIcon /> {prospect.email}
-              </span>
-            </div>
-            {/* On her own phone the check-in heads the page (below), so the
-                rail at its foot does not say it a second time. */}
-            {checkIn && !mine && (
-              <div className="cp-checkin">
-                <span className="cp-checkin-face">
-                  <img src={MOOD_FACE[checkIn.level]} alt="" />
-                </span>
-                <span className="cp-checkin-main">
-                  <span className="cp-checkin-dots" aria-hidden>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <i key={i} className={i <= checkIn.level ? 'is-on' : ''} />
-                    ))}
-                  </span>
-                  <span className="cp-checkin-mood">{checkIn.mood}</span>
-                </span>
-                <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
-                {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
-              </div>
-            )}
-
-            {!mine && onConvert && (
-              <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
-                Convert to Client
-              </button>
-            )}
-          </div>
-        </aside>
-
-        {/* Main column */}
-        <main className="pp-main">
-          {!mine && (
-          <div className="pp-tabs">
-            {(
-              [
-                ['id', 'Financial ID'],
-                ['readiness', 'Prospect Readiness'],
-                ['toolkit', 'Prospect Playbook'],
-              ] as [ProfileTab, string][]
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`pp-tab ${tab === id ? 'is-active' : ''}`}
-                onClick={() => {
-                  setTab(id)
-                  scrollPageToTop()
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          )}
-
-          <div className="pp-title-row">
-            <div className="pp-title-id">
-              {ownerMenu}
-              <h1 className="pp-title">
-                {tab === 'id'
-                  ? `${prospect.name}’s Financial ID`
-                  : tab === 'readiness'
-                    ? 'Prospect Readiness'
-                    : 'Prospect Playbook'}
-              </h1>
-            </div>
-            <button className="btn btn-download active" type="button" onClick={print}>
-              <DownloadIcon /> Download PDF
-            </button>
-          </div>
-
-          {/* How she last said she felt, at the top of the page she said it on.
-              The advisor's copy keeps it in the rail beside her name; on her
-              own phone the rail is a drawer, and a check-in nobody can see is
-              a check-in nobody made. */}
-          {checkIn && <CheckInCard checkIn={checkIn} />}
-
-          {!printing && tab === 'readiness' ? (
-            <ReadinessTabView d={prospectReadiness} />
-          ) : !printing && tab === 'toolkit' ? (
-            <ToolkitTabView d={prospectToolkit} />
-          ) : (
+  /* The Financial ID's cards, drawn once: the page lays them out, and the
+     celebration at the end of an adventure shows the one it just added. */
+  const show = (k: FinIdCard) => !only || only === k
+  const idCards = (
             <>
               {/* Key Highlights — waiting, like the other cards, until some
                   adventure has put one here. */}
+              {!only && (
               <section className={`pp-card${fi.keyHighlights.length ? '' : ' is-waiting'}`}>
                 <div className="pp-card-head">
                   <span className="pp-card-title">
@@ -383,10 +286,12 @@ export default function ProspectProfileScreen({
                   ))}
                 </div>
               </section>
+              )}
 
-              <div className="pp-cols">
+              <div className={only ? 'pp-only' : 'pp-cols'}>
                 {/* Left content column */}
-                <div className="pp-col-main">
+                <div className={only ? undefined : 'pp-col-main'}>
+                  {show('goals') && (
                   <section className="pp-card">
                     {/* No way back to the Goals ending here: each goal opens its
                           own card, which is the reading the ending gave. */}
@@ -435,7 +340,9 @@ export default function ProspectProfileScreen({
                     </EmptyFold>
                     {goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
                   </section>
+                  )}
 
+                  {show('joy') && (
                   <section className={`pp-card${has.joy ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       {fresh && has.joy && onOpenEnding ? (
@@ -488,7 +395,9 @@ export default function ProspectProfileScreen({
                     </>
                     )}
                   </section>
+                  )}
 
+                  {show('future') && (
                   <section className={`pp-card${has.futureYou ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       {fresh && has.futureYou && onOpenEnding ? (
@@ -534,7 +443,9 @@ export default function ProspectProfileScreen({
                     </>
                     )}
                   </section>
+                  )}
 
+                  {show('outlook') && (
                   <section className={`pp-card${has.outlook ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       {fresh && has.outlook && onOpenEnding ? (
@@ -573,7 +484,10 @@ export default function ProspectProfileScreen({
                     </>
                     )}
                   </section>
+                  )}
 
+                  {!only && (
+                  <>
                   <section className="pp-card">
                     <div className="pp-card-head">
                       <span className="pp-card-title">
@@ -609,10 +523,13 @@ export default function ProspectProfileScreen({
                     {vision.body}
                     </EmptyFold>
                   </section>
+                  </>
+                  )}
                 </div>
 
                 {/* Right rail */}
-                <div className="pp-rail">
+                <div className={only ? undefined : 'pp-rail'}>
+                  {show('confidence') && (
                   <section className={`pp-card${has.confidence ? '' : ' is-waiting'}`}>
                     <div className="pp-card-head">
                       {fresh && has.confidence && onOpenEnding ? (
@@ -664,7 +581,10 @@ export default function ProspectProfileScreen({
                     </>
                     )}
                   </section>
+                  )}
 
+                  {!only && (
+                  <>
                   <section className="pp-card">
                     <EmptyFold
                       empty={events.shown.length === 0}
@@ -775,9 +695,123 @@ export default function ProspectProfileScreen({
                       <ShowToggle open={questions.open} onToggle={questions.toggle} />
                     )}
                   </section>
+                  </>
+                  )}
                 </div>
               </div>
             </>
+  )
+  if (only) return <div className="pp pp-only-card">{idCards}</div>
+
+  return (
+    <div className={`pp ${mine ? 'cp-mine' : ''}`}>
+      {!mine && (
+        <nav className="pp-crumb">
+          <button type="button" className="pp-crumb-link" onClick={onBack}>
+            My Prospects
+          </button>
+          <span className="pp-crumb-sep">›</span>
+          <span className="pp-crumb-cur">{prospect.name}</span>
+        </nav>
+      )}
+      <div className="pp-layout">
+        {/* Left profile sidebar — a full-height static strip */}
+        <aside className="pp-side">
+          <div className="pp-side-inner">
+            <div className="pp-avatar">
+              <RailFace name={prospect.name} fallback={prospect.avatar} />
+            </div>
+            <h2 className="pp-name">{prospect.name}</h2>
+            <div className="pp-meta">
+              <span className="pp-meta-row">
+                <CalendarIcon /> Joined {fi.joined}
+              </span>
+              <span className="pp-meta-row">
+                <MailIcon /> {prospect.email}
+              </span>
+            </div>
+            {/* On her own phone the check-in heads the page (below), so the
+                rail at its foot does not say it a second time. */}
+            {checkIn && !mine && (
+              <div className="cp-checkin">
+                <span className="cp-checkin-face">
+                  <img src={MOOD_FACE[checkIn.level]} alt="" />
+                </span>
+                <span className="cp-checkin-main">
+                  <span className="cp-checkin-dots" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <i key={i} className={i <= checkIn.level ? 'is-on' : ''} />
+                    ))}
+                  </span>
+                  <span className="cp-checkin-mood">{checkIn.mood}</span>
+                </span>
+                <span className="cp-checkin-date">Last check-in: {checkIn.date}</span>
+                {checkIn.note && <p className="cp-checkin-note">“{checkIn.note}”</p>}
+              </div>
+            )}
+
+            {!mine && onConvert && (
+              <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
+                Convert to Client
+              </button>
+            )}
+          </div>
+        </aside>
+
+        {/* Main column */}
+        <main className="pp-main">
+          {!mine && (
+          <div className="pp-tabs">
+            {(
+              [
+                ['id', 'Financial ID'],
+                ['readiness', 'Prospect Readiness'],
+                ['toolkit', 'Prospect Playbook'],
+              ] as [ProfileTab, string][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`pp-tab ${tab === id ? 'is-active' : ''}`}
+                onClick={() => {
+                  setTab(id)
+                  scrollPageToTop()
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          )}
+
+          <div className="pp-title-row">
+            <div className="pp-title-id">
+              {ownerMenu}
+              <h1 className="pp-title">
+                {tab === 'id'
+                  ? `${prospect.name}’s Financial ID`
+                  : tab === 'readiness'
+                    ? 'Prospect Readiness'
+                    : 'Prospect Playbook'}
+              </h1>
+            </div>
+            <button className="btn btn-download active" type="button" onClick={print}>
+              <DownloadIcon /> Download PDF
+            </button>
+          </div>
+
+          {/* How she last said she felt, at the top of the page she said it on.
+              The advisor's copy keeps it in the rail beside her name; on her
+              own phone the rail is a drawer, and a check-in nobody can see is
+              a check-in nobody made. */}
+          {checkIn && <CheckInCard checkIn={checkIn} />}
+
+          {!printing && tab === 'readiness' ? (
+            <ReadinessTabView d={prospectReadiness} />
+          ) : !printing && tab === 'toolkit' ? (
+            <ToolkitTabView d={prospectToolkit} />
+          ) : (
+            idCards
           )}
 
           {/* Printing takes the whole sheet: the Financial ID above, then the

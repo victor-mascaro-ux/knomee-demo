@@ -88,7 +88,8 @@ function CardHead({
 }
 
 /** Which of the Business ID's cards are still waiting for their adventure. */
-export type WaitingCards = Partial<Record<'move' | 'joy' | 'future' | 'outlook' | 'confidence', boolean>>
+export type IdCard = 'move' | 'joy' | 'future' | 'outlook' | 'confidence'
+export type WaitingCards = Partial<Record<IdCard, boolean>>
 
 /* A card whose adventure is still to come: its head, greyed, and the line the
    client's Financial ID says in the same place. */
@@ -376,7 +377,11 @@ function BusinessIdTab({
   stageLevel,
   noBadges = false,
   waiting = {},
+  only,
 }: {
+  /** Just this one adventure's card, as the page draws it — for the
+      celebration at the end of that adventure. */
+  only?: IdCard
   noBadges?: boolean
   waiting?: WaitingCards
   d: AdvisorProfileData['id']
@@ -423,9 +428,11 @@ function BusinessIdTab({
   const goals = authored.map((g, i) => edits[i] ?? g)
   // He has taken the flow once, so every card's date picker offers that sitting.
   const dates = [d.header.completed]
+  const show = (k: IdCard) => !only || only === k
   return (
     <>
       {/* Key Highlights */}
+      {!only && (
       <section className="pp-card">
         <CardHead icon={icKeyHighlights} title="Key Highlights">
           {highlights.overflows && (
@@ -448,18 +455,19 @@ function BusinessIdTab({
           ))}
         </div>
       </section>
+      )}
 
-      <div className="pp-cols">
+      <div className={only ? 'pp-only' : 'pp-cols'}>
         {/* Left content column */}
-        <div className="pp-col-main">
-          {waiting.move ? (
-            <Waiting icon={icTheMove} title="Goals" adventure="The Move" />
+        <div className={only ? undefined : 'pp-col-main'}>
+          {!show('move') ? null : waiting.move ? (
+            <Waiting icon={icTheMove} title="The Move" adventure="The Move" />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
                 <img className="pp-card-ic" src={icTheMove} alt="" />
-                Goals
+                The Move
               </span>
               <AddButton />
             </div>
@@ -492,7 +500,7 @@ function BusinessIdTab({
           </section>
           )}
 
-          {waiting.joy ? (
+          {!show('joy') ? null : waiting.joy ? (
             <Waiting icon={icPracticeJoy} title="Practice Joy" adventure="Practice Joy" />
           ) : (
           <section className="pp-card">
@@ -535,7 +543,7 @@ function BusinessIdTab({
           </section>
           )}
 
-          {waiting.future ? (
+          {!show('future') ? null : waiting.future ? (
             <Waiting icon={icFutureYou} title="Future You" adventure="Future You" />
           ) : (
           <section className="pp-card">
@@ -589,7 +597,7 @@ function BusinessIdTab({
           </section>
           )}
 
-          {waiting.outlook ? (
+          {!show('outlook') ? null : waiting.outlook ? (
             <Waiting icon={icOutlook} title="Outlook" adventure="Outlook" />
           ) : (
           <section className="pp-card">
@@ -615,7 +623,7 @@ function BusinessIdTab({
           </section>
           )}
 
-          {!noBadges && (
+          {!noBadges && !only && (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -636,8 +644,8 @@ function BusinessIdTab({
         </div>
 
         {/* Right rail */}
-        <div className="pp-rail">
-          {waiting.confidence ? (
+        <div className={only ? undefined : 'pp-rail'}>
+          {!show('confidence') ? null : waiting.confidence ? (
             <Waiting icon={icConfidence} title="Confidence" adventure="Confidence" />
           ) : (
           <section className="pp-card">
@@ -668,6 +676,8 @@ function BusinessIdTab({
               has room for them — folded, so two empty trays do not carry the
               same weight as the reading above them, and open when there is
               something to put in them. */}
+          {!only && (
+          <>
           <FoldCard icon={icLifeEvents} title="Life Events">
             {/* The advisor adventures do not ask for these yet, and inventing
                 them would put words in his mouth — so the card wears the empty
@@ -683,6 +693,8 @@ function BusinessIdTab({
                 way in, the same way the Life Events tray above it is. */}
             <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
           </FoldCard>
+          </>
+          )}
         </div>
       </div>
 
@@ -719,3 +731,10 @@ function BusinessIdTab({
    route, second seat, book profile, the comp clock — are gone: they are not
    in the design, and everything they carried that the flow actually captures
    already reads somewhere on these two tabs. */
+
+/* One adventure's card from the Business ID, exactly as the page draws it:
+   the celebration at the end of an adventure shows what it just added. */
+export function BusinessIdCard({ data, which }: { data: AdvisorProfileData; which: IdCard }) {
+  const stageLevel = TTM_STAGES.indexOf(data.id.readiness.stage) + 1
+  return <BusinessIdTab d={data.id} confidence={data.confidence} stageLevel={stageLevel} noBadges only={which} />
+}

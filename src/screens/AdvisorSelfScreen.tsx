@@ -16,6 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
+import { BusinessIdCard, type IdCard } from './AdvisorProfileScreen'
 import TopBar from '../components/TopBar'
 import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
@@ -1048,11 +1049,28 @@ function FlowPhone({
     total: jp.required,
     next,
   })
-  const finish = (id: AdventureId, write: (a: Answers) => Answers) => {
+  /* Finishing an adventure goes straight into the next one — the
+     celebration's Next says which — rather than back to the list. */
+  const finish = (id: AdventureId, write: (a: Answers) => Answers, next?: AdventureId) => {
     edit.apply((a) => withFinished(write(a), id))
+    if (next) {
+      setRichOpen(next)
+      toTop()
+      return
+    }
     setRichOpen(null)
     closeToList()
   }
+  /* The celebration's card: what this adventure has just put on the Business
+     ID, drawn by the ID page itself from the answers as they will be saved. */
+  const cardFrom = (sheet: Answers, which: IdCard) => (
+    <BusinessIdCard data={derive(rich ? anonymized(sheet) : sheet)} which={which} />
+  )
+  const celebrate = (id: AdventureId, next: string, sheet: Answers, which: IdCard) => ({
+    ...rewardFor(id, next),
+    card: cardFrom(sheet, which),
+    idName: 'Business ID',
+  })
   /* The concerns screen answers both private concern questions at once, so
      its one switch shares — or keeps back — both. */
   const concernStep = steps.find((s) => s.id === 'ol-q1')
@@ -1157,7 +1175,7 @@ function FlowPhone({
                   return s ? <PrivateNote step={s} a={answers} edit={edit} stacked /> : null
                 }}
                 mic={(value, set) => <MicButton value={value} onChange={set} />}
-                reward={rewardFor('the-move', '')}
+                reward={(m) => ({ ...rewardFor('the-move', ''), card: cardFrom(sheetWithMove(answers, m), 'move') })}
                 onComplete={(m, to) => {
                   edit.apply((a) => withFinished(sheetWithMove(a, m), 'the-move'))
                   setRichOpen(null)
@@ -1177,14 +1195,14 @@ function FlowPhone({
             ) : richOpen === 'future-you' ? (
               <FutureYouFlow
                 content={ADVISOR_FUTURE}
-                reward={rewardFor('future-you', 'The Move')}
+                reward={(f) => celebrate('future-you', 'The Move', sheetWithFuture(answers, f), 'future')}
                 postcardSlot={(text, set) => <MicButton value={text} onChange={set} />}
-                onComplete={(f) => finish('future-you', (a) => sheetWithFuture(a, f))}
+                onComplete={(f) => finish('future-you', (a) => sheetWithFuture(a, f), 'the-move')}
               />
             ) : richOpen === 'outlook' ? (
               <OutlookFlow
                 content={ADVISOR_OUTLOOK}
-                reward={rewardFor('outlook', 'Future You')}
+                reward={(o) => celebrate('outlook', 'Future You', sheetWithOutlook(answers, o), 'outlook')}
                 askSlot={(kind, text, setText) => ({
                   above:
                     kind === 'concern' && concernStep ? (
@@ -1192,18 +1210,18 @@ function FlowPhone({
                     ) : null,
                   below: <MicButton value={text} onChange={setText} />,
                 })}
-                onComplete={(o) => finish('outlook', (a) => sheetWithOutlook(a, o))}
+                onComplete={(o) => finish('outlook', (a) => sheetWithOutlook(a, o), 'future-you')}
               />
             ) : richOpen === 'confidence' ? (
               <ConfidenceFlow
                 content={ADVISOR_CONFIDENCE}
-                reward={rewardFor('confidence', 'Outlook')}
-                onComplete={(c) => finish('confidence', (a) => sheetWithConfidence(a, c))}
+                reward={(c) => celebrate('confidence', 'Outlook', sheetWithConfidence(answers, c), 'confidence')}
+                onComplete={(c) => finish('confidence', (a) => sheetWithConfidence(a, c), 'outlook')}
               />
             ) : richOpen === 'practice-joy' ? (
               <JoyFlow
                 content={ADVISOR_JOY}
-                reward={rewardFor('practice-joy', 'Confidence')}
+                reward={(j) => celebrate('practice-joy', 'Confidence', sheetWithJoy(answers, j), 'joy')}
                 reflectSlot={(s, value, set) => {
                   const flowStep = steps.find((x) => x.id === s.id)
                   return {
@@ -1211,7 +1229,7 @@ function FlowPhone({
                     below: <MicButton big value={value} onChange={set} />,
                   }
                 }}
-                onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j))}
+                onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j), 'confidence')}
               />
             ) : tab === 'questions' ? (
               /* The three questions are rules over the answers, like the

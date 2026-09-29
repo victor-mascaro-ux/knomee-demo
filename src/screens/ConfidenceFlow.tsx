@@ -219,7 +219,7 @@ export default function ConfidenceFlow({
 }: {
   /** Her answers, to open straight on the ending with. */
   review?: ConfidenceAnswers
-  reward: { before: number; after: number; total: number; next: string } | ((a: ConfidenceAnswers) => { before: number; after: number; total: number; next: string })
+  reward: { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string } | ((a: ConfidenceAnswers) => { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string })
   onComplete: (a: ConfidenceAnswers) => void
   content?: ConfidenceContent
 }) {
@@ -419,6 +419,8 @@ export default function ConfidenceFlow({
           done={rewardNow.after}
           total={rewardNow.total}
           next={rewardNow.next}
+          card={rewardNow.card}
+          idName={rewardNow.idName}
           onNext={() => onComplete({ values: settled })}
         />
       )}

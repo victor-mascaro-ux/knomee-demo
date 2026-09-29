@@ -424,7 +424,7 @@ function Ask({
 type Step = 'intro' | 'concerns' | 'hopes' | 'results' | 'badge'
 const ORDER: Step[] = ['intro', 'concerns', 'hopes', 'results', 'badge']
 
-type Reward = { before: number; after: number; total: number; next: string }
+type Reward = { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string }
 
 export default function OutlookFlow({
   reward,
@@ -639,6 +639,8 @@ export default function OutlookFlow({
           done={rewardNow.after}
           total={rewardNow.total}
           next={rewardNow.next}
+          card={rewardNow.card}
+          idName={rewardNow.idName}
           onNext={() => onComplete(a)}
         />
       )}

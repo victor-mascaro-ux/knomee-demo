@@ -68,7 +68,14 @@ export default function JoyReward({
   onNext,
   arcTitle,
   ending,
+  card,
+  idName = 'Financial ID',
 }: {
+  /** What this adventure just added to the ID, as the ID page draws it. */
+  card?: React.ReactNode
+  /** Which ID the card is from: the client's Financial ID, the advisor's
+      Business ID. */
+  idName?: string
   /** In place of the next adventure — the last one has none to name, and
       ends on where to go from here. */
   ending?: React.ReactNode
@@ -100,7 +107,7 @@ export default function JoyReward({
   const pct = Math.round((shown / total) * 100)
 
   return (
-    <div className="jw" role="dialog" aria-label="Adventure complete">
+    <div className={`jw${card ? ' has-card' : ''}`} role="dialog" aria-label="Adventure complete">
       <div className="jw-progress">
         <div className="jw-progress-line">
           <span>Progress</span>
@@ -172,6 +179,13 @@ export default function JoyReward({
           <img className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
         )}
       </div>
+
+      {card && (
+        <div className="jw-card">
+          <p className="jw-card-k">New on your {idName}</p>
+          <div className="jw-card-body">{card}</div>
+        </div>
+      )}
 
       {ending ?? (
         <div className="jw-next">
