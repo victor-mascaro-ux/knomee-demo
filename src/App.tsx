@@ -93,11 +93,12 @@ import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
 import ClientExperienceScreen from './screens/ClientExperienceScreen'
 import ClientMobileScreen from './screens/ClientMobileScreen'
-import AdvisorMobileScreen from './screens/AdvisorMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
-import { readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
+import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
+import { sampleAnswers } from './data/advisorAnswers'
+import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
@@ -4230,19 +4231,21 @@ export default function App() {
   // Marcus's Business ID in the same frame. The firm side has its own
   // profile page, so it gets its own phone route rather than sharing hers.
   if (advisorMobileOpen) {
+    /* Marcus's phone is the advisor journey — the one advisors answer on now —
+       carrying his answers, every adventure taken to its end. Read-only: it
+       is the worked example, so nothing done on it is saved or sent. */
+    const marcus = sampleAnswers()
+    marcus.finished = Object.fromEntries(advisorAdventures.map((r) => [r.id, marcus.completed]))
     return (
       <>
-        <AdvisorMobileScreen
+        <AdvisorSelfScreen
+          key="self-marcus-phone"
+          rich
+          mode="view"
+          phone
+          entry={entryOf(marcus, null, 'Marcus Hale')}
           brand={brand}
           onExit={() => setAdvisorMobileOpen(false)}
-          onRedo={() => {
-            setAdvisorMobileOpen(false)
-            setAdvisorFlowOpen(true)
-          }}
-          onAccountSettings={() => {
-            setAdvisorMobileOpen(false)
-            setSettingsOpen(true)
-          }}
         />
         {brand && <PoweredBy />}
       </>

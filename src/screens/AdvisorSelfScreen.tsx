@@ -941,7 +941,9 @@ export default function AdvisorSelfScreen({
   /* On the journey page, and reading somebody else's sitting, the person is
      shown by their initials. Only what is drawn changes: the sheet — and what
      reaches the directory — keeps the name they typed. */
-  const anon = rich
+  /* Not for somebody's own sitting read back — Marcus's phone, the worked
+     example, reads as him. */
+  const anon = rich && !viewing
   const d = useMemo(() => derive(anon ? anonymized(answers) : answers), [answers, anon])
   /* The sheet as the firm sees it: private answers the advisor has not chosen
      to share are left out of everything that leaves this device, and out of
@@ -1244,7 +1246,7 @@ function FlowPhone({
   /* The celebration's card: what this adventure has just put on the Business
      ID, drawn by the ID page itself from the answers as they will be saved. */
   const cardFrom = (sheet: Answers, which: IdCard) => (
-    <BusinessIdCard data={derive(rich ? anonymized(sheet) : sheet)} which={which} />
+    <BusinessIdCard data={derive(rich && !viewing ? anonymized(sheet) : sheet)} which={which} />
   )
   const celebrate = (id: AdventureId, next: string, sheet: Answers, which: IdCard) => ({
     ...rewardFor(id, next),
@@ -1444,7 +1446,7 @@ function FlowPhone({
                     </button>
                   )}
                 </div>
-              ) : rich && !viewing ? (
+              ) : rich ? (
                 /* On the journey page the tab is the designed page, the same
                    one The Move's celebration opens — with the app's own bar
                    under it rather than the flow's. */
