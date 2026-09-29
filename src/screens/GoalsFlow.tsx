@@ -151,6 +151,8 @@ export const CLIENT_GOALS: MoveContent = {
     starters: ['It would cost…', 'I’m worried about…', 'It’s hard to…', 'I’d have to give up…'],
   },
   questions: ['pick', 'when', 'why', 'support', 'pros', 'cons'],
+  /* Four of each: the balloon names four, and a goal reads best on a few. */
+  listMax: 4,
   added: 'Goal Added Successfully!',
   ready: {
     thought: { title: `${THOUGHT.lead}${THOUGHT.strong}${THOUGHT.tail}`, options: THOUGHT.options.map((o) => o.label) },
