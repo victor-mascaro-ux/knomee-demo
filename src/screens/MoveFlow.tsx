@@ -30,7 +30,7 @@ import './moveFlow.css'
 import { steps as flowSteps } from '../data/advisorFlow'
 import { emptyAnswers, STAGES, STAGE_BODY, stageOf, type Answers } from '../data/advisorAnswers'
 import type { Goal } from '../data/financialId'
-import { ArrowGo, PointList, Sparkle } from './AddGoalModal'
+import { ArrowGo, Sparkle } from './AddGoalModal'
 import { Road } from './FutureYouFlow'
 import { MARK_PARTS } from './ClientExperienceScreen'
 import { GoalDetail, TTM_ART } from './profileParts'
@@ -61,6 +61,191 @@ const BLOCKER_GHOSTS = [
   'My team has to be taken care of first…',
 ]
 const BLOCKER_STARTERS = ['I need to know…', 'I’m worried about…', 'Before I decide…']
+const PRO_GHOSTS = [
+  'My clients would finally get the service I want to give them…',
+  'I’d keep more of what I build…',
+  'I could choose my own platform and tools…',
+]
+const PRO_STARTERS = ['I’d finally be able to…', 'My clients would…', 'I’d keep…', 'It would free me to…']
+const CON_GHOSTS = [
+  'Some clients might not come with me…',
+  'A year of lower income while it settles…',
+  'Rebuilding the back office from nothing…',
+]
+const CON_STARTERS = ['I could lose…', 'It would cost me…', 'I’m not sure about…', 'My team might…']
+
+/* ── the balloon ──────────────────────────────────────────────────────────
+   Pros and cons as a hot-air balloon: the move is the balloon and its
+   basket, every reason it is worth it is a balloon tied on — lift — and every
+   obstacle a sandbag hung under the basket — weight. The whole thing rises
+   and sinks with the balance of the two, so the answer is the picture, the
+   way Outlook's sky is. Positions are in % across and px down, from a scene
+   256px tall; the lift moves them all together, strings and all. */
+const PRO_SPOTS = [
+  { x: 16, y: 30 },
+  { x: 84, y: 30 },
+  { x: 24, y: 84 },
+  { x: 76, y: 84 },
+]
+/* Past four the balloons keep coming, only unnamed, closer in. */
+const PRO_EXTRA = [
+  { x: 38, y: 16 },
+  { x: 62, y: 16 },
+  { x: 33, y: 50 },
+  { x: 67, y: 50 },
+]
+/* Sandbags hang under the basket, their words out to the side they hang on. */
+const CON_SPOTS = [
+  { x: 42, y: 172 },
+  { x: 58, y: 172 },
+  { x: 36, y: 210 },
+  { x: 64, y: 210 },
+]
+const CON_EXTRA = [{ x: 50, y: 194 }]
+const BALLOON_HUES = ['#bff65b', '#f25a7a', '#ffb547', '#6bd6c4', '#c77dff', '#ff9525', '#ffe066', '#8fb8ff']
+/* Where the basket's ropes meet: its top for the strings, its foot for the
+   sandbags. */
+const BASKET_TOP = 138
+const BASKET_FOOT = 152
+
+/* A reason or an obstacle in a few words, for its pill. */
+const brief = (s: string) => {
+  const t = s.replace(/[.…?!]+$/, '')
+  const words = t.split(/\s+/)
+  return words.length > 4 ? `${words.slice(0, 4).join(' ')}…` : t
+}
+
+function Balloon({
+  pros,
+  cons,
+  naming,
+  onRemove,
+}: {
+  pros: string[]
+  cons: string[]
+  /** Which of the two carry their words right now. */
+  naming: 'pros' | 'cons'
+  onRemove: (kind: 'pros' | 'cons', i: number) => void
+}) {
+  const [open, setOpen] = useState<string | null>(null)
+  useEffect(() => setOpen(null), [naming])
+  /* Up for every reason, down for every obstacle, within the scene. */
+  const lift = Math.max(-26, Math.min(6, cons.length * 7 - pros.length * 6))
+  const proAt = (i: number) => (i < PRO_SPOTS.length ? PRO_SPOTS[i] : PRO_EXTRA[i - PRO_SPOTS.length])
+  const conAt = (i: number) => (i < CON_SPOTS.length ? CON_SPOTS[i] : CON_EXTRA[i - CON_SPOTS.length])
+  const shownPros = pros.slice(0, PRO_SPOTS.length + PRO_EXTRA.length)
+  const shownCons = cons.slice(0, CON_SPOTS.length + CON_EXTRA.length)
+  const full = open ? (open[0] === 'p' ? pros : cons)[Number(open.slice(1))] : null
+
+  const Pill = ({ kind, i, text }: { kind: 'pros' | 'cons'; i: number; text: string }) => {
+    const key = `${kind[0]}${i}`
+    const toggle = () => setOpen((o) => (o === key ? null : key))
+    return (
+      <b
+        className={`mv-tag${open === key ? ' is-open' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open === key}
+        onClick={toggle}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle()}
+      >
+        {brief(text)}
+        <button
+          type="button"
+          className="ol-x mv-tag-x"
+          aria-label={`Remove “${text}”`}
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen(null)
+            onRemove(kind, i)
+          }}
+        >
+          <svg viewBox="0 0 16 16" width="8" height="8" fill="none" aria-hidden>
+            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+        </button>
+      </b>
+    )
+  }
+
+  return (
+    <div className="mv-air">
+      <i className="mv-wisp mv-wisp-a" aria-hidden />
+      <i className="mv-wisp mv-wisp-b" aria-hidden />
+      <div className="mv-rig" style={{ ['--lift' as string]: `${lift}px` }}>
+        {/* Strings up to the balloons, ropes down to the sandbags. */}
+        <svg className="mv-lines" viewBox="0 0 100 256" preserveAspectRatio="none" aria-hidden>
+          {shownPros.map((p, i) => {
+            const s = proAt(i)
+            return (
+              <line key={`p${i}:${p}`} className="mv-string" x1={s.x} y1={s.y + 28} x2={50} y2={BASKET_TOP} />
+            )
+          })}
+          {shownCons.map((c, i) => {
+            const s = conAt(i)
+            return <line key={`c${i}:${c}`} className="mv-rope" x1={50} y1={BASKET_FOOT} x2={s.x} y2={s.y + 2} />
+          })}
+        </svg>
+
+        {/* The move itself: the envelope and its basket. */}
+        <svg className="mv-envelope" viewBox="0 0 64 96" aria-hidden>
+          <defs>
+            <clipPath id="mv-env-clip">
+              <path d="M32 2C15 2 3 15 3 31c0 15 11 27 21 37l2 6h12l2-6c10-10 21-22 21-37C61 15 49 2 32 2Z" />
+            </clipPath>
+          </defs>
+          <g clipPath="url(#mv-env-clip)">
+            <rect width="64" height="80" fill="#7639a1" />
+            <ellipse cx="32" cy="36" rx="12" ry="40" fill="#240446" />
+            <ellipse cx="32" cy="36" rx="4" ry="40" fill="#9a5cc6" />
+            <rect y="44" width="64" height="7" fill="#bff65b" />
+            <ellipse cx="20" cy="18" rx="6" ry="10" fill="#fff" opacity=".18" />
+          </g>
+          <path d="M26 74l-2 10M38 74l2 10" stroke="#5b3a1e" strokeWidth="1.2" />
+          <rect x="22" y="84" width="20" height="11" rx="2.5" fill="#b0773f" />
+          <path d="M22 88h20" stroke="#8a5a2b" strokeWidth="1.2" />
+        </svg>
+
+        {shownPros.map((p, i) => {
+          const s = proAt(i)
+          return (
+            <span
+              key={`p${i}:${p}`}
+              className="mv-pro"
+              style={{ left: `${s.x}%`, top: s.y, ['--hue' as string]: BALLOON_HUES[i % BALLOON_HUES.length], ['--i' as string]: i }}
+            >
+              <svg viewBox="0 0 24 30" aria-hidden>
+                <path d="M12 1C6 1 1.5 5.6 1.5 11.6c0 6.4 5.4 11.4 9.2 13.6h2.6c3.8-2.2 9.2-7.2 9.2-13.6C22.5 5.6 18 1 12 1Z" fill="var(--hue)" />
+                <path d="M10.4 25.2h3.2l-1.6 2.6Z" fill="var(--hue)" />
+                <ellipse cx="8" cy="8" rx="2.6" ry="4" fill="#fff" opacity=".45" />
+              </svg>
+              {naming === 'pros' && i < PRO_SPOTS.length && <Pill kind="pros" i={i} text={p} />}
+            </span>
+          )
+        })}
+
+        {shownCons.map((c, i) => {
+          const s = conAt(i)
+          return (
+            <span key={`c${i}:${c}`} className={`mv-con${s.x < 50 ? ' is-left' : ''}`} style={{ left: `${s.x}%`, top: s.y, ['--i' as string]: i }}>
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path d="M9 3h6l-1.2 3.2C18.6 7.6 21 11.4 21 15.4 21 19.6 17 22 12 22s-9-2.4-9-6.6c0-4 2.4-7.8 7.2-9.2Z" fill="#b98a5e" />
+                <path d="M9.6 6.4h4.8" stroke="#6e4a28" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M7 14.5c1.6 1.2 3.2 1.6 5 1.6s3.4-.4 5-1.6" stroke="#8f6843" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+              </svg>
+              {naming === 'cons' && i < CON_SPOTS.length && <Pill kind="cons" i={i} text={c} />}
+            </span>
+          )
+        })}
+      </div>
+      {full && (
+        <p className="ol-full mv-full" aria-live="polite">
+          {full}
+        </p>
+      )}
+    </div>
+  )
+}
 
 const OTHER = 'Other'
 const step = (id: string) => flowSteps.find((s) => s.id === id)
@@ -153,6 +338,25 @@ function Photo({ src, className, fallback }: { src: string; className?: string; 
   return <img className={className} src={src} alt="" draggable={false} onError={() => setMissing(true)} />
 }
 
+/* Icons for an answer card's disc, on a 24 grid in the line style of the
+   flow's other icons. */
+const icon = (...d: string[]) => (
+  <svg className="mv-ic" viewBox="0 0 24 24" aria-hidden>
+    {d.map((p) => (
+      <path key={p} d={p} />
+    ))}
+  </svg>
+)
+/* The brand question, answer by answer: letting it go is a paper plane
+   taking off, the terms a balance weighing them, not sure a signpost at a
+   fork, and keeping it a flag planted in the ground. */
+const BRAND_ICONS = [
+  icon('M21 3 3 10.4l7.2 2.4L12.6 20 21 3Z', 'M10.2 12.8 15 8'),
+  icon('M12 4v16', 'M8 20h8', 'M5 7.5h14', 'M5 7.5 2.6 13a2.4 2.4 0 0 0 4.8 0L5 7.5Z', 'M19 7.5 16.6 13a2.4 2.4 0 0 0 4.8 0L19 7.5Z'),
+  icon('M12 21V3', 'M12 5h6l2 2.25L18 9.5h-6', 'M12 12.5H6l-2 2.25L6 17h6'),
+  icon('M5.5 21V3.5', 'M5.5 4h11.5l-2.2 4 2.2 4H5.5', 'M3 21h5'),
+]
+
 /* Confetti for the move written down: the Goals flow's burst. */
 const BITS = Array.from({ length: 36 }, (_, i) => ({
   i,
@@ -170,10 +374,14 @@ function Pills({
   options,
   value,
   onPick,
+  icons,
 }: {
   options: string[]
   value: string | null
   onPick: (v: string) => void
+  /** An icon for each answer's disc, in the order of `options`; the check
+      takes its place when the answer is tapped. */
+  icons?: ReactNode[]
 }) {
   const [tapped, setTapped] = useState<string | null>(null)
   const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null)
@@ -201,8 +409,9 @@ function Pills({
                 aria-hidden
               />
             )}
-            <span className="mv-disc" aria-hidden>
-              <svg viewBox="0 0 16 16">
+            <span className={`mv-disc${icons?.[i] ? ' has-icon' : ''}`} aria-hidden>
+              {icons?.[i]}
+              <svg className="mv-tick" viewBox="0 0 16 16">
                 <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
               </svg>
             </span>
@@ -212,6 +421,64 @@ function Pills({
       ))}
     </ul>
   )
+}
+
+/* A two-answer question as two photographs side by side, Practice Joy's
+   cells: the picture says the answer before the words do. The tapped one
+   takes the lime ring and a check, the other steps back, and the page turns
+   after the same beat the answer cards hold. `pictures` follows the order of
+   `options`; `labels` shortens an answer for under its picture, and the answer
+   kept is still the option's own words. */
+function PhotoPair({
+  options,
+  pictures,
+  labels,
+  value,
+  onPick,
+}: {
+  options: string[]
+  pictures: string[]
+  labels?: Record<string, string>
+  value: string | null
+  onPick: (v: string) => void
+}) {
+  const [tapped, setTapped] = useState<string | null>(null)
+  const picked = tapped ?? value
+  return (
+    <div className={`jf-photos mv-photos${tapped ? ' is-chosen' : ''}`}>
+      {options.map((o, i) => (
+        <button
+          key={o}
+          type="button"
+          className={`jf-photo mv-photo${picked === o ? ' is-on' : ''}`}
+          style={{ ['--i' as string]: i }}
+          aria-pressed={picked === o}
+          onClick={() => {
+            setTapped(o)
+            onPick(o)
+          }}
+        >
+          <span className="jf-photo-frame">
+            <Photo src={pictures[i]} fallback="jf-photo-fallback" />
+            <span className="mv-photo-check" aria-hidden>
+              <svg viewBox="0 0 16 16">
+                <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+              </svg>
+            </span>
+          </span>
+          <span className="jf-photo-label">{labels?.[o] ?? o}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/* The support question's two answers, pictured: the advisor on their own,
+   and a table they would have beside them. */
+const SUPPORT_PICTURES = ['./advisor/future-you/at-my-own-firm.jpg', './advisor/future-you/at-a-firm-i-joined.jpg']
+const SUPPORT_LABELS: Record<string, string> = {
+  'I want to do it on my own.': 'On my own',
+  'I want help from a platform partner.': 'With a platform partner',
 }
 
 /* How far through the three readiness questions: three stops on a track,
@@ -275,9 +542,16 @@ export default function MoveFlow({
   const [at, setAt] = useState<Step>('intro')
   const [m, setM] = useState<MoveAnswers>(EMPTY)
   const [own, setOwn] = useState('')
+  /* What is in the box on the pros or cons screen, not yet added. */
+  const [draft, setDraft] = useState('')
   const set = <K extends keyof MoveAnswers>(k: K, v: MoveAnswers[K]) => setM((p) => ({ ...p, [k]: v }))
+  const addTo = (k: 'pros' | 'cons', v: string) => {
+    const t = v.trim()
+    if (t) setM((p) => ({ ...p, [k]: [...p[k].filter((x) => x.trim()), t] }))
+  }
 
   useEffect(() => {
+    setDraft('')
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
     if (at === 'loading') {
       const t = window.setTimeout(() => setAt('pick'), 2600)
@@ -311,14 +585,16 @@ export default function MoveFlow({
     (at === 'why' && !m.why.trim()) ||
     (at === 'support' && !m.support) ||
     (at === 'brand' && !m.brand) ||
-    (at === 'pros' && !m.pros.some((p) => p.trim())) ||
-    (at === 'cons' && !m.cons.some((p) => p.trim())) ||
+    (at === 'pros' && !m.pros.some((p) => p.trim()) && !draft.trim()) ||
+    (at === 'cons' && !m.cons.some((p) => p.trim()) && !draft.trim()) ||
     (at === 'who' && !m.who.length) ||
     (at === 'blocker' && !m.blocker.trim())
 
   const onOk = () => {
     /* A move typed but never sent with its arrow is still the move. */
     if (at === 'pick' && !m.move && own.trim()) set('move', own.trim())
+    /* And a reason or an obstacle typed but never added is still one. */
+    if (at === 'pros' || at === 'cons') addTo(at, draft)
     next()
   }
 
@@ -473,7 +749,13 @@ export default function MoveFlow({
       {at === 'support' && (
         <div className="mv-q">
           <h2 className="fy-h fy-h-sm">{title('mv-q4')}</h2>
-          <Pills options={opts('mv-q4')} value={m.support} onPick={(v) => pickAndGo('support', v)} />
+          <PhotoPair
+            options={opts('mv-q4')}
+            pictures={SUPPORT_PICTURES}
+            labels={SUPPORT_LABELS}
+            value={m.support}
+            onPick={(v) => pickAndGo('support', v)}
+          />
         </div>
       )}
 
@@ -482,20 +764,60 @@ export default function MoveFlow({
           <h2 className="fy-h fy-h-sm">{title('mv-brand')}</h2>
           <p className="fy-sub">{body('mv-brand')}</p>
           {privateNote?.('mv-brand')}
-          <Pills options={opts('mv-brand')} value={m.brand} onPick={(v) => pickAndGo('brand', v)} />
+          <Pills
+            options={opts('mv-brand')}
+            icons={BRAND_ICONS}
+            value={m.brand}
+            onPick={(v) => pickAndGo('brand', v)}
+          />
         </div>
       )}
 
       {(at === 'pros' || at === 'cons') && (
-        <div className="mv-q">
+        <div className="mv-q mv-lift">
+          {/* The balloon over both screens: the pros are its balloons, the
+              cons its sandbags, and each carries its words while it is the
+              one being asked about. */}
+          <Balloon
+            pros={m.pros.filter((p) => p.trim())}
+            cons={m.cons.filter((c) => c.trim())}
+            naming={at}
+            onRemove={(k, i) => set(k, m[k].filter((x) => x.trim()).filter((_, j) => j !== i))}
+          />
           <h2 className="fy-h fy-h-sm">{title(at === 'pros' ? 'mv-q8' : 'mv-q9')}</h2>
-          <p className="fy-sub">{at === 'pros' ? 'One at a time — add as many as you like.' : 'The obstacles, one at a time.'}</p>
-          <PointList
+          <p className="fy-sub">
+            {at === 'pros'
+              ? 'Every reason is a balloon — add them and watch your move lift.'
+              : 'Every obstacle is a sandbag. Name them — that’s how you drop them later.'}
+          </p>
+          <MemoryAsk
             key={at}
-            label={at === 'pros' ? 'Pros' : 'Cons'}
-            hint={at === 'pros' ? 'Add a reason it’s worth it.' : 'Add something that could get in the way.'}
-            items={at === 'pros' ? m.pros : m.cons}
-            onChange={(v) => set(at, v)}
+            value={draft}
+            onChange={setDraft}
+            placeholder={at === 'pros' ? 'A reason it’s worth it…' : 'Something that could get in the way…'}
+            ghosts={at === 'pros' ? PRO_GHOSTS : CON_GHOSTS}
+            starters={at === 'pros' ? PRO_STARTERS : CON_STARTERS}
+            onEnter={() => {
+              addTo(at, draft)
+              setDraft('')
+            }}
+            below={
+              <div className={`ol-add-row${mic ? ' has-mic' : ''}`}>
+                <button
+                  className="ol-add ol-add-pill"
+                  type="button"
+                  disabled={!draft.trim()}
+                  onClick={() => {
+                    addTo(at, draft)
+                    setDraft('')
+                  }}
+                >
+                  <span aria-hidden>+</span>
+                  {at === 'pros' ? 'Add Balloon' : 'Add Sandbag'}
+                </button>
+                {mic?.(draft, setDraft)}
+              </div>
+            }
           />
         </div>
       )}

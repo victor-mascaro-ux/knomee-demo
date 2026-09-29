@@ -206,7 +206,7 @@
     border-color 0.25s var(--ease-out, ease),
     transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
-.mv-disc svg {
+.mv-disc .mv-tick {
   width: 14px;
   height: 14px;
   fill: none;
@@ -232,7 +232,7 @@
   background: var(--k-plum, #240446);
   transform: scale(1.12);
 }
-.mv-choice.is-on .mv-disc svg {
+.mv-choice.is-on .mv-disc .mv-tick {
   animation: mvCheck 0.32s 0.08s ease-out forwards;
 }
 .mv-choice.is-on .mv-choice-text {
@@ -350,8 +350,344 @@
   .mv-ripple {
     animation: none;
   }
-  .mv-choice.is-on .mv-disc svg {
+  .mv-choice.is-on .mv-disc .mv-tick {
     animation: none;
     stroke-dashoffset: 0;
   }
+}
+
+/* ── the balloon ──
+   Pros and cons as a hot-air balloon on a soft morning sky, full width like
+   Outlook's, held at the top while the box scrolls under it. The rig — the
+   move's balloon, the balloons tied to it, the sandbags hung under it, and
+   every string — moves as one by --lift: up for each reason, down for each
+   obstacle. */
+.mv-air {
+  position: sticky;
+  top: 21px;
+  z-index: 2;
+  height: 256px;
+  margin: var(--space-12) calc(-1 * var(--space-16)) var(--space-16);
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(180deg, #e7dcf6 0%, #f6e9f1 48%, #fdeede 82%, #ffe7c4 100%);
+}
+.mv-wisp {
+  position: absolute;
+  z-index: -1;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.7;
+  animation: mvWisp 22s linear infinite;
+}
+.mv-wisp::before {
+  content: '';
+  position: absolute;
+  left: 22%;
+  bottom: 6px;
+  width: 44%;
+  height: 18px;
+  border-radius: 999px;
+  background: inherit;
+}
+.mv-wisp-a {
+  top: 46px;
+  width: 70px;
+}
+.mv-wisp-b {
+  top: 128px;
+  width: 54px;
+  opacity: 0.5;
+  animation-duration: 30s;
+  animation-delay: -14s;
+}
+@keyframes mvWisp {
+  from {
+    transform: translateX(-90px);
+  }
+  to {
+    transform: translateX(460px);
+  }
+}
+
+.mv-rig {
+  position: absolute;
+  inset: 0;
+  transform: translateY(var(--lift, 0px));
+  transition: transform 1.1s cubic-bezier(0.3, 1.35, 0.5, 1);
+  animation: mvDrift 5s ease-in-out infinite;
+}
+@keyframes mvDrift {
+  50% {
+    translate: 0 -4px;
+  }
+}
+.mv-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mv-lines line {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1;
+  animation: mvLineIn 0.5s ease backwards;
+}
+.mv-string {
+  stroke: rgba(36, 4, 70, 0.35);
+}
+.mv-rope {
+  stroke: #8a5a2b;
+  stroke-dasharray: 3 2;
+}
+@keyframes mvLineIn {
+  from {
+    opacity: 0;
+  }
+}
+.mv-envelope {
+  position: absolute;
+  left: 50%;
+  top: 58px;
+  width: 64px;
+  height: 96px;
+  margin-left: -32px;
+  filter: drop-shadow(0 6px 10px rgba(36, 4, 70, 0.18));
+}
+
+/* A reason: its balloon floats up out of the basket, then bobs on its string. */
+.mv-pro,
+.mv-con {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  width: 0;
+}
+.mv-pro svg {
+  width: 24px;
+  height: 30px;
+  margin-left: -12px;
+  justify-self: start;
+  filter: drop-shadow(0 3px 4px rgba(36, 4, 70, 0.18));
+  animation:
+    mvFloatUp 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) backwards,
+    mvBob 3.4s ease-in-out 0.9s infinite;
+  animation-delay: 0s, calc(0.9s + var(--i, 0) * 0.37s);
+}
+@keyframes mvFloatUp {
+  from {
+    opacity: 0;
+    transform: translateY(70px) scale(0.3);
+  }
+}
+@keyframes mvBob {
+  50% {
+    transform: translateY(-3px) rotate(3deg);
+  }
+}
+/* An obstacle: its sandbag drops from the basket and settles with a bounce. */
+.mv-con svg {
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  justify-self: start;
+  animation: mvDrop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+@keyframes mvDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.6);
+  }
+}
+
+/* The words, on the dark glass Outlook's sky uses, the × on the corner. */
+.mv-tag {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: 112px;
+  margin-top: 3px;
+  padding: 3px 13px 3px 8px;
+  border-radius: var(--radius-pill, 999px);
+  background: rgba(26, 4, 51, 0.72);
+  font-size: 11.5px;
+  font-weight: var(--weight-semibold, 600);
+  line-height: 1.2;
+  text-align: center;
+  color: #fff;
+  cursor: pointer;
+  transform: translateX(-50%);
+  justify-self: start;
+  animation: mvIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s backwards;
+  transition:
+    background 0.35s var(--ease-out, ease),
+    box-shadow 0.35s var(--ease-out, ease);
+}
+.mv-tag:hover,
+.mv-tag.is-open {
+  background: rgba(26, 4, 51, 0.9);
+  box-shadow: 0 0 0 2px rgba(191, 246, 91, 0.8);
+}
+.mv-tag-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  color: #2a1a44;
+  box-shadow: 0 1px 4px rgba(10, 2, 30, 0.35);
+}
+.mv-tag-x:hover {
+  background: #f3edf8;
+}
+.mv-full {
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-wisp,
+  .mv-rig,
+  .mv-lines line,
+  .mv-pro svg,
+  .mv-con svg,
+  .mv-tag {
+    animation: none;
+  }
+  .mv-rig {
+    transition: none;
+  }
+}
+/* A sandbag's words sit beside it, on the outside, level with the bag. */
+.mv-con .mv-tag {
+  position: absolute;
+  top: 2px;
+  left: 18px;
+  margin: 0;
+  transform: none;
+}
+.mv-con.is-left .mv-tag {
+  left: auto;
+  right: 18px;
+}
+
+/* ── a two-answer question, pictured ──
+   Practice Joy's photo cells, two to the row, arriving one after the other.
+   The chosen one takes Joy's lime ring and a plum check on its corner that
+   pops in and draws itself; the other steps back. */
+.mv-photos {
+  margin-top: var(--space-20);
+}
+.mv-photo {
+  animation: mvIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.08s + var(--i, 0) * 0.1s);
+  transition: opacity 0.3s var(--ease-out, ease);
+}
+.mv-photo .jf-photo-frame {
+  transition:
+    box-shadow 0.3s var(--ease-out, ease),
+    transform 0.3s var(--ease-out, ease);
+}
+.mv-photo:hover .jf-photo-frame {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(36, 4, 70, 0.35);
+}
+.mv-photo:hover .jf-photo-frame img {
+  transform: scale(1.03);
+}
+.mv-photos.is-chosen .mv-photo:not(.is-on) {
+  opacity: 0.4;
+}
+.mv-photo-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--k-plum, #240446);
+  box-shadow: 0 2px 6px rgba(36, 4, 70, 0.3);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.2s ease,
+    transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.mv-photo-check svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--k-lime, #bff65b);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+}
+.mv-photo.is-on .mv-photo-check {
+  opacity: 1;
+  transform: none;
+}
+.mv-photo.is-on .mv-photo-check svg {
+  animation: mvCheck 0.32s 0.12s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-photo {
+    animation: none;
+  }
+  .mv-photo.is-on .mv-photo-check svg {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── a disc that carries an icon ──
+   Larger, a soft lilac tile with the icon in grape, no ring. The icon and the
+   check share the disc's one cell: tapped, the disc turns plum, the icon
+   shrinks away and the check draws in where it was. The disc's middle meets
+   the answer's first line, so the words keep their place. */
+.mv-disc > svg {
+  grid-area: 1 / 1;
+}
+.mv-disc.has-icon {
+  width: 34px;
+  height: 34px;
+  margin: -6px 0 -6px -4px;
+  border: 0;
+  background: var(--k-grape-soft, #f3ebfa);
+}
+.mv-ic {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: var(--k-grape, #7639a1);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    opacity 0.2s ease,
+    transform 0.3s var(--ease-out, ease),
+    stroke 0.3s ease;
+}
+.mv-choice:hover .mv-disc.has-icon {
+  background: var(--k-grape-light, #e9d9f4);
+}
+.mv-choice:hover .mv-ic {
+  transform: rotate(-6deg) scale(1.08);
+}
+.mv-disc.has-icon .mv-tick {
+  width: 17px;
+  height: 17px;
+}
+.mv-choice.is-on .mv-disc.has-icon {
+  background: var(--k-plum, #240446);
+}
+.mv-choice.is-on .mv-ic {
+  opacity: 0;
+  transform: scale(0.4);
 }
