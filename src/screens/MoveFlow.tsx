@@ -771,6 +771,8 @@ export default function MoveFlow({
     setM((p) => {
       const list = p[k].filter((x) => x.trim())
       if (content.listMax && list.length >= content.listMax) return p
+      /* The same reason twice is one reason. */
+      if (list.some((x) => x.trim().toLowerCase() === t.toLowerCase())) return p
       return { ...p, [k]: [...list, t] }
     })
   }
