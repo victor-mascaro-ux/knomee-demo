@@ -1392,22 +1392,34 @@ svg.cx-tab-mark {
   top: -24px;
   border-radius: 2px;
   opacity: 0;
-  animation-name: cxConfettiFall;
-  animation-timing-function: cubic-bezier(0.3, 0.1, 0.5, 1);
+  /* The drop and the sway are two animations: an easing on a keyframed
+     drop applies to each leg of it, so the pieces slowed to a stop halfway
+     down before falling on. Now the drop is one leg, steady, and the sway
+     rocks side to side over the same time. */
+  animation-name: cxConfettiFall, cxConfettiSway;
+  animation-timing-function: cubic-bezier(0.35, 0.05, 0.65, 1), ease-in-out;
   /* Forwards: hidden until each piece's turn, not waiting visibly at the top. */
   animation-fill-mode: forwards;
 }
 @keyframes cxConfettiFall {
   0% {
     opacity: 1;
-    transform: translate(0, 0) rotate(var(--r));
-  }
-  50% {
-    transform: translate(var(--sway), 480px) rotate(calc(var(--r) + 220deg));
+    transform: translateY(0) rotate(var(--r));
   }
   100% {
     opacity: 0.9;
-    transform: translate(calc(var(--sway) * -1), 960px) rotate(calc(var(--r) + 460deg));
+    transform: translateY(960px) rotate(calc(var(--r) + 460deg));
+  }
+}
+@keyframes cxConfettiSway {
+  0% {
+    translate: 0 0;
+  }
+  50% {
+    translate: var(--sway) 0;
+  }
+  100% {
+    translate: calc(var(--sway) * -1) 0;
   }
 }
 .cx-celebrate-banner {
