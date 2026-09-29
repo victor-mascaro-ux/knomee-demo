@@ -364,28 +364,13 @@ const BRAND_ICONS = [
    but me" is not somebody on the ring — it sits under it, and choosing it
    clears the ring and leaves you glowing on your own. */
 const ALONE = 'Nobody but me'
-const PERSON_ICONS: Record<string, ReactNode> = {
-  'My team': icon(
-    'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
-    'M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8',
-    'M16 11a2.5 2.5 0 1 0 0-5',
-    'M17.5 14.4c1.7.5 2.9 2 3.3 4.1',
-  ),
-  'A business partner': icon(
-    'M3 12.5 7 8.5l3.2 1.6 2.6-1.8L17 12.5',
-    'M17 12.5l-4.2 4a1.6 1.6 0 0 1-2.3 0l-.5-.5',
-    'M7 8.5 3 12.5l3.6 3.6',
-    'M21 12.5l-4-4-2.2-.6',
-    'M9.6 13.6 11.8 16',
-  ),
-  'My spouse or family': icon(
-    'M12 20s-7-4.3-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.7 12 20 12 20Z',
-  ),
-  'My clients': icon(
-    'M12 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z',
-    'M5.5 19.5c.7-3.4 3.3-5.4 6.5-5.4s5.8 2 6.5 5.4',
-    'M16.6 4.2l.6 1.2 1.3.2-.9.9.2 1.3-1.2-.6-1.2.6.2-1.3-.9-.9 1.3-.2Z',
-  ),
+/* Each of them as a photograph in a round frame: the team together, a
+   partner's fist bump, the family on the sofa, a client across the table. */
+const PERSON_PHOTOS: Record<string, string> = {
+  'My team': './advisor/future-you/my-current-team.jpg',
+  'A business partner': './future-you/business-partners.png',
+  'My spouse or family': './future-you/family.png',
+  'My clients': './advisor/future-you/clients-i-chose.jpg',
 }
 /* Around the ring from the top, clockwise: x and y in % of the stage. */
 const SEATS = [
@@ -437,10 +422,8 @@ function Circle({ options, value, onChange }: { options: string[]; value: string
               onClick={() => toggle(o)}
             >
               <span className="mv-seat-disc">
-                {PERSON_ICONS[o]}
-                <svg className="mv-tick" viewBox="0 0 16 16" aria-hidden>
-                  <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
-                </svg>
+                <Photo src={PERSON_PHOTOS[o] ?? ''} fallback="mv-seat-fallback" />
+                <PhotoCheck />
               </span>
               <span className="mv-seat-label">{o}</span>
             </button>
@@ -832,6 +815,7 @@ export default function MoveFlow({
           title={title('mv-q2')}
           sub="Pick the stretch of road it sits on."
           onChange={(v) => set('when', v)}
+          onSettle={() => window.setTimeout(next, 560)}
         />
       )}
 
@@ -852,8 +836,11 @@ export default function MoveFlow({
       )}
 
       {at === 'support' && (
-        <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q4')}</h2>
+        <div className="mv-q mv-q-pair">
+          {/* Asked as a how rather than a yes or no, so it is answered by the
+              two pictures under it. Here only: the invite flow keeps its own
+              wording of the question. */}
+          <h2 className="fy-h fy-h-sm">How do you want to make your move?</h2>
           <PhotoPair
             options={opts('mv-q4')}
             pictures={SUPPORT_PICTURES}

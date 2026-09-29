@@ -725,9 +725,9 @@
   position: absolute;
   display: grid;
   justify-items: center;
-  gap: 5px;
+  gap: 8px;
   width: 96px;
-  margin: -24px 0 0 -48px;
+  margin: -29px 0 0 -48px;
   padding: 0;
   border: 0;
   background: none;
@@ -745,64 +745,78 @@
   }
 }
 .mv-seat-disc {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  position: relative;
+  display: block;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 4px 12px -6px rgba(36, 4, 70, 0.3);
+  background: var(--k-grape-soft, #f3ebfa);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px var(--k-grape-light, #e9d9f4),
+    0 6px 14px -6px rgba(36, 4, 70, 0.35);
   transition:
-    background 0.3s var(--ease-out, ease),
-    border-color 0.3s var(--ease-out, ease),
-    transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1),
-    box-shadow 0.3s var(--ease-out, ease);
+    box-shadow 0.3s var(--ease-out, ease),
+    transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
-.mv-seat-disc > svg {
-  grid-area: 1 / 1;
+.mv-seat-disc img,
+.mv-seat-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
-.mv-seat .mv-ic {
+/* The photo cells' check, smaller, on the frame's shoulder. */
+.mv-seat .jf-photo-check {
+  top: -4px;
+  right: -6px;
   width: 22px;
   height: 22px;
+  box-shadow: 0 0 0 2px #fff;
 }
-.mv-seat .mv-tick {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: var(--k-plum, #240446);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 16;
-  stroke-dashoffset: 16;
+.mv-seat .jf-photo-check svg {
+  width: 13px;
+  height: 13px;
+}
+.mv-seat.is-on .jf-photo-check {
+  opacity: 1;
+  transform: none;
+}
+.mv-seat.is-on .jf-photo-check svg {
+  animation: jfTick 0.32s 0.12s ease-out forwards;
 }
 .mv-seat:hover .mv-seat-disc {
-  border-color: var(--k-grape, #7639a1);
   transform: translateY(-2px);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px var(--k-grape, #7639a1),
+    0 10px 18px -8px rgba(36, 4, 70, 0.4);
 }
 .mv-seat.is-on .mv-seat-disc {
-  border-color: var(--k-lime, #bff65b);
-  background: var(--k-lime, #bff65b);
   transform: scale(1.08);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 6px var(--k-lime, #bff65b),
+    0 10px 18px -8px rgba(36, 4, 70, 0.4);
   animation: mvPulse 0.6s ease-out;
-}
-.mv-seat.is-on .mv-ic {
-  opacity: 0;
-  transform: scale(0.4);
-}
-.mv-seat.is-on .mv-tick {
-  animation: mvCheck 0.32s 0.1s ease-out forwards;
 }
 @keyframes mvPulse {
   from {
-    box-shadow: 0 0 0 0 rgba(191, 246, 91, 0.7);
+    filter: drop-shadow(0 0 0 rgba(191, 246, 91, 0.9));
   }
   to {
-    box-shadow: 0 0 0 14px rgba(191, 246, 91, 0);
+    filter: drop-shadow(0 0 10px rgba(191, 246, 91, 0));
   }
 }
 .mv-seat-label {
+  /* On its own white pill, so the line drawn in to you passes behind the
+     words rather than through them. */
+  position: relative;
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff;
   font-size: 12.5px;
   line-height: 1.25;
   text-align: center;
@@ -866,4 +880,10 @@
     animation: none;
     stroke-dashoffset: 0;
   }
+}
+
+/* A question answered by a pair of pictures reads as one centred block. */
+.mv-q-pair > .fy-h {
+  text-align: center;
+  text-wrap: balance;
 }
