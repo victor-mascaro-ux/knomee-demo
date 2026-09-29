@@ -974,7 +974,7 @@ export default function AdvisorSelfScreen({
      Answers kept private were never sent, so those are asked again. While
      the directory is being read nothing is written, so an untouched sheet
      cannot overwrite the sitting it is about to pick up. */
-  const [resumed, setResumed] = useState(() => !(mode === 'invited' && invite && !answered))
+  const [resumed, setResumed] = useState(() => !(mode === 'invited' && invite))
   useEffect(() => {
     if (resumed || !invite) return
     let live = true
@@ -990,11 +990,23 @@ export default function AdvisorSelfScreen({
         const finished = done
           ? Object.fromEntries(advisorAdventures.map((r) => [r.id, mine.answers.completed || today()]))
           : mine.answers.finished
-        setAnswers({
-          ...emptyAnswers(),
-          ...mine.answers,
-          ...(finished ? { finished } : {}),
-          sittingId: mine.answers.sittingId || mine.id,
+        setAnswers((local) => {
+          const touched =
+            Object.keys(local.text).length > 0 ||
+            Object.keys(local.choice).length > 0 ||
+            (!!local.identity.name.trim() && local.identity.name.trim() !== invite.name.trim())
+          /* Nothing here yet: the directory's sitting, whole. Answered here
+             already: this device's answers, with every adventure the
+             directory has as finished kept finished — so a copy saved before
+             a sitting was repaired cannot write it back unfinished. */
+          if (!touched)
+            return {
+              ...emptyAnswers(),
+              ...mine.answers,
+              ...(finished ? { finished } : {}),
+              sittingId: mine.answers.sittingId || mine.id,
+            }
+          return finished ? { ...local, finished: { ...finished, ...(local.finished ?? {}) } } : local
         })
       }
       setResumed(true)
