@@ -772,5 +772,11 @@ function BusinessIdTab({
    the celebration at the end of an adventure shows what it just added. */
 export function BusinessIdCard({ data, which }: { data: AdvisorProfileData; which: IdCard }) {
   const stageLevel = TTM_STAGES.indexOf(data.id.readiness.stage) + 1
-  return <BusinessIdTab d={data.id} confidence={data.confidence} stageLevel={stageLevel} noBadges only={which} />
+  /* Inside the page's own wrapper: the dial's colours, and the cards'
+     spacing, are set on it. */
+  return (
+    <div className="pp ap ap-mine pp-only-card">
+      <BusinessIdTab d={data.id} confidence={data.confidence} stageLevel={stageLevel} noBadges only={which} />
+    </div>
+  )
 }
