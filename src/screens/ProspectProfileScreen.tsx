@@ -46,6 +46,7 @@ import type { GoalsAnswers } from './GoalsFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
+import SharingView from './SharingView'
 
 /* The five core adventures, in the order they are taken. */
 const BADGE_ORDER = ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals']
@@ -111,6 +112,8 @@ export default function ProspectProfileScreen({
   only?: FinIdCard
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
+  /* Her ID read for what it says, or for who sees it. */
+  const [lens, setLens] = useState<'id' | 'sharing'>('id')
   const { printing, print } = usePrintSheet()
   /* A new client's page is empty, and fills as adventures are completed:
      only Financial Joy can be taken yet, so only what it produces appears —
@@ -806,7 +809,32 @@ export default function ProspectProfileScreen({
               a check-in nobody made. */}
           {checkIn && <CheckInCard checkIn={checkIn} />}
 
-          {!printing && tab === 'readiness' ? (
+          {/* Her own phone: the ID read two ways — what it says, and who
+              sees each part of it. */}
+          {mine && fresh && tab === 'id' && !printing && (
+            <div className="sh-lens" role="group" aria-label="Financial ID view">
+              <button type="button" aria-pressed={lens === 'id'} onClick={() => setLens('id')}>
+                My ID
+              </button>
+              <button type="button" aria-pressed={lens === 'sharing'} onClick={() => setLens('sharing')}>
+                Who sees it
+              </button>
+            </div>
+          )}
+
+          {mine && fresh && tab === 'id' && !printing && lens === 'sharing' ? (
+            <SharingView
+              cards={[
+                { id: 'goals', title: 'Goals', icon: icGoals },
+                { id: 'financial-joy', title: 'Financial Joy', icon: icFinancialJoy },
+                { id: 'confidence', title: 'Confidence', icon: icConfidence },
+                { id: 'outlook', title: 'Outlook', icon: icOutlook },
+                { id: 'future-you', title: 'Future You', icon: icFutureYou },
+                { id: 'life-events', title: 'Life Events', icon: icLifeEvents },
+                { id: 'vision', title: 'Future Vision Board', icon: icVision },
+              ]}
+            />
+          ) : !printing && tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
           ) : !printing && tab === 'toolkit' ? (
             <ToolkitTabView d={prospectToolkit} />
