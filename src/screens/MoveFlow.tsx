@@ -36,6 +36,7 @@ import { MARK_PARTS } from './ClientExperienceScreen'
 import { GoalDetail, TTM_ART } from './profileParts'
 import { Reveal } from './JoyResults'
 import MemoryAsk from './MemoryAsk'
+import { PhotoCheck } from './PhotoOther'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -357,6 +358,114 @@ const BRAND_ICONS = [
   icon('M5.5 21V3.5', 'M5.5 4h11.5l-2.2 4 2.2 4H5.5', 'M3 21h5'),
 ]
 
+/* ── your circle ──────────────────────────────────────────────────────────
+   Who has a say, as the people around you: you in the middle, the others on
+   a ring, and each one chosen lights up with a line drawn in to you. "Nobody
+   but me" is not somebody on the ring — it sits under it, and choosing it
+   clears the ring and leaves you glowing on your own. */
+const ALONE = 'Nobody but me'
+const PERSON_ICONS: Record<string, ReactNode> = {
+  'My team': icon(
+    'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+    'M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8',
+    'M16 11a2.5 2.5 0 1 0 0-5',
+    'M17.5 14.4c1.7.5 2.9 2 3.3 4.1',
+  ),
+  'A business partner': icon(
+    'M3 12.5 7 8.5l3.2 1.6 2.6-1.8L17 12.5',
+    'M17 12.5l-4.2 4a1.6 1.6 0 0 1-2.3 0l-.5-.5',
+    'M7 8.5 3 12.5l3.6 3.6',
+    'M21 12.5l-4-4-2.2-.6',
+    'M9.6 13.6 11.8 16',
+  ),
+  'My spouse or family': icon(
+    'M12 20s-7-4.3-7-9.4A4 4 0 0 1 12 8a4 4 0 0 1 7 2.6C19 15.7 12 20 12 20Z',
+  ),
+  'My clients': icon(
+    'M12 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z',
+    'M5.5 19.5c.7-3.4 3.3-5.4 6.5-5.4s5.8 2 6.5 5.4',
+    'M16.6 4.2l.6 1.2 1.3.2-.9.9.2 1.3-1.2-.6-1.2.6.2-1.3-.9-.9 1.3-.2Z',
+  ),
+}
+/* Around the ring from the top, clockwise: x and y in % of the stage. */
+const SEATS = [
+  { x: 50, y: 13 },
+  { x: 87, y: 50 },
+  { x: 50, y: 87 },
+  { x: 13, y: 50 },
+]
+
+function Circle({ options, value, onChange }: { options: string[]; value: string[]; onChange: (v: string[]) => void }) {
+  const people = options.filter((o) => o !== ALONE)
+  const alone = value.includes(ALONE)
+  const toggle = (o: string) =>
+    onChange(value.includes(o) ? value.filter((x) => x !== o) : [...value.filter((x) => x !== ALONE), o])
+  const count = value.filter((v) => v !== ALONE).length
+  return (
+    <div className="mv-circle">
+      <div className={`mv-ring${alone ? ' is-alone' : ''}`}>
+        <svg className="mv-ring-lines" viewBox="0 0 100 100" aria-hidden>
+          <circle className="mv-ring-orbit" cx="50" cy="50" r="37" />
+          {people.map((o, i) => {
+            const s = SEATS[i % SEATS.length]
+            return (
+              <line
+                key={o}
+                className={`mv-ring-line${value.includes(o) ? ' is-on' : ''}`}
+                x1="50"
+                y1="50"
+                x2={s.x}
+                y2={s.y}
+              />
+            )
+          })}
+        </svg>
+        <span className="mv-you" aria-hidden>
+          <b>You</b>
+          <small>{alone ? 'on your own' : count ? `+ ${count}` : ''}</small>
+        </span>
+        {people.map((o, i) => {
+          const s = SEATS[i % SEATS.length]
+          const on = value.includes(o)
+          return (
+            <button
+              key={o}
+              type="button"
+              className={`mv-seat${on ? ' is-on' : ''}`}
+              style={{ left: `${s.x}%`, top: `${s.y}%`, ['--i' as string]: i }}
+              aria-pressed={on}
+              onClick={() => toggle(o)}
+            >
+              <span className="mv-seat-disc">
+                {PERSON_ICONS[o]}
+                <svg className="mv-tick" viewBox="0 0 16 16" aria-hidden>
+                  <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+                </svg>
+              </span>
+              <span className="mv-seat-label">{o}</span>
+            </button>
+          )
+        })}
+      </div>
+      {options.includes(ALONE) && (
+        <button
+          type="button"
+          className={`mv-alone${alone ? ' is-on' : ''}`}
+          aria-pressed={alone}
+          onClick={() => onChange(alone ? [] : [ALONE])}
+        >
+          <span className="mv-disc" aria-hidden>
+            <svg className="mv-tick" viewBox="0 0 16 16">
+              <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+            </svg>
+          </span>
+          Nobody but me — it’s my call
+        </button>
+      )}
+    </div>
+  )
+}
+
 /* Confetti for the move written down: the Goals flow's burst. */
 const BITS = Array.from({ length: 36 }, (_, i) => ({
   i,
@@ -460,11 +569,7 @@ function PhotoPair({
         >
           <span className="jf-photo-frame">
             <Photo src={pictures[i]} fallback="jf-photo-fallback" />
-            <span className="mv-photo-check" aria-hidden>
-              <svg viewBox="0 0 16 16">
-                <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
-              </svg>
-            </span>
+            <PhotoCheck />
           </span>
           <span className="jf-photo-label">{labels?.[o] ?? o}</span>
         </button>
@@ -813,7 +918,7 @@ export default function MoveFlow({
                   }}
                 >
                   <span aria-hidden>+</span>
-                  {at === 'pros' ? 'Add Balloon' : 'Add Sandbag'}
+                  {at === 'pros' ? 'Add Pro' : 'Add Con'}
                 </button>
                 {mic?.(draft, setDraft)}
               </div>
@@ -826,19 +931,7 @@ export default function MoveFlow({
         <div className="mv-q">
           <h2 className="fy-h fy-h-sm">{title('mv-q10')}</h2>
           <p className="fy-sub">{body('mv-q10')}</p>
-          <div className="fy-chips mv-chips">
-            {opts('mv-q10').map((o) => (
-              <button
-                key={o}
-                type="button"
-                className={`fy-chip${m.who.includes(o) ? ' is-on' : ''}`}
-                aria-pressed={m.who.includes(o)}
-                onClick={() => set('who', m.who.includes(o) ? m.who.filter((x) => x !== o) : [...m.who, o])}
-              >
-                {o}
-              </button>
-            ))}
-          </div>
+          <Circle options={opts('mv-q10')} value={m.who} onChange={(v) => set('who', v)} />
         </div>
       )}
 

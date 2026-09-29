@@ -574,76 +574,13 @@
 }
 
 /* ── a two-answer question, pictured ──
-   Practice Joy's photo cells, two to the row, arriving one after the other.
-   The chosen one takes Joy's lime ring and a plum check on its corner that
-   pops in and draws itself; the other steps back. */
+   The photo cells' standard (joyFlow.css) does the arrival, the hover and the
+   check; a single answer adds that the other one steps back. */
 .mv-photos {
   margin-top: var(--space-20);
 }
-.mv-photo {
-  animation: mvIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  animation-delay: calc(0.08s + var(--i, 0) * 0.1s);
-  transition: opacity 0.3s var(--ease-out, ease);
-}
-.mv-photo .jf-photo-frame {
-  transition:
-    box-shadow 0.3s var(--ease-out, ease),
-    transform 0.3s var(--ease-out, ease);
-}
-.mv-photo:hover .jf-photo-frame {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px -10px rgba(36, 4, 70, 0.35);
-}
-.mv-photo:hover .jf-photo-frame img {
-  transform: scale(1.03);
-}
 .mv-photos.is-chosen .mv-photo:not(.is-on) {
   opacity: 0.4;
-}
-.mv-photo-check {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--k-plum, #240446);
-  box-shadow: 0 2px 6px rgba(36, 4, 70, 0.3);
-  opacity: 0;
-  transform: scale(0.4);
-  transition:
-    opacity 0.2s ease,
-    transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
-}
-.mv-photo-check svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: var(--k-lime, #bff65b);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 16;
-  stroke-dashoffset: 16;
-}
-.mv-photo.is-on .mv-photo-check {
-  opacity: 1;
-  transform: none;
-}
-.mv-photo.is-on .mv-photo-check svg {
-  animation: mvCheck 0.32s 0.12s ease-out forwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mv-photo {
-    animation: none;
-  }
-  .mv-photo.is-on .mv-photo-check svg {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
 }
 
 /* ── a disc that carries an icon ──
@@ -690,4 +627,243 @@
 .mv-choice.is-on .mv-ic {
   opacity: 0;
   transform: scale(0.4);
+}
+
+/* ── your circle ──
+   You in the middle on the plum disc, the people who might have a say on a
+   dotted orbit around you. A person chosen turns lime, draws a line in to
+   you and pulses once; the middle counts them. "Nobody but me" clears the
+   orbit and the middle glows alone. */
+.mv-circle {
+  margin-top: var(--space-16);
+}
+.mv-ring {
+  position: relative;
+  width: min(100%, 320px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.mv-ring-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mv-ring-orbit {
+  fill: none;
+  stroke: var(--k-grape-light, #e9d9f4);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.2 1.8;
+  transform-origin: 50% 50%;
+  animation: mvOrbit 60s linear infinite;
+}
+@keyframes mvOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mv-ring-line {
+  stroke: var(--k-grape, #7639a1);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mv-ring-line.is-on {
+  stroke-dashoffset: 0;
+}
+
+.mv-you {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4a1680, var(--k-plum, #240446) 70%);
+  box-shadow:
+    0 0 0 6px #fff,
+    0 0 0 7px var(--k-grape-light, #e9d9f4),
+    0 10px 24px -8px rgba(36, 4, 70, 0.5);
+  color: #fff;
+  text-align: center;
+  transition: box-shadow 0.5s var(--ease-out, ease);
+}
+.mv-you b {
+  font-size: 17px;
+  font-weight: var(--weight-bold, 700);
+  line-height: 1.1;
+}
+.mv-you small {
+  min-height: 14px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold, 600);
+  color: var(--k-lime, #bff65b);
+}
+.mv-ring.is-alone .mv-you {
+  animation: mvAlone 2.4s ease-in-out infinite;
+}
+@keyframes mvAlone {
+  50% {
+    box-shadow:
+      0 0 0 6px #fff,
+      0 0 0 12px rgba(191, 246, 91, 0.55),
+      0 10px 30px -6px rgba(36, 4, 70, 0.55);
+  }
+}
+.mv-ring.is-alone .mv-seat {
+  opacity: 0.35;
+}
+
+.mv-seat {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  width: 96px;
+  margin: -24px 0 0 -48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: mvSeatIn 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+  animation-delay: calc(0.1s + var(--i, 0) * 0.08s);
+  transition: opacity 0.35s var(--ease-out, ease);
+}
+@keyframes mvSeatIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+.mv-seat-disc {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px -6px rgba(36, 4, 70, 0.3);
+  transition:
+    background 0.3s var(--ease-out, ease),
+    border-color 0.3s var(--ease-out, ease),
+    transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1),
+    box-shadow 0.3s var(--ease-out, ease);
+}
+.mv-seat-disc > svg {
+  grid-area: 1 / 1;
+}
+.mv-seat .mv-ic {
+  width: 22px;
+  height: 22px;
+}
+.mv-seat .mv-tick {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--k-plum, #240446);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+}
+.mv-seat:hover .mv-seat-disc {
+  border-color: var(--k-grape, #7639a1);
+  transform: translateY(-2px);
+}
+.mv-seat.is-on .mv-seat-disc {
+  border-color: var(--k-lime, #bff65b);
+  background: var(--k-lime, #bff65b);
+  transform: scale(1.08);
+  animation: mvPulse 0.6s ease-out;
+}
+.mv-seat.is-on .mv-ic {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.mv-seat.is-on .mv-tick {
+  animation: mvCheck 0.32s 0.1s ease-out forwards;
+}
+@keyframes mvPulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(191, 246, 91, 0.7);
+  }
+  to {
+    box-shadow: 0 0 0 14px rgba(191, 246, 91, 0);
+  }
+}
+.mv-seat-label {
+  font-size: 12.5px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+.mv-seat.is-on .mv-seat-label {
+  font-weight: var(--weight-semibold, 600);
+}
+
+/* On your own: an answer card of its own under the circle. */
+.mv-alone {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12, 12px);
+  width: 100%;
+  /* Clear of the label under the ring's lowest seat. */
+  margin-top: 40px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 18px;
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-base, 15px);
+  line-height: 1.4;
+  text-align: left;
+  color: var(--text-strong);
+  cursor: pointer;
+  transition:
+    border-color 0.3s var(--ease-out, ease),
+    background 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease);
+}
+.mv-alone:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+.mv-alone.is-on {
+  border-color: var(--k-lime, #bff65b);
+  background: var(--k-lime-soft, #eafdcf);
+  box-shadow: 0 0 0 3px var(--k-lime-soft, #eafdcf);
+  font-weight: var(--weight-semibold, 600);
+}
+.mv-alone.is-on .mv-disc {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-plum, #240446);
+  transform: scale(1.12);
+}
+.mv-alone.is-on .mv-disc .mv-tick {
+  animation: mvCheck 0.32s 0.08s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-ring-orbit,
+  .mv-seat,
+  .mv-ring.is-alone .mv-you,
+  .mv-seat.is-on .mv-seat-disc {
+    animation: none;
+  }
+  .mv-seat.is-on .mv-tick,
+  .mv-alone.is-on .mv-disc .mv-tick {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }

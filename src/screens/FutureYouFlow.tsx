@@ -23,7 +23,7 @@ import './joyResults.css'
 import './futureYouFlow.css'
 import { financialId } from '../data/financialId'
 import JoyReward from './JoyReward'
-import { OtherField, OtherTile } from './PhotoOther'
+import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 
@@ -268,13 +268,14 @@ function PhotoAsk({
       <p className="jf-pick-sub">{sub}</p>
       <p className="jf-pick-note">{single ? 'Choose the one that fits best.' : 'Choose as many as you see.'}</p>
       <div className="jf-photos">
-        {options.map((o) => {
+        {options.map((o, i) => {
           const on = chosen.includes(o.label)
           return (
             <button
               key={o.label}
               type="button"
               className={`jf-photo${on ? ' is-on' : ''}`}
+              style={{ ['--i' as string]: i }}
               aria-pressed={on}
               onClick={() => {
                 /* One answer only: a photograph chosen replaces their own words. */
@@ -287,12 +288,14 @@ function PhotoAsk({
             >
               <span className="jf-photo-frame">
                 <Photo src={o.src} fallback="jf-photo-fallback" />
+                <PhotoCheck />
               </span>
               <span className="jf-photo-label">{o.label}</span>
             </button>
           )
         })}
         <OtherTile
+          i={options.length}
           open={showOther}
           filled={!!other.trim()}
           onToggle={() => {

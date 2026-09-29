@@ -23,7 +23,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import { JOY_AREA_CARDS, JOY_PICKS, joySteps, type JoyPick, type JoyStep } from '../data/joyFlow'
 import JoySwipe from './JoySwipe'
-import { OtherField, OtherTile } from './PhotoOther'
+import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import MemoryAsk from './MemoryAsk'
 import JoyResults, { type JoyResultsCopy } from './JoyResults'
 import JoyReward from './JoyReward'
@@ -296,7 +296,7 @@ export default function JoyFlow({
               one wears the lime ring and its word goes bold; once three are
               chosen the rest wait, and say so by fading. */}
           <div className="jf-photos">
-            {step.options.map((o) => {
+            {step.options.map((o, i) => {
               const on = a.tools.includes(o.label)
               /* Their own words count toward the limit, like a photograph. */
               const full = !on && a.tools.length + (a.other.trim() ? 1 : 0) >= step.max
@@ -305,18 +305,21 @@ export default function JoyFlow({
                   key={o.label}
                   type="button"
                   className={`jf-photo${on ? ' is-on' : ''}${full ? ' is-full' : ''}`}
+                  style={{ ['--i' as string]: i }}
                   aria-pressed={on}
                   aria-disabled={full}
                   onClick={() => !full && toggleTool(o.label)}
                 >
                   <span className="jf-photo-frame">
                     <JoyImage src={o.src} fallback="jf-photo-fallback" />
+                    <PhotoCheck />
                   </span>
                   <span className="jf-photo-label">{o.label}</span>
                 </button>
               )
             })}
             <OtherTile
+              i={step.options.length}
               open={otherOpen || !!a.other.trim()}
               filled={!!a.other.trim()}
               disabled={!otherOpen && !a.other.trim() && a.tools.length >= step.max}

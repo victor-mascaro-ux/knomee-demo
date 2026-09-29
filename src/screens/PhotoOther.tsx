@@ -22,11 +22,23 @@ const Pencil = () => (
   </svg>
 )
 
+/* The check a chosen photograph wears on its corner: a plum disc that pops in
+   and draws its lime tick — The Move's standard, for every photo question.
+   It sits inside `.jf-photo-frame` and shows whenever the cell is `.is-on`. */
+export const PhotoCheck = () => (
+  <span className="jf-photo-check" aria-hidden>
+    <svg viewBox="0 0 16 16">
+      <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+    </svg>
+  </span>
+)
+
 export function OtherTile({
   open,
   filled,
   disabled,
   onToggle,
+  i,
 }: {
   open: boolean
   /** There are words in the field: it is an answer, and wears the ring. */
@@ -34,11 +46,14 @@ export function OtherTile({
   /** The question's limit is reached and this is not one of the answers. */
   disabled?: boolean
   onToggle: () => void
+  /** Its place in the grid, so it arrives after the photographs. */
+  i?: number
 }) {
   return (
     <button
       type="button"
       className={`jf-photo jf-photo-other${filled ? ' is-on' : ''}${open ? ' is-open' : ''}${disabled ? ' is-full' : ''}`}
+      style={{ ['--i' as string]: i ?? 0 }}
       aria-pressed={open}
       aria-expanded={open}
       aria-disabled={disabled}
@@ -48,6 +63,7 @@ export function OtherTile({
         <span className="jf-other-tile">
           <Pencil />
         </span>
+        <PhotoCheck />
       </span>
       <span className="jf-photo-label">Other</span>
     </button>
