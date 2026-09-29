@@ -836,8 +836,11 @@ export default function MoveFlow({
       )}
 
       {at === 'support' && (
-        <div className="mv-q">
-          <h2 className="fy-h fy-h-sm">{title('mv-q4')}</h2>
+        <div className="mv-q mv-q-pair">
+          {/* Asked as a how rather than a yes or no, so it is answered by the
+              two pictures under it. Here only: the invite flow keeps its own
+              wording of the question. */}
+          <h2 className="fy-h fy-h-sm">How do you want to make your move?</h2>
           <PhotoPair
             options={opts('mv-q4')}
             pictures={SUPPORT_PICTURES}

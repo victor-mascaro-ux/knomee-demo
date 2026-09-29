@@ -881,3 +881,9 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* A question answered by a pair of pictures reads as one centred block. */
+.mv-q-pair > .fy-h {
+  text-align: center;
+  text-wrap: balance;
+}
