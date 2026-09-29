@@ -47,7 +47,13 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
 // data — one rich profile stands in for whichever prospect is opened.
 
 /** The demo's today — what a goal marked done from the panel is dated. */
-export const DEMO_TODAY = '06/12/2025'
+/* The day something is marked done, resolved or updated: today, in the
+   pages' mm/dd/yyyy. Every use of it stamps an action taken now. */
+export const DEMO_TODAY = (() => {
+  const d = new Date()
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  return `${p2(d.getMonth() + 1)}/${p2(d.getDate())}/${d.getFullYear()}`
+})()
 
 export interface Goal {
   /** "New" when just added, "Updated" when just saved — a pill on its row. */
