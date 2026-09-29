@@ -577,9 +577,6 @@ export function JourneyQuestions({
   d,
   a,
   onHome,
-  onReport,
-  onSend,
-  onRecord,
 }: {
   d: Derived
   a: Answers
@@ -588,9 +585,7 @@ export function JourneyQuestions({
   onSend: () => void
   onRecord: () => void
 }) {
-  const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState<number | 'all' | null>(null)
-  const wired = !!endpoint()
   const kept = privateSteps.filter((s) => isAnswered(s, a) && !isShared(s.id, a)).length
   const qs = d.id.questions
   const copy = (text: string, which: number | 'all') => {
@@ -682,28 +677,6 @@ export function JourneyQuestions({
             : `You kept ${kept} answers private. You can share any of them from its question.`}
         </p>
       )}
-      <div className="af-links aq-links">
-        <button className="af-link" type="button" onClick={onReport}>
-          See what the firm sees
-        </button>
-        {wired ? (
-          <button
-            className="af-link"
-            type="button"
-            disabled={sent}
-            onClick={() => {
-              onSend()
-              setSent(true)
-            }}
-          >
-            {sent ? 'Sent to the spreadsheet' : 'Send to the spreadsheet'}
-          </button>
-        ) : (
-          <button className="af-link" type="button" onClick={onRecord}>
-            Where my answers are kept
-          </button>
-        )}
-      </div>
       <div className="af-stat">If you’d like to talk it through with Acme, book a time.</div>
     </div>
   )
@@ -1298,7 +1271,11 @@ function FlowPhone({
 
           {/* Where you are in the flow, at the top under the bar. Nothing to
               measure yet before the first question, so no strip until then. */}
-          {inFlow && !richOpen && step.kind !== 'welcome' && step.kind !== 'identity' && (
+          {inFlow &&
+            !richOpen &&
+            step.kind !== 'welcome' &&
+            step.kind !== 'identity' &&
+            !(rich && step.kind === 'questions') && (
             <div className="af-top">
               <div className="af-progress" aria-hidden>
                 {meterSteps.map((s, n) => (
@@ -1331,8 +1308,14 @@ function FlowPhone({
                     toTop()
                     return
                   }
+                  if (to === 'questions') {
+                    reset(HOME_AT)
+                    setTab('questions')
+                    toTop()
+                    return
+                  }
                   setTab('flow')
-                  reset(steps.findIndex((x) => x.kind === (to === 'questions' ? 'questions' : 'summary')))
+                  reset(steps.findIndex((x) => x.kind === 'summary'))
                 }}
               />
             ) : richOpen === 'future-you' ? (
@@ -1397,6 +1380,18 @@ function FlowPhone({
                     </button>
                   )}
                 </div>
+              ) : rich && !viewing ? (
+                /* On the journey page the tab is the designed page, the same
+                   one The Move's celebration opens — with the app's own bar
+                   under it rather than the flow's. */
+                <JourneyQuestions
+                  d={d}
+                  a={answers}
+                  onHome={() => setTab('finid')}
+                  onReport={onReport}
+                  onSend={onSend}
+                  onRecord={onRecord}
+                />
               ) : (
                 <div className="af-unlock">
                   {/* His page, in the words he reads it in — the directory shows
