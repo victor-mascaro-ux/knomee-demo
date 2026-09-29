@@ -12,6 +12,8 @@
 
 import { useEffect, useState } from 'react'
 import './sharing.css'
+import SelectMenu from '../components/SelectMenu'
+import icTeam from '../assets/adventures/my-team.svg'
 
 export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent'] as const
 type Role = (typeof ROLES)[number]
@@ -58,15 +60,6 @@ const Pencil = () => (
     <path d="M10.8 2.8a1.6 1.6 0 0 1 2.3 2.3L6.2 12l-3 .8.8-3 6.8-7Z" strokeLinejoin="round" />
   </svg>
 )
-const TeamIcon = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden>
-    <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-    <path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8" />
-    <path d="M16 11a2.5 2.5 0 1 0 0-5" />
-    <path d="M17.5 14.4c1.7.5 2.9 2 3.3 4.1" />
-  </svg>
-)
-
 export default function SharingView({ cards }: { cards: SharedCard[] }) {
   const [team, setTeam] = useStored<Person[]>(`${KEY}.team`, TEAM)
   const [access, setAccess] = useStored<Access>(`${KEY}.access`, {})
@@ -92,9 +85,7 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
       <section className="pp-card sh-team">
         <div className="pp-card-head">
           <span className="pp-card-title">
-            <span className="sh-team-ic">
-              <TeamIcon />
-            </span>
+            <img className="pp-card-ic" src={icTeam} alt="" />
             My Team
           </span>
           <button className="sh-add" type="button" aria-label="Add someone to your team" onClick={addPerson}>
@@ -128,25 +119,23 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
                   <Pencil />
                 </button>
               )}
-              <select
+              {/* The product's own dropdown, not the browser's list. */}
+              <SelectMenu
                 className="sh-role"
                 value={p.role}
-                aria-label={`${p.name || 'Their'} role`}
-                onChange={(e) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: e.target.value as Role } : x)))}
-              >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+                options={[...ROLES]}
+                onChange={(v) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: v as Role } : x)))}
+              />
             </li>
           ))}
         </ul>
       </section>
 
       <p className="sh-count">
-        <b>{shared}</b> of {cards.length} parts shared
+        <b key={shared} className="sh-tick">
+          {shared}
+        </b>{' '}
+        of {cards.length} parts shared
       </p>
 
       {/* Every card of the ID, with its switch and the people it goes to. */}
@@ -171,23 +160,25 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
                 <i aria-hidden />
               </button>
             </div>
-            {a.on ? (
-              <>
+            <div className={`sh-fold${a.on ? ' is-open' : ''}`}>
+              <div className="sh-fold-in">
                 <span className="pp-fy-label">Shared with</span>
                 <div className="sh-chips">
-                  {team.map((p) => {
+                  {team.map((p, k) => {
                     const on = !a.off.includes(p.id)
                     return (
                       <button
                         key={p.id}
                         type="button"
+                        style={{ ['--i' as string]: k }}
+                        tabIndex={a.on ? 0 : -1}
                         className={`sh-chip${on ? ' is-on' : ''}`}
                         aria-pressed={on}
                         onClick={() =>
                           setCard(c.id, { off: on ? [...a.off, p.id] : a.off.filter((x) => x !== p.id) })
                         }
                       >
-                        <span className="sh-chip-av" aria-hidden>
+                        <span className="sh-chip-av" aria-hidden key={on ? 'on' : 'off'}>
                           {on ? (p.name || '?').charAt(0).toUpperCase() : <Lock />}
                         </span>
                         <span className="sh-chip-text">
@@ -198,13 +189,18 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
                     )
                   })}
                 </div>
-              </>
-            ) : (
-              <p className="sh-private">
-                <Lock />
-                Only you can see this.
-              </p>
-            )}
+              </div>
+            </div>
+            <div className={`sh-fold${a.on ? '' : ' is-open'}`}>
+              <div className="sh-fold-in">
+                <p className="sh-private">
+                  <span className="sh-private-lock" key={a.on ? 'on' : 'off'}>
+                    <Lock />
+                  </span>
+                  Only you can see this.
+                </p>
+              </div>
+            </div>
           </section>
         )
       })}

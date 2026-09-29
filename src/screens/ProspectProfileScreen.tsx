@@ -812,7 +812,8 @@ export default function ProspectProfileScreen({
           {/* Her own phone: the ID read two ways — what it says, and who
               sees each part of it. */}
           {mine && fresh && tab === 'id' && !printing && (
-            <div className="sh-lens" role="group" aria-label="Financial ID view">
+            <div className={`sh-lens${lens === 'sharing' ? ' is-second' : ''}`} role="group" aria-label="Financial ID view">
+              <i className="sh-lens-pill" aria-hidden />
               <button type="button" aria-pressed={lens === 'id'} onClick={() => setLens('id')}>
                 My ID
               </button>
