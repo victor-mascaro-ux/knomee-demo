@@ -76,6 +76,7 @@ import {
 import {
   entryOf,
   greeting,
+  listEntries,
   putEntry,
   touchInvite,
   type Entry,
@@ -959,11 +960,40 @@ export default function AdvisorSelfScreen({
   // is the other one: every sitting this device has seen, written on every
   // answer, and a restart adds to it rather than clearing it. So the answers
   // outlive the ID they built.
+  /* The name the invite filled in for them is not something they answered:
+     a link only opened, and not yet answered, writes no row. */
+  const typedName = answers.identity.name.trim()
   const answered = !d.empty || Object.keys(answers.text).length > 0 ||
-    Object.keys(answers.choice).length > 0 || !!answers.identity.name.trim()
+    Object.keys(answers.choice).length > 0 ||
+    (!!typedName && typedName !== (invite?.name.trim() ?? ''))
+
+  /* Their link opened on another device — or this one after its storage was
+     cleared — picks up the sitting already in the directory under it: the
+     answers they shared and the adventures they finished, as the same row.
+     Answers kept private were never sent, so those are asked again. While
+     the directory is being read nothing is written, so an untouched sheet
+     cannot overwrite the sitting it is about to pick up. */
+  const [resumed, setResumed] = useState(() => !(mode === 'invited' && invite && !answered))
   useEffect(() => {
-    if (answered && !viewing) noteSitting(visible, answers.sittingId)
-  }, [visible, answers.sittingId, answered, viewing])
+    if (resumed || !invite) return
+    let live = true
+    void listEntries().then(({ values }) => {
+      if (!live) return
+      const mine = values
+        .filter((e) => e.token === invite.token && e.answered > 0)
+        .sort((x, y) => y.answered - x.answered || (y.at ?? '').localeCompare(x.at ?? ''))[0]
+      if (mine) setAnswers({ ...emptyAnswers(), ...mine.answers, sittingId: mine.answers.sittingId || mine.id })
+      setResumed(true)
+    })
+    return () => {
+      live = false
+    }
+    // Once, on opening the link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    if (answered && !viewing && resumed) noteSitting(visible, answers.sittingId)
+  }, [visible, answers.sittingId, answered, viewing, resumed])
 
   /* And the third store: the shared directory, so the person who sent the link
      can see that it was answered. The ledger above is this device's; this one
@@ -975,14 +1005,14 @@ export default function AdvisorSelfScreen({
      doing that for now", and the row is a whole sheet each time rather than a
      delta, so a lost write costs nothing but freshness. */
   useEffect(() => {
-    if (viewing || !answered) return
+    if (viewing || !answered || !resumed) return
     const fallback = invite?.name ?? ''
     const id = window.setTimeout(() => {
       void putEntry(entryOf(answers, invite?.token ?? null, fallback, visible))
       if (invite) void touchInvite(invite.token, true)
     }, 1000)
     return () => window.clearTimeout(id)
-  }, [answers, visible, answered, viewing, invite])
+  }, [answers, visible, answered, viewing, invite, resumed])
 
   /* An opened link is worth knowing about on its own: it separates "has not
      looked at it yet" from "looked, and did not answer", which are two
@@ -1014,6 +1044,9 @@ export default function AdvisorSelfScreen({
 
   return (
     <FlowPhone
+      /* Drawn again once the directory has been read, so a sitting picked up
+         from it opens where that sitting is. */
+      key={resumed ? 'ready' : 'reading'}
       answers={answers}
       edit={edit}
       d={d}
@@ -1075,7 +1108,12 @@ function FlowPhone({
   // adventures list jumps across the flow, and Back has to mean "the screen I
   // came from" rather than "the step before this one" — otherwise Back out of
   // The Move would land in the middle of Future You.
-  const [trail, setTrail] = useState<number[]>([0])
+  /* Somebody coming back to a journey already under way lands on their
+     adventures, not on the welcome they have read and the name they gave. */
+  const [trail, setTrail] = useState<number[]>(() => {
+    const home = steps.findIndex((s) => s.kind === 'home')
+    return rich && home >= 0 && journeyProgress(answers).done + Object.keys(answers.choice).length > 0 ? [home] : [0]
+  })
   const i = trail[trail.length - 1]
   const viewing = mode === 'view'
   const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
