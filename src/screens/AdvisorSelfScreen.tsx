@@ -1157,13 +1157,21 @@ function FlowPhone({
                   return s ? <PrivateNote step={s} a={answers} edit={edit} stacked /> : null
                 }}
                 mic={(value, set) => <MicButton value={value} onChange={set} />}
-                onComplete={(m) => {
+                reward={rewardFor('the-move', '')}
+                onComplete={(m, to) => {
                   edit.apply((a) => withFinished(sheetWithMove(a, m), 'the-move'))
                   setRichOpen(null)
-                  /* The last adventure hands on to the flow's own ending: the
-                     summary, then the three questions. */
+                  /* The last adventure ends on its celebration, and the card
+                     chosen there says where to: the Business ID it completed,
+                     or the three questions it wrote. */
+                  if (to === 'id') {
+                    reset(HOME_AT)
+                    setTab('finid')
+                    toTop()
+                    return
+                  }
                   setTab('flow')
-                  reset(steps.findIndex((x) => x.kind === 'summary'))
+                  reset(steps.findIndex((x) => x.kind === (to === 'questions' ? 'questions' : 'summary')))
                 }}
               />
             ) : richOpen === 'future-you' ? (

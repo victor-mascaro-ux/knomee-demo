@@ -67,7 +67,11 @@ export default function JoyReward({
   next,
   onNext,
   arcTitle,
+  ending,
 }: {
+  /** In place of the next adventure — the last one has none to name, and
+      ends on where to go from here. */
+  ending?: React.ReactNode
   /** Lettering for the badge's top arc, for a badge drawn without its own —
       the advisor's Practice Joy wears the Financial Joy art under its own
       name. Set in the page's type, so it matches the arc underneath. */
@@ -169,13 +173,15 @@ export default function JoyReward({
         )}
       </div>
 
-      <div className="jw-next">
-        <p>Next adventure:</p>
-        <button className="jw-next-btn" type="button" onClick={onNext}>
-          {NEXT_ICON[next] && <img className="jw-next-ic" src={NEXT_ICON[next]} alt="" />}
-          {next}
-        </button>
-      </div>
+      {ending ?? (
+        <div className="jw-next">
+          <p>Next adventure:</p>
+          <button className="jw-next-btn" type="button" onClick={onNext}>
+            {NEXT_ICON[next] && <img className="jw-next-ic" src={NEXT_ICON[next]} alt="" />}
+            {next}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
