@@ -38,6 +38,8 @@ import icWidowhood from '../assets/life-events/widowhood.svg'
 import { confidenceAnswers } from '../data/financialId'
 import { avatarSources } from '../data/clientProfile'
 import emptyLifeEvents from '../assets/empty/life-events.svg'
+import emptyTeam from '../assets/empty/team.svg'
+import colourTeam from '../assets/adventures/my-team.svg'
 import emptyQuestions from '../assets/empty/questions.svg'
 import emptyVisionBoard from '../assets/empty/vision-board.svg'
 import colourLifeEvents from '../assets/adventures/life-events.svg'
@@ -49,6 +51,7 @@ import colourGoals from '../assets/adventures/goals.svg'
    picture — the same size and the same shapes — and only the colour arrives
    under the pointer. */
 const EMPTY_COLOUR: Record<string, string> = {
+  [emptyTeam]: colourTeam,
   [emptyLifeEvents]: colourLifeEvents,
   [emptyQuestions]: colourQuestions,
   [emptyVisionBoard]: colourVisionBoard,
@@ -558,6 +561,8 @@ export const EMPTY_ART = {
      two — the empty tray is a family, not three drawings. */
   visionBoard: emptyVisionBoard,
   goals: colourGoals,
+  /* My Team: the grey people, and on hover the card's own team mark. */
+  team: emptyTeam,
 }
 
 export function EmptyState({
