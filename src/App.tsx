@@ -4359,8 +4359,13 @@ export default function App() {
       invite.brand === 'acme' ? (CLIENT_BRANDS.find((b) => b.id === 'acme') ?? null) : null
     return (
       <>
+        {/* The official journey: an invited advisor answers on the advisor
+            journey — the adventures on the client's own mechanism — and what
+            they answer is saved under their link and reaches the directory
+            and the firm's dashboard as it goes. */}
         <AdvisorSelfScreen
           key={`self-invited-${invite.token}`}
+          rich
           mode="invited"
           invite={invite}
           brand={sentAs}
