@@ -568,6 +568,147 @@ function EndQuestions({
   )
 }
 
+/* ── My Three Questions, on the journey page ──
+   The same three questions and the same ways on, made an ending: the living
+   sky the Financial Joy memory wears as the hero, each question its own card
+   arriving in turn with a way to copy it, all three copied at once, and the
+   Business ID as a card to open. The invite flow keeps the plain page above. */
+export function JourneyQuestions({
+  d,
+  a,
+  onHome,
+  onReport,
+  onSend,
+  onRecord,
+}: {
+  d: Derived
+  a: Answers
+  onHome: () => void
+  onReport: () => void
+  onSend: () => void
+  onRecord: () => void
+}) {
+  const [sent, setSent] = useState(false)
+  const [copied, setCopied] = useState<number | 'all' | null>(null)
+  const wired = !!endpoint()
+  const kept = privateSteps.filter((s) => isAnswered(s, a) && !isShared(s.id, a)).length
+  const qs = d.id.questions
+  const copy = (text: string, which: number | 'all') => {
+    void navigator.clipboard?.writeText(text)
+    setCopied(which)
+    window.setTimeout(() => setCopied((c) => (c === which ? null : c)), 1600)
+  }
+  return (
+    <div className="aq">
+      <figure className="jr-memory aq-hero">
+        <span className="jr-sky" aria-hidden>
+          <i className="jr-sun" />
+          <i className="jr-glow jr-glow-a" />
+          <i className="jr-glow jr-glow-b" />
+          <i className="jr-glow jr-glow-c" />
+        </span>
+        <span className="aq-hero-k">From your own answers</span>
+        <h2 className="aq-hero-title">My Three Questions</h2>
+        <p className="aq-hero-body">
+          Put these to every firm you’re considering — including this one. What you hear back tells
+          you whether a firm is right for you.
+        </p>
+      </figure>
+
+      <ol className="aq-list">
+        {qs.map((q, i) => (
+          <li className="aq-card" key={q} style={{ ['--i' as string]: i }}>
+            <span className="aq-num" aria-hidden>
+              {i + 1}
+            </span>
+            <p className="aq-q">{q}</p>
+            <button
+              className={`aq-copy${copied === i ? ' is-done' : ''}`}
+              type="button"
+              aria-label={`Copy question ${i + 1}`}
+              onClick={() => copy(q, i)}
+            >
+              {copied === i ? (
+                <svg viewBox="0 0 16 16" aria-hidden>
+                  <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 16 16" aria-hidden>
+                  <rect x="5.5" y="5.5" width="8" height="8" rx="1.8" />
+                  <path d="M10.5 3.2V3a.9.9 0 0 0-.9-.9H3.9a1.8 1.8 0 0 0-1.8 1.8v5.7c0 .5.4.9.9.9h.2" />
+                </svg>
+              )}
+            </button>
+          </li>
+        ))}
+      </ol>
+      <button
+        className={`aq-copy-all${copied === 'all' ? ' is-done' : ''}`}
+        type="button"
+        onClick={() => copy(qs.map((q, i) => `${i + 1}. ${q}`).join('\n'), 'all')}
+      >
+        {copied === 'all' ? 'Copied all three ✓' : 'Copy all three'}
+      </button>
+
+      {/* The Business ID, as the celebration offers it: a card that says what
+          it is before it opens it. */}
+      <button className="mv-end-card aq-id" type="button" onClick={onHome}>
+        <span className="mv-end-ic" aria-hidden>
+          <svg className="mv-ic" viewBox="0 0 24 24">
+            <path d="M4 5.5h16v13H4z" />
+            <path d="M8 10a1.8 1.8 0 1 0 0-3.6A1.8 1.8 0 0 0 8 10Z" />
+            <path d="M5.6 14.4c.5-1.8 1.3-2.8 2.4-2.8s1.9 1 2.4 2.8" />
+            <path d="M13 9h4.5" />
+            <path d="M13 12.5h4.5" />
+          </svg>
+        </span>
+        <span className="mv-end-text">
+          <b>Your Business ID is ready</b>
+          <span>Everything you told us on one page — yours to keep.</span>
+        </span>
+        <span className="mv-end-go" aria-hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+            <circle cx="12" cy="12" r="10" fill="currentColor" />
+            <path d="M9.5 8 13.5 12 9.5 16" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+
+      {kept > 0 && (
+        <p className="af-private-sum">
+          <LockIcon />
+          {kept === 1
+            ? 'You kept 1 answer private. You can share it from its question.'
+            : `You kept ${kept} answers private. You can share any of them from its question.`}
+        </p>
+      )}
+      <div className="af-links aq-links">
+        <button className="af-link" type="button" onClick={onReport}>
+          See what the firm sees
+        </button>
+        {wired ? (
+          <button
+            className="af-link"
+            type="button"
+            disabled={sent}
+            onClick={() => {
+              onSend()
+              setSent(true)
+            }}
+          >
+            {sent ? 'Sent to the spreadsheet' : 'Send to the spreadsheet'}
+          </button>
+        ) : (
+          <button className="af-link" type="button" onClick={onRecord}>
+            Where my answers are kept
+          </button>
+        )}
+      </div>
+      <div className="af-stat">If you’d like to talk it through with Acme, book a time.</div>
+    </div>
+  )
+}
+
 /* ── the step renderer ── */
 
 function StepBody({
@@ -757,7 +898,9 @@ function StepBody({
       )
 
     case 'questions':
-      return (
+      return journey ? (
+        <JourneyQuestions d={d} a={a} onHome={onHome} onReport={onReport} onSend={onSend} onRecord={onRecord} />
+      ) : (
         <EndQuestions d={d} a={a} onHome={onHome} onReport={onReport} onSend={onSend} onRecord={onRecord} />
       )
 
