@@ -882,10 +882,15 @@
   }
 }
 
-/* A question answered by a pair of pictures reads as one centred block. */
-.mv-q-pair > .fy-h {
-  text-align: center;
-  text-wrap: balance;
+/* A question answered by a pair of pictures sits in the middle of the
+   screen, between the move card and the foot — the question on the left as
+   every other question is, the two pictures under it. */
+.mv-q-pair {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: var(--space-32, 32px);
 }
 
 /* ── the last celebration ──
