@@ -296,7 +296,14 @@ function DeleteCell({ row, onGone }: { row: Row; onGone: (t: Trouble) => void })
 
 /* ── the page ───────────────────────────────────────────────────────────── */
 
-export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: string) => void }) {
+export default function AdvisorDirectoryScreen({
+  onOpen,
+  onRemoved,
+}: {
+  onOpen: (entryId: string) => void
+  /** A row removed from the directory. */
+  onRemoved?: () => void
+}) {
   const [entries, setEntries] = useState<Entry[]>([])
   const [invites, setInvites] = useState<Invite[]>([])
   const [loading, setLoading] = useState(true)
@@ -440,6 +447,7 @@ export default function AdvisorDirectoryScreen({ onOpen }: { onOpen: (entryId: s
                         row={r}
                         onGone={(t) => {
                           setTrouble(t)
+                          if (!t) onRemoved?.()
                           void load()
                         }}
                       />
