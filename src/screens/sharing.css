@@ -417,3 +417,37 @@
   font-size: var(--text-sm, 13px);
   color: var(--text-secondary, #6b6478);
 }
+
+/* Taking someone off the team: a small round ✕ at the row's end, quiet until
+   the row is hovered, red on its own hover. */
+.sh-remove {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary, #8a8792);
+  cursor: pointer;
+  opacity: 0.6;
+  transition:
+    background 0.25s var(--ease-out, ease),
+    color 0.25s var(--ease-out, ease),
+    opacity 0.25s var(--ease-out, ease),
+    transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.sh-person:hover .sh-remove,
+.sh-remove:focus-visible {
+  opacity: 1;
+}
+.sh-remove:hover {
+  background: #fdecef;
+  color: #c9304f;
+  transform: rotate(90deg);
+}
+.sh-role {
+  min-width: 132px;
+}
