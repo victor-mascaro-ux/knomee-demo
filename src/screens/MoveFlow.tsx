@@ -36,6 +36,8 @@ import { MARK_PARTS } from './ClientExperienceScreen'
 import { GoalDetail, TTM_ART } from './profileParts'
 import { Reveal } from './JoyResults'
 import MemoryAsk from './MemoryAsk'
+import JoyReward from './JoyReward'
+import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
@@ -608,6 +610,7 @@ type Step =
   | 'knows'
   | 'acting'
   | 'results'
+  | 'badge'
 
 /* The screens that ask something, in order, with the foot and the meter. */
 const QUESTIONS: Step[] = ['pick', 'when', 'why', 'support', 'brand', 'pros', 'cons', 'who', 'blocker']
@@ -616,12 +619,22 @@ const QUESTIONS: Step[] = ['pick', 'when', 'why', 'support', 'brand', 'pros', 'c
 const READY: Step[] = ['thought', 'knows', 'acting']
 const READY_ID: Record<string, string> = { thought: 'mv-q5', knows: 'mv-q6', acting: 'mv-q7' }
 
+/* Where the last adventure's celebration can send you. */
+export type MoveEnd = 'id' | 'questions'
+
 export default function MoveFlow({
   onComplete,
   privateNote,
   mic,
+  reward,
 }: {
-  onComplete: (m: MoveAnswers) => void
+  /** The Move taken to its end; `to` is the card chosen on the celebration,
+      when there is one. */
+  onComplete: (m: MoveAnswers, to?: MoveEnd) => void
+  /** The celebration, as the other adventures end on it. The Move is the
+      last of them, so it ends not on a next adventure but on two cards: the
+      Business ID it has completed, and the questions it has written. */
+  reward?: { before: number; after: number; total: number }
   /** The advisor's privacy switch, for a private question's screen. */
   privateNote?: (stepId: string) => ReactNode
   /** The microphone, under a free-text box. */
@@ -994,6 +1007,49 @@ export default function MoveFlow({
         </div>
       )}
 
+      {at === 'badge' && reward && (
+        <JoyReward
+          badge={bgMove}
+          arcTitle="The Move"
+          name="The Move"
+          from={reward.before}
+          done={reward.after}
+          total={reward.total}
+          next=""
+          onNext={() => onComplete(m)}
+          ending={
+            <div className="mv-end">
+              <h2 className="mv-end-title">Every adventure, done!</h2>
+              <p className="mv-end-sub">Your Business ID is complete. Where to next?</p>
+              <button className="mv-end-card" type="button" style={{ ['--i' as string]: 0 }} onClick={() => onComplete(m, 'id')}>
+                <span className="mv-end-ic" aria-hidden>
+                  {icon('M4 5.5h16v13H4z', 'M8 10a1.8 1.8 0 1 0 0-3.6A1.8 1.8 0 0 0 8 10Z', 'M5.6 14.4c.5-1.8 1.3-2.8 2.4-2.8s1.9 1 2.4 2.8', 'M13 9h4.5', 'M13 12.5h4.5')}
+                </span>
+                <span className="mv-end-text">
+                  <b>My Business ID</b>
+                  <span>Everything you told us, on one page.</span>
+                </span>
+                <span className="mv-end-go" aria-hidden>
+                  <ArrowGo />
+                </span>
+              </button>
+              <button className="mv-end-card" type="button" style={{ ['--i' as string]: 1 }} onClick={() => onComplete(m, 'questions')}>
+                <span className="mv-end-ic" aria-hidden>
+                  {icon('M5 5.5h14v10H10l-4 3.5v-3.5H5z', 'M10.2 9.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1', 'M12 14h.01')}
+                </span>
+                <span className="mv-end-text">
+                  <b>My Three Questions</b>
+                  <span>Put them to every firm you’re considering.</span>
+                </span>
+                <span className="mv-end-go" aria-hidden>
+                  <ArrowGo />
+                </span>
+              </button>
+            </div>
+          }
+        />
+      )}
+
       {at === 'results' && (
         <div className="jr glr">
           <Reveal>
@@ -1028,7 +1084,7 @@ export default function MoveFlow({
           </Reveal>
 
           <Reveal className="jr-reward">
-            <button className="jr-claim" type="button" onClick={() => onComplete(m)}>
+            <button className="jr-claim" type="button" onClick={() => (reward ? go('badge') : onComplete(m))}>
               <span>Continue</span>
             </button>
           </Reveal>
