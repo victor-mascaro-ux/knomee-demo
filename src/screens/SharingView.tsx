@@ -15,6 +15,7 @@ import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
 import { AddButton, EmptyState } from './profileParts'
 import icTeam from '../assets/adventures/my-team.svg'
+import emptyTeam from '../assets/empty/team.svg'
 
 export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent']
 /* An advisor's team is the practice's: the people a Business ID goes to. */
@@ -134,7 +135,7 @@ export default function SharingView({
           <AddButton label="Add someone to your team" onClick={addPerson} />
         </div>
         {team.length === 0 && (
-          <EmptyState art={icTeam} label="Add someone to your team" cta onClick={addPerson} />
+          <EmptyState art={emptyTeam} label="Add someone to your team" cta onClick={addPerson} />
         )}
         <ul className="sh-people">
           {team.map((p, i) => (
@@ -168,6 +169,24 @@ export default function SharingView({
                 options={[...roles]}
                 onChange={(v) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: v } : x)))}
               />
+              {/* Off the team, and so off every card they could see. */}
+              <button
+                className="sh-remove"
+                type="button"
+                aria-label={`Remove ${p.name || 'this person'} from your team`}
+                onClick={() => {
+                  setTeam((t) => t.filter((x) => x.id !== p.id))
+                  setAccess((acc) =>
+                    Object.fromEntries(
+                      Object.entries(acc).map(([k, v]) => [k, { ...v, off: v.off.filter((x) => x !== p.id) }]),
+                    ),
+                  )
+                }}
+              >
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
+                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
             </li>
           ))}
         </ul>
