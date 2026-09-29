@@ -29,7 +29,7 @@ import {
   type Tier,
 } from '../data/candidates'
 import { talkTo } from '../data/candidateInsights'
-import { advisor } from '../data/advisorFlow'
+import { initials } from '../data/advisorAnswers'
 import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
@@ -81,7 +81,7 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
       {isOwner ? (
         <button type="button" className="name-line name-link-btn" onClick={() => onOpen(c)}>
           <span className="name-text">
-            {c.name}
+            {initials(c.name)}
             <span className="name-chevron" aria-hidden>
               ›
             </span>
@@ -90,7 +90,7 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
         </button>
       ) : (
         <span className="name-line">
-          <span className="name-text">{c.name}</span>
+          <span className="name-text">{initials(c.name)}</span>
           {tag}
         </span>
       )}
@@ -264,7 +264,7 @@ function CommandCenter({
               aria-expanded={listOpen}
             >
               <span className="cmd-lead-tag">Start with</span>
-              <span className="cmd-lead-name">{lead.name}</span>
+              <span className="cmd-lead-name">{initials(lead.name)}</span>
               <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
                 {lead.tier}
               </span>
@@ -299,10 +299,10 @@ function CommandCenter({
                           className="talk-name name-link-btn"
                           onClick={() => onOpenProfile(rec)}
                         >
-                          {t.name}
+                          {initials(t.name)}
                         </button>
                       ) : (
-                        <span className="talk-name">{t.name}</span>
+                        <span className="talk-name">{initials(t.name)}</span>
                       )
                     })()}
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
@@ -358,21 +358,15 @@ function Row({
           type="checkbox"
           checked={checked}
           onChange={onToggle}
-          aria-label={`Select ${c.name}`}
+          aria-label={`Select ${initials(c.name)}`}
         />
       </td>
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
-            {c.name === profileOwner ? (
-              /* Only the candidate whose profile is built out has a picture —
-                 the same rule that decides whose name is a link. */
-              <span className="avatar fc-portrait">
-                <img src={advisor.photo} alt="" />
-              </span>
-            ) : (
-              <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
-            )}
+            {/* Every candidate by their initial: the pipeline is anonymous,
+                the worked example included, so nobody has a picture. */}
+            <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
           </span>
           <CandidateName c={c} onOpen={onOpen} />
         </div>
@@ -777,7 +771,7 @@ export default function FirmCandidatesScreen({
           <div className="modal fc-remove-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title" id="fc-remove-title">
-                Remove {removing.name}?
+                Remove {initials(removing.name)}?
               </h2>
               <button className="modal-close" type="button" aria-label="Close" onClick={() => setRemoving(null)}>
                 <CloseIcon />
