@@ -1418,7 +1418,7 @@ function FlowPhone({
                   const flowStep = steps.find((x) => x.id === s.id)
                   return {
                     above: flowStep ? <PrivateNote step={flowStep} a={answers} edit={edit} stacked /> : null,
-                    below: <MicButton big value={value} onChange={set} />,
+                    below: <MicButton value={value} onChange={set} />,
                   }
                 }}
                 onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j), 'confidence')}
