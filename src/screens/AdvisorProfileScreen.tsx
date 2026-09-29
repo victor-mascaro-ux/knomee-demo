@@ -48,6 +48,7 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
+import { initials } from '../data/advisorAnswers'
 import SharingView, { ADVISOR_ROLES, SharingLens } from './SharingView'
 
 /* An answer that is a list of things rather than a sentence — "Ownership, my
@@ -160,6 +161,10 @@ export default function AdvisorProfileScreen({
   const [photoFailed, setPhotoFailed] = useState(false)
   const d = data.id
   const who = data.who
+  /* The firm reads its pipeline anonymously: a candidate is their initials and
+     no picture. Their own page, on their own phone, is theirs by name. */
+  const shownName = mine ? who.name : initials(who.name)
+  const photo = mine ? who.photo : undefined
   const showTabs = !mine || tabs
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
   /* Whatever of the three the page happens to know. Marcus's are in the flow;
@@ -205,18 +210,18 @@ export default function AdvisorProfileScreen({
             {backLabel ?? 'My Candidates'}
           </button>
           <span className="pp-crumb-sep">›</span>
-          <span className="pp-crumb-cur">{who.name}</span>
+          <span className="pp-crumb-cur">{shownName}</span>
         </nav>
       )}
       <div className="pp-layout">
         {/* Left profile sidebar */}
         <aside className="pp-side">
           <div className="pp-side-inner">
-            <div className={`pp-avatar ap-portrait${photoFailed || !who.photo ? '' : ' has-photo'}`}>
-              {photoFailed || !who.photo ? (
+            <div className={`pp-avatar ap-portrait${photoFailed || !photo ? '' : ' has-photo'}`}>
+              {photoFailed || !photo ? (
                 <span>{who.initial}</span>
               ) : (
-                <img src={who.photo} alt="" onError={() => setPhotoFailed(true)} />
+                <img src={photo} alt="" onError={() => setPhotoFailed(true)} />
               )}
             </div>
             {/* Name and date are one thing — who this is and when they said it.
@@ -224,7 +229,7 @@ export default function AdvisorProfileScreen({
                 together beside the portrait; at full width the wrapper is
                 `display: contents` and the column is exactly as it was. */}
             <div className="ap-idline">
-              <h2 className="pp-name">{who.name}</h2>
+              <h2 className="pp-name">{shownName}</h2>
               <div className="pp-meta">
                 <span className="pp-meta-row">
                   <CalendarIcon /> <span className="ap-completed-word">Completed </span>
@@ -295,7 +300,7 @@ export default function AdvisorProfileScreen({
             <div className="pp-title-id">
               {ownerMenu}
               <h1 className="pp-title">
-                {tab === 'id' ? (who.name === 'You' ? 'Your Business ID' : `${who.name}’s Business ID`) : TAB_LABEL[tab]}
+                {tab === 'id' ? (who.name === 'You' ? 'Your Business ID' : `${shownName}’s Business ID`) : TAB_LABEL[tab]}
               </h1>
             </div>
             {/* The sheet is all three tabs, so that is what downloads —
