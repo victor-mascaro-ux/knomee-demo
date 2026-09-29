@@ -215,7 +215,10 @@ function Sky({
   tall,
   label,
   onRemove,
+  prompts,
 }: {
+  /** The prompts the answers may start with, taken off each label. */
+  prompts?: string[]
   concerns: string[]
   hopes: string[]
   dawn: boolean
@@ -286,7 +289,7 @@ function Sky({
                         (e.key === 'Enter' || e.key === ' ') && toggle(`c${i}`),
                     })}
               >
-                {short(c)}
+                {short(c, prompts)}
                 {!tall && label?.clouds && <X kind="concern" i={i} text={c} />}
               </b>
             )}
@@ -317,7 +320,7 @@ function Sky({
                         (e.key === 'Enter' || e.key === ' ') && toggle(`h${i}`),
                     })}
               >
-                {short(h)}
+                {short(h, prompts)}
                 {!tall && label?.lights && <X kind="hope" i={i} text={h} />}
               </b>
             )}
@@ -334,9 +337,27 @@ function Sky({
   )
 }
 
-/* A worry or a hope in a few words, for a label on the sky. */
-const short = (s: string) => {
-  const t = s.replace(/^I (worry about|dream of|hope)\s+/i, '').replace(/[.?!]$/, '')
+/* A worry or a hope in a few words, for a label on the sky. The label is what
+   comes after the prompt it was started with — "I worry about affording
+   college" reads "affording college" — so every label starts on its own
+   words rather than on the prompt they all share. */
+export const afterPrompt = (s: string, prompts: string[] = []) => {
+  const text = s.trim()
+  const lower = text.toLowerCase()
+  const stems = prompts
+    .map((p) => p.replace(/[.…\s]+$/, '').trim())
+    .filter(Boolean)
+    .sort((x, y) => y.length - x.length)
+  for (const stem of stems) {
+    if (lower.startsWith(stem.toLowerCase())) {
+      const rest = text.slice(stem.length).replace(/^[\s,:;—–-]+/, '')
+      if (rest) return rest
+    }
+  }
+  return text.replace(/^I (worry about|dream of|hope)\s+/i, '')
+}
+const short = (s: string, prompts?: string[]) => {
+  const t = afterPrompt(s, prompts).replace(/[.?!]$/, '')
   const words = t.split(/\s+/)
   return words.length > 5 ? `${words.slice(0, 5).join(' ')}…` : t
 }
@@ -489,6 +510,7 @@ export default function OutlookFlow({
 
   const reading = content.reading(a.concerns.length, a.hopes.length)
   const rewardNow = typeof reward === 'function' ? reward(a) : reward
+  const prompts = [...content.starts.concern, ...content.starts.hope]
 
   return (
     <div className="jf ol">
@@ -516,6 +538,7 @@ export default function OutlookFlow({
           {/* What is added goes onto the sky with its words — concerns as
               clouds, hopes as lights — and comes off it with its ×. */}
           <Sky
+            prompts={prompts}
             concerns={a.concerns}
             hopes={step === 'hopes' ? a.hopes : []}
             dawn={step === 'hopes'}
@@ -570,7 +593,7 @@ export default function OutlookFlow({
             {/* The whole sky: her worries low as clouds, her hopes above them
                 as lights, each named. */}
             <figure className="olr-hero">
-              <Sky concerns={a.concerns} hopes={a.hopes} dawn tall />
+              <Sky concerns={a.concerns} hopes={a.hopes} dawn tall prompts={prompts} />
               <blockquote className="olr-words">
                 <Typed text={reading} />
               </blockquote>
@@ -611,8 +634,8 @@ export default function OutlookFlow({
                   ✦
                 </span>
                 {content.results.line(
-                  short(a.concerns[0] ?? 'your first concern'),
-                  short(a.hopes[0] ?? 'your first hope'),
+                  short(a.concerns[0] ?? 'your first concern', prompts),
+                  short(a.hopes[0] ?? 'your first hope', prompts),
                 )}
               </p>
             )}
