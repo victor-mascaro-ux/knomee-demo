@@ -1316,3 +1316,200 @@ button.af-opt:hover {
 .is-journey .af-private {
   margin-bottom: var(--space-16, 16px);
 }
+
+
+/* ── My Three Questions, on the journey page ──
+   The living sky as the hero, a deep scrim under the words; the questions as
+   cards that arrive one after another, each with a lime numeral on plum and
+   a copy button that turns into a tick; the Business ID as the celebration's
+   card. */
+.aq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12, 12px);
+  padding: var(--space-16) 0 var(--space-24, 24px);
+}
+.aq-hero {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 26px 20px 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  animation: aqIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* The scrim: deep at the foot where the words are, so the sun and the glows
+   stay bright above them without costing the text its contrast. */
+.aq-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(26, 4, 51, 0.1) 0%, rgba(26, 4, 51, 0.55) 45%, rgba(26, 4, 51, 0.82) 100%);
+}
+.aq-hero .jr-sky {
+  z-index: -2;
+}
+.aq-hero-k {
+  margin-top: 54px;
+  font-size: 11px;
+  font-weight: var(--weight-bold, 700);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--k-lime, #bff65b);
+}
+.aq-hero-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: var(--weight-bold, 700);
+  line-height: 1.15;
+}
+.aq-hero-body {
+  margin: 4px 0 0;
+  font-size: var(--text-sm, 13px);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.aq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10, 10px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.aq-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12, 12px);
+  padding: 14px 12px 14px 14px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 20px -14px rgba(36, 4, 70, 0.35);
+  animation: aqIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.25s + var(--i, 0) * 0.12s);
+  transition:
+    border-color 0.3s var(--ease-out, ease),
+    transform 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease);
+}
+.aq-card:hover {
+  border-color: var(--k-grape, #7639a1);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -14px rgba(36, 4, 70, 0.4);
+}
+/* The numeral level with the first line of the question. */
+.aq-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--k-plum, #240446);
+  color: var(--k-lime, #bff65b);
+  font-size: 15px;
+  font-weight: var(--weight-bold, 700);
+}
+.aq-q {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-base, 15px);
+  line-height: 1.45;
+  color: var(--text-strong);
+  text-wrap: pretty;
+}
+.aq-copy {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px -2px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--k-grape-soft, #f3ebfa);
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+  transition:
+    background 0.25s var(--ease-out, ease),
+    color 0.25s var(--ease-out, ease),
+    transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.aq-copy svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.aq-copy:hover {
+  background: var(--k-grape-light, #e9d9f4);
+}
+.aq-copy.is-done {
+  background: var(--k-lime, #bff65b);
+  color: var(--k-plum, #240446);
+  transform: scale(1.08);
+}
+.aq-copy.is-done svg {
+  stroke-width: 2.4;
+}
+.aq-copy-all {
+  align-self: flex-start;
+  margin: 2px 0 var(--space-8, 8px);
+  padding: 8px 16px;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-sm, 13px);
+  font-weight: var(--weight-semibold, 600);
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+  animation: aqIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.65s backwards;
+  transition:
+    border-color 0.3s var(--ease-out, ease),
+    background 0.3s var(--ease-out, ease);
+}
+.aq-copy-all:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+.aq-copy-all.is-done {
+  border-color: var(--k-lime, #bff65b);
+  background: var(--k-lime-soft, #eafdcf);
+  color: var(--k-plum, #240446);
+}
+/* The Business ID card, on white rather than the celebration's plum: a
+   lilac edge instead of the deep shadow. */
+.aq-id {
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  box-shadow: 0 10px 24px -16px rgba(36, 4, 70, 0.45);
+  animation-delay: 0.75s;
+}
+.aq-links {
+  margin-top: var(--space-4, 4px);
+}
+@keyframes aqIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aq-hero,
+  .aq-card,
+  .aq-copy-all,
+  .aq-id {
+    animation: none;
+  }
+}
