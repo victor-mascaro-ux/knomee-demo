@@ -676,7 +676,8 @@ export default function MoveFlow({
     (at === 'pros' && !m.pros.some((p) => p.trim()) && !draft.trim()) ||
     (at === 'cons' && !m.cons.some((p) => p.trim()) && !draft.trim()) ||
     (at === 'who' && !m.who.length) ||
-    (at === 'blocker' && !m.blocker.trim())
+    (at === 'blocker' && !m.blocker.trim()) ||
+    (ri >= 0 && !m[at as 'thought' | 'knows' | 'acting'])
 
   const onOk = () => {
     /* A move typed but never sent with its arrow is still the move. */
@@ -990,9 +991,6 @@ export default function MoveFlow({
             value={m[at as 'thought' | 'knows' | 'acting']}
             onPick={(v) => pickAndGo(at as 'thought' | 'knows' | 'acting', v)}
           />
-          <button className="rm-back" type="button" onClick={previous}>
-            Back
-          </button>
         </div>
       )}
 
@@ -1037,17 +1035,21 @@ export default function MoveFlow({
         </div>
       )}
 
+      {/* Where you are, at the top under the bar. The readiness questions
+          carry their own three-stop track instead. */}
       {qi >= 0 && (
-        <>
-          {/* Where you are, at the top under the bar — the foot is only
-              Back and the one thing to press. */}
-          <div className="jf-top">
-            <div className="af-progress" aria-hidden>
-              {QUESTIONS.map((s, i) => (
-                <i key={s} className={i <= qi ? 'is-on' : ''} />
-              ))}
-            </div>
+        <div className="jf-top">
+          <div className="af-progress" aria-hidden>
+            {QUESTIONS.map((s, i) => (
+              <i key={s} className={i <= qi ? 'is-on' : ''} />
+            ))}
           </div>
+        </div>
+      )}
+      {/* The foot, on every question — the readiness ones too: Back, and the
+          one thing to press. */}
+      {(qi >= 0 || ri >= 0) && (
+        <>
           <div className="jf-foot">
             <div className="jf-where">
               <button className="jf-prev" type="button" onClick={previous}>
