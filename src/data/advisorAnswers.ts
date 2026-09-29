@@ -461,7 +461,6 @@ function rankThemes(a: Answers): ThemeKey[] {
     [said('ol-q1', a), 3],
     [said('ol-q2', a), 2],
     [said('mv-q9', a), 2],
-    [said('pj-q5', a), 2],
     [said('mv-q10b', a), 1],
     [said('mv-q3', a), 1],
     [said('mv-q8', a), 1],
@@ -755,12 +754,6 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
       icon: 'financial-joy',
       title: 'My business “why”',
       text: trim(firstSentence(said('pj-q3', a), 200), 200),
-    })
-  if (said('pj-q5', a))
-    highlights.push({
-      icon: 'financial-joy',
-      title: 'Why now',
-      text: trim(firstSentence(said('pj-q5', a), 200), 200),
     })
   if (concerns.length)
     highlights.push({

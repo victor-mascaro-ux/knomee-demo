@@ -186,7 +186,7 @@ export const steps: Step[] = [
     id: 'pj-q1',
     kind: 'multi',
     adventure: 'practice-joy',
-    eyebrow: 'Practice Joy · 1 of 5',
+    eyebrow: 'Practice Joy · 1 of 4',
     title: 'I want my practice to give me…',
     body: 'Choose what feels most relevant today. Make between 1 and 3 choices.',
     options: [
@@ -218,7 +218,7 @@ export const steps: Step[] = [
     id: 'pj-q2',
     kind: 'grid',
     adventure: 'practice-joy',
-    eyebrow: 'Practice Joy · 2 of 5',
+    eyebrow: 'Practice Joy · 2 of 4',
     title: 'Right now, how would you like to direct attention to these areas…',
     rows: [
       { label: 'Client relationships', value: 'Same' },
@@ -235,7 +235,7 @@ export const steps: Step[] = [
     id: 'pj-q3',
     kind: 'text',
     adventure: 'practice-joy',
-    eyebrow: 'Practice Joy · 3 of 5',
+    eyebrow: 'Practice Joy · 3 of 4',
     title: 'Think back — what was a recent moment in your work that reminded you why you do this?',
     body: '(Sometimes it has nothing to do with money.)',
     answer:
@@ -245,31 +245,10 @@ export const steps: Step[] = [
     id: 'pj-q4',
     kind: 'text',
     adventure: 'practice-joy',
-    eyebrow: 'Practice Joy · 4 of 5',
+    eyebrow: 'Practice Joy · 4 of 4',
     title: 'Thinking about that moment — what made it matter?',
     answer:
       'It was the whole point of doing this for eleven years. And it had nothing to do with whose name is on the wall.',
-  },
-  /* Advisors who move are usually moving because of something in their own
-     life — a family moment, their own history with money, the way they want to
-     give back — and it is the part of the story they are least likely to
-     volunteer to a recruiter. Private by default for that reason. */
-  {
-    id: 'pj-q5',
-    kind: 'text',
-    adventure: 'practice-joy',
-    eyebrow: 'Practice Joy · 5 of 5',
-    title: 'What’s happening in your life that has you thinking about a change now?',
-    body: 'Often it’s personal. Say as much or as little as you like.',
-    private: true,
-    hints: [
-      '“My own family’s experience with money…”',
-      '“Since I turned…”',
-      '“The way I want to give back is…”',
-      '“It started when…”',
-    ],
-    answer:
-      'My father lost most of his savings to a broker who never picked up the phone. That is why I do this. Turning fifty-five made me ask who looks after my clients, and my team, when I step back.',
   },
   {
     id: 'pj-unlock',
