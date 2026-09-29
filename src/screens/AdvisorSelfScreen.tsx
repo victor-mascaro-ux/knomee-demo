@@ -127,8 +127,8 @@ const IDENTITY_HEAD =
    shared directory. Telling somebody their answers are private while posting
    them is the one line on this page that is not allowed to be out of date. */
 const IDENTITY_WHERE: Record<SelfMode, string> = {
-  demo: 'Listed in the advisor directory — minus anything private.',
-  invited: 'The firm that invited you sees your answers — minus anything private.',
+  demo: 'Listed in the advisor directory.',
+  invited: 'The firm that invited you sees your answers.',
   view: 'These are their answers, read from the directory.',
 }
 
@@ -1759,7 +1759,7 @@ function FlowReport({
             ‹ Back to the flow
           </button>
           <span className="af-report-note">
-            What the firm reads from your answers. Private answers you haven’t shared are left out.
+            What the firm reads from your answers.
           </span>
         </header>
       )}

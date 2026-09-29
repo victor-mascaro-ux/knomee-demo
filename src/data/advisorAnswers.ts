@@ -424,11 +424,6 @@ const hits = (text: string, key: ThemeKey) => (THEME_WORDS[key].test(text) ? 1 :
    of their own, and those differ from advisor to advisor far more than the
    words do. */
 const CHOICE_VOTES: Record<string, Partial<Record<string, [ThemeKey, number][]>>> = {
-  'mv-brand': {
-    'Keeping my brand is a must': [['brand', 5]],
-    'Not sure yet': [['brand', 4]],
-    'Open to it, depending on the terms': [['brand', 2]],
-  },
   'mv-q1': {
     'Go independent with my team': [['team', 1], ['transition', 1]],
     'Join an existing RIA': [['transition', 1], ['brand', 1]],
