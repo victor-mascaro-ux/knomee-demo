@@ -56,6 +56,10 @@ const NEXT_ICON: Record<string, string> = {
   'Future You': icFutureYou,
   Goals: icGoals,
   'Life Events': icLifeEvents,
+  /* The advisor's names for the same two adventures, wearing the same marks
+     their rows on the advisor's list do. */
+  'Practice Joy': icFinancialJoy,
+  'The Move': icGoals,
 }
 
 export default function JoyReward({
