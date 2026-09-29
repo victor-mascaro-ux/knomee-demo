@@ -37,6 +37,7 @@ import './familyModal.css'
 import { scrollPageToTop } from '../reviewBridge'
 import { usePrintSheet } from '../printSheet'
 import { VisionBoardCard } from './VisionBoards'
+import SharingView, { SharingLens } from './SharingView'
 
 const ADVENTURE_ICON: Record<string, string> = {
   'Financial Joy': icFinancialJoy,
@@ -802,6 +803,7 @@ export default function ClientProfileScreen({
   household,
   onAddMember,
   mine,
+  sharing,
   onToast,
   startFlow,
   onStartFlowDone,
@@ -836,8 +838,11 @@ export default function ClientProfileScreen({
      the advisor's read on her and not hers. The rail is untouched: her
      household and her advisory team are hers. */
   mine?: boolean
+  /** Her own phone: the ID read two ways, what it says and who sees it. */
+  sharing?: boolean
 }) {
   const [tab, setTab] = useState<ClientTab>('id')
+  const [lens, setLens] = useState<'id' | 'sharing'>('id')
   const { printing, print } = usePrintSheet()
   /* Whose answers this page shows. Emily and Sebastian have their own; anyone
      else opens the built-out one, as the page always did. */
@@ -1070,7 +1075,27 @@ export default function ClientProfileScreen({
               on — the same card her own phone shows her, in the same place. */}
           {mine && <CheckInCard checkIn={cp.checkIn} />}
 
-          {!printing && tab === 'insights' ? (
+          {sharing && tab === 'id' && !printing && <SharingLens value={lens} onChange={setLens} />}
+
+          {sharing && tab === 'id' && !printing && lens === 'sharing' ? (
+            <SharingView
+              who="emily"
+              team={[
+                { id: 'p1', name: 'Sebastian', role: 'partner' },
+                { id: 'p2', name: 'Sam', role: 'advisor' },
+                { id: 'p3', name: 'Florence', role: 'banker' },
+                { id: 'p4', name: 'Kim', role: 'accountant' },
+              ]}
+              cards={[
+                { id: 'goals', title: 'Goals', icon: icGoals },
+                { id: 'financial-joy', title: 'Financial Joy', icon: icFinancialJoy },
+                { id: 'confidence', title: 'Confidence', icon: icConfidence },
+                { id: 'outlook', title: 'Outlook', icon: icOutlook },
+                { id: 'future-you', title: 'Future You', icon: icFutureYou },
+                { id: 'life-events', title: 'Life Events', icon: icLifeEvents },
+              ]}
+            />
+          ) : !printing && tab === 'insights' ? (
             <ClientInsightsTab name={client.name} />
           ) : !printing && tab === 'toolkit' ? (
             <ClientToolkitTab />

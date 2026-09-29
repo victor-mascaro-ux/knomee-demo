@@ -4415,8 +4415,12 @@ export default function App() {
     }
     return (
       <>
+        {/* Their sitting, read back on the journey — the adventures they took,
+            finished as they finished them, their Business ID and their team —
+            as the phone they answer on now shows it. */}
         <AdvisorSelfScreen
           key={`self-view-${viewEntry.id}${viewEntryPhone ? '-phone' : ''}`}
+          rich
           mode="view"
           phone={viewEntryPhone}
           entry={viewEntry}

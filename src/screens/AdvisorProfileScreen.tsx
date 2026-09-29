@@ -48,6 +48,7 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
+import SharingView, { ADVISOR_ROLES, SharingLens } from './SharingView'
 
 /* An answer that is a list of things rather than a sentence — "Ownership, my
    name on it, equity for Ana and Dev" — reads as lines. One with a full stop in
@@ -111,6 +112,7 @@ export default function AdvisorProfileScreen({
   onBack,
   onAdd,
   ownerMenu,
+  sharing,
   mine,
   tabs,
   backLabel,
@@ -148,8 +150,12 @@ export default function AdvisorProfileScreen({
      same slot the client page has, in the same place. Nothing renders here on a
      desktop, where the rail is on screen already. */
   ownerMenu?: ReactNode
+  /** His own phone: the My ID | Who sees it switch. */
+  sharing?: boolean
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
+  /* His ID read for what it says, or for who sees it. */
+  const [lens, setLens] = useState<'id' | 'sharing'>('id')
   const { printing, print } = usePrintSheet()
   const [photoFailed, setPhotoFailed] = useState(false)
   const d = data.id
@@ -302,8 +308,32 @@ export default function AdvisorProfileScreen({
           {/* On screen, the tab you chose. On paper, every tab: the Business
               ID, then the readiness and the toolkit, each starting its own
               page under its own heading. */}
-          {(printing || tab === 'id') && (
-            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
+          {/* His own phone: the ID read two ways — what it says, and who on
+              his team sees each part of it. */}
+          {sharing && mine && tab === 'id' && !printing && <SharingLens value={lens} onChange={setLens} />}
+          {sharing && mine && tab === 'id' && !printing && lens === 'sharing' ? (
+            <SharingView
+              who={`advisor-${who.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}
+              idName="Business ID"
+              roles={ADVISOR_ROLES}
+              team={[
+                { id: 'p1', name: 'Ana', role: 'junior advisor' },
+                { id: 'p2', name: 'Dev', role: 'associate' },
+                { id: 'p3', name: 'Rachel', role: 'spouse' },
+                { id: 'p4', name: 'Tom', role: 'accountant' },
+              ]}
+              cards={[
+                { id: 'the-move', title: 'The Move', icon: icTheMove },
+                { id: 'practice-joy', title: 'Practice Joy', icon: icPracticeJoy },
+                { id: 'confidence', title: 'Confidence', icon: icConfidence },
+                { id: 'outlook', title: 'Outlook', icon: icOutlook },
+                { id: 'future-you', title: 'Future You', icon: icFutureYou },
+              ]}
+            />
+          ) : (
+            (printing || tab === 'id') && (
+              <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
+            )
           )}
           {(printing || tab === 'readiness') && (
             <div className={printing ? 'print-page' : undefined}>

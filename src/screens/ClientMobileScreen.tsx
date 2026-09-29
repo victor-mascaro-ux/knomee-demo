@@ -144,6 +144,7 @@ export default function ClientMobileScreen({
           >
             <ClientProfileScreen
               client={EMILY}
+              sharing
               onBack={() => force((n) => n + 1)}
               ownerMenu={
                 /* Emily's own initial, above her name, opening her rail. The
