@@ -22,7 +22,7 @@ import type { Answers, Grade } from '../data/advisorAnswers'
 import type { JoyAnswers, JoyContent } from './JoyFlow'
 
 const OTHER = 'Other'
-const REFLECT_IDS = ['pj-q3', 'pj-q4', 'pj-q5'] as const
+const REFLECT_IDS = ['pj-q3', 'pj-q4'] as const
 
 const stepOf = (id: string): Step => {
   const s = flowSteps.find((x) => x.id === id)
@@ -63,7 +63,6 @@ const q1 = stepOf('pj-q1')
 const REFLECT_EYEBROW: Record<(typeof REFLECT_IDS)[number], string> = {
   'pj-q3': 'Think back!',
   'pj-q4': 'Why it mattered',
-  'pj-q5': 'Why now',
 }
 
 /* The memory screen's starters and ghost openings, per question. Where the
@@ -82,13 +81,6 @@ const MEMORY: Record<(typeof REFLECT_IDS)[number], { starters: string[]; ghosts:
     ghosts: [
       'It had nothing to do with whose name is on the wall…',
       'It was the whole point of doing this…',
-    ],
-  },
-  'pj-q5': {
-    starters: [],
-    ghosts: [
-      'Turning fifty-five made me ask who looks after my clients…',
-      'My father lost his savings to a broker who never called back…',
     ],
   },
 }

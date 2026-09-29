@@ -679,7 +679,6 @@ export const ADVISOR_MOVE: MoveContent = {
     pictures: SUPPORT_PICTURES,
     labels: SUPPORT_LABELS,
   },
-  brand: { title: title('mv-brand'), sub: body('mv-brand'), options: opts('mv-brand') },
   pros: {
     title: title('mv-q8'),
     sub: 'Every reason is a balloon — add them and watch your move lift.',
@@ -702,7 +701,7 @@ export const ADVISOR_MOVE: MoveContent = {
     starters: BLOCKER_STARTERS,
     cheer: 'Now it can be worked on ✦',
   },
-  questions: ['pick', 'when', 'why', 'support', 'brand', 'pros', 'cons', 'who', 'blocker'],
+  questions: ['pick', 'when', 'why', 'support', 'pros', 'cons', 'who', 'blocker'],
   added: 'Your move is written down!',
   ready: {
     thought: { title: title('mv-q5'), options: opts('mv-q5') },

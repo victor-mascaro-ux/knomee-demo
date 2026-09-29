@@ -119,7 +119,7 @@ export type SelfMode = 'demo' | 'invited' | 'view'
    headed with. It is inserted here rather than in the flow data, because the
    walkthrough is somebody whose name the demo already knows. */
 const IDENTITY_HEAD =
-  'This heads your Business ID. Check it and change anything that’s off — every field can be edited, and a blank one simply drops out.'
+  'This heads your Business ID. Leave any field blank to skip it.'
 
 /* Where the answers actually go, said on the screen that collects the name.
    This used to read "Nothing is sent anywhere — the answers stay in this
@@ -127,9 +127,8 @@ const IDENTITY_HEAD =
    shared directory. Telling somebody their answers are private while posting
    them is the one line on this page that is not allowed to be out of date. */
 const IDENTITY_WHERE: Record<SelfMode, string> = {
-  demo: 'Kept on this device and listed in the advisor directory — except the answers marked private, unless you choose to share them.',
-  invited:
-    'The firm that invited you sees your answers — except the ones marked private, which stay with you unless you choose to share them.',
+  demo: 'Listed in the advisor directory.',
+  invited: 'The firm that invited you sees your answers.',
   view: 'These are their answers, read from the directory.',
 }
 
@@ -447,14 +446,17 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
   )
 }
 
-/** Who the Business ID is headed with. Four fields, none of them required —
-    an unanswered one just drops out of the header line. */
+/** Who the Business ID is headed with. Three fields, none of them required —
+    an unanswered one just drops out of the header line. No sample values in
+    them: a made-up book size read as a bar to clear, and they start blank. Role
+    is not asked — everyone answering is an advisor. The firm is only the name,
+    and optional: a recruiter's warm lead is already known, it matters for a
+    cold one. */
 function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
-  const fields: [keyof Answers['identity'], string, string, string?][] = [
-    ['name', 'Your name', 'Alex Rivera'],
-    ['role', 'Your role', 'Lead advisor · team of four', 'Your title, and the size of your team'],
-    ['book', 'Assets you advise on', '$840M', 'A rough figure is fine'],
-    ['firm', 'Where you are today', 'Wirehouse', 'The kind of firm, or its name'],
+  const fields: [keyof Answers['identity'], string, string?][] = [
+    ['name', 'Your name'],
+    ['book', 'Assets you advise on', 'A rough figure is fine'],
+    ['firm', 'Name of your firm', 'Optional'],
   ]
   return (
     <div className="af-welcome">
@@ -463,7 +465,7 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
       {/* The adventures' own open field — label, italic hint, input — so the
           first thing an advisor types into looks like everything after it. */}
       <div className="af-idform">
-        {fields.map(([key, label, placeholder, hint]) => (
+        {fields.map(([key, label, hint]) => (
           <div className="af-idfield" key={key}>
             <label className="jf-other-label" htmlFor={`af-id-${key}`}>
               {label}
@@ -473,7 +475,6 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
               id={`af-id-${key}`}
               className="jf-other"
               value={a.identity[key]}
-              placeholder={placeholder}
               onChange={(e) => edit.identity({ [key]: e.target.value })}
             />
           </div>
@@ -938,13 +939,12 @@ export default function AdvisorSelfScreen({
      the report a rep reads — not on their phone. */
   const [view, setView] = useState<'flow' | 'report' | 'record'>(viewing && !phone ? 'report' : 'flow')
   const edit = useEdit(setAnswers)
-  /* On the journey page, and reading somebody else's sitting, the person is
-     shown by their initials. Only what is drawn changes: the sheet — and what
-     reaches the directory — keeps the name they typed. */
-  /* Not for somebody's own sitting read back — Marcus's phone, the worked
-     example, reads as him. */
+  /* The phone is the advisor's own, so it greets and shows them by the name
+     they gave. Initials are for the desktop pages a firm reads — here, the
+     report of what a firm sees. Only what is drawn changes: the sheet — and
+     what reaches the directory — keeps the name they typed. */
   const anon = rich && !viewing
-  const d = useMemo(() => derive(anon ? anonymized(answers) : answers), [answers, anon])
+  const d = useMemo(() => derive(answers), [answers])
   /* The sheet as the firm sees it: private answers the advisor has not chosen
      to share are left out of everything that leaves this device, and out of
      the report that shows them what a firm reads. */
@@ -1246,7 +1246,7 @@ function FlowPhone({
   /* The celebration's card: what this adventure has just put on the Business
      ID, drawn by the ID page itself from the answers as they will be saved. */
   const cardFrom = (sheet: Answers, which: IdCard) => (
-    <BusinessIdCard data={derive(rich && !viewing ? anonymized(sheet) : sheet)} which={which} />
+    <BusinessIdCard data={derive(sheet)} which={which} />
   )
   const celebrate = (id: AdventureId, next: string, sheet: Answers, which: IdCard) => ({
     ...rewardFor(id, next),
@@ -1759,7 +1759,7 @@ function FlowReport({
             ‹ Back to the flow
           </button>
           <span className="af-report-note">
-            What the firm reads from your answers. Private answers you haven’t shared are left out.
+            What the firm reads from your answers.
           </span>
         </header>
       )}
