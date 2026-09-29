@@ -19,7 +19,7 @@
  * the stage the Business ID shows.
  */
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './goalsFlow.css'
@@ -746,6 +746,23 @@ export default function MoveFlow({
   /* What is in the box on the pros or cons screen, not yet added. */
   const [draft, setDraft] = useState('')
   const set = <K extends keyof MoveAnswers>(k: K, v: MoveAnswers[K]) => setM((p) => ({ ...p, [k]: v }))
+  /* A double-click on an empty box types a sample in, a few letters at a
+     time, the way Outlook's does: one of the openings the box was already
+     showing, finished as a sentence. For a list, the next one not yet added. */
+  const typing = useRef(0)
+  useEffect(() => () => window.clearInterval(typing.current), [])
+  const typeIn = (pool: string[], onType: (v: string) => void, skip: string[] = []) => {
+    const pick = pool.find((g) => !skip.includes(g.replace(/[.…\s]+$/, ''))) ?? pool[0]
+    if (!pick) return
+    const full = pick.replace(/[.…\s]+$/, '')
+    window.clearInterval(typing.current)
+    let n = 0
+    typing.current = window.setInterval(() => {
+      n = Math.min(full.length, n + 3)
+      onType(full.slice(0, n))
+      if (n >= full.length) window.clearInterval(typing.current)
+    }, 16)
+  }
   const addTo = (k: 'pros' | 'cons', v: string) => {
     const t = v.trim()
     if (t) setM((p) => ({ ...p, [k]: [...p[k].filter((x) => x.trim()), t] }))
@@ -947,6 +964,7 @@ export default function MoveFlow({
             ghosts={c.why.ghosts}
             starters={c.why.starters}
             cheer={c.why.cheer}
+            onDemoFill={() => typeIn(c.why.ghosts, (v) => set('why', v))}
             below={mic?.(m.why, (v) => set('why', v))}
           />
         </div>
@@ -1000,6 +1018,7 @@ export default function MoveFlow({
             placeholder={c[at].placeholder ?? ''}
             ghosts={c[at].ghosts}
             starters={c[at].starters}
+            onDemoFill={() => typeIn(c[at].ghosts, setDraft, m[at])}
             onEnter={() => {
               addTo(at, draft)
               setDraft('')
@@ -1045,6 +1064,7 @@ export default function MoveFlow({
             ghosts={c.blocker.ghosts}
             starters={c.blocker.starters}
             cheer={c.blocker.cheer}
+            onDemoFill={() => typeIn(c.blocker!.ghosts, (v) => set('blocker', v))}
             below={mic?.(m.blocker, (v) => set('blocker', v))}
           />
         </div>
