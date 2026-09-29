@@ -995,3 +995,11 @@
     animation: none;
   }
 }
+
+/* A list at its limit says so under the box. */
+.mv-full-note {
+  margin: var(--space-10, 10px) 0 0;
+  font-size: var(--text-sm, 13px);
+  color: var(--k-grape, #7639a1);
+  animation: mvIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

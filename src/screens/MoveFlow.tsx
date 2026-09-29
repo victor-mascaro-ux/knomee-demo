@@ -645,6 +645,8 @@ export interface MoveContent {
   who?: Ask & { options: string[] }
   blocker?: Written
   questions: Step[]
+  /** At most this many pros, and as many cons. Unlimited when left out. */
+  listMax?: number
   added: string
   ready: Record<'thought' | 'knows' | 'acting', Ask & { options: string[] }>
   /** Where the answers put them: the stage, 1-5, its name and its line. */
@@ -765,7 +767,12 @@ export default function MoveFlow({
   }
   const addTo = (k: 'pros' | 'cons', v: string) => {
     const t = v.trim()
-    if (t) setM((p) => ({ ...p, [k]: [...p[k].filter((x) => x.trim()), t] }))
+    if (!t) return
+    setM((p) => {
+      const list = p[k].filter((x) => x.trim())
+      if (content.listMax && list.length >= content.listMax) return p
+      return { ...p, [k]: [...list, t] }
+    })
   }
 
   useEffect(() => {
@@ -778,6 +785,9 @@ export default function MoveFlow({
   }, [at])
 
   const c = content
+  /* This list has as many as it may hold. */
+  const full =
+    (at === 'pros' || at === 'cons') && !!c.listMax && m[at].filter((x) => x.trim()).length >= c.listMax
   /* The screens that ask something, in order, with the foot and the meter. */
   const QUESTIONS = c.questions
   const qi = QUESTIONS.indexOf(at)
@@ -998,7 +1008,7 @@ export default function MoveFlow({
       )}
 
       {(at === 'pros' || at === 'cons') && (
-        <div className="mv-q mv-lift">
+        <div className={`mv-q mv-lift${full ? ' is-full' : ''}`}>
           {/* The balloon over both screens: the pros are its balloons, the
               cons its sandbags, and each carries its words while it is the
               one being asked about. */}
@@ -1028,7 +1038,7 @@ export default function MoveFlow({
                 <button
                   className="ol-add ol-add-pill"
                   type="button"
-                  disabled={!draft.trim()}
+                  disabled={!draft.trim() || full}
                   onClick={() => {
                     addTo(at, draft)
                     setDraft('')
@@ -1041,6 +1051,11 @@ export default function MoveFlow({
               </div>
             }
           />
+          {full && (
+            <p className="mv-full-note" role="status">
+              That’s {c.listMax} — take one off the balloon to add another.
+            </p>
+          )}
         </div>
       )}
 
