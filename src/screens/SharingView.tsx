@@ -10,7 +10,7 @@
  * tabs and reloading. Nothing here is sent anywhere.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
 import { AddButton, EmptyState } from './profileParts'
@@ -31,7 +31,8 @@ export const CLIENT_TEAM: Person[] = [
   { id: 'p3', name: 'Florence', role: 'banker' },
   { id: 'p4', name: 'Kim', role: 'accountant' },
 ]
-const KEY = 'knomee.sharing.v1'
+/* v2: v1 kept each page's starting team as if it had been chosen. */
+const KEY = 'knomee.sharing.v2'
 
 function useStored<T>(key: string, initial: T) {
   const [v, setV] = useState<T>(() => {
@@ -42,14 +43,22 @@ function useStored<T>(key: string, initial: T) {
       return initial
     }
   })
+  /* Saved only once something is changed: the team a page starts with is not
+     a choice anybody made, and storing it would keep it after it changes. */
+  const changed = useRef(false)
   useEffect(() => {
+    if (!changed.current) return
     try {
       window.localStorage.setItem(key, JSON.stringify(v))
     } catch {
       /* private window: the choices last the session */
     }
   }, [key, v])
-  return [v, setV] as const
+  const set = (next: T | ((prev: T) => T)) => {
+    changed.current = true
+    setV(next)
+  }
+  return [v, set] as const
 }
 
 const Lock = () => (
