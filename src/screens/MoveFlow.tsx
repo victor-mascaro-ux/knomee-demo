@@ -1026,6 +1026,7 @@ export default function MoveFlow({
             value={draft}
             onChange={setDraft}
             placeholder={c[at].placeholder ?? ''}
+            disabled={full ? `That’s ${c.listMax}. Take one off the balloon to add another.` : undefined}
             ghosts={c[at].ghosts}
             starters={c[at].starters}
             onDemoFill={() => typeIn(c[at].ghosts, setDraft, m[at])}
@@ -1047,15 +1048,10 @@ export default function MoveFlow({
                   <span aria-hidden>+</span>
                   {at === 'pros' ? 'Add Pro' : 'Add Con'}
                 </button>
-                {mic?.(draft, setDraft)}
+                {!full && mic?.(draft, setDraft)}
               </div>
             }
           />
-          {full && (
-            <p className="mv-full-note" role="status">
-              That’s {c.listMax} — take one off the balloon to add another.
-            </p>
-          )}
         </div>
       )}
 
