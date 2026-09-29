@@ -46,7 +46,7 @@ import type { GoalsAnswers } from './GoalsFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
-import SharingView from './SharingView'
+import SharingView, { SharingLens } from './SharingView'
 
 /* The five core adventures, in the order they are taken. */
 const BADGE_ORDER = ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals']
@@ -812,15 +812,7 @@ export default function ProspectProfileScreen({
           {/* Her own phone: the ID read two ways — what it says, and who
               sees each part of it. */}
           {mine && fresh && tab === 'id' && !printing && (
-            <div className={`sh-lens${lens === 'sharing' ? ' is-second' : ''}`} role="group" aria-label="Financial ID view">
-              <i className="sh-lens-pill" aria-hidden />
-              <button type="button" aria-pressed={lens === 'id'} onClick={() => setLens('id')}>
-                My ID
-              </button>
-              <button type="button" aria-pressed={lens === 'sharing'} onClick={() => setLens('sharing')}>
-                Who sees it
-              </button>
-            </div>
+            <SharingLens value={lens} onChange={setLens} />
           )}
 
           {mine && fresh && tab === 'id' && !printing && lens === 'sharing' ? (

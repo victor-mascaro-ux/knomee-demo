@@ -15,14 +15,16 @@ import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
 import icTeam from '../assets/adventures/my-team.svg'
 
-export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent'] as const
-type Role = (typeof ROLES)[number]
-type Person = { id: string; name: string; role: Role }
+export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 'insurance agent']
+/* An advisor's team is the practice's: the people a Business ID goes to. */
+export const ADVISOR_ROLES = ['business partner', 'junior advisor', 'associate', 'compliance', 'spouse', 'accountant']
+type Role = string
+export type Person = { id: string; name: string; role: Role }
 type Access = Record<string, { on: boolean; off: string[] }>
 
 export type SharedCard = { id: string; title: string; icon: string }
 
-const TEAM: Person[] = [
+export const CLIENT_TEAM: Person[] = [
   { id: 'p1', name: 'Alex', role: 'partner' },
   { id: 'p2', name: 'Sam', role: 'advisor' },
   { id: 'p3', name: 'Florence', role: 'banker' },
@@ -60,16 +62,47 @@ const Pencil = () => (
     <path d="M10.8 2.8a1.6 1.6 0 0 1 2.3 2.3L6.2 12l-3 .8.8-3 6.8-7Z" strokeLinejoin="round" />
   </svg>
 )
-export default function SharingView({ cards }: { cards: SharedCard[] }) {
-  const [team, setTeam] = useStored<Person[]>(`${KEY}.team`, TEAM)
-  const [access, setAccess] = useStored<Access>(`${KEY}.access`, {})
+
+/* The switch between the ID's two faces: what it says, and who sees it. */
+export function SharingLens({ value, onChange }: { value: 'id' | 'sharing'; onChange: (v: 'id' | 'sharing') => void }) {
+  return (
+    <div className={`sh-lens${value === 'sharing' ? ' is-second' : ''}`} role="group" aria-label="ID view">
+      <i className="sh-lens-pill" aria-hidden />
+      <button type="button" aria-pressed={value === 'id'} onClick={() => onChange('id')}>
+        My ID
+      </button>
+      <button type="button" aria-pressed={value === 'sharing'} onClick={() => onChange('sharing')}>
+        Who sees it
+      </button>
+    </div>
+  )
+}
+
+export default function SharingView({
+  cards,
+  team: startTeam = CLIENT_TEAM,
+  roles = ROLES,
+  who = 'client',
+  idName = 'Financial ID',
+}: {
+  cards: SharedCard[]
+  /** The team they start with. */
+  team?: Person[]
+  roles?: string[]
+  /** Whose choices these are, so two people's phones keep their own. */
+  who?: string
+  idName?: string
+}) {
+  const store = who === 'client' ? KEY : `${KEY}.${who}`
+  const [team, setTeam] = useStored<Person[]>(`${store}.team`, startTeam)
+  const [access, setAccess] = useStored<Access>(`${store}.access`, {})
   const [editing, setEditing] = useState<string | null>(null)
   const of = (id: string) => access[id] ?? { on: true, off: [] }
   const setCard = (id: string, patch: Partial<Access[string]>) =>
     setAccess((a) => ({ ...a, [id]: { ...of(id), ...patch } }))
   const addPerson = () => {
     const id = `p${Date.now()}`
-    setTeam((t) => [...t, { id, name: '', role: 'advisor' }])
+    setTeam((t) => [...t, { id, name: '', role: roles[0] }])
     setEditing(id)
   }
   const shared = cards.filter((c) => of(c.id).on).length
@@ -77,7 +110,7 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
   return (
     <div className="sh">
       <p className="sh-lead">
-        Your Financial ID is yours. Choose who on your team sees each part of it — everything is
+        Your {idName} is yours. Choose who on your team sees each part of it — everything is
         shared until you say otherwise, and you can change it any time.
       </p>
 
@@ -123,8 +156,8 @@ export default function SharingView({ cards }: { cards: SharedCard[] }) {
               <SelectMenu
                 className="sh-role"
                 value={p.role}
-                options={[...ROLES]}
-                onChange={(v) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: v as Role } : x)))}
+                options={[...roles]}
+                onChange={(v) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: v } : x)))}
               />
             </li>
           ))}
