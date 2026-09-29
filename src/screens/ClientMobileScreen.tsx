@@ -41,9 +41,12 @@ const EMILY = {
 } as Client
 
 export default function ClientMobileScreen({
+  client = EMILY,
   onExit,
   onAccountSettings,
 }: {
+  /** Whose phone. Emily's unless another client is named. */
+  client?: Client
   onExit: () => void
   onAccountSettings?: () => void
 }) {
@@ -93,7 +96,8 @@ export default function ClientMobileScreen({
               on a desktop rather than opening straight onto a white page. */}
           <header className="cx-appbar cxm-appbar">
             <div className="cx-appbar-brand">
-              <img src="./knomee-advisor-white.svg" alt="knomee advisor" />
+              {/* Her own phone, so the client app's mark — not the advisor's. */}
+              <img src="./knomee-logo-white.svg" alt="knomee" />
             </div>
             {/* The burger is the account menu, the same one the desktop top bar
                 opens — same glyph, same items, same right-hand corner, so it
@@ -143,7 +147,8 @@ export default function ClientMobileScreen({
             ref={viewport}
           >
             <ClientProfileScreen
-              client={EMILY}
+              client={client}
+              mine
               sharing
               onBack={() => force((n) => n + 1)}
               ownerMenu={
@@ -160,7 +165,7 @@ export default function ClientMobileScreen({
                     setMenuOpen((o) => !o)
                   }}
                 >
-                  <RailFace name={EMILY.name} />
+                  <RailFace name={client.name} />
                 </button>
               }
             />

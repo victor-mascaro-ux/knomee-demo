@@ -1665,6 +1665,9 @@
     if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute() + '/phone';
     if (here === 'firm-candidates' && demoState.profile === 'marcus-hale') return '#/advisor-mobile';
     if (here === 'advisor-mobile') return '#/advisor-mobile';
+    // Every client with a page has a phone: their own Financial ID on it.
+    if (here === 'clients' && demoState.profile && demoState.profile !== 'household') return '#/client-mobile/' + demoState.profile;
+    if (here === 'client-mobile') return currentRoute || '#/client-mobile';
     if (here === 'prospects' && demoState.profile === SARAH) return '#/client-experience/complete';
     if (here === 'client-experience' && sarahComplete()) return '#/client-experience/complete';
     return MOBILE_OF[here] || null;
@@ -1673,6 +1676,7 @@
     const here = canon(demoState.view);
     if (here === 'advisors') return /\/phone$/i.test(currentRoute || '');
     if (here === 'advisor-mobile') return true;
+    if (here === 'client-mobile') return true;
     if (here === 'client-experience') return sarahComplete();
     return !!BACK_FROM_MOBILE[here];
   };
@@ -1680,6 +1684,7 @@
     const here = canon(demoState.view);
     if (here === 'advisors' && entryOfRoute()) return '#/advisors/' + entryOfRoute();
     if (here === 'advisor-mobile') return '#/firm-candidates/marcus-hale';
+    if (here === 'client-mobile') return '#/clients/' + (demoState.profile || 'emily-watson');
     if (here === 'client-experience' && sarahComplete()) return '#/prospects/' + SARAH;
     return null;
   };
@@ -1702,7 +1707,7 @@
     // and its absence read as "this page has no mobile view" only if you
     // already knew the control existed. Pages without a phone show it inert.
     { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
-      views: SHELL_VIEWS.concat(['advisor-mobile', 'client-experience']),
+      views: SHELL_VIEWS.concat(['advisor-mobile', 'client-mobile', 'client-experience', 'advisors']),
       // Only where there is a phone to switch to: a candidate, or Sarah.
       when: () => !!mobileOf() || isMobileView(),
       // Strictly whether THIS page has a phone. The old guard also let any

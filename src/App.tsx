@@ -3881,6 +3881,11 @@ export default function App() {
   const [clientExpOpen, setClientExpOpen] = useState(initialView === 'client-experience')
   // Emily's Financial ID in the device frame, opened from the demo menu.
   const [clientMobileOpen, setClientMobileOpen] = useState(initialView === 'client-mobile')
+  /* Whose phone: #/client-mobile/<client>. Emily's when the address names no
+     one, as it always was. */
+  const [clientMobileSlug, setClientMobileSlug] = useState<string | null>(
+    initialView === 'client-mobile' ? initialProfile : null,
+  )
   const [advisorMobileOpen, setAdvisorMobileOpen] = useState(initialView === 'advisor-mobile')
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
@@ -4045,7 +4050,9 @@ export default function App() {
           // Whose page is open over the table, if anyone's. The panel offers
           // the phone rendering as a view of THIS page, so it has to know
           // there is one — and it hides the controls a profile covers up.
-          profile: profileClient
+          profile: clientMobileOpen
+            ? (clientMobileSlug ?? 'emily-watson')
+            : profileClient
             ? profileSlug(profileClient.name)
             : profileProspect
               ? profileSlug(profileProspect.name)
@@ -4110,6 +4117,7 @@ export default function App() {
       setClientExpOpen(v === 'client-experience')
       setClientExpComplete(v === 'client-experience' && /^#\/?client-experience\/complete/i.test(window.location.hash))
       setClientMobileOpen(v === 'client-mobile')
+      setClientMobileSlug(v === 'client-mobile' ? slug : null)
       setAdvisorMobileOpen(v === 'advisor-mobile')
       if (v === 'welcome') setLandingVersion('a')
       if (v === 'welcome-b') setLandingVersion('b')
@@ -4152,7 +4160,9 @@ export default function App() {
                 ? inviteToken
                 : currentView === 'client-experience' && clientExpComplete
                   ? 'complete'
-                  : null
+                  : currentView === 'client-mobile' && clientMobileSlug
+                    ? clientMobileSlug
+                    : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
@@ -4175,6 +4185,7 @@ export default function App() {
     viewEntryPhone,
     inviteToken,
     clientExpComplete,
+    clientMobileSlug,
   ])
 
   // Esc closes the convert modal.
@@ -4256,6 +4267,8 @@ export default function App() {
     return (
       <>
         <ClientMobileScreen
+          key={clientMobileSlug ?? 'emily'}
+          client={clientMobileSlug ? baseClients.find((c) => profileSlug(c.name) === clientMobileSlug) : undefined}
           onExit={() => setClientMobileOpen(false)}
           onAccountSettings={() => {
             setClientMobileOpen(false)
