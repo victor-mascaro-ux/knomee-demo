@@ -663,20 +663,10 @@
   const ACTIVATION_KEY = 'F2';
   /* An invited advisor's link, and the one address where this shell is not
      review scaffolding wrapped around a prototype — it is the product, opened
-     by somebody who was sent it. They get no comment rail and no demo panel:
-     the promise the link makes is the flow and nothing else, and "nothing else"
-     has to include the two keys that would otherwise hand a stranger the whole
-     demo. Read once, from the address the page was opened at, so navigating
+     by somebody who was sent it. They get no demo panel: that key would hand a
+     stranger the whole demo. Commenting ("c") works here as everywhere else. Read once, from the address the page was opened at, so navigating
      away from a flow inside the frame cannot unlock them either. */
   const INVITED = /^#\/flow\//.test(window.location.hash || '');
-  /* Except for us. A browser that has signed a comment here before carries a
-     reviewer's name (WHO_KEY, below), and an advisor's never does — so on an
-     invite link that browser may still press F2 and comment on the journey.
-     The demo panel stays shut on a flow either way. */
-  const REVIEWER = (() => {
-    try { return !!(localStorage.getItem('knomee-cc-who') || '').trim(); } catch (_) { return false; }
-  })();
-  const COMMENTS_LOCKED = INVITED && !REVIEWER;
   // ────────────────────────────────────────────────────────
 
   const stage    = document.getElementById('ccStage');
@@ -1476,7 +1466,7 @@
     return false;
   }
   window.addEventListener('keydown', (e) => {
-    if (!COMMENTS_LOCKED && isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
+    if (isToggleCombo(e)) { e.preventDefault(); toggleArmed(); }
     else if (!INVITED && isDemoCombo(e)) { e.preventDefault(); toggleDemo(); }
   });
 
@@ -1492,7 +1482,7 @@
       // however many times you pressed it.
       retreat();
     } else if (d.type === 'cc-activate') {
-      if (!COMMENTS_LOCKED) toggleArmed();
+      toggleArmed();
     } else if (d.type === 'cc-frame-height' && typeof d.height === 'number') {
       // 0 means "a fixed-layout page — one viewport tall" (see reviewBridge).
       // Only while comments are armed: unarmed, the frame is one viewport tall
