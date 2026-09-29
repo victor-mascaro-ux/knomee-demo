@@ -524,15 +524,10 @@ body {
   gap: 2px;
 }
 
-/* Each segment carries --seg-pad of its own on both sides on top of its share
-   of the bar, so a segment is never exactly its share of the width. The legend
-   below borrows the same number as its flex-basis; that is the whole reason the
-   two rows line up. Pinned here rather than left to the UA's button padding,
-   which is what it used to be. */
-.dist-bar,
-.dist-legend-bars {
-  /* Declared on both rows because both read it: the segments as padding, the
-     legend columns as flex-basis. */
+/* Each segment's own padding on both sides, pinned here rather than left to
+   the UA's button padding. The legend no longer copies it — TierLegend reads
+   where the segments actually are. */
+.dist-bar {
   --seg-pad: 6px;
 }
 .dist-bar .seg {
@@ -614,32 +609,29 @@ body {
   font-weight: 600;
   color: #a69fb5;
 }
-/* Bars-aligned legend: each tier label sits under the LEFT edge of its bar
-   segment (same flex + gap as the bar), and the last one right-aligns to the
-   bar's right edge. */
+/* Bars-aligned legend (TierLegend in App.tsx): every label is placed at the
+   left edge of its own segment, measured off the bar; one wider than its
+   segment is set against the chart's right edge (.is-end) instead. */
 .dist-legend-bars {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  gap: 2px;
+  position: relative;
+  display: block;
 }
-/* Every tier label starts on the left edge of its own bar segment. A legend
-   column is the same flex-grow as its segment, so it only lands on that edge if
-   it also carries the segment's own 2 × --seg-pad — otherwise the fixed padding
-   the segments add walks the later columns a few pixels off their edge, which
-   is what put "Tier 3 · Nurture" to the right of the 5. `min-width: 0` is what
-   lets the column hold that width instead of widening to its label and
-   shrinking the two before it. A label wider than its column wraps rather than
-   spilling past the card, which clips. */
 .dist-legend-bars .dist-leg {
+  position: absolute;
+  top: 0;
   align-items: flex-start;
-  min-width: 0;
-  flex-basis: calc(var(--seg-pad) * 2);
+  white-space: nowrap;
 }
-.dist-legend-bars .dist-leg-name {
-  white-space: normal;
+.dist-legend-bars .dist-leg.is-end {
+  align-items: flex-end;
 }
-.dist-legend-bars .dist-leg-range {
-  text-align: inherit;
+.dist-legend-bars.is-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.dist-legend-bars.is-flow .dist-leg {
+  position: static;
 }
 
 .dot {
