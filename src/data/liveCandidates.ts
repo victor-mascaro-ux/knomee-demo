@@ -9,7 +9,7 @@
  * value rather than being invented.
  */
 
-import { derive } from './advisorAnswers'
+import { derive, journeyProgress } from './advisorAnswers'
 import type { Entry } from './advisorDirectory'
 import type { Candidate, Stage, Tier } from './candidates'
 
@@ -44,7 +44,12 @@ const aumOf = (book: string) => {
 }
 
 export function candidateFromEntry(e: Entry): LiveCandidate {
-  const done = e.answered >= e.total && e.total > 0
+  /* Complete when every question is answered — or when every adventure has
+     been taken to its end, the journey's own rule. The second keeps a sitting
+     finished on an older version of the flow finished after the flow gains a
+     question it never saw. */
+  const jp = journeyProgress(e.answers)
+  const done = (e.answered >= e.total && e.total > 0) || (jp.required > 0 && jp.done === jp.required)
   const d = derive(e.answers)
   const scored = done && !d.empty
   return {

@@ -656,9 +656,12 @@ export default function FirmCandidatesScreen({
   onDownload,
   onAdd,
   onCopied,
+  onRemoved,
 }: {
   /** A row's invite link copied from its menu. */
   onCopied?: () => void
+  /** An entry removed from the pipeline. */
+  onRemoved?: () => void
   onOpenProfile: (c: Candidate) => void
   /** A live sitting's row: opens the report built from its answers. */
   onOpenEntry: (entryId: string) => void
@@ -693,6 +696,7 @@ export default function FirmCandidatesScreen({
     const t = await deleteEntry(c.entryId)
     if (!t && c.token) await deleteInvite(c.token)
     setTrouble(t)
+    if (!t) onRemoved?.()
     void loadLive()
   }
   useEffect(() => {

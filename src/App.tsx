@@ -4512,6 +4512,7 @@ export default function App() {
                 onDownload={() => showToast('CSV downloaded')}
                 onAdd={() => showToast('Added to Network')}
                 onCopied={() => showToast('Link copied')}
+                onRemoved={() => showToast('Entry removed')}
               />
             )}
             {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}
@@ -4578,6 +4579,7 @@ export default function App() {
               setDirectoryOpen(false)
               setViewEntryId(id)
             }}
+            onRemoved={() => showToast('Entry removed')}
           />
         </main>
       ) : adminView ? (

@@ -62,6 +62,7 @@ import {
   journeyDone,
   journeyProgress,
   journeyStates,
+  today,
   withFinished,
   loadAnswers,
   privateSteps,
@@ -982,7 +983,20 @@ export default function AdvisorSelfScreen({
       const mine = values
         .filter((e) => e.token === invite.token && e.answered > 0)
         .sort((x, y) => y.answered - x.answered || (y.at ?? '').localeCompare(x.at ?? ''))[0]
-      if (mine) setAnswers({ ...emptyAnswers(), ...mine.answers, sittingId: mine.answers.sittingId || mine.id })
+      if (mine) {
+        /* A sitting that was complete stays complete: every adventure is
+           marked taken to its end, whatever the flow has gained since. */
+        const done = mine.total > 0 && mine.answered >= mine.total
+        const finished = done
+          ? Object.fromEntries(advisorAdventures.map((r) => [r.id, mine.answers.completed || today()]))
+          : mine.answers.finished
+        setAnswers({
+          ...emptyAnswers(),
+          ...mine.answers,
+          ...(finished ? { finished } : {}),
+          sittingId: mine.answers.sittingId || mine.id,
+        })
+      }
       setResumed(true)
     })
     return () => {
