@@ -127,7 +127,7 @@ const CLIENT_SPLIT_ASK = (
   </>
 )
 
-type Reward = { before: number; after: number; total: number; next: string }
+type Reward = { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string }
 
 export default function JoyFlow({
   onComplete,
@@ -254,9 +254,27 @@ export default function JoyFlow({
 
   /* Every screen of the adventure starts at its top — the ending most of all,
      which is long and was opening wherever the last screen had been scrolled. */
+  /* A pick with a limit is answered once the limit is reached: the last one
+     chosen, it moves on by itself after the beat every one-tap answer holds.
+     Fewer than the limit still waits for OK. Back, OK or a changed step
+     cancels one still waiting. */
+  const auto = useRef(0)
+  const ctaLatest = useRef(onCta)
+  ctaLatest.current = onCta
   useEffect(() => {
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+    return () => window.clearTimeout(auto.current)
   }, [at])
+  const picked = step.kind === 'pick' ? a.tools.length + (a.other.trim() ? 1 : 0) : 0
+  const pickMax = step.kind === 'pick' ? step.max : 0
+  const lastPicked = useRef(picked)
+  useEffect(() => {
+    const grew = picked > lastPicked.current
+    lastPicked.current = picked
+    window.clearTimeout(auto.current)
+    if (step.kind === 'pick' && grew && picked >= pickMax && !a.other.trim())
+      auto.current = window.setTimeout(() => ctaLatest.current(), 700)
+  }, [picked, pickMax, step.kind, a.other])
 
   const slot = step.kind === 'reflect' ? reflectSlot?.(step, a.notes[noteIndex] ?? '', setNote) : undefined
 
@@ -413,6 +431,8 @@ export default function JoyFlow({
           done={reward.after}
           total={reward.total}
           next={reward.next}
+          card={reward.card}
+          idName={reward.idName}
           onNext={onCta}
         />
       )}

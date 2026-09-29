@@ -619,6 +619,8 @@ const QUESTIONS: Step[] = ['pick', 'when', 'why', 'support', 'brand', 'pros', 'c
 const READY: Step[] = ['thought', 'knows', 'acting']
 const READY_ID: Record<string, string> = { thought: 'mv-q5', knows: 'mv-q6', acting: 'mv-q7' }
 
+type MoveReward = { before: number; after: number; total: number; card?: ReactNode }
+
 /* Where the last adventure's celebration can send you. */
 export type MoveEnd = 'id' | 'questions'
 
@@ -634,7 +636,7 @@ export default function MoveFlow({
   /** The celebration, as the other adventures end on it. The Move is the
       last of them, so it ends not on a next adventure but on two cards: the
       Business ID it has completed, and the questions it has written. */
-  reward?: { before: number; after: number; total: number }
+  reward?: MoveReward | ((m: MoveAnswers) => MoveReward)
   /** The advisor's privacy switch, for a private question's screen. */
   privateNote?: (stepId: string) => ReactNode
   /** The microphone, under a free-text box. */
@@ -714,6 +716,7 @@ export default function MoveFlow({
     ],
   }
 
+  const rewardNow = typeof reward === 'function' ? reward(m) : reward
   const stage = stageOf(sheetWithMove(emptyAnswers(), m))
   const level = STAGES.indexOf(stage) + 1
 
@@ -1007,14 +1010,16 @@ export default function MoveFlow({
         </div>
       )}
 
-      {at === 'badge' && reward && (
+      {at === 'badge' && rewardNow && (
         <JoyReward
           badge={bgMove}
           arcTitle="The Move"
           name="The Move"
-          from={reward.before}
-          done={reward.after}
-          total={reward.total}
+          from={rewardNow.before}
+          done={rewardNow.after}
+          total={rewardNow.total}
+          card={rewardNow.card}
+          idName="Business ID"
           next=""
           onNext={() => onComplete(m)}
           ending={

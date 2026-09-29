@@ -276,3 +276,55 @@
   font-weight: 800;
   letter-spacing: 2px;
 }
+
+/* ── what the adventure added ──
+   With the card it just put on the ID, the badge makes room: smaller, and the
+   screen scrolls, the card arriving under it as a white page on the plum. */
+.jw.has-card {
+  overflow-y: auto;
+  scrollbar-width: none;
+  gap: var(--space-16);
+  padding-bottom: 32px;
+}
+.jw.has-card .jw-stage {
+  flex: none;
+  padding: var(--space-8) 0;
+}
+.jw.has-card .jw-badge {
+  width: 62%;
+  max-width: 240px;
+}
+.jw-card {
+  animation: jwUp 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) 1.1s both;
+}
+.jw-card-k {
+  margin: 0 0 var(--space-8);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--k-lime);
+}
+.jw-card-body {
+  color: var(--text-strong);
+}
+.jw-card-body .pp-card {
+  margin: 0;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.55);
+}
+.jw-card-body .pp-only {
+  display: block;
+}
+.jw.has-card .jw-next {
+  padding-top: var(--space-8);
+}
+@media (prefers-reduced-motion: reduce) {
+  .jw-card {
+    animation: none;
+  }
+}
+
+.jw.has-card::-webkit-scrollbar {
+  display: none;
+}

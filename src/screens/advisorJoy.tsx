@@ -16,6 +16,7 @@
  */
 
 import type { JoyPick, JoyStep } from '../data/joyFlow'
+import bgJoyUntitled from '../assets/badges/joy-on-plum-untitled.svg'
 import { steps as flowSteps, type Step } from '../data/advisorFlow'
 import type { Answers, Grade } from '../data/advisorAnswers'
 import type { JoyAnswers, JoyContent } from './JoyFlow'
@@ -144,13 +145,23 @@ const STEPS: JoyStep[] = [
     kind: 'done',
     title: 'What the work is for',
     body: 'Here is what you said. It is on your Business ID now.',
-    // No badges on the advisor journey: the ending's button finishes it.
+    cta: 'Claim badge',
+  },
+  /* The celebration every adventure ends on, under its own name: Practice
+     Joy's lettering over the Joy art. */
+  {
+    kind: 'badge',
+    title: 'Practice Joy',
+    body: 'Adventure complete.',
     cta: 'Continue',
   },
 ]
 
 export const ADVISOR_JOY: JoyContent = {
   steps: STEPS,
+  badge: bgJoyUntitled,
+  badgeName: 'Practice Joy',
+  badgeArcTitle: 'Practice Joy',
   picks: PICKS,
   areas: AREAS,
   // No samples: an advisor answering for real skips what they leave blank.

@@ -765,7 +765,7 @@ type Step =
   | 'results'
   | 'badge'
 
-type Reward = { before: number; after: number; total: number; next: string }
+type Reward = { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string }
 
 export default function FutureYouFlow({
   reward,
@@ -1156,6 +1156,8 @@ export default function FutureYouFlow({
           done={rewardNow.after}
           total={rewardNow.total}
           next={rewardNow.next}
+          card={rewardNow.card}
+          idName={rewardNow.idName}
           onNext={() => onComplete(a)}
         />
       )}

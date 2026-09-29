@@ -50,7 +50,8 @@ import moodNeutral from '../assets/moods/neutral.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import './client-experience.css'
-import ProspectProfileScreen from './ProspectProfileScreen'
+import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
+import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
@@ -1320,6 +1321,33 @@ export default function ClientExperienceScreen({
       return next
     })
   }
+  /* The celebration's card: what an adventure has just put on her Financial
+     ID, drawn by the ID page itself from her answers as they will be saved —
+     this adventure marked done with everything before it. */
+  const finCard = (id: string, which: FinIdCard, patch: Partial<NonNullable<ComponentProps<typeof ProspectProfileScreen>['fresh']>>) => {
+    const upTo = journey.findIndex((j) => j.id === id)
+    const doneNow: Record<string, string> = {}
+    for (const j of journey.slice(0, upTo + 1)) doneNow[j.id] = done[j.id] ?? completedToday()
+    return {
+      card: (
+        <ProspectProfileScreen
+          prospect={SARAH}
+          fresh={{ joy, done: doneNow, conf, outlook, future, goals: goalsDone, ...patch }}
+          onBack={() => {}}
+          mine
+          only={which}
+        />
+      ),
+      idName: 'Financial ID',
+    }
+  }
+  /* Finishing an adventure goes straight into the next one, as its
+     celebration's Next says. */
+  const goNext = (id: string) => {
+    setAdventure(id)
+    document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
+  }
+
   /* A finished adventure opened again from the list is taken again: it and
      everything after it go back to waiting, so however it is left — its end
      or the bar's cross — it is the one next. */
@@ -1529,12 +1557,13 @@ export default function ClientExperienceScreen({
                         total: journey.filter((j) => j.core).length,
                         next: journey.find((j) => !done[j.id])?.title ?? 'Life Events',
                       }
-                    : {
+                    : (g: GoalsAnswers) => ({
                         before: 4,
                         after: 5,
                         total: journey.filter((j) => j.core).length,
                         next: 'Life Events',
-                      }
+                        ...finCard('goals', 'goals', { goals: g }),
+                      })
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
@@ -1559,19 +1588,19 @@ export default function ClientExperienceScreen({
                         total: journey.filter((j) => j.core).length,
                         next: journey.find((j) => !done[j.id])?.title ?? 'Goals',
                       }
-                    : {
+                    : (f: FutureYouAnswers) => ({
                         before: 3,
                         after: 4,
                         total: journey.filter((j) => j.core).length,
                         next: 'Goals',
-                      }
+                        ...finCard('future-you', 'future', { future: f }),
+                      })
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
                   setFuture(answers)
                   completeAt('future-you')
-                  setAdventure(null)
-                  setTab('adventures')
+                  goNext('goals')
                 }}
               />
             ) : adventure === 'outlook' ? (
@@ -1586,19 +1615,19 @@ export default function ClientExperienceScreen({
                         total: journey.filter((j) => j.core).length,
                         next: journey.find((j) => !done[j.id])?.title ?? 'Future You',
                       }
-                    : {
+                    : (o: OutlookAnswers) => ({
                         before: 2,
                         after: 3,
                         total: journey.filter((j) => j.core).length,
                         next: 'Future You',
-                      }
+                        ...finCard('outlook', 'outlook', { outlook: o }),
+                      })
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
                   setOutlook(answers)
                   completeAt('outlook')
-                  setAdventure(null)
-                  setTab('adventures')
+                  goNext('future-you')
                 }}
               />
             ) : adventure === 'confidence' ? (
@@ -1612,19 +1641,19 @@ export default function ClientExperienceScreen({
                         total: journey.filter((j) => j.core).length,
                         next: journey.find((j) => !done[j.id])?.title ?? 'Outlook',
                       }
-                    : {
+                    : (c: ConfidenceAnswers) => ({
                         before: 1,
                         after: 2,
                         total: journey.filter((j) => j.core).length,
                         next: 'Outlook',
-                      }
+                        ...finCard('confidence', 'confidence', { conf: c }),
+                      })
                 }
                 onComplete={(answers) => {
                   if (reviewing) return leaveReview()
                   setConf(answers)
                   completeAt('confidence')
-                  setAdventure(null)
-                  setTab('adventures')
+                  goNext('outlook')
                 }}
               />
             ) : adventure ? (
@@ -1643,7 +1672,13 @@ export default function ClientExperienceScreen({
                         total: journey.filter((j) => j.core).length,
                         next: journey.find((j) => !done[j.id])?.title ?? 'Confidence',
                       }
-                    : { before: 0, after: 1, total: journey.filter((j) => j.core).length, next: 'Confidence' }
+                    : (j: JoyAnswers) => ({
+                        before: 0,
+                        after: 1,
+                        total: journey.filter((x) => x.core).length,
+                        next: 'Confidence',
+                        ...finCard('financial-joy', 'joy', { joy: j }),
+                      })
                 }
                 onClose={() => setAdventure(null)}
                 onComplete={(answers) => {
@@ -1656,8 +1691,7 @@ export default function ClientExperienceScreen({
                   if (reviewing) return leaveReview()
                   setJoy(answers)
                   completeAt('financial-joy')
-                  setAdventure(null)
-                  setTab('adventures')
+                  goNext('confidence')
                 }}
               />
             ) : tab === 'adventures' ? (

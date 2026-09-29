@@ -14,6 +14,7 @@ import { steps as flowSteps } from '../data/advisorFlow'
 import { confidenceBandOf, type Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { ConfidenceAnswers, ConfidenceContent } from './ConfidenceFlow'
+import bgBadge from '../assets/badges/confidence-on-plum.svg'
 
 const flow = flowSteps.find((s) => s.id === 'cf-q')
 const reflect = flowSteps.find((s) => s.id === 'cf-reflect')
@@ -24,6 +25,10 @@ export const toScale = (v: number) => Math.min(5, Math.max(1, 1 + Math.round(v /
 const fromScale = (n: number) => (n - 1) * 25
 
 export const ADVISOR_CONFIDENCE: ConfidenceContent = {
+  /* The celebration every adventure ends on, the client's badge: the
+     adventure has the same name on both sides. */
+  badge: bgBadge,
+  badgeName: 'Confidence',
   statements: (flow?.statements ?? []).map((s) => ({
     statement: s.text,
     low: s.low,

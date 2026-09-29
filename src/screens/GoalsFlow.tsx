@@ -8,7 +8,7 @@
  * readiness, which lands on a stage of change; then the badge — the fifth.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './goalsFlow.css'
@@ -94,7 +94,7 @@ export default function GoalsFlow({
   onComplete,
   review,
 }: {
-  reward: { before: number; after: number; total: number; next: string }
+  reward: { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string } | ((a: GoalsAnswers) => { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string })
   onComplete: (a: GoalsAnswers) => void
   review?: GoalsAnswers
 }) {
@@ -113,6 +113,7 @@ export default function GoalsFlow({
   const level = current?.readiness || 0
   const stage = level ? TTM_STAGES[level - 1] : null
 
+  const rewardNow = typeof reward === 'function' ? reward({ goals }) : reward
   return (
     <div className="jf gl">
       {step === 'intro' && (
@@ -275,10 +276,12 @@ export default function GoalsFlow({
         <JoyReward
           badge={bgGoals}
           name="Goals"
-          from={reward.before}
-          done={reward.after}
-          total={reward.total}
-          next={reward.next}
+          from={rewardNow.before}
+          done={rewardNow.after}
+          total={rewardNow.total}
+          next={rewardNow.next}
+          card={rewardNow.card}
+          idName={rewardNow.idName}
           onNext={() => onComplete({ goals })}
         />
       )}

@@ -16,6 +16,7 @@ import { steps as flowSteps } from '../data/advisorFlow'
 import type { Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { DetailGroup, FutureYouAnswers, FutureYouContent, Pick } from './FutureYouFlow'
+import bgBadge from '../assets/badges/future-you-on-plum.svg'
 
 const OTHER = 'Other'
 const step = (id: string) => flowSteps.find((s) => s.id === id)
@@ -68,6 +69,10 @@ const lower = (s: string) =>
 const q = (id: string, fallback = '') => step(id)?.title ?? fallback
 
 export const ADVISOR_FUTURE: FutureYouContent = {
+  /* The celebration every adventure ends on, the client's badge: the
+     adventure has the same name on both sides. */
+  badge: bgBadge,
+  badgeName: 'Future You',
   intro: {
     image: './future-you/intro.png',
     title: q('fy-intro', 'Let’s materialize your vision for Future You'),
