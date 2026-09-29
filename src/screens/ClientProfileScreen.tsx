@@ -1079,9 +1079,13 @@ export default function ClientProfileScreen({
 
           {sharing && tab === 'id' && !printing && lens === 'sharing' ? (
             <SharingView
-              who="emily"
+              who={client.name.toLowerCase().replace(/[^a-z]+/g, '-')}
               team={[
-                { id: 'p1', name: 'Sebastian', role: 'partner' },
+                {
+                  id: 'p1',
+                  name: /sebastian/i.test(client.name) ? 'Emily' : /emily/i.test(client.name) ? 'Sebastian' : 'Alex',
+                  role: 'partner',
+                },
                 { id: 'p2', name: 'Sam', role: 'advisor' },
                 { id: 'p3', name: 'Florence', role: 'banker' },
                 { id: 'p4', name: 'Kim', role: 'accountant' },
