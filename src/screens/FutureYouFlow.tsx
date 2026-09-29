@@ -416,7 +416,22 @@ export function Road({
               }}
             >
               <i />
-              <span>{w}</span>
+              {/* "year" or "years" on a line of its own, so every stop reads
+                  as two even lines rather than breaking wherever it falls. */}
+              <span>
+                {(() => {
+                  const m = w.match(/^(.*\S)\s+(years?)$/i)
+                  return m ? (
+                    <>
+                      {m[1]}
+                      <br />
+                      {m[2]}
+                    </>
+                  ) : (
+                    w
+                  )
+                })()}
+              </span>
             </button>
           ))}
         </div>
