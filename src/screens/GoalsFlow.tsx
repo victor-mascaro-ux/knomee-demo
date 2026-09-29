@@ -19,7 +19,6 @@ import JoyReward from './JoyReward'
 import { Reveal } from './JoyResults'
 import { MARK_PARTS } from './ClientExperienceScreen'
 import MoveFlow, { type MoveAnswers, type MoveContent } from './MoveFlow'
-import { TIMELINES } from './AddGoalModal'
 import { QUESTIONS as READINESS, stageOf as readinessStageOf } from './ReadinessModal'
 import { GoalDetail, TTM_ART, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
@@ -113,7 +112,13 @@ export const CLIENT_GOALS: MoveContent = {
     options: financialId.suggestedGoals,
     ownPlaceholder: 'Buy a lake house',
   },
-  when: { title: 'When would you like to reach it?', sub: 'Pick the stretch of road it sits on.', stops: TIMELINES },
+  /* Five stops, as every road in the app has: the goal panel's seven
+     horizons would not fit their words along it. */
+  when: {
+    title: 'When would you like to reach it?',
+    sub: 'Pick the stretch of road it sits on.',
+    stops: ['Under 1 year', '1–3 years', '3–5 years', '5–10 years', '10+ years'],
+  },
   why: {
     title: 'Why do you want this?',
     sub: 'In your own words — this is what your advisor reads first.',
