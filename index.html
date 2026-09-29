@@ -664,8 +664,9 @@
   /* An invited advisor's link, and the one address where this shell is not
      review scaffolding wrapped around a prototype — it is the product, opened
      by somebody who was sent it. They get no demo panel: that key would hand a
-     stranger the whole demo. Commenting ("c") works here as everywhere else. Read once, from the address the page was opened at, so navigating
-     away from a flow inside the frame cannot unlock them either. */
+     stranger the whole demo. Commenting ("c") works here as everywhere else.
+     Read once, from the address the page was opened at, so navigating away
+     from a flow inside the frame cannot unlock it either. */
   const INVITED = /^#\/flow\//.test(window.location.hash || '');
   // ────────────────────────────────────────────────────────
 
@@ -703,6 +704,7 @@
   let commentMode = false;
   let who = '';
   let currentScreen = 'default';
+  let currentSub = '';
   // The prototype's own route (e.g. "#/clients/jane-doe"), mirrored up by the
   // frame. A thread records the route it was left on, so a card can take you
   // back to the exact page — profile and all — not just the screen.
@@ -740,6 +742,11 @@
       // Threads written before routes were recorded have none; threadRoute()
       // falls back to the screen id, which is a route in every case but one.
       route: (typeof raw.route === 'string' && raw.route) ? raw.route : null,
+      // The step or tab inside the route the note was left on (see subPage),
+      // and the two together: the page a note pins to. Older notes have
+      // neither and fall back to their route, then their screen.
+      sub: (typeof raw.sub === 'string') ? raw.sub : null,
+      page: (typeof raw.page === 'string' && raw.page) ? raw.page : null,
       x: raw.x, y: raw.y,
       img: raw.img || null,
       createdAt: raw.createdAt || Date.now(),
@@ -931,6 +938,7 @@
     let label = SCREEN_LABELS[s] || prettySlug(s);
     const m = (t.route || '').match(/^#\/[^/]+\/(.+)$/);
     if (m) label += ' · ' + prettySlug(m[1]);
+    if (t.sub) label += ' · ' + t.sub;
     return label;
   }
 
@@ -944,11 +952,40 @@
     } catch (e) { /* cross-origin or not ready */ }
     return 'default';
   }
+  /* Which page inside the route is showing. A screen id is too coarse — the
+     whole advisor journey, every phone tab and each of its steps is one
+     screen, and none of them is in the address — so a note left on the
+     welcome pinned on every step after it. The app can name the page outright
+     with data-cc-page; otherwise it is the heading of what is on show: the
+     phone's viewport when there is one, else the page. */
+  function subPage() {
+    try {
+      const d = proto.contentDocument;
+      if (!d) return '';
+      const shown = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+      const named = [...d.querySelectorAll('[data-cc-page]')].filter(shown).pop();
+      if (named) return named.getAttribute('data-cc-page') || '';
+      const root = [...d.querySelectorAll('.cx-viewport')].find(shown) || d.querySelector('main') || d.body;
+      const h = [...root.querySelectorAll('h1, h2')].find(shown);
+      return h ? h.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '';
+    } catch (e) { return ''; }
+  }
+  const hereKey = () => (currentRoute || '') + '|' + currentSub;
+  /* Where a note belongs: its page if it recorded one, else (older notes)
+     its route, else its screen. */
+  function belongsHere(t) {
+    if (t.page) return t.page === hereKey();
+    if (t.route) return t.route === currentRoute;
+    return !!canon(t.screen) && canon(t.screen) === canon(currentScreen);
+  }
+  const keyOf = (t) => t.page || t.route || ('screen:' + canon(t.screen));
   setInterval(() => {
     const s = getScreenId();
-    if (s !== currentScreen) {
+    const sub = subPage();
+    if (s !== currentScreen || sub !== currentSub) {
       currentScreen = s;
-      closeThread();
+      currentSub = sub;
+      if (!draft) closeThread();
       renderAll();
     }
   }, 400);
@@ -980,8 +1017,7 @@
   // lost by being dropped from here: the rail lists every open thread whatever
   // page it belongs to, and a card still opens and reads.
   function visibleThreads() {
-    const here = canon(currentScreen);
-    const list = store.threads.filter(t => !t.resolved && canon(t.screen) === here);
+    const list = store.threads.filter(t => !t.resolved && belongsHere(t));
     if (draft) list.push(draft);
     return list.sort((a, b) => a.createdAt - b.createdAt);
   }
@@ -998,10 +1034,11 @@
   // so the number on a card matches the pin you'll find when you land there.
   // A thread with no screen has no pin anywhere, so it has no number either.
   function pinNumber(t) {
-    const s = canon(t.screen);
-    if (!s) return 0;
+    if (!t.page && !t.route && !canon(t.screen)) return 0;
+    if (belongsHere(t)) return visibleThreads().findIndex(x => x.id === t.id) + 1;
+    const k = keyOf(t);
     const group = store.threads
-      .filter(x => !x.resolved && canon(x.screen) === s)
+      .filter(x => !x.resolved && keyOf(x) === k)
       .sort((a, b) => a.createdAt - b.createdAt);
     return group.findIndex(x => x.id === t.id) + 1;
   }
@@ -1047,9 +1084,8 @@
     // another page findable at all — but an undivided list reads as if all of
     // them were left here. So it comes in two parts, under their own headings:
     // this page first, then everywhere else.
-    const here = canon(currentScreen);
-    const onThisPage = visible.filter(t => canon(t.screen) === here);
-    const otherPages = visible.filter(t => canon(t.screen) !== here);
+    const onThisPage = visible.filter(t => belongsHere(t));
+    const otherPages = visible.filter(t => !belongsHere(t));
 
     if (!visible.length) {
       const empty = document.createElement('div');
@@ -1073,11 +1109,11 @@
     };
 
     const renderCard = (t) => {
-      const elsewhere = canon(t.screen) && canon(t.screen) !== canon(currentScreen);
       // No screen recorded is not the same as belonging here: the card reads
       // muted like an elsewhere card, but there is nowhere to send you, so it
       // does not offer to go there.
-      const homeless = !canon(t.screen);
+      const homeless = !t.page && !t.route && !canon(t.screen);
+      const elsewhere = !homeless && !belongsHere(t);
       const card = document.createElement('button');
       card.className = 'cc-card' + (t.id === activeId ? ' cc-active' : '')
         + (elsewhere || homeless ? ' cc-elsewhere' : '');
@@ -1142,7 +1178,8 @@
     };
 
     if (onThisPage.length) {
-      groupHead('On this page', SCREEN_LABELS[here] || prettySlug(here));
+      const here = canon(currentScreen);
+      groupHead('On this page', (SCREEN_LABELS[here] || prettySlug(here)) + (currentSub ? ' · ' + currentSub : ''));
       onThisPage.forEach(renderCard);
     } else {
       groupHead('On this page', 'nothing yet');
@@ -1554,6 +1591,8 @@
       id: 'c' + Date.now() + Math.random().toString(36).slice(2, 7),
       screen: currentScreen,
       route: currentRoute || null,
+      sub: currentSub || null,
+      page: hereKey(),
       x: xPct, y: yPct,
       img: null,
       createdAt: Date.now(),
