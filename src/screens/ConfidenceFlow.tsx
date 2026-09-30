@@ -228,7 +228,7 @@ export default function ConfidenceFlow({
   const statements = content.statements
   const n = statements.length
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
-  useCcNav('conf.step', step, setStep)
+  useCcNav('conf.step', step, setStep, ['intro', ...content.statements.map((_, n) => n), 'results'])
   /* The ending's overlay: said once a moment after it arrives, as Financial
      Joy's is, and again from "Learn more". */
   const ending = useEndingOverlay(step === 'results')
