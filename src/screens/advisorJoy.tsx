@@ -176,12 +176,12 @@ export const ADVISOR_JOY: JoyContent = {
     prefLead: 'This is where you want your attention to go.',
     reading: (more, less) =>
       more && less
-        ? `You want your attention to move toward ${more}, and away from ${less}. The right partner makes room for that.`
+        ? `You want your attention to move toward ${more}, and away from ${less}.`
         : more
-          ? `You want more of your attention on ${more}. The right partner makes room for that.`
+          ? `You want more of your attention on ${more}.`
           : less
-            ? `You want less of your attention going to ${less}. The right partner takes that off your plate.`
-            : 'You are happy with where your attention goes today. The right partner keeps it there.',
+            ? `You want less of your attention going to ${less}.`
+            : 'You are happy with where your attention goes today.',
     about: {
       title: 'You found what the work is for',
       share: 61,

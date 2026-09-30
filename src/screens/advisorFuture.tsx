@@ -156,7 +156,7 @@ export const ADVISOR_FUTURE: FutureYouContent = {
     line: (a) =>
       `${a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself ${
         a.where[0] ? lower(a.where[0]) : 'somewhere new'
-      }${a.with[0] ? `, with ${lower(a.with[0])}` : ''}. The right partner should help you build exactly that.`,
+      }${a.with[0] ? `, with ${lower(a.with[0])}` : ''}.`,
     about: (a) => ({
       title: 'You visualized Future You!',
       share: 67,

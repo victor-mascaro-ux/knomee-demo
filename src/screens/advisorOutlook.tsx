@@ -78,7 +78,7 @@ export const ADVISOR_OUTLOOK: OutlookContent = {
     h > c
       ? 'There is more light than cloud in your sky. You are looking ahead with more hope than worry — a good place to decide from.'
       : h < c
-        ? 'The clouds are heavy right now. Naming them is how they start to lift — and they are the first thing any firm should answer.'
+        ? 'The clouds are heavy right now. Naming them is how they start to lift.'
         : 'Your worries and your hopes are in balance. The right move is the one that tips it toward the hopes.',
   results: {
     title: step('ol-unlock')?.title ?? 'Your outlook',

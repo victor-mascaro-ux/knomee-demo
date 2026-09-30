@@ -47,7 +47,7 @@ export const ADVISOR_CONFIDENCE: ConfidenceContent = {
   reading: (values) => confidenceBandOf(values.map(toScale)),
   means: {
     Strong: 'You feel sure of the practice you are building and where it is going. That is a strong place to decide from.',
-    Balanced: 'You feel steady in some places and less so in others. The right partner starts where it feels least sure.',
+    Balanced: 'You feel steady in some places and less so in others.',
     Weak: 'The practice is taking more out of you than it gives back right now. That is worth knowing before you decide anything.',
   },
   results: {
@@ -55,7 +55,7 @@ export const ADVISOR_CONFIDENCE: ConfidenceContent = {
     sub: 'This is how you feel about your practice today:',
     tag: 'Your confidence',
     line: (hi, lo) =>
-      `You feel most sure that ${hi} You feel least sure that ${lo} That is where the right partner should start.`,
+      `You feel most sure that ${hi} You feel least sure that ${lo}`,
     about: {
       title: 'Confidence matters',
       share: 48,
