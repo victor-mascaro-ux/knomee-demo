@@ -1599,3 +1599,39 @@ button.af-opt:hover {
     animation: none;
   }
 }
+
+/* The welcome's Get started wears the light the results' Claim button does:
+   the first tap, and the one button on the screen that matters. */
+.af-next.is-shine {
+  position: relative;
+  overflow: hidden;
+}
+.af-next.is-shine > span {
+  position: relative;
+}
+.af-next.is-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: afShine 2.8s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes afShine {
+  0% {
+    left: -60%;
+  }
+  45%,
+  100% {
+    left: 130%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-next.is-shine::after {
+    animation: none;
+    display: none;
+  }
+}

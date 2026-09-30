@@ -1595,8 +1595,12 @@ function FlowPhone({
                       Skip this question
                     </button>
                   ) : (
-                    <button className="cx-start af-next" type="button" onClick={() => go(i + 1)}>
-                      {cta}
+                    <button
+                      className={`cx-start af-next${step.kind === 'welcome' ? ' is-shine' : ''}`}
+                      type="button"
+                      onClick={() => go(i + 1)}
+                    >
+                      <span>{cta}</span>
                     </button>
                   ))}
               </div>

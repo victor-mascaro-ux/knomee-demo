@@ -27,7 +27,6 @@ import JoyReward from './JoyReward'
 import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
-import { IntroGets, type Gets } from './IntroGets'
 
 export interface OutlookAnswers {
   concerns: string[]
@@ -69,7 +68,7 @@ export const SAMPLE_OUTLOOK: OutlookAnswers = {
 /** Everything that makes this the client's Outlook rather than another
     adventure of the same shape. */
 export interface OutlookContent {
-  intro: { image: string; title: string; body: string; lead: string; minutes: number; gets?: Gets }
+  intro: { image: string; title: string; body: string; lead: string; minutes: number }
   /** The question over a screen — which can change once one has been added,
       to ask for another. */
   question: (kind: Kind, added: number) => ReactNode
@@ -523,7 +522,6 @@ export default function OutlookFlow({
           <h2 className="jf-title">{content.intro.title}</h2>
           <p className="jf-body">{content.intro.body}</p>
           <p className="jf-lead">{content.intro.lead}</p>
-          {content.intro.gets && <IntroGets gets={content.intro.gets} />}
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => setStep('concerns')}>
               Get Started
