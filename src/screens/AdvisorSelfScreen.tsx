@@ -1721,8 +1721,8 @@ function FlowPhone({
                       setMenuOpen(false)
                       setRichOpen(null)
                       onRestart()
-                      const home = steps.findIndex((st) => st.kind === 'home')
-                      reset(home >= 0 ? home : 0)
+                      // Starting over starts at the beginning: the welcome.
+                      reset(0)
                     }}
                   >
                     {restartArmed ? 'Tap again to start over' : 'Restart adventures'}
