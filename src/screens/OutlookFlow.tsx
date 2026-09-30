@@ -27,8 +27,9 @@ import JoyReward from './JoyReward'
 import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
-import { AdventureBadge, AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
+import { StepBar, morph, useFinishFill } from './StepBar'
 
 export interface OutlookAnswers {
   concerns: string[]
@@ -445,7 +446,6 @@ function Ask({
 }
 
 type Step = 'intro' | 'concerns' | 'hopes' | 'results' | 'badge'
-const ORDER: Step[] = ['intro', 'concerns', 'hopes', 'results', 'badge']
 
 type Reward = { before: number; after: number; total: number; next: string; card?: ReactNode; idName?: string }
 
@@ -477,7 +477,6 @@ export default function OutlookFlow({
     document.querySelector('.cx-viewport')?.scrollTo({ top: 0 })
   }, [step])
 
-  const at = ORDER.indexOf(step)
   const kind: Kind = step === 'hopes' ? 'hope' : 'concern'
   const list = kind === 'concern' ? a.concerns : a.hopes
   const pending = draft[kind].trim()
@@ -496,6 +495,7 @@ export default function OutlookFlow({
       setA((p) => ({ ...p, [key]: content.examples[key] }))
     }
   }
+  const fill = useFinishFill()
   const onOk = () => {
     if (step === 'concerns') {
       settle('concern')
@@ -503,7 +503,7 @@ export default function OutlookFlow({
     }
     if (step === 'hopes') {
       settle('hope')
-      return setStep('results')
+      return fill.finish(() => setStep('results'))
     }
   }
   const previous = () => {
@@ -527,7 +527,7 @@ export default function OutlookFlow({
           <p className="jf-body">{content.intro.body}</p>
           <p className="jf-lead">{content.intro.lead}</p>
           <div className="jf-start">
-            <button className="jf-go" type="button" onClick={() => setStep('concerns')}>
+            <button className="jf-go" type="button" onClick={() => morph(() => setStep('concerns'))}>
               Get Started
             </button>
             <span className="jf-min">
@@ -678,11 +678,8 @@ export default function OutlookFlow({
               Back and the one thing to press. */}
           <div className="jf-top">
             <AdventureMark />
-            <div className="af-progress" aria-hidden>
-              {['concerns', 'hopes'].map((s, i) => (
-                <i key={s} className={i <= at - 1 ? 'is-on' : ''} />
-              ))}
-            </div>
+            <StepBar count={2} done={fill.full ? 2 : step === 'hopes' ? 1 : 0} />
+            <AdventureClose />
           </div>
         <div className="jf-foot">
           <div className="jf-where">

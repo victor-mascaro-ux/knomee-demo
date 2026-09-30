@@ -347,12 +347,12 @@
   opacity: 0.9;
 }
 .af-appbar-logo img {
-  height: 15px;
+  height: 18px;
   width: auto;
   display: block;
 }
 .af-appbar-logo .client-logo {
-  height: 15px;
+  height: 18px;
   width: auto;
 }
 .af-appbar-title {
@@ -407,13 +407,31 @@
   margin: 14px 0 0;
 }
 .af-progress i {
+  position: relative;
+  overflow: hidden;
   flex: 1;
   height: 3px;
   border-radius: 2px;
   background: #e6e4ea;
 }
-.af-progress i.is-on {
+/* A segment fills with a quick sweep from its left, so answering a question
+   is seen landing on the bar. */
+.af-progress i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: var(--k-grape, #7639a1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.af-progress i.is-on::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-progress i::after {
+    transition: none;
+  }
 }
 .af-id-readiness > div {
   display: flex;
@@ -1725,7 +1743,7 @@ button.af-opt:hover {
     100deg,
     var(--k-plum, #240446) 0%,
     var(--k-grape, #7639a1) 40%,
-    #c58bff 50%,
+    #9a64c6 50%,
     var(--k-grape, #7639a1) 60%,
     var(--k-plum, #240446) 100%
   );
@@ -1733,7 +1751,7 @@ button.af-opt:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: advTitleShine 3.2s ease-in-out 0.6s infinite;
+  animation: advTitleShine 5s ease-in-out 1s infinite;
 }
 @keyframes advTitleShine {
   0% {
@@ -1768,17 +1786,7 @@ button.af-opt:hover {
   min-width: 0;
   margin: 0 0 0 4px;
 }
-/* The bar takes 80% of the room after the name and sits against the right
-   edge: a spacer between the name and the bar takes the other fifth
-   (1 : 0.25), put there by order. */
-.adv-badge:has(.adv-badge-bar)::after {
-  content: '';
-  flex: 0.25;
-  order: 1;
-}
-.adv-badge-bar {
-  order: 2;
-}
+
 
 /* The adventure's icon, alive: it floats — a slow, even drift up and down
    with the faintest sway, never a jump — in the intro's title and at the
@@ -1806,6 +1814,93 @@ button.af-opt:hover {
 @media (prefers-reduced-motion: reduce) {
   .adv-badge-ic img,
   .jf-mark-ic img {
+    animation: none;
+  }
+}
+
+/* Get Started on an intro: its title — icon, name, bar — moves up into the
+   timeline of the first screen rather than vanishing and reappearing
+   (StepBar's morph). Same names on both ends; only one end is ever on screen. */
+.adv-badge-ic,
+.jf-mark-ic {
+  view-transition-name: adv-ic;
+}
+.adv-badge-title,
+.jf-mark-title {
+  view-transition-name: adv-title;
+}
+.adv-badge-bar,
+.jf-top .af-progress {
+  view-transition-name: adv-bar;
+}
+::view-transition-group(adv-ic),
+::view-transition-group(adv-title),
+::view-transition-group(adv-bar) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The close, at the end of the adventure's bar: just the cross, small and
+   quiet — no disc — and part of the same move up into the timeline. */
+.adv-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0 -4px 0 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary, #6d6a76);
+  cursor: pointer;
+  view-transition-name: adv-x;
+  transition: color 0.15s ease;
+}
+.adv-close svg {
+  width: 14px;
+  height: 14px;
+}
+.adv-close:hover {
+  color: var(--text-strong, #240446);
+}
+::view-transition-group(adv-x) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* On the intro the icon wanders rather than bobs: an uneven path, drifting
+   and turning a different way each beat, on a long loop so it never reads
+   as a repeat. The timeline's icon keeps the even float. */
+.adv-badge-ic img {
+  animation: advIconWander 9.7s ease-in-out infinite;
+}
+@keyframes advIconWander {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  13% {
+    transform: translate(1.5px, -2px) rotate(6deg);
+  }
+  27% {
+    transform: translate(-1px, -3px) rotate(-4deg);
+  }
+  41% {
+    transform: translate(-2px, 0.5px) rotate(3deg);
+  }
+  56% {
+    transform: translate(1px, 2px) rotate(-7deg);
+  }
+  68% {
+    transform: translate(2px, -1px) rotate(2deg);
+  }
+  83% {
+    transform: translate(-1.5px, -1.5px) rotate(-3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adv-badge-ic img {
     animation: none;
   }
 }

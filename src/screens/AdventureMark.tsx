@@ -12,6 +12,8 @@ export interface AdventureMarkValue {
   /** The adventure's icon, and its name beside it. */
   art?: string
   title?: string
+  /** The way out of the adventure, drawn at the end of the bar. */
+  onClose?: () => void
   /** 1-based place in the journey, and how many there are. */
   at: number
   of: number
@@ -28,6 +30,9 @@ export function AdventureMark() {
         {m.art && <img src={m.art} alt="" />}
       </span>
       {m.title && <span className="jf-mark-title">{m.title}</span>}
+      <span className="jf-mark-at">
+        {m.at} of {m.of}
+      </span>
     </span>
   )
 }
@@ -53,6 +58,22 @@ export function AdventureBadge({ steps }: { steps?: number }) {
           ))}
         </span>
       )}
+      <AdventureClose />
     </div>
+  )
+}
+
+/* The way out of the adventure, at the end of its bar — on the intro's title
+   row and on every screen's timeline — where the app bar's burger now is the
+   menu. */
+export function AdventureClose() {
+  const m = useContext(AdventureMarkContext)
+  if (!m?.onClose) return null
+  return (
+    <button type="button" className="adv-close" aria-label="Close this adventure and go back to My Adventures" onClick={m.onClose}>
+      <svg viewBox="0 0 22 22" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+        <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
+      </svg>
+    </button>
   )
 }

@@ -30,8 +30,9 @@ import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
    for the plum it sits on there. */
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
-import { AdventureBadge, AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
+import { StepBar, morph, useFinishFill } from './StepBar'
 
 export interface JoyAnswers {
   tools: string[]
@@ -177,9 +178,16 @@ export default function JoyFlow({
      counts as complete once every question in it is. */
   const reward = typeof rewardFor === 'function' ? rewardFor(a) : rewardFor
 
+  /* The screens that ask something — what the step bar counts. */
+  const asks = steps.flatMap((st, n) => (st.kind === 'pick' || st.kind === 'split' || st.kind === 'reflect' ? [n] : []))
+  const answered = asks.filter((n) => n < at).length
+  const fill = useFinishFill()
   const next = () => {
     window.clearInterval(typing.current)
-    setAt((n) => Math.min(n + 1, steps.length - 1))
+    const on = () => setAt((n) => Math.min(n + 1, steps.length - 1))
+    // The last question fills the bar to the end before the results.
+    if (at === asks[asks.length - 1]) return fill.finish(on)
+    on()
   }
   /* One question back. Inside the deck that is the card before this one, put
      back on top to be sorted again; out of it, the screen before — and a deck
@@ -285,7 +293,7 @@ export default function JoyFlow({
     <div className="jf">
       {step.kind === 'intro' && (
         <div className="jf-intro">
-          <AdventureBadge steps={steps.length - 1} />
+          <AdventureBadge steps={asks.length} />
           {/* The portrait on its teal disc, and beside it the line the
               adventure is built on — who said it, underneath. */}
           <div className="jf-hero">
@@ -299,7 +307,7 @@ export default function JoyFlow({
           <p className="jf-body">{step.body}</p>
           <p className="jf-lead">{step.lead}</p>
           <div className="jf-start">
-            <button className="jf-go" type="button" onClick={next}>
+            <button className="jf-go" type="button" onClick={() => morph(next)}>
               {step.cta}
             </button>
             <span className="jf-min">
@@ -451,11 +459,8 @@ export default function JoyFlow({
               Back and the one thing to press. */}
           <div className="jf-top">
             <AdventureMark />
-            <div className="af-progress" aria-hidden>
-              {steps.slice(1).map((_, i) => (
-                <i key={i} className={i < at ? 'is-on' : ''} />
-              ))}
-            </div>
+            <StepBar count={asks.length} done={fill.full ? asks.length : answered} />
+            <AdventureClose />
           </div>
         <div className="jf-foot">
           {/* Where you are, and under it the way one question back; then the

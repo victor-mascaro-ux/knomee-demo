@@ -40,8 +40,9 @@ import JoyReward from './JoyReward'
 import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
-import { AdventureBadge, AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
+import { StepBar, morph, useFinishFill } from './StepBar'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -797,8 +798,9 @@ export default function MoveFlow({
   const qi = QUESTIONS.indexOf(at)
   const ri = READY.indexOf(at)
   const go = (s: Step) => setAt(s)
+  const fill = useFinishFill()
   const next = () => {
-    if (qi >= 0) return go(qi + 1 < QUESTIONS.length ? QUESTIONS[qi + 1] : 'added')
+    if (qi >= 0) return qi + 1 < QUESTIONS.length ? go(QUESTIONS[qi + 1]) : fill.finish(() => go('added'))
     if (ri >= 0) return go(ri + 1 < READY.length ? READY[ri + 1] : 'results')
   }
   const previous = () => {
@@ -862,7 +864,7 @@ export default function MoveFlow({
           <h2 className="jf-title">{c.intro.title}</h2>
           <p className="jf-body">{c.intro.body}</p>
           <div className="jf-start">
-            <button className="jf-go" type="button" onClick={() => go('loading')}>
+            <button className="jf-go" type="button" onClick={() => morph(() => go('loading'))}>
               Get Started
             </button>
             <span className="jf-min">
@@ -1228,14 +1230,20 @@ export default function MoveFlow({
 
       {/* Where you are, at the top under the bar. The readiness questions
           carry their own three-stop track instead. */}
+      {/* The screen between the intro and the first question already wears the
+          timeline, so the intro's title has somewhere to move to. */}
+      {at === 'loading' && (
+        <div className="jf-top">
+          <AdventureMark />
+          <StepBar count={QUESTIONS.length} done={0} />
+          <AdventureClose />
+        </div>
+      )}
       {qi >= 0 && (
         <div className="jf-top">
           <AdventureMark />
-          <div className="af-progress" aria-hidden>
-            {QUESTIONS.map((s, i) => (
-              <i key={s} className={i <= qi ? 'is-on' : ''} />
-            ))}
-          </div>
+          <StepBar count={QUESTIONS.length} done={fill.full ? QUESTIONS.length : Math.max(0, qi)} />
+          <AdventureClose />
         </div>
       )}
       {/* The foot, on every question — the readiness ones too: Back, and the
