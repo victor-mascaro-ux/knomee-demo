@@ -17,7 +17,7 @@
  * The shell is the app's own modal, like every other panel here.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './readinessModal.css'
 import type { Goal } from '../data/financialId'
 import { TTM_STATEMENTS } from '../data/ttm'
@@ -84,30 +84,36 @@ export default function ReadinessModal({
   goal,
   onClose,
   onSave,
-  saveLabel = 'See it in my Financial ID',
+  saveLabel,
 }: {
   goal: Goal
   onClose: () => void
   /** The stage the answers put them on, 1–5. */
   onSave: (level: number) => void
-  /** What the last button says it leads to. */
+  /** What the last button says it leads to. Left out, there is no button:
+      the reading is kept when the result is closed. */
   saveLabel?: string
 }) {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<(Answer | null)[]>([null, null, null, null])
+  const closeRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [])
 
   const done = step >= QUESTIONS.length
   const q = QUESTIONS[Math.min(step, QUESTIONS.length - 1)]
   const level = done ? stageOf(answers) : 0
   const stage = level ? TTM_STAGES[level - 1] : null
+
+  /* Closed on the result with no button to press, the reading is kept. */
+  const close = done && !saveLabel ? () => onSave(level) : onClose
+  closeRef.current = close
 
   const answer = (a: Answer) => {
     setAnswers((list) => list.map((o, i) => (i === step ? a : o)))
@@ -115,11 +121,11 @@ export default function ReadinessModal({
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" onClick={close} role="dialog" aria-modal="true">
       <div className="modal rm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Goal Readiness</h2>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" onClick={close}>
             <CloseIcon />
           </button>
         </div>
@@ -164,11 +170,13 @@ export default function ReadinessModal({
                 <span className="rm-stage">{stage}</span>
               </div>
               <p className="rm-statement">{stage ? TTM_STATEMENTS[stage] : ''}</p>
-              <div className="rm-foot">
-                <button className="btn btn-primary" type="button" onClick={() => onSave(level)}>
-                  {saveLabel}
-                </button>
-              </div>
+              {saveLabel && (
+                <div className="rm-foot">
+                  <button className="btn btn-primary" type="button" onClick={() => onSave(level)}>
+                    {saveLabel}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
