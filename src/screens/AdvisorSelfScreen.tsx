@@ -101,6 +101,7 @@ import './client-experience.css'
    wear them too. */
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
+import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
 
@@ -481,6 +482,11 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
           </div>
         ))}
       </div>
+      {/* Where the answers go, said where they are collected. */}
+      <p className="lg-consent is-left">
+        Please leave out client names and anything confidential to your current firm.{' '}
+        <LegalLink doc="data">How your answers are used</LegalLink>
+      </p>
     </div>
   )
 }
@@ -1662,6 +1668,17 @@ function FlowPhone({
                     menu, not in somebody's app. */}
                 <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
                   Account Settings
+                  <ArrowRight />
+                </button>
+                <button
+                  className="cx-sheet-item"
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    openLegal('terms')
+                  }}
+                >
+                  Legal &amp; privacy
                   <ArrowRight />
                 </button>
                 <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>

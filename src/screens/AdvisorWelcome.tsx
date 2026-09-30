@@ -13,6 +13,7 @@ import type { CSSProperties } from 'react'
 import type { Step } from '../data/advisorFlow'
 import { ClockIcon, TabFinId, TabMark, TabQuestions } from './ClientExperienceScreen'
 import './joyFlow.css'
+import { LegalLink } from '../components/Legal'
 
 const ICONS = [TabMark, TabFinId, TabQuestions]
 
@@ -75,6 +76,11 @@ export default function AdvisorWelcome({ step }: { step: Step }) {
           )
         })}
       </ol>
+      {/* Consent, where the first tap is: small, above Get started. */}
+      <p className="lg-consent">
+        By continuing you agree to the <LegalLink doc="terms">Terms of Use</LegalLink> and acknowledge the{' '}
+        <LegalLink doc="privacy">Privacy Notice</LegalLink>.
+      </p>
     </div>
   )
 }

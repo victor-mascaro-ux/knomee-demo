@@ -50,6 +50,7 @@ import moodNeutral from '../assets/moods/neutral.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import './client-experience.css'
+import { LegalHost, openLegal } from '../components/Legal'
 import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
@@ -433,7 +434,10 @@ export function IPhone({
     return (
       <div className="cx-device is-bare">
         <div className="cx-bezel">
-          <div className={`cx-screen ${dim ? 'has-sheet' : ''}`}>{children}</div>
+          <div className={`cx-screen ${dim ? 'has-sheet' : ''}`}>
+            {children}
+            <LegalHost />
+          </div>
         </div>
       </div>
     )
@@ -480,6 +484,7 @@ export function IPhone({
             </span>
           </div>
           {children}
+          <LegalHost />
         </div>
       </div>
     </div>
@@ -1277,6 +1282,17 @@ function MobileMenu({
             goes nowhere. */}
         <button className="cx-sheet-item" type="button" onClick={onClose}>
           Account Settings
+          <ArrowRight />
+        </button>
+        <button
+          className="cx-sheet-item"
+          type="button"
+          onClick={() => {
+            onClose()
+            openLegal('terms')
+          }}
+        >
+          Legal &amp; privacy
           <ArrowRight />
         </button>
         <button className="cx-sheet-item" type="button" onClick={onClose}>
