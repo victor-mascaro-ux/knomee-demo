@@ -63,34 +63,39 @@
   cursor: pointer;
 }
 .lg-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+  /* Page tabs, as everywhere else in the app. */
+  display: flex;
+  gap: 10px;
   margin: 0 18px 12px;
-  padding: 3px;
-  border-radius: 999px;
-  background: var(--k-grape-soft, #f3ebfa);
+  border-bottom: 1px solid var(--line, #e7e4ee);
 }
 .lg-tabs button {
-  padding: 7px 6px;
+  position: relative;
+  padding: 0 14px 10px;
   border: 0;
-  border-radius: 999px;
   background: none;
   font: inherit;
-  font-size: var(--text-sm, 13px);
-  font-weight: var(--weight-semibold, 600);
-  color: var(--k-grape, #7639a1);
+  font-size: 14px;
+  color: var(--grey-text, #757575);
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background 0.3s var(--ease-out, ease),
-    color 0.3s var(--ease-out, ease),
-    box-shadow 0.3s var(--ease-out, ease);
+}
+.lg-tabs button:first-child {
+  padding-left: 0;
 }
 .lg-tabs button[aria-pressed='true'] {
-  background: #fff;
-  color: var(--k-plum, #240446);
-  box-shadow: 0 2px 8px -3px rgba(36, 4, 70, 0.3);
+  color: var(--plum, #240446);
+  font-weight: 600;
+}
+.lg-tabs button[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--plum, #240446);
 }
 .lg-body {
   flex: 1;

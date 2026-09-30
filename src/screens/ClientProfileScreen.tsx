@@ -1085,10 +1085,11 @@ export default function ClientProfileScreen({
                   id: 'p1',
                   name: /sebastian/i.test(client.name) ? 'Emily' : /emily/i.test(client.name) ? 'Sebastian' : 'Alex',
                   role: 'partner',
+                  email: `${/sebastian/i.test(client.name) ? 'emily' : /emily/i.test(client.name) ? 'sebastian' : 'alex'}@example.com`,
                 },
-                { id: 'p2', name: 'Sam', role: 'advisor' },
-                { id: 'p3', name: 'Florence', role: 'banker' },
-                { id: 'p4', name: 'Kim', role: 'accountant' },
+                { id: 'p2', name: 'Sam', role: 'advisor', email: 'sam@example.com' },
+                { id: 'p3', name: 'Florence', role: 'banker', email: 'florence@example.com' },
+                { id: 'p4', name: 'Kim', role: 'accountant', email: 'kim@example.com' },
               ]}
               cards={[
                 { id: 'goals', title: 'Goals', icon: icGoals },

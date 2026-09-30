@@ -329,10 +329,10 @@ export default function AdvisorProfileScreen({
               team={
                 who.name === 'Marcus Hale'
                   ? [
-                      { id: 'p1', name: 'Ana', role: 'junior advisor' },
-                      { id: 'p2', name: 'Dev', role: 'associate' },
-                      { id: 'p3', name: 'Rachel', role: 'spouse' },
-                      { id: 'p4', name: 'Tom', role: 'accountant' },
+                      { id: 'p1', name: 'Ana', role: 'junior advisor', email: 'ana@example.com' },
+                      { id: 'p2', name: 'Dev', role: 'associate', email: 'dev@example.com' },
+                      { id: 'p3', name: 'Rachel', role: 'spouse', email: 'rachel@example.com' },
+                      { id: 'p4', name: 'Tom', role: 'accountant', email: 'tom@example.com' },
                     ]
                   : []
               }

@@ -226,3 +226,22 @@
     font-size: var(--text-2xl);
   }
 }
+
+/* The picker reads at the size of the form it opens: 16px categories with
+   24px marks, 15px kinds with 22px marks and room to tap. */
+.le-cat-head {
+  padding: 14px 16px;
+  font-size: 16px;
+}
+.le-cat-ic {
+  width: 24px;
+  height: 24px;
+}
+.le-kind {
+  padding: 11px 16px;
+  font-size: 15px;
+}
+.le-kind-ic {
+  width: 22px;
+  height: 22px;
+}

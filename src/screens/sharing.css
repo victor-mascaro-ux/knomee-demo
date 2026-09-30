@@ -549,7 +549,10 @@
 .sh-form-title {
   /* The modals' coloured bar across the top, the title in white. */
   margin: -22px -20px 4px;
-  padding: 18px 20px;
+  padding: 9px 20px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   border-radius: 20px 20px 0 0;
   background: var(--surface-brand, var(--plum, #240446));
   font-size: 18px;
@@ -612,4 +615,53 @@
 .sh-form-save:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* My ID | Who sees it are page tabs, the same as the dashboard's and a
+   profile's (.tab / .pp-tab): labels over a 1px rule, the active one plum and
+   semibold with a 3px bar, the first flush left. The sliding pill is gone. */
+.sh-lens {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 var(--space-16, 16px);
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border-bottom: 1px solid var(--line, #e7e4ee);
+}
+.sh-lens-pill {
+  display: none;
+}
+.sh-lens button {
+  position: relative;
+  padding: 0 20px 12px;
+  border-radius: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--grey-text, #757575);
+  transition: color 0.2s ease;
+}
+.sh-lens button:first-of-type {
+  padding-left: 0;
+}
+.sh-lens button[aria-pressed='true'] {
+  color: var(--plum, #240446);
+  font-weight: 600;
+}
+.sh-lens button[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--plum, #240446);
+}
+.sh-lens button:first-of-type[aria-pressed='true']::after {
+  left: 0;
+}
+.sh-lens button:not([aria-pressed='true']):hover {
+  color: #333;
 }
