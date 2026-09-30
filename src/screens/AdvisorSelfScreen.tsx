@@ -105,7 +105,7 @@ import AdvisorWelcome from './AdvisorWelcome'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
-import { AdventureMark, AdventureMarkContext } from './AdventureMark'
+import { AdventureClose, AdventureMark, AdventureMarkContext } from './AdventureMark'
 import { useCcNav, useCcNavRoots } from '../ccNav'
 
 const ZOOM_STEP = 0.1
@@ -1324,6 +1324,10 @@ function FlowPhone({
                 ? {
                     art: artOf(adventure.art),
                     title: adventure.title,
+                    onClose: () => {
+                      setRichOpen(null)
+                      closeToList()
+                    },
                     at: advisorAdventures.indexOf(adventure) + 1,
                     of: advisorAdventures.length,
                   }
@@ -1339,14 +1343,12 @@ function FlowPhone({
                 <button
                   className="cx-appbar-burger"
                   type="button"
-                  aria-label="Close this adventure and go back to My Adventures"
-                  onClick={() => {
-                    setRichOpen(null)
-                    closeToList()
-                  }}
+                  aria-label="Menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
                 >
-                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2">
-                    <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
+                    <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
                   </svg>
                 </button>
               </>
@@ -1382,6 +1384,7 @@ function FlowPhone({
                   <i key={s.id} className={n <= meterAt ? 'is-on' : ''} />
                 ))}
               </div>
+              <AdventureClose />
             </div>
           )}
           <div

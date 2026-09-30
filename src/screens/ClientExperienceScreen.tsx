@@ -1600,6 +1600,7 @@ export default function ClientExperienceScreen({
                       return k ? art[k] : undefined
                     })(),
                     title: journey.find((j) => j.id === adventure)?.title,
+                    onClose: () => setAdventure(null),
                     at: journey.filter((j) => j.core).findIndex((j) => j.id === adventure) + 1,
                     of: journey.filter((j) => j.core).length,
                   }
@@ -1620,11 +1621,12 @@ export default function ClientExperienceScreen({
                 <button
                   className="cx-appbar-burger"
                   type="button"
-                  aria-label="Close this adventure and go back to My Adventures"
-                  onClick={() => setAdventure(null)}
+                  aria-label="Menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
                 >
-                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="2">
-                    <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" strokeLinecap="round" />
+                  <svg viewBox="0 0 22 22" width="22" height="22" fill="none" stroke="#fff" strokeWidth="1.9">
+                    <path d="M3 6h16M3 11h16M3 16h16" strokeLinecap="round" />
                   </svg>
                 </button>
               </>

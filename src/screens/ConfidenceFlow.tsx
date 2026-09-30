@@ -25,8 +25,9 @@ import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyRes
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
-import { AdventureBadge, AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
+import { StepBar, morph, useFinishFill } from './StepBar'
 
 export interface ConfidenceStatement {
   statement: string
@@ -245,13 +246,14 @@ export default function ConfidenceFlow({
   }
 
   const untouched = typeof step === 'number' && values[step] === null
+  const fill = useFinishFill()
   const onOk = () => {
     if (typeof step === 'number') {
       /* Left where it started: the sample goes in, so the demo can be clicked
          through and still arrive at a reading. Without samples it is skipped. */
       if (values[step] === null && content.samples)
         setValues((vs) => vs.map((x, i) => (i === step ? statements[i].sample : x)))
-      return go(step + 1 < n ? step + 1 : 'results')
+      return step + 1 < n ? go(step + 1) : fill.finish(() => go('results'))
     }
     if (step === 'results') return go('badge')
   }
@@ -290,7 +292,7 @@ export default function ConfidenceFlow({
           </div>
           <p className="jf-lead cf-lead">{content.intro.lead}</p>
           <div className="jf-start">
-            <button className="jf-go" type="button" onClick={() => go(0)}>
+            <button className="jf-go" type="button" onClick={() => morph(() => go(0))}>
               Get Started
             </button>
             <span className="jf-min">
@@ -435,11 +437,8 @@ export default function ConfidenceFlow({
               Back and the one thing to press. */}
           <div className="jf-top">
             <AdventureMark />
-            <div className="af-progress" aria-hidden>
-              {statements.map((_, i) => (
-                <i key={i} className={i <= at ? 'is-on' : ''} />
-              ))}
-            </div>
+            <StepBar count={statements.length} done={fill.full ? statements.length : Math.max(0, at)} />
+            <AdventureClose />
           </div>
         <div className="jf-foot">
           <div className="jf-where">

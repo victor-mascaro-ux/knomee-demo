@@ -26,8 +26,9 @@ import JoyReward from './JoyReward'
 import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
-import { AdventureBadge, AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
+import { StepBar, morph, useFinishFill } from './StepBar'
 
 export interface Pick {
   label: string
@@ -879,6 +880,7 @@ export default function FutureYouFlow({
     (step === 'postcard' && !a.postcard.trim())
   const skipping = blank && !content.fill
 
+  const fill = useFinishFill()
   const onOk = () => {
     /* Left blank: the sample goes in, so a demo still arrives at a vision. */
     if (content.fill) {
@@ -903,16 +905,20 @@ export default function FutureYouFlow({
       /* A card left blank by somebody answering is not posted: straight on
          to the ending, without the stamp. */
       if (!content.fill && !a.postcard.trim()) {
-        settle()
-        setStep('results')
+        fill.finish(() => {
+          settle()
+          setStep('results')
+        })
         return
       }
       /* Posted: the postmark lands, the card goes off to the right as if it
          had been dropped in the box, then the ending. */
       setStamped(true)
+      fill.setFull(true)
       window.setTimeout(() => setSent(true), 750)
       window.setTimeout(() => {
         settle()
+        fill.setFull(false)
         setStep('results')
       }, 1450)
       return
@@ -948,7 +954,7 @@ export default function FutureYouFlow({
           <h2 className="jf-title">{content.intro.title}</h2>
           <p className="jf-body">{content.intro.body}</p>
           <div className="jf-start">
-            <button className="jf-go" type="button" onClick={() => setStep('breathe')}>
+            <button className="jf-go" type="button" onClick={() => morph(() => setStep('breathe'))}>
               Get Started
             </button>
             <span className="jf-min">
@@ -1195,17 +1201,23 @@ export default function FutureYouFlow({
         />
       )}
 
+      {/* The screen between the intro and the first question already wears the
+          timeline, so the intro's title has somewhere to move to. */}
+      {step === 'breathe' && (
+        <div className="jf-top">
+          <AdventureMark />
+          <StepBar count={QUESTIONS.length} done={0} />
+          <AdventureClose />
+        </div>
+      )}
       {qi >= 0 && (
         <>
           {/* Where you are, at the top under the bar — the foot is only
               Back and the one thing to press. */}
           <div className="jf-top">
             <AdventureMark />
-            <div className="af-progress" aria-hidden>
-              {QUESTIONS.map((s, i) => (
-                <i key={s} className={i <= qi ? 'is-on' : ''} />
-              ))}
-            </div>
+            <StepBar count={QUESTIONS.length} done={fill.full ? QUESTIONS.length : Math.max(0, qi)} />
+            <AdventureClose />
           </div>
         <div className="jf-foot">
           <div className="jf-where">
