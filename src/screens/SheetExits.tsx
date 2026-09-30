@@ -1,12 +1,12 @@
-/* A phone's sheets move rather than jump.
+/* A phone's modals move rather than jump.
  *
- * Every modal on the phone is a sheet that rises from the foot of the screen
+ * Every modal on the phone is a card centred on the screen
  * (client-experience.css). Two things CSS cannot do for them, done here once
  * for all of them rather than taught to each modal:
  *
  * — Leaving. A modal is gone the moment its owner stops rendering it, so the
  *   screen watches for a sheet being taken out, puts an inert copy of it back
- *   for a moment, and lets that copy slide down and fade before it goes.
+ *   for a moment, and lets that copy fade and shrink away before it goes.
  *
  * — Changing size. A sheet whose contents change — Add a goal going from its
  *   suggestions to the goal's details, a life event opening its list — used
@@ -21,7 +21,7 @@ const SHEETS = '.modal-backdrop, .sh-form-back'
 const PANELS = '.modal-backdrop .modal, .sh-form-back .sh-form'
 const LEAVE_MS = 300
 const RESIZE_MS = 280
-/* How long a sheet takes to rise; a height change inside that is the rise. */
+/* How long a modal takes to open; a height change inside that is the opening. */
 const SETTLE_MS = 420
 
 export default function SheetExits() {

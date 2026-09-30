@@ -1482,20 +1482,18 @@ svg.cx-tab-mark {
   color: var(--k-grape, #7639a1);
 }
 
-/* ── every modal on a phone is a sheet ──
-   The one My Team's "Add someone" set: it rises from the foot of the screen,
-   full width, rounded along its top, on a dimmed screen; the brand's coloured
-   bar across its top with the title in white, and a foot of full-width pill
-   buttons. Goals,
-   life events, questions, vision boards, the adventures' "about" cards — all
-   of them, on the phone only; a desktop modal stays a centred card. */
+/* ── a modal on a phone ──
+   A centred card over the dimmed screen, a margin clear of its edges, with the
+   brand's coloured bar across its top and a foot of full-width pill buttons.
+   It pops in, and on closing fades and shrinks away (SheetExits plays that
+   half on a brief copy, since a closed modal is already gone). */
 .cx-screen .modal-backdrop {
   position: absolute;
   inset: 0;
   z-index: 30;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: var(--space-12, 12px);
   background: rgba(12, 6, 26, 0.42);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -1504,11 +1502,10 @@ svg.cx-tab-mark {
 .cx-screen .modal-backdrop .modal {
   width: 100%;
   max-width: 100%;
-  max-height: calc(100% - 48px);
+  max-height: calc(100% - var(--space-40, 40px));
   overflow: auto;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -10px 30px rgba(20, 10, 40, 0.18);
-  animation: cxSheetUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -12px rgba(20, 10, 40, 0.32);
 }
 .cx-screen .modal-backdrop .modal .modal-header {
   height: auto;
@@ -1534,7 +1531,7 @@ svg.cx-tab-mark {
   padding: 14px 20px;
 }
 .cx-screen .modal-backdrop .modal .modal-footer {
-  padding: 8px 20px 28px;
+  padding: 8px 20px 20px;
   border-radius: 0;
 }
 .cx-screen .modal-backdrop .modal .modal-footer .btn {
@@ -1545,16 +1542,10 @@ svg.cx-tab-mark {
     opacity: 0;
   }
 }
-/* In from below the screen's edge, and back down the way it came (SheetExits
-   plays the leaving half on a copy, since a closed modal is already gone). */
-@keyframes cxSheetUp {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes cxSheetDown {
+@keyframes cxModalOut {
   to {
-    transform: translateY(100%);
+    opacity: 0;
+    transform: scale(0.96);
   }
 }
 @keyframes cxSheetFadeOut {
@@ -1564,11 +1555,11 @@ svg.cx-tab-mark {
 }
 .cx-screen .modal-backdrop.is-leaving,
 .cx-screen .sh-form-back.is-leaving {
-  animation: cxSheetFadeOut 0.3s ease both;
+  animation: cxSheetFadeOut 0.22s ease both;
 }
 .cx-screen .modal-backdrop.is-leaving .modal,
 .cx-screen .sh-form-back.is-leaving .sh-form {
-  animation: cxSheetDown 0.3s cubic-bezier(0.4, 0, 0.9, 0.6) both;
+  animation: cxModalOut 0.22s ease both;
 }
 @media (prefers-reduced-motion: reduce) {
   .cx-screen .modal-backdrop,
@@ -1576,8 +1567,8 @@ svg.cx-tab-mark {
     animation: none;
   }
 }
-/* A card or photograph opened to look at is not a sheet: it opens in the
-   middle of the screen, over the dimmed page. */
+
+/* A card or photograph opened to look at: in the middle, a little more room. */
 .cx-screen .modal-backdrop.fyr-zoom {
   align-items: center;
   padding: var(--space-16, 16px);

@@ -45,10 +45,9 @@ small and diffable.
 
 - **A modal is a white panel on a dimmed plum ground.** Rounded 20px; the brand's coloured bar across the top with the title and
   close in white; the body on white; a foot of full-width pill buttons, the main
-  action filled. On a desktop it sits centred; on a phone the same panel
-  rises from the foot of the screen as a sheet, full width, rounded along its
-  top only. The base styles are in `index.css` (the modal block, prefixed
-  `body` so no modal's own header colour wins) and the phone sheet in
+  action filled. On a desktop it sits centred; on a phone too, as a card a
+  margin clear of the screen's edges. The base styles are in `index.css` (the modal block, prefixed
+  `body` so no modal's own header colour wins) and the phone's in
   `client-experience.css`; My Team's "Add someone" form is the reference.
 
 - **A form field is label, helper, field — in that order, one look.** The
