@@ -1507,7 +1507,7 @@ svg.cx-tab-mark {
   overflow: auto;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -10px 30px rgba(20, 10, 40, 0.18);
-  animation: cxSheetUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cxSheetUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .cx-screen .modal-backdrop .modal .modal-header {
   height: auto;
@@ -1543,11 +1543,30 @@ svg.cx-tab-mark {
     opacity: 0;
   }
 }
+/* In from below the screen's edge, and back down the way it came (SheetExits
+   plays the leaving half on a copy, since a closed modal is already gone). */
 @keyframes cxSheetUp {
   from {
-    transform: translateY(40px);
+    transform: translateY(100%);
+  }
+}
+@keyframes cxSheetDown {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes cxSheetFadeOut {
+  to {
     opacity: 0;
   }
+}
+.cx-screen .modal-backdrop.is-leaving,
+.cx-screen .sh-form-back.is-leaving {
+  animation: cxSheetFadeOut 0.3s ease both;
+}
+.cx-screen .modal-backdrop.is-leaving .modal,
+.cx-screen .sh-form-back.is-leaving .sh-form {
+  animation: cxSheetDown 0.3s cubic-bezier(0.4, 0, 0.9, 0.6) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .cx-screen .modal-backdrop,
