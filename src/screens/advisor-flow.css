@@ -1751,13 +1751,15 @@ button.af-opt:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: advTitleShine 5s ease-in-out 1s infinite;
+  /* A quick pass, then a long rest: the light crosses in about a second
+     and comes back every nine. */
+  animation: advTitleShine 9s ease-in-out 1s infinite;
 }
 @keyframes advTitleShine {
   0% {
     background-position: 100% 0;
   }
-  50%,
+  12%,
   100% {
     background-position: 0% 0;
   }
@@ -1869,34 +1871,40 @@ button.af-opt:hover {
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* On the intro the icon wanders rather than bobs: an uneven path, drifting
-   and turning a different way each beat, on a long loop so it never reads
-   as a repeat. The timeline's icon keeps the even float. */
+/* The circle stays put; only the drawing inside it moves. The artwork
+   carries its own white disc, so the circle clips it — white on white, the
+   disc's edge never shows — and what is seen moving is the icon alone:
+   drifting, turning and swelling a different way each beat, on a long loop
+   so it never reads as a repeat. */
+.adv-badge-ic,
+.jf-mark-ic {
+  overflow: hidden;
+}
 .adv-badge-ic img {
   animation: advIconWander 9.7s ease-in-out infinite;
 }
 @keyframes advIconWander {
   0%,
   100% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
   13% {
-    transform: translate(1.5px, -2px) rotate(6deg);
+    transform: translate(2px, -2px) rotate(8deg) scale(1.08);
   }
   27% {
-    transform: translate(-1px, -3px) rotate(-4deg);
+    transform: translate(-1.5px, -3px) rotate(-6deg) scale(0.94);
   }
   41% {
-    transform: translate(-2px, 0.5px) rotate(3deg);
+    transform: translate(-2.5px, 1px) rotate(4deg) scale(1.05);
   }
   56% {
-    transform: translate(1px, 2px) rotate(-7deg);
+    transform: translate(1px, 2.5px) rotate(-9deg) scale(0.96);
   }
   68% {
-    transform: translate(2px, -1px) rotate(2deg);
+    transform: translate(2.5px, -1px) rotate(3deg) scale(1.1);
   }
   83% {
-    transform: translate(-1.5px, -1.5px) rotate(-3deg);
+    transform: translate(-2px, -2px) rotate(-4deg) scale(1);
   }
 }
 @media (prefers-reduced-motion: reduce) {
