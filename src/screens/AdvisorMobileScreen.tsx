@@ -33,6 +33,7 @@ import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
 import { advisor } from '../data/advisorFlow'
 import { useDropdown } from '../components/useDropdown'
+import { openLegal } from '../components/Legal'
 
 const ZOOM_STEP = 0.1
 
@@ -142,6 +143,9 @@ export default function AdvisorMobileScreen({
                     }}
                   >
                     Account Settings
+                  </button>
+                  <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
+                    Legal &amp; privacy
                   </button>
                   <button className="menu-item" type="button" role="menuitem">
                     Sign Out
