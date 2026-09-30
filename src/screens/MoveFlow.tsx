@@ -263,6 +263,26 @@ const step = (id: string) => flowSteps.find((s) => s.id === id)
 const opts = (id: string) => (step(id)?.options ?? []).filter((o) => o !== OTHER)
 const title = (id: string) => step(id)?.title ?? ''
 const body = (id: string) => step(id)?.body ?? ''
+const chosen = (id: string) => (step(id)?.chosen ?? [])[0] ?? null
+const said = (id: string) => step(id)?.answer ?? ''
+const list = (id: string) => said(id).split(',').map((x) => x.trim()).filter(Boolean)
+
+/* Marcus's answers, what a skipped question takes when the flow is one of the
+   demo's own people rather than an advisor answering for real. */
+const SAMPLE_MOVE: MoveAnswers = {
+  move: chosen('mv-q1'),
+  when: chosen('mv-q2'),
+  why: said('mv-q3'),
+  support: chosen('mv-q4'),
+  brand: null,
+  pros: list('mv-q8'),
+  cons: list('mv-q9'),
+  who: step('mv-q10')?.chosen?.filter((x) => x !== OTHER) ?? [],
+  blocker: said('mv-q10b'),
+  thought: chosen('mv-q5'),
+  knows: chosen('mv-q6'),
+  acting: chosen('mv-q7'),
+}
 
 export interface MoveAnswers {
   move: string | null
@@ -729,7 +749,11 @@ export default function MoveFlow({
   mic,
   reward,
   content = ADVISOR_MOVE,
+  fillSkipped = false,
 }: {
+  /** A skipped question takes the sample answer (the demo's people), rather
+      than staying blank (an advisor answering for real). */
+  fillSkipped?: boolean
   /** The words it asks in: the advisor's move, or the client's goal. */
   content?: MoveContent
   /** The Move taken to its end; `to` is the card chosen on the celebration,
@@ -830,6 +854,12 @@ export default function MoveFlow({
     (ri >= 0 && !m[at as 'thought' | 'knows' | 'acting'])
 
   const onOk = () => {
+    /* Skipped by one of the demo's people: the sample answer goes in. */
+    if (fillSkipped && blank) {
+      const k = at as keyof MoveAnswers
+      if (k in SAMPLE_MOVE) setM((p) => ({ ...p, [k]: SAMPLE_MOVE[k] }))
+      return next()
+    }
     /* A move typed but never sent with its arrow is still the move. */
     if (at === 'pick' && !m.move && own.trim()) set('move', own.trim())
     /* And a reason or an obstacle typed but never added is still one. */

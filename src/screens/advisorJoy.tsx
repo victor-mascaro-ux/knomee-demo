@@ -153,6 +153,14 @@ const STEPS: JoyStep[] = [
   },
 ]
 
+/* Marcus's picks, what a skipped question takes on the demo's own phones. */
+export const ADVISOR_JOY_SAMPLE = {
+  tools: (q1.chosen ?? []).filter((o) => o !== OTHER),
+  ways: Object.fromEntries(
+    (stepOf('pj-q2').rows ?? []).map((r) => [r.label, r.value === 'More' ? 1 : r.value === 'Less' ? -1 : 0]),
+  ) as Record<string, number>,
+}
+
 export const ADVISOR_JOY: JoyContent = {
   steps: STEPS,
   badge: bgJoyUntitled,

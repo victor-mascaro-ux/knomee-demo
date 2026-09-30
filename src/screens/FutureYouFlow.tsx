@@ -146,9 +146,9 @@ export const CLIENT_FUTURE: FutureYouContent = {
     placeholder: 'Dear Me,',
   },
   sample: SAMPLE_FUTURE,
-  /* A blank answer is a skipped question, said so on the button — not a
-     sample slipped in behind an OK. */
-  fill: false,
+  /* The demo's people: a skipped question takes the sample (the button still
+     says Skip). */
+  fill: true,
   results: {
     title: 'You visualized Future You',
     sub: 'This is the life you are preparing for:',
@@ -880,7 +880,7 @@ export default function FutureYouFlow({
     (step === 'detail' && !a.detail.length) ||
     (step === 'clarity' && !a.clarity) ||
     (step === 'postcard' && !a.postcard.trim())
-  const skipping = blank && !content.fill
+  const skipping = blank
 
   const fill = useFinishFill()
   const settling = useSettling(step)

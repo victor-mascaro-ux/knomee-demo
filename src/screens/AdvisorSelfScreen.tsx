@@ -44,7 +44,7 @@ import {
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
-import { ADVISOR_JOY, sheetWithJoy } from './advisorJoy'
+import { ADVISOR_JOY, ADVISOR_JOY_SAMPLE, sheetWithJoy } from './advisorJoy'
 import ConfidenceFlow from './ConfidenceFlow'
 import { ADVISOR_CONFIDENCE, sheetWithConfidence } from './advisorConfidence'
 import OutlookFlow from './OutlookFlow'
@@ -1228,6 +1228,9 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
+  /* Skipping fills in the sample on the demo's own phones (Marcus, the demo
+     journey); an advisor on their invite link skips for real. */
+  const personaFill = mode !== 'invited'
   useCcNav('self.rich', richOpen, setRichOpen)
   /* The screens this phone can start from, for finding a comment's step by
      its heading: each step outside an adventure, each adventure, each tab. */
@@ -1401,6 +1404,7 @@ function FlowPhone({
           >
             {richOpen === 'the-move' ? (
               <MoveFlow
+                fillSkipped={personaFill}
                 privateNote={(id) => {
                   const s = steps.find((x) => x.id === id)
                   return s ? <PrivateNote step={s} a={answers} edit={edit} stacked /> : null
@@ -1431,14 +1435,14 @@ function FlowPhone({
               />
             ) : richOpen === 'future-you' ? (
               <FutureYouFlow
-                content={ADVISOR_FUTURE}
+                content={personaFill ? { ...ADVISOR_FUTURE, fill: true } : ADVISOR_FUTURE}
                 reward={(f) => celebrate('future-you', 'The Move', sheetWithFuture(answers, f), 'future')}
                 postcardSlot={(text, set) => <MicButton value={text} onChange={set} />}
                 onComplete={(f) => finish('future-you', (a) => sheetWithFuture(a, f), 'the-move')}
               />
             ) : richOpen === 'outlook' ? (
               <OutlookFlow
-                content={ADVISOR_OUTLOOK}
+                content={personaFill ? { ...ADVISOR_OUTLOOK, fill: true } : ADVISOR_OUTLOOK}
                 reward={(o) => celebrate('outlook', 'Future You', sheetWithOutlook(answers, o), 'outlook')}
                 askSlot={(kind, text, setText) => ({
                   above:
@@ -1451,13 +1455,13 @@ function FlowPhone({
               />
             ) : richOpen === 'confidence' ? (
               <ConfidenceFlow
-                content={ADVISOR_CONFIDENCE}
+                content={personaFill ? { ...ADVISOR_CONFIDENCE, samples: true } : ADVISOR_CONFIDENCE}
                 reward={(c) => celebrate('confidence', 'Outlook', sheetWithConfidence(answers, c), 'confidence')}
                 onComplete={(c) => finish('confidence', (a) => sheetWithConfidence(a, c), 'outlook')}
               />
             ) : richOpen === 'practice-joy' ? (
               <JoyFlow
-                content={ADVISOR_JOY}
+                content={personaFill ? { ...ADVISOR_JOY, sample: ADVISOR_JOY_SAMPLE } : ADVISOR_JOY}
                 reward={(j) => celebrate('practice-joy', 'Confidence', sheetWithJoy(answers, j), 'joy')}
                 reflectSlot={(s, value, set) => {
                   const flowStep = steps.find((x) => x.id === s.id)
