@@ -33,6 +33,7 @@ import {
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
+  AdventureBarTitle,
   type FlowBrand,
   clampZoom,
   useDarkGround,
@@ -1302,7 +1303,7 @@ function FlowPhone({
           <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
             {adventure && tab === 'flow' ? (
               <>
-                <div className="af-appbar-title">{adventure.title}</div>
+                <AdventureBarTitle brand={brand} title={adventure.title} />
                 <button
                   className="cx-appbar-burger"
                   type="button"

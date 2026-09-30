@@ -395,6 +395,22 @@ export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
   )
 }
 
+/* Inside an adventure the bar is the adventure's — its name and the way out —
+   but it still says whose app this is, the way Gmail or a bank's app keeps its
+   mark in the corner of every screen: the firm's logo (or knomee's), small, a
+   hairline, then the adventure. */
+export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; title: ReactNode }) {
+  return (
+    <div className="af-appbar-lead">
+      <span className="af-appbar-logo">
+        {brand ? brand.logo : <img src="./knomee-logo-white.svg" alt="knomee" />}
+      </span>
+      <span className="af-appbar-rule" aria-hidden />
+      <div className="af-appbar-title">{title}</div>
+    </div>
+  )
+}
+
 /* ── iPhone frame ──────────────────────────────────────────────────────────
    390 × 844 logical screen (iPhone 14) inside a titanium bezel, with the
    Dynamic Island and side buttons so it reads as a device, not a div. */
@@ -1535,9 +1551,10 @@ export default function ClientExperienceScreen({
               <>
                 {/* Inside an adventure the bar carries its name and the way
                     out, in place of the wordmark and the burger. */}
-                <div className="af-appbar-title">
-                  {journey.find((j) => j.id === adventure)?.title ?? 'Financial Joy'}
-                </div>
+                <AdventureBarTitle
+                  brand={brand}
+                  title={journey.find((j) => j.id === adventure)?.title ?? 'Financial Joy'}
+                />
                 <button
                   className="cx-appbar-burger"
                   type="button"

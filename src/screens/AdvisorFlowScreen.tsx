@@ -26,6 +26,7 @@ import {
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
+  AdventureBarTitle,
   brandVars,
   type FlowBrand,
   clampZoom,
@@ -384,7 +385,7 @@ export default function AdvisorFlowScreen({
           <header className="cx-appbar">
             {adventure && tab === 'flow' ? (
               <>
-                <div className="af-appbar-title">{adventure.title}</div>
+                <AdventureBarTitle brand={brand} title={adventure.title} />
                 <button
                   className="cx-appbar-burger"
                   type="button"
