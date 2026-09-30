@@ -42,7 +42,9 @@ const BORROWED: Record<string, string> = {
   Independence: './joy/independence.png',
   Security: './joy/security.png',
   Simplicity: './joy/simplicity.png',
-  'Control over how I serve': './joy/control.png',
+  Control: './joy/control.png',
+  // Renamed from Ownership; the key in the hand still says it.
+  Equity: './advisor/joy/ownership.png',
 }
 
 const pick = (label: string): JoyPick => ({
@@ -117,7 +119,7 @@ const STEPS: JoyStep[] = [
   },
   {
     kind: 'pick',
-    eyebrow: 'Your practice is a tool!',
+    eyebrow: 'What your practice gives you',
     title: q1.title ?? '',
     body: `Choose up to ${q1.max ?? 3}.`,
     options: PICKS,
@@ -167,7 +169,7 @@ export const ADVISOR_JOY: JoyContent = {
     title: 'What the work is for',
     memoryLead: 'The last moment that reminded you why you do this:',
     memoryTag: 'Your moment',
-    toolsTitle: 'Your practice is a tool',
+    toolsTitle: 'What your practice gives you',
     toolsLead: 'You want your practice to give you:',
     prefLead: 'This is where you want your attention to go.',
     reading: (more, less) =>
@@ -183,8 +185,8 @@ export const ADVISOR_JOY: JoyContent = {
       share: 61,
       want: 'want their practice to give them',
       why: [
-        'Advisors who are clear on what the practice is for make better decisions about it — including this one.',
-        'Knowing it before you talk to a firm means you judge them on what matters to you, not on what they lead with.',
+        'Advisors who are clear about what their practice is for make better decisions.',
+        'Knowing how you find fulfillment in your practice before exploring a move helps you evaluate options based on what matters most to you.',
       ],
     },
   },

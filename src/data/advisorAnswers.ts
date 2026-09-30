@@ -398,7 +398,10 @@ const THEME_WORDS: Record<ThemeKey, RegExp> = {
     the practice to give them still points at the shape of their decision — so
     each pick lends its theme a lighter vote. */
 const JOY_THEME: Record<string, ThemeKey> = {
+  Equity: 'brand',
   Ownership: 'brand',
+  Control: 'purpose',
+  // Sittings saved before the option was shortened carry its old wording.
   'Control over how I serve': 'purpose',
   Independence: 'brand',
   'Enterprise value': 'economics',
@@ -811,7 +814,9 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
 /** Where a motivator can be evidenced from in their own prose — a pick is
     stronger when they wrote the same thing again unprompted. */
 const JOY_ECHO: Record<string, RegExp> = {
+  Equity: /\bown\b|ownership|belongs? to|equity/i,
   Ownership: /\bown\b|ownership|belongs? to|equity/i,
+  Control: /control|committee|my own way|autonom/i,
   'Control over how I serve': /control|committee|my own way|autonom/i,
   Independence: /independen|my own terms|nobody telling/i,
   'Enterprise value': /worth something|enterprise value|valuation|multiple/i,
@@ -905,7 +910,9 @@ function velocity(a: Answers, intent: number, id: BusinessId) {
 /* ── the Toolkit ────────────────────────────────────────────────────────── */
 
 const JOY_WORD: Record<string, string> = {
+  Equity: 'equity',
   Ownership: 'ownership',
+  Control: 'control',
   'Control over how I serve': 'control',
   Independence: 'independence',
   'Enterprise value': 'what it’s worth',
@@ -1242,7 +1249,7 @@ export function unlockView(id: string, a: Answers): UnlockView {
     case 'pj-unlock':
       return {
         lines: [
-          { label: 'My practice is a tool. It gives me', value: picked('pj-q1', a) || DASH },
+          { label: 'My practice gives me', value: picked('pj-q1', a) || DASH },
           {
             label: 'The last thing that reminded me why I do this',
             value: said('pj-q3', a) ? `“${firstSentence(said('pj-q3', a), 200)}”` : DASH,

@@ -182,12 +182,12 @@ export interface Ranked {
 export const motivators: Ranked[] = [
   {
     rank: 1,
-    label: 'Ownership',
+    label: 'Equity',
     detail: 'Named first in Practice Joy, and again unprompted: “Everything we build belongs to someone else.”',
   },
   {
     rank: 2,
-    label: 'Control over how I serve',
+    label: 'Control',
     detail: 'Wants no committee between him and a client.',
   },
   {
@@ -319,7 +319,7 @@ export const words = {
   use: [
     { word: 'ownership', why: 'His first pick in Practice Joy, and the word he reaches for unprompted.' },
     { word: 'equity', why: 'What he wants to hand his juniors. The hope, in one word.' },
-    { word: 'control', why: '“Control over how I serve” — his second pick.' },
+    { word: 'control', why: '“Control” — his second pick.' },
     { word: 'your team', why: 'Ana and Dev are in every answer that matters.' },
     { word: 'what you’d own', why: 'Turns the abstraction into the thing he pictured in Future You.' },
   ],
