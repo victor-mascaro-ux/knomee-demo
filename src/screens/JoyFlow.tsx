@@ -30,7 +30,7 @@ import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
    for the plum it sits on there. */
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
-import { AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
 
 export interface JoyAnswers {
@@ -285,6 +285,7 @@ export default function JoyFlow({
     <div className="jf">
       {step.kind === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge steps={steps.length - 1} />
           {/* The portrait on its teal disc, and beside it the line the
               adventure is built on — who said it, underneath. */}
           <div className="jf-hero">

@@ -27,7 +27,7 @@ import JoyReward from './JoyReward'
 import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
-import { AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
 
 export interface OutlookAnswers {
@@ -519,6 +519,7 @@ export default function OutlookFlow({
     <div className="jf ol">
       {step === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge steps={2} />
           <div className="jf-hero">
             <Photo className="jf-hero-img" src={content.intro.image} fallback="ol-hero-fallback" />
           </div>

@@ -25,7 +25,7 @@ import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyRes
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
-import { AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
 
 export interface ConfidenceStatement {
@@ -280,6 +280,7 @@ export default function ConfidenceFlow({
     <div className="jf cf">
       {step === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge steps={statements.length} />
           <div className="jf-hero">
             <Photo className="jf-hero-img" src={content.intro.image} fallback="cf-hero-fallback" />
             <figure className="jf-quote">

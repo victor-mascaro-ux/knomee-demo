@@ -387,7 +387,12 @@ export default function AdvisorFlowScreen({
           <AdventureMarkContext.Provider
             value={
               adventure
-                ? { art: artOf(adventure.art), at: advisorAdventures.indexOf(adventure) + 1, of: advisorAdventures.length }
+                ? {
+                    art: artOf(adventure.art),
+                    title: adventure.title,
+                    at: advisorAdventures.indexOf(adventure) + 1,
+                    of: advisorAdventures.length,
+                  }
                 : null
             }
           >
