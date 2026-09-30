@@ -457,11 +457,11 @@ export default function ConfidenceFlow({
             </button>
           </div>
           <button
-            className={`cx-start jf-ok${untouched && !content.samples ? ' is-skip' : ''}`}
+            className={`cx-start jf-ok${untouched ? ' is-skip' : ''}`}
             type="button"
             onClick={onOk}
           >
-            {untouched && !content.samples ? 'Skip this question' : 'OK'}
+            {untouched ? 'Skip this question' : 'OK'}
           </button>
         </div>
         </>

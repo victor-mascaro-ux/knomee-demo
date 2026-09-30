@@ -241,7 +241,7 @@ export default function JoyFlow({
   const cta =
     step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge' || step.kind === 'pause'
       ? step.cta
-      : blank && !sample
+      : blank
         ? 'Skip this question'
         : 'OK'
 

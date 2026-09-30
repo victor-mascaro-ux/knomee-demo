@@ -120,9 +120,9 @@ export const CLIENT_OUTLOOK: OutlookContent = {
   starts: { concern: CONCERN_STARTS, hope: HOPE_STARTS },
   placeholder: { concern: 'Can I afford to retire in 10 years?', hope: 'I dream of a home by the water.' },
   examples: SAMPLE_OUTLOOK,
-  /* A blank answer is a skipped question, said so on the button — not a
-     sample slipped in behind an OK. */
-  fill: false,
+  /* The demo's people: a skipped question takes the sample (the button still
+     says Skip). */
+  fill: true,
   reading: (c, h) =>
     h > c
       ? 'There is more light than cloud in your sky. You are looking ahead with more hope than worry — that is ground to build on.'
@@ -700,11 +700,11 @@ export default function OutlookFlow({
             </button>
           </div>
           <button
-            className={`cx-start jf-ok${blank && !content.fill ? ' is-skip' : ''}`}
+            className={`cx-start jf-ok${blank ? ' is-skip' : ''}`}
             type="button"
             onClick={onOk}
           >
-            {blank && !content.fill ? 'Skip this question' : 'OK'}
+            {blank ? 'Skip this question' : 'OK'}
           </button>
         </div>
         </>
