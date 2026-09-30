@@ -106,7 +106,7 @@ import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
 import { AdventureMark, AdventureMarkContext } from './AdventureMark'
-import { useCcNav } from '../ccNav'
+import { useCcNav, useCcNavRoots } from '../ccNav'
 
 const ZOOM_STEP = 0.1
 const OTHER = 'Other'
@@ -1221,6 +1221,14 @@ function FlowPhone({
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
   useCcNav('self.rich', richOpen, setRichOpen)
+  /* The screens this phone can start from, for finding a comment's step by
+     its heading: each step outside an adventure, each adventure, each tab. */
+  useCcNavRoots('self', () => [
+    ...steps.flatMap((st, n) => (st.adventure ? [] : [{ 'self.tab': 'flow', 'self.rich': null, 'self.trail': [n] }])),
+    ...advisorAdventures.map((r) => ({ 'self.tab': 'flow', 'self.rich': r.id })),
+    { 'self.tab': 'finid', 'self.rich': null },
+    { 'self.tab': 'questions', 'self.rich': null },
+  ])
   const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.

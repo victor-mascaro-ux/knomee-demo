@@ -278,6 +278,7 @@
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'%3E%3Cpath d='M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z' fill='none' stroke='%231E1A28' stroke-width='3.2' stroke-linejoin='round' stroke-opacity='0.9'/%3E%3Cpath d='M5 4H19C20.1046 4 21 4.89543 21 6V15C21 16.1046 20.1046 17 19 17H9.41421L5.70711 20.7071C5.42111 20.9931 5 20.7889 5 20.3839V17C3.89543 17 3 16.1046 3 15V6C3 4.89543 3.89543 4 5 4Z' fill='%23FFD84D' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 6 22, crosshair;
   }
   .cc-stage.cc-mode .cc-catcher { display: block; }
+  .cc-stage.cc-finding, .cc-stage.cc-finding * { cursor: progress !important; }
 
   /* ════════ Thread popover ════════
      No avatars — a name over each note, timestamp + delete in the head. */
@@ -999,6 +1000,27 @@
   /* Put the app back where a note was left, one owner at a time: the
      adventure has to open before its own step can be set, so keep applying
      until nothing is left or time runs out, then call back. */
+  /* Take the app to a note's step: its saved position if it has one; if it
+     only has the step's heading (left before positions were saved), have
+     the app walk its screens to that heading, and keep what it finds on the
+     note so the walk happens once. */
+  function goToStep(t, done) {
+    if (t.nav) { restoreNav(t.nav, done); return; }
+    let find = null;
+    try { find = proto.contentWindow.__ccNavFind; } catch (e) { find = null; }
+    if (!t.sub || !find) { done(); return; }
+    if (subPage() === t.sub) { done(); return; }
+    stage.classList.add('cc-finding');
+    find(() => subPage() === t.sub).then((nav) => {
+      stage.classList.remove('cc-finding');
+      if (nav) {
+        t.nav = nav;
+        const real = store.threads.find((x) => x.id === t.id);
+        if (real) { real.nav = nav; persistThread(real); }
+      }
+      done();
+    }).catch(() => { stage.classList.remove('cc-finding'); done(); });
+  }
   function restoreNav(nav, done) {
     const apply = (() => { try { return proto.contentWindow.__ccNavApply; } catch (e) { return null; } })();
     if (!nav || !apply) { done(); return; }
@@ -1438,7 +1460,7 @@
     if (!t) return;
     const target = threadRoute(t);
     if (!target || target === currentRoute) {   // already here
-      restoreNav(t.nav, () => {
+      goToStep(t, () => {
         currentSub = subPage();
         renderAll();
         openThread(id);
@@ -1464,7 +1486,7 @@
       const settle = (n, prev) => {
         const h = proto.style.height;
         if ((n > 0 && h === prev) || n > 10) {
-          restoreNav(t.nav, () => {
+          goToStep(t, () => {
             currentSub = subPage();
             renderAll();
             openThread(id);

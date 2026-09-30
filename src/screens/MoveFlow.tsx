@@ -744,7 +744,7 @@ export default function MoveFlow({
   mic?: (value: string, set: (v: string) => void) => ReactNode
 }) {
   const [at, setAt] = useState<Step>('intro')
-  useCcNav('mv.at', at, setAt)
+  useCcNav('mv.at', at, setAt, ['intro', 'pick', 'when', 'why', 'support', 'pros', 'cons', 'who', 'blocker', 'thought', 'knows', 'acting', 'results'])
   const [m, setM] = useState<MoveAnswers>(EMPTY)
   const [own, setOwn] = useState('')
   /* What is in the box on the pros or cons screen, not yet added. */

@@ -809,7 +809,7 @@ export default function FutureYouFlow({
     'postcard',
   ]
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
-  useCcNav('fy.step', step, setStep)
+  useCcNav('fy.step', step, setStep, ['intro', 'breathe', 'where', 'doing', 'with', 'when', 'detail', 'clarity', 'postcard', 'results'])
   const [a, setA] = useState<FutureYouAnswers>(
     () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '', clarity: null },
   )

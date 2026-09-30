@@ -57,7 +57,7 @@ import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 import { AdventureMarkContext } from './AdventureMark'
-import { useCcNav } from '../ccNav'
+import { useCcNav, useCcNavRoots } from '../ccNav'
 
 const art: Record<ArtKey, string> = {
   'financial-joy': icFinancialJoy,
@@ -1355,6 +1355,11 @@ export default function ClientExperienceScreen({
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
   useCcNav('cx.adventure', adventure, setAdventure)
+  useCcNavRoots('cx', () => [
+    { 'cx.tab': 'adventures', 'cx.adventure': null },
+    ...journey.map((j) => ({ 'cx.tab': 'adventures', 'cx.adventure': j.id })),
+    { 'cx.tab': 'finid', 'cx.adventure': null },
+  ])
   /* Reopened from her Financial ID: the adventure's ending again, with her
      answers, and back to the page after — nothing on the journey changes. */
   const [reviewing, setReviewing] = useState(false)

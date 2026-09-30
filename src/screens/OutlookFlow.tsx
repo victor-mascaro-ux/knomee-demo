@@ -465,7 +465,7 @@ export default function OutlookFlow({
   askSlot?: (kind: Kind, text: string, setText: (t: string) => void) => { above?: ReactNode; below?: ReactNode }
 }) {
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
-  useCcNav('ol.step', step, setStep)
+  useCcNav('ol.step', step, setStep, ['intro', 'concerns', 'hopes', 'results'])
   const [a, setA] = useState<OutlookAnswers>(() => review ?? { concerns: [], hopes: [] })
   /* What is in the box right now, per screen. */
   const [draft, setDraft] = useState<Record<Kind, string>>({ concern: '', hope: '' })
