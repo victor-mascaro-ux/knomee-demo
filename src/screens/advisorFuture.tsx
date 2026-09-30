@@ -39,11 +39,12 @@ const BORROWED: Record<string, string> = {
 const photos = (id: string): Pick[] =>
   options(id).map((label) => ({ label, src: BORROWED[label] ?? `./advisor/future-you/${slug(label)}.jpg` }))
 
-/* What the practice includes, the flow's one long list, in three kinds. Anything
+/* What the practice includes, the flow's one long list, in two kinds. Anything
    the flow adds later that none of these name goes in the last. */
 const KINDS: { group: string; icon: string; items: string[] }[] = [
-  /* No "What you own": ownership is equity, and the group read as a riddle.
-     Equity sits with succession and the team; the exit is time. */
+  /* No "What you own": ownership is equity, and the group read as a riddle,
+     so equity sits with succession and the team. No "Your time" either —
+     the other questions already ask where their time goes. */
   {
     group: 'Your people',
     icon: 'people',
@@ -67,17 +68,6 @@ const KINDS: { group: string; icon: string; items: string[] }[] = [
       'A niche I’m known for',
       'Predictable revenue',
       'Generational clients',
-    ],
-  },
-  {
-    group: 'Your time',
-    icon: 'plane',
-    items: [
-      'Time away from the desk',
-      'Time with family',
-      'Room to travel',
-      'Board or industry work',
-      'An exit',
     ],
   },
 ]
