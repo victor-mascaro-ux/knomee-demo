@@ -189,13 +189,12 @@ export const steps: Step[] = [
     title: 'I want my practice to give me…',
     body: 'Choose what feels most relevant today. Make between 1 and 3 choices.',
     options: [
-      'Ownership',
-      'Control over how I serve',
+      'Equity',
+      'Control',
       'Independence',
       'Enterprise value',
       'Security',
       'Income',
-      'Time',
       'My team’s future',
       'Reputation',
       'Simplicity',
@@ -203,14 +202,13 @@ export const steps: Step[] = [
       'Other',
     ],
     max: 3,
-    chosen: ['Ownership', 'Control over how I serve', 'My team’s future'],
+    chosen: ['Equity', 'Control', 'My team’s future'],
   },
   {
     id: 'pj-reflect',
     kind: 'reflect',
     adventure: 'practice-joy',
-    title: 'What if you saw the firm as a tool for the practice you want, rather than the thing you belong to?',
-    body: 'Pause and reflect — what do you actually need a firm for?',
+    title: 'Pause and reflect — what do you really want out of your practice?',
     cta: 'Reflect & continue',
   },
   {
@@ -256,7 +254,7 @@ export const steps: Step[] = [
     title: 'What the work is for',
     body: 'Identifying what the practice is for helps align how you spend your days with what matters most.',
     lines: [
-      { label: 'My practice is a tool. It gives me', value: 'Ownership, Control over how I serve, My team’s future' },
+      { label: 'My practice gives me', value: 'Equity, Control, My team’s future' },
       {
         label: 'The last thing that reminded me why I do this',
         value: '“A client I have had for eleven years brought her daughter in to meet me.”',
@@ -698,7 +696,7 @@ export const businessId = {
   // profile can reuse the shared HighlightIcon: Practice Joy wears the Financial
   // Joy artwork, concerns and hopes come out of Outlook, the rest Future You.
   highlights: [
-    { icon: 'financial-joy', title: 'What the practice is for', text: 'Ownership, control over how I serve, my team’s future' },
+    { icon: 'financial-joy', title: 'What the practice is for', text: 'Equity, control, my team’s future' },
     {
       icon: 'financial-joy',
       title: 'My business “why”',
@@ -716,7 +714,7 @@ export const businessId = {
   },
   practiceJoy: {
     prompt: 'I want my practice to give me',
-    chips: ['Ownership', 'Control over how I serve', 'My team’s future'],
+    chips: ['Equity', 'Control', 'My team’s future'],
   },
   attention: {
     more: ['Business development', 'Team and hiring', 'Strategy and growth', 'Life outside the practice'],
