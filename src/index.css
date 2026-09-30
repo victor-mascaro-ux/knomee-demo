@@ -311,7 +311,7 @@ body {
   /* No top padding: the content's top inset already equals the side inset, so
      the tab text sits exactly one --page-pad below the header (matches the
      horizontal screen-to-content padding). */
-  padding: 0 20px 16px;
+  padding: 0 20px 10px;
   cursor: pointer;
   position: relative;
 }
@@ -4687,7 +4687,7 @@ button.name-link-btn:hover .name-text {
     overflow-x: auto;
   }
   .tab {
-    padding: 12px 16px 14px;
+    padding: 12px 16px 8px;
     white-space: nowrap;
   }
   .page-title {
