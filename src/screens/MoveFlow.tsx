@@ -41,6 +41,7 @@ import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
 import { AdventureMark } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -743,6 +744,7 @@ export default function MoveFlow({
   mic?: (value: string, set: (v: string) => void) => ReactNode
 }) {
   const [at, setAt] = useState<Step>('intro')
+  useCcNav('mv.at', at, setAt)
   const [m, setM] = useState<MoveAnswers>(EMPTY)
   const [own, setOwn] = useState('')
   /* What is in the box on the pros or cons screen, not yet added. */
