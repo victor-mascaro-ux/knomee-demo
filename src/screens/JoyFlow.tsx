@@ -30,7 +30,6 @@ import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
    for the plum it sits on there. */
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
-import { IntroGets } from './IntroGets'
 
 export interface JoyAnswers {
   tools: string[]
@@ -295,7 +294,6 @@ export default function JoyFlow({
           <h2 className="jf-title">{step.title}</h2>
           <p className="jf-body">{step.body}</p>
           <p className="jf-lead">{step.lead}</p>
-          {step.gets && <IntroGets gets={step.gets} />}
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={next}>
               {step.cta}
