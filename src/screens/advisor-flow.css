@@ -326,11 +326,19 @@
    sits where the burger does, so the target people already reach for is the
    one that closes back to the list. */
 .af-appbar-lead {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: var(--space-10, 10px);
   min-width: 0;
+  /* The name sits against the close button, as far from it as the button is
+     from the screen's edge: the bar's 18px, less the 4px the button's own
+     padding already gives. */
+  padding-right: 14px;
   color: var(--text-inverse);
+}
+.af-appbar-lead .af-appbar-title {
+  margin-left: auto;
 }
 .af-appbar-logo {
   flex: none;
@@ -346,12 +354,6 @@
 .af-appbar-logo .client-logo {
   height: 15px;
   width: auto;
-}
-.af-appbar-rule {
-  flex: none;
-  width: 1px;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.35);
 }
 .af-appbar-title {
   font-size: 17px;

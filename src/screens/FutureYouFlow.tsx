@@ -492,7 +492,12 @@ function Detail({
   extra,
   onAdd,
   content,
+  onNext,
 }: {
+  /** Tells the foot which kind is still to come (null once all are open),
+      and hands it the way to open it — the foot says "Next: Your clients"
+      until every kind has been seen, so none can be skipped past unseen. */
+  onNext?: (next: { name: string; open: () => void } | null) => void
   chosen: string[]
   onToggle: (v: string) => void
   extra: Record<string, string[]>
@@ -525,6 +530,15 @@ function Detail({
     return () => window.clearTimeout(t)
   }, [shown])
   const next = groups[shown]
+  const openNext = () => {
+    revealed.current = true
+    setShown((s) => s + 1)
+  }
+  const nextName = next?.group ?? null
+  useEffect(() => {
+    onNext?.(nextName ? { name: nextName, open: openNext } : null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextName])
   return (
     <div className="fy-detail">
       <h2 className="fy-h fy-h-sm">{content.title}</h2>
@@ -616,10 +630,7 @@ function Detail({
           type="button"
           className="fy-next-group"
           data-tone={next.tone}
-          onClick={() => {
-            revealed.current = true
-            setShown((s) => s + 1)
-          }}
+          onClick={openNext}
         >
           <span className="fy-next-icon" aria-hidden>
             <GroupIcon icon={next.icon} />
@@ -809,6 +820,8 @@ export default function FutureYouFlow({
     'postcard',
   ]
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  /* The practice screen's kinds still to open — see Detail's onNext. */
+  const [detailNext, setDetailNext] = useState<{ name: string; open: () => void } | null>(null)
   useCcNav('fy.step', step, setStep, ['intro', 'breathe', 'where', 'doing', 'with', 'when', 'detail', 'clarity', 'postcard', 'results'])
   const [a, setA] = useState<FutureYouAnswers>(
     () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '', clarity: null },
@@ -990,6 +1003,7 @@ export default function FutureYouFlow({
             setExtra((e) => ({ ...e, [g]: [...(e[g] ?? []), v] }))
             setA((p) => ({ ...p, detail: [...p.detail, v] }))
           }}
+          onNext={setDetailNext}
         />
       )}
       {step === 'clarity' && content.clarity && (
@@ -1207,14 +1221,20 @@ export default function FutureYouFlow({
               Previous question
             </button>
           </div>
-          <button
-            className={`cx-start jf-ok${skipping ? ' is-skip' : ''}`}
-            type="button"
-            onClick={onOk}
-            disabled={stamped}
-          >
-            {skipping ? 'Skip this question' : step === 'postcard' ? 'Send' : 'OK'}
-          </button>
+          {step === 'detail' && detailNext ? (
+            <button className="cx-start jf-ok" type="button" onClick={detailNext.open}>
+              Next: {detailNext.name}
+            </button>
+          ) : (
+            <button
+              className={`cx-start jf-ok${skipping ? ' is-skip' : ''}`}
+              type="button"
+              onClick={onOk}
+              disabled={stamped}
+            >
+              {skipping ? 'Skip this question' : step === 'postcard' ? 'Send' : 'OK'}
+            </button>
+          )}
         </div>
         </>
       )}
