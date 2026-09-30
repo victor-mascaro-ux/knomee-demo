@@ -403,15 +403,14 @@ export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
 
 /* Inside an adventure the bar is the adventure's — its name and the way out —
    but it still says whose app this is, the way Gmail or a bank's app keeps its
-   mark in the corner of every screen: the firm's logo (or knomee's), small, a
-   hairline, then the adventure. */
+   mark in the corner of every screen: the firm's logo (or knomee's) on the
+   left, the adventure's name on the right beside the way out. */
 export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; title: ReactNode }) {
   return (
     <div className="af-appbar-lead">
       <span className="af-appbar-logo">
         {brand ? brand.logo : <img src="./knomee-logo-white.svg" alt="knomee" />}
       </span>
-      <span className="af-appbar-rule" aria-hidden />
       <div className="af-appbar-title">{title}</div>
     </div>
   )
