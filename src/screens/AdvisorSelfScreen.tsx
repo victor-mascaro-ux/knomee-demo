@@ -1119,6 +1119,7 @@ function FlowPhone({
   onReport,
   onRecord,
   onSend,
+  onRestart,
   brand,
   rich = false,
 }: {
@@ -1131,9 +1132,9 @@ function FlowPhone({
   steps: Step[]
   mode: SelfMode
   brand?: FlowBrand | null
-  /* The menu's old ways around the demo — back to it, restart, samples,
-     discard — are gone from the phone's menu (the demo menu has them); still
-     accepted, no longer read. */
+  /* The menu's old ways around the demo — back to it, samples, discard — are
+     gone from the phone's menu (the demo menu has them); still accepted, no
+     longer read. Restart is back in it, as "Restart adventures". */
   onExit?: () => void
   onReport: () => void
   onRecord: () => void
@@ -1158,6 +1159,13 @@ function FlowPhone({
   const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
   useCcNav('self.tab', tab, setTab)
   const [menuOpen, setMenuOpen] = useState(false)
+  /* Restart asks twice: the first tap says what it will do, the second does
+     it. It starts the adventures over — the answers so far are kept as their
+     own sitting, not lost. */
+  const [restartArmed, setRestartArmed] = useState(false)
+  useEffect(() => {
+    if (!menuOpen) setRestartArmed(false)
+  }, [menuOpen])
   const [railOpen, setRailOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   /* A tab opens at its top, not wherever the last one was scrolled to. */
@@ -1704,6 +1712,23 @@ function FlowPhone({
                   Account Settings
                   <ArrowRight />
                 </button>
+                {!viewing && onRestart && (
+                  <button
+                    className={`cx-sheet-item${restartArmed ? ' is-armed' : ''}`}
+                    type="button"
+                    onClick={() => {
+                      if (!restartArmed) return setRestartArmed(true)
+                      setMenuOpen(false)
+                      setRichOpen(null)
+                      onRestart()
+                      const home = steps.findIndex((st) => st.kind === 'home')
+                      reset(home >= 0 ? home : 0)
+                    }}
+                  >
+                    {restartArmed ? 'Tap again to start over' : 'Restart adventures'}
+                    <ArrowRight />
+                  </button>
+                )}
                 <button
                   className="cx-sheet-item"
                   type="button"
