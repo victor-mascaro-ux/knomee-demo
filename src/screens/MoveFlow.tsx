@@ -42,7 +42,7 @@ import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
 import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
-import { StepBar, morph, useFinishFill } from './StepBar'
+import { StepBar, morph, useFinishFill, useSettling } from './StepBar'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -799,6 +799,7 @@ export default function MoveFlow({
   const ri = READY.indexOf(at)
   const go = (s: Step) => setAt(s)
   const fill = useFinishFill()
+  const settling = useSettling(at)
   const next = () => {
     if (qi >= 0) return qi + 1 < QUESTIONS.length ? go(QUESTIONS[qi + 1]) : fill.finish(() => go('added'))
     if (ri >= 0) return go(ri + 1 < READY.length ? READY[ri + 1] : 'results')
@@ -1250,7 +1251,7 @@ export default function MoveFlow({
           one thing to press. */}
       {(qi >= 0 || ri >= 0) && (
         <>
-          <div className="jf-foot">
+          <div className={`jf-foot${settling ? ' is-settling' : ''}`}>
             <div className="jf-where">
               <button className="jf-prev" type="button" onClick={previous}>
                 <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>

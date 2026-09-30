@@ -32,7 +32,7 @@ import JoyReward from './JoyReward'
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
 import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
-import { StepBar, morph, useFinishFill } from './StepBar'
+import { StepBar, morph, useFinishFill, useSettling } from './StepBar'
 
 export interface JoyAnswers {
   tools: string[]
@@ -182,6 +182,7 @@ export default function JoyFlow({
   const asks = steps.flatMap((st, n) => (st.kind === 'pick' || st.kind === 'split' || st.kind === 'reflect' ? [n] : []))
   const answered = asks.filter((n) => n < at).length
   const fill = useFinishFill()
+  const settling = useSettling(`${at}:${area}`)
   const next = () => {
     window.clearInterval(typing.current)
     const on = () => setAt((n) => Math.min(n + 1, steps.length - 1))
@@ -462,7 +463,7 @@ export default function JoyFlow({
             <StepBar count={asks.length} done={fill.full ? asks.length : answered} />
             <AdventureClose />
           </div>
-        <div className="jf-foot">
+        <div className={`jf-foot${settling ? ' is-settling' : ''}`}>
           {/* Where you are, and under it the way one question back; then the
               one thing to press. */}
           <div className="jf-where">

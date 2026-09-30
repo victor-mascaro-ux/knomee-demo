@@ -28,7 +28,7 @@ import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
-import { StepBar, morph, useFinishFill } from './StepBar'
+import { StepBar, morph, useFinishFill, useSettling } from './StepBar'
 
 export interface Pick {
   label: string
@@ -883,6 +883,7 @@ export default function FutureYouFlow({
   const skipping = blank && !content.fill
 
   const fill = useFinishFill()
+  const settling = useSettling(step)
   const onOk = () => {
     /* Left blank: the sample goes in, so a demo still arrives at a vision. */
     if (content.fill) {
@@ -1203,15 +1204,6 @@ export default function FutureYouFlow({
         />
       )}
 
-      {/* The screen between the intro and the first question already wears the
-          timeline, so the intro's title has somewhere to move to. */}
-      {step === 'breathe' && (
-        <div className="jf-top">
-          <AdventureMark />
-          <StepBar count={QUESTIONS.length} done={0} />
-          <AdventureClose />
-        </div>
-      )}
       {qi >= 0 && (
         <>
           {/* Where you are, at the top under the bar — the foot is only
@@ -1221,7 +1213,7 @@ export default function FutureYouFlow({
             <StepBar count={QUESTIONS.length} done={fill.full ? QUESTIONS.length : Math.max(0, qi)} />
             <AdventureClose />
           </div>
-        <div className="jf-foot">
+        <div className={`jf-foot${settling ? ' is-settling' : ''}`}>
           <div className="jf-where">
             <button className="jf-prev" type="button" onClick={previous}>
               <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>
