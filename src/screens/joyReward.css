@@ -259,6 +259,36 @@
   width: 34px;
   height: 34px;
   display: block;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.jw-next-ic img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  animation: advIconWander 9.7s ease-in-out infinite;
+}
+
+/* A badge read into the page (BadgeArt): the star and its words hold still,
+   the icon at its heart wanders. */
+.badge-art,
+.badge-art-svg {
+  display: block;
+}
+.badge-art-svg {
+  width: 100%;
+  height: 100%;
+}
+.badge-art .badge-icon {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: advIconWander 9.7s ease-in-out 0.6s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jw-next-ic img,
+  .badge-art .badge-icon {
+    animation: none;
+  }
 }
 
 /* A badge whose top lettering is set here rather than in the art. */

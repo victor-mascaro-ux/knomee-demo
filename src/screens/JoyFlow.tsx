@@ -163,7 +163,8 @@ export default function JoyFlow({
   const areas = content.areas
   const sample = content.sample
   const [at, setAt] = useState(() => (review ? steps.findIndex((s) => s.kind === 'done') : 0))
-  useCcNav('joy.at', at, setAt, steps.map((_, n) => n))
+  // Clamped: a position saved on an older comment may point past the end.
+  useCcNav('joy.at', at, (v: number) => setAt(Math.max(0, Math.min(v, steps.length - 1))), steps.map((_, n) => n))
   /* Which of the seven areas the attention screen is on. It is one step in the
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */
