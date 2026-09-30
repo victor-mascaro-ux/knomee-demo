@@ -753,7 +753,10 @@ export function EmptyFold({
 /* What was just done to a row, said on it: "New" on one just added,
    "Updated" on one just saved. Other tags (Sensitive) stay beside it. */
 export function withTag<T extends { tags?: string[] }>(x: T, tag: 'New' | 'Updated'): T {
-  return { ...x, tags: [tag, ...(x.tags ?? []).filter((t) => t !== 'New' && t !== 'Updated')] }
+  /* Something just added is still new when it is changed straight after —
+     a goal is assessed the moment it is made, and read "Updated" for it. */
+  const t = tag === 'Updated' && x.tags?.includes('New') ? 'New' : tag
+  return { ...x, tags: [t, ...(x.tags ?? []).filter((v) => v !== 'New' && v !== 'Updated')] }
 }
 
 /* A row's pills. */
