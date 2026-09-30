@@ -6974,3 +6974,64 @@ body .modal-backdrop .modal .modal-footer {
 body .modal-backdrop .modal .modal-footer .btn {
   flex: 1;
 }
+
+/* ── a form in a modal, one way everywhere (design system) ──
+   Label, then an optional helper line, then the field. The label is the
+   page's ink, 13px semibold; the helper sits under it in grey, 12.5px,
+   upright; the field is a white box, 12px round, a light border that turns
+   grape on focus, 15px text with a plain grey placeholder. The modals keep
+   their own class names; these rules give them one look. */
+body .modal .ag-label,
+body .modal .le-label,
+body .modal .qm-label,
+body .modal .vb-label,
+body .modal .invite-field-label,
+body .modal .sh-field > span,
+body .sh-form .sh-field > span {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-strong, #240446);
+}
+body .modal .ag-step-note,
+body .modal .vb-step-note,
+body .modal .vb-voice-hint,
+body .modal .ag-hint {
+  font-size: 12.5px;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--text-secondary, #6d6a76);
+}
+body .modal .ag-input,
+body .modal .le-input,
+body .modal .qm-input,
+body .modal .vb-input,
+body .modal .fam-input,
+body .sh-form .sh-field input {
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1.5px solid var(--border-default, #e7e4ee);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--text-strong, #240446);
+}
+body .modal .ag-input::placeholder,
+body .modal .le-input::placeholder,
+body .modal .qm-input::placeholder,
+body .modal .vb-input::placeholder,
+body .modal .fam-input::placeholder,
+body .sh-form .sh-field input::placeholder {
+  font-style: normal;
+  color: #a19cad;
+}
+body .modal .ag-input:focus,
+body .modal .le-input:focus,
+body .modal .qm-input:focus,
+body .modal .vb-input:focus,
+body .modal .fam-input:focus,
+body .sh-form .sh-field input:focus {
+  outline: none;
+  border-color: var(--k-grape, #7639a1);
+}
