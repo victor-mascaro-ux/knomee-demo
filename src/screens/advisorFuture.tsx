@@ -61,7 +61,13 @@ const KINDS: { group: string; icon: string; items: string[] }[] = [
   {
     group: 'Your clients',
     icon: 'handshake',
-    items: ['Fewer, better clients', 'More clients', 'A niche I’m known for', 'Predictable revenue'],
+    items: [
+      'Fewer, better clients',
+      'More clients',
+      'A niche I’m known for',
+      'Predictable revenue',
+      'Generational clients',
+    ],
   },
   {
     group: 'Your time',
