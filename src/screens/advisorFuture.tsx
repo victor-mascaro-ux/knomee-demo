@@ -74,7 +74,6 @@ const KINDS: { group: string; icon: string; items: string[] }[] = [
     icon: 'plane',
     items: [
       'Time away from the desk',
-      'A shorter work week',
       'Time with family',
       'Room to travel',
       'Board or industry work',
