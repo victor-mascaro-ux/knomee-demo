@@ -212,7 +212,7 @@
   font: inherit;
   font-size: 16px;
   color: var(--grey-text, #8b8598);
-  padding: 0 20px 16px;
+  padding: 0 20px 10px;
   cursor: pointer;
   text-align: center;
 }
@@ -991,7 +991,7 @@
     padding-top: 12px;
   }
   .pp-tabs {
-    gap: 0;
+    gap: 4px;
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
@@ -1000,14 +1000,11 @@
   .pp-tabs::-webkit-scrollbar {
     display: none;
   }
+  /* The dashboard's tabs at this width, exactly (.tab in index.css). */
   .pp-tab {
     flex: none;
     white-space: nowrap;
-    font-size: 14px;
-    padding: 0 14px 12px;
-  }
-  .pp-tab:first-child {
-    padding-left: 0;
+    padding: 0 16px 8px;
   }
 
   /* The title and its action stop fighting for the same line: who this is on
