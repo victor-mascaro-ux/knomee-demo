@@ -1768,6 +1768,17 @@ button.af-opt:hover {
   min-width: 0;
   margin: 0 0 0 4px;
 }
+/* The bar takes 80% of the room after the name and sits against the right
+   edge: a spacer between the name and the bar takes the other fifth
+   (1 : 0.25), put there by order. */
+.adv-badge:has(.adv-badge-bar)::after {
+  content: '';
+  flex: 0.25;
+  order: 1;
+}
+.adv-badge-bar {
+  order: 2;
+}
 
 /* The adventure's icon, alive: it floats — a slow, even drift up and down
    with the faintest sway, never a jump — in the intro's title and at the
