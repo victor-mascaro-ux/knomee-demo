@@ -418,7 +418,9 @@ export default function JoyResults({
       {(picks.length > 0 || other) && (
       <Reveal>
         <h3 className="jr-h">{copy?.toolsTitle ?? 'Money is a tool'}</h3>
-        <p className="jr-sub">{copy?.toolsLead ?? 'You want money to help you with:'}</p>
+        {(copy?.toolsLead ?? 'You want money to help you with:') && (
+          <p className="jr-sub">{copy?.toolsLead ?? 'You want money to help you with:'}</p>
+        )}
         <div className="jr-tools">
           {picks.map((p, i) => (
             <figure className="jr-tool" key={p.label} style={{ ['--i' as string]: i }}>
