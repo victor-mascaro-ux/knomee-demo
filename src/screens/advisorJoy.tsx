@@ -119,8 +119,10 @@ const STEPS: JoyStep[] = [
   },
   {
     kind: 'pick',
-    eyebrow: 'What your practice gives you',
-    title: q1.title ?? '',
+    /* The question is the heading: "I want my practice to give me…" says it
+       plainly, and a line over it only said it again. */
+    eyebrow: q1.title ?? '',
+    title: '',
     body: `Choose up to ${q1.max ?? 3}.`,
     options: PICKS,
     max: q1.max ?? 3,
@@ -169,8 +171,8 @@ export const ADVISOR_JOY: JoyContent = {
     title: 'What the work is for',
     memoryLead: 'The last moment that reminded you why you do this:',
     memoryTag: 'Your moment',
-    toolsTitle: 'What your practice gives you',
-    toolsLead: 'You want your practice to give you:',
+    toolsTitle: 'You want your practice to represent…',
+    toolsLead: '',
     prefLead: 'This is where you want your attention to go.',
     reading: (more, less) =>
       more && less

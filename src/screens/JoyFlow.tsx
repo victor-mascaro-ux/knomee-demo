@@ -308,7 +308,7 @@ export default function JoyFlow({
       {step.kind === 'pick' && (
         <div className="jf-pick">
           <h2 className="jf-pick-title">{step.eyebrow}</h2>
-          <p className="jf-pick-sub">{step.title}</p>
+          {step.title && <p className="jf-pick-sub">{step.title}</p>}
           <p className="jf-pick-note">{step.body}</p>
           {/* Photographs, two to a row, each with its word under it. A chosen
               one wears the lime ring and its word goes bold; once three are
