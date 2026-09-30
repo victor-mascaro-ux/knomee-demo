@@ -36,6 +36,8 @@ export type JoyStep =
       lead: string
       cta: string
       minutes: number
+      /** What the adventure asks and hands back (the advisor's intros). */
+      gets?: { do: string; get: string }
     }
   | {
       kind: 'pick'

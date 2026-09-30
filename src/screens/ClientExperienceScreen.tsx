@@ -400,7 +400,17 @@ export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
    but it still says whose app this is, the way Gmail or a bank's app keeps its
    mark in the corner of every screen: the firm's logo (or knomee's), small, a
    hairline, then the adventure. */
-export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; title: ReactNode }) {
+export function AdventureBarTitle({
+  brand,
+  title,
+  at,
+}: {
+  brand?: FlowBrand | null
+  title: ReactNode
+  /** Which of the journey's adventures this is — [2, 5] reads "2 of 5" — so
+      the screen says where it sits in the whole, not only in itself. */
+  at?: [number, number]
+}) {
   return (
     <div className="af-appbar-lead">
       <span className="af-appbar-logo">
@@ -408,6 +418,11 @@ export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; 
       </span>
       <span className="af-appbar-rule" aria-hidden />
       <div className="af-appbar-title">{title}</div>
+      {at && at[0] > 0 && (
+        <span className="af-appbar-at">
+          {at[0]} of {at[1]}
+        </span>
+      )}
     </div>
   )
 }
@@ -584,7 +599,17 @@ function Celebration() {
 /* How far through the core adventures she is: one segment per adventure,
    each filling in turn with the brand's plum-to-lilac, a light running across
    what is done, and the percentage counting up to where she is. */
-export function ProgressMeter({ done, required }: { done: number; required: number }) {
+export function ProgressMeter({
+  done,
+  required,
+  goal,
+}: {
+  done: number
+  required: number
+  /** What the adventures add up to — "Business ID", "Financial ID" — named
+      under the bar so the count says what it is counting toward. */
+  goal?: string
+}) {
   const pct = Math.round((done / required) * 100)
   /* The segments that fill now fill in a row from the first new one, so a
      skip ahead continues the bar rather than starting it over. */
@@ -639,6 +664,13 @@ export function ProgressMeter({ done, required }: { done: number; required: numb
         </div>
         <span className="cx-progress-pct">{shown}%</span>
       </div>
+      {goal && (
+        <p className="cx-progress-goal">
+          {done >= required
+            ? `Your ${goal} is complete`
+            : `${required - done} to go until your ${goal}`}
+        </p>
+      )}
     </div>
   )
 }
@@ -777,7 +809,7 @@ function AdventuresScreen({
     return (
       <>
         <h2 className="cx-screen-title">My Adventures</h2>
-        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
+        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} goal="Financial ID" />
         <div className="cx-adv-list">
           {/* What is still to do leads — the next adventure, the ones waiting
               behind it, and (once Goals is done) the two she keeps adding to —
@@ -842,7 +874,7 @@ function AdventuresScreen({
       {/* The page says what it is, then how far through it you are: a meter
           above the title measures something that has not been named yet. */}
       <h2 className="cx-screen-title">My Adventures</h2>
-      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
+      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} goal="Financial ID" />
       <div className="cx-adv-list">
         {completedAdventures.map((a) => (
           <CompletedRow
@@ -1570,6 +1602,10 @@ export default function ClientExperienceScreen({
                 <AdventureBarTitle
                   brand={brand}
                   title={journey.find((j) => j.id === adventure)?.title ?? 'Financial Joy'}
+                  at={[
+                    journey.filter((j) => j.core).findIndex((j) => j.id === adventure) + 1,
+                    journey.filter((j) => j.core).length,
+                  ]}
                 />
                 <button
                   className="cx-appbar-burger"

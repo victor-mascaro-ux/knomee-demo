@@ -53,6 +53,10 @@ export const ADVISOR_OUTLOOK: OutlookContent = {
     body: introBody[0] ?? '',
     lead: introBody[1] ?? '',
     minutes: 2,
+    gets: {
+      do: 'name the concerns and the hopes on your mind right now.',
+      get: 'Your outlook — and the concern your three questions start from.',
+    },
   },
   question: (kind, added) =>
     kind === 'concern'

@@ -25,6 +25,7 @@ import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyRes
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
+import { IntroGets, type Gets } from './IntroGets'
 
 export interface ConfidenceStatement {
   statement: string
@@ -76,7 +77,7 @@ const lower = (st: string) =>
     adventure of the same shape. */
 export interface ConfidenceContent {
   statements: ConfidenceStatement[]
-  intro: { image: string; quote: string; source: string; lead: string; minutes: number }
+  intro: { image: string; quote: string; source: string; lead: string; minutes: number; gets?: Gets }
   /** Whether OK on an untouched slider records its sample (a demo clicked
       straight through) or skips it (somebody actually answering). */
   samples: boolean
@@ -285,6 +286,7 @@ export default function ConfidenceFlow({
             </figure>
           </div>
           <p className="jf-lead cf-lead">{content.intro.lead}</p>
+          {content.intro.gets && <IntroGets gets={content.intro.gets} />}
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => go(0)}>
               Get Started

@@ -116,6 +116,10 @@ const STEPS: JoyStep[] = [
     lead: 'Let’s get clear on what you want yours to give you.',
     cta: 'Get Started',
     minutes: 2,
+    gets: {
+      do: 'pick what you want your practice to give you, and sort where your attention goes.',
+      get: 'What your practice is for — the first card on your Business ID.',
+    },
   },
   {
     kind: 'pick',

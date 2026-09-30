@@ -138,6 +138,9 @@ export default function JoyReward({
           </span>
           <span className="jw-pct">{pct}%</span>
         </div>
+        <p className="jw-progress-goal">
+          {total - shown <= 0 ? `Your ${idName} is complete` : `${total - shown} to go until your ${idName}`}
+        </p>
       </div>
 
       <div className="jw-stage">
