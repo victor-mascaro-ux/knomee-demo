@@ -300,10 +300,14 @@ function AboutCopy({ about, tools, onClose }: { about: JoyResultsCopy['about']; 
           of respondents {about.want}{' '}
           {named.length === 2 ? (
             <>
-              <b>{named[0]}</b> and <b>{named[1]}</b>
+              <b>{named[0]}</b> and <b>{named[1]}</b>, like you do
+            </>
+          ) : named.length === 1 ? (
+            <>
+              <b>{named[0]}</b>, like you do
             </>
           ) : (
-            <b>{named[0] ?? 'the same things you do'}</b>
+            <b>the same things you do</b>
           )}
           .
         </>
