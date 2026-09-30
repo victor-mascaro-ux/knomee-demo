@@ -6948,11 +6948,12 @@ body .modal-backdrop .modal .modal-header {
   /* The brand's bar across the top, the title in white on it. */
   height: auto;
   min-height: 0;
-  padding: 18px 24px;
+  padding: 9px 24px;
   border-radius: 0;
   background: var(--surface-brand, var(--plum, #240446));
 }
 body .modal-backdrop .modal .modal-title {
+  margin: 0;
   font-size: 20px;
   font-weight: 700;
   color: #fff;

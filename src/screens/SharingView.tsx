@@ -27,10 +27,10 @@ type Access = Record<string, { on: boolean; off: string[] }>
 export type SharedCard = { id: string; title: string; icon: string }
 
 export const CLIENT_TEAM: Person[] = [
-  { id: 'p1', name: 'Alex', role: 'partner' },
-  { id: 'p2', name: 'Sam', role: 'advisor' },
-  { id: 'p3', name: 'Florence', role: 'banker' },
-  { id: 'p4', name: 'Kim', role: 'accountant' },
+  { id: 'p1', name: 'Alex', role: 'partner', email: 'alex@example.com' },
+  { id: 'p2', name: 'Sam', role: 'advisor', email: 'sam@example.com' },
+  { id: 'p3', name: 'Florence', role: 'banker', email: 'florence@example.com' },
+  { id: 'p4', name: 'Kim', role: 'accountant', email: 'kim@example.com' },
 ]
 /* v2: v1 kept each page's starting team as if it had been chosen. */
 const KEY = 'knomee.sharing.v2'

@@ -63,6 +63,6 @@ small and diffable.
   the active one plum and semibold with a 3px plum bar on the rule; the first
   tab sits flush with the page's left edge; hover darkens an inactive label to
   #333. The dashboard's `.tab` and a profile's `.pp-tab` are the same thing and
-  must stay so. A choice between two views of one thing (My ID | Who sees it,
-  the legal documents) is the segmented pill switch instead, not tabs.
+  must stay so — and so are My ID | Who sees it and the legal documents'
+  tabs. There is no other tab style in the app.
 
