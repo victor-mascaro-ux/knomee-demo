@@ -22,6 +22,7 @@ import MoveFlow, { type MoveAnswers, type MoveContent } from './MoveFlow'
 import { QUESTIONS as READINESS, stageOf as readinessStageOf } from './ReadinessModal'
 import { GoalDetail, TTM_ART, TTM_STAGES } from './profileParts'
 import bgGoals from '../assets/badges/goals-on-plum.svg'
+import { AdventureBadge } from './AdventureMark'
 
 export interface GoalsAnswers {
   goals: Goal[]
@@ -249,6 +250,7 @@ function GoalsReview({
     <div className="jf gl">
       {step === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge />
           <div className="jf-hero">
             <Photo className="jf-hero-img" src="./goals/intro.png" fallback="gl-hero-fallback" />
           </div>

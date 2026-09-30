@@ -406,12 +406,15 @@ export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
    mark in the corner of every screen: the firm's logo (or knomee's) on the
    left, the adventure's name on the right beside the way out. */
 export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; title: ReactNode }) {
+  /* The adventure's name is at the head of its timeline, beside its icon
+     (AdventureMark); the bar keeps only whose app this is. The name stays
+     for screen readers. */
   return (
     <div className="af-appbar-lead">
       <span className="af-appbar-logo">
         {brand ? brand.logo : <img src="./knomee-logo-white.svg" alt="knomee" />}
       </span>
-      <div className="af-appbar-title">{title}</div>
+      <span className="sr-only">{title}</span>
     </div>
   )
 }
@@ -1596,6 +1599,7 @@ export default function ClientExperienceScreen({
                       const k = journey.find((j) => j.id === adventure)?.art
                       return k ? art[k] : undefined
                     })(),
+                    title: journey.find((j) => j.id === adventure)?.title,
                     at: journey.filter((j) => j.core).findIndex((j) => j.id === adventure) + 1,
                     of: journey.filter((j) => j.core).length,
                   }

@@ -26,7 +26,7 @@ import JoyReward from './JoyReward'
 import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
-import { AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
 
 export interface Pick {
@@ -941,6 +941,7 @@ export default function FutureYouFlow({
     <div className="jf fy">
       {step === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge steps={QUESTIONS.length} />
           <div className="jf-hero">
             <Photo className="jf-hero-img" src={content.intro.image} fallback="fy-hero-fallback" />
           </div>

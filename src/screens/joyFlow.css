@@ -1148,3 +1148,29 @@
   }
 }
 
+
+/* ── every intro fits one screen ──
+   The intro takes exactly the screen it is on, and the hero picture is what
+   gives: it shrinks to leave room for the title, the words and Get Started,
+   so nothing scrolls. The picture keeps its shape and its left edge. */
+.cx-viewport:has(> .jf > .jf-intro) > .jf {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.jf-intro {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.jf-intro > .jf-hero {
+  flex: 0 1 auto;
+  min-height: 150px;
+  overflow: hidden;
+}
+.jf-intro .jf-hero-img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left top;
+}

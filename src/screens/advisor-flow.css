@@ -1660,13 +1660,141 @@ button.af-opt:hover {
   box-shadow: 0 2px 8px rgba(36, 4, 70, 0.18);
 }
 .jf-mark-ic img {
-  width: 22px;
-  height: 22px;
+  width: 100%;
+  height: 100%;
   display: block;
+}
+.jf-mark-title {
+  font-size: 14px;
+  font-weight: var(--weight-bold);
+  color: var(--text-strong, #240446);
+  white-space: nowrap;
 }
 .jf-mark-at {
   font-size: 12px;
   font-weight: var(--weight-semibold);
   color: var(--text-secondary, #6d6a76);
   white-space: nowrap;
+}
+/* Read out, not drawn. */
+.af-appbar-lead .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The intro's title: the adventure's icon raised in a white circle, and its
+   name beside it in lettering that carries the brand's gradient, a light
+   passing through it. A title, not a control — no fill, no pill. */
+.adv-badge {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-10, 10px);
+  animation: advBadgeIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.adv-badge-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(36, 4, 70, 0.22);
+  animation: advBadgeIc 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+.adv-badge-ic img {
+  /* The mark is drawn inside its own disc with its own air, as it is on My
+     Adventures and the Business ID — so it fills the circle, not a smaller
+     box inside it, and reads at the same proportion everywhere. */
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.adv-badge-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  background: linear-gradient(
+    100deg,
+    var(--k-plum, #240446) 0%,
+    var(--k-grape, #7639a1) 40%,
+    #c58bff 50%,
+    var(--k-grape, #7639a1) 60%,
+    var(--k-plum, #240446) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: advTitleShine 3.2s ease-in-out 0.6s infinite;
+}
+@keyframes advTitleShine {
+  0% {
+    background-position: 100% 0;
+  }
+  50%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+@keyframes advBadgeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes advBadgeIc {
+  from {
+    transform: scale(0.4) rotate(-20deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adv-badge,
+  .adv-badge-ic,
+  .adv-badge-title {
+    animation: none;
+  }
+}
+
+.adv-badge-bar {
+  flex: 1;
+  min-width: 0;
+  margin: 0 0 0 4px;
+}
+
+/* The adventure's icon, alive: every few seconds it tips and bobs, in the
+   intro's title and at the head of the timeline alike. */
+.adv-badge-ic img,
+.jf-mark-ic img {
+  animation: advIconIdle 4s ease-in-out 1s infinite;
+  transform-origin: 50% 70%;
+}
+@keyframes advIconIdle {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  78% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  86% {
+    transform: rotate(9deg) translateY(-2px) scale(1.08);
+  }
+  93% {
+    transform: rotate(-4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adv-badge-ic img,
+  .jf-mark-ic img {
+    animation: none;
+  }
 }

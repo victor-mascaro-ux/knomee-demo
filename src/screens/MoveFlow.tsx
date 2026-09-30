@@ -40,7 +40,7 @@ import JoyReward from './JoyReward'
 import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
-import { AdventureMark } from './AdventureMark'
+import { AdventureBadge, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
@@ -855,6 +855,7 @@ export default function MoveFlow({
     <div className="jf gl mv">
       {at === 'intro' && (
         <div className="jf-intro">
+          <AdventureBadge steps={QUESTIONS.length} />
           <div className="jf-hero">
             <Photo className="jf-hero-img" src="./goals/intro.png" fallback="gl-hero-fallback" />
           </div>
