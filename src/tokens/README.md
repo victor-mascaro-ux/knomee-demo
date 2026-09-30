@@ -42,3 +42,12 @@ small and diffable.
   centred icon floats between them and stops belonging to either. In a flex
   row use `align-items: flex-start`; in a grid, `align-self: start` on the
   icon's cell. Nudge it down only to meet the first line's cap height.
+
+- **A modal is a white panel on a dimmed plum ground.** Rounded 20px; a white
+  head with the title in the page's ink (never a coloured bar) and a quiet
+  grey close; the body on white; a foot of full-width pill buttons, the main
+  action filled. On a desktop it sits centred; on a phone the same panel
+  rises from the foot of the screen as a sheet, full width, rounded along its
+  top only. The base styles are in `index.css` (the modal block, prefixed
+  `body` so no modal's own header colour wins) and the phone sheet in
+  `client-experience.css`; My Team's "Add someone" form is the reference.
