@@ -27,7 +27,7 @@ import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
 import { AdventureBadge, AdventureClose, AdventureMark } from './AdventureMark'
 import { useCcNav } from '../ccNav'
-import { StepBar, morph, useFinishFill } from './StepBar'
+import { StepBar, morph, useFinishFill, useSettling } from './StepBar'
 
 export interface ConfidenceStatement {
   statement: string
@@ -247,6 +247,7 @@ export default function ConfidenceFlow({
 
   const untouched = typeof step === 'number' && values[step] === null
   const fill = useFinishFill()
+  const settling = useSettling(step)
   const onOk = () => {
     if (typeof step === 'number') {
       /* Left where it started: the sample goes in, so the demo can be clicked
@@ -440,7 +441,7 @@ export default function ConfidenceFlow({
             <StepBar count={statements.length} done={fill.full ? statements.length : Math.max(0, at)} />
             <AdventureClose />
           </div>
-        <div className="jf-foot">
+        <div className={`jf-foot${settling ? ' is-settling' : ''}`}>
           <div className="jf-where">
             <button className="jf-prev" type="button" onClick={previous}>
               <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden>

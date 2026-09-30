@@ -6,7 +6,7 @@
  * bar to the end, and only then does the flow move on to its results.
  */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 
 export function StepBar({ count, done }: { count: number; done: number }) {
@@ -44,4 +44,25 @@ export function morph(change: () => void) {
   const d = document as Document & { startViewTransition?: (cb: () => void) => unknown }
   if (!d.startViewTransition || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return change()
   d.startViewTransition(() => flushSync(change))
+}
+
+const SETTLE_MS = 700
+
+/** True for a moment after `key` changes — a new question has just come in.
+    The foot's buttons ignore taps meanwhile, so a click aimed at OK on the
+    screen before (a single choice moves on by itself) does not land on the
+    new screen's Skip. */
+export function useSettling(key: unknown) {
+  const [settling, setSettling] = useState(false)
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    setSettling(true)
+    const t = window.setTimeout(() => setSettling(false), SETTLE_MS)
+    return () => window.clearTimeout(t)
+  }, [key])
+  return settling
 }
