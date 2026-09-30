@@ -1163,14 +1163,19 @@
   min-height: 0;
 }
 .jf-intro > .jf-hero {
-  flex: 0 1 auto;
+  /* The picture takes whatever height the words leave — shrinking on a
+     short screen, growing on a tall one — so there is no empty band above
+     Get Started. */
+  flex: 1 1 auto;
   min-height: 150px;
   overflow: hidden;
 }
 .jf-intro .jf-hero-img {
+  /* Up to the full width of the screen, still cut by its left edge the way
+     the artwork is drawn; it sits on the words below it. */
   height: 100%;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   object-fit: contain;
-  object-position: left top;
+  object-position: left bottom;
 }
