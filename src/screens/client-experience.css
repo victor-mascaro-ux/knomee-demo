@@ -228,15 +228,18 @@
   font-weight: var(--weight-bold);
 }
 .cx-sheet-item {
-  width: 100%;
-  margin-top: var(--space-12);
+  /* The hover wash reaches past the words on both sides, so the label and
+     its arrow sit inside it rather than on its edge; the negative margin
+     keeps the text where it was, aligned with the account row above. */
+  width: calc(100% + 2 * var(--space-8));
+  margin: var(--space-12) calc(-1 * var(--space-8)) 0;
   background: none;
   border: none;
   font: inherit;
   font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   color: var(--text-strong);
-  padding: var(--space-12) 2px;
+  padding: var(--space-12) calc(var(--space-8) + 2px);
   display: flex;
   align-items: center;
   justify-content: space-between;

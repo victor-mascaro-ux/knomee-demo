@@ -41,9 +41,10 @@ export function LegalLink({ doc, children }: { doc: LegalDoc; children: ReactNod
 
 const UPDATED = '[Effective date]'
 
-const DOCS: Record<LegalDoc, { title: string; body: ReactNode }> = {
+const DOCS: Record<LegalDoc, { title: string; tab: string; body: ReactNode }> = {
   terms: {
     title: 'Terms of Use',
+    tab: 'Terms',
     body: (
       <>
         <p>
@@ -87,6 +88,7 @@ const DOCS: Record<LegalDoc, { title: string; body: ReactNode }> = {
   },
   privacy: {
     title: 'Privacy Notice',
+    tab: 'Privacy',
     body: (
       <>
         <p>This notice explains what we collect when you use this service and what happens to it.</p>
@@ -118,6 +120,7 @@ const DOCS: Record<LegalDoc, { title: string; body: ReactNode }> = {
   },
   data: {
     title: 'How your answers are used',
+    tab: 'Your answers',
     body: (
       <>
         <p>The short version, in plain words.</p>
@@ -162,19 +165,15 @@ export function LegalHost() {
           </svg>
         </button>
       </div>
-      <nav className="lg-tabs" aria-label="Legal documents">
+      {/* The app's own segmented switch (the ID page's My ID | Who sees it),
+          three across, so the documents are one tap apart and never scroll. */}
+      <div className="lg-tabs" role="group" aria-label="Legal documents">
         {ORDER.map((k) => (
-          <button
-            key={k}
-            type="button"
-            className={`lg-tab${k === doc ? ' is-on' : ''}`}
-            aria-current={k === doc}
-            onClick={() => setDoc(k)}
-          >
-            {DOCS[k].title}
+          <button key={k} type="button" aria-pressed={k === doc} onClick={() => setDoc(k)}>
+            {DOCS[k].tab}
           </button>
         ))}
-      </nav>
+      </div>
       <div className="lg-body">
         <p className="lg-placeholder">
           Placeholder text for the demo — to be replaced by legal and compliance before launch.

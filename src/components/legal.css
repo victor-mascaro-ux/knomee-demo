@@ -63,31 +63,40 @@
   cursor: pointer;
 }
 .lg-tabs {
-  display: flex;
-  gap: 6px;
-  padding: 0 18px 12px;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--border-subtle, #ecebf0);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin: 0 18px 12px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--k-grape-soft, #f3ebfa);
 }
-.lg-tab {
-  flex: none;
-  padding: 6px 12px;
-  border: 1px solid var(--border-default, #e7e4ee);
+.lg-tabs button {
+  padding: 7px 6px;
+  border: 0;
   border-radius: 999px;
   background: none;
   font: inherit;
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--text-sm, 13px);
+  font-weight: var(--weight-semibold, 600);
+  color: var(--k-grape, #7639a1);
+  white-space: nowrap;
   cursor: pointer;
+  transition:
+    background 0.3s var(--ease-out, ease),
+    color 0.3s var(--ease-out, ease),
+    box-shadow 0.3s var(--ease-out, ease);
 }
-.lg-tab.is-on {
-  border-color: var(--text-strong);
-  background: var(--text-strong);
-  color: #fff;
+.lg-tabs button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--k-plum, #240446);
+  box-shadow: 0 2px 8px -3px rgba(36, 4, 70, 0.3);
 }
 .lg-body {
   flex: 1;
   overflow-y: auto;
+  /* A phone shows no scrollbar; the demo's desktop one read as a web page. */
+  scrollbar-width: none;
   padding: 14px 18px 40px;
   font-size: 14px;
   line-height: 1.55;
@@ -128,4 +137,7 @@
 .lg-consent.is-left {
   text-align: left;
   margin-top: var(--space-20, 20px);
+}
+.lg-body::-webkit-scrollbar {
+  display: none;
 }
