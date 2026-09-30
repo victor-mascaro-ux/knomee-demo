@@ -390,7 +390,7 @@
      pushed the button below the fold, and a first-time reader took the page
      for a dead end. So it rides the foot of the screen over a soft wash:
      ::before is one long eased gradient, clear at its top and white behind
-     the button, reaching out to both edges and down to the screen's foot. */
+     the button. */
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -401,10 +401,13 @@
   content: '';
   position: absolute;
   z-index: -1;
-  left: -100vmax;
-  right: -100vmax;
+  /* Out to the screen's edges (the page's own 16px gutter) and down to the
+     band's foot, no further: anything reaching past the page is content the
+     scroller will scroll to, and the page ran on into white. */
+  left: calc(-1 * var(--space-16));
+  right: calc(-1 * var(--space-16));
   top: -56px;
-  bottom: -100vmax;
+  bottom: 0;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0) 0,
