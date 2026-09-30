@@ -329,6 +329,24 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
           </div>
         </div>
 
+        {/* Who the book is actually made of. The point of this section is the
+            question "am I reaching the people I set out to reach?" — business
+            owners, a practice sale, a family moving abroad — so the answer
+            leads, before who to call. */}
+        <div className="cmd-reach">
+          <span className="cmd-reach-label">Who you’re reaching</span>
+          <div className="cmd-reach-list">
+            {[...verbatims]
+              .sort((a, b) => b.count - a.count)
+              .map((v) => (
+                <span className="cmd-reach-chip" key={v.niche}>
+                  {v.niche}
+                  <b>{v.count}</b>
+                </span>
+              ))}
+          </div>
+        </div>
+
         {/* Layer 0 — the one next action */}
         <div className="cmd-focus">
           <p className="cmd-focus-line">
@@ -390,9 +408,9 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                         <span className="talk-name">{t.name}</span>
                       )
                     })()}
+                    <span className="talk-niche">{t.niche}</span>
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
                     <span className="talk-kq">KQ {t.kq}</span>
-                    <span className="talk-niche">{t.niche}</span>
                   </div>
                   <div className="talk-chips">
                     {t.said.map((s, i) => (
