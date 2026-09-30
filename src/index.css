@@ -3672,11 +3672,55 @@ button.name-link-btn:hover .name-text {
   color: #201a2e;
   font-variant-numeric: tabular-nums;
 }
+/* Who this person is — the audience they belong to — right after the name,
+   where it is read first, rather than grey at the far edge of the card. */
 .talk-niche {
-  font-size: 11.5px;
-  color: #8e88a0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--k-ocean, #086375);
+  background: var(--k-teal-light, #e3f6f4);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* "Who you're reaching": the book by audience, largest first. */
+.cmd-reach {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.cmd-reach-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6d6a76;
+}
+.cmd-reach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cmd-reach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px 4px 11px;
+  border-radius: 999px;
+  background: var(--k-teal-light, #e3f6f4);
+  color: var(--k-ocean, #086375);
+  font-size: 12.5px;
   font-weight: 600;
-  margin-left: auto;
+}
+.cmd-reach-chip b {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 11.5px;
+  text-align: center;
 }
 /* Arrow-separated reasoning strip; wraps rather than scrolling so nothing is
    hidden on a narrow window. */
