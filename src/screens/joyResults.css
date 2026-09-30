@@ -393,7 +393,8 @@
      the button. */
   position: sticky;
   bottom: 0;
-  z-index: 2;
+  /* Over everything the read-back draws, its markers and ribbons included. */
+  z-index: 6;
   padding-top: var(--space-24);
   padding-bottom: var(--space-16);
 }
@@ -408,6 +409,11 @@
   right: calc(-1 * var(--space-16));
   top: -56px;
   bottom: 0;
+  /* Solid white on down past the band's foot to the screen's edge — as a
+     shadow, which paints without adding anything the scroller can scroll to. */
+  box-shadow:
+    0 100px 0 0 #fff,
+    0 200px 0 0 #fff;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0) 0,
