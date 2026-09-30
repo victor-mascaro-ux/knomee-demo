@@ -1769,27 +1769,27 @@ button.af-opt:hover {
   margin: 0 0 0 4px;
 }
 
-/* The adventure's icon, alive: every few seconds it tips and bobs, in the
-   intro's title and at the head of the timeline alike. */
+/* The adventure's icon, alive: it floats — a slow, even drift up and down
+   with the faintest sway, never a jump — in the intro's title and at the
+   head of the timeline alike. */
 .adv-badge-ic img,
 .jf-mark-ic img {
-  animation: advIconIdle 4s ease-in-out 1s infinite;
-  transform-origin: 50% 70%;
+  animation: advIconFloat 4.8s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
-@keyframes advIconIdle {
+@keyframes advIconFloat {
   0%,
-  70%,
   100% {
-    transform: none;
+    transform: translateY(0) rotate(0deg);
   }
-  78% {
-    transform: rotate(-12deg) scale(1.08);
+  25% {
+    transform: translateY(-2px) rotate(-2deg);
   }
-  86% {
-    transform: rotate(9deg) translateY(-2px) scale(1.08);
+  50% {
+    transform: translateY(-3px) rotate(0deg);
   }
-  93% {
-    transform: rotate(-4deg);
+  75% {
+    transform: translateY(-1px) rotate(2deg);
   }
 }
 @media (prefers-reduced-motion: reduce) {
