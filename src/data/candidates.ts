@@ -147,7 +147,7 @@ interface Slot {
 }
 
 const SLOTS: Slot[] = [
-  // Ready, blocked on one thing — 6. The highest-yield group.
+  // Ready, blocked on one thing — 6. The highest-yield group. Marcus leads it.
   { arch: 'ready-blocked', stage: 'Action', progress: 'signed' },
   { arch: 'ready-blocked', stage: 'Action', progress: 'signed' },
   { arch: 'ready-blocked', stage: 'Action', progress: 'transition' },
@@ -155,7 +155,7 @@ const SLOTS: Slot[] = [
   { arch: 'ready-blocked', stage: 'Maintenance', progress: 'meeting' },
   { arch: 'ready-blocked', stage: 'Maintenance', progress: 'meeting' },
 
-  // Wants it, hasn't started — 13, the largest group. Marcus leads it.
+  // Wants it, hasn't started — 13, the largest group.
   { arch: 'wants-waiting', stage: 'Contemplation', progress: 'completed' },
   { arch: 'wants-waiting', stage: 'Contemplation', progress: 'signed' },
   { arch: 'wants-waiting', stage: 'Contemplation', progress: 'meeting' },
@@ -349,13 +349,13 @@ const marcus: Candidate = {
   intent: marcusDimensions.find((d) => d.key === 'Intent')!.score,
   clarity: marcusDimensions.find((d) => d.key === 'Clarity')!.score,
   receptivity: marcusDimensions.find((d) => d.key === 'Receptivity')!.score,
-  stage: 'Contemplation',
+  stage: 'Action',
   aum: 840,
   team: marcusTeam,
   segment: 'Breakaway',
   source: 'Go Independent link',
   apprehension: 'Client attrition',
-  secondSeat: 'G2 not aligned',
+  secondSeat: 'Aligned',
   change: 'Go independent with my team',
   vision: 'Own firm',
   progress: 'completed',
@@ -372,7 +372,7 @@ function generate(): Candidate[] {
   let marcusPlaced = false
   
   for (const slot of SLOTS) {
-    if (slot.arch === 'wants-waiting' && !marcusPlaced) {
+    if (slot.arch === 'ready-blocked' && !marcusPlaced) {
       marcusPlaced = true
       out.push(marcus)
       continue

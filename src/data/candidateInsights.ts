@@ -257,9 +257,9 @@ function chips(c: Candidate): string[] {
 const MARCUS_CHIPS = [
   'Wants ownership, control, his team’s future',
   '“Do the clients come with me”',
-  'Two junior advisors owed something he cannot give them',
+  'Two junior advisors moving with him, waiting on equity',
   'Asked for a platform partner outright',
-  'Three years of weighing it, no step taken',
+  'Moving within 12 months, steps already taken',
 ]
 
 const topOf = (key: ClusterKey, by: (c: Candidate) => number, n = 1) =>

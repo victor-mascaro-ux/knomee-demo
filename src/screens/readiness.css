@@ -618,8 +618,15 @@
   background: var(--surface-card);
   border: var(--border-thin) solid var(--border-control);
   color: var(--text-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+/* Plain at rest, so the words read; struck through in red only under the
+   pointer, as the reminder of what they are there for. */
+.rd-words-avoid .rd-word:hover {
+  color: var(--k-crimson, #c8323c);
+  border-color: currentColor;
   text-decoration: line-through;
-  text-decoration-color: var(--k-ash);
+  text-decoration-color: currentColor;
 }
 
 

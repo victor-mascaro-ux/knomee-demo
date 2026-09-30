@@ -105,7 +105,7 @@ export const dimensions: Dimension[] = [
       `Started acting: “${picked('mv-q7')}”`,
       `Timeline: ${picked('mv-q2')}`,
     ],
-    read: 'Three years of weighing it and no step taken. Nothing is in motion.',
+    read: 'Wants to move within twelve months, and has already started.',
   },
   {
     key: 'Clarity',
@@ -150,27 +150,27 @@ export const tier = RQ_TIERS.find((t) => kq >= t.min && kq <= t.max)!
 /** The banner under the ring: the score in a sentence, and what it is not. */
 export const tierBanner = {
   headline: `Tier ${tier.tier} · ${tier.name}`,
-  body: 'Wants it, has not started. High clarity and an open door sitting on top of an intent score that says nothing is moving — the common case, and the one a recruiting pipeline cannot see today.',
+  body: 'Ready and moving. A window of under a year, steps already taken, a clear picture of the firm he wants and an open door — blocked on one thing: proof that his clients follow.',
 }
 
 /* ── the three columns ──────────────────────────────────────────────────── */
 
 export const velocity = {
-  read: 'Low velocity, high value.',
-  body: `A ${advisor.book} team that will not move this quarter, and is worth staying with anyway. His own window says ${picked('mv-q2')}, and nothing behind it has started.`,
+  read: 'High velocity, high value.',
+  body: `A ${advisor.book} team that wants to move this year. His own window says ${picked('mv-q2')}, and he has already started.`,
   reasons: [
     {
-      label: 'No steps taken',
-      detail: `“${picked('mv-q7')}” — and “${picked('mv-q6')}” on what the steps even are.`,
+      label: 'Already acting',
+      detail: `“${picked('mv-q7')}” — and “${picked('mv-q6')}”.`,
     },
     {
-      label: 'No timeline',
-      detail: `${picked('mv-q2')} is a range, not a date. Nothing in the flow anchors it.`,
+      label: 'A window this year',
+      detail: `${picked('mv-q2')}. He wants the move timed around year-end.`,
     },
-    { label: 'The spouse has stopped believing him', detail: said('mv-q10b') },
+    { label: 'The one thing he needs first', detail: said('mv-q10b') },
   ],
   action:
-    'Work him on a two-quarter cadence, not a two-week one — and make the first meeting about the attrition question rather than a pitch.',
+    'Work him on a two-week cadence — he is moving this year. Make the first meeting about the attrition question, with evidence.',
 }
 
 export interface Ranked {
@@ -202,7 +202,7 @@ export const apprehensions: Ranked[] = [
   { rank: 2, label: 'What he owes the two juniors', detail: said('ol-q2') },
   {
     rank: 3,
-    label: 'Eighteen months of disruption',
+    label: 'Disruption during the move',
     detail: 'Named in what makes the move hard — the transition itself, not the destination.',
   },
   {
@@ -245,26 +245,26 @@ export interface Starter {
 export const starters: Starter[] = [
   {
     tag: 'Acknowledge and Validate',
-    line: 'You said the only question that matters is whether the clients come. Let’s start there, and not move off it until you’re satisfied.',
-    why: 'Uses his own sentence back. It makes the meeting his agenda before it is Dynasty’s.',
+    line: 'You said the only question that matters is whether the clients come. Let’s talk about how we help you with client communications.',
+    why: 'Uses his own sentence back, then goes straight to how the firm keeps his clients informed through the move — the thing he is most afraid of.',
     source: 'Outlook — Marcus said the only question that matters is whether his clients come with him.',
   },
   {
     tag: 'Demonstrate Curiosity',
-    line: 'What did Ana and Dev say the last time you talked about equity — or has that conversation not happened yet?',
-    why: 'The second seat is the blocker he has not tested. His answer tells you which meeting you are actually in.',
-    source: 'The Move — his juniors, Ana and Dev, are the second seat he has not yet talked to.',
+    line: 'Ana and Dev are coming with you. What do you want to be able to tell them about equity on day one?',
+    why: 'His juniors are on board and the move is this year, so their terms are the next thing he has to settle. His answer tells you what the offer has to include.',
+    source: 'The Move — his juniors, Ana and Dev, are part of the move and waiting on their terms.',
   },
   {
     tag: 'Self-Reinforcement',
-    line: 'A client of eleven years brought her daughter in to meet you. That relationship isn’t with the letterhead.',
-    why: 'His own evidence against the thing he is most afraid of. He is more persuasive on it than you are.',
+    line: 'A client of eleven years brought her daughter in to meet you. Here’s how we help engage the next generation to make sure that the daughter gets the service she expects.',
+    why: 'Starts from his own evidence that his relationships are personal, then shows how the firm helps him keep the next generation.',
     source: 'Practice Joy — a client of eleven years brought her daughter in to meet him.',
   },
   {
     tag: 'Positive Talk',
     line: 'You already know what you want it to look like — equity you own, a team you built, someone else running ops. Most people at this stage don’t.',
-    why: 'Clarity is his strongest dimension. Naming it moves the conversation off whether and onto when.',
+    why: 'He knows what he wants and is moving this year. Naming it moves the conversation onto how.',
     source: 'Future You — equity he owns, a team he built, someone else running operations.',
   },
 ]
@@ -294,17 +294,17 @@ export const questionsTheyAsk: AskedQuestion[] = [
   {
     q: businessId.questions[1],
     guidance:
-      'This is the promise he cannot keep where he is — he has two junior advisors who stayed six years on it. Answer with mechanics rather than intention.',
+      'This is the promise he cannot keep where he is — he has two junior advisors who stayed six years on it, and they are moving with him. Answer with mechanics rather than intention.',
     points: [
       'Bring the G2 equity terms to the first meeting: grant, vesting, and what it is worth',
       'Show what Ana and Dev could own at Dynasty that a wirehouse cannot offer them',
-      'Help him plan how and when he tells them — he named telling the team before he is sure as one of the hard parts',
+      'Put their terms in writing before he signs — he wants to tell them exactly what they will own',
     ],
   },
   {
     q: businessId.questions[2],
     guidance:
-      'He named eighteen months of disruption as what makes the move hard, so the honest answer is a dated plan with an owner against each part, not an average.',
+      'He wants to move this year and named disruption during the move as what makes it hard, so the honest answer is a dated plan with an owner against each part, not an average.',
     points: [
       'Put a transition calendar in front of him with names against every workstream',
       'Name who carries operations during the move — his Future You has someone else running ops',
