@@ -196,3 +196,10 @@ button.sm-trigger.sm-inline .sm-caret {
     animation-duration: 0.01ms;
   }
 }
+
+/* Inside a phone: placed against the screen (SelectMenu), which is the
+   positioned box it is drawn in. */
+.sm-pop.is-in-phone {
+  position: absolute;
+  z-index: 40;
+}

@@ -56,6 +56,8 @@ export default function SelectMenu({
     top?: number
     bottom?: number
     up: boolean
+    /** Drawn inside the phone's screen rather than on the page. */
+    host?: HTMLElement
   } | null>(null)
   const [active, setActive] = useState(-1)
   const trigger = useRef<HTMLButtonElement>(null)
@@ -81,6 +83,26 @@ export default function SelectMenu({
     if (state !== 'open' || !trigger.current) return
     const r = trigger.current.getBoundingClientRect()
     const want = opts.length * 40 + 12
+    /* Inside a phone the list opens in the phone's own screen: placed and
+       sized in the screen's coordinates (the frame is scaled to fit the
+       window), and turned upward against the screen's foot rather than the
+       window's — on the page it came out too large and ran off the phone. */
+    const host = trigger.current.closest('.cx-screen') as HTMLElement | null
+    if (host && variant === 'field') {
+      const sr = host.getBoundingClientRect()
+      const k = sr.width / host.offsetWidth || 1
+      const top = (r.top - sr.top) / k
+      const bottom = (r.bottom - sr.top) / k
+      const h = host.offsetHeight
+      const roomBelow = h - bottom
+      const upward = roomBelow < want + 12 && top > roomBelow
+      setPlace(
+        upward
+          ? { left: (r.left - sr.left) / k, width: r.width / k, bottom: h - top - 1, up: true, host }
+          : { left: (r.left - sr.left) / k, width: r.width / k, top: bottom - 1, up: false, host },
+      )
+      return
+    }
     const below = window.innerHeight - r.bottom
     const up = below < want + 12 && r.top > below
     if (variant === 'inline') {
@@ -175,7 +197,7 @@ export default function SelectMenu({
         createPortal(
           <div
             ref={list}
-            className={`sm-pop sm-pop-${variant}${place.up ? ' is-up' : ''}${state === 'closing' ? ' is-closing' : ''}`}
+            className={`sm-pop sm-pop-${variant}${place.up ? ' is-up' : ''}${place.host ? ' is-in-phone' : ''}${state === 'closing' ? ' is-closing' : ''}`}
             role="listbox"
             style={{
               left: place.left,
@@ -204,7 +226,7 @@ export default function SelectMenu({
               </button>
             ))}
           </div>,
-          document.body,
+          place.host ?? document.body,
         )}
     </>
   )
