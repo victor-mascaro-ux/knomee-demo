@@ -216,6 +216,11 @@
   cursor: pointer;
   text-align: center;
 }
+/* The dashboard's tabs, exactly (.tab in index.css): the first sits flush
+   with the page's left edge, so its underline starts where the page does. */
+.pp-tab:first-child {
+  padding-left: 0;
+}
 .pp-tab.is-active {
   color: var(--plum, #240446);
   font-weight: 600;
@@ -1158,8 +1163,8 @@
 .pp-tab {
   transition: color 0.15s ease;
 }
-.pp-tab:hover {
-  color: var(--plum, #240446);
+.pp-tab:not(.is-active):hover {
+  color: #333;
 }
 
 /* Add buttons and badges spring on hover. */

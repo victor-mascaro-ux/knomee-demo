@@ -1484,8 +1484,9 @@ svg.cx-tab-mark {
 
 /* ── every modal on a phone is a sheet ──
    The one My Team's "Add someone" set: it rises from the foot of the screen,
-   full width, rounded along its top, on a dimmed screen; a white head with the
-   title in the page's own ink, and a foot of full-width pill buttons. Goals,
+   full width, rounded along its top, on a dimmed screen; the brand's coloured
+   bar across its top with the title in white, and a foot of full-width pill
+   buttons. Goals,
    life events, questions, vision boards, the adventures' "about" cards — all
    of them, on the phone only; a desktop modal stays a centred card. */
 .cx-screen .modal-backdrop {
@@ -1512,21 +1513,21 @@ svg.cx-tab-mark {
 .cx-screen .modal-backdrop .modal .modal-header {
   height: auto;
   min-height: 0;
-  padding: 22px 20px 4px;
+  padding: 18px 20px;
   border-radius: 0;
-  background: #fff;
+  background: var(--surface-brand, var(--plum, #240446));
 }
 .cx-screen .modal-backdrop .modal .modal-title {
   font-size: 18px;
   font-weight: var(--weight-bold, 700);
-  color: var(--text-strong, #240446);
+  color: #fff;
 }
 .cx-screen .modal-backdrop .modal .modal-close {
-  color: var(--text-secondary, #6d6a76);
+  color: #fff;
 }
 .cx-screen .modal-backdrop .modal .modal-close:hover {
-  background: var(--surface-muted, #f3f1f6);
-  color: var(--text-strong, #240446);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 .cx-screen .modal-backdrop .modal .modal-body {
   padding: 14px 20px;

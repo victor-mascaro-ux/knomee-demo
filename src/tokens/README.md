@@ -43,9 +43,8 @@ small and diffable.
   row use `align-items: flex-start`; in a grid, `align-self: start` on the
   icon's cell. Nudge it down only to meet the first line's cap height.
 
-- **A modal is a white panel on a dimmed plum ground.** Rounded 20px; a white
-  head with the title in the page's ink (never a coloured bar) and a quiet
-  grey close; the body on white; a foot of full-width pill buttons, the main
+- **A modal is a white panel on a dimmed plum ground.** Rounded 20px; the brand's coloured bar across the top with the title and
+  close in white; the body on white; a foot of full-width pill buttons, the main
   action filled. On a desktop it sits centred; on a phone the same panel
   rises from the foot of the screen as a sheet, full width, rounded along its
   top only. The base styles are in `index.css` (the modal block, prefixed
@@ -59,4 +58,11 @@ small and diffable.
   plain grey placeholder. Every modal's fields follow it (the block in
   `index.css` after the modal rules maps each modal's own class names onto
   it); a new form reuses those classes or `.sh-field`.
+
+- **Page tabs are one style.** A row of labels over a 1px rule: 16px grey,
+  the active one plum and semibold with a 3px plum bar on the rule; the first
+  tab sits flush with the page's left edge; hover darkens an inactive label to
+  #333. The dashboard's `.tab` and a profile's `.pp-tab` are the same thing and
+  must stay so. A choice between two views of one thing (My ID | Who sees it,
+  the legal documents) is the segmented pill switch instead, not tabs.
 

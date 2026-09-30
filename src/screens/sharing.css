@@ -547,10 +547,14 @@
   }
 }
 .sh-form-title {
-  margin: 0 0 2px;
+  /* The modals' coloured bar across the top, the title in white. */
+  margin: -22px -20px 4px;
+  padding: 18px 20px;
+  border-radius: 20px 20px 0 0;
+  background: var(--surface-brand, var(--plum, #240446));
   font-size: 18px;
   font-weight: var(--weight-bold, 700);
-  color: var(--text-strong);
+  color: #fff;
 }
 .sh-field {
   display: flex;
