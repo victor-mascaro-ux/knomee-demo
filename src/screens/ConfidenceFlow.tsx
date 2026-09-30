@@ -25,6 +25,7 @@ import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyRes
 import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
+import { AdventureMark } from './AdventureMark'
 
 export interface ConfidenceStatement {
   statement: string
@@ -430,6 +431,7 @@ export default function ConfidenceFlow({
           {/* Where you are, at the top under the bar — the foot is only
               Back and the one thing to press. */}
           <div className="jf-top">
+            <AdventureMark />
             <div className="af-progress" aria-hidden>
               {statements.map((_, i) => (
                 <i key={i} className={i <= at ? 'is-on' : ''} />

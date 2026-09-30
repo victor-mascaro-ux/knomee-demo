@@ -27,6 +27,7 @@ import JoyReward from './JoyReward'
 import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
+import { AdventureMark } from './AdventureMark'
 
 export interface OutlookAnswers {
   concerns: string[]
@@ -673,6 +674,7 @@ export default function OutlookFlow({
           {/* Where you are, at the top under the bar — the foot is only
               Back and the one thing to press. */}
           <div className="jf-top">
+            <AdventureMark />
             <div className="af-progress" aria-hidden>
               {['concerns', 'hopes'].map((s, i) => (
                 <i key={s} className={i <= at - 1 ? 'is-on' : ''} />

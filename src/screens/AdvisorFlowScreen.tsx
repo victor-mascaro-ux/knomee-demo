@@ -26,6 +26,7 @@ import {
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
+  artOf,
   AdventureBarTitle,
   brandVars,
   type FlowBrand,
@@ -48,6 +49,7 @@ import './client-experience.css'
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
 import './advisor-flow.css'
+import { AdventureMark, AdventureMarkContext } from './AdventureMark'
 
 const ZOOM_STEP = 0.1
 
@@ -383,14 +385,17 @@ export default function AdvisorFlowScreen({
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
         <IPhone scale={scale} bare={bare}>
+          <AdventureMarkContext.Provider
+            value={
+              adventure
+                ? { art: artOf(adventure.art), at: advisorAdventures.indexOf(adventure) + 1, of: advisorAdventures.length }
+                : null
+            }
+          >
           <header className="cx-appbar">
             {adventure && tab === 'flow' ? (
               <>
-                <AdventureBarTitle
-                  brand={brand}
-                  title={adventure.title}
-                  at={[advisorAdventures.indexOf(adventure) + 1, advisorAdventures.length]}
-                />
+                <AdventureBarTitle brand={brand} title={adventure.title} />
                 <button
                   className="cx-appbar-burger"
                   type="button"
@@ -424,6 +429,7 @@ export default function AdvisorFlowScreen({
               measure yet before the first question, so no strip until then. */}
           {inFlow && step.kind !== 'welcome' && (
             <div className="af-top">
+              <AdventureMark />
               <div className="af-progress" aria-hidden>
                 {steps.map((s, n) => (
                   <i key={s.id} className={n <= i ? 'is-on' : ''} />
@@ -584,6 +590,7 @@ export default function AdvisorFlowScreen({
               </div>
             </div>
           )}
+          </AdventureMarkContext.Provider>
         </IPhone>
       </div>
 

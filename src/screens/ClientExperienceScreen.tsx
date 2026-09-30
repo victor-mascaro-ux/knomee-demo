@@ -56,6 +56,7 @@ import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
+import { AdventureMarkContext } from './AdventureMark'
 
 const art: Record<ArtKey, string> = {
   'financial-joy': icFinancialJoy,
@@ -68,6 +69,9 @@ const art: Record<ArtKey, string> = {
   vision: imgVision,
   divorce: imgDivorce,
 }
+
+/** An adventure's icon, for the pieces that draw it outside this file. */
+export const artOf = (k: ArtKey) => art[k]
 
 const moodArt: Record<MoodId, string> = {
   worried: moodWorried,
@@ -400,17 +404,7 @@ export function AppbarBrand({ brand }: { brand?: FlowBrand | null }) {
    but it still says whose app this is, the way Gmail or a bank's app keeps its
    mark in the corner of every screen: the firm's logo (or knomee's), small, a
    hairline, then the adventure. */
-export function AdventureBarTitle({
-  brand,
-  title,
-  at,
-}: {
-  brand?: FlowBrand | null
-  title: ReactNode
-  /** Which of the journey's adventures this is — [2, 5] reads "2 of 5" — so
-      the screen says where it sits in the whole, not only in itself. */
-  at?: [number, number]
-}) {
+export function AdventureBarTitle({ brand, title }: { brand?: FlowBrand | null; title: ReactNode }) {
   return (
     <div className="af-appbar-lead">
       <span className="af-appbar-logo">
@@ -418,11 +412,6 @@ export function AdventureBarTitle({
       </span>
       <span className="af-appbar-rule" aria-hidden />
       <div className="af-appbar-title">{title}</div>
-      {at && at[0] > 0 && (
-        <span className="af-appbar-at">
-          {at[0]} of {at[1]}
-        </span>
-      )}
     </div>
   )
 }
@@ -1592,6 +1581,20 @@ export default function ClientExperienceScreen({
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
         <IPhone scale={scale} bare={bare} dim={sheet || voiceOpen}>
+          <AdventureMarkContext.Provider
+            value={
+              adventure
+                ? {
+                    art: (() => {
+                      const k = journey.find((j) => j.id === adventure)?.art
+                      return k ? art[k] : undefined
+                    })(),
+                    at: journey.filter((j) => j.core).findIndex((j) => j.id === adventure) + 1,
+                    of: journey.filter((j) => j.core).length,
+                  }
+                : null
+            }
+          >
           {/* Under a firm's brand only the bar changes: its colour, and its logo
               in place of knomee's. Everything inside stays the journey's own. */}
           <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
@@ -1602,10 +1605,6 @@ export default function ClientExperienceScreen({
                 <AdventureBarTitle
                   brand={brand}
                   title={journey.find((j) => j.id === adventure)?.title ?? 'Financial Joy'}
-                  at={[
-                    journey.filter((j) => j.core).findIndex((j) => j.id === adventure) + 1,
-                    journey.filter((j) => j.core).length,
-                  ]}
                 />
                 <button
                   className="cx-appbar-burger"
@@ -1932,6 +1931,7 @@ export default function ClientExperienceScreen({
               progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}
+          </AdventureMarkContext.Provider>
         </IPhone>
       </div>
 

@@ -40,6 +40,7 @@ import JoyReward from './JoyReward'
 import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
+import { AdventureMark } from './AdventureMark'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -1226,6 +1227,7 @@ export default function MoveFlow({
           carry their own three-stop track instead. */}
       {qi >= 0 && (
         <div className="jf-top">
+          <AdventureMark />
           <div className="af-progress" aria-hidden>
             {QUESTIONS.map((s, i) => (
               <i key={s} className={i <= qi ? 'is-on' : ''} />
