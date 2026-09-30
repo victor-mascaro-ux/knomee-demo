@@ -321,6 +321,8 @@ export default function AdvisorProfileScreen({
               who={`advisor-${who.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}
               idName="Business ID"
               roles={ADVISOR_ROLES}
+              /* Placeholder: the invite does not yet record who made it. */
+              sender={{ id: 'sender', name: 'Jordan Ellis', role: 'recruiter', email: 'jordan.ellis@example.com' }}
               /* Marcus, the worked example, arrives with his team; everybody
                  else's is theirs to add. */
               team={

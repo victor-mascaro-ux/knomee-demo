@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './sharing.css'
 import SelectMenu from '../components/SelectMenu'
 import { AddButton, EmptyState, EMPTY_ART } from './profileParts'
@@ -20,7 +21,7 @@ export const ROLES = ['partner', 'advisor', 'banker', 'accountant', 'attorney', 
 /* An advisor's team is the practice's: the people a Business ID goes to. */
 export const ADVISOR_ROLES = ['business partner', 'junior advisor', 'associate', 'compliance', 'spouse', 'accountant']
 type Role = string
-export type Person = { id: string; name: string; role: Role }
+export type Person = { id: string; name: string; role: Role; email?: string }
 type Access = Record<string, { on: boolean; off: string[] }>
 
 export type SharedCard = { id: string; title: string; icon: string }
@@ -67,11 +68,6 @@ const Lock = () => (
     <path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7" strokeLinecap="round" />
   </svg>
 )
-const Pencil = () => (
-  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-    <path d="M10.8 2.8a1.6 1.6 0 0 1 2.3 2.3L6.2 12l-3 .8.8-3 6.8-7Z" strokeLinejoin="round" />
-  </svg>
-)
 
 /* The switch between the ID's two faces: what it says, and who sees it. */
 export function SharingLens({ value, onChange }: { value: 'id' | 'sharing'; onChange: (v: 'id' | 'sharing') => void }) {
@@ -94,7 +90,12 @@ export default function SharingView({
   roles = ROLES,
   who = 'client',
   idName = 'Financial ID',
+  sender,
 }: {
+  /** Whoever sent the link, at the head of the team: named, marked as the
+      one who sent it, and not removable, so the page opens on a person rather
+      than an empty list. */
+  sender?: Person
   cards: SharedCard[]
   /** The team they start with. */
   team?: Person[]
@@ -106,14 +107,16 @@ export default function SharingView({
   const store = who === 'client' ? KEY : `${KEY}.${who}`
   const [team, setTeam] = useStored<Person[]>(`${store}.team`, startTeam)
   const [access, setAccess] = useStored<Access>(`${store}.access`, {})
-  const [editing, setEditing] = useState<string | null>(null)
+  /* The person being added or changed, in the form; null when it is shut. */
+  const [form, setForm] = useState<Person | null>(null)
+  const everyone = sender ? [sender, ...team] : team
   const of = (id: string) => access[id] ?? { on: true, off: [] }
   const setCard = (id: string, patch: Partial<Access[string]>) =>
     setAccess((a) => ({ ...a, [id]: { ...of(id), ...patch } }))
-  const addPerson = () => {
-    const id = `p${Date.now()}`
-    setTeam((t) => [...t, { id, name: '', role: roles[0] }])
-    setEditing(id)
+  const addPerson = () => setForm({ id: `p${Date.now()}`, name: '', email: '', role: roles[0] })
+  const savePerson = (p: Person) => {
+    setTeam((t) => (t.some((x) => x.id === p.id) ? t.map((x) => (x.id === p.id ? p : x)) : [...t, p]))
+    setForm(null)
   }
   const shared = cards.filter((c) => of(c.id).on).length
 
@@ -133,61 +136,57 @@ export default function SharingView({
           </span>
           <AddButton label="Add someone to your team" onClick={addPerson} />
         </div>
-        {team.length === 0 && (
+        {everyone.length === 0 && (
           <EmptyState art={EMPTY_ART.team} label="Add someone to your team" cta onClick={addPerson} />
         )}
         <ul className="sh-people">
-          {team.map((p, i) => (
-            <li className="sh-person" key={p.id} style={{ ['--i' as string]: i }}>
-              <span className="sh-avatar" aria-hidden>
-                {(p.name || '?').charAt(0).toUpperCase()}
-              </span>
-              {editing === p.id ? (
-                <input
-                  className="sh-name-input"
-                  autoFocus
-                  value={p.name}
-                  placeholder="Their name"
-                  onChange={(e) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, name: e.target.value } : x)))}
-                  onBlur={() => {
-                    setEditing(null)
-                    setTeam((t) => t.filter((x) => x.id !== p.id || x.name.trim()))
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-                />
-              ) : (
-                <button className="sh-name" type="button" onClick={() => setEditing(p.id)}>
-                  {p.name}
-                  <Pencil />
+          {everyone.map((p, i) => {
+            const isSender = p.id === sender?.id
+            return (
+              <li className="sh-person" key={p.id} style={{ ['--i' as string]: i }}>
+                <span className="sh-avatar" aria-hidden>
+                  {(p.name || '?').charAt(0).toUpperCase()}
+                </span>
+                {/* Who they are, in one look: name, then what they do and how
+                    to reach them. Tapping opens the form they were added with. */}
+                <button
+                  className="sh-who"
+                  type="button"
+                  disabled={isSender}
+                  onClick={() => setForm(p)}
+                  aria-label={isSender ? undefined : `Change ${p.name}`}
+                >
+                  <b className="sh-who-name">
+                    {p.name}
+                    {isSender && <span className="sh-tag">Sent your invite</span>}
+                  </b>
+                  <span className="sh-who-sub">
+                    {p.role}
+                    {p.email ? ` · ${p.email}` : ''}
+                  </span>
                 </button>
-              )}
-              {/* The product's own dropdown, not the browser's list. */}
-              <SelectMenu
-                className="sh-role"
-                value={p.role}
-                options={[...roles]}
-                onChange={(v) => setTeam((t) => t.map((x) => (x.id === p.id ? { ...x, role: v } : x)))}
-              />
-              {/* Off the team, and so off every card they could see. */}
-              <button
-                className="sh-remove"
-                type="button"
-                aria-label={`Remove ${p.name || 'this person'} from your team`}
-                onClick={() => {
-                  setTeam((t) => t.filter((x) => x.id !== p.id))
-                  setAccess((acc) =>
-                    Object.fromEntries(
-                      Object.entries(acc).map(([k, v]) => [k, { ...v, off: v.off.filter((x) => x !== p.id) }]),
-                    ),
-                  )
-                }}
-              >
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
-                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </li>
-          ))}
+                {!isSender && (
+                  <button
+                    className="sh-remove"
+                    type="button"
+                    aria-label={`Remove ${p.name || 'this person'} from your team`}
+                    onClick={() => {
+                      setTeam((t) => t.filter((x) => x.id !== p.id))
+                      setAccess((acc) =>
+                        Object.fromEntries(
+                          Object.entries(acc).map(([k, v]) => [k, { ...v, off: v.off.filter((x) => x !== p.id) }]),
+                        ),
+                      )
+                    }}
+                  >
+                    <svg viewBox="0 0 16 16" width="10" height="10" fill="none" aria-hidden>
+                      <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </section>
 
@@ -223,11 +222,11 @@ export default function SharingView({
             <div className={`sh-fold${a.on ? ' is-open' : ''}`}>
               <div className="sh-fold-in">
                 <span className="pp-fy-label">Shared with</span>
-                {team.length === 0 && (
+                {everyone.length === 0 && (
                   <p className="sh-none">Add the people on your team, then choose who sees this.</p>
                 )}
                 <div className="sh-chips">
-                  {team.map((p, k) => {
+                  {everyone.map((p, k) => {
                     const on = !a.off.includes(p.id)
                     return (
                       <button
@@ -267,6 +266,84 @@ export default function SharingView({
           </section>
         )
       })}
+      {form && (
+        <PersonForm
+          person={form}
+          roles={roles}
+          isNew={!team.some((x) => x.id === form.id)}
+          onCancel={() => setForm(null)}
+          onSave={savePerson}
+        />
+      )}
     </div>
+  )
+}
+
+/* Adding someone, or changing them: their name, their email and what they
+   do, in a sheet over the phone's screen (or over the page, off a phone). */
+function PersonForm({
+  person,
+  roles,
+  isNew,
+  onCancel,
+  onSave,
+}: {
+  person: Person
+  roles: string[]
+  isNew: boolean
+  onCancel: () => void
+  onSave: (p: Person) => void
+}) {
+  const [p, setP] = useState<Person>(person)
+  const anchor = useRef<HTMLSpanElement>(null)
+  const [host, setHost] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    setHost((anchor.current?.closest('.cx-screen') as HTMLElement | null) ?? document.body)
+  }, [])
+  const ok = !!p.name.trim() && /\S+@\S+\.\S+/.test(p.email ?? '')
+  const sheet = (
+    <div className={`sh-form-back${host && host !== document.body ? ' is-in-phone' : ''}`} onClick={onCancel}>
+      <form
+        className="sh-form"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (ok) onSave({ ...p, name: p.name.trim(), email: p.email?.trim() })
+        }}
+      >
+        <h3 className="sh-form-title">{isNew ? 'Add someone to your team' : 'Change their details'}</h3>
+        <label className="sh-field">
+          <span>Name</span>
+          <input autoFocus value={p.name} onChange={(e) => setP({ ...p, name: e.target.value })} placeholder="Their name" />
+        </label>
+        <label className="sh-field">
+          <span>Email</span>
+          <input
+            type="email"
+            value={p.email ?? ''}
+            onChange={(e) => setP({ ...p, email: e.target.value })}
+            placeholder="name@firm.com"
+          />
+        </label>
+        <div className="sh-field">
+          <span>Role</span>
+          <SelectMenu className="sh-role" value={p.role} options={[...roles]} onChange={(v) => setP({ ...p, role: v })} />
+        </div>
+        <div className="sh-form-acts">
+          <button type="button" className="sh-form-cancel" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="sh-form-save" disabled={!ok}>
+            {isNew ? 'Add to team' : 'Save'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+  return (
+    <>
+      <span ref={anchor} hidden />
+      {host && createPortal(sheet, host)}
+    </>
   )
 }

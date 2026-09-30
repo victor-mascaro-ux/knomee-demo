@@ -462,3 +462,151 @@
 .sh-team .pp-empty-cta:hover .pp-empty-colour {
   filter: none;
 }
+
+/* ── who someone is, on their row: name, then role and email ── */
+.sh-who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.sh-who:disabled {
+  cursor: default;
+}
+.sh-who-name {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--text-base, 15px);
+  font-weight: var(--weight-semibold, 600);
+}
+.sh-who-sub {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  color: var(--text-secondary, #6d6a76);
+}
+.sh-tag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--k-lime-light, #ecfbd3);
+  color: #3d5a0f;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ── adding someone: a sheet over the phone's screen ── */
+.sh-form-back {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(12, 6, 26, 0.42);
+  animation: shFade 0.2s ease both;
+}
+.sh-form-back.is-in-phone {
+  position: absolute;
+  z-index: 30;
+}
+@keyframes shFade {
+  from {
+    opacity: 0;
+  }
+}
+.sh-form {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14, 14px);
+  padding: 22px 20px 28px;
+  border-radius: 20px 20px 0 0;
+  background: #fff;
+  box-shadow: 0 -10px 30px rgba(20, 10, 40, 0.18);
+  animation: shUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes shUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.sh-form-title {
+  margin: 0 0 2px;
+  font-size: 18px;
+  font-weight: var(--weight-bold, 700);
+  color: var(--text-strong);
+}
+.sh-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary, #6d6a76);
+}
+.sh-field input {
+  padding: 11px 12px;
+  border: 1.5px solid var(--border-default, #e7e4ee);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-strong);
+  outline: none;
+}
+.sh-field input:focus {
+  border-color: var(--k-grape, #7639a1);
+}
+.sh-field .sh-role {
+  max-width: none;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+.sh-form-acts {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.sh-form-cancel,
+.sh-form-save {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sh-form-cancel {
+  border: 1.5px solid var(--border-default, #e7e4ee);
+  background: #fff;
+  color: var(--text-strong);
+}
+.sh-form-save {
+  border: 0;
+  background: var(--action-primary, #240446);
+  color: #fff;
+}
+.sh-form-save:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
