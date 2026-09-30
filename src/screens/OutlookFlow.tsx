@@ -120,7 +120,9 @@ export const CLIENT_OUTLOOK: OutlookContent = {
   starts: { concern: CONCERN_STARTS, hope: HOPE_STARTS },
   placeholder: { concern: 'Can I afford to retire in 10 years?', hope: 'I dream of a home by the water.' },
   examples: SAMPLE_OUTLOOK,
-  fill: true,
+  /* A blank answer is a skipped question, said so on the button — not a
+     sample slipped in behind an OK. */
+  fill: false,
   reading: (c, h) =>
     h > c
       ? 'There is more light than cloud in your sky. You are looking ahead with more hope than worry — that is ground to build on.'

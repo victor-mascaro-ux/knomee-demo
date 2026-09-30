@@ -146,7 +146,9 @@ export const CLIENT_FUTURE: FutureYouContent = {
     placeholder: 'Dear Me,',
   },
   sample: SAMPLE_FUTURE,
-  fill: true,
+  /* A blank answer is a skipped question, said so on the button — not a
+     sample slipped in behind an OK. */
+  fill: false,
   results: {
     title: 'You visualized Future You',
     sub: 'This is the life you are preparing for:',
