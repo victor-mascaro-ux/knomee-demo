@@ -60,8 +60,9 @@ small and diffable.
   it); a new form reuses those classes or `.sh-field`.
 
 - **Page tabs are one style.** A row of labels over a 1px rule: 16px grey,
-  the active one plum and semibold with a 3px plum bar on the rule; the first
-  tab sits flush with the page's left edge; hover darkens an inactive label to
+  the active one plum and semibold with a 3px plum bar on the rule; every tab,
+  the first included, has the same padding on both sides so its bar sits
+  evenly under its label; hover darkens an inactive label to
   #333. The dashboard's `.tab` and a profile's `.pp-tab` are the same thing and
   must stay so — and so are My ID | Who sees it and the legal documents'
   tabs. There is no other tab style in the app.

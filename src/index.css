@@ -316,9 +316,8 @@ body {
   position: relative;
 }
 /* First tab's label lines up with the page title and the logo above. */
-.tab:first-child {
-  padding-left: 0;
-}
+/* The first tab keeps its padding like the rest: its bar then sits evenly
+   under its label rather than starting at the letters and running on. */
 
 .tab-active {
   color: var(--plum);

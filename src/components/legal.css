@@ -80,9 +80,6 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.lg-tabs button:first-child {
-  padding-left: 0;
-}
 .lg-tabs button[aria-pressed='true'] {
   color: var(--plum, #240446);
   font-weight: 600;

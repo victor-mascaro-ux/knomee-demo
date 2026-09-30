@@ -619,7 +619,7 @@
 
 /* My ID | Who sees it are page tabs, the same as the dashboard's and a
    profile's (.tab / .pp-tab): labels over a 1px rule, the active one plum and
-   semibold with a 3px bar, the first flush left. The sliding pill is gone. */
+   semibold with a 3px bar. The sliding pill is gone. */
 .sh-lens {
   display: flex;
   gap: 10px;
@@ -642,9 +642,6 @@
   color: var(--grey-text, #757575);
   transition: color 0.2s ease;
 }
-.sh-lens button:first-of-type {
-  padding-left: 0;
-}
 .sh-lens button[aria-pressed='true'] {
   color: var(--plum, #240446);
   font-weight: 600;
@@ -658,9 +655,6 @@
   height: 3px;
   border-radius: 3px;
   background: var(--plum, #240446);
-}
-.sh-lens button:first-of-type[aria-pressed='true']::after {
-  left: 0;
 }
 .sh-lens button:not([aria-pressed='true']):hover {
   color: #333;
