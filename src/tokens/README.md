@@ -51,3 +51,12 @@ small and diffable.
   top only. The base styles are in `index.css` (the modal block, prefixed
   `body` so no modal's own header colour wins) and the phone sheet in
   `client-experience.css`; My Team's "Add someone" form is the reference.
+
+- **A form field is label, helper, field — in that order, one look.** The
+  label is 13px semibold in the page's ink; an optional helper under it is
+  12.5px grey, upright (never italic); the field is a white box with a 12px
+  radius and a 1.5px light border that turns grape on focus, 15px text, a
+  plain grey placeholder. Every modal's fields follow it (the block in
+  `index.css` after the modal rules maps each modal's own class names onto
+  it); a new form reuses those classes or `.sh-field`.
+
