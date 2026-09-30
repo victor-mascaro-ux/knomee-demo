@@ -1751,15 +1751,15 @@ button.af-opt:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  /* A quick pass, then a long rest: the light crosses in about a second
-     and comes back every nine. */
-  animation: advTitleShine 9s ease-in-out 1s infinite;
+  /* A quick pass, then a rest a little longer than Get Started's shine: the
+     light crosses in about a second and comes back every three and a half. */
+  animation: advTitleShine 3.5s ease-in-out 1s infinite;
 }
 @keyframes advTitleShine {
   0% {
     background-position: 100% 0;
   }
-  12%,
+  30%,
   100% {
     background-position: 0% 0;
   }
