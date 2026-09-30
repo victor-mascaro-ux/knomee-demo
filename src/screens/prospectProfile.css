@@ -216,11 +216,7 @@
   cursor: pointer;
   text-align: center;
 }
-/* The dashboard's tabs, exactly (.tab in index.css): the first sits flush
-   with the page's left edge, so its underline starts where the page does. */
-.pp-tab:first-child {
-  padding-left: 0;
-}
+/* The dashboard's tabs, exactly (.tab in index.css). */
 .pp-tab.is-active {
   color: var(--plum, #240446);
   font-weight: 600;
