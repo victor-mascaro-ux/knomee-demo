@@ -57,6 +57,7 @@ import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 import { AdventureMarkContext } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 const art: Record<ArtKey, string> = {
   'financial-joy': icFinancialJoy,
@@ -798,7 +799,7 @@ function AdventuresScreen({
     return (
       <>
         <h2 className="cx-screen-title">My Adventures</h2>
-        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} goal="Financial ID" />
+        <ProgressMeter done={coreDone} required={journey.filter((j) => j.core).length} />
         <div className="cx-adv-list">
           {/* What is still to do leads — the next adventure, the ones waiting
               behind it, and (once Goals is done) the two she keeps adding to —
@@ -863,7 +864,7 @@ function AdventuresScreen({
       {/* The page says what it is, then how far through it you are: a meter
           above the title measures something that has not been named yet. */}
       <h2 className="cx-screen-title">My Adventures</h2>
-      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} goal="Financial ID" />
+      <ProgressMeter done={adventureProgress.done} required={adventureProgress.required} />
       <div className="cx-adv-list">
         {completedAdventures.map((a) => (
           <CompletedRow
@@ -1338,6 +1339,7 @@ export default function ClientExperienceScreen({
   brand?: FlowBrand | null
 }) {
   const [tab, setTab] = useState<TabId>('adventures')
+  useCcNav('cx.tab', tab, setTab)
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
@@ -1352,6 +1354,7 @@ export default function ClientExperienceScreen({
   /* The adventure being taken, if any. It takes over the screen: the app bar
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
+  useCcNav('cx.adventure', adventure, setAdventure)
   /* Reopened from her Financial ID: the adventure's ending again, with her
      answers, and back to the page after — nothing on the journey changes. */
   const [reviewing, setReviewing] = useState(false)

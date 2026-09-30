@@ -31,6 +31,7 @@ import JoyReward from './JoyReward'
    for the plum it sits on there. */
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
 import { AdventureMark } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 export interface JoyAnswers {
   tools: string[]
@@ -161,6 +162,7 @@ export default function JoyFlow({
   const areas = content.areas
   const sample = content.sample
   const [at, setAt] = useState(() => (review ? steps.findIndex((s) => s.kind === 'done') : 0))
+  useCcNav('joy.at', at, setAt)
   /* Which of the seven areas the attention screen is on. It is one step in the
      flow and seven screens inside it, so Back walks the areas before it walks
      out of the question. */

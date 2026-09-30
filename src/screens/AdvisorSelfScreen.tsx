@@ -106,6 +106,7 @@ import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
 import { AdventureMark, AdventureMarkContext } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 const ZOOM_STEP = 0.1
 const OTHER = 'Other'
@@ -731,7 +732,6 @@ function StepBody({
     case 'home':
       return (
         <AdventureList
-          goal="Business ID"
           rows={journey ? journeyStates(a) : adventureStates(a)}
           done={journey ? journeyProgress(a).done : d.progress.done}
           required={d.progress.required}
@@ -1153,8 +1153,10 @@ function FlowPhone({
     return rich && home >= 0 && journeyProgress(answers).done + Object.keys(answers.choice).length > 0 ? [home] : [0]
   })
   const i = trail[trail.length - 1]
+  useCcNav('self.trail', trail, setTrail)
   const viewing = mode === 'view'
   const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
+  useCcNav('self.tab', tab, setTab)
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
@@ -1218,6 +1220,7 @@ function FlowPhone({
      while it runs and hands them to the sheet when it ends, the way the
      client's do — so it takes over the screen, bar to foot. */
   const [richOpen, setRichOpen] = useState<AdventureId | null>(null)
+  useCcNav('self.rich', richOpen, setRichOpen)
   const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
   // Tapping a row on the adventures list drops you at that adventure's intro.

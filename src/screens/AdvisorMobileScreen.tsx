@@ -160,7 +160,6 @@ export default function AdvisorMobileScreen({
           >
             {tab === 'flow' ? (
               <AdventureList
-          goal="Business ID"
                 rows={rows}
                 done={d.progress.done}
                 required={d.progress.required}

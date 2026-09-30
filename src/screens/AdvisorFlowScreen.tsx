@@ -109,7 +109,6 @@ function StepBody({
     case 'home':
       return (
         <AdventureList
-          goal="Business ID"
           rows={advisorAdventures}
           done={advisorProgress.done}
           required={advisorProgress.required}

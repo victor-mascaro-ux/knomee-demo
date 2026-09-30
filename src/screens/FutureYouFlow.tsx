@@ -27,6 +27,7 @@ import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
 import { AdventureMark } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 export interface Pick {
   label: string
@@ -808,6 +809,7 @@ export default function FutureYouFlow({
     'postcard',
   ]
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  useCcNav('fy.step', step, setStep)
   const [a, setA] = useState<FutureYouAnswers>(
     () => review ?? { where: [], doing: [], with: [], when: null, detail: [], postcard: '', clarity: null },
   )

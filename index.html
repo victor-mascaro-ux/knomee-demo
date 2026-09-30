@@ -747,6 +747,10 @@
       // neither and fall back to their route, then their screen.
       sub: (typeof raw.sub === 'string') ? raw.sub : null,
       page: (typeof raw.page === 'string' && raw.page) ? raw.page : null,
+      // The app's own position when the note was left — tab, step, open
+      // adventure and the step inside it (src/ccNav.ts) — so its card can
+      // take you back to exactly that screen.
+      nav: (raw.nav && typeof raw.nav === 'object') ? raw.nav : null,
       x: raw.x, y: raw.y,
       img: raw.img || null,
       createdAt: raw.createdAt || Date.now(),
@@ -973,10 +977,39 @@
   const hereKey = () => (currentRoute || '') + '|' + currentSub;
   /* Where a note belongs: its page if it recorded one, else (older notes)
      its route, else its screen. */
+  /* A phone is showing: its steps and tabs share one address. */
+  function onPhone() {
+    try { return !!proto.contentDocument.querySelector('.cx-device'); } catch (e) { return false; }
+  }
   function belongsHere(t) {
     if (t.page) return t.page === hereKey();
+    // An older note, left before the step was recorded. On a phone every
+    // step shares the address, so pinning it by address stacked every such
+    // note onto whatever screen was up. It stays in the rail instead.
+    if (onPhone()) return false;
     if (t.route) return t.route === currentRoute;
     return !!canon(t.screen) && canon(t.screen) === canon(currentScreen);
+  }
+  function snapshotNav() {
+    try {
+      const f = proto.contentWindow.__ccNavSnapshot;
+      return f ? f() : null;
+    } catch (e) { return null; }
+  }
+  /* Put the app back where a note was left, one owner at a time: the
+     adventure has to open before its own step can be set, so keep applying
+     until nothing is left or time runs out, then call back. */
+  function restoreNav(nav, done) {
+    const apply = (() => { try { return proto.contentWindow.__ccNavApply; } catch (e) { return null; } })();
+    if (!nav || !apply) { done(); return; }
+    const deadline = Date.now() + 3000;
+    const step = () => {
+      let left = 0;
+      try { left = proto.contentWindow.__ccNavApply(nav); } catch (e) { left = 0; }
+      if (left === 0 || Date.now() > deadline) { setTimeout(done, 150); return; }
+      setTimeout(step, 120);
+    };
+    step();
   }
   const keyOf = (t) => t.page || t.route || ('screen:' + canon(t.screen));
   setInterval(() => {
@@ -1405,8 +1438,12 @@
     if (!t) return;
     const target = threadRoute(t);
     if (!target || target === currentRoute) {   // already here
-      openThread(id);
-      scrollPinIntoView(t);
+      restoreNav(t.nav, () => {
+        currentSub = subPage();
+        renderAll();
+        openThread(id);
+        scrollPinIntoView(findThread(id));
+      });
       return;
     }
     const want = canon(t.screen);
@@ -1427,8 +1464,12 @@
       const settle = (n, prev) => {
         const h = proto.style.height;
         if ((n > 0 && h === prev) || n > 10) {
-          openThread(id);
-          scrollPinIntoView(findThread(id));
+          restoreNav(t.nav, () => {
+            currentSub = subPage();
+            renderAll();
+            openThread(id);
+            scrollPinIntoView(findThread(id));
+          });
           return;
         }
         setTimeout(() => settle(n + 1, h), 110);
@@ -1593,6 +1634,7 @@
       route: currentRoute || null,
       sub: currentSub || null,
       page: hereKey(),
+      nav: snapshotNav(),
       x: xPct, y: yPct,
       img: null,
       createdAt: Date.now(),

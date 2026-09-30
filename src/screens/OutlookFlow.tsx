@@ -28,6 +28,7 @@ import MemoryAsk from './MemoryAsk'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import bgOutlook from '../assets/badges/outlook-on-plum.svg'
 import { AdventureMark } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 export interface OutlookAnswers {
   concerns: string[]
@@ -464,6 +465,7 @@ export default function OutlookFlow({
   askSlot?: (kind: Kind, text: string, setText: (t: string) => void) => { above?: ReactNode; below?: ReactNode }
 }) {
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  useCcNav('ol.step', step, setStep)
   const [a, setA] = useState<OutlookAnswers>(() => review ?? { concerns: [], hopes: [] })
   /* What is in the box right now, per screen. */
   const [draft, setDraft] = useState<Record<Kind, string>>({ concern: '', hope: '' })

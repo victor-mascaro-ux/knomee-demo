@@ -26,6 +26,7 @@ import JoyReward from './JoyReward'
 import icConfidence from '../assets/adventures/confidence.svg'
 import bgConfidence from '../assets/badges/confidence-on-plum.svg'
 import { AdventureMark } from './AdventureMark'
+import { useCcNav } from '../ccNav'
 
 export interface ConfidenceStatement {
   statement: string
@@ -227,6 +228,7 @@ export default function ConfidenceFlow({
   const statements = content.statements
   const n = statements.length
   const [step, setStep] = useState<Step>(review ? 'results' : 'intro')
+  useCcNav('conf.step', step, setStep)
   /* The ending's overlay: said once a moment after it arrives, as Financial
      Joy's is, and again from "Learn more". */
   const ending = useEndingOverlay(step === 'results')
