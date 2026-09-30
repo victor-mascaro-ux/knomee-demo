@@ -386,6 +386,17 @@
   align-items: center;
   gap: var(--space-10);
   padding-top: var(--space-8);
+  /* The way on stays in reach. A long read-back — many picks, long answers —
+     pushed the button below the fold, and a first-time reader took the page
+     for a dead end. So it rides the foot of the screen, on a wash of the page
+     that fades up into what scrolls behind it; the border-image carries the
+     wash out to both edges without widening the page. */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-bottom: var(--space-16);
+  border-image: fill 0 / / 0 100vw
+    linear-gradient(to top, var(--surface-page, #fff) 72%, rgba(255, 255, 255, 0));
 }
 .jr-reward-line {
   margin: 0;
