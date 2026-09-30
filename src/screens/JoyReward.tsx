@@ -17,6 +17,7 @@ import icGoals from '../assets/adventures/goals.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { useEffect, useState } from 'react'
 import './joyReward.css'
+import BadgeArt from './BadgeArt'
 
 /* Confetti, laid out once: a seeded scatter so the burst is the same every
    time it is shown — a demo does not reshuffle between rooms. */
@@ -172,7 +173,7 @@ export default function JoyReward({
           /* The lettering rides inside the badge's own box, so it spins in and
              floats with the art rather than beside it. */
           <div className="jw-badge jw-badge-titled" role="img" aria-label={`${name} — adventure complete`}>
-            <img src={badge} alt="" />
+            <BadgeArt src={badge} />
             <svg viewBox="0 0 1000 1000" aria-hidden>
               <path id="jw-arc" d="M 150 520 A 350 350 0 0 1 850 520" fill="none" />
               <text className="jw-arc-text">
@@ -183,7 +184,7 @@ export default function JoyReward({
             </svg>
           </div>
         ) : (
-          <img className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
+          <BadgeArt className="jw-badge" src={badge} alt={`${name} — adventure complete`} />
         )}
       </div>
 
@@ -198,7 +199,13 @@ export default function JoyReward({
         <div className="jw-next">
           <p>Next adventure:</p>
           <button className="jw-next-btn" type="button" onClick={onNext}>
-            {NEXT_ICON[next] && <img className="jw-next-ic" src={NEXT_ICON[next]} alt="" />}
+            {/* The circle holds still; the icon wanders inside it, as it does
+                in an adventure's title. */}
+            {NEXT_ICON[next] && (
+              <span className="jw-next-ic" aria-hidden>
+                <img src={NEXT_ICON[next]} alt="" />
+              </span>
+            )}
             {next}
           </button>
         </div>

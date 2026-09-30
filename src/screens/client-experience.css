@@ -1576,3 +1576,9 @@ svg.cx-tab-mark {
     animation: none;
   }
 }
+/* A card or photograph opened to look at is not a sheet: it opens in the
+   middle of the screen, over the dimmed page. */
+.cx-screen .modal-backdrop.fyr-zoom {
+  align-items: center;
+  padding: var(--space-16, 16px);
+}
