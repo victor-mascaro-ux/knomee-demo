@@ -350,11 +350,12 @@ const trim = (text: string, cap: number) => {
 }
 
 /** A list of picked options set mid-sentence: "equity I own, a team I built"
-    rather than "Equity I own, A team I built". */
+    rather than "Equity I own, A team I built". An acronym keeps its capitals:
+    "a CFP", not "a cFP". */
 const lowerList = (items: string[], n = items.length) =>
   items
     .slice(0, n)
-    .map((s, i) => (i === 0 ? s : s.charAt(0).toLowerCase() + s.slice(1)))
+    .map((s, i) => (i === 0 || /^[A-Z]{2}/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1)))
     .join(', ')
 
 const sentence = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)

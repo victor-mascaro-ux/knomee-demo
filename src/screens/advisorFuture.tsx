@@ -47,7 +47,16 @@ const KINDS: { group: string; icon: string; items: string[] }[] = [
   {
     group: 'Your people',
     icon: 'people',
-    items: ['A named successor', 'A team I built', 'Someone else running ops', 'Equity I own'],
+    items: [
+      'A named successor',
+      'A team I built',
+      'Someone else running ops',
+      'Equity I own',
+      'CFP',
+      'CPA',
+      'Estate attorney',
+      'Trust officer',
+    ],
   },
   {
     group: 'Your clients',
