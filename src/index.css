@@ -6928,3 +6928,49 @@ button.name-link-btn:hover .name-text {
     display: none !important;
   }
 }
+
+/* ── the modal, one look everywhere (design system) ──
+   A white panel on a dimmed plum ground: rounded 20px, a white head with the
+   title in the page's own ink and a quiet close, and a foot of pill buttons.
+   On a desktop it is a centred card; on a phone the same panel rises from the
+   foot of the screen as a sheet (client-experience.css). `body` in front so a
+   modal's own older header colours cannot win back the plum bar. */
+body .modal-backdrop {
+  background: rgba(12, 6, 26, 0.42);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+body .modal-backdrop .modal {
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -12px rgba(20, 10, 40, 0.32);
+}
+body .modal-backdrop .modal .modal-header {
+  height: auto;
+  min-height: 0;
+  padding: 24px 24px 4px;
+  border-radius: 0;
+  background: #fff;
+}
+body .modal-backdrop .modal .modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-strong, #240446);
+}
+body .modal-backdrop .modal .modal-close {
+  color: var(--text-secondary, #6d6a76);
+  border-radius: 50%;
+}
+body .modal-backdrop .modal .modal-close:hover {
+  background: var(--surface-muted, #f3f1f6);
+  color: var(--text-strong, #240446);
+}
+body .modal-backdrop .modal .modal-body {
+  padding: 16px 24px;
+}
+body .modal-backdrop .modal .modal-footer {
+  padding: 8px 24px 24px;
+  border-radius: 0;
+}
+body .modal-backdrop .modal .modal-footer .btn {
+  flex: 1;
+}
