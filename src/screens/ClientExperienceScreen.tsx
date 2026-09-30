@@ -57,6 +57,7 @@ import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
 import './client-experience-quick-access.css'
 import { AdventureMarkContext } from './AdventureMark'
+import SheetExits from './SheetExits'
 import { useCcNav, useCcNavRoots } from '../ccNav'
 
 const art: Record<ArtKey, string> = {
@@ -444,6 +445,7 @@ export function IPhone({
           <div className={`cx-screen ${dim ? 'has-sheet' : ''}`}>
             {children}
             <LegalHost />
+            <SheetExits />
           </div>
         </div>
       </div>
@@ -492,6 +494,7 @@ export function IPhone({
           </div>
           {children}
           <LegalHost />
+            <SheetExits />
         </div>
       </div>
     </div>
