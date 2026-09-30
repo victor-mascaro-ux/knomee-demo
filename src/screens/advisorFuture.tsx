@@ -98,6 +98,10 @@ export const ADVISOR_FUTURE: FutureYouContent = {
     title: q('fy-intro', 'Let’s materialize your vision for Future You'),
     body: step('fy-intro')?.body ?? '',
     minutes: 2,
+    gets: {
+      do: 'picture where Future You is, who with, and what the practice includes.',
+      get: 'Your Future You card, and a postcard from yourself.',
+    },
   },
   breathe: {
     title: q('fy-breathe', 'This is your future.'),

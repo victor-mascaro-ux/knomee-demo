@@ -1473,3 +1473,11 @@ svg.cx-tab-mark {
     transform: translateX(-50%);
   }
 }
+
+/* What the adventures add up to, named under the progress bar. */
+.cx-progress-goal {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
+  color: var(--k-grape, #7639a1);
+}

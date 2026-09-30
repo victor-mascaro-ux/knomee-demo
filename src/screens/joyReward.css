@@ -341,3 +341,11 @@
   padding: var(--space-24, 24px) 0 32px;
   background: linear-gradient(180deg, rgba(36, 4, 70, 0) 0%, var(--k-plum) 28%);
 }
+
+/* What the count is counting toward, under the bar. */
+.jw-progress-goal {
+  margin: 6px 0 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--k-lime, #c5f25b);
+}

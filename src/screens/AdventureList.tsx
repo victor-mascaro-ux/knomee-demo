@@ -32,6 +32,7 @@ export default function AdventureList({
   onOpen,
   title = 'My Adventures',
   foot,
+  goal,
   lockedOpens = true,
   doneLast = false,
   clientLayout = false,
@@ -52,6 +53,8 @@ export default function AdventureList({
   completedOn: string
   onOpen: (id: AdventureId) => void
   title?: string
+  /** What the count is counting toward, named under the bar. */
+  goal?: string
   /** Anything that belongs under the list — the way back into the flow, where
       a screen has one. */
   foot?: React.ReactNode
@@ -61,11 +64,11 @@ export default function AdventureList({
       {clientLayout ? (
         <>
           <h2 className="cx-screen-title">{title}</h2>
-          <ProgressMeter done={done} required={required} />
+          <ProgressMeter done={done} required={required} goal={goal} />
         </>
       ) : (
         <>
-          <ProgressMeter done={done} required={required} />
+          <ProgressMeter done={done} required={required} goal={goal} />
           <h2 className="cx-screen-title">{title}</h2>
         </>
       )}

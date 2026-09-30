@@ -40,6 +40,7 @@ import JoyReward from './JoyReward'
 import bgMove from '../assets/badges/goals-on-plum-untitled.svg'
 import { PhotoCheck } from './PhotoOther'
 import { afterPrompt } from './OutlookFlow'
+import { IntroGets, type Gets } from './IntroGets'
 
 /* The sparkle on the move card's disc. The Goals one leans up and to the left
    — drawn to sit beside text, not inside a circle — so this pair is balanced
@@ -633,7 +634,7 @@ type Written = Ask & { ghosts: string[]; starters: string[]; placeholder?: strin
 export interface MoveContent {
   /** What the thing is called in a label: "move", "goal". */
   word: string
-  intro: { title: string; body: string; minutes: number }
+  intro: { title: string; body: string; minutes: number; gets?: Gets }
   loading: string
   pick: Ask & { options: string[]; ownPlaceholder: string }
   when: Ask & { stops: string[] }
@@ -660,7 +661,15 @@ export interface MoveContent {
 
 export const ADVISOR_MOVE: MoveContent = {
   word: 'move',
-  intro: { title: title('mv-intro'), body: body('mv-intro'), minutes: 3 },
+  intro: {
+    title: title('mv-intro'),
+    body: body('mv-intro'),
+    minutes: 3,
+    gets: {
+      do: 'say what move you are weighing, when, and what stands in the way.',
+      get: 'Your readiness stage — and it completes your Business ID and your three questions.',
+    },
+  },
   loading: 'Lining up the moves that fit what you’ve told us…',
   pick: { title: title('mv-q1'), sub: body('mv-q1'), options: opts('mv-q1'), ownPlaceholder: 'Open a second office' },
   when: { title: title('mv-q2'), sub: 'Pick the stretch of road it sits on.', stops: opts('mv-q2') },
@@ -857,6 +866,7 @@ export default function MoveFlow({
           </div>
           <h2 className="jf-title">{c.intro.title}</h2>
           <p className="jf-body">{c.intro.body}</p>
+          {c.intro.gets && <IntroGets gets={c.intro.gets} />}
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => go('loading')}>
               Get Started

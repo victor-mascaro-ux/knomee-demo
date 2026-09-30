@@ -353,6 +353,13 @@
   height: 18px;
   background: rgba(255, 255, 255, 0.35);
 }
+.af-appbar-at {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
 .af-appbar-title {
   font-size: 17px;
   font-weight: var(--weight-bold);

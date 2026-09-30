@@ -26,6 +26,7 @@ import JoyReward from './JoyReward'
 import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
+import { IntroGets, type Gets } from './IntroGets'
 
 export interface Pick {
   label: string
@@ -87,7 +88,7 @@ interface PhotoQuestion {
 /** Everything that makes this the client's Future You rather than another
     adventure of the same shape. */
 export interface FutureYouContent {
-  intro: { image: string; title: string; body: string; minutes: number }
+  intro: { image: string; title: string; body: string; minutes: number; gets?: Gets }
   breathe: { title: string; sub: string; prompts: string[] }
   ask: Record<AskKey, PhotoQuestion>
   when: { title: string; sub: string; stops: string[] }
@@ -930,6 +931,7 @@ export default function FutureYouFlow({
           </div>
           <h2 className="jf-title">{content.intro.title}</h2>
           <p className="jf-body">{content.intro.body}</p>
+          {content.intro.gets && <IntroGets gets={content.intro.gets} />}
           <div className="jf-start">
             <button className="jf-go" type="button" onClick={() => setStep('breathe')}>
               Get Started

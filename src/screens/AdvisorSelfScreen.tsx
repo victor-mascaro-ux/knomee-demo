@@ -729,6 +729,7 @@ function StepBody({
     case 'home':
       return (
         <AdventureList
+          goal="Business ID"
           rows={journey ? journeyStates(a) : adventureStates(a)}
           done={journey ? journeyProgress(a).done : d.progress.done}
           required={d.progress.required}
@@ -1309,7 +1310,11 @@ function FlowPhone({
           <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
             {adventure && tab === 'flow' ? (
               <>
-                <AdventureBarTitle brand={brand} title={adventure.title} />
+                <AdventureBarTitle
+                  brand={brand}
+                  title={adventure.title}
+                  at={[advisorAdventures.indexOf(adventure) + 1, advisorAdventures.length]}
+                />
                 <button
                   className="cx-appbar-burger"
                   type="button"

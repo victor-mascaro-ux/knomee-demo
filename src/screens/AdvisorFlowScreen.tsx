@@ -107,6 +107,7 @@ function StepBody({
     case 'home':
       return (
         <AdventureList
+          goal="Business ID"
           rows={advisorAdventures}
           done={advisorProgress.done}
           required={advisorProgress.required}
@@ -385,7 +386,11 @@ export default function AdvisorFlowScreen({
           <header className="cx-appbar">
             {adventure && tab === 'flow' ? (
               <>
-                <AdventureBarTitle brand={brand} title={adventure.title} />
+                <AdventureBarTitle
+                  brand={brand}
+                  title={adventure.title}
+                  at={[advisorAdventures.indexOf(adventure) + 1, advisorAdventures.length]}
+                />
                 <button
                   className="cx-appbar-burger"
                   type="button"

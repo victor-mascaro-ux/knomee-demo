@@ -1147,3 +1147,34 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* ── what the adventure asks, and what it hands back (IntroGets) ──
+   Two short rows on a quiet wash, right above Get Started. */
+.jf-gets {
+  margin: var(--space-16, 16px) 0 0;
+  padding: var(--space-12, 12px) var(--space-14, 14px);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--k-grape-soft, #f3ebfa);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8, 8px);
+}
+.jf-gets-row {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: var(--space-10, 10px);
+  align-items: baseline;
+}
+.jf-gets dt {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--k-grape, #7639a1);
+}
+.jf-gets dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-strong, #240446);
+}

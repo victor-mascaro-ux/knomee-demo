@@ -41,6 +41,10 @@ export const ADVISOR_CONFIDENCE: ConfidenceContent = {
     source: intro?.cite ?? 'Albert Bandura, psychologist and self-efficacy pioneer',
     lead: 'Let’s explore how you feel about your practice, and about the decision in front of you.',
     minutes: 1,
+    gets: {
+      do: 'rate six statements about your practice today.',
+      get: 'Your confidence reading, and where you feel most and least sure.',
+    },
   },
   // An advisor answering for real skips what they leave alone.
   samples: false,
