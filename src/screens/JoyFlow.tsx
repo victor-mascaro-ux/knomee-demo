@@ -30,6 +30,7 @@ import JoyReward from './JoyReward'
 /* The badge as the reward shows it: the same art with its lettering in white,
    for the plum it sits on there. */
 import bgFinancialJoy from '../assets/badges/financial-joy-on-plum.svg'
+import { AdventureMark } from './AdventureMark'
 
 export interface JoyAnswers {
   tools: string[]
@@ -446,6 +447,7 @@ export default function JoyFlow({
           {/* Where you are, at the top under the bar — the foot is only
               Back and the one thing to press. */}
           <div className="jf-top">
+            <AdventureMark />
             <div className="af-progress" aria-hidden>
               {steps.slice(1).map((_, i) => (
                 <i key={i} className={i < at ? 'is-on' : ''} />

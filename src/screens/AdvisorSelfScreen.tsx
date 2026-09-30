@@ -33,6 +33,7 @@ import {
   TabQuestions,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
+  artOf,
   AdventureBarTitle,
   type FlowBrand,
   clampZoom,
@@ -104,6 +105,7 @@ import AdvisorWelcome from './AdvisorWelcome'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
+import { AdventureMark, AdventureMarkContext } from './AdventureMark'
 
 const ZOOM_STEP = 0.1
 const OTHER = 'Other'
@@ -1305,16 +1307,19 @@ function FlowPhone({
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
         <IPhone scale={scale} bare={bare}>
+          <AdventureMarkContext.Provider
+            value={
+              adventure
+                ? { art: artOf(adventure.art), at: advisorAdventures.indexOf(adventure) + 1, of: advisorAdventures.length }
+                : null
+            }
+          >
           {/* Under a firm's brand only the bar changes — its colour and its
               logo — the way the client's phone does it. */}
           <header className="cx-appbar" style={brand ? { background: brand.primary } : undefined}>
             {adventure && tab === 'flow' ? (
               <>
-                <AdventureBarTitle
-                  brand={brand}
-                  title={adventure.title}
-                  at={[advisorAdventures.indexOf(adventure) + 1, advisorAdventures.length]}
-                />
+                <AdventureBarTitle brand={brand} title={adventure.title} />
                 <button
                   className="cx-appbar-burger"
                   type="button"
@@ -1355,6 +1360,7 @@ function FlowPhone({
             step.kind !== 'identity' &&
             !(rich && step.kind === 'questions') && (
             <div className="af-top">
+              <AdventureMark />
               <div className="af-progress" aria-hidden>
                 {meterSteps.map((s, n) => (
                   <i key={s.id} className={n <= meterAt ? 'is-on' : ''} />
@@ -1697,6 +1703,7 @@ function FlowPhone({
               </div>
             </div>
           )}
+          </AdventureMarkContext.Provider>
         </IPhone>
       </div>
 

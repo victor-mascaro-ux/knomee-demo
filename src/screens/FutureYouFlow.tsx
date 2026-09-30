@@ -26,6 +26,7 @@ import JoyReward from './JoyReward'
 import { OtherField, OtherTile, PhotoCheck } from './PhotoOther'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal } from './JoyResults'
 import bgFutureYou from '../assets/badges/future-you-on-plum.svg'
+import { AdventureMark } from './AdventureMark'
 
 export interface Pick {
   label: string
@@ -1182,6 +1183,7 @@ export default function FutureYouFlow({
           {/* Where you are, at the top under the bar — the foot is only
               Back and the one thing to press. */}
           <div className="jf-top">
+            <AdventureMark />
             <div className="af-progress" aria-hidden>
               {QUESTIONS.map((s, i) => (
                 <i key={s} className={i <= qi ? 'is-on' : ''} />
