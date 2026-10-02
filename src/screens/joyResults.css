@@ -181,6 +181,11 @@
 }
 
 /* ── money is a tool: their photographs, dealt in ── */
+/* With no lead line under the heading (the advisor's), the tiles keep the
+   gap the lead would have left. */
+.jr-h + .jr-tools {
+  margin-top: var(--space-14);
+}
 .jr-tools {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
