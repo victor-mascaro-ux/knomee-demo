@@ -1112,9 +1112,6 @@ export default function ClientProfileScreen({
                     <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
-                  {highlights.overflows && (
-                    <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
-                  )}
                 </div>
                 <div className="pp-highlights" ref={highlights.box}>
                   {highlights.shown.map((h, i) => (
@@ -1131,6 +1128,7 @@ export default function ClientProfileScreen({
                     </div>
                   ))}
                 </div>
+                {highlights.overflows && <HeadToggle open={highlights.open} onToggle={highlights.toggle} />}
               </section>
 
               <div className="pp-cols">

@@ -155,9 +155,6 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             <img className="pp-card-ic" src={icKeyHighlights} alt="" />
             Key Highlights
           </span>
-          {highlights.overflows && (
-            <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
-          )}
         </div>
         <div className="pp-highlights" ref={highlights.box}>
           {highlights.shown.map((h, i) => (
@@ -181,6 +178,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             </div>
           ))}
         </div>
+        {highlights.overflows && <HeadToggle open={highlights.open} onToggle={highlights.toggle} />}
       </section>
 
       <FamilyCard
