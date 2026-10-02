@@ -478,11 +478,7 @@ function BusinessIdTab({
       {/* Key Highlights */}
       {!only && (
       <section className="pp-card">
-        <CardHead icon={icKeyHighlights} title="Key Highlights">
-          {highlights.overflows && (
-            <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
-          )}
-        </CardHead>
+        <CardHead icon={icKeyHighlights} title="Key Highlights" />
         <div className="pp-highlights" ref={highlights.box}>
           {highlights.shown.map((h, i) => (
             <div
@@ -498,6 +494,7 @@ function BusinessIdTab({
             </div>
           ))}
         </div>
+        {highlights.overflows && <HeadToggle open={highlights.open} onToggle={highlights.toggle} />}
       </section>
       )}
 

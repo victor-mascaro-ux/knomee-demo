@@ -777,7 +777,7 @@ export function StatusTags({ tags, advisorAdded }: { tags?: string[]; advisorAdd
 
 export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
-    <button className="pp-head-toggle" type="button" aria-expanded={open} onClick={onToggle}>
+    <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
       {open ? 'Show less' : 'Show more'} <CaretIcon up={open} />
     </button>
   )

@@ -268,9 +268,6 @@ export default function ProspectProfileScreen({
                     <img className="pp-card-ic" src={icKeyHighlights} alt="" />
                     Key Highlights
                   </span>
-                  {highlights.overflows && (
-                    <HeadToggle open={highlights.open} onToggle={highlights.toggle} />
-                  )}
                 </div>
                 {fi.keyHighlights.length === 0 && <p className="pp-waiting">Complete any adventure</p>}
                 <div className="pp-highlights" ref={highlights.box}>
@@ -288,6 +285,7 @@ export default function ProspectProfileScreen({
                     </div>
                   ))}
                 </div>
+                {highlights.overflows && <HeadToggle open={highlights.open} onToggle={highlights.toggle} />}
               </section>
               )}
 
