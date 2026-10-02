@@ -1725,7 +1725,9 @@ function FlowPhone({
                       setMenuOpen(false)
                       setRichOpen(null)
                       onRestart()
-                      // Starting over starts at the beginning: the welcome.
+                      // Starting over starts at the beginning: the welcome —
+                      // from whichever tab the menu was opened on.
+                      setTab('flow')
                       reset(0)
                     }}
                   >
