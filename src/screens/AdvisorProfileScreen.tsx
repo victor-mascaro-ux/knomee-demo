@@ -315,33 +315,7 @@ export default function AdvisorProfileScreen({
               his team sees each part of it. */}
           {sharing && mine && tab === 'id' && !printing && <SharingLens value={lens} onChange={setLens} />}
           {sharing && mine && tab === 'id' && !printing && lens === 'sharing' ? (
-            <SharingView
-              who={`advisor-${who.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}
-              idName="Business ID"
-              roles={ADVISOR_ROLES}
-              /* For the demo every link is sent by Marla; the invite does not
-                 yet record who made it. */
-              sender={{ id: 'sender', name: 'Marla Sofer', role: 'recruiter', email: 'marla.sofer@knomee.com' }}
-              /* Marcus, the worked example, arrives with his team; everybody
-                 else's is theirs to add. */
-              team={
-                who.name === 'Marcus Hale'
-                  ? [
-                      { id: 'p1', name: 'Ana', role: 'junior advisor', email: 'ana@example.com' },
-                      { id: 'p2', name: 'Dev', role: 'associate', email: 'dev@example.com' },
-                      { id: 'p3', name: 'Rachel', role: 'spouse', email: 'rachel@example.com' },
-                      { id: 'p4', name: 'Tom', role: 'accountant', email: 'tom@example.com' },
-                    ]
-                  : []
-              }
-              cards={[
-                { id: 'the-move', title: 'The Move', icon: icTheMove },
-                { id: 'practice-joy', title: 'Practice Joy', icon: icPracticeJoy },
-                { id: 'confidence', title: 'Confidence', icon: icConfidence },
-                { id: 'outlook', title: 'Outlook', icon: icOutlook },
-                { id: 'future-you', title: 'Future You', icon: icFutureYou },
-              ]}
-            />
+            <AdvisorTeam name={who.name} />
           ) : (
             (printing || tab === 'id') && (
               <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
@@ -373,12 +347,15 @@ function FoldCard({
   icon,
   title,
   children,
+  defaultOpen = false,
 }: {
   icon: string
   title: string
   children: ReactNode
+  /** Open on arrival — a card with something in it worth reading first. */
+  defaultOpen?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultOpen)
   return (
     <section className={`pp-card ap-fold${open ? " is-open" : ""}`}>
       <button
@@ -401,6 +378,41 @@ function FoldCard({
         </div>
       </div>
     </section>
+  )
+}
+
+/* An advisor's team and who of them sees each part of their Business ID —
+   the "Who sees it" lens on the page, and the My Team tab on their phone. */
+export function AdvisorTeam({ name }: { name: string }) {
+  const who = { name }
+  return (
+    <SharingView
+      who={`advisor-${who.name.toLowerCase().replace(/[^a-z]+/g, '-')}`}
+      idName="Business ID"
+      roles={ADVISOR_ROLES}
+      /* For the demo every link is sent by Marla; the invite does not
+         yet record who made it. */
+      sender={{ id: 'sender', name: 'Marla Sofer', role: 'recruiter', email: 'marla.sofer@knomee.com' }}
+      /* Marcus, the worked example, arrives with his team; everybody
+         else's is theirs to add. */
+      team={
+        who.name === 'Marcus Hale'
+          ? [
+              { id: 'p1', name: 'Ana', role: 'junior advisor', email: 'ana@example.com' },
+              { id: 'p2', name: 'Dev', role: 'associate', email: 'dev@example.com' },
+              { id: 'p3', name: 'Rachel', role: 'spouse', email: 'rachel@example.com' },
+              { id: 'p4', name: 'Tom', role: 'accountant', email: 'tom@example.com' },
+            ]
+          : []
+      }
+      cards={[
+        { id: 'the-move', title: 'The Move', icon: icTheMove },
+        { id: 'practice-joy', title: 'Practice Joy', icon: icPracticeJoy },
+        { id: 'confidence', title: 'Confidence', icon: icConfidence },
+        { id: 'outlook', title: 'Outlook', icon: icOutlook },
+        { id: 'future-you', title: 'Future You', icon: icFutureYou },
+      ]}
+    />
   )
 }
 
@@ -748,13 +760,26 @@ function BusinessIdTab({
             <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
           </FoldCard>
 
-          <FoldCard icon={icQuestions} title="Questions">
-            {/* He has asked nobody anything yet — this card is for questions he
-                puts to Dynasty. The three the flow handed HIM are a different
-                thing and live on the Recruiting Toolkit. An empty tray that
-                only reports its own emptiness is a dead end: this one is the
-                way in, the same way the Life Events tray above it is. */}
-            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+          <FoldCard icon={icQuestions} title="Questions" defaultOpen={d.questions.length > 0}>
+            {/* The three questions the adventures handed him — the ones to put
+                to every platform he is considering — live here, on his ID,
+                where a client's questions sit. Before anything is answered
+                there are none, and the tray is the way in to asking one. */}
+            {d.questions.length > 0 ? (
+              <>
+                <p className="ap-qs-lead">Put these to every platform you’re considering.</p>
+                <ol className="ap-qs">
+                  {d.questions.map((q, n) => (
+                    <li key={q}>
+                      <span className="ap-qs-num">{n + 1}</span>
+                      <span>{q}</span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            ) : (
+              <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+            )}
           </FoldCard>
           </>
           )}

@@ -172,6 +172,18 @@ export const TabMark = () => (
 
 /* The bubble is taller than it was — more room above and below the question
    mark — with the mark re-centred in it and the tail unchanged. */
+/* My Team: three figures, the one in front larger. */
+export const TabTeam = () => (
+  <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="16" cy="8.4" r="4" />
+    <path d="M9.4 21.4c1-3.4 3.6-5.2 6.6-5.2s5.6 1.8 6.6 5.2" strokeLinecap="round" />
+    <circle cx="5.4" cy="10.4" r="3.1" />
+    <path d="M1 20.6c.7-2.6 2.4-4 4.4-4" strokeLinecap="round" />
+    <circle cx="26.6" cy="10.4" r="3.1" />
+    <path d="M31 20.6c-.7-2.6-2.4-4-4.4-4" strokeLinecap="round" />
+  </svg>
+)
+
 export const TabQuestions = () => (
   <svg viewBox="0 0 32 29" width="34" height="31" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path
