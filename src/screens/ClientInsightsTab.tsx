@@ -23,7 +23,7 @@ import {
   StartersCard,
   TopAction,
 } from './readinessParts'
-import { clientInsights } from '../data/clientInsights'
+import { clientInsights, sebastianSnapshot } from '../data/clientInsights'
 import type { SuggestedAdventure } from '../data/clientInsights'
 import icAdventures from '../assets/adventures/award.svg'
 import icAngelInvesting from '../assets/adventures/angel-investing.svg'
@@ -140,30 +140,10 @@ export function AdventuresCard() {
    action sits here rather than over the toolkit — on this side it is the
    answer the snapshot leads to, and a line that appears on both tabs is a line
    nobody reads on either. */
-/* Household KR is the other member's own KR: Sebastian's on Emily's page,
-   Emily's on Sebastian's. The authored snapshot is Emily's, so on his page
-   that one card — and the average it feeds — reads her KR instead. */
-const EMILY_KR = 92
+/* Each member's own snapshot: Emily's, or Sebastian's. Their Household KR
+   cards read each other's KR, solved together in the data. */
 export function snapshotFor(name?: string) {
-  const s = clientInsights.snapshot
-  if (!name || !/^Sebastian/.test(name)) return s
-  const dimensions = s.dimensions.map((d) =>
-    d.key === 'Household KR'
-      ? {
-          ...d,
-          score: EMILY_KR,
-          calc: [{ label: 'Household member (their own KR)', value: 'Emily Watson', points: EMILY_KR }],
-        }
-      : d,
-  )
-  const counted = dimensions.filter((d) => !(d.key === 'Referenceability' && d.score === 0))
-  const kq = Math.round(counted.reduce((n, d) => n + d.score, 0) / counted.length)
-  return {
-    ...s,
-    kq,
-    dimensions,
-    total: `The KR is the average of the dimensions: (${counted.map((d) => d.score).join(' + ')}) ÷ ${counted.length} = ${kq}. Referenceability is left out while there is no referral signal either way.`,
-  }
+  return name && /^Sebastian/.test(name) ? sebastianSnapshot : clientInsights.snapshot
 }
 
 export default function ClientInsightsTab({ name }: { name?: string }) {

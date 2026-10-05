@@ -12,7 +12,7 @@
 .pp.cp .rd {
   --rd-accent: var(--k-ocean);
   --rd-accent-soft: var(--k-teal-light);
-  --rd-ink: var(--k-forest);
+  --rd-ink: var(--client-ink);
   --rd-strong: var(--k-ocean);
   --rd-wash: var(--k-teal-light);
   --rd-quiet: var(--k-ocean);

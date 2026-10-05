@@ -9,6 +9,7 @@
    only four cards are new — route, second seat, book profile and the comp
    clock, which the client version has no slot for. */
 
+import { breakAfterAt } from './profileParts'
 import ExperienceButton from '../components/ExperienceButton'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -231,7 +232,7 @@ export default function AdvisorProfileScreen({
                     Each drops out when it was left blank. */}
                 {who.email && (
                   <span className="pp-meta-row">
-                    <MailIcon /> {who.email}
+                    <MailIcon /> <span className="pp-meta-email">{breakAfterAt(who.email)}</span>
                   </span>
                 )}
                 {who.book && (
@@ -766,17 +767,16 @@ function BusinessIdTab({
                 where a client's questions sit. Before anything is answered
                 there are none, and the tray is the way in to asking one. */}
             {d.questions.length > 0 ? (
-              <>
-                <p className="ap-qs-lead">Put these to every platform you’re considering.</p>
-                <ol className="ap-qs">
-                  {d.questions.map((q, n) => (
-                    <li key={q}>
-                      <span className="ap-qs-num">{n + 1}</span>
-                      <span>{q}</span>
-                    </li>
-                  ))}
-                </ol>
-              </>
+              /* The question rows the Financial ID's Questions card uses —
+                 the question, and the day the adventures gave it. */
+              <div className="pp-questions">
+                {d.questions.map((q) => (
+                  <div className="pp-question" key={q}>
+                    <span className="pp-q-text">{q}</span>
+                    <span className="pp-q-date">{d.header.completed}</span>
+                  </div>
+                ))}
+              </div>
             ) : (
               <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
             )}

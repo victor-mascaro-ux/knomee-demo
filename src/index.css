@@ -6951,6 +6951,11 @@ body .modal-backdrop .modal .modal-header {
   border-radius: 0;
   background: var(--surface-brand, var(--plum, #240446));
 }
+/* Opened from a client's or household's page — inline or portalled to the
+   body — the bar is the client side's ink, as the page's own headings are. */
+body:has(.pp.cp) .modal-backdrop .modal .modal-header {
+  background: var(--client-ink);
+}
 body .modal-backdrop .modal .modal-title {
   margin: 0;
   font-size: 20px;

@@ -14,6 +14,7 @@
  * All figures and answers are placeholder demo data.
  */
 
+import { familyId } from './familyId'
 import { clientProfile as cp } from './clientProfile'
 import type { Snapshot, ToolkitTab } from './readiness'
 
@@ -27,11 +28,18 @@ const recentEvents = cp.lifeEvents.slice(0, 3).map((e) => e.kind)
 
 /* ── the snapshot ───────────────────────────────────────────────────────── */
 
+/* Each spouse's Household KR is the other's own KR, so the two scores are
+   solved together: 87 = (100 + 100 + 80 + 90 + 65) ÷ 5 and
+   65 = (70 + 80 + 40 + 50 + 87) ÷ 5, both rounded. Change a dimension on
+   either side and both totals move. The Clients table reads the same two. */
+export const EMILY_KR = 87
+export const SEBASTIAN_KR = 65
+
 export const clientSnapshot: Snapshot = {
   question: 'How strong the advisor–client relationship is.',
   score: { name: 'Knomee Relationship', abbr: 'KR' },
-  total: 'The KR is the average of the dimensions: (100 + 100 + 80 + 90 + 88) ÷ 5 = 92. Referenceability is left out while there is no referral signal either way.',
-  kq: 92,
+  total: 'The KR is the average of the dimensions: (100 + 100 + 80 + 90 + 65) ÷ 5 = 87. Referenceability is left out while there is no referral signal either way.',
+  kq: 87,
   dimensions: [
     {
       key: 'Intent',
@@ -102,16 +110,89 @@ export const clientSnapshot: Snapshot = {
     {
       key: 'Household KR',
       question: "How engaged is the client's household?",
-      score: 88,
-      caption: 'Household is highly engaged',
+      /* Sebastian's own KR — the one his page and the Clients table show. */
+      score: SEBASTIAN_KR,
+      caption: 'Household is partly engaged',
       evidence: [`${cp.household}: ${cp.members.map((m) => m.name).join(' · ')}`],
-      calc: [{ label: 'Household member (their own KR)', value: 'Sebastian Watson', points: 88 }],
+      calc: [{ label: 'Household member (their own KR)', value: 'Sebastian Watson', points: SEBASTIAN_KR }],
     },
   ],
   tier: {
     n: 1,
     name: 'Engaged',
     body: 'Strong client relationship — high trust, active engagement, and rich client context.',
+  },
+}
+
+/* Sebastian's own reading, from his column of the Family ID: two goals open
+   and one done, every adventure taken, but nothing asked of his advisor and
+   little activity since — a relationship that is there but thin. */
+const him = familyId.members[1]
+const hisLive = him.goals.filter((g) => !g.completed)
+const hisDone = him.goals.filter((g) => g.completed)
+
+export const sebastianSnapshot: Snapshot = {
+  ...clientSnapshot,
+  total: `The KR is the average of the dimensions: (70 + 80 + 40 + 50 + ${EMILY_KR}) ÷ 5 = ${SEBASTIAN_KR}. Referenceability is left out while there is no referral signal either way.`,
+  kq: SEBASTIAN_KR,
+  dimensions: [
+    {
+      key: 'Intent',
+      question: 'Are they actively working toward meaningful goals?',
+      score: 70,
+      caption: 'A few goals in motion',
+      evidence: [
+        `${hisLive.length} goals open and ${hisDone.length} completed`,
+        `Furthest along: ${hisLive[0].title}`,
+      ],
+      calc: [{ label: 'Number of active goals', value: `${hisLive.length}`, points: 70 }],
+    },
+    {
+      key: 'Clarity',
+      question: 'How clearly have they expressed what matters?',
+      score: 80,
+      caption: 'Values and goals mostly clear',
+      evidence: [`Values: ${him.joy.join(' · ')}`, `Future You: ${him.futureYou.where.join(' · ')}`],
+      calc: [{ label: 'How clear was the picture of Future You?', value: '4 of 5', points: 80 }],
+    },
+    {
+      key: 'Reliance',
+      question: 'Do they trust and involve their advisor?',
+      score: 40,
+      caption: 'Rarely brings the advisor in',
+      evidence: ['No questions asked of his advisor', 'No life events shared'],
+      calc: [
+        { label: '“I believe that working with a financial advisor improves my confidence.”', value: '2 of 5', points: 40, weight: '50%' },
+        { label: 'Do you want support from your financial advisor on this goal?', value: 'Not sure', points: 40, weight: '50%' },
+      ],
+    },
+    {
+      key: 'Knomee Activity',
+      question: 'How active and current is their knomee profile?',
+      score: 50,
+      caption: 'Set up, then quiet',
+      evidence: [`Last check-in ${him.checkIn.date} — ${him.checkIn.mood}`, 'Nothing logged since'],
+      calc: [
+        { label: 'Last meaningful activity', value: '61–90 days ago', points: 40 },
+        { label: 'Meaningful actions in the last 90 days', value: '1–3', points: 40 },
+        { label: 'Completed adventures', value: '5 of 5', points: 100 },
+        { label: 'Advisor requests', value: 'None answered', points: 20 },
+      ],
+    },
+    clientSnapshot.dimensions.find((d) => d.key === 'Referenceability')!,
+    {
+      key: 'Household KR',
+      question: "How engaged is the client's household?",
+      score: EMILY_KR,
+      caption: 'Household is highly engaged',
+      evidence: [`${cp.household}: ${cp.members.map((m) => m.name).join(' · ')}`],
+      calc: [{ label: 'Household member (their own KR)', value: 'Emily Watson', points: EMILY_KR }],
+    },
+  ],
+  tier: {
+    n: 2,
+    name: 'Attention',
+    body: 'A relationship that is there but thin — answers given once, little asked of the advisor since.',
   },
 }
 

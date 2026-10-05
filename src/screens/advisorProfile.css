@@ -317,39 +317,3 @@
   line-height: 1.6;
   color: var(--text-table);
 }
-
-/* The three questions, in the Business ID's Questions card: numbered, one to
-   a line, the number top-aligned with its first line. */
-.ap-qs-lead {
-  margin: 0 0 12px;
-  font-size: 13.5px;
-  color: var(--k-slate);
-}
-.ap-qs {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.ap-qs li {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: 10px;
-  align-items: start;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--k-ink-soft, #3f3c49);
-}
-.ap-qs-num {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--k-plum, #240446);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-}
