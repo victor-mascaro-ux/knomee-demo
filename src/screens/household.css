@@ -93,7 +93,7 @@
 }
 .hh-pill.is-active {
   background: var(--k-mint);
-  color: var(--k-emerald);
+  color: var(--client-ink);
 }
 .hh-pill.is-pending {
   background: var(--k-amber-light);
