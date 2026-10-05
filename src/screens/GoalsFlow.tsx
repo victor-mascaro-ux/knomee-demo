@@ -169,16 +169,18 @@ export const CLIENT_GOALS: MoveContent = {
 }
 
 /* Her answers as the goal the Financial ID keeps: dated today, at the stage
-   the readiness questions put it on — and, left bare, filled with the sample
-   that fits it, so a demo never lands on an empty summary. */
-export function goalFrom(m: MoveAnswers): Goal {
+   the readiness questions put it on. For the demo's people (`fill`), a goal
+   left bare is filled with the sample that fits it, so a demo never lands on
+   an empty summary; for anybody else it is exactly what they gave — a goal
+   they did not name has no title, and blank reasons stay blank. */
+export function goalFrom(m: MoveAnswers, fill = true): Goal {
   const d = new Date()
   const p2 = (n: number) => String(n).padStart(2, '0')
-  const title = m.move ?? 'My goal'
+  const title = m.move ?? (fill ? 'My goal' : '')
   const pros = m.pros.map((p) => p.trim()).filter(Boolean)
   const cons = m.cons.map((p) => p.trim()).filter(Boolean)
   const note = m.why.trim() || undefined
-  const bare = !pros.length && !cons.length && !note
+  const bare = fill && !pros.length && !cons.length && !note
   const sample = SAMPLE_DETAIL[title] ?? SAMPLE_OWN
   return {
     title,
@@ -197,9 +199,13 @@ export default function GoalsFlow({
   onComplete,
   review,
   mic,
+  fill = true,
 }: {
   /** The microphone, under a free-text box. */
   mic?: (value: string, set: (v: string) => void) => ReactNode
+  /** Whether a goal left bare takes the demo's sample (the demo's people)
+      or stays exactly as answered (somebody answering for real). */
+  fill?: boolean
   reward: GoalsReward | ((a: GoalsAnswers) => GoalsReward)
   onComplete: (a: GoalsAnswers) => void
   review?: GoalsAnswers
@@ -212,10 +218,10 @@ export default function GoalsFlow({
         content={CLIENT_GOALS}
         mic={mic}
         reward={(m) => {
-          const a = { goals: [goalFrom(m)] }
+          const a = { goals: [goalFrom(m, fill)] }
           return typeof reward === 'function' ? reward(a) : reward
         }}
-        onComplete={(m) => onComplete({ goals: [goalFrom(m)] })}
+        onComplete={(m) => onComplete({ goals: [goalFrom(m, fill)] })}
       />
     )
   return <GoalsReview reward={reward} onComplete={onComplete} review={review} />
@@ -361,7 +367,7 @@ function GoalsReview({
         <div className="jr glr">
           <Reveal>
             <h2 className="jr-title">Goal Readiness</h2>
-            <p className="jr-sub">{current?.title ?? 'Your goal'}</p>
+            {current?.title && <p className="jr-sub">{current.title}</p>}
             {/* Her stage as the picture: the readiness bars at size on a
                 living sky, and the stage's name. */}
             <figure className="jr-memory glr-hero">
@@ -388,7 +394,7 @@ function GoalsReview({
               <div className="glr-summaries">
                 {goals.map((g, i) => (
                   <div className="gl-summary glr-summary" key={`${i}:${g.title}`} style={{ ['--i' as string]: i }}>
-                    <b className="gl-summary-title">{g.title}</b>
+                    {g.title && <b className="gl-summary-title">{g.title}</b>}
                     <GoalDetail g={g} />
                   </div>
                 ))}

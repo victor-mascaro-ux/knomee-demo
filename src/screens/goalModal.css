@@ -253,6 +253,6 @@
   color: #2e9e6a;
 }
 .goal-list.is-cons .goal-line::before {
-  content: '2';
+  content: '−';
   color: #d4573b;
 }

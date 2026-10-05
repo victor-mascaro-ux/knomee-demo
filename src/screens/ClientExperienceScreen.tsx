@@ -51,6 +51,7 @@ import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import './client-experience.css'
 import { LegalHost, openLegal } from '../components/Legal'
+import SignUpScreen from './SignUpScreen'
 import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
@@ -1285,11 +1286,15 @@ const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0
 function MobileMenu({
   onClose,
   progress,
+  onRestart,
 }: {
   onClose: () => void
+  /** Restart Adventures, asked twice like the advisor's. */
+  onRestart?: () => void
   /** Where she is on the five, said under her name. */
   progress: string
 }) {
+  const [armed, setArmed] = useState(false)
   return (
     <div className="cx-sheet" onClick={onClose}>
       <div className="cx-sheet-panel" onClick={(e) => e.stopPropagation()}>
@@ -1322,6 +1327,16 @@ function MobileMenu({
           Legal &amp; Privacy
           <ArrowRight />
         </button>
+        {onRestart && (
+          <button
+            className={`cx-sheet-item${armed ? ' is-armed' : ''}`}
+            type="button"
+            onClick={() => (armed ? onRestart() : setArmed(true))}
+          >
+            {armed ? 'Tap Again to Start Over' : 'Restart Adventures'}
+            <ArrowRight />
+          </button>
+        )}
         <button className="cx-sheet-item" type="button" onClick={onClose}>
           Sign Out
           <ArrowRight />
@@ -1331,10 +1346,27 @@ function MobileMenu({
   )
 }
 
-export default function ClientExperienceScreen({
+/* Sarah's phone, restartable from her menu: a restart is a fresh run of the
+   journey — everything she did, signed up included, gone. */
+export default function ClientExperienceScreen(props: ComponentProps<typeof ClientExperienceRun>) {
+  const [run, setRun] = useState(0)
+  return (
+    <ClientExperienceRun
+      key={run}
+      {...props}
+      complete={run ? false : props.complete}
+      onRestart={() => setRun((n) => n + 1)}
+    />
+  )
+}
+
+function ClientExperienceRun({
   brand,
   complete,
+  onRestart,
 }: {
+  /** Start the journey over from nothing. */
+  onRestart?: () => void
   /** Open with all five adventures done and Life Events next — her page as the
       advisor sees it, on her phone. */
   complete?: boolean
@@ -1345,6 +1377,9 @@ export default function ClientExperienceScreen({
 }) {
   const [tab, setTab] = useState<TabId>('adventures')
   useCcNav('cx.tab', tab, setTab)
+  /* Signed up, in this demo session: until then the Financial ID tab is the
+     sign-up. The finished-journey demo opens already signed in. */
+  const [signedUp, setSignedUp] = useState(!!complete)
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
@@ -1815,6 +1850,14 @@ export default function ClientExperienceScreen({
                 built={BUILT}
                 onAddAgain={addAgain}
               />
+            ) : !signedUp ? (
+              /* Her Financial ID is behind an account; her advisor already has
+                 her answers. Not Now takes her back to the adventures. */
+              <SignUpScreen
+                idName="Financial ID"
+                onDone={() => setSignedUp(true)}
+                onClose={() => setTab('adventures')}
+              />
             ) : (
               /* Her Financial ID is the page her advisor opens, carrying her
                  answers — one artefact, not a second rendering of it. It was a
@@ -1944,6 +1987,7 @@ export default function ClientExperienceScreen({
           {menuOpen && (
             <MobileMenu
               onClose={() => setMenuOpen(false)}
+              onRestart={onRestart}
               progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}

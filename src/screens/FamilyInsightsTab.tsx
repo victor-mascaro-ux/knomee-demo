@@ -9,22 +9,19 @@
  * action, the starters and their key, the words to use and avoid, the
  * adventures — rendered by the very same components, with the household's own
  * four techniques. What follows is what only a pair can have: the statements
- * they answered the same, the ones they did not, what each of them brings, and
- * the topics to tread carefully around.
+ * they answered the same, the ones they did not, and the topics to tread
+ * carefully around.
  */
 
 import './familyInsights.css'
 import { CommunicationRail, StartersCard, TopAction } from './readinessParts'
 import { AdventuresCard } from './ClientInsightsTab'
-import { FamilyCard, Who } from './familyParts'
+import { Who } from './familyParts'
 import { familyInsights } from '../data/familyInsights'
 import type { SharedStatement } from '../data/familyInsights'
 import type { HouseholdMember } from '../data/clientProfile'
 import icMotivators from '../assets/cards/motivators.svg'
 import icApprehensions from '../assets/cards/apprehensions.svg'
-import icOutlook from '../assets/adventures/outlook.svg'
-import icFinancialJoy from '../assets/adventures/financial-joy.svg'
-import icFutureYou from '../assets/adventures/future-you.svg'
 
 /* One statement, and where each of them landed on it. The track is the
    confidence card's own (.pp-conf-*), carrying a mark per member instead of
@@ -114,10 +111,7 @@ function CompareCard({
 }
 
 export default function FamilyInsightsTab({ members }: { members: HouseholdMember[] }) {
-  const { toolkit, similarities, differences, byMember, sensitiveTopics } = familyInsights
-  /* A member the demo carries no reading for gets an empty column, exactly as
-     they do on the Family ID. */
-  const lists = (name: string) => byMember[name] ?? { concerns: [], joy: [], vision: [] }
+  const { toolkit, similarities, differences, sensitiveTopics } = familyInsights
 
   return (
     <div className="rd fin">
@@ -149,27 +143,6 @@ export default function FamilyInsightsTab({ members }: { members: HouseholdMembe
         members={members}
       />
 
-      <FamilyCard
-        members={members}
-        icon={icOutlook}
-        title="Primary Concerns & Confidence"
-        render={(m) => <Bullets items={lists(m.name).concerns} />}
-      />
-
-      <FamilyCard
-        members={members}
-        icon={icFinancialJoy}
-        title="Sources of Joy"
-        render={(m) => <Bullets items={lists(m.name).joy} />}
-      />
-
-      <FamilyCard
-        members={members}
-        icon={icFutureYou}
-        title="Future Vision"
-        render={(m) => <Bullets items={lists(m.name).vision} />}
-      />
-
       {/* What to tread carefully around: the topic, why it is delicate, and
           what to do about it — three columns, because the third is the only one
           that changes what the advisor does. */}
@@ -196,17 +169,6 @@ export default function FamilyInsightsTab({ members }: { members: HouseholdMembe
         </div>
       </section>
     </div>
-  )
-}
-
-function Bullets({ items }: { items: string[] }) {
-  if (items.length === 0) return <p className="fin-none">Nothing answered yet.</p>
-  return (
-    <ul className="fin-bullets">
-      {items.map((i) => (
-        <li key={i}>{i}</li>
-      ))}
-    </ul>
   )
 }
 

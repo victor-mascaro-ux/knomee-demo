@@ -241,7 +241,7 @@
   color: #2e9e6a;
 }
 .gl-summary .pp-goal-list.is-cons li::before {
-  content: '2';
+  content: '−';
   color: #d4573b;
 }
 /* Readiness is bars and a word: side by side, centred on each other, and the
