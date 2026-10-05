@@ -43,11 +43,11 @@ const sebastian: MemberProfile = {
   joined: 'May 2025',
   owner: him.name,
   checkIn: him.checkIn,
-  /* The same six questions, answered by him. */
-  keyHighlights: clientProfile.keyHighlights.map((h) => ({
-    ...h,
-    text: him.highlights[h.title] ?? h.text,
-  })),
+  /* The same six questions, answered by him — only the ones he answered. One
+     he left blank is left off, never filled with her line. */
+  keyHighlights: clientProfile.keyHighlights
+    .filter((h) => him.highlights[h.title])
+    .map((h) => ({ ...h, text: him.highlights[h.title] })),
   goals: him.goals,
   /* His, not hers: the lake place, the four-day week, the two he mentors. */
   suggestedGoals: [

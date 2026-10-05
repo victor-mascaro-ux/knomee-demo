@@ -598,12 +598,15 @@ export default function OutlookFlow({
             <h2 className="jr-title">{content.results.title}</h2>
             <p className="jr-sub">{content.results.sub}</p>
             {/* The whole sky: her worries low as clouds, her hopes above them
-                as lights, each named. */}
+                as lights, each named. Nothing added to either is nothing to
+                read, so no line is typed over an empty sky. */}
             <figure className="olr-hero">
               <Sky concerns={a.concerns} hopes={a.hopes} dawn tall prompts={prompts} />
-              <blockquote className="olr-words">
-                <Typed text={reading} />
-              </blockquote>
+              {(a.concerns.length > 0 || a.hopes.length > 0) && (
+                <blockquote className="olr-words">
+                  <Typed text={reading} />
+                </blockquote>
+              )}
             </figure>
           </Reveal>
 
@@ -635,15 +638,14 @@ export default function OutlookFlow({
                 </ul>
               </>
             )}
-            {(content.fill || (a.concerns.length > 0 && a.hopes.length > 0)) && (
+            {/* Said only from a concern and a hope they gave — the demo's
+                samples are recorded on Skip, so a demo still arrives here. */}
+            {a.concerns.length > 0 && a.hopes.length > 0 && (
               <p className="jr-reading">
                 <span className="jr-reading-mark" aria-hidden>
                   ✦
                 </span>
-                {content.results.line(
-                  short(a.concerns[0] ?? 'your first concern', prompts),
-                  short(a.hopes[0] ?? 'your first hope', prompts),
-                )}
+                {content.results.line(short(a.concerns[0], prompts), short(a.hopes[0], prompts))}
               </p>
             )}
           </Reveal>

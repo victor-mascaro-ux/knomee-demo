@@ -37,6 +37,22 @@ export const MailIcon = ({ size = 14 }: IconProps) => (
   </svg>
 )
 
+/** Assets advised on — a stack of coins. */
+export const CoinsIcon = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <ellipse cx="12" cy="6" rx="7" ry="2.5" />
+    <path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" />
+    <path d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6" />
+  </svg>
+)
+
+/** A firm — a building. */
+export const BuildingIcon = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M4 20h16M6 20V9l6-4 6 4v11M10 20v-5h4v5" />
+  </svg>
+)
+
 /** Core values, hopes — a target. */
 export const TargetIcon = ({ size = 16 }: IconProps) => (
   <svg {...base(size)}>

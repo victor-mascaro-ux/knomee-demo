@@ -410,6 +410,8 @@ export interface AdvisorProfileData {
     book?: string
     role?: string
     firm?: string
+    /** The address they signed up with, once they have. */
+    email?: string
   }
   id: BusinessId
   /** The six Confidence statements on the 0-100 track the dial draws. */
@@ -428,6 +430,7 @@ export const marcusProfile: AdvisorProfileData = {
     book: advisor.book,
     role: advisor.role,
     firm: advisor.firm,
+    email: advisor.email,
   },
   id: businessId,
   confidence: confidenceAnswers,

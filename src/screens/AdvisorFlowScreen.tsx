@@ -264,7 +264,8 @@ function StepBody({
             <div className="af-line">
               <span className="af-line-k">Readiness stage</span>
               <span className="af-line-v">
-                {businessId.readiness.stage} · confidence {businessId.readiness.confidence.toLowerCase()}
+                {businessId.readiness.stage}
+                {businessId.readiness.confidence && ` · confidence ${businessId.readiness.confidence.toLowerCase()}`}
               </span>
             </div>
           </div>

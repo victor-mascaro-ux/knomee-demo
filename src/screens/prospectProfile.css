@@ -1657,3 +1657,15 @@
 .pp-empty-cta:hover .pp-empty-disc img.pp-empty-colour {
   filter: none;
 }
+
+/* The score in the rail — the candidate page's RQ block (advisorProfile.css),
+   on the prospect and client pages too. */
+.pp-side .ap-side-stat {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--k-line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}

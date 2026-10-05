@@ -17,6 +17,7 @@ import { MemberVisionBoards } from './VisionBoards'
 import './familyId.css'
 import { familyId } from '../data/familyId'
 import type { FamilyMemberId } from '../data/familyId'
+import { profileFor } from '../data/memberProfiles'
 import type { HouseholdMember, ClientGoal } from '../data/clientProfile'
 import {
   AddButton,
@@ -168,10 +169,14 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
                 {h.title}
               </div>
               <div className="fid-split fid-split-tight">
-                {members.map((m) => (
+                {/* A member who left this one blank has no cell in it, rather
+                    than a dash under their name. */}
+                {members
+                  .filter((m) => m.highlights[h.title])
+                  .map((m) => (
                   <div className="fid-cell" key={m.name}>
                     <Who name={m.name} />
-                    <p className="pp-highlight-text">{m.highlights[h.title] ?? '—'}</p>
+                    <p className="pp-highlight-text">{m.highlights[h.title]}</p>
                   </div>
                 ))}
               </div>
@@ -256,7 +261,8 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
               <span className="pp-confidence-label">{m.confidence}</span>
               <Gauge label={m.confidence} />
             </div>
-            <ConfidenceResults open={confidence} />
+            {/* Each member's own statements — the ones their page shows. */}
+            <ConfidenceResults open={confidence} answers={profileFor(m.name).confidenceAnswers} />
           </>
         )}
       />
@@ -340,14 +346,18 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         head={<DateSelect />}
         render={(m) => (
           <>
-            <p className="pp-prompt">I want money to help me with</p>
-            <div className="pp-chips">
-              {m.joy.map((c) => (
-                <span className="pp-chip" key={c}>
-                  {c}
-                </span>
-              ))}
-            </div>
+            {m.joy.length > 0 && (
+              <>
+                <p className="pp-prompt">I want money to help me with</p>
+                <div className="pp-chips">
+                  {m.joy.map((c) => (
+                    <span className="pp-chip" key={c}>
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
       />
@@ -364,7 +374,9 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
               ['What', m.futureYou.what],
               ['Who', m.futureYou.who],
             ] as [string, string[]][]
-          ).map(([label, items]) => (
+          )
+            .filter(([, items]) => items.length > 0)
+            .map(([label, items]) => (
             <div className="pp-fy-group" key={label}>
               <span className="pp-fy-label">{label}</span>
               <div className="pp-chips">
@@ -386,13 +398,13 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         head={<DateSelect />}
         render={(m) => (
           <>
-            <span className="pp-fy-label">Concerns</span>
+            {m.outlook.concerns.length > 0 && <span className="pp-fy-label">Concerns</span>}
             {m.outlook.concerns.map((c) => (
               <p className="pp-quote" key={c}>
                 “{c}”
               </p>
             ))}
-            <span className="pp-fy-label pp-hope">Hopes</span>
+            {m.outlook.hopes.length > 0 && <span className="pp-fy-label pp-hope">Hopes</span>}
             {m.outlook.hopes.map((h) => (
               <p className="pp-quote" key={h}>
                 “{h}”

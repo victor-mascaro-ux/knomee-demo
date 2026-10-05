@@ -1923,8 +1923,15 @@ button.af-opt:hover {
   isolation: isolate;
   overflow: hidden;
   margin-top: var(--space-16, 16px);
-  padding: 16px 18px 18px;
-  border-radius: 20px;
+  /* Room to breathe: the card is the screen's subject, so it is tall and its
+     three lines sit apart — eyebrow at the top, who in the middle, the chips
+     at the foot. */
+  min-height: 200px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 24px;
+  border-radius: 22px;
   color: #fff;
   box-shadow: 0 14px 30px -14px rgba(36, 4, 70, 0.55);
   animation: afRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -1995,16 +2002,17 @@ button.af-opt:hover {
 .af-idcard-who {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 14px;
+  margin: auto 0;
+  padding: 18px 0;
   min-width: 0;
 }
 .af-idcard-avatar {
   flex: none;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.16);
   border: 1.5px dashed rgba(255, 255, 255, 0.5);
@@ -2043,7 +2051,6 @@ button.af-opt:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
 }
 .af-idcard-chip {
   display: inline-flex;
