@@ -19,6 +19,18 @@
 .fc-table .col-action {
   width: auto; /* the remainder */
 }
+/* The day the flow was finished: a date with no break in it, so fixed at
+   what it needs, like My Prospects' Sign-up column. First left-aligned cell
+   after the readings, so it takes the wider inset Top Action had. */
+.fc-table .col-completed {
+  width: 108px;
+  color: #444;
+  white-space: nowrap;
+}
+.fc-table thead th.col-completed,
+.fc-table tbody tr:not(.group-header) td.col-completed {
+  padding-left: 24px;
+}
 .fc-table td.col-num,
 .fc-table th.col-num {
   white-space: nowrap;
@@ -64,6 +76,7 @@
   }
 }
 @media (max-width: 700px) {
+  .fc-table .col-completed,
   .fc-table .col-action {
     display: none;
   }

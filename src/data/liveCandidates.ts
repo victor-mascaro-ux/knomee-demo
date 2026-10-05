@@ -76,5 +76,7 @@ export function candidateFromEntry(e: Entry): LiveCandidate {
     progress: done ? 'completed' : 'started',
     topAction: scored ? d.toolkit.topAction : `Finish the flow — ${e.answered} of ${e.total} answered.`,
     tier: scored ? tierOf(d.readiness.snapshot.kq) : 'incomplete',
+    // The same date the report's Completed line shows.
+    completed: done ? e.answers.completed : undefined,
   }
 }

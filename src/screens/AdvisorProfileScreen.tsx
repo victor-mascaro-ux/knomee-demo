@@ -48,7 +48,6 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
-import { initials } from '../data/advisorAnswers'
 import SharingView, { ADVISOR_ROLES, SharingLens } from './SharingView'
 
 /* An answer that is a list of things rather than a sentence — "Ownership, my
@@ -161,9 +160,8 @@ export default function AdvisorProfileScreen({
   const [photoFailed, setPhotoFailed] = useState(false)
   const d = data.id
   const who = data.who
-  /* The firm reads its pipeline anonymously: a candidate is their initials and
-     no picture. Their own page, on their own phone, is theirs by name. */
-  const shownName = mine ? who.name : initials(who.name)
+  /* The firm sees a candidate by their full name, but not their picture. */
+  const shownName = who.name
   const photo = mine ? who.photo : undefined
   const showTabs = !mine || tabs
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1

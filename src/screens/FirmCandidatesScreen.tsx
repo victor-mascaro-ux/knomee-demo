@@ -30,7 +30,6 @@ import {
   type Tier,
 } from '../data/candidates'
 import { talkTo } from '../data/candidateInsights'
-import { initials } from '../data/advisorAnswers'
 import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
@@ -82,7 +81,7 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
       {isOwner ? (
         <button type="button" className="name-line name-link-btn" onClick={() => onOpen(c)}>
           <span className="name-text">
-            {initials(c.name)}
+            {c.name}
             <span className="name-chevron" aria-hidden>
               ›
             </span>
@@ -91,7 +90,7 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
         </button>
       ) : (
         <span className="name-line">
-          <span className="name-text">{initials(c.name)}</span>
+          <span className="name-text">{c.name}</span>
           {tag}
         </span>
       )}
@@ -264,7 +263,7 @@ function CommandCenter({
               aria-expanded={listOpen}
             >
               <span className="cmd-lead-tag">Start with</span>
-              <span className="cmd-lead-name">{initials(lead.name)}</span>
+              <span className="cmd-lead-name">{lead.name}</span>
               <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
                 {lead.tier}
               </span>
@@ -299,10 +298,10 @@ function CommandCenter({
                           className="talk-name name-link-btn"
                           onClick={() => onOpenProfile(rec)}
                         >
-                          {initials(t.name)}
+                          {t.name}
                         </button>
                       ) : (
-                        <span className="talk-name">{initials(t.name)}</span>
+                        <span className="talk-name">{t.name}</span>
                       )
                     })()}
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
@@ -358,14 +357,13 @@ function Row({
           type="checkbox"
           checked={checked}
           onChange={onToggle}
-          aria-label={`Select ${initials(c.name)}`}
+          aria-label={`Select ${c.name}`}
         />
       </td>
       <td className="col-name">
         <div className="name-cell">
           <span className="avatar-wrap">
-            {/* Every candidate by their initial: the pipeline is anonymous,
-                the worked example included, so nobody has a picture. */}
+            {/* Named in full, but nobody has a picture. */}
             <span className="avatar avatar-initial">{c.name.charAt(0)}</span>
           </span>
           <CandidateName c={c} onOpen={onOpen} />
@@ -404,6 +402,7 @@ function Row({
           <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
         </>
       )}
+      <td className="col-completed">{c.completed ?? '–'}</td>
       <td className="col-action">
         <div className="top-action">
           <div className="top-action-text">{c.topAction}</div>
@@ -541,6 +540,7 @@ function Table({
             <th className="col-num col-intent">Intent</th>
             <th className="col-num col-clarity">Clarity</th>
             <th className="col-num col-receptivity">Receptivity</th>
+            <th className="col-completed">Completed</th>
             <th className="col-action">Top Action</th>
             <th className="col-bolt" />
             <th className="col-dots" />
@@ -557,10 +557,10 @@ function Table({
                   className={`group-header group-${group.id} ${isCollapsed ? 'is-collapsed' : ''}`}
                   onClick={() => toggleGroup(group.id)}
                 >
-                  {/* Nine columns, and the band has to say nine: under
+                  {/* Ten columns, and the band has to say ten: under
                       table-layout: fixed a colSpan that disagrees with the
                       table reserves width for columns that do not exist. */}
-                  <td colSpan={9}>
+                  <td colSpan={10}>
                     <div className="group-header-inner">
                       <button
                         type="button"
@@ -771,7 +771,7 @@ export default function FirmCandidatesScreen({
           <div className="modal fc-remove-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title" id="fc-remove-title">
-                Remove {initials(removing.name)}?
+                Remove {removing.name}?
               </h2>
               <button className="modal-close" type="button" aria-label="Close" onClick={() => setRemoving(null)}>
                 <CloseIcon />
