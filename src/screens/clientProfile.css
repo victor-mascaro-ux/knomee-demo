@@ -8,15 +8,15 @@
    client's Financial ID belongs to the first of those. Restating the tokens
    here turns the whole page over — labels, bar ramp, confidence dial, hover
    outlines — without a single component knowing which side it is rendering on.
-   Drawn from the design system's teal family: --k-forest, --k-ocean, --k-teal,
+   Drawn from the design system's teal family: --client-ink (ocean), --k-teal,
    --k-mint. */
 .pp.cp {
   /* Ocean, not teal. --k-teal is a surface colour: at #3dbdaa it sits about
      2.2:1 on white, so every label drawn in it failed to read. Ocean carries
      the same family at 7.4:1. */
   --purple-bolt: var(--k-ocean, #086375);
-  --plum: var(--k-forest, #0f4a3a);
-  --text-strong: var(--k-forest, #0f4a3a);
+  --plum: var(--client-ink, #086375);
+  --text-strong: var(--client-ink, #086375);
   --text-link: var(--k-ocean, #086375);
 
   --bar-1: #0f4a3a;

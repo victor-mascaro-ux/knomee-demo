@@ -1,3 +1,4 @@
+import { EMILY_KR, SEBASTIAN_KR } from './clientInsights'
 export type ClientTier = 'engaged' | 'attention' | 'reconnect' | 'incomplete'
 
 export interface Client {
@@ -72,6 +73,7 @@ const featuredClients: Client[] = [
   },
   {
     name: 'Emily Watson',
+    kr: EMILY_KR,
     email: 'emily.watson@email.com',
     household: 'Watson Family',
     sentiment: 4,
@@ -109,6 +111,7 @@ const featuredClients: Client[] = [
   },
   {
     name: 'Sebastian Watson',
+    kr: SEBASTIAN_KR,
     email: 'sebastian.watson@email.com',
     household: 'Watson Family',
     sentiment: 3,

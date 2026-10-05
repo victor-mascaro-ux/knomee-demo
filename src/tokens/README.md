@@ -43,8 +43,15 @@ small and diffable.
   row use `align-items: flex-start`; in a grid, `align-self: start` on the
   icon's cell. Nudge it down only to meet the first line's cap height.
 
+- **The client side's ink is ocean (`--client-ink`, `#086375`).** On a
+  client's or a household's page every heading, name, strong label and big
+  number is ocean, the way the prospect side's are plum. `--k-forest` read as
+  near-black and is not a client colour any more. The tier ramp
+  (`--client-1/2/3`) is separate and unchanged.
+
 - **A modal is a white panel on a dimmed plum ground.** Rounded 20px; the brand's coloured bar across the top with the title and
-  close in white; the body on white; a foot of full-width pill buttons, the main
+  close in white — plum, or ocean (`--client-ink`) when it opens from a
+  client's or household's page; the body on white; a foot of full-width pill buttons, the main
   action filled. On a desktop it sits centred; on a phone too, as a card a
   margin clear of the screen's edges. The base styles are in `index.css` (the modal block, prefixed
   `body` so no modal's own header colour wins) and the phone's in

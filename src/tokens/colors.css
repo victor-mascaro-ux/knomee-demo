@@ -31,7 +31,8 @@
   --k-steel:         #6ba1ac;  /* muted teal — KQ tier 2 */
   --k-aqua:          #6bd6c4;  /* aqua tint (brand vector family) */
   --k-forest:        #0f4a3a;  /* deepest green (shipped). Still the curiosity
-                                  tag's ink; no longer client tier 1. */
+                                  tag's ink; no longer client tier 1, and no
+                                  longer the client pages' ink (--client-ink). */
   --k-emerald:       #055c3c;  /* client tier 1. --k-forest is 66% saturated at
                                   17% lightness, which reads as black rather
                                   than as green — the tier the whole ramp is
@@ -196,6 +197,10 @@
      (#5b21b6 / #8b5cf6 / #6ba1ac). The shipped app uses green→teal,
      which is what keeps Clients visually distinct from Prospects. */
   --client-1:        var(--k-emerald);
+  /* The client side's one ink: headings, names, strong text, big numbers and
+     the modal header bar on a client's or household's page. Ocean, the way
+     plum is the prospect side's. Forest read as near-black. */
+  --client-ink:      var(--k-ocean);
   --client-2:        var(--k-ocean);
   --client-3:        var(--k-steel);
 
