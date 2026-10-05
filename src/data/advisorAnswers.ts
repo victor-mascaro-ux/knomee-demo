@@ -1244,7 +1244,14 @@ export interface UnlockView {
   stat?: string
 }
 
+/* A field left blank is left out of an adventure's ending, not shown as a
+   dash. */
 export function unlockView(id: string, a: Answers): UnlockView {
+  const v = unlockViewAll(id, a)
+  return v.lines ? { ...v, lines: v.lines.filter((l) => l.value && l.value !== DASH) } : v
+}
+
+function unlockViewAll(id: string, a: Answers): UnlockView {
   const set = a.scaleSet['cf-q'] ?? []
   switch (id) {
     case 'pj-unlock':

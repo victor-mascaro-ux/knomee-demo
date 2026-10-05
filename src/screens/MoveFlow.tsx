@@ -878,6 +878,7 @@ export default function MoveFlow({
     extra: [
       ...(m.who.length ? [{ label: 'Who it involves', value: m.who.join(' · ') }] : []),
       ...(m.support ? [{ label: 'Support', value: m.support }] : []),
+      ...(m.blocker.trim() ? [{ label: 'Holding back', value: m.blocker.trim() }] : []),
     ],
   }
 
