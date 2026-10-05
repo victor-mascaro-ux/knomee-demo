@@ -100,6 +100,9 @@ export interface Candidate {
   topAction: string
   tier: Tier
   isNew?: boolean
+  /** The day the flow was finished, DD.MM.YYYY as the profile writes it.
+      Absent while it is not. */
+  completed?: string
 }
 
 export interface TierGroup {
@@ -361,12 +364,31 @@ const marcus: Candidate = {
   progress: 'completed',
   topAction: marcusTopAction.title,
   tier: `tier${marcusTier.tier}` as Tier,
+  completed: advisor.completedOn,
+}
+
+/* When a generated row finished the flow: the further down the funnel, the
+   longer ago. Its own seed, so adding dates moved nobody's name or score. */
+const DONE_AGO: Partial<Record<Progress, [number, number]>> = {
+  completed: [3, 30],
+  meeting: [20, 60],
+  transition: [45, 90],
+  signed: [60, 120],
+}
+const DATE_ANCHOR = Date.UTC(2026, 9, 2)
+function completedOn(rand: () => number, p: Progress): string | undefined {
+  const r = DONE_AGO[p]
+  if (!r) return undefined
+  const d = new Date(DATE_ANCHOR - Math.round(r[0] + rand() * (r[1] - r[0])) * 86400000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(d.getUTCDate())}.${pad(d.getUTCMonth() + 1)}.${d.getUTCFullYear()}`
 }
 
 /* Marcus takes the first "wants it, hasn't started" slot; the other 39 are
    generated from their slot's shape. */
 function generate(): Candidate[] {
   const rand = mulberry32(0x4f1a2b)
+  const dateRand = mulberry32(0x9c3d17)
   const used = new Set<string>([marcus.name.toLowerCase()])
   const out: Candidate[] = []
   let marcusPlaced = false
@@ -419,6 +441,7 @@ function generate(): Candidate[] {
       topAction: pick(rand, shape.actions),
       tier: tierOf(kq),
       isNew: rand() < 0.12,
+      completed: completedOn(dateRand, slot.progress),
     })
   }
 
