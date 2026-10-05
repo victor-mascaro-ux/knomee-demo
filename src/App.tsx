@@ -4343,7 +4343,8 @@ export default function App() {
           rich
           mode="view"
           phone
-          askSignUp
+          /* His finished journey is a signed-in advisor's, so his Business ID
+             opens straight away; the sign-up comes back when he restarts. */
           onRestartDemo={() => setMarcusRun(1)}
           entry={entryOf(marcus, null, 'Marcus Hale')}
           brand={brand}
