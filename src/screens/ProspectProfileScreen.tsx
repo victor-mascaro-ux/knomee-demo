@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { breakAfterAt } from './profileParts'
 import ExperienceButton from '../components/ExperienceButton'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
@@ -764,8 +763,8 @@ export default function ProspectProfileScreen({
               <span className="pp-meta-row">
                 <CalendarIcon /> Joined {fi.joined}
               </span>
-              <span className="pp-meta-row">
-                <MailIcon /> <span className="pp-meta-email">{breakAfterAt(prospect.email)}</span>
+              <span className="pp-meta-row tt" data-tip={prospect.email}>
+                <MailIcon /> <span className="pp-meta-email">{prospect.email}</span>
               </span>
             </div>
             {/* On her own phone the check-in heads the page (below), so the

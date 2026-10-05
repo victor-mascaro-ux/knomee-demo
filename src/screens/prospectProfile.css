@@ -1219,12 +1219,13 @@
 .pp-meta-row > svg {
   margin-top: 2px;
 }
-/* An email longer than the rail is wide wraps — after its @ first, anywhere
-   only if it must — rather than running past the rail's right padding. */
+/* An email longer than the rail is wide stays on one line and ends in an
+   ellipsis, inside the rail's padding; the row's tooltip (.tt) has all of it. */
 .pp-meta-email {
   min-width: 0;
-  overflow-wrap: anywhere;
-  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .pp-card-title > svg {
   flex: none;

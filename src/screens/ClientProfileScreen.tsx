@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { breakAfterAt } from './profileParts'
 import ExperienceButton from '../components/ExperienceButton'
 import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
@@ -971,8 +970,8 @@ export default function ClientProfileScreen({
               <span className="pp-meta-row">
                 <CalendarIcon /> Joined {cp.joined}
               </span>
-              <span className="pp-meta-row">
-                <MailIcon /> <span className="pp-meta-email">{breakAfterAt(client.email)}</span>
+              <span className="pp-meta-row tt" data-tip={client.email}>
+                <MailIcon /> <span className="pp-meta-email">{client.email}</span>
               </span>
             </div>
 
