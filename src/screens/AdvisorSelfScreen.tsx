@@ -103,6 +103,7 @@ import './client-experience.css'
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
 import SignUpScreen from './SignUpScreen'
+import { setDeviceMode } from '../deviceMode'
 import IdentityCardForm, { type IdField } from './IdentityCard'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
@@ -1110,7 +1111,25 @@ export default function AdvisorSelfScreen({
   }, [answered, answers.sittingId, answers.identity, visible, restart, sandbox])
 
   if (view === 'report')
-    return <FlowReport d={viewing ? d : dFirm} rich={rich} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
+    return (
+      <FlowReport
+        d={viewing ? d : dFirm}
+        rich={rich}
+        mode={mode}
+        brand={brand}
+        onBack={() => setView('flow')}
+        onList={onExit}
+        onOpenExperience={
+          viewing && entry
+            ? () => {
+                /* Their phone, at their own route — on the phone first. */
+                setDeviceMode('mobile')
+                window.location.hash = `#/advisors/${entry.id}/phone`
+              }
+            : undefined
+        }
+      />
+    )
   if (view === 'record') return <RecordScreen onBack={() => setView('flow')} />
 
   return (
@@ -1872,7 +1891,10 @@ function FlowReport({
   mode,
   onList,
   brand,
+  onOpenExperience,
 }: {
+  /** Reading somebody else's: their experience, from the rail's foot. */
+  onOpenExperience?: () => void
   d: Derived
   /** The journey page: no badges. */
   rich?: boolean
@@ -1932,6 +1954,7 @@ function FlowReport({
              opened from, not back one step to their phone. */
           backLabel={viewing ? 'My Candidates' : undefined}
           onBack={viewing ? (onList ?? onBack) : onBack}
+          onOpenExperience={onOpenExperience}
         />
       </main>
     </div>

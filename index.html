@@ -1718,7 +1718,7 @@
   // sets (cc-demo-set). Everything else is navigation, which the route
   // already handles.
   let demoArmed = false;
-  let demoState = { view: 'prospects', empty: false, brand: null, cobrand: 'left', brands: [], profile: null };
+  let demoState = { view: 'prospects', empty: false, brand: null, cobrand: 'left', brands: [], profile: null, device: 'mobile' };
 
   // Which controls each page offers. A control that isn't listed for a page is
   // one that would do nothing there — the panel never shows a dead switch.
@@ -1805,24 +1805,17 @@
     // control that moves is harder to find than one that is sometimes greyed,
     // and its absence read as "this page has no mobile view" only if you
     // already knew the control existed. Pages without a phone show it inert.
-    { key: 'mobile', kind: 'viewToggle', label: 'Toggle',
-      views: SHELL_VIEWS.concat(['advisor-mobile', 'client-mobile', 'client-experience', 'advisors']),
-      // Only where there is a phone to switch to: a candidate, or Sarah.
-      when: () => !!mobileOf() || isMobileView(),
-      // Strictly whether THIS page has a phone. The old guard also let any
-      // open profile through, which on a prospect meant the toggle offered a
-      // mobile view that fell back to Emily's — a different person's page.
-      hasMobile: () => !!mobileOf(),
-      isOn: () => isMobileView(),
-      apply: (on) => {
-        const here = canon(demoState.view);
-        if (on) {
-          mobileBackTo = currentRoute;
-          navigateFrame(mobileOf() || '#/client-mobile');
-        } else {
-          navigateFrame(mobileBackTo || desktopOf() || BACK_FROM_MOBILE[here] || '#/clients/emily-watson');
-        }
-      } },
+    // Mobile and desktop are two versions of the EXPERIENCE you are in — a
+    // candidate's, a prospect's or a client's journey. It opens on the phone;
+    // Desktop shows the same journey laid out for a computer. The profile
+    // pages reach an experience through their own button, so the switch only
+    // lives where there is an experience to switch.
+    { key: 'device', kind: 'viewToggle', label: 'Device',
+      views: ['advisor-mobile', 'client-mobile', 'client-experience', 'advisors', 'advisor-journey', 'advisor-self'],
+      when: () => canon(demoState.view) !== 'advisors' || isMobileView(),
+      hasMobile: () => true,
+      isOn: () => demoState.device !== 'desktop',
+      apply: (on) => demoSet('device', on ? 'mobile' : 'desktop') },
     { key: 'brand', kind: 'brands', label: 'Company', views: BRANDED_VIEWS }
     // Logo placement — client left / client centered — was here. It is a choice
     // the white-label deal settles once, not something a presenter flips in
@@ -1910,7 +1903,8 @@
       brand: (typeof d.brand === 'string') ? d.brand : null,
       cobrand: d.cobrand === 'centered' ? 'centered' : 'left',
       brands: Array.isArray(d.brands) ? d.brands : demoState.brands,
-      profile: (typeof d.profile === 'string') ? d.profile : null
+      profile: (typeof d.profile === 'string') ? d.profile : null,
+      device: d.device === 'desktop' ? 'desktop' : 'mobile'
     };
     if (demoArmed) renderDemo();
   }

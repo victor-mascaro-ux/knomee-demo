@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import ExperienceButton from '../components/ExperienceButton'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -74,6 +75,7 @@ export default function ProspectProfileScreen({
   prospect,
   onBack,
   onConvert,
+  onOpenExperience,
   onToast,
   mine,
   ownerMenu,
@@ -98,6 +100,8 @@ export default function ProspectProfileScreen({
   prospect: Prospect
   onBack: () => void
   onConvert?: (p: Prospect) => void
+  /** The person's own experience, from the foot of the rail. */
+  onOpenExperience?: () => void
   /** Her own copy, on her phone: no trail back to a list she cannot see, no
       button that converts her, and none of the advisor's reading of her. */
   mine?: boolean
@@ -799,6 +803,7 @@ export default function ProspectProfileScreen({
                 </span>
               </div>
             )}
+            {!mine && onOpenExperience && <ExperienceButton onClick={onOpenExperience} />}
           </div>
         </aside>
 

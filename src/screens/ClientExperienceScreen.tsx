@@ -56,6 +56,7 @@ import IdentityCardForm, { type IdField } from './IdentityCard'
 import type { Step } from '../data/advisorFlow'
 import './advisor-flow.css'
 import SignUpScreen from './SignUpScreen'
+import { useDeviceMode } from '../deviceMode'
 import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
@@ -245,14 +246,24 @@ function parentWindow(): Window | null {
    screen, so the window around the phone is never white. Shared by both mobile
    demos — see `.cx-dark-ground`. */
 export function useDarkGround() {
+  const device = useDeviceMode()
   useEffect(() => {
     const el = document.documentElement
     el.classList.add('cx-dark-ground')
     return () => el.classList.remove('cx-dark-ground')
   }, [])
+  /* Every experience screen calls this, so it is also where the page learns
+     it is showing the desktop version: the frame comes off (useFitToWindow)
+     and client-experience.css lays the journey out for a wide window. */
+  useEffect(() => {
+    const el = document.documentElement
+    el.classList.toggle('cx-desktop', device === 'desktop')
+    return () => el.classList.remove('cx-desktop')
+  }, [device])
 }
 
 export function useFitToWindow() {
+  const device = useDeviceMode()
   const [fit, setFit] = useState({ scale: 1, windowH: 0, bare: false })
   useEffect(() => {
     const measure = () => {
@@ -293,7 +304,8 @@ export function useFitToWindow() {
       }
     }
   }, [])
-  return fit
+  /* The desktop version is the journey with no frame, filling the window. */
+  return device === 'desktop' ? { ...fit, scale: 1, bare: true } : fit
 }
 
 /* ── zoom on top of the fit ───────────────────────────────────────────────

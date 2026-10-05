@@ -98,6 +98,7 @@ import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
 import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
 import { emptyAnswers, sampleAnswers } from './data/advisorAnswers'
+import { setDeviceMode, useDeviceMode } from './deviceMode'
 import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3927,6 +3928,24 @@ export default function App() {
   /* Marcus's phone restarted from its menu: 0 is his finished journey; each
      restart after that is a fresh, sandboxed run of it. */
   const [marcusRun, setMarcusRun] = useState(0)
+  /* Phone or desktop, for the experiences — set from the D panel. */
+  const device = useDeviceMode()
+  /* A profile's Open Experience: that person's journey, on the phone first —
+     the D panel switches it to desktop. A real hash change, so Back returns
+     to the profile. */
+  const openExperience = (hash: string) => {
+    setDeviceMode('mobile')
+    window.location.hash = hash
+  }
+  /* A client's experience is their own phone; a converted prospect's is the
+     journey she took as one (she has no phone of her own in the demo data). */
+  const experienceOfClient = (c: Client) => {
+    const slug = profileSlug(c.name)
+    if (baseClients.some((b) => profileSlug(b.name) === slug))
+      return () => openExperience(`#/client-mobile/${slug}`)
+    if (slug === 'sarah-mitchell') return () => openExperience('#/client-experience/complete')
+    return undefined
+  }
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
   const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
@@ -4089,6 +4108,9 @@ export default function App() {
           /* `primary` too: the panel tints its brand toggle with the colour
              this app actually paints the bar with, so the two cannot drift. */
           brands: CLIENT_BRANDS.map((b) => ({ id: b.id, name: b.name, primary: b.primary })),
+          // Phone or desktop, for an experience: the panel's Mobile/Desktop
+          // switch shows it.
+          device,
           // Whose page is open over the table, if anyone's. The panel offers
           // the phone rendering as a view of THIS page, so it has to know
           // there is one — and it hides the controls a profile covers up.
@@ -4107,7 +4129,7 @@ export default function App() {
     } catch {
       /* cross-origin parent — ignore */
     }
-  }, [currentView, emptyMode, brandId, cobrandLayout, profileClient, profileProspect, candidateOpen])
+  }, [currentView, emptyMode, brandId, cobrandLayout, profileClient, profileProspect, candidateOpen, device])
 
   useEffect(() => {
     const onDemo = (e: MessageEvent) => {
@@ -4116,6 +4138,7 @@ export default function App() {
       if (d.key === 'empty') setEmptyMode(!!d.value)
       if (d.key === 'brand') setBrandId(typeof d.value === 'string' ? d.value : null)
       if (d.key === 'cobrand') setCobrandLayout(d.value === 'centered' ? 'centered' : 'left')
+      if (d.key === 'device') setDeviceMode(d.value === 'desktop' ? 'desktop' : 'mobile')
     }
     window.addEventListener('message', onDemo)
     return () => window.removeEventListener('message', onDemo)
@@ -4594,6 +4617,7 @@ export default function App() {
             <AdvisorProfileScreen
               onBack={() => setCandidateOpen(false)}
               onAdd={() => showToast('Added to Network')}
+              onOpenExperience={() => openExperience('#/advisor-mobile')}
             />
           </main>
         ) : (
@@ -4660,6 +4684,7 @@ export default function App() {
             onOpenHousehold={openHousehold}
             onAddMember={openFamilyModal}
             onToast={showToast}
+            onOpenExperience={experienceOfClient(profileClient)}
           />
         </main>
       ) : profileProspect ? (
@@ -4669,6 +4694,12 @@ export default function App() {
             onBack={() => setProfileProspect(null)}
             onConvert={(p) => setConvertTarget(p)}
             onToast={showToast}
+            onOpenExperience={
+              // Sarah is the one prospect with a journey: her own phone.
+              profileSlug(profileProspect.name) === 'sarah-mitchell'
+                ? () => openExperience('#/client-experience/complete')
+                : undefined
+            }
           />
         </main>
       ) : directoryOpen ? (
