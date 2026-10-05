@@ -381,10 +381,9 @@ export function useCollapsed<T>(items: T[], max: number) {
 /* What a goal opens onto, printed inside the row rather than behind a click:
    on screen the panel carries it, and on paper there is nothing to click. Empty
    on a goal nobody went back to, which is most of them. */
-export function GoalDetail({ g, summary = false }: { g: Goal; summary?: boolean }) {
-  /* On a summary the two lists are always there — an empty one says so —
-     because weighing it up is half of what was asked. On a profile an empty
-     list is left out. */
+export function GoalDetail({ g }: { g: Goal }) {
+  /* A field left blank is left out — here and everywhere an adventure is
+     read back. */
   const list = (kind: 'pros' | 'cons', label: string, items?: string[]) =>
     items && items.length > 0 ? (
       <>
@@ -396,11 +395,6 @@ export function GoalDetail({ g, summary = false }: { g: Goal; summary?: boolean 
             ))}
           </ul>
         </dd>
-      </>
-    ) : summary ? (
-      <>
-        <dt>{label}</dt>
-        <dd className="pp-goal-none">None added</dd>
       </>
     ) : null
   return (
@@ -419,12 +413,14 @@ export function GoalDetail({ g, summary = false }: { g: Goal; summary?: boolean 
           <dd>{g.note}</dd>
         </>
       )}
-      {g.extra?.map((row) => (
-        <Fragment key={row.label}>
-          <dt>{row.label}</dt>
-          <dd>{row.value}</dd>
-        </Fragment>
-      ))}
+      {g.extra?.map((row) =>
+        row.value ? (
+          <Fragment key={row.label}>
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </Fragment>
+        ) : null,
+      )}
       {g.updated && (
         <>
           <dt>Last updated</dt>
@@ -433,11 +429,15 @@ export function GoalDetail({ g, summary = false }: { g: Goal; summary?: boolean 
       )}
       {/* The same reading the panel gives it: the bars, and the stage they add
           up to. Bars alone are a shape somebody has to know how to read. */}
-      <dt>Readiness</dt>
-      <dd className="pp-goal-stage">
-        <ReadinessLevel level={g.readiness} />
-        {TTM_STAGES[g.readiness - 1] ?? 'Not set'}
-      </dd>
+      {g.readiness > 0 && (
+        <>
+          <dt>Readiness</dt>
+          <dd className="pp-goal-stage">
+            <ReadinessLevel level={g.readiness} />
+            {TTM_STAGES[g.readiness - 1]}
+          </dd>
+        </>
+      )}
     </dl>
   )
 }

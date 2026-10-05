@@ -90,42 +90,36 @@ export default function GoalModal({
                 <dd>{goal.timeline}</dd>
               </>
             )}
-            {goal.pros && goal.pros.length > 0 && (
-              <>
-                <dt>Pros</dt>
-                <dd>
-                  {goal.pros.map((p) => (
-                    <span className="goal-line" key={p}>
-                      {p}
-                    </span>
-                  ))}
-                </dd>
-              </>
-            )}
-            {goal.cons && goal.cons.length > 0 && (
-              <>
-                <dt>Cons</dt>
-                <dd>
-                  {goal.cons.map((c) => (
-                    <span className="goal-line" key={c}>
-                      {c}
-                    </span>
-                  ))}
-                </dd>
-              </>
-            )}
+            {/* Pros and cons, each line marked; a list left blank is left out. */}
+            {(['pros', 'cons'] as const).map((kind) => {
+              const items = goal[kind] ?? []
+              return items.length > 0 ? (
+                <React.Fragment key={kind}>
+                  <dt>{kind === 'pros' ? 'Pros' : 'Cons'}</dt>
+                  <dd className={`goal-list is-${kind}`}>
+                    {items.map((x) => (
+                      <span className="goal-line" key={x}>
+                        {x}
+                      </span>
+                    ))}
+                  </dd>
+                </React.Fragment>
+              ) : null
+            })}
             {goal.note && (
               <>
                 <dt>Because</dt>
                 <dd>{goal.note}</dd>
               </>
             )}
-            {goal.extra?.map((row) => (
-              <React.Fragment key={row.label}>
-                <dt>{row.label}</dt>
-                <dd>{row.value}</dd>
-              </React.Fragment>
-            ))}
+            {goal.extra?.map((row) =>
+              row.value ? (
+                <React.Fragment key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </React.Fragment>
+              ) : null,
+            )}
             {/* A goal nobody has assessed has no rung to show. The button
                 below is what that gap is for. */}
             {goal.readiness > 0 && (

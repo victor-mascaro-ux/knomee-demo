@@ -235,3 +235,24 @@
 .goal-readiness .pp-ttm {
   margin: 0 0 calc(var(--ttm-w) * -0.2879);
 }
+
+/* Pros and cons on the goal card, each line marked the way the summaries
+   mark them: a green plus, a coral minus. An empty one says "None added". */
+.goal-list .goal-line {
+  position: relative;
+  padding-left: 16px;
+}
+.goal-list .goal-line::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+}
+.goal-list.is-pros .goal-line::before {
+  content: '+';
+  color: #2e9e6a;
+}
+.goal-list.is-cons .goal-line::before {
+  content: '2';
+  color: #d4573b;
+}

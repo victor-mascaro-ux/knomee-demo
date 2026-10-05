@@ -942,14 +942,16 @@ function StepBody({
           {step.kind === 'stage' && <div className="af-eyebrow">My readiness stage is</div>}
           <h2 className="af-h1">{view.title ?? step.title}</h2>
           <Paras text={view.body ?? step.body} />
-          <div className="af-lines">
-            {lines?.map((l) => (
-              <div className="af-line" key={l.label}>
-                <span className="af-line-k">{l.label}</span>
-                <span className="af-line-v">{l.value}</span>
-              </div>
-            ))}
-          </div>
+          {lines && lines.length > 0 && (
+            <div className="af-lines">
+              {lines.map((l) => (
+                <div className="af-line" key={l.label}>
+                  <span className="af-line-k">{l.label}</span>
+                  <span className="af-line-v">{l.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {(view.stat ?? step.stat) && <div className="af-stat">{view.stat ?? step.stat}</div>}
         </div>
       )

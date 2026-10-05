@@ -878,6 +878,7 @@ export default function MoveFlow({
     extra: [
       ...(m.who.length ? [{ label: 'Who it involves', value: m.who.join(' · ') }] : []),
       ...(m.support ? [{ label: 'Support', value: m.support }] : []),
+      ...(m.blocker.trim() ? [{ label: 'Holding back', value: m.blocker.trim() }] : []),
     ],
   }
 
@@ -1145,7 +1146,7 @@ export default function MoveFlow({
           <div className="gl-summary">
             <span className="gl-summary-head">Your {c.word}</span>
             <b className="gl-summary-title">{goal.title}</b>
-            <GoalDetail g={goal} summary />
+            <GoalDetail g={goal} />
           </div>
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => go('thought')}>
@@ -1246,7 +1247,7 @@ export default function MoveFlow({
             <div className="glr-summaries">
               <div className="gl-summary glr-summary">
                 <b className="gl-summary-title">{goal.title}</b>
-                <GoalDetail g={{ ...goal, readiness: level }} summary />
+                <GoalDetail g={{ ...goal, readiness: level }} />
               </div>
             </div>
           </Reveal>
