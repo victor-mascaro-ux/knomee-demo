@@ -1,4 +1,6 @@
-/* Family Insights — the advisor's read on a household.
+/* Family Playbook — the advisor's kit for a household. (The file keeps its
+ * old name; the tab is the Family Playbook, and Family Insights is now each
+ * member's Client Insights side by side — HouseholdInsightsTab.)
  *
  * The client's Insights and Toolkit answer "how is this relationship, and what
  * do I say to her". This answers the question a pair raises instead: where do
