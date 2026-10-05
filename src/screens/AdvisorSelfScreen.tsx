@@ -14,7 +14,7 @@
 // your sheet instead of the worked example — so nothing here is a lookalike of
 // a page that already exists.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
 import { BusinessIdCard, type IdCard } from './AdvisorProfileScreen'
 import TopBar from '../components/TopBar'
@@ -123,8 +123,7 @@ export type SelfMode = 'demo' | 'invited' | 'view'
    Answering it yourself needs one screen in between: who the Business ID is
    headed with. It is inserted here rather than in the flow data, because the
    walkthrough is somebody whose name the demo already knows. */
-const IDENTITY_HEAD =
-  'This heads your Business ID. Leave any field blank to skip it.'
+const IDENTITY_HEAD = 'Leave any field blank to skip it.'
 
 /* Where the answers actually go, said on the screen that collects the name.
    This used to read "Nothing is sent anywhere — the answers stay in this
@@ -457,33 +456,91 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     is not asked — everyone answering is an advisor. The firm is only the name,
     and optional: a recruiter's warm lead is already known, it matters for a
     cold one. */
-function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit }) {
-  const fields: [keyof Answers['identity'], string, string?][] = [
-    ['name', 'Your name'],
-    ['book', 'Assets you advise on', 'A rough figure is fine'],
-    ['firm', 'Name of your firm', 'Optional'],
-  ]
+const ID_FIELDS: [keyof Answers['identity'], string, string?][] = [
+  ['name', 'Your name'],
+  ['book', 'Assets you advise on', 'A rough figure is fine'],
+  ['firm', 'Name of your firm', 'Optional'],
+]
+
+/* One field at a time under the card, the way every question after it
+   arrives; the foot's Continue and Back step through them (`field`). */
+function IdentityForm({
+  step,
+  a,
+  edit,
+  field,
+  onNext,
+}: {
+  step: Step
+  a: Answers
+  edit: Edit
+  field: number
+  onNext: () => void
+}) {
+  const [key, label, hint] = ID_FIELDS[field] ?? ID_FIELDS[0]
+  const { name, book, firm } = a.identity
+  const initial = name.trim().charAt(0).toUpperCase()
   return (
-    <div className="af-welcome">
+    <div className="af-welcome af-id">
       <h2 className="af-h1">{step.title}</h2>
       <Paras text={step.body} />
+      {/* The head of their Business ID, filling in as they type — so the
+          three fields read as the start of something rather than a form. */}
+      <div className="af-idcard" aria-hidden>
+        <span className="af-idcard-sky">
+          <i className="af-idcard-glow is-a" />
+          <i className="af-idcard-glow is-b" />
+          <i className="af-idcard-glow is-c" />
+        </span>
+        <span className="af-idcard-eyebrow">Business ID</span>
+        <div className="af-idcard-who">
+          <span className={`af-idcard-avatar${initial ? ' is-set' : ''}`}>{initial || <IdIcon k="name" />}</span>
+          <span className={`af-idcard-name${name.trim() ? '' : ' is-empty'}`}>
+            {name.trim() || 'Your name'}
+          </span>
+        </div>
+        <div className="af-idcard-chips">
+          <span className={`af-idcard-chip${book.trim() ? '' : ' is-empty'}${key === 'book' ? ' is-on' : ''}`}>
+            <IdIcon k="book" />
+            {book.trim() || 'Assets'}
+          </span>
+          <span className={`af-idcard-chip${firm.trim() ? '' : ' is-empty'}${key === 'firm' ? ' is-on' : ''}`}>
+            <IdIcon k="firm" />
+            {firm.trim() || 'Firm'}
+          </span>
+        </div>
+      </div>
       {/* The adventures' own open field — label, italic hint, input — so the
           first thing an advisor types into looks like everything after it. */}
       <div className="af-idform">
-        {fields.map(([key, label, hint]) => (
-          <div className="af-idfield" key={key}>
-            <label className="jf-other-label" htmlFor={`af-id-${key}`}>
-              {label}
-            </label>
-            {hint && <span className="jf-other-hint">{hint}</span>}
+        <div className="af-idsteps" aria-label={`${field + 1} of ${ID_FIELDS.length}`}>
+          {ID_FIELDS.map(([k], n) => (
+            <i key={k} className={n === field ? 'is-on' : n < field ? 'is-done' : undefined} />
+          ))}
+        </div>
+        <div className="af-idfield" key={key}>
+          <label className="jf-other-label" htmlFor={`af-id-${key}`}>
+            {label}
+          </label>
+          {hint && <span className="jf-other-hint">{hint}</span>}
+          <span className="af-idinput">
+            <IdIcon k={key} />
             <input
               id={`af-id-${key}`}
               className="jf-other"
+              autoFocus
+              enterKeyHint={field < ID_FIELDS.length - 1 ? 'next' : 'done'}
               value={a.identity[key]}
               onChange={(e) => edit.identity({ [key]: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  onNext()
+                }
+              }}
             />
-          </div>
-        ))}
+          </span>
+        </div>
       </div>
       {/* Where the answers go, said where they are collected. */}
       <p className="lg-consent is-left">
@@ -491,6 +548,37 @@ function IdentityForm({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
         <LegalLink doc="data">How your answers are used</LegalLink>
       </p>
     </div>
+  )
+}
+
+/** The identity fields' marks: a person, a stack of coins, a building. */
+function IdIcon({ k }: { k: string }) {
+  const paths: Record<string, ReactNode> = {
+    name: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5" />
+      </>
+    ),
+    book: (
+      <>
+        <ellipse cx="12" cy="6" rx="7" ry="2.5" />
+        <path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" />
+        <path d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6" />
+      </>
+    ),
+    firm: (
+      <>
+        <path d="M4 20h16" />
+        <path d="M6 20V9l6-4 6 4v11" />
+        <path d="M10 20v-5h4v5" />
+      </>
+    ),
+  }
+  return (
+    <svg className="af-idicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      {paths[k]}
+    </svg>
   )
 }
 
@@ -708,7 +796,12 @@ function StepBody({
   onSend,
   onAdventure,
   journey = false,
+  idField = 0,
+  onIdNext = () => {},
 }: {
+  /** Which identity field is showing, and how to move past it. */
+  idField?: number
+  onIdNext?: () => void
   /** The journey page: the list counts an adventure taken to its end as
       complete, and a locked row does not open. */
   journey?: boolean
@@ -727,7 +820,7 @@ function StepBody({
       return <AdvisorWelcome step={step} />
 
     case 'identity':
-      return <IdentityForm step={step} a={a} edit={edit} />
+      return <IdentityForm step={step} a={a} edit={edit} field={idField} onNext={onIdNext} />
 
     case 'home':
       return (
@@ -1209,13 +1302,24 @@ function FlowPhone({
       const id = step.adventure
       edit.apply((a) => withFinished(a, id))
     }
+    if (steps[n]?.kind === 'identity') setIdField(0)
     setTrail((t) => [...t, n])
     toTop()
   }
   const back = () => {
+    /* Back into the identity screen lands on its last field. */
+    const to = trail[trail.length - 2]
+    if (to !== undefined && steps[to]?.kind === 'identity') setIdField(ID_FIELDS.length - 1)
     setTrail((t) => (t.length > 1 ? t.slice(0, -1) : t))
     toTop()
   }
+  /* The identity screen asks one field at a time: Continue and Back move
+     between its fields before they move between screens. */
+  const [idField, setIdField] = useState(0)
+  useCcNav('self.idField', idField, setIdField)
+  const onId = step.kind === 'identity'
+  const next = () => (onId && idField < ID_FIELDS.length - 1 ? setIdField(idField + 1) : go(i + 1))
+  const prev = () => (onId && idField > 0 ? setIdField(idField - 1) : back())
 
   // A fresh start rather than another screen on the trail — Back after this
   // has nowhere behind it to go, which is the point of restarting.
@@ -1604,6 +1708,8 @@ function FlowPhone({
                 onSend={onSend}
                 onAdventure={openAdventure}
                 journey={rich}
+                idField={idField}
+                onIdNext={next}
               />
             )}
           </div>
@@ -1619,8 +1725,8 @@ function FlowPhone({
                 {/* Two controls, never three: Back is a small arrow, and the
                     one wide button is Skip until the question has an answer,
                     then OK. Three buttons in a row read as three choices. */}
-                {trail.length > 1 && (
-                  <button className="af-back" type="button" aria-label="Back" onClick={back}>
+                {(trail.length > 1 || (onId && idField > 0)) && (
+                  <button className="af-back" type="button" aria-label="Back" onClick={prev}>
                     <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                       <path d="M10 3L5 8l5 5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -1635,7 +1741,7 @@ function FlowPhone({
                     <button
                       className={`cx-start af-next${step.kind === 'welcome' ? ' is-shine' : ''}`}
                       type="button"
-                      onClick={() => go(i + 1)}
+                      onClick={next}
                     >
                       <span>{cta}</span>
                     </button>
