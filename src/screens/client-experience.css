@@ -1625,6 +1625,29 @@ html.cx-desktop .cx-tabbar {
 html.cx-desktop .af-foot {
   padding-inline: var(--xp-col);
 }
+/* The ID's title row as the advisor's desktop page has it: the title on the
+   left, Download PDF on the right at its own size — not the phone's full-width
+   button on a line of its own. The rule runs under both. */
+html.cx-desktop .cx-screen .pp-title-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-thin) solid #ddd9e2;
+}
+html.cx-desktop .cx-screen .pp-title-row .pp-title-id {
+  flex: 1 1 auto;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+html.cx-desktop .cx-screen .pp-title-row .btn-download {
+  flex: none;
+  width: auto;
+  margin-top: 0;
+}
+
 /* The menu drops from the burger: right edge on the bar's edge, under the
    bar, a panel rather than the full width of the window. */
 html.cx-desktop .cx-device.is-bare .cx-sheet {
