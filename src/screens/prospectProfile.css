@@ -156,12 +156,16 @@
 .pp-meta {
   display: flex;
   flex-direction: column;
-  /* Centred under the name, the way the portrait and the name are. */
-  align-items: center;
+  /* One block centred under the name, its rows left-aligned inside it: the
+     icons stand in one straight column and the text starts on one line.
+     Centring each row on its own put every icon at a different x. */
+  align-items: flex-start;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto 18px;
   gap: 6px;
   font-size: 12.5px;
   color: var(--grey-text, #8b8598);
-  margin-bottom: 18px;
 }
 .pp-convert {
   display: inline-flex;
@@ -1195,7 +1199,14 @@
 }
 .pp-meta-row svg {
   flex: none;
+  /* The same box for every icon, so the text after each starts at one x. */
+  width: 14px;
+  height: 14px;
   color: var(--grey-text, #8b8598);
+}
+.pp-meta-row {
+  max-width: 100%;
+  min-width: 0;
 }
 .pp-card-title > svg {
   flex: none;
