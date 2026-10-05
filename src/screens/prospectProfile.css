@@ -1087,8 +1087,12 @@
   to { opacity: 1; }
 }
 @media (prefers-reduced-motion: no-preference) {
+  /* `backwards`, not `both`: once landed the element must carry no transform,
+     or it becomes the containing block for every position: fixed inside it —
+     and a modal opened from a card centres on the whole tab, far below the
+     screen, instead of on the window. */
   .pp-main > * {
-    animation: pp-rise 0.32s ease both;
+    animation: pp-rise 0.32s ease backwards;
   }
   .pp-main > *:nth-child(2) { animation-delay: 0.03s; }
   .pp-main > *:nth-child(3) { animation-delay: 0.06s; }

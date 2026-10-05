@@ -26,6 +26,18 @@
 .fid-cell {
   min-width: 0;
 }
+/* A member's name with their own plus at the column's right, on the cards
+   that can be added to. */
+.fid-who-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding-bottom: var(--space-10);
+}
+.fid-who-row .fid-who {
+  padding-bottom: 0;
+}
 .fid-cell + .fid-cell {
   padding-left: var(--space-20);
   border-left: var(--border-thin) solid var(--border-default);
