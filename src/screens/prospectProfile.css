@@ -1669,3 +1669,31 @@
   gap: 4px;
   text-align: center;
 }
+
+/* The way into the person's own experience, at the foot of the rail: an
+   outline pill under everything else the rail says. */
+.pp-side .pp-experience {
+  margin-top: 22px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--k-plum, #240446);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--k-plum, #240446);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.pp-side .pp-experience:hover {
+  background: var(--k-plum, #240446);
+  color: #fff;
+}
+.pp-side-inner > .pp-experience {
+  grid-column: 1 / -1;
+}

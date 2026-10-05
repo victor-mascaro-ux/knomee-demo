@@ -1573,3 +1573,97 @@ svg.cx-tab-mark {
   align-items: center;
   padding: var(--space-16, 16px);
 }
+
+/* ── The desktop version of an experience ────────────────────────────────
+   The same journey, the frame off (useFitToWindow returns `bare`), laid out
+   for a computer: the brand bar across the window, the tabs as a row under
+   it, and the journey in a readable column down the middle. A Business or
+   Financial ID gets the width it uses on the advisor's desktop page — the
+   profile switches to its desktop layout by its own container query.
+   html.cx-desktop is set by useDarkGround while the D panel says Desktop. */
+html.cx-desktop,
+html.cx-desktop body {
+  background: #f4f1f8;
+}
+html.cx-desktop .cx-page.is-bare {
+  --xp-col: 720px;
+  --xp-wide: 1200px;
+  --xp-pad: max(24px, calc((100% - var(--xp-col)) / 2));
+  background: #f4f1f8;
+}
+html.cx-desktop .cx-device.is-bare .cx-screen {
+  font-size: var(--text-base, 15px);
+  background: #f4f1f8;
+}
+/* Bar, then tabs, then the page, then the journey's own Back / Continue. */
+html.cx-desktop .cx-screen > * {
+  order: 0;
+}
+html.cx-desktop .cx-screen > .cx-tabbar {
+  order: 1;
+}
+html.cx-desktop .cx-screen > .cx-viewport {
+  order: 2;
+}
+html.cx-desktop .cx-screen > .af-foot {
+  order: 3;
+}
+html.cx-desktop .cx-appbar {
+  height: 64px;
+  padding: 0 max(24px, calc((100% - var(--xp-wide)) / 2));
+}
+/* The tab bar as a row of tabs under the bar: no swell, no rising mark. */
+html.cx-desktop .cx-tabbar {
+  height: 52px;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e6e5ea;
+}
+html.cx-desktop .cx-tab-edge {
+  display: none;
+}
+html.cx-desktop .cx-tab {
+  flex: none;
+  flex-direction: row;
+  gap: 8px;
+  height: 100%;
+  padding: 0 18px;
+  border-bottom: 2px solid transparent;
+}
+html.cx-desktop .cx-tab.is-on {
+  border-bottom-color: var(--k-plum, #240446);
+}
+html.cx-desktop .cx-tab-lbl {
+  font-size: 14px;
+}
+html.cx-desktop .cx-tab-center {
+  margin-top: 0;
+}
+html.cx-desktop .cx-tab-mark {
+  width: 30px;
+  height: 30px;
+}
+/* The journey reads in a column; an ID page takes the wide one. */
+html.cx-desktop .cx-viewport {
+  background: #f4f1f8;
+  padding: 32px var(--xp-pad) 48px;
+  scrollbar-width: auto;
+}
+html.cx-desktop .cx-viewport:has(> .pp, > .ap, > .af-report) {
+  padding-inline: max(24px, calc((100% - var(--xp-wide)) / 2));
+}
+html.cx-desktop .cx-viewport > * {
+  background: transparent;
+}
+/* Back and Continue under the column, the column's width. */
+html.cx-desktop .af-foot {
+  padding: 14px var(--xp-pad) 18px;
+  background: #fff;
+}
+/* Menus and sheets: a panel at the bar's edge rather than the full window. */
+html.cx-desktop .cx-sheet-panel {
+  max-width: 420px;
+  margin-left: auto;
+}

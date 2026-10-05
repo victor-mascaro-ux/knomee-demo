@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import ExperienceButton from '../components/ExperienceButton'
 import type { CSSProperties, ReactNode } from 'react'
 import './prospectProfile.css'
 import './clientProfile.css'
@@ -808,6 +809,7 @@ export default function ClientProfileScreen({
   onOpenHousehold,
   household,
   onAddMember,
+  onOpenExperience,
   mine,
   sharing,
   onToast,
@@ -837,6 +839,8 @@ export default function ClientProfileScreen({
      rail offers to make one rather than naming a family that does not exist. */
   household?: { name: string; members: HouseholdMember[] } | null
   onAddMember?: () => void
+  /** The person's own experience, from the foot of the rail. */
+  onOpenExperience?: () => void
   /* Emily reading her own Financial ID in her own app, rather than her advisor
      reading it about her. Same page — it is the artefact the five adventures
      produce — without the two things that only make sense from a client list:
@@ -1039,6 +1043,7 @@ export default function ClientProfileScreen({
                 </div>
               ))}
             </div>
+            {!mine && onOpenExperience && <ExperienceButton onClick={onOpenExperience} />}
           </div>
         </aside>
 

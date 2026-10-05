@@ -9,6 +9,7 @@
    only four cards are new — route, second seat, book profile and the comp
    clock, which the client version has no slot for. */
 
+import ExperienceButton from '../components/ExperienceButton'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import './prospectProfile.css'
@@ -111,6 +112,7 @@ function Waiting({ icon, title, adventure }: { icon: string; title: string; adve
 export default function AdvisorProfileScreen({
   onBack,
   onAdd,
+  onOpenExperience,
   ownerMenu,
   sharing,
   mine,
@@ -127,6 +129,8 @@ export default function AdvisorProfileScreen({
   waiting?: WaitingCards
   onBack: () => void
   onAdd?: () => void
+  /** The person's own experience, from the foot of the rail. */
+  onOpenExperience?: () => void
   /** What the breadcrumb calls the list behind this page. A candidate opened
       from the firm's pipeline came from My Candidates; one opened from the
       advisor directory did not, and a crumb that said so would be pointing at
@@ -288,6 +292,7 @@ export default function AdvisorProfileScreen({
                 </div>
               </>
             )}
+            {!mine && onOpenExperience && <ExperienceButton onClick={onOpenExperience} />}
           </div>
         </aside>
 
