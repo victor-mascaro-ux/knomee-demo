@@ -97,7 +97,7 @@ import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
 import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
-import { sampleAnswers } from './data/advisorAnswers'
+import { emptyAnswers, sampleAnswers } from './data/advisorAnswers'
 import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3917,6 +3917,9 @@ export default function App() {
     initialView === 'client-mobile' ? initialProfile : null,
   )
   const [advisorMobileOpen, setAdvisorMobileOpen] = useState(initialView === 'advisor-mobile')
+  /* Marcus's phone restarted from its menu: 0 is his finished journey; each
+     restart after that is a fresh, sandboxed run of it. */
+  const [marcusRun, setMarcusRun] = useState(0)
   // The same five adventures pointed at the advisor's own decision — the
   // Dynasty case, where the person answering is the prospect being recruited.
   const [advisorFlowOpen, setAdvisorFlowOpen] = useState(initialView === 'advisor-flow')
@@ -4277,6 +4280,25 @@ export default function App() {
        is the worked example, so nothing done on it is saved or sent. */
     const marcus = sampleAnswers()
     marcus.finished = Object.fromEntries(advisorAdventures.map((r) => [r.id, marcus.completed]))
+    /* Restarted: his journey from the welcome, his sample on every Skip, and
+       nothing saved or sent anywhere. */
+    if (marcusRun > 0)
+      return (
+        <>
+          <AdvisorSelfScreen
+            key={`self-marcus-run-${marcusRun}`}
+            rich
+            mode="demo"
+            sandbox
+            askSignUp
+            entry={entryOf({ ...emptyAnswers(), identity: marcus.identity }, null, 'Marcus Hale')}
+            brand={brand}
+            onRestartDemo={() => setMarcusRun((n) => n + 1)}
+            onExit={() => setAdvisorMobileOpen(false)}
+          />
+          {brand && <PoweredBy />}
+        </>
+      )
     return (
       <>
         <AdvisorSelfScreen
@@ -4284,6 +4306,8 @@ export default function App() {
           rich
           mode="view"
           phone
+          askSignUp
+          onRestartDemo={() => setMarcusRun(1)}
           entry={entryOf(marcus, null, 'Marcus Hale')}
           brand={brand}
           onExit={() => setAdvisorMobileOpen(false)}

@@ -74,12 +74,15 @@ export default function SignUpScreen({
         </form>
       </div>
 
-      <p className="su-terms">
-        By creating an account, you accept Knomee’s <u>Terms of Service</u> and <u>Privacy Policy</u>
-      </p>
-      <button className="su-later" type="button" onClick={onClose}>
-        Not Now
-      </button>
+      {/* Held at the foot of the screen, under the card's open space. */}
+      <div className="su-foot">
+        <p className="su-terms">
+          By creating an account, you accept Knomee’s <u>Terms of Service</u> and <u>Privacy Policy</u>
+        </p>
+        <button className="su-later" type="button" onClick={onClose}>
+          Not Now
+        </button>
+      </div>
     </div>
   )
 }

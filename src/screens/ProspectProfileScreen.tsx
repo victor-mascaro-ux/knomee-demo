@@ -147,7 +147,12 @@ export default function ProspectProfileScreen({
         ],
         /* The goals she set in the adventure; the authored ones when it was
            skipped past; none before. */
-        goals: fresh.goals ? fresh.goals.goals : isDone('goals') ? financialId.goals : [],
+        goals: fresh.goals
+          ? // A goal she never named is no row, rather than a row without a title.
+            fresh.goals.goals.filter((g) => g.title)
+          : isDone('goals')
+            ? financialId.goals
+            : [],
         /* With all five done she has life events on her page too, like the
            questions and the board. */
         lifeEvents: isDone('goals') ? financialId.lifeEvents : [],

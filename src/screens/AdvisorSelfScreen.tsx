@@ -1006,7 +1006,21 @@ export default function AdvisorSelfScreen({
   entry = null,
   phone = false,
   rich = false,
+  askSignUp = false,
+  sandbox = false,
+  onRestartDemo,
 }: {
+  /** Viewing mode, on a demo persona's phone (Marcus): still show the sign-up
+      before the Business ID, as an advisor taking it would see it. */
+  askSignUp?: boolean
+  /** A demo persona's journey taken again from the start (Marcus restarted):
+      it plays like the real thing — his sample on Skip, the sign-up before his
+      Business ID — but nothing is saved, recorded or sent to the directory.
+      `entry` is the sheet it starts from. */
+  sandbox?: boolean
+  /** On a persona's phone, the menu's Restart Adventures hands over to the
+      page that owns it, which starts the sandboxed run. */
+  onRestartDemo?: () => void
   /** The adventures on the client's own mechanism — photo picks, the swipe
       deck, the reveal and the reward — wherever one has been built for the
       advisor. The rest stay on the plain screens. */
@@ -1023,6 +1037,9 @@ export default function AdvisorSelfScreen({
   phone?: boolean
 }) {
   const viewing = mode === 'view'
+  /* Nothing leaves this phone: somebody else's sitting, or a persona's
+     sandboxed run. */
+  const quiet = viewing || sandbox
   // An invited advisor's sheet is scoped to their token, so a device that has
   // been used to demo the flow does not hand them its leftovers.
   const scope = mode === 'invited' && invite ? invite.token : null
@@ -1033,7 +1050,7 @@ export default function AdvisorSelfScreen({
     /* Someone else's sitting, over a fresh sheet: one saved before a field
        existed (`shared`, say) arrives without it, and every rule below reads
        it. The same merge `loadAnswers` gives a stored sheet. */
-    if (viewing && entry) return { ...emptyAnswers(), ...entry.answers }
+    if (quiet && entry) return { ...emptyAnswers(), ...entry.answers }
     const loaded = loadAnswers(scope)
     /* The name the link was made for arrives already in the field. The page has
        just greeted them by it, so asking them to type it is asking them to tell
@@ -1066,8 +1083,8 @@ export default function AdvisorSelfScreen({
     [mode, invite],
   )
   useEffect(() => {
-    if (!viewing) saveAnswers(answers, scope)
-  }, [answers, viewing, scope])
+    if (!quiet) saveAnswers(answers, scope)
+  }, [answers, quiet, scope])
 
   // Two stores, on purpose. `saveAnswers` holds the sheet you are filling in
   // and a restart wipes it — that is what resets the Business ID. The record
@@ -1131,8 +1148,8 @@ export default function AdvisorSelfScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => {
-    if (answered && !viewing && resumed) noteSitting(visible, answers.sittingId)
-  }, [visible, answers.sittingId, answered, viewing, resumed])
+    if (answered && !quiet && resumed) noteSitting(visible, answers.sittingId)
+  }, [visible, answers.sittingId, answered, quiet, resumed])
 
   /* And the third store: the shared directory, so the person who sent the link
      can see that it was answered. The ledger above is this device's; this one
@@ -1144,14 +1161,14 @@ export default function AdvisorSelfScreen({
      doing that for now", and the row is a whole sheet each time rather than a
      delta, so a lost write costs nothing but freshness. */
   useEffect(() => {
-    if (viewing || !answered || !resumed) return
+    if (quiet || !answered || !resumed) return
     const fallback = invite?.name ?? ''
     const id = window.setTimeout(() => {
       void putEntry(entryOf(answers, invite?.token ?? null, fallback, visible))
       if (invite) void touchInvite(invite.token, true)
     }, 1000)
     return () => window.clearTimeout(id)
-  }, [answers, visible, answered, viewing, invite, resumed])
+  }, [answers, visible, answered, quiet, invite, resumed])
 
   /* An opened link is worth knowing about on its own: it separates "has not
      looked at it yet" from "looked, and did not answer", which are two
@@ -1169,13 +1186,15 @@ export default function AdvisorSelfScreen({
      under a new id — a new person, a new Business ID. The row it just sent
      stays on the record whether or not the post got anywhere. */
   const close = useCallback(() => {
+    /* A persona's sandboxed run starts over as the same persona. */
+    if (sandbox) return restart({ ...emptyAnswers(), identity: answers.identity })
     if (answered) void pushSitting(noteSitting(visible, answers.sittingId))
     /* A restart under an invite is the same person starting over, not the next
        person in the room — so it keeps the token and the name on the link, and
        lands in the directory as a second sitting rather than overwriting the
        first. Nothing they already answered is lost. */
     restart(emptyAnswers())
-  }, [answered, answers.sittingId, visible, restart])
+  }, [answered, answers.sittingId, answers.identity, visible, restart, sandbox])
 
   if (view === 'report')
     return <FlowReport d={viewing ? d : dFirm} rich={rich} mode={mode} brand={brand} onBack={() => setView('flow')} onList={onExit} />
@@ -1193,11 +1212,13 @@ export default function AdvisorSelfScreen({
       mode={mode}
       brand={brand}
       rich={rich}
+      askSignUp={askSignUp}
+      onRestartDemo={onRestartDemo}
       onExit={onExit}
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
       onSend={() => {
-        if (answered) void pushSitting(noteSitting(visible, answers.sittingId))
+        if (answered && !quiet) void pushSitting(noteSitting(visible, answers.sittingId))
       }}
       onRestart={close}
       onSample={() => restart(sampleAnswers())}
@@ -1223,8 +1244,12 @@ function FlowPhone({
   onRestart,
   brand,
   rich = false,
+  askSignUp = false,
+  onRestartDemo,
 }: {
   rich?: boolean
+  askSignUp?: boolean
+  onRestartDemo?: () => void
   answers: Answers
   edit: Edit
   d: Derived
@@ -1324,6 +1349,7 @@ function FlowPhone({
   /* The identity screen asks one field at a time: Continue and Back move
      between its fields before they move between screens. */
   const [idField, setIdField] = useState(0)
+  const [demoSignedUp, setDemoSignedUp] = useState(false)
   useCcNav('self.idField', idField, setIdField)
   const onId = step.kind === 'identity'
   const next = () => (onId && idField < ID_FIELDS.length - 1 ? setIdField(idField + 1) : go(i + 1))
@@ -1636,17 +1662,21 @@ function FlowPhone({
                   </ol>
                 </div>
               )
-            ) : tab === 'finid' && !viewing && !answers.signedUp && !(!rich && idEmpty) ? (
+            ) : tab === 'finid' && (!viewing || askSignUp) && !answers.signedUp && !demoSignedUp && !(!rich && idEmpty) ? (
               /* Their Business ID is behind an account. Their answers are
                  already with the firm; this is their own copy of the page. */
               <SignUpScreen
                 idName="Business ID"
                 onDone={(email) =>
-                  edit.apply((a) => ({
-                    ...a,
-                    signedUp: today(),
-                    identity: email ? { ...a.identity, email } : a.identity,
-                  }))
+                  /* Marcus's phone is read-only: signing up there lasts as
+                     long as the demo does. */
+                  viewing
+                    ? setDemoSignedUp(true)
+                    : edit.apply((a) => ({
+                        ...a,
+                        signedUp: today(),
+                        identity: email ? { ...a.identity, email } : a.identity,
+                      }))
                 }
                 onClose={() => {
                   setTab('flow')
@@ -1847,15 +1877,16 @@ function FlowPhone({
                   Account Settings
                   <ArrowRight />
                 </button>
-                {!viewing && onRestart && (
+                {((!viewing && onRestart) || onRestartDemo) && (
                   <button
                     className={`cx-sheet-item${restartArmed ? ' is-armed' : ''}`}
                     type="button"
                     onClick={() => {
                       if (!restartArmed) return setRestartArmed(true)
                       setMenuOpen(false)
+                      if (onRestartDemo) return onRestartDemo()
                       setRichOpen(null)
-                      onRestart()
+                      onRestart?.()
                       // Starting over starts at the beginning: the welcome —
                       // from whichever tab the menu was opened on.
                       setTab('flow')
