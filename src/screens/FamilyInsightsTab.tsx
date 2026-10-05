@@ -10,9 +10,9 @@
  * So the top of the page is the toolkit the other tabs already own — the top
  * action, the starters and their key, the words to use and avoid, the
  * adventures — rendered by the very same components, with the household's own
- * four techniques. What follows is what only a pair can have: the statements
- * they answered the same, the ones they did not, and the topics to tread
- * carefully around.
+ * four techniques. The pair's comparison — Similarities, Differences and
+ * Sensitive Topics — lives on Family Insights, built from the cards exported
+ * here.
  */
 
 import './familyInsights.css'
@@ -22,7 +22,6 @@ import { Who } from './familyParts'
 import { familyInsights } from '../data/familyInsights'
 import type { SharedStatement } from '../data/familyInsights'
 import type { HouseholdMember } from '../data/clientProfile'
-import icMotivators from '../assets/cards/motivators.svg'
 import icApprehensions from '../assets/cards/apprehensions.svg'
 
 /* One statement, and where each of them landed on it. The track is the
@@ -73,7 +72,7 @@ function Statement({ s, members }: { s: SharedStatement; members: HouseholdMembe
 
 /* Statements on the left, what they add up to on the right. The reading is the
    point; the sliders are the working. */
-function CompareCard({
+export function CompareCard({
   icon,
   title,
   statements,
@@ -112,8 +111,8 @@ function CompareCard({
   )
 }
 
-export default function FamilyInsightsTab({ members }: { members: HouseholdMember[] }) {
-  const { toolkit, similarities, differences, sensitiveTopics } = familyInsights
+export default function FamilyInsightsTab() {
+  const { toolkit } = familyInsights
 
   return (
     <div className="rd fin">
@@ -128,49 +127,38 @@ export default function FamilyInsightsTab({ members }: { members: HouseholdMembe
           <AdventuresCard />
         </div>
       </div>
-
-      <CompareCard
-        icon={icMotivators}
-        title="Similarities"
-        statements={[similarities.statement]}
-        points={similarities.points}
-        members={members}
-      />
-
-      <CompareCard
-        icon={icApprehensions}
-        title="Differences"
-        statements={differences.statements}
-        points={differences.points}
-        members={members}
-      />
-
-      {/* What to tread carefully around: the topic, why it is delicate, and
-          what to do about it — three columns, because the third is the only one
-          that changes what the advisor does. */}
-      <section className="pp-card">
-        <div className="pp-card-head">
-          <span className="pp-card-title">
-            <img className="pp-card-ic" src={icApprehensions} alt="" />
-            Sensitive Topics
-          </span>
-        </div>
-        <div className="fin-topics">
-          <div className="fin-topic fin-topic-head">
-            <span>Topic</span>
-            <span>Why it’s sensitive</span>
-            <span>How to handle it</span>
-          </div>
-          {sensitiveTopics.map((t) => (
-            <div className="fin-topic" key={t.topic}>
-              <span className="fin-topic-name">{t.topic}</span>
-              <span className="fin-topic-why">{t.why}</span>
-              <span className="fin-topic-how">{t.how}</span>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
+  )
+}
+
+/* What to tread carefully around: the topic, why it is delicate, and what to
+   do about it — three columns, because the third is the only one that changes
+   what the advisor does. */
+export function SensitiveTopicsCard() {
+  const { sensitiveTopics } = familyInsights
+  return (
+    <section className="pp-card">
+      <div className="pp-card-head">
+        <span className="pp-card-title">
+          <img className="pp-card-ic" src={icApprehensions} alt="" />
+          Sensitive Topics
+        </span>
+      </div>
+      <div className="fin-topics">
+        <div className="fin-topic fin-topic-head">
+          <span>Topic</span>
+          <span>Why it’s sensitive</span>
+          <span>How to handle it</span>
+        </div>
+        {sensitiveTopics.map((t) => (
+          <div className="fin-topic" key={t.topic}>
+            <span className="fin-topic-name">{t.topic}</span>
+            <span className="fin-topic-why">{t.why}</span>
+            <span className="fin-topic-how">{t.how}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 

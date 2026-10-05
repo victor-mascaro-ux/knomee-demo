@@ -254,7 +254,7 @@ export default function HouseholdScreen({
               <div className="pp-title-row">
                 <h1 className="pp-title">{household.name} Playbook</h1>
               </div>
-              <FamilyInsightsTab members={members} />
+              <FamilyInsightsTab />
             </>
           )}
         </main>

@@ -17,7 +17,9 @@ export function Who({ name }: { name: string }) {
   )
 }
 
-/* The Financial ID's card and head, with a column per member under it. */
+/* The Financial ID's card and head, with a column per member under it. A card
+   members can add to takes `add`: the plus sits in each column, level with
+   that member's name, so it is never a question whose list it adds to. */
 export function FamilyCard<T extends { name: string }>({
   members,
   icon,
@@ -25,6 +27,7 @@ export function FamilyCard<T extends { name: string }>({
   head,
   foot,
   bodyRef,
+  add,
   render,
 }: {
   members: T[]
@@ -33,6 +36,7 @@ export function FamilyCard<T extends { name: string }>({
   head?: ReactNode
   foot?: ReactNode
   bodyRef?: RefObject<HTMLDivElement>
+  add?: (m: T) => ReactNode
   render: (m: T) => ReactNode
 }) {
   return (
@@ -47,7 +51,14 @@ export function FamilyCard<T extends { name: string }>({
       <div className="fid-split" ref={bodyRef}>
         {members.map((m) => (
           <div className="fid-cell" key={m.name}>
-            <Who name={m.name} />
+            {add ? (
+              <div className="fid-who-row">
+                <Who name={m.name} />
+                {add(m)}
+              </div>
+            ) : (
+              <Who name={m.name} />
+            )}
             {render(m)}
           </div>
         ))}

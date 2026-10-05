@@ -6968,6 +6968,11 @@ body .modal-backdrop .modal .modal-close:hover {
 body .modal-backdrop .modal .modal-body {
   padding: 16px 24px;
 }
+/* A modal with no button row ends on its body: give it the footer's own
+   bottom space so the last line does not sit on the edge. */
+body .modal-backdrop .modal .modal-body:last-child {
+  padding-bottom: 28px;
+}
 body .modal-backdrop .modal .modal-footer {
   padding: 8px 24px 24px;
   border-radius: 0;

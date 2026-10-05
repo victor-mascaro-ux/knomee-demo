@@ -19,6 +19,7 @@ import { familyId } from '../data/familyId'
 import type { FamilyMemberId } from '../data/familyId'
 import { profileFor } from '../data/memberProfiles'
 import type { HouseholdMember, ClientGoal } from '../data/clientProfile'
+import type { LifeEvent, ProfileQuestion } from '../data/financialId'
 import {
   AddButton,
   COLLAPSED_ROWS,
@@ -37,10 +38,13 @@ import {
   orderGoals,
   useCollapsed,
   CheckInCard,
+  withTag,
 } from './profileParts'
 import { FamilyCard, Who } from './familyParts'
 import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
+import { AddLifeEventModal } from './LifeEventModal'
+import { AddQuestionModal } from './QuestionModal'
 
 /** A goal on this page, carrying which member's list, and where in it, it
     came from — so an edit lands back on the one it was made to. */
@@ -101,12 +105,44 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
   /* A goal edited here, by who it is and where it sits in their list, laid
      over the answers the demo carries. */
   const [edits, setEdits] = useState<Record<string, ClientGoal>>({})
+  /* What the advisor added here, by member. Goals go after the carried ones so
+     an edit's key — its place in the list — still points at the same goal;
+     the list sorts them anyway. Events and questions read newest first. */
+  const [added, setAdded] = useState<
+    Record<string, { goals: ClientGoal[]; lifeEvents: LifeEvent[]; questions: ProfileQuestion[] }>
+  >({})
+  const addTo = (name: string, part: Partial<(typeof added)[string]>) =>
+    setAdded((a) => {
+      const was = a[name] ?? { goals: [], lifeEvents: [], questions: [] }
+      return {
+        ...a,
+        [name]: {
+          goals: [...was.goals, ...(part.goals ?? [])],
+          lifeEvents: [...(part.lifeEvents ?? []), ...was.lifeEvents],
+          questions: [...(part.questions ?? []), ...was.questions],
+        },
+      }
+    })
+  /* Which form is open, and for whom. */
+  const [adding, setAdding] = useState<{ kind: 'goal' | 'event' | 'question'; name: string } | null>(null)
   const members: FamilyMemberId[] = live
     .map((m) => familyId.members.find((f) => f.name === m.name) ?? blank(m))
-    .map((m) => ({
-      ...m,
-      goals: m.goals.map((g, i) => ({ ...(edits[`${m.name}|${i}`] ?? g), _k: `${m.name}|${i}` })),
-    }))
+    .map((m) => {
+      const a = added[m.name]
+      return {
+        ...m,
+        goals: [...m.goals, ...(a?.goals ?? [])].map((g, i) => ({
+          ...(edits[`${m.name}|${i}`] ?? g),
+          _k: `${m.name}|${i}`,
+        })),
+        lifeEvents: [...(a?.lifeEvents ?? []), ...m.lifeEvents],
+        questions: [...(a?.questions ?? []), ...m.questions],
+      }
+    })
+  /* The plus in a member's column, and the label that says whose it is. */
+  const plus = (kind: 'goal' | 'event' | 'question', what: string) => (m: FamilyMemberId) => (
+    <AddButton label={`Add ${what} for ${m.name}`} onClick={() => setAdding({ kind, name: m.name })} />
+  )
   const highlights = useCollapsed(familyId.highlights, COLLAPSED_ROWS)
   const goals = useSharedCollapse(
     members.map((m) => m.goals),
@@ -190,7 +226,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         members={members}
         icon={icGoals}
         title="Goals"
-        head={<AddButton />}
+        add={plus('goal', 'a goal')}
         bodyRef={goals.box}
         foot={goals.overflows && <ShowToggle open={goals.open} onToggle={goals.toggle} />}
         render={(m) => (
@@ -271,12 +307,17 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         members={members}
         icon={icLifeEvents}
         title="Life Events"
-        head={<AddButton />}
+        add={plus('event', 'a life event')}
         bodyRef={events.box}
         foot={events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
         render={(m) =>
           m.lifeEvents.length === 0 ? (
-            <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
+            <EmptyState
+              art={EMPTY_ART.lifeEvents}
+              label="Add a Life Event"
+              cta
+              onClick={() => setAdding({ kind: 'event', name: m.name })}
+            />
           ) : (
             <div className="pp-events">
               {events.cut(m.lifeEvents).map((e, i) => (
@@ -303,12 +344,17 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         members={members}
         icon={icQuestions}
         title="Questions"
-        head={<AddButton muted />}
+        add={plus('question', 'a question')}
         bodyRef={questions.box}
         foot={questions.overflows && <ShowToggle open={questions.open} onToggle={questions.toggle} />}
         render={(m) =>
           m.questions.length === 0 ? (
-            <EmptyState art={EMPTY_ART.questions} label="Ask a Question" cta />
+            <EmptyState
+              art={EMPTY_ART.questions}
+              label="Ask a Question"
+              cta
+              onClick={() => setAdding({ kind: 'question', name: m.name })}
+            />
           ) : (
             <div className="pp-questions">
               {questions.cut(m.questions).map((q, i) => (
@@ -446,6 +492,35 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
           onEdit={() => {
             setEditingGoal(openGoal)
             setOpenGoal(null)
+          }}
+        />
+      )}
+      {adding?.kind === 'goal' && (
+        <AddGoalModal
+          suggestions={profileFor(adding.name).suggestedGoals}
+          onClose={() => setAdding(null)}
+          onAdd={(g) => {
+            addTo(adding.name, { goals: [withTag(g as ClientGoal, 'New')] })
+            setAdding(null)
+            if (!goals.open && goals.overflows) goals.toggle()
+          }}
+        />
+      )}
+      {adding?.kind === 'event' && (
+        <AddLifeEventModal
+          onClose={() => setAdding(null)}
+          onSave={(e) => {
+            addTo(adding.name, { lifeEvents: [withTag(e, 'New')] })
+            setAdding(null)
+          }}
+        />
+      )}
+      {adding?.kind === 'question' && (
+        <AddQuestionModal
+          onClose={() => setAdding(null)}
+          onSave={(q) => {
+            addTo(adding.name, { questions: [withTag(q, 'New')] })
+            setAdding(null)
           }}
         />
       )}
