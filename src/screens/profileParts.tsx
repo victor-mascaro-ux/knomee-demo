@@ -381,7 +381,28 @@ export function useCollapsed<T>(items: T[], max: number) {
 /* What a goal opens onto, printed inside the row rather than behind a click:
    on screen the panel carries it, and on paper there is nothing to click. Empty
    on a goal nobody went back to, which is most of them. */
-export function GoalDetail({ g }: { g: Goal }) {
+export function GoalDetail({ g, summary = false }: { g: Goal; summary?: boolean }) {
+  /* On a summary the two lists are always there — an empty one says so —
+     because weighing it up is half of what was asked. On a profile an empty
+     list is left out. */
+  const list = (kind: 'pros' | 'cons', label: string, items?: string[]) =>
+    items && items.length > 0 ? (
+      <>
+        <dt>{label}</dt>
+        <dd>
+          <ul className={`pp-goal-list is-${kind}`}>
+            {items.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+        </dd>
+      </>
+    ) : summary ? (
+      <>
+        <dt>{label}</dt>
+        <dd className="pp-goal-none">None added</dd>
+      </>
+    ) : null
   return (
     <dl className="pp-goal-detail">
       {g.timeline && (
@@ -390,30 +411,8 @@ export function GoalDetail({ g }: { g: Goal }) {
           <dd>{g.timeline}</dd>
         </>
       )}
-      {g.pros && g.pros.length > 0 && (
-        <>
-          <dt>Pros</dt>
-          <dd>
-            <ul className="pp-goal-list">
-              {g.pros.map((x) => (
-                <li key={x}>{x}</li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      )}
-      {g.cons && g.cons.length > 0 && (
-        <>
-          <dt>Cons</dt>
-          <dd>
-            <ul className="pp-goal-list">
-              {g.cons.map((x) => (
-                <li key={x}>{x}</li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      )}
+      {list('pros', 'Pros', g.pros)}
+      {list('cons', 'Cons', g.cons)}
       {g.note && (
         <>
           <dt>Because</dt>

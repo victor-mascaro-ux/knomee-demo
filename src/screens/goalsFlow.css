@@ -221,6 +221,33 @@
 .gl-summary .pp-goal-detail dd {
   margin: 0;
 }
+/* Pros and cons, each line marked: a plus in the brand's green, a minus in
+   its coral, so the two lists read apart at a glance. */
+.gl-summary .pp-goal-list {
+  gap: 4px;
+}
+.gl-summary .pp-goal-list li {
+  position: relative;
+  padding-left: 16px;
+}
+.gl-summary .pp-goal-list li::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: var(--weight-bold, 700);
+}
+.gl-summary .pp-goal-list.is-pros li::before {
+  content: '+';
+  color: #2e9e6a;
+}
+.gl-summary .pp-goal-list.is-cons li::before {
+  content: '2';
+  color: #d4573b;
+}
+.gl-summary .pp-goal-none {
+  font-style: italic;
+  color: var(--text-secondary);
+}
 /* Readiness is bars and a word: side by side, centred on each other, and the
    row's label centred on both rather than hanging at the top of the bars' box. */
 .gl-summary .pp-goal-stage {

@@ -329,7 +329,7 @@ function GoalsReview({
           <div className="gl-summary">
             <span className="gl-summary-head">Goal Summary</span>
             <b className="gl-summary-title">{current.title}</b>
-            <GoalDetail g={current} />
+            <GoalDetail g={current} summary />
           </div>
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => setStep('readiness')}>
@@ -389,7 +389,7 @@ function GoalsReview({
                 {goals.map((g, i) => (
                   <div className="gl-summary glr-summary" key={`${i}:${g.title}`} style={{ ['--i' as string]: i }}>
                     <b className="gl-summary-title">{g.title}</b>
-                    <GoalDetail g={g} />
+                    <GoalDetail g={g} summary />
                   </div>
                 ))}
               </div>

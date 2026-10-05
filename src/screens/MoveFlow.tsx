@@ -1145,7 +1145,7 @@ export default function MoveFlow({
           <div className="gl-summary">
             <span className="gl-summary-head">Your {c.word}</span>
             <b className="gl-summary-title">{goal.title}</b>
-            <GoalDetail g={goal} />
+            <GoalDetail g={goal} summary />
           </div>
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => go('thought')}>
@@ -1246,7 +1246,7 @@ export default function MoveFlow({
             <div className="glr-summaries">
               <div className="gl-summary glr-summary">
                 <b className="gl-summary-title">{goal.title}</b>
-                <GoalDetail g={{ ...goal, readiness: level }} />
+                <GoalDetail g={{ ...goal, readiness: level }} summary />
               </div>
             </div>
           </Reveal>
