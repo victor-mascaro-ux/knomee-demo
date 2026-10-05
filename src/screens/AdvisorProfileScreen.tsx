@@ -35,6 +35,7 @@ import {
   useCollapsed,
 } from './profileParts'
 import GoalModal from './GoalModal'
+import QuestionModal from './QuestionModal'
 import AddGoalModal from './AddGoalModal'
 import type { Goal } from '../data/financialId'
 
@@ -50,7 +51,7 @@ import icQuestions from '../assets/adventures/questions.svg'
 import icBadges from '../assets/badges/badges-icon.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import { scrollPageToTop } from '../reviewBridge'
-import SharingView, { ADVISOR_ROLES, SharingLens } from './SharingView'
+import SharingView, { ADVISOR_ROLES } from './SharingView'
 
 /* An answer that is a list of things rather than a sentence — "Ownership, my
    name on it, equity for Ana and Dev" — reads as lines. One with a full stop in
@@ -115,7 +116,6 @@ export default function AdvisorProfileScreen({
   onAdd,
   onOpenExperience,
   ownerMenu,
-  sharing,
   mine,
   tabs,
   backLabel,
@@ -155,12 +155,9 @@ export default function AdvisorProfileScreen({
      same slot the client page has, in the same place. Nothing renders here on a
      desktop, where the rail is on screen already. */
   ownerMenu?: ReactNode
-  /** His own phone: the My ID | Who sees it switch. */
-  sharing?: boolean
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   /* His ID read for what it says, or for who sees it. */
-  const [lens, setLens] = useState<'id' | 'sharing'>('id')
   const { printing, print } = usePrintSheet()
   const [photoFailed, setPhotoFailed] = useState(false)
   const d = data.id
@@ -312,15 +309,10 @@ export default function AdvisorProfileScreen({
           {/* On screen, the tab you chose. On paper, every tab: the Business
               ID, then the readiness and the toolkit, each starting its own
               page under its own heading. */}
-          {/* His own phone: the ID read two ways — what it says, and who on
-              his team sees each part of it. */}
-          {sharing && mine && tab === 'id' && !printing && <SharingLens value={lens} onChange={setLens} />}
-          {sharing && mine && tab === 'id' && !printing && lens === 'sharing' ? (
-            <AdvisorTeam name={who.name} />
-          ) : (
-            (printing || tab === 'id') && (
-              <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
-            )
+          {/* Who on his team sees each part of it is the phone's My Team
+              tab now, so the ID is read one way: what it says. */}
+          {(printing || tab === 'id') && (
+            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
           )}
           {(printing || tab === 'readiness') && (
             <div className={printing ? 'print-page' : undefined}>
@@ -383,7 +375,7 @@ function FoldCard({
 }
 
 /* An advisor's team and who of them sees each part of their Business ID —
-   the "Who sees it" lens on the page, and the My Team tab on their phone. */
+   the My Team tab on their phone. */
 export function AdvisorTeam({ name }: { name: string }) {
   const who = { name }
   return (
@@ -446,6 +438,9 @@ function BusinessIdTab({
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
   const [openGoal, setOpenGoal] = useState<number | null>(null)
+  /* One of the three questions, opened on the card a client's question opens
+     on — read-only: they come out of the adventures, not a form. */
+  const [openQuestion, setOpenQuestion] = useState<string | null>(null)
   /* A goal edited here — its stage by taking the assessment again — laid over
      the one the flow put together, by its place in the list. */
   const [edits, setEdits] = useState<Record<number, Goal>>({})
@@ -771,9 +766,21 @@ function BusinessIdTab({
                  the question, and the day the adventures gave it. */
               <div className="pp-questions">
                 {d.questions.map((q) => (
-                  <div className="pp-question" key={q}>
+                  <div
+                    className="pp-question is-open-able"
+                    key={q}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOpenQuestion(q)}
+                    onKeyDown={(k) => {
+                      if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
+                    }}
+                  >
                     <span className="pp-q-text">{q}</span>
                     <span className="pp-q-date">{d.header.completed}</span>
+                    <span className="pp-goal-caret">
+                      <RowChevron />
+                    </span>
                   </div>
                 ))}
               </div>
@@ -786,6 +793,12 @@ function BusinessIdTab({
         </div>
       </div>
 
+      {openQuestion !== null && (
+        <QuestionModal
+          question={{ q: openQuestion, date: d.header.completed }}
+          onClose={() => setOpenQuestion(null)}
+        />
+      )}
       {/* Their move, opened. Read-only: these are their answers, and a rep
           reading them has nothing to rename or throw away. */}
       {openGoal !== null && (

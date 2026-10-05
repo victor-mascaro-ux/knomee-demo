@@ -1611,7 +1611,6 @@ function FlowPhone({
                    here, so the two drifted every time one of them was touched. */
                 <AdvisorProfileScreen
                   mine
-                  sharing={rich}
                   noBadges={rich}
                   /* On the journey page the Business ID is there from the start,
                      each card waiting for its adventure, as the client's is. */
