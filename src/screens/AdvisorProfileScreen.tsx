@@ -9,7 +9,6 @@
    only four cards are new — route, second seat, book profile and the comp
    clock, which the client version has no slot for. */
 
-import { breakAfterAt } from './profileParts'
 import ExperienceButton from '../components/ExperienceButton'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -228,8 +227,8 @@ export default function AdvisorProfileScreen({
                     are today — the same on their own page as on the firm's.
                     Each drops out when it was left blank. */}
                 {who.email && (
-                  <span className="pp-meta-row">
-                    <MailIcon /> <span className="pp-meta-email">{breakAfterAt(who.email)}</span>
+                  <span className="pp-meta-row tt" data-tip={who.email}>
+                    <MailIcon /> <span className="pp-meta-email">{who.email}</span>
                   </span>
                 )}
                 {who.book && (

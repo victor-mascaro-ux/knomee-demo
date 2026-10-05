@@ -798,9 +798,3 @@ export function RailFace({ name, fallback }: { name: string; fallback?: string }
     </span>
   )
 }
-
-/** An address that may wrap after its @ when the rail is narrower than it —
-    the one place an email reads well broken. */
-export function breakAfterAt(email: string) {
-  return email.replace('@', '@​')
-}
