@@ -185,7 +185,8 @@ export const CLIENT_FUTURE: FutureYouContent = {
           <b>powerful and actionable step</b> toward the life you want.
         </p>
       ),
-    }),
+      }
+    },
   },
   badge: bgFutureYou,
   badgeName: 'Future You',
