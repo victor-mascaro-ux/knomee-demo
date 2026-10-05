@@ -1603,22 +1603,23 @@ html.cx-desktop .cx-viewport:has(> .pp, > .ap, > .af-report) {
    pushed it down. */
 html.cx-desktop .cx-viewport .pp-side-inner {
   top: 0;
+  /* The title's own top inset (8px) over the column's 36. */
+  padding-top: 44px;
+}
+/* Room above the title, under the bar — and the rail's portrait starts at the
+   same height, so the two columns begin on one line. */
+html.cx-desktop .cx-viewport .pp-main {
+  padding-top: 36px;
 }
 /* The rail is on the page, so the portrait that opens it as a drawer on the
    phone has nothing to open. */
 html.cx-desktop .cxm-rail-btn {
   display: none;
 }
-/* The bottom bar: the phone's, with its tabs together in the middle. */
+/* The bottom bar: the phone's, its tabs spread across the content width —
+   the bar's edge to edge, as they spread across the phone. */
 html.cx-desktop .cx-tabbar {
-  justify-content: center;
-  gap: 24px;
-}
-html.cx-desktop .cx-tab {
-  flex: 0 0 140px;
-}
-html.cx-desktop .cx-tab-center {
-  flex-basis: 96px;
+  padding-inline: var(--xp-edge);
 }
 /* Journey screens' Back / Continue, on the column. */
 html.cx-desktop .af-foot {
