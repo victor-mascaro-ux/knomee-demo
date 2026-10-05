@@ -161,7 +161,7 @@ export const ADVISOR_FUTURE: FutureYouContent = {
     postcardSub: 'Sent back from there:',
     line: (a) =>
       `${a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself ${
-        a.where[0] ? lower(a.where[0]) : 'somewhere new'
+        a.where[0] ? lower(a.where[0]) : ''
       }${a.with[0] ? `, with ${lower(a.with[0])}` : ''}.`,
     about: (a) => ({
       title: 'You visualized Future You!',

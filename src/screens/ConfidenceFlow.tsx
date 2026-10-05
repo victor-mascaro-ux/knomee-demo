@@ -345,7 +345,9 @@ export default function ConfidenceFlow({
             <p className="jr-sub">{content.results.sub}</p>
             {/* The reading as the picture: a warm sky that keeps moving, and on
                 it the Financial ID's own confidence row — her word and the dial,
-                its needle swinging round to where she landed. */}
+                its needle swinging round to where she landed. Nothing rated is
+                no reading, so then there is no dial to swing. */}
+            {given.length > 0 && (
             <figure className="jr-memory cfr-hero">
               <span className="jr-sky cfr-sky" aria-hidden>
                 <i className="jr-sun" />
@@ -364,6 +366,7 @@ export default function ConfidenceFlow({
               </blockquote>
               <figcaption className="jr-tag">{content.results.tag}</figcaption>
             </figure>
+            )}
           </Reveal>
 
           {given.length > 0 && (

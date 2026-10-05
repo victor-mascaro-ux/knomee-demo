@@ -12,6 +12,12 @@ import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
 import type { Client } from '../data/clients'
+
+const CLIENT_TIER: Record<string, string> = {
+  engaged: 'Tier 1 · Engaged',
+  attention: 'Tier 2 · Attention',
+  reconnect: 'Tier 3 · Reconnect',
+}
 import { DownloadIcon } from '../components/icons'
 import {
   CalendarIcon,
@@ -970,6 +976,18 @@ export default function ClientProfileScreen({
                 there it goes under the title instead. */}
             {!mine && <CheckInCard checkIn={cp.checkIn} />}
 
+            {/* Her score where the candidate page has the RQ: the number, and
+                the tier it puts her in. None until her profile is complete. */}
+            {!mine && client.kr != null && CLIENT_TIER[client.tier] && (
+              <div className="ap-side-stat">
+                <span className="ap-side-stat-k">Knomee Relationship</span>
+                <span className="ap-side-stat-v">
+                  {client.kr}
+                  <i>{CLIENT_TIER[client.tier]}</i>
+                </span>
+              </div>
+            )}
+
             {household ? (
               <div className="cp-side-block">
                 <button className="cp-side-head" type="button" onClick={onOpenHousehold}>
@@ -1106,6 +1124,8 @@ export default function ClientProfileScreen({
             <ClientToolkitTab />
           ) : (
             <>
+              {/* No highlight drawn from what they answered, no card for one. */}
+              {cp.keyHighlights.length > 0 && (
               <section className="pp-card">
                 <div className="pp-card-head">
                   <span className="pp-card-title">
@@ -1130,6 +1150,7 @@ export default function ClientProfileScreen({
                 </div>
                 {highlights.overflows && <HeadToggle open={highlights.open} onToggle={highlights.toggle} />}
               </section>
+              )}
 
               <div className="pp-cols">
                 <div className="pp-col-main">
@@ -1169,6 +1190,8 @@ export default function ClientProfileScreen({
                       </span>
                       <DateSelect />
                     </div>
+                    {cp.financialJoy.chips.length > 0 && (
+                    <>
                     <p className="pp-prompt">{cp.financialJoy.prompt}</p>
                     <div className="pp-chips">
                       {cp.financialJoy.chips.map((c) => (
@@ -1177,12 +1200,15 @@ export default function ClientProfileScreen({
                         </span>
                       ))}
                     </div>
+                    </>
+                    )}
                     {/* Where they want their attention is the second half of the
                         Joy adventure, and not everyone has answered it. The card
                         carries the chips and stops rather than printing two
                         empty headings. */}
                     {(cp.attention.more.length > 0 || cp.attention.less.length > 0) && (
                     <div className="pp-attention">
+                      {cp.attention.more.length > 0 && (
                       <div>
                         <span className="pp-fy-label">More attention</span>
                         {cp.attention.more.map((m) => (
@@ -1191,6 +1217,8 @@ export default function ClientProfileScreen({
                           </div>
                         ))}
                       </div>
+                      )}
+                      {cp.attention.less.length > 0 && (
                       <div>
                         <span className="pp-fy-label">Less attention</span>
                         {cp.attention.less.map((m) => (
@@ -1199,6 +1227,7 @@ export default function ClientProfileScreen({
                           </div>
                         ))}
                       </div>
+                      )}
                     </div>
                     )}
                   </section>
@@ -1217,7 +1246,9 @@ export default function ClientProfileScreen({
                         ['What', cp.futureYou.what],
                         ['Who', cp.futureYou.who],
                       ] as [string, string[]][]
-                    ).map(([label, items]) => (
+                    )
+                      .filter(([, items]) => items.length > 0)
+                      .map(([label, items]) => (
                       <div className="pp-fy-group" key={label}>
                         <span className="pp-fy-label">{label}</span>
                         <div className="pp-chips">
@@ -1240,13 +1271,13 @@ export default function ClientProfileScreen({
                       </span>
                       <DateSelect />
                     </div>
-                    <span className="pp-fy-label">Concerns</span>
+                    {cp.outlook.concerns.length > 0 && <span className="pp-fy-label">Concerns</span>}
                     {cp.outlook.concerns.map((c) => (
                       <p className="pp-quote" key={c}>
                         “{c}”
                       </p>
                     ))}
-                    <span className="pp-fy-label pp-hope">Hopes</span>
+                    {cp.outlook.hopes.length > 0 && <span className="pp-fy-label pp-hope">Hopes</span>}
                     {cp.outlook.hopes.map((h) => (
                       <p className="pp-quote" key={h}>
                         “{h}”

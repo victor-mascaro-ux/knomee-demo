@@ -102,6 +102,7 @@ import './client-experience.css'
    wear them too. */
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
+import SignUpScreen from './SignUpScreen'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
@@ -975,7 +976,8 @@ function StepBody({
             <div className="af-line">
               <span className="af-line-k">Readiness stage</span>
               <span className="af-line-v">
-                {d.id.readiness.stage} · confidence {d.id.readiness.confidence.toLowerCase()}
+                {d.id.readiness.stage}
+                {d.id.readiness.confidence && ` · confidence ${d.id.readiness.confidence.toLowerCase()}`}
               </span>
             </div>
           </div>
@@ -1634,6 +1636,23 @@ function FlowPhone({
                   </ol>
                 </div>
               )
+            ) : tab === 'finid' && !viewing && !answers.signedUp && !(!rich && idEmpty) ? (
+              /* Their Business ID is behind an account. Their answers are
+                 already with the firm; this is their own copy of the page. */
+              <SignUpScreen
+                idName="Business ID"
+                onDone={(email) =>
+                  edit.apply((a) => ({
+                    ...a,
+                    signedUp: today(),
+                    identity: email ? { ...a.identity, email } : a.identity,
+                  }))
+                }
+                onClose={() => {
+                  setTab('flow')
+                  toTop()
+                }}
+              />
             ) : tab === 'finid' ? (
               !rich && idEmpty ? (
                 /* Nothing answered yet. An empty page of empty cards would read

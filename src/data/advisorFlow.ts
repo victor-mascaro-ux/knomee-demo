@@ -84,6 +84,7 @@ export const advisor = {
   role: 'Lead advisor · team of four',
   book: '$840M',
   firm: 'Wirehouse',
+  email: 'marcus.hale@example.com',
   completedOn: '09.09.2026',
 }
 

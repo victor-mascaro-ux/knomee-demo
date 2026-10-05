@@ -33,6 +33,8 @@ export interface Identity {
   role: string
   book: string
   firm: string
+  /** Given at sign-up, just before the Business ID — absent until then. */
+  email?: string
 }
 
 /** One bucket per kind of question, keyed by step id. Flat on purpose: it is
@@ -60,6 +62,9 @@ export interface Answers {
       hands out a new one, which is what makes the recorded answers a history
       of people rather than one row being overwritten all evening. */
   sittingId: string
+  /** The day they signed up, just before their Business ID opened. Until then
+      the page stays closed to them — the firm has the answers either way. */
+  signedUp?: string
 }
 
 const OTHER = 'Other'
@@ -727,7 +732,8 @@ function confidenceBand(a: Answers) {
     ending reads before the answers have reached the sheet. */
 export function confidenceBandOf(values: number[]) {
   const set = values.filter(Boolean)
-  if (!set.length) return 'Balanced'
+  // Nothing rated is no reading — not a middling one nobody gave.
+  if (!set.length) return ''
   /* A Business ID can be built from a half-filled sheet — the directory lists
      people at "9 of 27" — and there a bare sum would read as strain purely for
      being unfinished. Scaling the answered ones up to six keeps the published
@@ -1068,13 +1074,23 @@ export function derive(a: Answers): Derived {
   const done = advisorAdventures.filter((r) => adventureDone(r.id, a)).length
 
   const statements = stepOf('cf-q')?.statements ?? []
-  const confidence = statements.map((s, i) => ({
-    statement: s.text,
-    low: s.low,
-    high: s.high,
-    // The flow's 1–5 sliders on the 0–100 track the profile's dial draws.
-    value: a.scaleSet['cf-q']?.[i] ? Math.round(((a.scaleSet['cf-q'][i] - 1) / 4) * 100) : 0,
-  }))
+  /* A statement they skipped is left out, rather than drawn at the far left of
+     its track as though they had rated it as low as it goes. */
+  const confidence = statements
+    .map((s, i) => ({ s, n: a.scaleSet['cf-q']?.[i] }))
+    .filter(({ n }) => !!n)
+    .map(({ s, n }) => ({
+      statement: s.text,
+      low: s.low,
+      high: s.high,
+      // The flow's 1–5 sliders on the 0–100 track the profile's dial draws.
+      value: Math.round(((n! - 1) / 4) * 100),
+    }))
+  /* An evidence line only for what they answered: a skipped question is left
+     off, rather than quoted back as a dash. The first line names the source. */
+  const quote = (label: string, v: string) => (v ? [`${label}: “${v}”`] : [])
+  const plain = (label: string, v: string) => (v ? [`${label}: ${v}`] : [])
+  const cf6 = a.scaleSet['cf-q']?.[5]
 
   const readiness: ReadinessTab = {
     snapshot: {
@@ -1094,10 +1110,10 @@ export function derive(a: Answers): Derived {
                 : 'Weighed, and not acted on. Nothing is in motion.',
           evidence: [
             'The Move · Q5–Q7 (the readiness stage)',
-            `Thought about it: “${picked('mv-q5', a) || '—'}”`,
-            `Knows the steps: “${picked('mv-q6', a) || '—'}”`,
-            `Started acting: “${picked('mv-q7', a) || '—'}”`,
-            `Timeline: ${picked('mv-q2', a) || '—'}`,
+            ...quote('Thought about it', picked('mv-q5', a)),
+            ...quote('Knows the steps', picked('mv-q6', a)),
+            ...quote('Started acting', picked('mv-q7', a)),
+            ...plain('Timeline', picked('mv-q2', a)),
           ],
           calc: rq.calc.Intent,
         },
@@ -1113,9 +1129,11 @@ export function derive(a: Answers): Derived {
                 : 'The picture is still blurry.',
           evidence: [
             'Future You · the vision and its clarity rating',
-            `Rated the picture of Future You ${a.scale['fy-clarity'] ?? '—'} of 5 for clarity`,
-            `Where: ${picked('fy-q1', a) || '—'}`,
-            `Practice includes: ${picked('fy-q5', a) || '—'}`,
+            ...(a.scale['fy-clarity']
+              ? [`Rated the picture of Future You ${a.scale['fy-clarity']} of 5 for clarity`]
+              : []),
+            ...plain('Where', picked('fy-q1', a)),
+            ...plain('Practice includes', picked('fy-q5', a)),
           ],
           calc: rq.calc.Clarity,
         },
@@ -1131,8 +1149,8 @@ export function derive(a: Answers): Derived {
                 : 'Intends to do this alone.',
           evidence: [
             'Confidence · item 6, and The Move · Q4',
-            `“${statements[5]?.text ?? '—'}” — ${a.scaleSet['cf-q']?.[5] ?? '—'} of 5`,
-            `Wants support: “${picked('mv-q4', a) || '—'}”`,
+            ...(statements[5] && cf6 ? [`“${statements[5].text}” — ${cf6} of 5`] : []),
+            ...quote('Wants support', picked('mv-q4', a)),
           ],
           calc: rq.calc.Receptivity,
         },
@@ -1160,6 +1178,10 @@ export function derive(a: Answers): Derived {
       // Only Marcus has a portrait in the demo. Your own sheet wears an initial,
       // which is the rule the rest of the app uses for a name without a face.
       photo: a.identity.name.trim() === advisor.name ? advisor.photo : undefined,
+      // What the first form and sign-up gave; a blank one drops out of the rail.
+      book: a.identity.book.trim() || undefined,
+      firm: a.identity.firm.trim() || undefined,
+      email: a.identity.email?.trim() || undefined,
     },
     id,
     confidence,

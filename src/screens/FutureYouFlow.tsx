@@ -155,10 +155,19 @@ export const CLIENT_FUTURE: FutureYouContent = {
     detailTitle: 'What it includes',
     postcardSub: 'Sent back from there:',
     line: (a) =>
-      `${a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself ${a.where[0]?.toLowerCase() ?? 'somewhere new'}${
+      `${a.when ? `In ${a.when.toLowerCase()}, ` : ''}you see yourself ${a.where[0]?.toLowerCase() ?? ''}${
         a.with[0] ? `, with ${a.with[0].toLowerCase()}` : ''
       }. Your advisor will build the plan toward exactly that.`,
-    about: (a) => ({
+    about: (a) => {
+      // Their vision in their words — nothing put in its place where it is blank.
+      const vision = [
+        (a.doing[0] ?? '').toLowerCase(),
+        (a.where[0] ?? '').toLowerCase(),
+        a.with[0] ? `with ${a.with[0].toLowerCase().replace(/^a /, 'a ')}` : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+      return {
       title: 'You visualized Future You!',
       share: 80,
       first: (
@@ -166,17 +175,7 @@ export const CLIENT_FUTURE: FutureYouContent = {
           <b>
             <CountUp to={80} />%
           </b>{' '}
-          of respondents share your vision of{' '}
-          <b>
-            {[
-              (a.doing[0] ?? 'living well').toLowerCase(),
-              (a.where[0] ?? '').toLowerCase(),
-              a.with[0] ? `with ${a.with[0].toLowerCase().replace(/^a /, 'a ')}` : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          </b>
-          .
+          of respondents share your vision{vision && <> of <b>{vision}</b></>}.
         </>
       ),
       second: (
@@ -186,7 +185,8 @@ export const CLIENT_FUTURE: FutureYouContent = {
           <b>powerful and actionable step</b> toward the life you want.
         </p>
       ),
-    }),
+      }
+    },
   },
   badge: bgFutureYou,
   badgeName: 'Future You',
@@ -1060,9 +1060,13 @@ export default function FutureYouFlow({
           )}
           <Reveal>
             <h2 className="jr-title">{content.results.title}</h2>
-            <p className="jr-sub">{content.results.sub}</p>
             {/* The vision as a poster: the living sky, and on it where, what,
-                with whom and when, each stamped on in turn. */}
+                with whom and when, each stamped on in turn. With none of the
+                four answered there is no vision to stamp, so no poster and no
+                line introducing one. */}
+            {(a.where.length > 0 || a.doing.length > 0 || a.with.length > 0 || !!a.when) && (
+            <>
+            <p className="jr-sub">{content.results.sub}</p>
             <figure className="jr-memory fyr-poster">
               <span className="jr-sky fyr-sky" aria-hidden>
                 <i className="jr-sun" />
@@ -1120,6 +1124,8 @@ export default function FutureYouFlow({
                 )}
               </div>
             </figure>
+            </>
+            )}
           </Reveal>
 
           {a.detail.length > 0 && (
@@ -1156,7 +1162,9 @@ export default function FutureYouFlow({
                 </ArrivingCard>
               </>
             )}
-            {(content.fill || a.where.length > 0) && (
+            {/* Said only from where they placed themselves — the demo's
+                sample is recorded on Skip, so a demo still has one. */}
+            {a.where.length > 0 && (
               <p className="jr-reading">
                 <span className="jr-reading-mark" aria-hidden>
                   ✦

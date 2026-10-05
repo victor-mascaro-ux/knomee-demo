@@ -867,9 +867,10 @@ export default function MoveFlow({
     next()
   }
 
-  /* The move as the Goals flow's summary reads a goal. */
+  /* The move as the Goals flow's summary reads a goal. A move they skipped
+     naming has no title — never a stand-in one. */
   const goal: Goal = {
-    title: m.move ?? `My ${c.word}`,
+    title: m.move ?? '',
     readiness: 0,
     timeline: m.when ?? undefined,
     pros: m.pros.map((p) => p.trim()).filter(Boolean),
@@ -881,6 +882,14 @@ export default function MoveFlow({
       ...(m.blocker.trim() ? [{ label: 'Holding back', value: m.blocker.trim() }] : []),
     ],
   }
+  /* Anything at all to sum up: with nothing given, there is no summary card. */
+  const hasGoal =
+    !!goal.title ||
+    !!goal.timeline ||
+    !!goal.note ||
+    !!goal.pros?.length ||
+    !!goal.cons?.length ||
+    !!goal.extra?.length
 
   const rewardNow = typeof reward === 'function' ? reward(m) : reward
   const { level, name: stage, line: stageLine } = c.reading(m)
@@ -1143,11 +1152,13 @@ export default function MoveFlow({
             </svg>
           </span>
           <h2 className="gl-title">{c.added}</h2>
+          {hasGoal && (
           <div className="gl-summary">
             <span className="gl-summary-head">Your {c.word}</span>
-            <b className="gl-summary-title">{goal.title}</b>
+            {goal.title && <b className="gl-summary-title">{goal.title}</b>}
             <GoalDetail g={goal} />
           </div>
+          )}
           <div className="gl-acts">
             <button className="jf-go" type="button" onClick={() => go('thought')}>
               Assess My Readiness
@@ -1223,7 +1234,7 @@ export default function MoveFlow({
         <div className="jr glr">
           <Reveal>
             <h2 className="jr-title">{c.results.title}</h2>
-            <p className="jr-sub">{goal.title}</p>
+            {goal.title && <p className="jr-sub">{goal.title}</p>}
             {/* The stage as the picture: the readiness art on a living sky, and
                 the stage's name — the Goals flow's ending. */}
             <figure className="jr-memory glr-hero">
@@ -1242,15 +1253,17 @@ export default function MoveFlow({
             </figure>
           </Reveal>
 
+          {hasGoal && (
           <Reveal>
             <h3 className="jr-h">Your {c.word}</h3>
             <div className="glr-summaries">
               <div className="gl-summary glr-summary">
-                <b className="gl-summary-title">{goal.title}</b>
+                {goal.title && <b className="gl-summary-title">{goal.title}</b>}
                 <GoalDetail g={{ ...goal, readiness: level }} />
               </div>
             </div>
           </Reveal>
+          )}
 
           <Reveal className="jr-reward">
             <button className="jr-claim" type="button" onClick={() => (reward ? go('badge') : onComplete(m))}>

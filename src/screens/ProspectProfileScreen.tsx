@@ -12,6 +12,12 @@ import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
 import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
+
+const PROSPECT_TIER: Record<string, string> = {
+  tier1: 'Tier 1 · Ready Now',
+  tier2: 'Tier 2 · Considering',
+  tier3: 'Tier 3 · Nurture',
+}
 import { DownloadIcon } from '../components/icons'
 import {
   CalendarIcon,
@@ -148,10 +154,14 @@ export default function ProspectProfileScreen({
         /* All five done — Life Events is what is left — and her page carries
            what a client this far along has: questions she has asked. */
         questions: isDone('goals') ? financialId.questions : [],
-        /* Her own reading when she has taken Confidence; the authored one when
-           it was skipped past. */
+        /* Her own reading when she has taken Confidence — from the statements
+           she rated, and none when she rated none; the authored one when the
+           adventure was skipped past. (The demo phone records a sample on Skip
+           itself, so a skipped statement reaching here was really skipped.) */
         confidence: fresh.conf
-          ? confidenceReading(fresh.conf.values.map((v, i) => v ?? CONFIDENCE_STATEMENTS[i].sample))
+          ? fresh.conf.values.some((v) => v !== null)
+            ? confidenceReading(fresh.conf.values.filter((v): v is number => v !== null))
+            : ''
           : financialId.confidence,
         /* Her own worries and hopes when she has taken Outlook; the authored
            ones when it was skipped past. */
@@ -160,7 +170,8 @@ export default function ProspectProfileScreen({
         futureYou: fresh.future
           ? { where: fresh.future.where, what: fresh.future.doing, who: fresh.future.with }
           : financialId.futureYou,
-        postcard: fresh.future?.postcard.trim() ? fresh.future.postcard : financialId.postcard,
+        // Her postcard, or none when she left it blank — never somebody else's.
+        postcard: fresh.future ? fresh.future.postcard.trim() : financialId.postcard,
         badges: BADGE_ORDER.filter((b) => isDone(b.toLowerCase().replace(/ /g, '-'))),
         financialJoy: {
           ...financialId.financialJoy,
@@ -367,6 +378,10 @@ export default function ProspectProfileScreen({
                     {!has.joy && <p className="pp-waiting">Complete the Financial Joy adventure</p>}
                     {has.joy && (
                     <>
+                    {/* A question left blank is left off — no prompt over no
+                        chips, no heading over an empty side. */}
+                    {fi.financialJoy.chips.length > 0 && (
+                    <>
                     <p className="pp-prompt">{fi.financialJoy.prompt}</p>
                     <div className="pp-chips">
                       {fi.financialJoy.chips.map((c) => (
@@ -375,7 +390,11 @@ export default function ProspectProfileScreen({
                         </span>
                       ))}
                     </div>
+                    </>
+                    )}
+                    {(fi.attention.more.length > 0 || fi.attention.less.length > 0) && (
                     <div className="pp-attention">
+                      {fi.attention.more.length > 0 && (
                       <div>
                         <span className="pp-fy-label">More attention</span>
                         {fi.attention.more.map((m) => (
@@ -384,6 +403,8 @@ export default function ProspectProfileScreen({
                           </div>
                         ))}
                       </div>
+                      )}
+                      {fi.attention.less.length > 0 && (
                       <div>
                         <span className="pp-fy-label">Less attention</span>
                         {fi.attention.less.map((m) => (
@@ -392,7 +413,9 @@ export default function ProspectProfileScreen({
                           </div>
                         ))}
                       </div>
+                      )}
                     </div>
+                    )}
                     </>
                     )}
                   </section>
@@ -428,7 +451,9 @@ export default function ProspectProfileScreen({
                         ['What', fi.futureYou.what],
                         ['Who', fi.futureYou.who],
                       ] as [string, string[]][]
-                    ).map(([label, items]) => (
+                    )
+                      .filter(([, items]) => items.length > 0)
+                      .map(([label, items]) => (
                       <div className="pp-fy-group" key={label}>
                         <span className="pp-fy-label">{label}</span>
                         <div className="pp-chips">
@@ -470,13 +495,13 @@ export default function ProspectProfileScreen({
                     {!has.outlook && <p className="pp-waiting">Complete the Outlook adventure</p>}
                     {has.outlook && (
                     <>
-                    <span className="pp-fy-label">Concerns</span>
+                    {fi.outlook.concerns.length > 0 && <span className="pp-fy-label">Concerns</span>}
                     {fi.outlook.concerns.map((c) => (
                       <p className="pp-quote" key={c}>
                         “{c}”
                       </p>
                     ))}
-                    <span className="pp-fy-label pp-hope">Hopes</span>
+                    {fi.outlook.hopes.length > 0 && <span className="pp-fy-label pp-hope">Hopes</span>}
                     {fi.outlook.hopes.map((h) => (
                       <p className="pp-quote" key={h}>
                         “{h}”
@@ -552,7 +577,8 @@ export default function ProspectProfileScreen({
                       {has.confidence && <DateSelect />}
                     </div>
                     {!has.confidence && <p className="pp-waiting">Complete the Confidence adventure</p>}
-                    {has.confidence && (
+                    {/* Nothing rated, no reading: no dial and no results. */}
+                    {has.confidence && fi.confidence && (
                     <>
                     <div className="pp-confidence">
                       <span className="pp-confidence-label">{fi.confidence}</span>
@@ -562,12 +588,13 @@ export default function ProspectProfileScreen({
                       open={confidence}
                       answers={
                         fresh?.conf
-                          ? CONFIDENCE_STATEMENTS.map((s, i) => ({
-                              statement: s.statement,
-                              value: fresh.conf!.values[i] ?? s.sample,
-                              low: s.low,
-                              high: s.high,
-                            }))
+                          ? CONFIDENCE_STATEMENTS.flatMap((s, i) => {
+                              // A statement she skipped is left out, not filled in.
+                              const value = fresh.conf!.values[i]
+                              return value === null || value === undefined
+                                ? []
+                                : [{ statement: s.statement, value, low: s.low, high: s.high }]
+                            })
                           : undefined
                       }
                     />
@@ -755,6 +782,17 @@ export default function ProspectProfileScreen({
               <button className="pp-convert" type="button" onClick={() => onConvert(prospect)}>
                 Convert to Client
               </button>
+            )}
+            {/* Her score where the candidate page has the RQ: the number, and
+                the tier it puts her in. None until her profile is complete. */}
+            {!mine && prospect.kq !== null && PROSPECT_TIER[prospect.tier] && (
+              <div className="ap-side-stat">
+                <span className="ap-side-stat-k">Knomee Quotient</span>
+                <span className="ap-side-stat-v">
+                  {prospect.kq}
+                  <i>{PROSPECT_TIER[prospect.tier]}</i>
+                </span>
+              </div>
             )}
           </div>
         </aside>

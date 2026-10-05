@@ -120,14 +120,6 @@ const list = (xs: string[]) =>
       ? (xs[0] ?? '')
       : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`
 
-/* When the demo reaches this screen without having been answered, it still
-   has something to show: the same answers the design was drawn with. */
-const FALLBACK = {
-  memory:
-    'Finally booking a long-awaited family trip, knowing I’ve planned it without financial stress.',
-  tools: ['Comfort', 'Supporting my family'],
-}
-
 /* The share of people who chose the same two things — a demo figure, stated
    the way the design states it. */
 const SHARE = 55
@@ -339,25 +331,27 @@ export default function JoyResults({
   rewardLine?: string | null
   picks?: JoyPick[]
   areas?: JoyPick[]
-  /** Another adventure's words. Without them the page is the client's, and
-      an unanswered one is shown the design's sample answers; with them, an
-      unanswered part of the page simply is not there. */
+  /** Another adventure's words. Without them the page is the client's.
+      Either way an unanswered part of the page simply is not there — the demo
+      phones record their samples on Skip, so they arrive here answered. */
   copy?: JoyResultsCopy
 }) {
-  const memory = answers.notes.find((n) => n.trim())?.trim() || (copy ? '' : FALLBACK.memory)
-  const tools = answers.tools.length ? answers.tools : copy ? [] : FALLBACK.tools
+  const memory = answers.notes.find((n) => n.trim())?.trim() ?? ''
+  const tools = answers.tools
   const picks = tools
     .map((t) => allPicks.find((p) => p.label === t))
     .filter((p): p is JoyPick => !!p)
   const other = answers.other.trim()
 
-  /* Anything unanswered sits with "the same": not moved is not moving. */
-  const wayOf = (label: string) => answers.attention[label] ?? 0
+  /* Only the areas they sorted: one they never reached is in no pile, rather
+     than counted as "the same". */
+  const sorted = areas.filter((c) => c.label in answers.attention)
+  const wayOf = (label: string) => answers.attention[label]
   /* A preference card tapped opens larger, as Future You's pictures do. */
   const [zoom, setZoom] = useState<{ src: string; label: string } | null>(null)
   const piles = PILES.map((p) => ({
     ...p,
-    cards: areas.filter((c) => wayOf(c.label) === p.way),
+    cards: sorted.filter((c) => wayOf(c.label) === p.way),
   }))
   const more = piles[0].cards.map((c) => c.label.toLowerCase())
   const less = piles[1].cards.map((c) => c.label.toLowerCase())
@@ -444,6 +438,7 @@ export default function JoyResults({
       </Reveal>
       )}
 
+      {sorted.length > 0 && (
       <Reveal>
         <h3 className="jr-h">Preferences</h3>
         <p className="jr-sub">{copy?.prefLead ?? 'This is how you prefer to allocate your time today.'}</p>
@@ -486,6 +481,7 @@ export default function JoyResults({
           {reading}
         </p>
       </Reveal>
+      )}
 
       {zoom && (
         <div className="modal-backdrop fyr-zoom" role="dialog" aria-modal="true" aria-label={zoom.label} onClick={() => setZoom(null)}>

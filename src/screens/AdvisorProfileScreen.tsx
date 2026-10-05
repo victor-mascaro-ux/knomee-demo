@@ -37,7 +37,7 @@ import AddGoalModal from './AddGoalModal'
 import type { Goal } from '../data/financialId'
 
 import { DownloadIcon } from '../components/icons'
-import { CalendarIcon, CaretIcon, RowChevron } from '../components/profileIcons'
+import { BuildingIcon, CalendarIcon, CaretIcon, CoinsIcon, MailIcon, RowChevron } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icPracticeJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -233,6 +233,23 @@ export default function AdvisorProfileScreen({
                   <CalendarIcon /> <span className="ap-completed-word">Completed </span>
                   {d.header.completed}
                 </span>
+                {/* Who they are to the firm: how to reach them, the book, and
+                    where they are today. Each drops out when it was left blank. */}
+                {!mine && who.email && (
+                  <span className="pp-meta-row">
+                    <MailIcon /> {who.email}
+                  </span>
+                )}
+                {!mine && who.book && (
+                  <span className="pp-meta-row">
+                    <CoinsIcon /> {who.book}
+                  </span>
+                )}
+                {!mine && who.firm && (
+                  <span className="pp-meta-row">
+                    <BuildingIcon /> {who.firm}
+                  </span>
+                )}
               </div>
             </div>
             {/* One page, one rail — but whose rail decides what hangs under the
@@ -445,10 +462,11 @@ function BusinessIdTab({
      and carrying everything else The Move asked, so the row opens onto the same
      panel a client's goal does. Marcus's answers and an advisor who took the
      flow this morning fill the same shape, so Gary's move opens as readily as
-     his. */
-  const authored: Goal[] = [
+     his. A move they skipped naming is no row at all, not a row without a
+     title. */
+  const authored: Goal[] = (d.move.change ? [d.move.change] : []).map((change) => (
     {
-      title: d.move.change,
+      title: change,
       readiness: stageLevel,
       updated: d.header.completed,
       timeline: d.move.when,
@@ -463,16 +481,17 @@ function BusinessIdTab({
           ? [{ label: 'Letting go of their brand', value: d.move.brand }]
           : []),
       ],
-    },
-  ]
+    }
+  ))
   const goals = authored.map((g, i) => edits[i] ?? g)
   // He has taken the flow once, so every card's date picker offers that sitting.
   const dates = [d.header.completed]
   const show = (k: IdCard) => !only || only === k
   return (
     <>
-      {/* Key Highlights */}
-      {!only && (
+      {/* Key Highlights — none drawn from a sheet that answered nothing they
+          read, and then no card to hold them. */}
+      {!only && d.highlights.length > 0 && (
       <section className="pp-card">
         <CardHead icon={icKeyHighlights} title="Key Highlights" />
         <div className="pp-highlights" ref={highlights.box}>
@@ -548,18 +567,26 @@ function BusinessIdTab({
               </span>
               <DateSelect dates={dates} />
             </div>
-            <p className="pp-prompt">{d.practiceJoy.prompt}</p>
-            <div className="pp-chips">
-              {d.practiceJoy.chips.map((c) => (
-                <span className="pp-chip" key={c}>
-                  {c}
-                </span>
-              ))}
-            </div>
+            {/* A question left blank is left off: no prompt over no chips. */}
+            {d.practiceJoy.chips.length > 0 && (
+              <>
+                <p className="pp-prompt">{d.practiceJoy.prompt}</p>
+                <div className="pp-chips">
+                  {d.practiceJoy.chips.map((c) => (
+                    <span className="pp-chip" key={c}>
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
             {/* The second half of the same adventure: where he wants his days to
                 go. It rides in this card rather than a new one, so the page
-                keeps the client page's shape. */}
+                keeps the client page's shape. A side nothing was sorted into
+                is not drawn. */}
+            {(d.attention.more.length > 0 || d.attention.less.length > 0) && (
             <div className="pp-attention">
+              {d.attention.more.length > 0 && (
               <div>
                 <span className="pp-fy-label">More attention</span>
                 {d.attention.more.map((m) => (
@@ -568,6 +595,8 @@ function BusinessIdTab({
                   </div>
                 ))}
               </div>
+              )}
+              {d.attention.less.length > 0 && (
               <div>
                 <span className="pp-fy-label">Less attention</span>
                 {d.attention.less.map((m) => (
@@ -576,7 +605,9 @@ function BusinessIdTab({
                   </div>
                 ))}
               </div>
+              )}
             </div>
+            )}
           </section>
           )}
 
@@ -597,7 +628,9 @@ function BusinessIdTab({
                 ['What', d.futureYou.what],
                 ['Who', d.futureYou.who],
               ] as [string, string[]][]
-            ).map(([label, items]) => (
+            )
+              .filter(([, items]) => items.length > 0)
+              .map(([label, items]) => (
               <div className="pp-fy-group" key={label}>
                 <span className="pp-fy-label">{label}</span>
                 <div className="pp-chips">
@@ -645,13 +678,17 @@ function BusinessIdTab({
               </span>
               <DateSelect dates={dates} />
             </div>
-            <span className="pp-fy-label">Concerns</span>
+            {d.outlook.concerns.length > 0 && (
+              <span className="pp-fy-label">Concerns</span>
+            )}
             {d.outlook.concerns.map((c) => (
               <p className="pp-quote" key={c}>
                 “{c}”
               </p>
             ))}
-            <span className="pp-fy-label pp-hope">Hopes</span>
+            {d.outlook.hopes.length > 0 && (
+              <span className="pp-fy-label pp-hope">Hopes</span>
+            )}
             {d.outlook.hopes.map((h) => (
               <p className="pp-quote" key={h}>
                 “{h}”
@@ -660,7 +697,7 @@ function BusinessIdTab({
           </section>
           )}
 
-          {!noBadges && !only && (
+          {!noBadges && !only && d.badges.length > 0 && (
           <section className="pp-card">
             <div className="pp-card-head">
               <span className="pp-card-title">
@@ -693,19 +730,25 @@ function BusinessIdTab({
               </span>
               <DateSelect dates={dates} />
             </div>
-            <div className="pp-confidence">
-              <span className="pp-confidence-label">{d.readiness.confidence}</span>
-              <Gauge label={d.readiness.confidence} />
-            </div>
-            <ConfidenceResults open={confidence} answers={answers} />
-            <button
-              className="pp-show"
-              type="button"
-              aria-expanded={confidence}
-              onClick={() => setConfidence((v) => !v)}
-            >
-              {confidence ? 'Hide Results' : 'Show Results'} <CaretIcon up={confidence} />
-            </button>
+            {/* No statement rated, no reading: the dial and its results are
+                left off rather than drawn at a band nobody gave. */}
+            {d.readiness.confidence && (
+              <>
+                <div className="pp-confidence">
+                  <span className="pp-confidence-label">{d.readiness.confidence}</span>
+                  <Gauge label={d.readiness.confidence} />
+                </div>
+                <ConfidenceResults open={confidence} answers={answers} />
+                <button
+                  className="pp-show"
+                  type="button"
+                  aria-expanded={confidence}
+                  onClick={() => setConfidence((v) => !v)}
+                >
+                  {confidence ? 'Hide Results' : 'Show Results'} <CaretIcon up={confidence} />
+                </button>
+              </>
+            )}
           </section>
           )}
 
