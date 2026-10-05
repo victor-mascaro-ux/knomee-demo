@@ -621,7 +621,7 @@ function Detail({
               />
             ) : (
               <button type="button" className="fy-chip fy-chip-add" onClick={() => setAdding(d.group)}>
-                + Add your own
+                + Add Your Own
               </button>
             )}
           </div>
@@ -1042,7 +1042,7 @@ export default function FutureYouFlow({
       {step === 'results' && (
         <div className={`jr fyr${ending.held ? ' is-held' : ''}`} key={ending.run}>
           <button className="jr-learn" type="button" onClick={ending.open}>
-            Learn more
+            Learn More
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
               <circle cx="8" cy="8" r="7" fill="currentColor" />
               <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
@@ -1225,7 +1225,7 @@ export default function FutureYouFlow({
                   strokeLinejoin="round"
                 />
               </svg>
-              Previous question
+              Previous Question
             </button>
           </div>
           {step === 'detail' && detailNext ? (
@@ -1239,7 +1239,7 @@ export default function FutureYouFlow({
               onClick={onOk}
               disabled={stamped}
             >
-              {skipping ? 'Skip this question' : step === 'postcard' ? 'Send' : 'OK'}
+              {skipping ? 'Skip This Question' : step === 'postcard' ? 'Send' : 'OK'}
             </button>
           )}
         </div>

@@ -25,6 +25,7 @@ import type {
   Word as WordT,
 } from '../data/readiness'
 import { CheckIcon, CloseIcon } from '../components/icons'
+import FeedbackButton from '../components/FeedbackButton'
 import { isPrinting } from '../printSheet'
 import icScore from '../assets/cards/readiness-score.svg'
 import icVelocity from '../assets/cards/velocity.svg'
@@ -359,51 +360,40 @@ export function ReadinessTabView({ d, extras }: { d: ReadinessTab; extras?: Reac
 
 /** Copies a line to the clipboard — the rep's actual next move with it. */
 function CopyLine({ text, label }: { text: string; label: string }) {
-  const [done, setDone] = useState(false)
-  const timer = useRef<number>()
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-  const copy = () => {
-    navigator.clipboard?.writeText(text).catch(() => {})
-    setDone(true)
-    window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setDone(false), 1600)
-  }
   return (
-    <button
-      type="button"
-      className={`rd-copy ${done ? 'is-done' : ''}`}
-      onClick={copy}
+    <FeedbackButton
+      className="rd-copy"
+      tint={false}
+      onClick={() => navigator.clipboard?.writeText(text).catch(() => {})}
       aria-label={`Copy ${label}`}
-    >
-      {done ? (
+      announce="Copied"
+      done={
         <>
           <CheckIcon /> Copied
         </>
-      ) : (
-        <>
-          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
-            <rect
-              x="5.2"
-              y="5.2"
-              width="8"
-              height="9"
-              rx="1.6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-            />
-            <path
-              d="M10.6 3.2V2.6a1.6 1.6 0 0 0-1.6-1.6H4.2a1.6 1.6 0 0 0-1.6 1.6v6.2"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-          </svg>
-          Copy
-        </>
-      )}
-    </button>
+      }
+    >
+      <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
+        <rect
+          x="5.2"
+          y="5.2"
+          width="8"
+          height="9"
+          rx="1.6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+        />
+        <path
+          d="M10.6 3.2V2.6a1.6 1.6 0 0 0-1.6-1.6H4.2a1.6 1.6 0 0 0-1.6 1.6v6.2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      </svg>
+      Copy
+    </FeedbackButton>
   )
 }
 

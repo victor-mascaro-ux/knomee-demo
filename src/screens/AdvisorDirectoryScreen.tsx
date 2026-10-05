@@ -27,6 +27,7 @@ import {
 } from '../data/advisorDirectory'
 import { advisor } from '../data/advisorFlow'
 import { CLIENT_BRANDS } from '../components/clientBrands'
+import FeedbackButton, { useFlash } from '../components/FeedbackButton'
 import './advisorDirectory.css'
 
 /* One line per person, whichever kind they are. An entry and an invite are
@@ -136,7 +137,10 @@ export function InvitePanel({
   const [brand, setBrand] = useState<InviteBrand>('knomee')
   const [made, setMade] = useState<Invite | null>(null)
   const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState(false)
+  /* Feedback lives in the buttons: the link view opens with Copy Link saying
+     "Link Created ✓", and Copy Link then says "Copied ✓" for a moment. */
+  const created = useFlash()
+  const copied = useFlash()
 
   const make = async () => {
     setBusy(true)
@@ -147,6 +151,7 @@ export function InvitePanel({
     // not offered — the name is still in the field to try again with.
     if (!trouble) {
       setMade(invite)
+      created.flash()
       onDone()
     }
   }
@@ -155,12 +160,10 @@ export function InvitePanel({
     if (!made) return
     try {
       await navigator.clipboard.writeText(inviteLink(made.token))
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2000)
+      copied.flash()
     } catch {
       // Clipboard blocked: the field beside the button holds the link and is
       // selectable, so there is always a way to get it out.
-      setCopied(false)
     }
   }
 
@@ -180,7 +183,7 @@ export function InvitePanel({
             actions together at the right, the one that finishes it last. */}
         <input className="adir-link" readOnly value={link} onFocus={(e) => e.target.select()} />
         <a className="adir-open" href={link} target="_blank" rel="noreferrer">
-          Open it yourself ↗
+          Open It Yourself ↗
         </a>
         <div className="adir-invite-foot">
           <button
@@ -191,11 +194,23 @@ export function InvitePanel({
               setName('')
             }}
           >
-            Invite another
+            Invite Another
           </button>
-          <button className="btn btn-primary" type="button" onClick={copy}>
-            {copied ? 'Copied' : 'Copy link'}
-          </button>
+          <FeedbackButton
+            className="btn btn-primary"
+            onClick={copy}
+            flashing={created.is() || copied.is()}
+            announce={copied.is() ? 'Copied' : 'Link created'}
+            done={
+              /* Both confirmations stacked, so the button keeps one width. */
+              <span className="fb-stack">
+                <span data-off={copied.is() || undefined}>Link Created ✓</span>
+                <span data-off={!copied.is() || undefined}>Copied ✓</span>
+              </span>
+            }
+          >
+            Copy Link
+          </FeedbackButton>
         </div>
       </div>
     )
@@ -240,7 +255,7 @@ export function InvitePanel({
           </span>
         </span>
         <button className="btn btn-primary" type="button" disabled={busy} onClick={make}>
-          {busy ? 'Making…' : 'Generate link'}
+          {busy ? 'Making…' : 'Generate Link'}
         </button>
       </div>
     </div>
@@ -427,13 +442,13 @@ export default function AdvisorDirectoryScreen({
                   <td className="adir-when">{when(r.at)}</td>
                   <td>
                     {r.link ? (
-                      <button
+                      <FeedbackButton
                         className="adir-copy"
-                        type="button"
+                        done="Copied ✓"
                         onClick={() => void navigator.clipboard?.writeText(r.link as string)}
                       >
                         Copy
-                      </button>
+                      </FeedbackButton>
                     ) : (
                       <span className="adir-meta">walked in</span>
                     )}

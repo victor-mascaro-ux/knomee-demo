@@ -132,7 +132,7 @@ export function MemberVisionBoards({ initial }: { initial: VisionBoard[] }) {
       {v.body}
       {v.boards.length > 0 && (
         <button type="button" className="cp-board-more" onClick={v.add}>
-          + Add a vision board
+          + Add a Vision Board
         </button>
       )}
       {v.modal}

@@ -145,7 +145,7 @@ export default function AdvisorMobileScreen({
                     Account Settings
                   </button>
                   <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
-                    Legal &amp; privacy
+                    Legal &amp; Privacy
                   </button>
                   <button className="menu-item" type="button" role="menuitem">
                     Sign Out
@@ -170,7 +170,7 @@ export default function AdvisorMobileScreen({
                 foot={
                   onRedo && (
                     <button className="cx-start af-wide" type="button" onClick={onRedo}>
-                      Redo my adventures
+                      Redo My Adventures
                     </button>
                   )
                 }
@@ -289,10 +289,10 @@ export default function AdvisorMobileScreen({
               strokeLinejoin="round"
             />
           </svg>
-          Fit to screen
+          Fit to Screen
         </button>
         <button type="button" className="cx-fit-btn" onClick={onExit}>
-          Back to the desktop
+          Back to the Desktop
         </button>
       </div>
     </div>

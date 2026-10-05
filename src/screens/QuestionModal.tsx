@@ -201,7 +201,7 @@ export default function QuestionModal({
             ))}
           {question.resolved && onToggleResolved && (
             <button className="qm-unresolve" type="button" onClick={onToggleResolved}>
-              Reopen this question
+              Reopen This Question
             </button>
           )}
         </div>

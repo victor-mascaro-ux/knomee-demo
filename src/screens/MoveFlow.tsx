@@ -1293,11 +1293,11 @@ export default function MoveFlow({
                     strokeLinejoin="round"
                   />
                 </svg>
-                Previous question
+                Previous Question
               </button>
             </div>
             <button className={`cx-start jf-ok${blank ? ' is-skip' : ''}`} type="button" onClick={onOk}>
-              {blank ? 'Skip this question' : 'OK'}
+              {blank ? 'Skip This Question' : 'OK'}
             </button>
           </div>
         </>

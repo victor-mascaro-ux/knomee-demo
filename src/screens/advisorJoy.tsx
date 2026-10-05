@@ -141,7 +141,7 @@ const STEPS: JoyStep[] = [
     kind: 'done',
     title: 'What the work is for',
     body: 'Here is what you said. It is on your Business ID now.',
-    cta: 'Claim badge',
+    cta: 'Claim Badge',
   },
   /* The celebration every adventure ends on, under its own name: Practice
      Joy's lettering over the Joy art. */

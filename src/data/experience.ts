@@ -68,7 +68,7 @@ export const adventureActions: AdventureAction[] = [
     art: 'goals',
     blurb: 'Add a new goal.',
     minutes: 3,
-    label: 'Add goal',
+    label: 'Add Goal',
     outline: true,
   },
   { title: 'Life Events', art: 'life-events', blurb: 'Add a new life event.', minutes: 3, label: 'Start' },
@@ -106,10 +106,10 @@ export const quickNext: AdventureAction = {
 }
 
 export const quickActions: QuickAction[] = [
-  { label: 'Save a vision', art: 'vision' },
-  { label: 'Add a new goal', art: 'goals' },
-  { label: 'Add a life event', art: 'life-events' },
-  { label: 'Ask a question', art: 'questions' },
+  { label: 'Save a Vision', art: 'vision' },
+  { label: 'Add a New Goal', art: 'goals' },
+  { label: 'Add a Life Event', art: 'life-events' },
+  { label: 'Ask a Question', art: 'questions' },
 ]
 
 export type MoodId = 'worried' | 'unsure' | 'neutral' | 'good' | 'great'
@@ -153,7 +153,7 @@ export interface VoiceScript {
 export const voices: VoiceScript[] = [
   {
     said: ['I', 'just', 'got', 'divorced'],
-    action: 'Create a life event',
+    action: 'Create a Life Event',
     done: 'Life event created',
     result: {
       tag: 'Personal',
@@ -164,7 +164,7 @@ export const voices: VoiceScript[] = [
   },
   {
     said: ['Can', 'I', 'afford', 'to', 'retire', 'at', 'sixty?'],
-    action: 'Ask a question',
+    action: 'Ask a Question',
     done: 'Question sent',
     result: {
       tag: 'Question',
@@ -175,7 +175,7 @@ export const voices: VoiceScript[] = [
   },
   {
     said: ['I', 'want', 'a', 'lake', 'house', 'in', 'five', 'years'],
-    action: 'Add a goal',
+    action: 'Add a Goal',
     done: 'Goal added',
     result: {
       tag: 'Goal',

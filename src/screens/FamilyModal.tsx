@@ -209,7 +209,7 @@ export default function FamilyModal({
             Cancel
           </button>
           <button className="btn btn-primary" type="button" disabled={!ready} onClick={submit}>
-            {creating ? 'Create family' : invite ? 'Send Invite' : 'Add member'}
+            {creating ? 'Create Family' : invite ? 'Send Invite' : 'Add Member'}
           </button>
         </div>
       </div>

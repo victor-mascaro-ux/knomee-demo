@@ -105,6 +105,7 @@ import AdvisorWelcome from './AdvisorWelcome'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
+import FeedbackButton from '../components/FeedbackButton'
 import { AdventureClose, AdventureMark, AdventureMarkContext } from './AdventureMark'
 import { useCcNav, useCcNavRoots } from '../ccNav'
 
@@ -478,12 +479,17 @@ function IdentityForm({
   onNext: () => void
 }) {
   const [key, label, hint] = ID_FIELDS[field] ?? ID_FIELDS[0]
+  const [sub, ...where] = (step.body ?? '').split('\n\n')
   const { name, book, firm } = a.identity
   const initial = name.trim().charAt(0).toUpperCase()
   return (
     <div className="af-welcome af-id">
-      <h2 className="af-h1">{step.title}</h2>
-      <Paras text={step.body} />
+      {/* Title and one line under it; where the answers go is said at the
+          foot, with the confidentiality line, not as a second paragraph. */}
+      <header className="af-idhead">
+        <h2 className="af-h1">{step.title}</h2>
+        <p className="af-idsub">{sub}</p>
+      </header>
       {/* The head of their Business ID, filling in as they type — so the
           three fields read as the start of something rather than a form. */}
       <div className="af-idcard" aria-hidden>
@@ -544,6 +550,7 @@ function IdentityForm({
       </div>
       {/* Where the answers go, said where they are collected. */}
       <p className="lg-consent is-left">
+        {where.length > 0 && <>{where.join(' ')} </>}
         Please leave out client names and anything confidential to your current firm.{' '}
         <LegalLink doc="data">How your answers are used</LegalLink>
       </p>
@@ -626,7 +633,7 @@ function EndQuestions({
           and concerns, and the move you’re weighing. It’s yours to keep.
         </p>
         <button className="cx-start af-wide" type="button" onClick={onHome}>
-          View my Business ID
+          View My Business ID
         </button>
       </div>
       {kept > 0 && (
@@ -642,7 +649,7 @@ function EndQuestions({
             thing the flow is for, and hiding it from the person who answered
             would be the wrong way round. */}
         <button className="af-link" type="button" onClick={onReport}>
-          See what the firm sees
+          See What the Firm Sees
         </button>
         {/* What became of the answers. A post to the spreadsheet comes back
             opaque, so this claims it was sent and never that it arrived. */}
@@ -656,11 +663,11 @@ function EndQuestions({
               setSent(true)
             }}
           >
-            {sent ? 'Sent to the spreadsheet' : 'Send to the spreadsheet'}
+            {sent ? 'Sent to the Spreadsheet' : 'Send to the Spreadsheet'}
           </button>
         ) : (
           <button className="af-link" type="button" onClick={onRecord}>
-            Where my answers are kept
+            Where My Answers Are Kept
           </button>
         )}
       </div>
@@ -686,14 +693,10 @@ export function JourneyQuestions({
   onSend: () => void
   onRecord: () => void
 }) {
-  const [copied, setCopied] = useState<number | 'all' | null>(null)
   const kept = privateSteps.filter((s) => isAnswered(s, a) && !isShared(s.id, a)).length
   const qs = d.id.questions
-  const copy = (text: string, which: number | 'all') => {
-    void navigator.clipboard?.writeText(text)
-    setCopied(which)
-    window.setTimeout(() => setCopied((c) => (c === which ? null : c)), 1600)
-  }
+  // Each copy button confirms itself (FeedbackButton), so nothing is tracked here.
+  const copy = (text: string) => void navigator.clipboard?.writeText(text)
   return (
     <div className="aq">
       <figure className="jr-memory aq-hero">
@@ -718,33 +721,34 @@ export function JourneyQuestions({
               {i + 1}
             </span>
             <p className="aq-q">{q}</p>
-            <button
-              className={`aq-copy${copied === i ? ' is-done' : ''}`}
-              type="button"
+            <FeedbackButton
+              className="aq-copy"
+              tint={false}
               aria-label={`Copy question ${i + 1}`}
-              onClick={() => copy(q, i)}
-            >
-              {copied === i ? (
+              onClick={() => copy(q)}
+              announce="Copied"
+              done={
                 <svg viewBox="0 0 16 16" aria-hidden>
                   <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
                 </svg>
-              ) : (
-                <svg viewBox="0 0 16 16" aria-hidden>
-                  <rect x="5.5" y="5.5" width="8" height="8" rx="1.8" />
-                  <path d="M10.5 3.2V3a.9.9 0 0 0-.9-.9H3.9a1.8 1.8 0 0 0-1.8 1.8v5.7c0 .5.4.9.9.9h.2" />
-                </svg>
-              )}
-            </button>
+              }
+            >
+              <svg viewBox="0 0 16 16" aria-hidden>
+                <rect x="5.5" y="5.5" width="8" height="8" rx="1.8" />
+                <path d="M10.5 3.2V3a.9.9 0 0 0-.9-.9H3.9a1.8 1.8 0 0 0-1.8 1.8v5.7c0 .5.4.9.9.9h.2" />
+              </svg>
+            </FeedbackButton>
           </li>
         ))}
       </ol>
-      <button
-        className={`aq-copy-all${copied === 'all' ? ' is-done' : ''}`}
-        type="button"
-        onClick={() => copy(qs.map((q, i) => `${i + 1}. ${q}`).join('\n'), 'all')}
+      <FeedbackButton
+        className="aq-copy-all"
+        tint={false}
+        onClick={() => copy(qs.map((q, i) => `${i + 1}. ${q}`).join('\n'))}
+        done="Copied All Three ✓"
       >
-        {copied === 'all' ? 'Copied all three ✓' : 'Copy all three'}
-      </button>
+        Copy All Three
+      </FeedbackButton>
 
       {/* The Business ID, as the celebration offers it: a card that says what
           it is before it opens it. */}
@@ -1735,7 +1739,7 @@ function FlowPhone({
                 {!last &&
                   (asks && !answered ? (
                     <button className="af-next af-next-skip" type="button" onClick={() => go(i + 1)}>
-                      Skip this question
+                      Skip This Question
                     </button>
                   ) : (
                     <button
@@ -1837,7 +1841,7 @@ function FlowPhone({
                       reset(0)
                     }}
                   >
-                    {restartArmed ? 'Tap again to start over' : 'Restart adventures'}
+                    {restartArmed ? 'Tap Again to Start Over' : 'Restart Adventures'}
                     <ArrowRight />
                   </button>
                 )}
@@ -1849,7 +1853,7 @@ function FlowPhone({
                     openLegal('terms')
                   }}
                 >
-                  Legal &amp; privacy
+                  Legal &amp; Privacy
                   <ArrowRight />
                 </button>
                 <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
@@ -1883,7 +1887,7 @@ function FlowPhone({
               strokeLinejoin="round"
             />
           </svg>
-          Fit to screen
+          Fit to Screen
         </button>
       </div>
     </div>
@@ -1946,7 +1950,7 @@ function FlowReport({
       ) : (
         <header className="af-report-bar">
           <button className="af-report-back" type="button" onClick={onBack}>
-            ‹ Back to the flow
+            ‹ Back to the Flow
           </button>
           <span className="af-report-note">
             What the firm reads from your answers.
@@ -2011,7 +2015,7 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
     <div className="page af-report">
       <header className="af-report-bar">
         <button className="af-report-back" type="button" onClick={onBack}>
-          ‹ Back to the flow
+          ‹ Back to the Flow
         </button>
         <span className="af-report-note">
           Where the answers are kept — {rows.length} sitting{rows.length === 1 ? '' : 's'} on this
@@ -2053,7 +2057,7 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
                 Save the URL
               </button>
               <button className="af-secondary af-record-btn" type="button" onClick={() => void send()}>
-                Post {waiting || 'the'} unsent {waiting === 1 ? 'sitting' : 'sittings'}
+                Post {waiting || 'the'} Unsent {waiting === 1 ? 'Sitting' : 'Sittings'}
               </button>
               <button
                 className="af-secondary af-record-btn"
@@ -2119,7 +2123,7 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
                   )
                 }}
               >
-                Post a test row
+                Post a Test Row
               </button>
               {url && (
                 <a
@@ -2128,7 +2132,7 @@ function RecordScreen({ onBack }: { onBack: () => void }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open the endpoint
+                  Open the Endpoint
                 </a>
               )}
             </div>

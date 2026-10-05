@@ -2067,12 +2067,52 @@ button.af-opt:hover {
   height: 15px;
 }
 
+/* Title over one quiet line, held together as a single block. */
+.af-idhead .af-h1 {
+  margin: 0;
+}
+.af-idsub {
+  margin: var(--space-6, 6px) 0 0;
+  font-size: 15px;
+  color: var(--text-secondary, #6d6a76);
+}
+
+/* The screen, filled like the welcome: heading at the top, the card and its
+   field together in the middle of what is left, the confidentiality line held
+   at the foot. */
+.af-welcome.af-id {
+  box-sizing: border-box;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.af-id .af-idcard {
+  margin-top: auto;
+}
+.af-id .af-idform {
+  margin-bottom: auto;
+  padding-bottom: var(--space-24, 24px);
+}
+.af-id > .lg-consent {
+  margin-top: 0;
+  padding-top: var(--space-16, 16px);
+}
+.af-id .af-idfield .jf-other-hint {
+  margin-top: 0;
+}
+.af-id .af-idfield .jf-other-label + .af-idinput {
+  margin-top: var(--space-10, 10px);
+}
+.af-id .af-idfield .jf-other-hint + .af-idinput {
+  margin-top: var(--space-4, 4px);
+}
+
 /* Under the card, one field at a time: three short bars say where you are,
    and each field rises in as the one before it did. */
 .af-idsteps {
   display: flex;
   gap: 6px;
-  margin-top: var(--space-20, 20px);
+  margin-top: var(--space-24, 24px);
 }
 .af-idsteps i {
   flex: 1;
@@ -2088,7 +2128,8 @@ button.af-opt:hover {
   background: #7639a1;
 }
 .af-id .af-idform .af-idfield .jf-other-label {
-  margin-top: var(--space-16, 16px);
+  margin-top: var(--space-20, 20px);
+  margin-bottom: var(--space-4, 4px);
 }
 .af-id .af-idfield {
   animation: afRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;

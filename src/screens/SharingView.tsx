@@ -334,7 +334,7 @@ function PersonForm({
             Cancel
           </button>
           <button type="submit" className="sh-form-save" disabled={!ok}>
-            {isNew ? 'Add to team' : 'Save'}
+            {isNew ? 'Add to Team' : 'Save'}
           </button>
         </div>
       </form>

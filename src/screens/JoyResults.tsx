@@ -380,7 +380,7 @@ export default function JoyResults({
   return (
     <div className={`jr${ending.held ? ' is-held' : ''}`} key={ending.run}>
       <button className="jr-learn" type="button" onClick={ending.open}>
-        Learn more
+        Learn More
         <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
           <circle cx="8" cy="8" r="7" fill="currentColor" />
           <path d="M8 7v4.2" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />

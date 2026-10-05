@@ -287,7 +287,7 @@ function StepBody({
             ))}
           </ol>
           <button className="cx-start af-wide" type="button" onClick={onHome}>
-            View my Business ID
+            View My Business ID
           </button>
           <div className="af-stat">If you’d like to talk it through with Dynasty, book a time.</div>
         </div>
@@ -584,7 +584,7 @@ export default function AdvisorFlowScreen({
                     reset(0)
                   }}
                 >
-                  Restart the flow
+                  Restart the Flow
                   <ArrowRight />
                 </button>
                 <button className="cx-sheet-item" type="button" onClick={onExit}>
@@ -621,7 +621,7 @@ export default function AdvisorFlowScreen({
               strokeLinejoin="round"
             />
           </svg>
-          Fit to screen
+          Fit to Screen
         </button>
       </div>
     </div>

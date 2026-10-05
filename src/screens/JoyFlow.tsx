@@ -242,7 +242,7 @@ export default function JoyFlow({
     step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge' || step.kind === 'pause'
       ? step.cta
       : blank
-        ? 'Skip this question'
+        ? 'Skip This Question'
         : 'OK'
 
   /* OK on a question left unanswered records a sample answer and moves on —
@@ -478,10 +478,10 @@ export default function JoyFlow({
                   strokeLinejoin="round"
                 />
               </svg>
-              Previous question
+              Previous Question
             </button>
           </div>
-          <button className={`cx-start jf-ok${cta === 'Skip this question' ? ' is-skip' : ''}`} type="button" onClick={onCta}>
+          <button className={`cx-start jf-ok${cta === 'Skip This Question' ? ' is-skip' : ''}`} type="button" onClick={onCta}>
             {cta}
           </button>
         </div>

@@ -177,7 +177,7 @@ function CommandCenter({
               <span className="metric-label">TIER DISTRIBUTION</span>
               {tier ? (
                 <button className="cmd-clear" type="button" onClick={clear}>
-                  Clear filter ✕
+                  Clear Filter ✕
                 </button>
               ) : (
                 <span className="dist-filter-hint">
@@ -270,7 +270,7 @@ function CommandCenter({
               <span className="cmd-lead-kq">RQ {lead.kq}</span>
               <span className="cmd-lead-niche">{lead.niche}</span>
               <span className="cmd-lead-more">
-                {listOpen ? 'Hide' : `See all ${flagged.length}`}
+                {listOpen ? 'Hide' : `See All ${flagged.length}`}
                 <ChevronDown />
               </span>
             </button>
@@ -335,15 +335,12 @@ function Row({
   onOpen,
   onAdd,
   onRemove,
-  onCopied,
   checked,
   onToggle,
 }: {
   c: Candidate
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
-  /** Said once a row's link is on the clipboard. */
-  onCopied?: () => void
   /** Only a live sitting can be removed; the worked example cannot. */
   onRemove?: (c: LiveCandidate) => void
   checked: boolean
@@ -431,11 +428,11 @@ function Row({
         <RowMenu
           items={[
             ...(incomplete
-              ? [{ label: 'View profile', disabled: true }]
+              ? [{ label: 'View Profile', disabled: true }]
               : [
                   { label: 'Add to Network', onClick: () => onAdd(c) },
                   {
-                    label: 'View profile',
+                    label: 'View Profile',
                     disabled: !opensProfile(c),
                     onClick: opensProfile(c) ? () => onOpen(c) : undefined,
                   },
@@ -445,16 +442,16 @@ function Row({
             ...('entryId' in c && (c as LiveCandidate).token
               ? [
                   {
-                    label: 'Copy link',
+                    label: 'Copy Link',
+                    done: 'Copied ✓',
                     onClick: () => {
                       void navigator.clipboard?.writeText(inviteLink((c as LiveCandidate).token as string))
-                      onCopied?.()
                     },
                   },
                 ]
               : []),
             ...('entryId' in c && onRemove
-              ? [{ label: 'Remove entry', danger: true, onClick: () => onRemove(c as LiveCandidate) }]
+              ? [{ label: 'Remove Entry', danger: true, onClick: () => onRemove(c as LiveCandidate) }]
               : []),
           ]}
         />
@@ -468,7 +465,6 @@ function Table({
   onOpen,
   onAdd,
   onRemove,
-  onCopied,
   selected,
   onToggle,
   allChecked,
@@ -477,7 +473,6 @@ function Table({
   rows: Candidate[]
   onOpen: (c: Candidate) => void
   onAdd: (c: Candidate) => void
-  onCopied?: () => void
   onRemove: (c: LiveCandidate) => void
   selected: Set<string>
   onToggle: (name: string) => void
@@ -590,7 +585,6 @@ function Table({
                       onOpen={onOpen}
                       onAdd={onAdd}
                       onRemove={onRemove}
-                      onCopied={onCopied}
                       checked={selected.has(c.name)}
                       onToggle={() => onToggle(c.name)}
                     />
@@ -649,11 +643,8 @@ export default function FirmCandidatesScreen({
   onOpenEntry,
   onDownload,
   onAdd,
-  onCopied,
   onRemoved,
 }: {
-  /** A row's invite link copied from its menu. */
-  onCopied?: () => void
   /** An entry removed from the pipeline. */
   onRemoved?: () => void
   onOpenProfile: (c: Candidate) => void
@@ -788,7 +779,7 @@ export default function FirmCandidatesScreen({
                 Keep
               </button>
               <button className="btn btn-primary fc-remove-yes" type="button" onClick={() => void remove(removing)}>
-                Remove entry
+                Remove Entry
               </button>
             </div>
           </div>
@@ -803,7 +794,6 @@ export default function FirmCandidatesScreen({
         rows={rows}
         onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
         onRemove={setRemoving}
-        onCopied={onCopied}
         onAdd={onAdd}
         selected={selected}
         onToggle={toggle}

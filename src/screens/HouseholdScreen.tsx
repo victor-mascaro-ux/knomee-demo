@@ -211,17 +211,17 @@ export default function HouseholdScreen({
                         <RowMenu
                           items={[
                             {
-                              label: 'Open profile',
+                              label: 'Open Profile',
                               onClick: () => row && onOpenMember(row),
                             },
-                            { label: 'Change role', onClick: () => onAction('Role updated') },
+                            { label: 'Change Role', onClick: () => onAction('Role updated') },
                             {
-                              label: 'Resend invitation',
-                              onClick: () => onAction('Invitation resent'),
+                              label: 'Resend Invitation',
+                              done: 'Resent ✓',
                               disabled: !pending,
                             },
                             {
-                              label: 'Remove from family',
+                              label: 'Remove from Family',
                               danger: true,
                               onClick: () => setRemoving(m.name),
                             },

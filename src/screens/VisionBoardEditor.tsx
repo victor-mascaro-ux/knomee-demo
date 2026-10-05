@@ -97,7 +97,7 @@ export default function VisionBoardEditor({
         foot={
           <>
             <button className="vb-link vb-delete vb-inline-delete" type="button" onClick={() => setDeleting(true)}>
-              Delete board
+              Delete Board
             </button>
             {/* Held to the foot of the screen while the board is on it. */}
             <div className="vb-inline-dock">
@@ -166,10 +166,10 @@ export default function VisionBoardEditor({
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline vb-delete-yes" type="button" onClick={onDelete}>
-                Delete board
+                Delete Board
               </button>
               <button className="btn btn-primary" type="button" autoFocus onClick={() => setDeleting(false)}>
-                Keep it
+                Keep It
               </button>
             </div>
           </div>

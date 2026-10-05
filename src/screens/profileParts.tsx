@@ -499,7 +499,7 @@ export function CheckInCard({
 export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
-      {open ? 'See less' : 'See more'} <CaretIcon up={open} />
+      {open ? 'See Less' : 'See More'} <CaretIcon up={open} />
     </button>
   )
 }
@@ -778,7 +778,7 @@ export function StatusTags({ tags, advisorAdded }: { tags?: string[]; advisorAdd
 export function HeadToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
-      {open ? 'Show less' : 'Show more'} <CaretIcon up={open} />
+      {open ? 'Show Less' : 'Show More'} <CaretIcon up={open} />
     </button>
   )
 }
