@@ -10,7 +10,7 @@
 // through as a walkthrough. Nothing here is a real advisor.
 
 import { useMemo, useRef, useState } from 'react'
-import AdvisorProfileScreen from './AdvisorProfileScreen'
+import AdvisorProfileScreen, { AdvisorTeam } from './AdvisorProfileScreen'
 import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
@@ -23,7 +23,7 @@ import {
   SheetCredit,
   TabFinId,
   TabMark,
-  TabQuestions,
+  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -314,7 +314,7 @@ export default function AdvisorFlowScreen({
   // The Move would land in the middle of Future You.
   const [trail, setTrail] = useState<number[]>([0])
   const i = trail[trail.length - 1]
-  const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>('flow')
+  const [tab, setTab] = useState<'flow' | 'finid' | 'team'>('flow')
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
@@ -449,18 +449,12 @@ export default function AdvisorFlowScreen({
             className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
-            {tab === 'questions' ? (
-              <div className="af-unlock">
-                <h2 className="af-h1">My Three Questions</h2>
-                <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
-                <ol className="af-qs">
-                  {businessId.questions.map((q, n) => (
-                    <li key={q}>
-                      <span className="af-getnum">{n + 1}</span>
-                      <span>{q}</span>
-                    </li>
-                  ))}
-                </ol>
+            {tab === 'team' ? (
+              /* My Team, as on every advisor's phone; the three questions are
+                 on the Business ID, in its Questions card. */
+              <div className="af-team">
+                <h2 className="af-h1">My Team</h2>
+                <AdvisorTeam name={advisor.name} />
               </div>
             ) : tab === 'finid' ? (
               /* The Business ID he reads is the Business ID the firm
@@ -538,18 +532,15 @@ export default function AdvisorFlowScreen({
             >
               <TabMark />
             </button>
-            {/* The other half of what the eight minutes produce. The Business
-                ID is what a platform reads about you; these are what you put to
-                it — so they belong on the bar beside it rather than only at the
-                end of the flow, where you would have to walk it again to find
-                them. */}
+            {/* My Team: the people the Business ID goes to, and which part of
+                it each of them sees. */}
             <button
               type="button"
-              className={`cx-tab ${tab === 'questions' ? 'is-on' : ''}`}
-              onClick={() => setTab('questions')}
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
             >
-              <TabQuestions />
-              <span className="cx-tab-lbl">My Questions</span>
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
             </button>
           </nav>
           )}
