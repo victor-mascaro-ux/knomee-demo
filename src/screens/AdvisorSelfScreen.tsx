@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
-import { BusinessIdCard, type IdCard } from './AdvisorProfileScreen'
+import { AdvisorTeam, BusinessIdCard, type IdCard } from './AdvisorProfileScreen'
 import TopBar from '../components/TopBar'
 import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
@@ -30,7 +30,7 @@ import {
   SheetCredit,
   TabFinId,
   TabMark,
-  TabQuestions,
+  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -1217,7 +1217,7 @@ function FlowPhone({
   const i = trail[trail.length - 1]
   useCcNav('self.trail', trail, setTrail)
   const viewing = mode === 'view'
-  const [tab, setTab] = useState<'flow' | 'finid' | 'questions'>(viewing ? 'finid' : 'flow')
+  const [tab, setTab] = useState<'flow' | 'finid' | 'team'>(viewing ? 'finid' : 'flow')
   useCcNav('self.tab', tab, setTab)
   const [menuOpen, setMenuOpen] = useState(false)
   /* Restart asks twice: the first tap says what it will do, the second does
@@ -1311,7 +1311,7 @@ function FlowPhone({
     ...steps.flatMap((st, n) => (st.adventure ? [] : [{ 'self.tab': 'flow', 'self.rich': null, 'self.trail': [n] }])),
     ...advisorAdventures.map((r) => ({ 'self.tab': 'flow', 'self.rich': r.id })),
     { 'self.tab': 'finid', 'self.rich': null },
-    { 'self.tab': 'questions', 'self.rich': null },
+    { 'self.tab': 'team', 'self.rich': null },
   ])
   const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
@@ -1497,8 +1497,9 @@ function FlowPhone({
                     return
                   }
                   if (to === 'questions') {
+                    /* The questions live on the Business ID now. */
                     reset(HOME_AT)
-                    setTab('questions')
+                    setTab('finid')
                     toTop()
                     return
                   }
@@ -1545,58 +1546,14 @@ function FlowPhone({
                 }}
                 onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j), 'confidence')}
               />
-            ) : tab === 'questions' ? (
-              /* The three questions are rules over the answers, like the
-                 Business ID — so before anything is answered there is nothing
-                 to ask, and saying so is better than printing three questions
-                 nobody earned. */
-              idEmpty ? (
-                <div className="af-blank">
-                  <h2 className="af-h1">My Three Questions</h2>
-                  <p className="af-body">
-                    {viewing
-                      ? 'Not enough answered yet for these to take shape. They come out of the adventures, and there are still some to finish.'
-                      : 'These come out of what you answer — the three worth putting to any platform you are considering. Finish an adventure and they start taking shape.'}
-                  </p>
-                  {!viewing && (
-                    <button
-                      className="cx-start af-wide"
-                      type="button"
-                      onClick={() => setTab('flow')}
-                    >
-                      Go to My Adventures
-                    </button>
-                  )}
-                </div>
-              ) : rich ? (
-                /* On the journey page the tab is the designed page, the same
-                   one The Move's celebration opens — with the app's own bar
-                   under it rather than the flow's. */
-                <JourneyQuestions
-                  d={d}
-                  a={answers}
-                  onHome={() => setTab('finid')}
-                  onReport={onReport}
-                  onSend={onSend}
-                  onRecord={onRecord}
-                />
-              ) : (
-                <div className="af-unlock">
-                  {/* His page, in the words he reads it in — the directory shows
-                      what he saw, so this speaks to him whoever is holding the
-                      phone. */}
-                  <h2 className="af-h1">My Three Questions</h2>
-                  <p className="af-body">Put these to every platform you’re considering — including this one. They come out of your own answers, so what you hear back tells you whether a platform is the right one, and holds it to what it promises.</p>
-                  <ol className="af-qs">
-                    {d.id.questions.map((q, n) => (
-                      <li key={q}>
-                        <span className="af-getnum">{n + 1}</span>
-                        <span>{q}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )
+            ) : tab === 'team' ? (
+              /* My Team: who on their team sees which part of the Business ID.
+                 The three questions moved onto the ID itself, in its
+                 Questions card. */
+              <div className="af-team">
+                <h2 className="af-h1">My Team</h2>
+                <AdvisorTeam name={d.who.name} />
+              </div>
             ) : tab === 'finid' && (!viewing || askSignUp) && !answers.signedUp && !demoSignedUp && !(!rich && idEmpty) ? (
               /* Their Business ID is behind an account. Their answers are
                  already with the firm; this is their own copy of the page. */
@@ -1761,18 +1718,16 @@ function FlowPhone({
             >
               <TabMark />
             </button>
-            {/* The other half of what the eight minutes produce. The Business
-                ID is what a platform reads about you; these are what you put to
-                it — so they belong on the bar beside it rather than only at the
-                end of the flow, where you would have to walk it again to find
-                them. */}
+            {/* My Team: the people the Business ID goes to, and which part of
+                it each of them sees. The three questions are on the ID, in its
+                Questions card. */}
             <button
               type="button"
-              className={`cx-tab ${tab === 'questions' ? 'is-on' : ''}`}
-              onClick={() => setTab('questions')}
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
             >
-              <TabQuestions />
-              <span className="cx-tab-lbl">{viewing ? 'Questions' : 'My Questions'}</span>
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
             </button>
           </nav>
           )}
