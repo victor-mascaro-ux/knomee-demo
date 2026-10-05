@@ -1,0 +1,54 @@
+/* FeedbackButton: both labels share one grid cell, so the button keeps the
+   width of the longer one and nothing beside it moves when it swaps. */
+.fb-stack {
+  display: inline-grid;
+  place-items: center;
+}
+.fb-stack > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    opacity 0.18s var(--ease-out, ease),
+    transform 0.22s var(--ease-out, ease);
+}
+.fb-stack > [data-off] {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(3px);
+}
+.fb.fb-tint,
+.fb.fb-tint:hover {
+  background-color: var(--k-lime-soft, #e4f7c6);
+  border-color: var(--k-lime, #affc41);
+  color: var(--k-plum, #240446);
+}
+.fb-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fb-stack > span {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* The same confirmation inside a row's overflow menu (RowMenu `done`). */
+.row-menu-item .fb-stack {
+  place-items: center start;
+}
+.row-menu-item .fb-stack > span {
+  justify-content: flex-start;
+}
+.row-menu-item.is-done,
+.row-menu-item.is-done:hover:not(:disabled) {
+  background: var(--k-lime-soft, #e4f7c6);
+  color: var(--k-plum, #240446);
+}

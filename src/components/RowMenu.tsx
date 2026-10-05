@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { DotsIcon } from './icons'
 import { useDropdown } from './useDropdown'
+import './feedbackButton.css'
 
 export interface MenuItem {
   label: string
@@ -13,7 +14,13 @@ export interface MenuItem {
   /** The one that takes something away. It reads in the warning colour, so a
       menu of four actions does not hide the one that cannot be undone. */
   danger?: boolean
+  /** In-button feedback ("Copied ✓"): the item says it for a moment and the
+      menu stays open while it does, then folds away on its own. */
+  done?: string
 }
+
+/* Long enough to read two words, short enough not to feel stuck open. */
+const DONE_MS = 1200
 
 export default function RowMenu({ items }: { items: MenuItem[] }) {
   const { open, shown, closing, setOpen } = useDropdown()
@@ -21,6 +28,17 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
      against its clipped, rounded frame, which cut the menu off. */
   const [up, setUp] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const [doneLabel, setDoneLabel] = useState<string | null>(null)
+  const doneTimer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(doneTimer.current), [])
+  /* Cleared once the menu has folded away, not as it starts to, so the
+     confirmation does not flip back mid-fold. */
+  useEffect(() => {
+    if (!shown) {
+      window.clearTimeout(doneTimer.current)
+      setDoneLabel(null)
+    }
+  }, [shown])
   useEffect(() => {
     if (!open) return
     const onDoc = (e: MouseEvent) => {
@@ -52,15 +70,30 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
             <button
               key={it.label}
               type="button"
-              className={`row-menu-item${it.danger ? ' is-danger' : ''}`}
+              className={`row-menu-item${it.danger ? ' is-danger' : ''}${doneLabel === it.label ? ' is-done' : ''}`}
               disabled={it.disabled}
               onClick={(e) => {
                 e.stopPropagation()
-                setOpen(false)
                 it.onClick?.()
+                if (it.done) {
+                  setDoneLabel(it.label)
+                  window.clearTimeout(doneTimer.current)
+                  doneTimer.current = window.setTimeout(() => setOpen(false), DONE_MS)
+                } else {
+                  setOpen(false)
+                }
               }}
             >
-              {it.label}
+              {it.done ? (
+                <span className="fb-stack">
+                  <span data-off={doneLabel === it.label || undefined}>{it.label}</span>
+                  <span data-off={doneLabel !== it.label || undefined} aria-live="polite">
+                    {it.done}
+                  </span>
+                </span>
+              ) : (
+                it.label
+              )}
             </button>
           ))}
         </div>

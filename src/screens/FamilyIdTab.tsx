@@ -247,7 +247,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             aria-expanded={confidence}
             onClick={() => setConfidence((v) => !v)}
           >
-            {confidence ? 'Hide results' : 'Show results'} <CaretIcon up={confidence} />
+            {confidence ? 'Hide Results' : 'Show Results'} <CaretIcon up={confidence} />
           </button>
         }
         render={(m) => (

@@ -105,6 +105,7 @@ import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
 import RowMenu from './components/RowMenu'
+import FeedbackButton, { useFlash } from './components/FeedbackButton'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import HouseholdScreen from './screens/HouseholdScreen'
@@ -279,7 +280,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               <span className="metric-label">TIER DISTRIBUTION</span>
               {tier ? (
                 <button className="cmd-clear" type="button" onClick={clear}>
-                  Clear filter ✕
+                  Clear Filter ✕
                 </button>
               ) : (
                 <span className="dist-filter-hint">
@@ -373,7 +374,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               <span className="cmd-lead-kq">KQ {lead.kq}</span>
               <span className="cmd-lead-niche">{lead.niche}</span>
               <span className="cmd-lead-more">
-                {listOpen ? 'Hide' : `See all ${flagged.length}`}
+                {listOpen ? 'Hide' : `See All ${flagged.length}`}
                 <ChevronDown />
               </span>
             </button>
@@ -439,7 +440,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
           {meta && tierInsight && !whyOpen && (
             <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
               <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
-              <span className="cmd-why-peek-more">Read more →</span>
+              <span className="cmd-why-peek-more">Read More →</span>
             </button>
           )}
           <div className={`collapse ${whyOpen ? 'open' : ''}`}>
@@ -574,8 +575,8 @@ function ProspectRow({
         <RowMenu
           items={
             incomplete
-              ? [{ label: 'View profile', disabled: true }]
-              : [{ label: 'Convert to client', onClick: () => onConvert(p) }, { label: 'View profile', disabled: true }]
+              ? [{ label: 'View Profile', disabled: true }]
+              : [{ label: 'Convert to Client', onClick: () => onConvert(p) }, { label: 'View Profile', disabled: true }]
           }
         />
       </td>
@@ -949,8 +950,8 @@ function ClientRow({
         <RowMenu
           items={[
             onOpenProfile && hasProfile(c.name)
-              ? { label: 'View profile', onClick: () => onOpenProfile(c) }
-              : { label: 'View profile', disabled: true },
+              ? { label: 'View Profile', onClick: () => onOpenProfile(c) }
+              : { label: 'View Profile', disabled: true },
             ...(onDemote ? [{ label: 'Convert to Prospect', onClick: () => onDemote(c) }] : []),
           ]}
         />
@@ -1166,7 +1167,7 @@ function ClientsMetrics({
             <span className="metric-label">TIER DISTRIBUTION</span>
             {filterTier ? (
               <button className="cmd-clear" type="button" onClick={() => onPickTier(filterTier)}>
-                Clear filter ✕
+                Clear Filter ✕
               </button>
             ) : (
               <span className="dist-filter-hint">
@@ -1225,7 +1226,7 @@ function ClientsMetrics({
                   type="button"
                   onClick={() => onPickSentiment(sentimentFilter)}
                 >
-                  Clear filter ✕
+                  Clear Filter ✕
                 </button>
               )}
             </span>
@@ -2231,7 +2232,7 @@ function ExperimentTable() {
             setOpen(allOpen ? new Set() : new Set(experiments.map((e) => e.key)))
           }
         >
-          {allOpen ? 'Collapse all' : 'Compare all'}
+          {allOpen ? 'Collapse All' : 'Compare All'}
         </button>
       </div>
       <div className="exp-table">
@@ -2840,7 +2841,8 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
 /* ── Invite flow ─────────────────────────────────────────────────────────
    One modal, two tabs (prospect / client). Opened from the Invite button on
    either dashboard, defaulting to that dashboard's kind. Sending an email,
-   copying the link, or copying the QR each fires the matching toast. All data
+   copying the link, or copying the QR each confirms in its own button (a
+   check, for a moment) rather than in a toast. All data
    is demo-fake: the link is a placeholder and the QR is decorative. */
 
 // Modal positioning across embeddings.
@@ -2985,14 +2987,21 @@ function InvitePreview({ kind }: { kind: InviteKind }) {
   )
 }
 
+// The check an icon-only button swaps to while it confirms.
+function DoneGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4.5 10.5 8.3 14 15.5 6.5" />
+    </svg>
+  )
+}
+
 function InviteModal({
   initialKind,
   onClose,
-  showToast,
 }: {
   initialKind: InviteKind
   onClose: () => void
-  showToast: (msg: string) => void
 }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
   const [email, setEmail] = useState('')
@@ -3009,20 +3018,22 @@ function InviteModal({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  // Clipboard may be blocked inside the embedding iframe; the toast is the
-  // demo's real feedback, so never let a copy failure swallow it.
-  const copy = (text: string, msg: string) => {
+  // Clipboard may be blocked inside the embedding iframe; the button's own
+  // check is the demo's real feedback, so never let a copy failure swallow it.
+  const copy = (text: string) => {
     try {
       navigator.clipboard?.writeText(text)
     } catch {
-      /* ignore — demo still confirms via toast */
+      /* ignore — demo still confirms in the button */
     }
-    showToast(msg)
   }
 
+  // The send button confirms itself; an empty field sends nothing, so it
+  // does not claim to have.
+  const sent = useFlash()
   const send = () => {
-    if (!email.trim()) return
-    showToast(`${label} email sent`)
+    if (!email.trim()) return false
+    sent.flash()
     setEmail('')
   }
 
@@ -3085,14 +3096,16 @@ function InviteModal({
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && send()}
               />
-              <button
+              <FeedbackButton
                 className="invite-send"
-                type="button"
                 aria-label={`Send ${kind} invite`}
                 onClick={send}
+                flashing={sent.is()}
+                done={<DoneGlyph />}
+                announce={`${label} email sent`}
               >
                 <SendGlyph />
-              </button>
+              </FeedbackButton>
             </div>
             <button
               className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
@@ -3115,28 +3128,30 @@ function InviteModal({
                 <label className="invite-field-label">Link</label>
                 <div className="invite-link-box">
                   <span className="invite-link-text">{link}</span>
-                  <button
+                  <FeedbackButton
                     className="invite-copy"
-                    type="button"
                     aria-label={`Copy ${kind} link`}
-                    onClick={() => copy(link, `${label} link copied`)}
+                    onClick={() => copy(link)}
+                    done={<DoneGlyph />}
+                    announce={`${label} link copied`}
                   >
                     <CopyGlyph />
-                  </button>
+                  </FeedbackButton>
                 </div>
               </div>
               <div className="invite-share-col">
                 <label className="invite-field-label">QR Code</label>
                 <div className="invite-qr-box">
                   <QrCode seed={kind === 'prospect' ? 7 : 23} />
-                  <button
+                  <FeedbackButton
                     className="invite-copy invite-qr-copy"
-                    type="button"
                     aria-label={`Copy ${kind} QR code`}
-                    onClick={() => copy(link, `${label} QR code copied`)}
+                    onClick={() => copy(link)}
+                    done={<DoneGlyph />}
+                    announce={`${label} QR code copied`}
                   >
                     <CopyGlyph />
-                  </button>
+                  </FeedbackButton>
                 </div>
               </div>
             </div>
@@ -3608,7 +3623,7 @@ function ProfilePanel() {
           <span className="avatar avatar-initial profile-avatar">A</span>
           <span>Alex Advisor</span>
         </div>
-        <button className="settings-link" type="button">Update profile</button>
+        <button className="settings-link" type="button">Update Profile</button>
       </div>
       <div className="settings-row">
         <span className="settings-label">Email addresses</span>
@@ -3616,12 +3631,12 @@ function ProfilePanel() {
           <div className="settings-email">
             alex@beaconplan.co <span className="settings-pill">Primary</span>
           </div>
-          <button className="settings-link" type="button">+ Add email address</button>
+          <button className="settings-link" type="button">+ Add Email Address</button>
         </div>
       </div>
       <div className="settings-row">
         <span className="settings-label">Connected accounts</span>
-        <button className="settings-link" type="button">+ Connect account</button>
+        <button className="settings-link" type="button">+ Connect Account</button>
       </div>
     </div>
   )
@@ -3634,7 +3649,7 @@ function SecurityPanel() {
       <div className="settings-row">
         <span className="settings-label">Password</span>
         <span className="settings-value">••••••••••</span>
-        <button className="settings-link" type="button">Update password</button>
+        <button className="settings-link" type="button">Update Password</button>
       </div>
       <div className="settings-row">
         <span className="settings-label">Active devices</span>
@@ -3647,7 +3662,7 @@ function SecurityPanel() {
       </div>
       <div className="settings-row">
         <span className="settings-label">Delete account</span>
-        <button className="settings-link danger" type="button">Delete account</button>
+        <button className="settings-link danger" type="button">Delete Account</button>
       </div>
     </div>
   )
@@ -3664,7 +3679,7 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
   return (
     <main className="content settings-screen">
       <button className="settings-back" type="button" onClick={onClose}>
-        ‹ Back to dashboard
+        ‹ Back to Dashboard
       </button>
       <div className="settings-grid">
         <aside className="settings-side">
@@ -4421,7 +4436,7 @@ export default function App() {
         <div className="page">
           <main className="content">
             <button className="settings-back" type="button" onClick={backToList}>
-              ‹ Back to the directory
+              ‹ Back to the Directory
             </button>
             <h1 className="page-title">No sitting by that name</h1>
             <p className="adir-note">
@@ -4546,7 +4561,6 @@ export default function App() {
                 }}
                 onDownload={() => showToast('CSV downloaded')}
                 onAdd={() => showToast('Added to Network')}
-                onCopied={() => showToast('Link copied')}
                 onRemoved={() => showToast('Entry removed')}
               />
             )}
@@ -4630,7 +4644,7 @@ export default function App() {
             type="button"
             onClick={() => setSegmentationOpen(false)}
           >
-            ‹ Back to dashboard
+            ‹ Back to Dashboard
           </button>
           <SegmentationScreen />
         </main>
@@ -4702,7 +4716,6 @@ export default function App() {
         <InviteModal
           initialKind={inviteKind}
           onClose={() => setInviteKind(null)}
-          showToast={showToast}
         />
       )}
       <Toast show={toast.show} message={toast.msg} />

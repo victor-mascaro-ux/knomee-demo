@@ -103,7 +103,7 @@ export function MicButton({
         onClick={mic.toggle}
       >
         <MicIcon />
-        <span>{mic.on ? 'Listening… tap to stop' : 'Tell it instead'}</span>
+        <span>{mic.on ? 'Listening… Tap to Stop' : 'Tell It Instead'}</span>
         {/* The sound wave: still bars at rest, moving while it listens. */}
         <span className="af-wave" aria-hidden>
           {Array.from({ length: 7 }, (_, i) => (
@@ -120,7 +120,7 @@ export function MicButton({
       onClick={mic.toggle}
     >
       {mic.on ? <i className="af-mic-dot" aria-hidden /> : <MicIcon />}
-      {mic.on ? 'Listening… tap to stop' : 'Say your answer'}
+      {mic.on ? 'Listening… Tap to Stop' : 'Say Your Answer'}
     </button>
   )
 }

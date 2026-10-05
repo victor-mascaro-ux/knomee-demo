@@ -136,7 +136,7 @@ export default function ClientMobileScreen({
                     Account Settings
                   </button>
                   <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
-                    Legal &amp; privacy
+                    Legal &amp; Privacy
                   </button>
                   <button className="menu-item" type="button" role="menuitem">
                     Sign Out
@@ -220,10 +220,10 @@ export default function ClientMobileScreen({
               strokeLinejoin="round"
             />
           </svg>
-          Fit to screen
+          Fit to Screen
         </button>
         <button type="button" className="cx-fit-btn" onClick={onExit}>
-          Back to the advisor
+          Back to the Advisor
         </button>
       </div>
     </div>

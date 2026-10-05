@@ -165,7 +165,7 @@ export const steps: Step[] = [
       { label: '3', value: '3 key questions to ask about your move' },
     ],
     stat: 'Est time: 8 min',
-    cta: 'Get started',
+    cta: 'Get Started',
   },
 
   { id: 'home', kind: 'home' },
@@ -179,7 +179,7 @@ export const steps: Step[] = [
     title: 'What is the work for?',
     body: 'A practice is more than a P&L. Aligning daily activity with what you actually value leads to greater satisfaction — in a business as much as a life.',
     cite: 'From “Build the Life You Want” by Arthur C. Brooks and Oprah Winfrey',
-    cta: 'Get started',
+    cta: 'Get Started',
   },
   {
     id: 'pj-q1',
@@ -209,7 +209,7 @@ export const steps: Step[] = [
     kind: 'reflect',
     adventure: 'practice-joy',
     title: 'Pause and reflect — what do you really want out of your practice?',
-    cta: 'Reflect & continue',
+    cta: 'Reflect & Continue',
   },
   {
     id: 'pj-q2',
@@ -272,7 +272,7 @@ export const steps: Step[] = [
     title: 'How do you feel about where you are?',
     body: 'Confidence strengthens as you gain clarity, trust your decisions, and feel in control of the business you are running. Confidence in your abilities directly influences your performance, motivation, and behavior.',
     cite: 'Albert Bandura, psychologist and self-efficacy pioneer',
-    cta: 'Get started',
+    cta: 'Get Started',
   },
   {
     id: 'cf-q',
@@ -325,7 +325,7 @@ You’re making great progress. Let’s keep going.`,
     eyebrow: 'Outlook',
     title: 'What’s on your mind?',
     body: 'What are your biggest concerns? Your hopes for the practice? Sharing what is on your mind informs support and guidance that aligns with what you actually want.',
-    cta: 'Get started',
+    cta: 'Get Started',
   },
   {
     id: 'ol-q1',
@@ -405,7 +405,7 @@ You’re making great progress. Let’s keep going.`,
     title: 'Let’s materialize your vision for Future You',
     body: 'The clearer your vision, the more likely you are to achieve it. Visualizing your future self inspires positive decisions and behavior change.',
     cite: 'Hal Hershfield PhD, behavioral scientist',
-    cta: 'Get started',
+    cta: 'Get Started',
   },
   {
     id: 'fy-breathe',

@@ -306,7 +306,7 @@ export default function AddGoalModal({
                       {TTM_STAGES[readiness - 1] ?? 'Not set'}
                     </span>
                     <button className="ag-ttm-retake" type="button" onClick={() => setAssessing(true)}>
-                      {readiness ? 'Retake assessment' : 'Assess readiness'}
+                      {readiness ? 'Retake Assessment' : 'Assess Readiness'}
                     </button>
                   </div>
                 </>
@@ -342,7 +342,7 @@ export default function AddGoalModal({
         <div onClick={(e) => e.stopPropagation()}>
         <ReadinessModal
           goal={{ ...(goal as Goal), title: title ?? goal?.title ?? '' }}
-          saveLabel="Use this stage"
+          saveLabel="Use This Stage"
           onClose={() => setAssessing(false)}
           onSave={(lv) => {
             setReadiness(lv)

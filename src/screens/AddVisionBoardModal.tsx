@@ -331,7 +331,7 @@ export default function AddVisionBoardModal({
             <div className="modal-footer vb-foot">
               {onDelete && (
                 <button className="vb-link vb-delete" type="button" onClick={() => setDeleting(true)}>
-                  Delete board
+                  Delete Board
                 </button>
               )}
               <button
@@ -357,7 +357,7 @@ export default function AddVisionBoardModal({
               </p>
               <div className="vb-leave-acts">
                 <button className="btn btn-outline vb-delete-yes" type="button" onClick={onDelete}>
-                  Delete board
+                  Delete Board
                 </button>
                 <button
                   className="btn btn-primary"
@@ -365,7 +365,7 @@ export default function AddVisionBoardModal({
                   autoFocus
                   onClick={() => setDeleting(false)}
                 >
-                  Keep it
+                  Keep It
                 </button>
               </div>
             </div>
@@ -385,7 +385,7 @@ export default function AddVisionBoardModal({
               </p>
               <div className="vb-leave-acts">
                 <button className="btn btn-outline" type="button" onClick={onClose}>
-                  Leave without saving
+                  Leave Without Saving
                 </button>
                 <button
                   className="btn btn-primary"
@@ -393,7 +393,7 @@ export default function AddVisionBoardModal({
                   autoFocus
                   onClick={() => setLeaving(false)}
                 >
-                  Keep creating
+                  Keep Creating
                 </button>
               </div>
             </div>
@@ -514,7 +514,7 @@ export function VoiceComposer({ onAdd, onCancel }: { onAdd: (t: BoardTile) => vo
           disabled={listening || !text.trim()}
           onClick={() => onAdd({ kind: 'note', text: text.trim(), tone, voice: true })}
         >
-          Add sticker
+          Add Sticker
         </button>
       </div>
     </div>

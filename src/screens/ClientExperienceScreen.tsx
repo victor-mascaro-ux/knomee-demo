@@ -1007,7 +1007,7 @@ function KnomeeSheet({
                 setWhy('')
               }}
             >
-              Choose another
+              Choose Another
             </button>
             <button
               className="kx-mood-save"
@@ -1253,7 +1253,7 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
             </div>
           </div>
           <button className="vx-dismiss" type="button" onClick={onClose}>
-            Done for now
+            Done for Now
           </button>
         </>
       )}
@@ -1319,7 +1319,7 @@ function MobileMenu({
             openLegal('terms')
           }}
         >
-          Legal &amp; privacy
+          Legal &amp; Privacy
           <ArrowRight />
         </button>
         <button className="cx-sheet-item" type="button" onClick={onClose}>
@@ -1987,7 +1987,7 @@ export default function ClientExperienceScreen({
               strokeLinejoin="round"
             />
           </svg>
-          Fit to screen
+          Fit to Screen
         </button>
       </div>
     </div>

@@ -176,7 +176,7 @@ export const joySteps: JoyStep[] = [
     kind: 'done',
     title: 'You found Financial Joy',
     body: 'Here is what you said. It is on your Financial ID now, and your advisor reads the same page you do.',
-    cta: 'Claim badge',
+    cta: 'Claim Badge',
   },
   {
     kind: 'badge',
