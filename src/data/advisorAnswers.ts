@@ -110,7 +110,7 @@ const SAMPLE_SITTING = 's-sample-marcus-hale'
 export function sampleAnswers(): Answers {
   const a = emptyAnswers()
   a.sittingId = SAMPLE_SITTING
-  a.identity = { name: advisor.name, role: 'Lead advisor', book: advisor.book, firm: advisor.firm }
+  a.identity = { name: advisor.name, role: 'Lead advisor', book: advisor.book, firm: advisor.firm, email: advisor.email }
   a.completed = advisor.completedOn
   for (const s of steps) {
     if (s.chosen?.length) a.choice[s.id] = [...s.chosen]

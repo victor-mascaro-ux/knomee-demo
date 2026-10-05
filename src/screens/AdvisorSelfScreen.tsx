@@ -103,7 +103,7 @@ import './client-experience.css'
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
 import SignUpScreen from './SignUpScreen'
-import { setDeviceMode } from '../deviceMode'
+import { openExperience } from '../deviceMode'
 import IdentityCardForm, { type IdField } from './IdentityCard'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
@@ -923,7 +923,11 @@ export default function AdvisorSelfScreen({
   askSignUp = false,
   sandbox = false,
   onRestartDemo,
+  onBackToProfile,
 }: {
+  /** A persona's or candidate's phone opened from their profile: the menu's
+      way back to it (the advisor's view). */
+  onBackToProfile?: () => void
   /** Viewing mode, on a demo persona's phone (Marcus): still show the sign-up
       before the Business ID, as an advisor taking it would see it. */
   askSignUp?: boolean
@@ -1121,11 +1125,7 @@ export default function AdvisorSelfScreen({
         onList={onExit}
         onOpenExperience={
           viewing && entry
-            ? () => {
-                /* Their phone, at their own route — on the phone first. */
-                setDeviceMode('mobile')
-                window.location.hash = `#/advisors/${entry.id}/phone`
-              }
+            ? () => openExperience(`#/advisors/${entry.id}/phone`)
             : undefined
         }
       />
@@ -1146,6 +1146,7 @@ export default function AdvisorSelfScreen({
       rich={rich}
       askSignUp={askSignUp}
       onRestartDemo={onRestartDemo}
+      onBackToProfile={onBackToProfile}
       onExit={onExit}
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
@@ -1178,10 +1179,12 @@ function FlowPhone({
   rich = false,
   askSignUp = false,
   onRestartDemo,
+  onBackToProfile,
 }: {
   rich?: boolean
   askSignUp?: boolean
   onRestartDemo?: () => void
+  onBackToProfile?: () => void
   answers: Answers
   edit: Edit
   d: Derived
@@ -1805,6 +1808,19 @@ function FlowPhone({
                     each answers the tap and goes nowhere. The demo's own ways
                     around — restart, samples, the report — live in the demo
                     menu, not in somebody's app. */}
+                {onBackToProfile && (
+                  <button
+                    className="cx-sheet-item"
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onBackToProfile()
+                    }}
+                  >
+                    Back to Profile
+                    <ArrowRight />
+                  </button>
+                )}
                 <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
                   Account Settings
                   <ArrowRight />

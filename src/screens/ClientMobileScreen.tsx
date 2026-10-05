@@ -45,7 +45,10 @@ export default function ClientMobileScreen({
   client = EMILY,
   onExit,
   onAccountSettings,
+  onBackToProfile,
 }: {
+  /** Opened from the client's profile: the menu's way back to it. */
+  onBackToProfile?: () => void
   /** Whose phone. Emily's unless another client is named. */
   client?: Client
   onExit: () => void
@@ -124,6 +127,19 @@ export default function ClientMobileScreen({
                     <span className="menu-avatar">A</span>
                     <span className="menu-name">Alex Advisor</span>
                   </div>
+                  {onBackToProfile && (
+                    <button
+                      className="menu-item"
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setAccountOpen(false)
+                        onBackToProfile()
+                      }}
+                    >
+                      Back to Profile
+                    </button>
+                  )}
                   <button
                     className="menu-item"
                     type="button"

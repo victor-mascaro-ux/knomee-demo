@@ -42,3 +42,30 @@ export function useDeviceMode(): DeviceMode {
     () => mode,
   )
 }
+
+/* The profile an experience was opened from, so its menu's Back to Profile
+   returns there — the converted Sarah's client page, say, rather than her
+   prospect page. Each experience also knows its own person's profile, used
+   when it was reached some other way. */
+const BACK_KEY = 'knomee.experienceFrom'
+
+export function openExperience(hash: string) {
+  try {
+    sessionStorage.setItem(BACK_KEY, window.location.hash)
+  } catch {
+    /* fine — the fallback still knows the way */
+  }
+  setDeviceMode('mobile')
+  window.location.hash = hash
+}
+
+export function backToProfile(fallback: string) {
+  let from: string | null = null
+  try {
+    from = sessionStorage.getItem(BACK_KEY)
+    sessionStorage.removeItem(BACK_KEY)
+  } catch {
+    /* ignore */
+  }
+  window.location.hash = from || fallback
+}

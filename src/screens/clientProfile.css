@@ -598,16 +598,15 @@
   color: var(--text-link);
 }
 /* Under a member's boards on the Family ID, whose shared card has no plus. */
-.cp-board-more {
-  margin-top: var(--space-10);
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--text-link);
-  cursor: pointer;
+/* A member's plus on the Family ID's board card, level with their name. */
+.fid-cell:has(> .cp-board-add) {
+  position: relative;
+}
+.cp-board-add {
+  position: absolute;
+  top: 0;
+  right: 0;
+  line-height: 0;
 }
 /* A board being made: tiles are picked up and carried. The one in hand lifts
    and dims a little, so the gap it will drop into reads as the gap. */
@@ -692,7 +691,7 @@
 
 @media print {
   .cp-board-edit,
-  .cp-board-more,
+  .cp-board-add,
   .cp-tile-x,
   .cp-tile-handle {
     display: none !important;
