@@ -38,7 +38,7 @@ export const SEBASTIAN_KR = 65
 export const clientSnapshot: Snapshot = {
   question: 'How strong the advisor–client relationship is.',
   score: { name: 'Knomee Relationship', abbr: 'KR' },
-  total: 'The KR is the average of the dimensions: (100 + 100 + 80 + 90 + 65) ÷ 5 = 87. Referenceability is left out while there is no referral signal either way.',
+  total: 'The KR is the average of the dimensions: (100 + 100 + 80 + 90 + 65) ÷ 5 = 87.',
   kq: 87,
   dimensions: [
     {
@@ -96,17 +96,8 @@ export const clientSnapshot: Snapshot = {
         { label: 'Advisor requests', value: '73% done, in 4–7 days, decision-ready answers', points: 78 },
       ],
     },
-    {
-      key: 'Referenceability',
-      question: 'Are they open to referring their advisor?',
-      score: 0,
-      caption: 'No referral signal yet',
-      evidence: ['Nothing asked and nothing offered — the one dimension with no reading'],
-      calc: [
-        { label: 'Willingness to refer', value: 'No referrals offered', points: 0, weight: '40%' },
-        { label: 'Actual referrals', value: 'None yet', points: 0, weight: '60%' },
-      ],
-    },
+    /* No Referenceability card: there is no referral data to score it from
+       yet, so the dimension is left off rather than shown at zero. */
     {
       key: 'Household KR',
       question: "How engaged is the client's household?",
@@ -133,7 +124,7 @@ const hisDone = him.goals.filter((g) => g.completed)
 
 export const sebastianSnapshot: Snapshot = {
   ...clientSnapshot,
-  total: `The KR is the average of the dimensions: (70 + 80 + 40 + 50 + ${EMILY_KR}) ÷ 5 = ${SEBASTIAN_KR}. Referenceability is left out while there is no referral signal either way.`,
+  total: `The KR is the average of the dimensions: (70 + 80 + 40 + 50 + ${EMILY_KR}) ÷ 5 = ${SEBASTIAN_KR}.`,
   kq: SEBASTIAN_KR,
   dimensions: [
     {
@@ -179,7 +170,6 @@ export const sebastianSnapshot: Snapshot = {
         { label: 'Advisor requests', value: 'None answered', points: 20 },
       ],
     },
-    clientSnapshot.dimensions.find((d) => d.key === 'Referenceability')!,
     {
       key: 'Household KR',
       question: "How engaged is the client's household?",

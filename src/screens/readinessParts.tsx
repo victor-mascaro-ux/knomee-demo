@@ -224,8 +224,11 @@ function verdictOf(v: number, abbr: string) {
 
 export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string }) {
   const score = s.score ?? { name: 'Knomee Quotient', abbr: 'KQ' }
-  /* Six read as two rows of three; a fourth column only for seven or more. */
+  /* Six read as two rows of three; a fourth column only for seven or more.
+     Five read as three over two, the two widened to fill the row rather than
+     leaving a hole where a sixth would be. */
   const wide = s.dimensions.length > 6
+  const five = s.dimensions.length === 5
   // A prospect's KQ and an advisor's RQ; the client's KR keeps it full width.
   const tierInBreakdown = score.abbr !== 'KR'
   const tier = (
@@ -257,7 +260,7 @@ export function ReadinessSnapshot({ s, title }: { s: Snapshot; title?: string })
         </div>
         <div className="rd-breakdown">
           <span className="rd-breakdown-label">{score.abbr} Breakdown:</span>
-          <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}`}>
+          <div className={`rd-dims${wide ? ' rd-dims-wide' : ''}${five ? ' rd-dims-five' : ''}`}>
             {s.dimensions.map((d, i) => (
               <DimensionCard d={d} i={i} key={d.key} />
             ))}

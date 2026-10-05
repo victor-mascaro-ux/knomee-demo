@@ -32,6 +32,14 @@
 .hin .rd-dims-wide {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+/* Five, two across: pairs, and the fifth takes the full last row. */
+.hin .rd-dims-five .rd-dim,
+.hin .rd-dims-five .rd-dim:nth-child(n + 4) {
+  grid-column: auto;
+}
+.hin .rd-dims-five .rd-dim:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 
 /* Two across, a card's bubble hangs from its outer edge: the left card's
    opens rightward, the right card's leftward, so neither overhangs the card. */
