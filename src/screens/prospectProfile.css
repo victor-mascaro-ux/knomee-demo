@@ -1211,6 +1211,20 @@
 .pp-meta-row {
   max-width: 100%;
   min-width: 0;
+  /* Icons top-align with their text (DS rule): a row that wraps — a long
+     email — keeps its icon on the first line, not centred on both. */
+  align-items: flex-start;
+  line-height: 18px;
+}
+.pp-meta-row > svg {
+  margin-top: 2px;
+}
+/* An email longer than the rail is wide wraps — after its @ first, anywhere
+   only if it must — rather than running past the rail's right padding. */
+.pp-meta-email {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
 }
 .pp-card-title > svg {
   flex: none;
