@@ -124,16 +124,17 @@ export function VisionBoardCard({
 }
 
 /* One member's boards inside the Family ID's shared card, which draws the
-   title itself: the plus goes under their boards instead. */
+   title itself: the plus sits level with the member's name, at the column's
+   right — the same circled plus every other card adds with. */
 export function MemberVisionBoards({ initial }: { initial: VisionBoard[] }) {
   const v = useVisionBoards(initial)
   return (
     <>
       {v.body}
       {v.boards.length > 0 && (
-        <button type="button" className="cp-board-more" onClick={v.add}>
-          + Add a Vision Board
-        </button>
+        <span className="cp-board-add">
+          <AddButton label="Add a vision board" onClick={v.add} />
+        </span>
       )}
       {v.modal}
     </>

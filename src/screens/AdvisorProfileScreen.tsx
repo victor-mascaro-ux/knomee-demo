@@ -169,17 +169,6 @@ export default function AdvisorProfileScreen({
   const photo = mine ? who.photo : undefined
   const showTabs = !mine || tabs
   const stageLevel = TTM_STAGES.indexOf(d.readiness.stage) + 1
-  /* Whatever of the three the page happens to know. Marcus's are in the flow;
-     a rail built from answers somebody just typed has none of them yet, and
-     each one simply drops out rather than standing there empty. */
-  const practice = (
-    [
-      ['Book', who.book],
-      ['Role', who.role],
-      ['Where I am today', who.firm],
-    ] as [string, string | undefined][]
-  ).filter((f): f is [string, string] => !!f[1])
-
   // Open scrolled to the top however far down the table the row sat. On the
   // live site the app runs in an iframe and the PARENT page scrolls, so reset
   // that too, and re-assert after the parent resizes the frame.
@@ -237,19 +226,20 @@ export default function AdvisorProfileScreen({
                   <CalendarIcon /> <span className="ap-completed-word">Completed </span>
                   {d.header.completed}
                 </span>
-                {/* Who they are to the firm: how to reach them, the book, and
-                    where they are today. Each drops out when it was left blank. */}
-                {!mine && who.email && (
+                {/* Who they are: how to reach them, the book, and where they
+                    are today — the same on their own page as on the firm's.
+                    Each drops out when it was left blank. */}
+                {who.email && (
                   <span className="pp-meta-row">
                     <MailIcon /> {who.email}
                   </span>
                 )}
-                {!mine && who.book && (
+                {who.book && (
                   <span className="pp-meta-row">
                     <CoinsIcon /> {who.book}
                   </span>
                 )}
-                {!mine && who.firm && (
+                {who.firm && (
                   <span className="pp-meta-row">
                     <BuildingIcon /> {who.firm}
                   </span>
@@ -264,19 +254,7 @@ export default function AdvisorProfileScreen({
                 who he is, and the practice he spent the eight minutes
                 answering about. Stripping the two and putting nothing back is
                 what left this a name and a date last time. */}
-            {mine ? (
-              practice.length > 0 && (
-                <div className="ap-side-block">
-                  <span className="ap-side-head">My Practice</span>
-                  {practice.map(([label, value]) => (
-                    <div className="ap-side-fact" key={label}>
-                      <b>{value}</b>
-                      <i>{label}</i>
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : (
+            {mine ? null : (
               <>
                 <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
                   Add to Network

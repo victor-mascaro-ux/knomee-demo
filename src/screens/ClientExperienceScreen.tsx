@@ -1303,8 +1303,10 @@ function MobileMenu({
   onClose,
   progress,
   onRestart,
+  onBackToProfile,
 }: {
   onClose: () => void
+  onBackToProfile?: () => void
   /** Restart Adventures, asked twice like the advisor's. */
   onRestart?: () => void
   /** Where she is on the five, said under her name. */
@@ -1326,6 +1328,19 @@ function MobileMenu({
           </span>
           <SheetCredit />
         </div>
+        {onBackToProfile && (
+          <button
+            className="cx-sheet-item"
+            type="button"
+            onClick={() => {
+              onClose()
+              onBackToProfile()
+            }}
+          >
+            Back to Profile
+            <ArrowRight />
+          </button>
+        )}
         {/* The product's own account menu, as mocks: each answers the tap and
             goes nowhere. */}
         <button className="cx-sheet-item" type="button" onClick={onClose}>
@@ -1400,7 +1415,10 @@ function ClientExperienceRun({
   brand,
   complete,
   onRestart,
+  onBackToProfile,
 }: {
+  /** Opened from her profile: the menu's way back to it. */
+  onBackToProfile?: () => void
   /** Start the journey over from nothing. */
   onRestart?: () => void
   /** Open with all five adventures done and Life Events next — her page as the
@@ -2083,6 +2101,7 @@ function ClientExperienceRun({
             <MobileMenu
               onClose={() => setMenuOpen(false)}
               onRestart={onRestart}
+              onBackToProfile={onBackToProfile}
               progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}

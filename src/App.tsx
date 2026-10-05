@@ -98,7 +98,7 @@ import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
 import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
 import { emptyAnswers, sampleAnswers } from './data/advisorAnswers'
-import { setDeviceMode, useDeviceMode } from './deviceMode'
+import { backToProfile, openExperience, setDeviceMode, useDeviceMode } from './deviceMode'
 import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3930,13 +3930,9 @@ export default function App() {
   const [marcusRun, setMarcusRun] = useState(0)
   /* Phone or desktop, for the experiences — set from the D panel. */
   const device = useDeviceMode()
-  /* A profile's Open Experience: that person's journey, on the phone first —
-     the D panel switches it to desktop. A real hash change, so Back returns
-     to the profile. */
-  const openExperience = (hash: string) => {
-    setDeviceMode('mobile')
-    window.location.hash = hash
-  }
+  /* A profile's Open Experience (deviceMode.ts): that person's journey, on
+     the phone first — the D panel switches it to desktop — and the menu's
+     Back to Profile returns to the page it was opened from. */
   /* A client's experience is their own phone; a converted prospect's is the
      journey she took as one (she has no phone of her own in the demo data). */
   const experienceOfClient = (c: Client) => {
@@ -4331,6 +4327,7 @@ export default function App() {
             entry={entryOf({ ...emptyAnswers(), identity: marcus.identity }, null, 'Marcus Hale')}
             brand={brand}
             onRestartDemo={() => setMarcusRun((n) => n + 1)}
+            onBackToProfile={() => backToProfile('#/firm-candidates/marcus-hale')}
             onExit={() => setAdvisorMobileOpen(false)}
           />
           {brand && <PoweredBy />}
@@ -4346,6 +4343,7 @@ export default function App() {
           /* His finished journey is a signed-in advisor's, so his Business ID
              opens straight away; the sign-up comes back when he restarts. */
           onRestartDemo={() => setMarcusRun(1)}
+          onBackToProfile={() => backToProfile('#/firm-candidates/marcus-hale')}
           entry={entryOf(marcus, null, 'Marcus Hale')}
           brand={brand}
           onExit={() => setAdvisorMobileOpen(false)}
@@ -4362,6 +4360,7 @@ export default function App() {
           key={clientMobileSlug ?? 'emily'}
           client={clientMobileSlug ? baseClients.find((c) => profileSlug(c.name) === clientMobileSlug) : undefined}
           onExit={() => setClientMobileOpen(false)}
+          onBackToProfile={() => backToProfile(`#/clients/${clientMobileSlug ?? 'emily-watson'}`)}
           onAccountSettings={() => {
             setClientMobileOpen(false)
             setSettingsOpen(true)
@@ -4380,6 +4379,7 @@ export default function App() {
           brand={brand}
           complete={clientExpComplete}
           onExit={() => setClientExpOpen(false)}
+          onBackToProfile={() => backToProfile('#/prospects/sarah-mitchell')}
         />
       </>
     )
@@ -4531,6 +4531,7 @@ export default function App() {
           entry={viewEntry}
           brand={brand}
           onExit={backToList}
+          onBackToProfile={viewEntryPhone ? () => backToProfile(`#/advisors/${viewEntry.id}`) : undefined}
         />
         {brand && <PoweredBy />}
       </>
