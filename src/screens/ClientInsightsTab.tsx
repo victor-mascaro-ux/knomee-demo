@@ -144,7 +144,7 @@ export function AdventuresCard() {
    Emily's on Sebastian's. The authored snapshot is Emily's, so on his page
    that one card — and the average it feeds — reads her KR instead. */
 const EMILY_KR = 92
-function snapshotFor(name?: string) {
+export function snapshotFor(name?: string) {
   const s = clientInsights.snapshot
   if (!name || !/^Sebastian/.test(name)) return s
   const dimensions = s.dimensions.map((d) =>

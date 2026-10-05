@@ -23,11 +23,12 @@ import { Portrait } from './ClientProfileScreen'
 import FamilyIdTab from './FamilyIdTab'
 import RemoveMemberModal from './RemoveMemberModal'
 import FamilyInsightsTab from './FamilyInsightsTab'
+import HouseholdInsightsTab from './HouseholdInsightsTab'
 import RowMenu from '../components/RowMenu'
 import { RowChevron } from '../components/profileIcons'
 import { scrollPageToTop } from '../reviewBridge'
 
-type FamilyTab = 'members' | 'id' | 'insights'
+type FamilyTab = 'members' | 'id' | 'insights' | 'playbook'
 
 /* A member's row on the Clients table, where their status actually lives. */
 const rowFor = (name: string): Client | undefined => baseClients.find((c) => c.name === name)
@@ -129,6 +130,7 @@ export default function HouseholdScreen({
                 ['members', 'Manage Members'],
                 ['id', 'Family ID'],
                 ['insights', 'Family Insights'],
+                ['playbook', 'Family Playbook'],
               ] as [FamilyTab, string][]
             ).map(([id, label]) => (
               <button
@@ -240,10 +242,17 @@ export default function HouseholdScreen({
               </div>
               <FamilyIdTab members={members} />
             </>
-          ) : (
+          ) : tab === 'insights' ? (
             <>
               <div className="pp-title-row">
                 <h1 className="pp-title">{household.name} Insights</h1>
+              </div>
+              <HouseholdInsightsTab members={members} />
+            </>
+          ) : (
+            <>
+              <div className="pp-title-row">
+                <h1 className="pp-title">{household.name} Playbook</h1>
               </div>
               <FamilyInsightsTab members={members} />
             </>

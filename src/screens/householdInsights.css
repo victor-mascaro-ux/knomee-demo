@@ -1,0 +1,67 @@
+/* Family Insights — two members' Client Insights in two columns.
+   The cards are the client page's own; this only fits a full-width snapshot
+   into half the width: the KR dial over its breakdown rather than beside it,
+   and the dimensions two to a row. Scoped under .hin, tokens only. */
+
+.hin {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-20);
+  align-items: start;
+}
+.hin-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  min-width: 0;
+}
+.hin .fid-who {
+  padding-bottom: 0;
+}
+
+/* Dial on top, breakdown under it. */
+.hin .rd-snapshot-body {
+  grid-template-columns: 1fr;
+  justify-items: stretch;
+}
+.hin .rd-breakdown {
+  width: 100%;
+}
+.hin .rd-dims,
+.hin .rd-dims-wide {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Two across, a card's bubble hangs from its outer edge: the left card's
+   opens rightward, the right card's leftward, so neither overhangs the card. */
+.pp.cp .hin .rd-dims .rd-dim.tt::after {
+  left: 0;
+  right: auto;
+  transform: translateY(-3px);
+}
+.pp.cp .hin .rd-dims .rd-dim.tt::before {
+  left: 24px;
+  right: auto;
+  transform: none;
+}
+.pp.cp .hin .rd-dims .rd-dim:nth-child(2n).tt::after {
+  left: auto;
+  right: 0;
+}
+.pp.cp .hin .rd-dims .rd-dim:nth-child(2n).tt::before {
+  left: auto;
+  right: 24px;
+}
+.pp.cp .hin .rd-dims .rd-dim.tt:hover::after,
+.pp.cp .hin .rd-dims .rd-dim.tt:focus-visible::after {
+  transform: translateY(0);
+}
+
+/* One column a person on narrow screens. */
+@media (max-width: 1100px) {
+  .hin {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+  }
+}
