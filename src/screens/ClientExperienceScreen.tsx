@@ -50,7 +50,11 @@ import moodNeutral from '../assets/moods/neutral.svg'
 import moodGood from '../assets/moods/good.svg'
 import moodGreat from '../assets/moods/great.svg'
 import './client-experience.css'
-import { LegalHost, openLegal } from '../components/Legal'
+import { LegalHost, LegalLink, openLegal } from '../components/Legal'
+import AdvisorWelcome from './AdvisorWelcome'
+import IdentityCardForm, { type IdField } from './IdentityCard'
+import type { Step } from '../data/advisorFlow'
+import './advisor-flow.css'
 import SignUpScreen from './SignUpScreen'
 import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
@@ -1346,6 +1350,26 @@ function MobileMenu({
   )
 }
 
+/* Her journey opens the way the advisor's does: a welcome, then who the
+   Financial ID is headed with — the same screens, in her words. */
+const CLIENT_WELCOME: Step = {
+  id: 'cx-welcome',
+  kind: 'welcome',
+  title: 'Welcome',
+  body: 'Get clear on what you want — in your own words — before your next conversation with your advisor.',
+  lines: [
+    { label: '1', value: 'Five short adventures to find what matters most' },
+    { label: '2', value: 'A Financial ID profile of what you want' },
+    { label: '3', value: 'Questions to bring to your advisor' },
+  ],
+  stat: 'Est time: 10 min',
+  cta: 'Get Started',
+}
+const CLIENT_ID_FIELDS: IdField[] = [
+  { key: 'name', label: 'Your name', icon: 'name' },
+  { key: 'place', label: 'Where you live', hint: 'Optional', chip: 'Where you live', icon: 'place' },
+]
+
 /* Sarah's phone, restartable from her menu: a restart is a fresh run of the
    journey — everything she did, signed up included, gone. */
 export default function ClientExperienceScreen(props: ComponentProps<typeof ClientExperienceRun>) {
@@ -1380,6 +1404,25 @@ function ClientExperienceRun({
   /* Signed up, in this demo session: until then the Financial ID tab is the
      sign-up. The finished-journey demo opens already signed in. */
   const [signedUp, setSignedUp] = useState(!!complete)
+  /* The welcome and the first form, before the adventures — skipped by the
+     finished-journey demo. Her name is already in the field: she is the
+     persona the demo is about. */
+  const [intro, setIntro] = useState<'welcome' | 'you' | null>(complete ? null : 'welcome')
+  const [idField, setIdField] = useState(0)
+  const [who, setWho] = useState<Record<string, string>>({ name: SARAH.name, place: '' })
+  const introNext = () => {
+    if (intro === 'welcome') {
+      setIdField(0)
+      setIntro('you')
+    } else if (idField < CLIENT_ID_FIELDS.length - 1) setIdField(idField + 1)
+    else setIntro(null)
+    viewport.current?.scrollTo({ top: 0 })
+  }
+  const introBack = () => {
+    if (intro === 'you' && idField > 0) setIdField(idField - 1)
+    else setIntro('welcome')
+    viewport.current?.scrollTo({ top: 0 })
+  }
   const [menuOpen, setMenuOpen] = useState(false)
   const [railOpen, setRailOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
@@ -1692,7 +1735,25 @@ function ClientExperienceRun({
             }`}
             ref={viewport}
           >
-            {adventure === 'goals' ? (
+            {intro === 'welcome' ? (
+              <AdvisorWelcome step={CLIENT_WELCOME} />
+            ) : intro === 'you' ? (
+              <IdentityCardForm
+                title="A little about you"
+                sub="Leave any field blank to skip it."
+                idName="Financial ID"
+                fields={CLIENT_ID_FIELDS}
+                values={who}
+                onChange={(key, value) => setWho((w) => ({ ...w, [key]: value }))}
+                field={idField}
+                onNext={introNext}
+                foot={
+                  <>
+                    Your advisor sees your answers. <LegalLink doc="data">How your answers are used</LegalLink>
+                  </>
+                }
+              />
+            ) : adventure === 'goals' ? (
               <GoalsFlow
                 review={reviewing ? (goalsDone ?? { goals: financialId.goals.slice(0, 1) }) : undefined}
                 mic={(value, set) => <MicButton value={value} onChange={set} />}
@@ -1928,7 +1989,29 @@ function ClientExperienceRun({
             />
           )}
 
-          {!adventure && (
+          {/* The welcome and the first form keep the advisor journey's foot:
+              Back and one wide button, in place of the tab bar. */}
+          {intro && (
+            <div className="af-foot">
+              <div className="af-nav">
+                {intro === 'you' && (
+                  <button className="af-back" type="button" aria-label="Back" onClick={introBack}>
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <path d="M10 3L5 8l5 5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                )}
+                <button
+                  className={`cx-start af-next${intro === 'welcome' ? ' is-shine' : ''}`}
+                  type="button"
+                  onClick={introNext}
+                >
+                  <span>{intro === 'welcome' ? 'Get Started' : 'Continue'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+          {!adventure && !intro && (
           <nav
             className="cx-tabbar"
             onPointerDown={pressStart}
