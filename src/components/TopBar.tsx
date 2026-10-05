@@ -24,11 +24,14 @@ export default function TopBar({
   /** The word under the knomee mark — which product this is. */
   sub = 'ADVISOR',
   onSettings,
+  onApiStore,
 }: {
   logo?: ReactNode
   cobrand?: 'left' | 'centered'
   sub?: string
   onSettings?: () => void
+  /** The API store — the data a firm can pull from knomee. */
+  onApiStore?: () => void
 }) {
   const { open, shown, closing, setOpen } = useDropdown()
   const ref = useRef<HTMLDivElement>(null)
@@ -88,6 +91,18 @@ export default function TopBar({
                   }}
                 >
                   Account Settings
+                </button>
+              )}
+              {onApiStore && (
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    onApiStore()
+                  }}
+                >
+                  API Store
                 </button>
               )}
               <button className="menu-item" type="button">

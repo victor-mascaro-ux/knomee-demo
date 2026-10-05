@@ -102,6 +102,7 @@ import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
+import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
 import RowMenu from './components/RowMenu'
@@ -3746,6 +3747,8 @@ const ROUTE_VIEWS = [
   'clients',
   'analytics',
   'segmentation',
+  /* The API store, from the burger menu; #/api-store/<product> opens one. */
+  'api-store',
   'welcome',
   'welcome-b',
   'client-experience',
@@ -3897,6 +3900,10 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
+  const [apiStoreOpen, setApiStoreOpen] = useState(initialView === 'api-store')
+  const [apiProduct, setApiProduct] = useState<string | null>(
+    initialView === 'api-store' ? initialProfile : null,
+  )
   // The prospect-facing welcome page, previewed from the burger menu. Its two
   // copy versions are separate routes (#/welcome, #/welcome-b) so their comment
   // pins never overlap.
@@ -4020,6 +4027,8 @@ export default function App() {
       ? 'settings'
       : segmentationOpen
         ? 'segmentation'
+        : apiStoreOpen
+        ? 'api-store'
         : landingOpen
           ? landingVersion === 'b'
             ? 'welcome-b'
@@ -4139,6 +4148,8 @@ export default function App() {
       setCandidateOpen(v === 'firm-candidates' && slug === profileSlug(candidate.name))
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
+      setApiStoreOpen(v === 'api-store')
+      setApiProduct(v === 'api-store' ? slug : null)
       setAdvisorFlowOpen(v === 'advisor-flow')
       setAdvisorSelfOpen(v === 'advisor-self')
       setAdvisorJourneyOpen(v === 'advisor-journey')
@@ -4195,7 +4206,9 @@ export default function App() {
                   ? 'complete'
                   : currentView === 'client-mobile' && clientMobileSlug
                     ? clientMobileSlug
-                    : null
+                    : currentView === 'api-store' && apiProduct
+                      ? apiProduct
+                      : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash)
@@ -4219,6 +4232,7 @@ export default function App() {
     inviteToken,
     clientExpComplete,
     clientMobileSlug,
+    apiProduct,
   ])
 
   // Esc closes the convert modal.
@@ -4550,9 +4564,21 @@ export default function App() {
       <TopBar
         logo={brand ? brand.logo : undefined}
         cobrand={cobrandLayout}
-        sub={adminView ? 'ADMIN' : 'ADVISOR'}
+        sub={adminView ? 'ADMIN' : apiStoreOpen ? 'API STORE' : 'ADVISOR'}
         onSettings={() => {
           setSettingsOpen(true)
+          setApiStoreOpen(false)
+          setSegmentationOpen(false)
+          setClientExpOpen(false)
+          setClientMobileOpen(false)
+          setLandingOpen(false)
+          setAdminView(false)
+          setFirmView(false)
+        }}
+        onApiStore={() => {
+          setApiStoreOpen(true)
+          setApiProduct(null)
+          setSettingsOpen(false)
           setSegmentationOpen(false)
           setClientExpOpen(false)
           setClientMobileOpen(false)
@@ -4671,6 +4697,14 @@ export default function App() {
             ‹ Back to Dashboard
           </button>
           <SegmentationScreen />
+        </main>
+      ) : apiStoreOpen ? (
+        <main className="content">
+          <ApiStoreScreen
+            productId={apiProduct}
+            onOpen={setApiProduct}
+            onExit={() => setApiStoreOpen(false)}
+          />
         </main>
       ) : (
       <main className="content">
