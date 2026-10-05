@@ -15,7 +15,9 @@ import { ClockIcon, TabFinId, TabMark, TabQuestions } from './ClientExperienceSc
 import './joyFlow.css'
 import { LegalLink } from '../components/Legal'
 
-const ICONS = [TabMark, TabFinId, TabQuestions]
+/* Read when drawn, not when the module loads: the client's screen imports
+   this one too, and the icons come from it. */
+const icons = () => [TabMark, TabFinId, TabQuestions]
 
 function LockIcon() {
   return (
@@ -61,6 +63,7 @@ export default function AdvisorWelcome({ step }: { step: Step }) {
       <ol className="af-gets">
         {step.lines?.map((l, i) => {
           const { title, body } = split(l.value)
+          const ICONS = icons()
           const Icon = ICONS[i % ICONS.length]
           return (
             <li key={l.label} className="af-get" style={{ '--i': i } as CSSProperties}>

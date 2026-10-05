@@ -14,7 +14,7 @@
 // your sheet instead of the worked example — so nothing here is a lookalike of
 // a page that already exists.
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdvisorProfileScreen from './AdvisorProfileScreen'
 import { BusinessIdCard, type IdCard } from './AdvisorProfileScreen'
 import TopBar from '../components/TopBar'
@@ -103,6 +103,7 @@ import './client-experience.css'
 import './joyFlow.css'
 import AdvisorWelcome from './AdvisorWelcome'
 import SignUpScreen from './SignUpScreen'
+import IdentityCardForm, { type IdField } from './IdentityCard'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
@@ -458,10 +459,10 @@ function TextQuestion({ step, a, edit }: { step: Step; a: Answers; edit: Edit })
     is not asked — everyone answering is an advisor. The firm is only the name,
     and optional: a recruiter's warm lead is already known, it matters for a
     cold one. */
-const ID_FIELDS: [keyof Answers['identity'], string, string?][] = [
-  ['name', 'Your name'],
-  ['book', 'Assets you advise on', 'A rough figure is fine'],
-  ['firm', 'Name of your firm', 'Optional'],
+const ID_FIELDS: IdField[] = [
+  { key: 'name', label: 'Your name', icon: 'name' },
+  { key: 'book', label: 'Assets you advise on', hint: 'A rough figure is fine', chip: 'Assets', icon: 'book' },
+  { key: 'firm', label: 'Name of your firm', hint: 'Optional', chip: 'Firm', icon: 'firm' },
 ]
 
 /* One field at a time under the card, the way every question after it
@@ -479,114 +480,26 @@ function IdentityForm({
   field: number
   onNext: () => void
 }) {
-  const [key, label, hint] = ID_FIELDS[field] ?? ID_FIELDS[0]
   const [sub, ...where] = (step.body ?? '').split('\n\n')
-  const { name, book, firm } = a.identity
-  const initial = name.trim().charAt(0).toUpperCase()
   return (
-    <div className="af-welcome af-id">
-      {/* Title and one line under it; where the answers go is said at the
-          foot, with the confidentiality line, not as a second paragraph. */}
-      <header className="af-idhead">
-        <h2 className="af-h1">{step.title}</h2>
-        <p className="af-idsub">{sub}</p>
-      </header>
-      {/* The head of their Business ID, filling in as they type — so the
-          three fields read as the start of something rather than a form. */}
-      <div className="af-idcard" aria-hidden>
-        <span className="af-idcard-sky">
-          <i className="af-idcard-glow is-a" />
-          <i className="af-idcard-glow is-b" />
-          <i className="af-idcard-glow is-c" />
-        </span>
-        <span className="af-idcard-eyebrow">Business ID</span>
-        <div className="af-idcard-who">
-          <span className={`af-idcard-avatar${initial ? ' is-set' : ''}`}>{initial || <IdIcon k="name" />}</span>
-          <span className={`af-idcard-name${name.trim() ? '' : ' is-empty'}`}>
-            {name.trim() || 'Your name'}
-          </span>
-        </div>
-        <div className="af-idcard-chips">
-          <span className={`af-idcard-chip${book.trim() ? '' : ' is-empty'}${key === 'book' ? ' is-on' : ''}`}>
-            <IdIcon k="book" />
-            {book.trim() || 'Assets'}
-          </span>
-          <span className={`af-idcard-chip${firm.trim() ? '' : ' is-empty'}${key === 'firm' ? ' is-on' : ''}`}>
-            <IdIcon k="firm" />
-            {firm.trim() || 'Firm'}
-          </span>
-        </div>
-      </div>
-      {/* The adventures' own open field — label, italic hint, input — so the
-          first thing an advisor types into looks like everything after it. */}
-      <div className="af-idform">
-        <div className="af-idsteps" aria-label={`${field + 1} of ${ID_FIELDS.length}`}>
-          {ID_FIELDS.map(([k], n) => (
-            <i key={k} className={n === field ? 'is-on' : n < field ? 'is-done' : undefined} />
-          ))}
-        </div>
-        <div className="af-idfield" key={key}>
-          <label className="jf-other-label" htmlFor={`af-id-${key}`}>
-            {label}
-          </label>
-          {hint && <span className="jf-other-hint">{hint}</span>}
-          <span className="af-idinput">
-            <IdIcon k={key} />
-            <input
-              id={`af-id-${key}`}
-              className="jf-other"
-              autoFocus
-              enterKeyHint={field < ID_FIELDS.length - 1 ? 'next' : 'done'}
-              value={a.identity[key]}
-              onChange={(e) => edit.identity({ [key]: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  onNext()
-                }
-              }}
-            />
-          </span>
-        </div>
-      </div>
-      {/* Where the answers go, said where they are collected. */}
-      <p className="lg-consent is-left">
-        {where.length > 0 && <>{where.join(' ')} </>}
-        Please leave out client names and anything confidential to your current firm.{' '}
-        <LegalLink doc="data">How your answers are used</LegalLink>
-      </p>
-    </div>
-  )
-}
-
-/** The identity fields' marks: a person, a stack of coins, a building. */
-function IdIcon({ k }: { k: string }) {
-  const paths: Record<string, ReactNode> = {
-    name: (
-      <>
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5" />
-      </>
-    ),
-    book: (
-      <>
-        <ellipse cx="12" cy="6" rx="7" ry="2.5" />
-        <path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" />
-        <path d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6" />
-      </>
-    ),
-    firm: (
-      <>
-        <path d="M4 20h16" />
-        <path d="M6 20V9l6-4 6 4v11" />
-        <path d="M10 20v-5h4v5" />
-      </>
-    ),
-  }
-  return (
-    <svg className="af-idicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      {paths[k]}
-    </svg>
+    <IdentityCardForm
+      title={step.title ?? ''}
+      sub={sub}
+      idName="Business ID"
+      fields={ID_FIELDS}
+      values={{ name: a.identity.name, book: a.identity.book, firm: a.identity.firm }}
+      onChange={(key, value) => edit.identity({ [key]: value })}
+      field={field}
+      onNext={onNext}
+      foot={
+        /* Where the answers go, said where they are collected. */
+        <>
+          {where.length > 0 && <>{where.join(' ')} </>}
+          Please leave out client names and anything confidential to your current firm.{' '}
+          <LegalLink doc="data">How your answers are used</LegalLink>
+        </>
+      }
+    />
   )
 }
 
