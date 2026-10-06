@@ -1204,9 +1204,14 @@ html.cx-desktop .jf.fy > .fy-breathe {
   justify-content: center;
 }
 
-/* Where, doing, with: six pictures and Other, four over three, centred. */
+/* Where, doing, with: six pictures and Other, four over three. The step is
+   the four-tile row's width (4 x 132 + 3 x 14), so the words above start on
+   the grid's left edge and the whole sits in the middle of the window. */
 html.cx-desktop .fy .jf-photos {
   --jf-cols: 4;
+}
+html.cx-desktop .jf > .jf-pick.fy-ask {
+  --xp-w: 570px;
 }
 
 /* The tally sticks directly under the top bar (53px on desktop), not behind

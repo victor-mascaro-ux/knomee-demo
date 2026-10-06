@@ -190,7 +190,10 @@ export default function JoyReward({
 
       {card && (
         <div className="jw-card">
-          <p className="jw-card-k">New on your {idName}</p>
+          {/* The design system's New pill, on the card's left edge. */}
+          <p className="jw-card-k">
+            <span className="new-tag cp-goal-tag is-new">New</span>
+          </p>
           <div className="jw-card-body">{card}</div>
         </div>
       )}

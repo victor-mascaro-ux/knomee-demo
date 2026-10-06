@@ -695,20 +695,21 @@
    rule does the width, this only says how wide. */
 html.cx-desktop .jf > .jr {
   --xp-w: 720px;
+  /* Learn More sits high: the .jf's own air is all there is above it. */
+  padding-top: 0;
 }
 html.cx-desktop .jr .jr-memory {
   margin-inline: 0;
   border-radius: 24px;
   overflow: hidden;
 }
-/* The pictures at 132 (150 art at 0.88x), the row centred in the column: there
-   are never more than three picks and her own words, so a row on the left edge
-   left an empty slot beside it. A label may run up to the phone's tile width
-   (172) under its picture, into the gap, so it breaks where the phone's does
-   ("Enterprise value" on one line). */
+/* The pictures at 132 (150 art at 0.88x), the row from the column's left edge,
+   under its heading like every other section. A label may run up to the
+   phone's tile width (172) under its picture, into the gap, so it breaks where
+   the phone's does ("Enterprise value" on one line). */
 html.cx-desktop .jr .jr-tools {
   grid-template-columns: repeat(auto-fit, 132px);
-  justify-content: center;
+  justify-content: start;
   gap: 20px 40px;
 }
 html.cx-desktop .jr .jr-tool .jr-pill {

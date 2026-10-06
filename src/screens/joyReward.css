@@ -328,13 +328,13 @@
   animation: jwUp 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) 1.1s both;
 }
 .jw-card-k {
+  display: flex;
   margin: 0 0 var(--space-8);
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--k-lime);
+}
+/* The pill elsewhere follows a name; here it starts the line, on the card's
+   left edge. */
+.jw-card-k .new-tag {
+  margin-left: 0;
 }
 .jw-card-body {
   color: var(--text-strong);
@@ -397,10 +397,13 @@ html.cx-desktop .jw > * {
   margin-inline: auto;
   box-sizing: border-box;
 }
-/* With a card: the stack sits in the middle when it fits, so no plum gap
-   opens above Next; when it does not, it scrolls under the sticky fade. */
-html.cx-desktop .jw.has-card {
-  justify-content: safe center;
+/* The stack always starts at the top of the window, card or not; when it
+   runs long it scrolls under the sticky fade. */
+html.cx-desktop .jw {
+  justify-content: flex-start;
+}
+html.cx-desktop .jw .jw-stage {
+  flex: none;
 }
 html.cx-desktop .jw.has-card .jw-next,
 html.cx-desktop .jw.has-card .mv-end {

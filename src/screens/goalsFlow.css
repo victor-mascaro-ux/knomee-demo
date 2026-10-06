@@ -405,11 +405,6 @@ html.cx-desktop .jf.gl > .gl-added {
 html.cx-desktop .gl-added .gl-summary {
   align-self: stretch;
 }
-/* Results: the summary at a reading width inside the 720 column, under its
-   heading, rather than its labels and answers spread across the column. */
-html.cx-desktop .glr .glr-summaries {
-  max-width: 560px;
-}
 /* Each label sits level with the first line of its answer, a two-line one
    too; only Readiness, whose answer is the bars and a word, centres on it. */
 html.cx-desktop .gl-summary .pp-goal-detail dt {
