@@ -104,8 +104,9 @@ export default function ActionableInsights({
       className={`insights-card${tone === 'client' ? ' is-client' : ''}`}
       icon={icon ?? <BoltIcon color="#7639a1" />}
       title="Actionable Insights"
-      hint={<HelpTip text={hint} />}
+      hint={<HelpTip side="right" text={hint} />}
       bodyClassName="cmd-body"
+      defaultOpen={false}
     >
       {/* Who the book is made of. The question is "am I reaching the people
           I set out to reach?", so the answer comes before who to call. */}

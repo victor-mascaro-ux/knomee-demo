@@ -406,6 +406,11 @@ body {
   font-weight: 600;
   color: #1a1a1a;
 }
+/* The card's "?" sits right after its title, 8px off it rather than the
+   11px the icon gets. */
+.card-title .help-tip {
+  margin-left: -3px;
+}
 
 /* Section-header glyphs sit in a uniform white circle; the SVG is forced to a
    single size inside so every icon reads at the same proportion. */
