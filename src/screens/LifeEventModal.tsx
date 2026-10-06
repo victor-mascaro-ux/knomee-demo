@@ -20,9 +20,11 @@ import { useEffect, useState } from 'react'
 import './lifeEventModal.css'
 import type { LifeEvent } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
-import { LifeEventIcon, StatusTags, lifeEventArt } from './profileParts'
+import { LifeEventIcon, StatusTags, lifeEventArt, withTag } from './profileParts'
 import { CaretIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
+import SelectMenu from '../components/SelectMenu'
+import { InlineTitle, ReadBackCheck, ReadBackFoot, closesOnEscape } from './ReadBack'
 import icCategoryPurchase from '../assets/life-events/category-purchase.svg'
 import icCategoryProfessional from '../assets/life-events/category-professional.svg'
 import icCategoryPersonal from '../assets/life-events/category-personal.svg'
@@ -271,10 +273,14 @@ export function AddLifeEventModal({
 
 /* ── reading one back ───────────────────────────────────────────────────── */
 
+/* Every kind the picker lists, for changing one in place. */
+const ALL_KINDS = CATEGORIES.flatMap((c) => c.events)
+
 export default function LifeEventModal({
   event,
+  client,
   onClose,
-  onEdit,
+  onSave,
   onToggleComplete,
   onDelete,
 }: {
@@ -283,104 +289,168 @@ export default function LifeEventModal({
       on the events her advisor put on her page, never on her own. */
   client?: boolean
   onClose: () => void
-  /** The owner's to offer, like a goal's. */
-  onEdit?: () => void
+  /** What changed, handed back as the panel closes — the event's own fields,
+      changed where they are read (no pencil, no second panel). Without it the
+      event is only read. */
+  onSave?: (e: LifeEvent) => void
   onToggleComplete?: () => void
   onDelete?: () => void
 }) {
+  const editable = !!onSave
+  const [text, setText] = useState(event.text)
+  const [kind, setKind] = useState(event.kind)
+  const [details, setDetails] = useState(event.details ?? '')
+  const [date, setDate] = useState(event.date ?? '')
+  const [sentiment, setSentiment] = useState(event.sentiment ?? 0)
+
+  const next: LifeEvent = {
+    ...event,
+    kind,
+    /* Unnamed, it is called what it is. */
+    text: text.trim().replace(/\s+/g, ' ') || kind,
+    details: details.trim() || undefined,
+    date: date.trim(),
+    sentiment: sentiment || undefined,
+  }
+  const changed =
+    next.kind !== event.kind ||
+    next.text !== event.text ||
+    (next.details ?? '') !== (event.details ?? '') ||
+    next.date !== (event.date ?? '') ||
+    (next.sentiment ?? 0) !== (event.sentiment ?? 0)
+
+  /* Every way out keeps what was typed. An advisor's change marks it as
+     theirs, as the form always has; the client's own does not. */
+  const close = () => {
+    if (onSave && changed)
+      onSave(withTag({ ...next, advisorAdded: client ? event.advisorAdded : true }, 'Updated'))
+    onClose()
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (closesOnEscape(e)) close()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  })
+
+  const pills = (event.tags?.length || event.advisorAdded) && (
+    <div className="card-pills">
+      <StatusTags tags={event.tags} />
+      {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
+    </div>
+  )
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" onClick={close} role="dialog" aria-modal="true">
       <div className="modal le-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Life Event</h2>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" onClick={close}>
             <CloseIcon />
           </button>
         </div>
 
-        <div className="modal-body le-body le-read">
-          {(event.tags?.length || event.advisorAdded) && (
-            <div className="card-pills">
-              <StatusTags tags={event.tags} />
-              {event.advisorAdded && <span className="le-advisor">Advisor added</span>}
+        {editable ? (
+          <div className="modal-body le-body le-live">
+            <div className="qm-read">
+              {pills}
+              <InlineTitle value={text} original={event.text} label="Life event" onChange={setText} />
             </div>
-          )}
-          <div className="le-head">
-            <h3 className="le-title">{event.text}</h3>
-            {onEdit && (
-              <button className="goal-edit" type="button" aria-label="Edit this event" onClick={onEdit}>
-                <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
-                  <path
-                    d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
 
-          <dl className="goal-rows">
-            <dt>Event type</dt>
-            <dd>{event.kind}</dd>
-            {event.details && (
-              <>
-                <dt>Details</dt>
-                <dd>{event.details}</dd>
-              </>
-            )}
-            {event.date && (
-              <>
-                <dt>Event date</dt>
-                <dd>{event.date}</dd>
-              </>
-            )}
-            {event.sentiment && (
-              <>
-                {/* The face has no baseline to sit on, so its row centres
-                    instead of aligning to one. */}
-                <dt className="le-row-face">Sentiment</dt>
-                <dd className="le-row-face">
-                  <SentimentFace level={event.sentiment} />
-                </dd>
-              </>
-            )}
-          </dl>
+            <span className="le-label">Event type</span>
+            <SelectMenu
+              className="le-input"
+              value={kind}
+              options={ALL_KINDS.includes(kind) ? ALL_KINDS : [kind, ...ALL_KINDS]}
+              onChange={setKind}
+            />
 
-          {onToggleComplete && (
-            <label className="goal-complete">
-              <input type="checkbox" checked={!!event.completed} onChange={onToggleComplete} />
-              <span>
-                {event.completed ? `Marked complete: ${event.completed}` : 'Mark complete'}
-              </span>
+            <label className="le-label" htmlFor="le-details">
+              More details (optional)
             </label>
-          )}
-        </div>
+            <textarea
+              id="le-details"
+              className="le-input le-area"
+              value={details}
+              rows={2}
+              placeholder="Add more details here."
+              onChange={(e) => setDetails(e.target.value)}
+            />
 
-        {onDelete && (
-          <div className="modal-footer goal-foot">
-            <button className="goal-delete" type="button" onClick={onDelete}>
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" aria-hidden>
-                <path
-                  d="M4 6h12M8.5 6V4.5h3V6M6 6l.7 9.2a1.3 1.3 0 0 0 1.3 1.2h4a1.3 1.3 0 0 0 1.3-1.2L14 6"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Delete Event
-            </button>
+            <label className="le-label" htmlFor="le-date">
+              Event date (optional)
+            </label>
+            <input
+              id="le-date"
+              className="le-input"
+              value={date}
+              placeholder="MM/DD/YYYY"
+              onChange={(e) => setDate(e.target.value)}
+            />
+
+            <span className="le-label">How do you feel about it? (optional)</span>
+            <div className="le-faces">
+              {FACES.map((f, i) => (
+                <button
+                  className={`le-face ${sentiment === i + 1 ? 'is-on' : ''}`}
+                  type="button"
+                  key={f.label}
+                  aria-label={f.label}
+                  aria-pressed={sentiment === i + 1}
+                  onClick={() => setSentiment((s) => (s === i + 1 ? 0 : i + 1))}
+                >
+                  <img src={f.art} alt="" />
+                </button>
+              ))}
+            </div>
+
+            {onToggleComplete && (
+              <ReadBackCheck label="Completed" on={event.completed} onToggle={onToggleComplete} />
+            )}
           </div>
+        ) : (
+          <div className="modal-body le-body le-read">
+            {pills}
+            <h3 className="le-title">{event.text}</h3>
+            <dl className="goal-rows">
+              <dt>Event type</dt>
+              <dd>{event.kind}</dd>
+              {event.details && (
+                <>
+                  <dt>Details</dt>
+                  <dd>{event.details}</dd>
+                </>
+              )}
+              {event.date && (
+                <>
+                  <dt>Event date</dt>
+                  <dd>{event.date}</dd>
+                </>
+              )}
+              {event.sentiment && (
+                <>
+                  {/* The face has no baseline to sit on, so its row centres
+                      instead of aligning to one. */}
+                  <dt className="le-row-face">Sentiment</dt>
+                  <dd className="le-row-face">
+                    <SentimentFace level={event.sentiment} />
+                  </dd>
+                </>
+              )}
+              {event.completed && (
+                <>
+                  <dt>Completed</dt>
+                  <dd>{event.completed}</dd>
+                </>
+              )}
+            </dl>
+          </div>
+        )}
+
+        {(editable || onDelete) && (
+          <ReadBackFoot noun="life event" onDelete={onDelete} onDone={close} />
         )}
       </div>
     </div>

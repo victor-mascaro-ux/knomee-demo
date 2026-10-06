@@ -12,7 +12,7 @@
  * footer.
  */
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './questionModal.css'
 import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
@@ -20,6 +20,7 @@ import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
 import SelectMenu from '../components/SelectMenu'
 import { StatusTags, withTag } from './profileParts'
+import { InlineTitle, ReadBackCheck, ReadBackFoot, closesOnEscape } from './ReadBack'
 
 /* The openers, in the order the phone lists them. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
@@ -167,31 +168,14 @@ export default function QuestionModal({
   onToggleResolved?: () => void
   onDelete?: () => void
 }) {
-  /* Delete is the one thing here that cannot be undone, so it asks first, in
-     the footer it was pressed in, not in a second panel. */
-  const [confirming, setConfirming] = useState(false)
   /* The question is its own field: what you read is what you change. */
   const [draft, setDraft] = useState(question.q)
-  const field = useRef<HTMLTextAreaElement>(null)
-  const reverting = useRef(false)
   useEffect(() => setDraft(question.q), [question.q])
-  /* As tall as the question, however many lines it runs to. */
-  useLayoutEffect(() => {
-    const el = field.current
-    if (!el) return
-    el.style.height = 'auto'
-    /* scrollHeight leaves out the border the field draws. */
-    el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`
-  }, [draft])
 
   /* Saved on leaving the field (click away, Enter, or closing the panel):
      tidied, given its question mark, and only if it actually changed. An
      emptied field puts the question back. */
   const commit = () => {
-    if (reverting.current) {
-      reverting.current = false
-      return
-    }
     const t = draft.trim().replace(/\s+/g, ' ')
     if (!t) return setDraft(question.q)
     const full = /[?!.]$/.test(t) ? t : `${t}?`
@@ -201,15 +185,12 @@ export default function QuestionModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      /* Escape inside the field undoes the typing; anywhere else it closes. */
-      if (e.key === 'Escape' && e.target !== field.current) onClose()
+      if (closesOnEscape(e)) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  /* Where it stands, said the way its row says it: resolved replaces the date
-     rather than adding a second one. */
   /* Where it stands. Where it can be resolved, the checkbox says so and the
      line keeps to the date; read-only, resolved replaces the date. */
   const status =
@@ -243,24 +224,12 @@ export default function QuestionModal({
         <div className="modal-body qm-read">
           <StatusTags tags={question.tags} knomee={question.knomee} />
           {onRename ? (
-            <textarea
-              ref={field}
-              className="qm-question qm-edit"
-              aria-label="Question"
-              rows={1}
+            <InlineTitle
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              original={question.q}
+              label="Question"
+              onChange={setDraft}
               onBlur={commit}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  e.currentTarget.blur()
-                } else if (e.key === 'Escape') {
-                  reverting.current = true
-                  setDraft(question.q)
-                  e.currentTarget.blur()
-                }
-              }}
             />
           ) : (
             <h3 className="qm-question">{question.q}</h3>
@@ -274,61 +243,12 @@ export default function QuestionModal({
               <span>{status}</span>
             </p>
           )}
-          {/* Resolving is a state, not a button: a filled "Mark Resolved"
-              after an edit read as Save, and got pressed as one. */}
           {onToggleResolved && (
-            <label className="qm-check">
-              <input type="checkbox" checked={!!question.resolved} onChange={onToggleResolved} />
-              <span>{question.resolved ? `Resolved · ${question.resolved}` : 'Resolved'}</span>
-            </label>
+            <ReadBackCheck label="Resolved" on={question.resolved} onToggle={onToggleResolved} />
           )}
         </div>
 
-        {hasActions && (
-          <div className="modal-footer qm-actions">
-            {/* Keyed so the confirm is a new set of controls, not the old
-                pills relabelled: Keep It has to mount to take the focus. */}
-            {confirming && onDelete ? (
-              <Fragment key="confirm">
-                {/* Holds a pill's 44px so the panel doesn't recentre, and
-                    Keep It lands exactly where Delete was. */}
-                <p className="qm-confirm" id="qm-confirm-line">
-                  Delete this question?
-                </p>
-                <button
-                  className="btn btn-outline"
-                  type="button"
-                  autoFocus
-                  aria-describedby="qm-confirm-line"
-                  onClick={() => setConfirming(false)}
-                >
-                  Keep It
-                </button>
-                <button className="btn btn-danger" type="button" onClick={onDelete}>
-                  Delete
-                </button>
-              </Fragment>
-            ) : (
-              <Fragment key="actions">
-                {/* Delete · Done. */}
-                {onDelete && (
-                  <button
-                    className="btn btn-outline qm-delete"
-                    type="button"
-                    onClick={() => setConfirming(true)}
-                  >
-                    Delete
-                  </button>
-                )}
-                {/* Done closes: the field has already saved on leaving it,
-                    so the press people reach for after an edit is safe. */}
-                <button className="btn btn-primary" type="button" onClick={onClose}>
-                  Done
-                </button>
-              </Fragment>
-            )}
-          </div>
-        )}
+        {hasActions && <ReadBackFoot noun="question" onDelete={onDelete} onDone={onClose} />}
       </div>
     </div>
   )
