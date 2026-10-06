@@ -39,6 +39,7 @@ import {
   useCollapsed,
   CheckInCard,
   withTag,
+  StatusTags,
 } from './profileParts'
 import { FamilyCard, Who } from './familyParts'
 import GoalModal from './GoalModal'
@@ -365,7 +366,10 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
                   style={questions.delay(i)}
                   key={i}
                 >
-                  <span className="pp-q-text">{q.q}</span>
+                  <span className="pp-q-text">
+                    <StatusTags knomee={q.knomee} />
+                    {q.q}
+                  </span>
                   <span className="pp-q-date">
                     {q.resolved ? (
                       <>

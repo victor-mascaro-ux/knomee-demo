@@ -8,7 +8,7 @@ import { profileFor } from '../data/memberProfiles'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
-import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import QuestionModal, { AddQuestionModal, renamed } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -1443,7 +1443,7 @@ export default function ClientProfileScreen({
                           }}
                         >
                           <span className="pp-q-text">
-                            <StatusTags tags={q.tags} />
+                            <StatusTags tags={q.tags} knomee={q.knomee} />
                             {q.q}
                           </span>
                           <span className="pp-q-date">
@@ -1531,7 +1531,11 @@ export default function ClientProfileScreen({
         <QuestionModal
           question={openQuestion}
           onClose={() => setOpenQuestion(null)}
-          onEdit={() => setQuestionForm('edit')}
+          onRename={(text) => {
+            const next = renamed(openQuestion, text)
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+          }}
           onToggleResolved={() => {
             const next = {
               ...openQuestion,
@@ -1539,7 +1543,6 @@ export default function ClientProfileScreen({
             }
             setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
             setOpenQuestion(next)
-            if (next.resolved) onToast?.('Question resolved')
           }}
           onDelete={() => {
             setQuestionList((list) => list.filter((q) => q !== openQuestion))

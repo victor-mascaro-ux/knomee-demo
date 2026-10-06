@@ -6,19 +6,20 @@
  * halves are stored as the one sentence they make, because that is what an
  * advisor reads.
  *
- * Reading one back is a panel with a single state on it — asked, or answered —
- * and the date it changed, which is the only fact a question carries beyond
- * its own text.
+ * Reading one back: its pills, the question as a field you can simply type
+ * into (no pencil, no second panel), where it stands, and two pills — Delete
+ * and Mark Resolved. A page that can only read it gets the text and no
+ * footer.
  */
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './questionModal.css'
 import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
 import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
 import SelectMenu from '../components/SelectMenu'
-import { StatusTags } from './profileParts'
+import { StatusTags, withTag } from './profileParts'
 
 /* The openers, in the order the phone lists them. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
@@ -63,6 +64,14 @@ export function AddQuestionModal({
 
   const sentence = [starter, rest.trim()].filter(Boolean).join(' ').trim()
   const full = sentence && !/[?!.]$/.test(sentence) ? `${sentence}?` : sentence
+  /* A Knomee question reworded is no longer Knomee's words: it keeps the
+     "Knomee generated" chip only while its text is the one Knomee wrote. */
+  const saved = (): ProfileQuestion => ({
+    ...question,
+    q: full,
+    date: DEMO_TODAY,
+    knomee: question?.knomee && full === question.q ? true : undefined,
+  })
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
@@ -100,7 +109,7 @@ export function AddQuestionModal({
               placeholder="Click to start writing."
               onChange={(e) => setRest(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && full) onSave({ ...question, q: full, date: DEMO_TODAY })
+                if (e.key === 'Enter' && full) onSave(saved())
               }}
             />
             <span className="qm-pencil" aria-hidden>
@@ -128,7 +137,7 @@ export function AddQuestionModal({
             className="btn btn-primary"
             type="button"
             disabled={!full}
-            onClick={() => onSave({ ...question, q: full, date: DEMO_TODAY })}
+            onClick={() => onSave(saved())}
           >
             Save
           </button>
@@ -138,88 +147,186 @@ export function AddQuestionModal({
   )
 }
 
+/* A question reworded in place: dated today, said "Updated" on its row, and
+   no longer Knomee's words — so it loses "Knomee generated". */
+export function renamed(question: ProfileQuestion, q: string): ProfileQuestion {
+  return withTag({ ...question, q, date: DEMO_TODAY, knomee: undefined }, 'Updated')
+}
+
 export default function QuestionModal({
   question,
   onClose,
-  onEdit,
+  onRename,
   onToggleResolved,
   onDelete,
 }: {
   question: ProfileQuestion
   onClose: () => void
-  onEdit?: () => void
+  /** Rewording it in place. Without it the question is only read. */
+  onRename?: (q: string) => void
   onToggleResolved?: () => void
   onDelete?: () => void
 }) {
+  /* Delete is the one thing here that cannot be undone, so it asks first, in
+     the footer it was pressed in, not in a second panel. */
+  const [confirming, setConfirming] = useState(false)
+  /* The question is its own field: what you read is what you change. */
+  const [draft, setDraft] = useState(question.q)
+  const field = useRef<HTMLTextAreaElement>(null)
+  const reverting = useRef(false)
+  useEffect(() => setDraft(question.q), [question.q])
+  /* As tall as the question, however many lines it runs to. */
+  useLayoutEffect(() => {
+    const el = field.current
+    if (!el) return
+    el.style.height = 'auto'
+    /* scrollHeight leaves out the border the field draws. */
+    el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`
+  }, [draft])
+
+  /* Saved on leaving the field (click away, Enter, or closing the panel):
+     tidied, given its question mark, and only if it actually changed. An
+     emptied field puts the question back. */
+  const commit = () => {
+    if (reverting.current) {
+      reverting.current = false
+      return
+    }
+    const t = draft.trim().replace(/\s+/g, ' ')
+    if (!t) return setDraft(question.q)
+    const full = /[?!.]$/.test(t) ? t : `${t}?`
+    if (full !== question.q) onRename?.(full)
+    else setDraft(question.q)
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      /* Escape inside the field undoes the typing; anywhere else it closes. */
+      if (e.key === 'Escape' && e.target !== field.current) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  /* Where it stands, said the way its row says it: resolved replaces the date
+     rather than adding a second one. */
+  /* Where it stands. Where it can be resolved, the checkbox says so and the
+     line keeps to the date; read-only, resolved replaces the date. */
+  const status =
+    question.resolved && !onToggleResolved
+      ? `Resolved: ${question.resolved}`
+      : question.date
+        ? `Last updated: ${question.date}`
+        : null
+  const hasActions = !!(onRename || onToggleResolved || onDelete)
+
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="qm-read-title"
+    >
       <div className="modal qm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Question</h2>
+          <h2 className="modal-title" id="qm-read-title">
+            Question
+          </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
 
-        <div className="modal-body qm-body">
-          <StatusTags tags={question.tags} />
-          <div className="qm-head">
+        {/* On one left edge, in the row's own order: its pills, the question,
+            where it stands. */}
+        <div className="modal-body qm-read">
+          <StatusTags tags={question.tags} knomee={question.knomee} />
+          {onRename ? (
+            <textarea
+              ref={field}
+              className="qm-question qm-edit"
+              aria-label="Question"
+              rows={1}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  e.currentTarget.blur()
+                } else if (e.key === 'Escape') {
+                  reverting.current = true
+                  setDraft(question.q)
+                  e.currentTarget.blur()
+                }
+              }}
+            />
+          ) : (
             <h3 className="qm-question">{question.q}</h3>
-            {onEdit && (
-              <button className="goal-edit" type="button" aria-label="Edit this question" onClick={onEdit}>
-                <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
-                  <path
-                    d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-          {question.date && <p className="qm-asked">Last updated: {question.date}</p>}
-
-          {onToggleResolved &&
-            (question.resolved ? (
-              <p className="qm-resolved">
-                <CheckIcon /> Marked resolved: {question.resolved}
-              </p>
-            ) : (
-              <label className="goal-complete">
-                <input type="checkbox" checked={false} onChange={onToggleResolved} />
-                <span>Mark resolved</span>
-              </label>
-            ))}
-          {question.resolved && onToggleResolved && (
-            <button className="qm-unresolve" type="button" onClick={onToggleResolved}>
-              Reopen This Question
-            </button>
+          )}
+          {status && (
+            <p
+              className={`qm-status${question.resolved ? ' is-resolved' : ''}`}
+              aria-live="polite"
+            >
+              {question.resolved && !onToggleResolved && <CheckIcon size={14} />}
+              <span>{status}</span>
+            </p>
+          )}
+          {/* Resolving is a state, not a button: a filled "Mark Resolved"
+              after an edit read as Save, and got pressed as one. */}
+          {onToggleResolved && (
+            <label className="qm-check">
+              <input type="checkbox" checked={!!question.resolved} onChange={onToggleResolved} />
+              <span>{question.resolved ? `Resolved · ${question.resolved}` : 'Resolved'}</span>
+            </label>
           )}
         </div>
 
-        {onDelete && (
-          <div className="modal-footer goal-foot">
-            <button className="goal-delete" type="button" onClick={onDelete}>
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" aria-hidden>
-                <path
-                  d="M4 6h12M8.5 6V4.5h3V6M6 6l.7 9.2a1.3 1.3 0 0 0 1.3 1.2h4a1.3 1.3 0 0 0 1.3-1.2L14 6"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Delete Question
-            </button>
+        {hasActions && (
+          <div className="modal-footer qm-actions">
+            {/* Keyed so the confirm is a new set of controls, not the old
+                pills relabelled: Keep It has to mount to take the focus. */}
+            {confirming && onDelete ? (
+              <Fragment key="confirm">
+                {/* Holds a pill's 44px so the panel doesn't recentre, and
+                    Keep It lands exactly where Delete was. */}
+                <p className="qm-confirm" id="qm-confirm-line">
+                  Delete this question?
+                </p>
+                <button
+                  className="btn btn-outline"
+                  type="button"
+                  autoFocus
+                  aria-describedby="qm-confirm-line"
+                  onClick={() => setConfirming(false)}
+                >
+                  Keep It
+                </button>
+                <button className="btn btn-danger" type="button" onClick={onDelete}>
+                  Delete
+                </button>
+              </Fragment>
+            ) : (
+              <Fragment key="actions">
+                {/* Delete · Done. */}
+                {onDelete && (
+                  <button
+                    className="btn btn-outline qm-delete"
+                    type="button"
+                    onClick={() => setConfirming(true)}
+                  >
+                    Delete
+                  </button>
+                )}
+                {/* Done closes: the field has already saved on leaving it,
+                    so the press people reach for after an edit is safe. */}
+                <button className="btn btn-primary" type="button" onClick={onClose}>
+                  Done
+                </button>
+              </Fragment>
+            )}
           </div>
         )}
       </div>

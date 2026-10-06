@@ -62,8 +62,9 @@ const emily: FamilyMemberId = {
 
 /* He has answered the same adventures and answered them differently: the same
    beach house reads as the kids' education to her and as their own retirement
-   to him. Where he has answered nothing — life events, questions — the card
-   shows its empty state rather than borrowing hers. */
+   to him. Where he has answered nothing — life events — the card shows its
+   empty state rather than borrowing hers. He has asked his advisor nothing;
+   his questions are the three Knomee drew from his own answers. */
 const sebastian: FamilyMemberId = {
   name: 'Sebastian Watson',
   role: 'Spouse',
@@ -85,7 +86,23 @@ const sebastian: FamilyMemberId = {
   ],
   confidence: 'Strong',
   lifeEvents: [],
-  questions: [],
+  questions: [
+    {
+      q: 'Can we pay for the kids’ college without giving up our own retirement — and what would we change to do both?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'What does a four-day week, and later part-time consulting, do to our plan — and when could I start?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'What would the place by the lake really cost, and when could we buy it without touching what the kids need?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+  ],
   joy: ['Enjoying the moment', 'Security', 'Supporting my family'],
   postcard:
     'Four days a week now, and the two I keep are the ones I actually like. ' +

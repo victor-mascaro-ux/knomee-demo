@@ -32,6 +32,7 @@ import {
   TTM_STAGES,
   COLLAPSED_ROWS,
   useCollapsed,
+  StatusTags,
 } from './profileParts'
 import GoalModal from './GoalModal'
 import QuestionModal from './QuestionModal'
@@ -775,7 +776,12 @@ function BusinessIdTab({
                       if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
                     }}
                   >
-                    <span className="pp-q-text">{q}</span>
+                    {/* Every one of the three is Knomee's, drawn from their
+                        answers — said on the row, as on a client's ID. */}
+                    <span className="pp-q-text">
+                      <StatusTags knomee />
+                      {q}
+                    </span>
                     <span className="pp-q-date">{d.header.completed}</span>
                     <span className="pp-goal-caret">
                       <RowChevron />
@@ -794,7 +800,7 @@ function BusinessIdTab({
 
       {openQuestion !== null && (
         <QuestionModal
-          question={{ q: openQuestion, date: d.header.completed }}
+          question={{ q: openQuestion, date: d.header.completed, knomee: true }}
           onClose={() => setOpenQuestion(null)}
         />
       )}

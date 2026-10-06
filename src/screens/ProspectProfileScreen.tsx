@@ -44,7 +44,7 @@ import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
-import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import QuestionModal, { AddQuestionModal, renamed } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
 import { clientProfile } from '../data/clientProfile'
 import type { JoyAnswers } from './JoyFlow'
@@ -762,7 +762,7 @@ export default function ProspectProfileScreen({
                           }}
                         >
                           <span className="pp-q-text">
-                            <StatusTags tags={q.tags} />
+                            <StatusTags tags={q.tags} knomee={q.knomee} />
                             {q.q}
                           </span>
                           <span className="pp-q-date">
@@ -992,7 +992,11 @@ export default function ProspectProfileScreen({
         <QuestionModal
           question={openQuestion}
           onClose={() => setOpenQuestion(null)}
-          onEdit={() => setQuestionForm('edit')}
+          onRename={(text) => {
+            const next = renamed(openQuestion, text)
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+          }}
           onToggleResolved={() => {
             const next = {
               ...openQuestion,
@@ -1000,7 +1004,6 @@ export default function ProspectProfileScreen({
             }
             setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
             setOpenQuestion(next)
-            if (next.resolved) onToast?.('Question resolved')
           }}
           onDelete={() => {
             setQuestionList((list) => list.filter((q) => q !== openQuestion))

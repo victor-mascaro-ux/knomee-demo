@@ -114,6 +114,11 @@ export interface ProfileQuestion {
   q: string
   date?: string
   resolved?: string
+  /** One of the three Knomee drew from their answers — questions to bring to
+      their advisor, as an advisor's Business ID carries three to put to a
+      firm. Labelled "Knomee generated" on its row; not a question they asked,
+      so not counted as one. */
+  knomee?: boolean
 }
 
 export const financialId = {
@@ -304,6 +309,23 @@ export const financialId = {
     { kind: 'Retirement', text: 'Targeting a wind-down from 2028', date: '02/17/2025', sentiment: 4, advisorAdded: true },
   ] as LifeEvent[],
   questions: [
+    /* The three Knomee drew from her answers: Vic's health and her own, the
+       kids' college against a 2028 wind-down, two homes. */
+    {
+      q: 'If Vic’s health or mine needs more care, what in our plan has to change — and what do we protect first?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'Can we pay for college for both kids and still wind down from 2028, or does one of those plans have to move?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'Can we keep the house in Costa Rica and still save for a second home, or is one home enough for the life we want?',
+      date: '05/03/2025',
+      knomee: true,
+    },
     { q: 'Can I afford to go to college?', date: '05/03/2025' },
     { q: 'Can I afford this family vacation?', date: '05/03/2025' },
     { q: 'Should I start a new company?', date: '05/03/2025' },
