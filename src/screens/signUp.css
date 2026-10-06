@@ -153,3 +153,13 @@
     animation: none;
   }
 }
+
+/* ── Desktop version — sign-up ──
+   Only under html.cx-desktop. The card and its terms are one group in the
+   middle of the window, rather than the terms held at the foot of it. */
+html.cx-desktop .su {
+  justify-content: center;
+}
+html.cx-desktop .su-foot {
+  margin-top: 24px;
+}

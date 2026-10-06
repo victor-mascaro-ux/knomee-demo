@@ -1189,3 +1189,62 @@
     transition-delay: 0s !important;
   }
 }
+
+/* ── Desktop version — Future You (html.cx-desktop) ──────────────────────────
+   Only what Future You adds. The intro (its .fy-hero-fallback included), the
+   top bar and the foot, the photo tiles, the results frame, Learn More and the
+   celebration are Joy's and the shell's desktop rules, and every step keeps
+   the default 560 measure. Scoped with .fy / .fyr, so The Move's road (it
+   reuses .fy-when, .fy-road and .fy-h) is unchanged. The framed phone and
+   real handsets never see any of this. */
+
+/* The breath: the orb in the middle of the screen, between the bars. */
+html.cx-desktop .jf.fy > .fy-breathe {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Where, doing, with: six pictures and Other, four over three, centred. */
+html.cx-desktop .fy .jf-photos {
+  --jf-cols: 4;
+}
+
+/* The tally sticks directly under the top bar (53px on desktop), not behind
+   it. */
+html.cx-desktop .fy .fy-tally {
+  top: calc(53px + 8px);
+}
+
+/* The postcard at 560 is close to a 3:2 card, its ruled lines a readable
+   length. */
+html.cx-desktop .fy .fy-post .fy-card {
+  min-height: 340px;
+}
+
+/* The poster stays the 720 results hero. Its words and their pictures sit
+   together: the words take a column of their own and the prints follow it,
+   instead of the prints running off to the far edge. */
+html.cx-desktop .fyr .fyr-lines {
+  max-width: 600px;
+}
+html.cx-desktop .fyr .fyr-line:not(.fyr-line-when) > p {
+  flex: 0 1 320px;
+}
+html.cx-desktop .fyr .fyr-line-when .fy-road {
+  max-width: 520px;
+}
+/* The postcard as it arrives: the width of the one she wrote. */
+html.cx-desktop .fyr .fyr-arrive .fyr-card {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+/* A print, tapped (Joy's results use it too): never larger than its picture.
+   260 holds 270-540 art at 240 (0.89x of 270); a 150 picture gets a 155 print,
+   135 of picture (0.9x). */
+html.cx-desktop .fyr-zoom-print {
+  max-width: 260px;
+}
+html.cx-desktop .fyr-zoom-print:has(img[src*='future-you/']):not(:has(img[src*='advisor/'])) {
+  max-width: 155px;
+}

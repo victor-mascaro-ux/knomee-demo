@@ -602,3 +602,73 @@
     transform: translateY(6px);
   }
 }
+
+/* ── Desktop version — Outlook (html.cx-desktop) ──
+   Only what Outlook adds: the sky, the add row and the ending's sky and
+   lists. The intro (its .ol-hero-fallback included), the top bar and the
+   foot, the memory card, the results frame, Learn More and the celebration
+   are Joy's and the shell's desktop rules. The framed phone and real handsets
+   never see any of this. */
+
+/* Concerns and hopes: the sky and the question are both step roots on the
+   adventure's default 560 measure, so the clouds and lights keep close to the
+   phone's density. The sky is a rounded card rather than the phone's
+   edge-to-edge band, held directly under the 53px top bar while a long
+   answer scrolls; its white lip fills its top corners and the air over it,
+   so nothing that scrolls under it shows above it. Its top and bottom
+   margins stay the frame's and the phone's; only its sides centre it. */
+html.cx-desktop .jf.ol > .ol-sky {
+  top: 53px;
+  margin-inline: auto;
+  border-radius: 20px;
+  box-shadow: 0 -40px 0 0 var(--surface-card, #fff);
+}
+/* The haze drifts 8% left at 1.1x, which on a card leaves a hard seam down
+   its right side; a little wider than the card, it always covers it. */
+html.cx-desktop .jf.ol .ol-sky .ol-haze {
+  inset: 0 -4%;
+}
+/* A tapped label's whole sentence, inside the card's rounded edge. */
+html.cx-desktop .jf.ol .ol-sky .ol-full {
+  left: 16px;
+  right: 16px;
+}
+
+/* Add Concern / Add Hope beside the microphone, not at the far ends of the
+   row. The Move's pros and cons use the same row. */
+html.cx-desktop .ol-add-row {
+  justify-content: flex-start;
+  gap: 12px;
+}
+html.cx-desktop .ol-add-row.has-mic .af-mic {
+  margin-left: 0;
+}
+
+/* The ending (the 720 results column): the tall sky is the same radius-24
+   card as every results hero, inside the column instead of the phone's
+   double bleed past it. */
+html.cx-desktop .olr .olr-hero {
+  margin-inline: 0;
+  border-radius: 24px;
+  overflow: hidden;
+}
+html.cx-desktop .olr .olr-hero .ol-sky.is-tall {
+  margin-inline: 0;
+}
+html.cx-desktop .olr .olr-words {
+  left: 28px;
+  right: 28px;
+  max-width: 560px;
+}
+/* Short quotes are pills that hug their words; a long one wraps at a
+   reading length (about 65 characters) rather than the full column. */
+html.cx-desktop .olr .olr-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+html.cx-desktop .olr .olr-list > li {
+  max-width: min(600px, 100%);
+  box-sizing: border-box;
+}

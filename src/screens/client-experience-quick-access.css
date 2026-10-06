@@ -304,3 +304,27 @@
   .kx-action{flex-direction:row;justify-content:flex-start;gap:var(--space-10);padding:8px 12px;text-align:left;font-size:14.5px}
   .kx-action span{width:40px;height:40px}
 }
+
+/* ── Desktop version — quick access and voice sheets ──
+   Only under html.cx-desktop. Not a frosted layer across the window: a 480
+   panel rising from the centre mark, its top rounded, standing on the tab bar
+   (which stays above it). A little wider than the phone's 430 bleed, so the
+   500 arc and the faces on its rim sit as they do on the phone. Placed by
+   left/right and top, never transform: the swipe writes an inline transform. */
+html.cx-desktop .cx-page.is-bare .kx-sheet,
+html.cx-desktop .cx-page.is-bare .vx-sheet {
+  left: max(16px, calc(50% - 240px));
+  right: max(16px, calc(50% - 240px));
+  padding-inline: 24px;
+  top: max(var(--mobile-appbar-h), calc(100% - var(--mobile-tabbar-h) - 680px));
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+}
+/* The page around the panel dims: the screen's dark ground, which the phone
+   lays under a sheet, shows through it as the scrim. */
+html.cx-desktop .cx-viewport {
+  transition: opacity 0.22s ease;
+}
+html.cx-desktop .cx-screen.has-sheet > .cx-viewport {
+  opacity: 0.58;
+}

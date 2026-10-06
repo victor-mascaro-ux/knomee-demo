@@ -389,3 +389,32 @@
   padding: var(--space-32, 32px) 0;
   color: var(--text-strong);
 }
+
+/* ── Desktop version — Goals (html.cx-desktop) ──
+   The intro's art card, the bars, the results frame and the reward are the
+   adventure's own (joyFlow, joyResults, joyReward): joy's art card outranks
+   the full-width picture above. The framed phone and real handsets never see
+   any of this. */
+/* Added: no bars, so the check, the words, the summary and the two actions
+   sit as one in the middle of the window's height rather than pinned to the
+   top over an empty band. The summary is the step's 560 card; the actions
+   keep their own width. */
+html.cx-desktop .jf.gl > .gl-added {
+  margin-block: auto;
+}
+html.cx-desktop .gl-added .gl-summary {
+  align-self: stretch;
+}
+/* Results: the summary at a reading width inside the 720 column, under its
+   heading, rather than its labels and answers spread across the column. */
+html.cx-desktop .glr .glr-summaries {
+  max-width: 560px;
+}
+/* Each label sits level with the first line of its answer, a two-line one
+   too; only Readiness, whose answer is the bars and a word, centres on it. */
+html.cx-desktop .gl-summary .pp-goal-detail dt {
+  align-self: start;
+}
+html.cx-desktop .gl-summary .pp-goal-detail dt:has(+ .pp-goal-stage) {
+  align-self: center;
+}
