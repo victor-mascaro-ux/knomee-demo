@@ -157,7 +157,7 @@ function CommandCenter({
               AVG RQ SCORE
               <HelpTip
                 side="right"
-                text="Recruitment Quotient — how ready this advisor is to move, 0–100. It scores the move, not the book."
+                text="Recruitment Quotient — how ready this advisor is to move, 0–100."
               />
             </span>
             <div className="metric-num">
