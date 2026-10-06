@@ -493,9 +493,9 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
         <GoalModal
           goal={openGoal}
           onClose={() => setOpenGoal(null)}
-          onEdit={() => {
-            setEditingGoal(openGoal)
-            setOpenGoal(null)
+          onSave={(g) => {
+            const { _k } = openGoal
+            setEdits((e) => ({ ...e, [_k]: { ...(g as KeyedGoal), _k } }))
           }}
         />
       )}

@@ -1035,7 +1035,7 @@ export default function ProspectProfileScreen({
           event={openEvent}
           client={mine}
           onClose={() => setOpenEvent(null)}
-          onEdit={() => setEventForm('edit')}
+          onSave={(e) => setEventList((list) => list.map((o) => (o === openEvent ? e : o)))}
           onToggleComplete={() => {
             const next = {
               ...openEvent,
@@ -1043,7 +1043,6 @@ export default function ProspectProfileScreen({
             }
             setEventList((list) => list.map((e) => (e === openEvent ? next : e)))
             setOpenEvent(next)
-            if (next.completed) onToast?.('Life event completed')
           }}
           onDelete={() => {
             setEventList((list) => list.filter((e) => e !== openEvent))
@@ -1093,16 +1092,9 @@ export default function ProspectProfileScreen({
         <GoalModal
           goal={goal}
           onClose={() => setOpenGoal(null)}
-          onAssess={() => {
-            setAssessing(goal.title)
-            setOpenGoal(null)
-          }}
-          onEdit={() => {
-            /* The form takes over from the panel: two panels stacked is two
-               copies of the same goal, one of them stale. */
-            setEditingGoal(goal.title)
-            setOpenGoal(null)
-          }}
+          /* Changed in the panel itself — title, timeline, pros, cons, the
+             reason, the readiness — and handed back as it closes. */
+          onSave={(g) => setGoalList((list) => list.map((o) => (o === goal ? g : o)))}
           onToggleComplete={() =>
             setGoalList((list) =>
               list.map((g) =>
