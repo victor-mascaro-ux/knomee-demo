@@ -6,7 +6,8 @@
  *
  * On a page that owns the goal, every one of those is changed where it is
  * read: the title is its own field, the rest are the goal form's own fields
- * (no pencil, no second panel). What changed is handed back when the panel
+ * (no pencil, no second panel), and so are the rows only some goals carry
+ * (an advisor's move: who it involves, what holds them back). What changed is handed back when the panel
  * closes — Done, the close, Escape or the ground behind it — and comes back
  * "Updated". Completed is a checkbox; the foot is Delete · Done, as on every
  * read-back (ReadBack.tsx).
@@ -50,6 +51,7 @@ export default function GoalModal({
   const [pros, setPros] = useState<string[]>(goal.pros ?? [])
   const [cons, setCons] = useState<string[]>(goal.cons ?? [])
   const [note, setNote] = useState(goal.note ?? '')
+  const [extra, setExtra] = useState(goal.extra ?? [])
   const [readiness, setReadiness] = useState(goal.readiness)
   const [assessing, setAssessing] = useState(false)
 
@@ -66,6 +68,8 @@ export default function GoalModal({
     pros: keep(pros),
     cons: keep(cons),
     note: note.trim() || undefined,
+    /* A row emptied is a row left out, as a blank answer is everywhere. */
+    extra: goal.extra && extra.map((r) => ({ ...r, value: r.value.trim() })).filter((r) => r.value),
     readiness,
   }
   const same = (a?: string[], b?: string[]) => (a ?? []).join('\n') === (b ?? []).join('\n')
@@ -75,6 +79,7 @@ export default function GoalModal({
     !same(next.pros, goal.pros) ||
     !same(next.cons, goal.cons) ||
     (next.note ?? '') !== (goal.note ?? '') ||
+    JSON.stringify(next.extra ?? []) !== JSON.stringify(goal.extra ?? []) ||
     next.readiness !== goal.readiness
 
   /* Every way out keeps what was typed. */
@@ -130,19 +135,23 @@ export default function GoalModal({
               onChange={(e) => setNote(e.target.value)}
             />
 
-            {/* Rows only some goals have (an advisor's move): read, not asked. */}
-            {goal.extra?.some((r) => r.value) && (
-              <dl className="goal-rows">
-                {goal.extra.map((row) =>
-                  row.value ? (
-                    <React.Fragment key={row.label}>
-                      <dt>{row.label}</dt>
-                      <dd>{row.value}</dd>
-                    </React.Fragment>
-                  ) : null,
-                )}
-              </dl>
-            )}
+            {/* Rows only some goals have (an advisor's move), each its own
+                field like the one above. */}
+            {extra.map((row, i) => (
+              <React.Fragment key={row.label}>
+                <label className="ag-label" htmlFor={`goal-extra-${i}`}>
+                  {row.label}
+                </label>
+                <input
+                  id={`goal-extra-${i}`}
+                  className="ag-input"
+                  value={row.value}
+                  onChange={(e) =>
+                    setExtra((rows) => rows.map((r, j) => (j === i ? { ...r, value: e.target.value } : r)))
+                  }
+                />
+              </React.Fragment>
+            ))}
 
             {/* The stage is not picked, it is worked out: changing it means
                 answering the readiness questions again. */}
