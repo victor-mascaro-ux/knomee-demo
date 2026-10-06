@@ -24,6 +24,10 @@
 .mv-q .ag-own-title {
   margin-top: var(--space-20);
 }
+/* "Or write your own" is the field's label: the standard 6px over it. */
+.mv-q .ag-own-title + .ag-own {
+  margin-top: var(--space-6);
+}
 .mv-q .jf-note {
   margin-top: var(--space-16);
 }
@@ -1002,4 +1006,98 @@
   font-size: var(--text-sm, 13px);
   color: var(--k-grape, #7639a1);
   animation: mvIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Desktop version — The Move + Goals (html.cx-desktop) ──
+   Every step stands on the adventure's 560 measure (joyFlow), the balloon
+   steps too: the pick rows, the own-goal field, the road, the boxes, the sky,
+   the readiness answers and their track all take it from the step, so every
+   question, card and box shares one left edge and one right edge. The bars
+   are joy's. What follows is only what the phone sized to its own width. The
+   framed phone and real handsets never see any of this. */
+
+/* The held move hugs its words instead of running the column as a lime
+   strip, on the step's left edge (where the question under it starts), so
+   it stays put while the steps under it change. */
+/* The goal / move it is about: the step's own width, edge to edge with the
+   field and the copy under it rather than a chip sized to its words. */
+html.cx-desktop .jf.mv > .mv-goal {
+  align-self: center;
+  box-sizing: border-box;
+  width: min(560px, calc(100% - 48px));
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* The pair: under its question like every other question (not floated
+   mid-window), two 270 tiles that fill the 560 step with a 20 gap, edge to
+   edge with the question over them, from 540–1080 art (0.5x or less). */
+html.cx-desktop .mv .mv-q-pair {
+  flex: none;
+  justify-content: flex-start;
+}
+html.cx-desktop .mv .mv-photos {
+  --jf-tile: 270px;
+  --jf-cols: 2;
+  column-gap: 20px;
+  max-width: none;
+  justify-content: center;
+  margin-inline: 0;
+}
+
+/* The road too: under the held move, not floated to the window's middle. */
+html.cx-desktop .jf.mv > .fy-when {
+  margin-top: var(--space-16, 16px);
+}
+
+/* The balloon: the phone's composition, the sky over its question, on the
+   560 step as Outlook's sky is. The sky is a rounded card inside the step
+   rather than the phone's edge-to-edge band, held directly under the top bar
+   (53) while the box scrolls; a short white lip fills its rounded top
+   corners there, clear of the held move above it. Its height stays the
+   phone's 256: the strings and ropes are drawn to it. */
+html.cx-desktop .mv .mv-lift > .mv-air {
+  top: 53px;
+  margin: 12px 0 16px;
+  border-radius: 24px;
+  box-shadow: 0 -24px 0 0 var(--surface-card, #fff);
+}
+/* The wisps cross the whole card and leave it before they come round again
+   (the phone's run ends at 460, inside a 560 card), at the phone's pace. */
+@media (prefers-reduced-motion: no-preference) {
+  html.cx-desktop .mv .mv-air .mv-wisp-a {
+    animation: mvWispWide 28s linear infinite;
+  }
+  html.cx-desktop .mv .mv-air .mv-wisp-b {
+    animation: mvWispWide 38s linear -18s infinite;
+  }
+}
+@keyframes mvWispWide {
+  from {
+    transform: translateX(-90px);
+  }
+  to {
+    transform: translateX(600px);
+  }
+}
+/* A tag's words run to two lines rather than three, so the sandbags hung one
+   over the other (38 apart) keep their words apart. */
+html.cx-desktop .mv .mv-air .mv-tag {
+  max-width: 140px;
+}
+
+/* On your own: as wide as the ring it answers, under it. */
+html.cx-desktop .mv .mv-alone {
+  max-width: 320px;
+  margin-inline: auto;
+}
+
+/* The readiness questions have no top bar: the held move, the track, the
+   question and its answers sit as one in the middle of the window's height,
+   not pinned to the top over an empty band; air over the foot. */
+html.cx-desktop .jf.mv:has(> .mv-ready) > :first-child {
+  margin-top: auto;
+}
+html.cx-desktop .jf.mv > .mv-ready {
+  margin-bottom: 40px;
 }

@@ -84,7 +84,8 @@
 .su-input {
   box-sizing: border-box;
   width: 100%;
-  margin-top: 8px;
+  /* The standard label-to-field gap. */
+  margin-top: var(--space-6, 6px);
   padding: 9px 12px;
   border: 1px solid #dcdce2;
   border-radius: 8px;
@@ -152,4 +153,14 @@
   .su {
     animation: none;
   }
+}
+
+/* ── Desktop version — sign-up ──
+   Only under html.cx-desktop. The card and its terms are one group in the
+   middle of the window, rather than the terms held at the foot of it. */
+html.cx-desktop .su {
+  justify-content: center;
+}
+html.cx-desktop .su-foot {
+  margin-top: 24px;
 }

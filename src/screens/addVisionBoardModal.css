@@ -52,6 +52,9 @@
 }
 .vb-label {
   margin-top: var(--space-8);
+  /* The standard label-to-field gap is 6px (--space-6). The body's flex gap
+     is 8 and also spaces everything else in it, so the label gives back 2. */
+  margin-bottom: calc(var(--space-6) - var(--space-8));
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   color: var(--text-strong);

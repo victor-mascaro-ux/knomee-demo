@@ -126,6 +126,11 @@
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }
+/* The standard label-to-field gap is 6px (--space-6). The body's flex gap is
+   8 and also spaces everything else in it, so a label in it gives back 2. */
+.ag-body > .ag-label {
+  margin-bottom: calc(var(--space-6) - var(--space-8));
+}
 /* The prompt under Pros and Cons: a line of text that is also the way in, so
    it carries no button chrome — only the pointer says it can be pressed. */
 .ag-hint {
@@ -295,4 +300,30 @@
 }
 .ag-ttm-retake:active {
   transform: scale(0.97);
+}
+
+/* ── Desktop version — Add a Goal (html.cx-desktop) ──
+   Inside the desktop experience every modal is a centred card at the shell's
+   --cx-modal-w; a form takes the 560 the profile pages give it. Cancel and
+   Save keep their own width, on the right (the shell's footer rule). The
+   base 560 above is the standalone pages' and stays as it is. */
+html.cx-desktop .cx-screen .modal-backdrop .modal.ag-modal {
+  --cx-modal-w: 560px;
+}
+/* The goal it saves, opened again (GoalModal): the readiness bubble opens
+   above the bars. Hung below them, at the panel's foot, its hidden box ran
+   past the panel and put a scrollbar on a card that fits. */
+html.cx-desktop .cx-screen .goal-modal .goal-readiness .tt::after {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-3px);
+}
+html.cx-desktop .cx-screen .goal-modal .goal-readiness .tt:hover::after {
+  transform: translateX(-50%) translateY(0);
+}
+html.cx-desktop .cx-screen .goal-modal .goal-readiness .tt::before {
+  top: auto;
+  bottom: calc(100% + 3px);
+  border-bottom-color: transparent;
+  border-top-color: #240446;
 }

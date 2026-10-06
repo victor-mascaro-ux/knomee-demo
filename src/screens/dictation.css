@@ -105,3 +105,13 @@
     height: 12px;
   }
 }
+
+/* ── Desktop version — dictation ──
+   Only under html.cx-desktop. The big mic is a pill at its own width, centred
+   under its box, not a bar the width of the column. The small one is as it is. */
+html.cx-desktop .af-mic.af-mic-big {
+  width: fit-content;
+  min-width: 240px;
+  margin-inline: auto;
+  padding-inline: 28px;
+}
