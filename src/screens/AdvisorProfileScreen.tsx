@@ -341,7 +341,10 @@ function FoldCard({
   title,
   children,
   defaultOpen = false,
+  id,
 }: {
+  /** An anchor, for a way in that lands on this card (The Move's ending). */
+  id?: string
   icon: string
   title: string
   children: ReactNode
@@ -350,7 +353,7 @@ function FoldCard({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <section className={`pp-card ap-fold${open ? " is-open" : ""}`}>
+    <section id={id} className={`pp-card ap-fold${open ? " is-open" : ""}`}>
       <button
         className="pp-card-head ap-fold-head"
         type="button"
@@ -756,7 +759,7 @@ function BusinessIdTab({
             <EmptyState art={EMPTY_ART.lifeEvents} label="Add a Life Event" cta />
           </FoldCard>
 
-          <FoldCard icon={icQuestions} title="Questions" defaultOpen={d.questions.length > 0}>
+          <FoldCard id="ap-questions" icon={icQuestions} title="Questions" defaultOpen={d.questions.length > 0}>
             {/* The three questions the adventures handed him — the ones to put
                 to every platform he is considering — live here, on his ID,
                 where a client's questions sit. Before anything is answered

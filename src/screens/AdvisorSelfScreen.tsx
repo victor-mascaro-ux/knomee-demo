@@ -1516,10 +1516,13 @@ function FlowPhone({
                     return
                   }
                   if (to === 'questions') {
-                    /* The questions live on the Business ID now. */
+                    /* The questions live on the Business ID now: open it on
+                       its Questions card. */
                     reset(HOME_AT)
                     setTab('finid')
-                    toTop()
+                    window.setTimeout(() => {
+                      document.getElementById('ap-questions')?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+                    }, 120)
                     return
                   }
                   setTab('flow')
