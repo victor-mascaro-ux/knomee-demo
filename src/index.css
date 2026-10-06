@@ -226,12 +226,14 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 0;
-  /* The page's own top inset, held by the row rather than by the page above it.
+  /* The room over the labels, held by the row rather than by the page above it.
      Pinned under the bar, the row had nothing over its labels and they sat
      against the bar's edge; as padding INSIDE the sticky element the space
-     travels with it, and at rest the page looks exactly as it did — the inset
-     moved rather than doubled (see .content:has(> .tabs)). */
-  padding-top: var(--page-pad);
+     travels with it (see .content:has(> .tabs)). 16px, the profile's own gap
+     between its breadcrumb and its tabs (.pp-tabs), so a tab row sits the same
+     distance under whatever bar is above it on every page. The full page inset
+     read as a gap between the bar and the navigation that hangs off it. */
+  padding-top: 16px;
 }
 .content:has(> .tabs) {
   padding-top: 0;
@@ -308,9 +310,8 @@ body {
   font-family: inherit;
   font-size: 16px;
   color: var(--grey-text);
-  /* No top padding: the content's top inset already equals the side inset, so
-     the tab text sits exactly one --page-pad below the header (matches the
-     horizontal screen-to-content padding). */
+  /* No top padding: the row's own 16px above (.tabs) is the whole gap under
+     the header. */
   padding: 0 20px 10px;
   cursor: pointer;
   position: relative;
