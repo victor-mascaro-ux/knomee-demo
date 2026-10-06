@@ -103,6 +103,31 @@
   overflow-wrap: break-word;
   text-wrap: pretty;
 }
+/* The question as its own field — what you read is what you change, so no
+   pencil and no second panel. It wears the forms' own input (.qm-input: the
+   control border, the lg radius, the link colour on focus) at the question's
+   size, and stands exactly as tall as the question. */
+.qm-edit {
+  display: block;
+  width: 100%;
+  padding: var(--space-10) var(--space-12);
+  border: var(--border-thin) solid var(--border-control);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  font-family: inherit;
+  resize: none;
+  overflow: hidden;
+  cursor: text;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.qm-edit:hover {
+  border-color: var(--text-secondary);
+}
+.qm-edit:focus {
+  outline: none;
+  border-color: var(--text-link);
+}
+
 /* Where it stands: the row's own date line at reading size. Upright, never
    italic (DS helper rule). */
 .qm-status {
@@ -126,7 +151,8 @@
   color: var(--k-green);
 }
 
-/* The footer: the state on its own full-width row, then Delete | Edit.
+/* The footer: Delete · Mark Resolved, two equal pills, the main one filled
+   on the right.
    (0,5,1) outranks index.css `body .modal-backdrop .modal .modal-footer .btn`
    (0,4,1) and client-experience.css `.cx-screen .modal-backdrop .modal
    .modal-footer .btn` (0,5,0), inside this panel only. */
@@ -139,9 +165,6 @@ body .modal-backdrop .modal .modal-footer.qm-actions .btn {
   min-width: 0;
   padding-inline: var(--space-16);
   white-space: nowrap;
-}
-body .modal-backdrop .modal .modal-footer.qm-actions .qm-act-main {
-  flex-basis: 100%;
 }
 
 /* Delete, offered: the outline pill in the warning colour, the same pairing

@@ -42,7 +42,7 @@ import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
-import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import QuestionModal, { AddQuestionModal, renamed } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
 import { clientProfile } from '../data/clientProfile'
 import type { JoyAnswers } from './JoyFlow'
@@ -923,7 +923,11 @@ export default function ProspectProfileScreen({
         <QuestionModal
           question={openQuestion}
           onClose={() => setOpenQuestion(null)}
-          onEdit={() => setQuestionForm('edit')}
+          onRename={(text) => {
+            const next = renamed(openQuestion, text)
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+          }}
           onToggleResolved={() => {
             const next = {
               ...openQuestion,
