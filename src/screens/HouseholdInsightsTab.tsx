@@ -1,9 +1,11 @@
 /* Family Insights — each member's Client Insights, side by side.
  *
- * Nothing here is new reading: every column is exactly what that person's own
- * Insights tab shows — the top action, then the Relationship Snapshot with its
- * KR, breakdown and tier — rendered by the same components off the same
- * `snapshotFor`, so a member's column cannot disagree with their own page.
+ * Nothing here is new reading: every column is the head of that person's own
+ * Insights tab — the top action, then the Relationship Snapshot with its KR,
+ * breakdown and tier — rendered by the same components off the same
+ * `snapshotFor`, so a member's column cannot disagree with their own page. The
+ * three cards under a member's snapshot stay on their own page: at half width
+ * they would stack into a column taller than both snapshots together.
  * Under the two columns, what only a pair can have: the statements they
  * answered the same, the ones they did not, and the topics to tread carefully
  * around. The pair's toolkit — what to say to them together — is the Family

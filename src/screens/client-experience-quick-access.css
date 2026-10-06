@@ -46,7 +46,6 @@
 @keyframes pxPulse{50%{transform:scale(1.09)}}
 .px-fill.is-static{animation:none}
 .px-fill.is-static path{animation:none}
-.cx-tab-center.is-on .cx-tab-mark{opacity:1}
 /* The tab bar's white arc stays above both overlays. */
 .cx-tabbar{z-index:7}
 /* Both overlays share one ground and one inset; -1px overlaps the app bar so
@@ -190,8 +189,6 @@
 .cx-adv-done:active,.cx-adv-locked:active{transform:scale(.988)}
 .cx-adv-more:active{transform:scale(.9)}
 .cx-tab:active{transform:scale(.94)}
-.cx-tab-center:active{transform:none}
-.cx-tab-center:active .cx-tab-mark,.cx-tab-center:active .px-fill svg{transform:scale(.94)}
 .cx-appbar-burger:active{transform:scale(.9)}
 .vx-dismiss:active,.vx-send:active,.cx-sheet-item:active{transform:scale(.97)}
 

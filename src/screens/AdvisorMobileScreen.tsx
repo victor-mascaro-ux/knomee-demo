@@ -11,20 +11,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './client-experience.css'
 import './advisor-flow.css'
 import { RailFace } from './profileParts'
-import AdvisorProfileScreen from './AdvisorProfileScreen'
+import AdvisorProfileScreen, { AdvisorTeam } from './AdvisorProfileScreen'
 import {
   DEVICE_H,
   DEVICE_W,
   IPhone,
   TabFinId,
-  TabMark,
-  TabQuestions,
+  TabAdventures,
+  TabTeam,
   ZOOM_CONTROLS_TITLE,
   clampZoom,
   useDarkGround,
   useFitToWindow,
   useZoom,
-  TabEdge,
+  KnomeeFab,
   type FlowBrand,
 } from './ClientExperienceScreen'
 import AdventureList from './AdventureList'
@@ -64,7 +64,7 @@ export default function AdvisorMobileScreen({
   const account = useDropdown()
   const accountOpen = account.open
   const setAccountOpen = account.setOpen
-  const [tab, setTab] = useState<'finid' | 'flow' | 'questions'>('finid')
+  const [tab, setTab] = useState<'finid' | 'flow' | 'team'>('finid')
   /* His finished sheet, read once. The adventures he completed and the three
      questions he came out with are both rules over these answers, so they are
      derived here rather than restated — the same `derive` the rest of the
@@ -175,22 +175,13 @@ export default function AdvisorMobileScreen({
                   )
                 }
               />
-            ) : tab === 'questions' ? (
-              <div className="af-unlock">
-                <h2 className="af-h1">My Three Questions</h2>
-                <p className="af-body">
-                  Put these to every platform you’re considering — including this one. They come
-                  out of your own answers, so what you hear back tells you whether a platform is
-                  the right one, and holds it to what it promises.
-                </p>
-                <ol className="af-qs">
-                  {d.id.questions.map((q, n) => (
-                    <li key={q}>
-                      <span className="af-getnum">{n + 1}</span>
-                      <span>{q}</span>
-                    </li>
-                  ))}
-                </ol>
+            ) : tab === 'team' ? (
+              /* My Team: who on his team sees which part of the Business ID,
+                 as on the flow's own phone. The three questions are on the
+                 ID, in its Questions card. */
+              <div className="af-team">
+                <h2 className="af-h1">My Team</h2>
+                <AdvisorTeam name={advisor.name} />
               </div>
             ) : (
             <AdvisorProfileScreen
@@ -212,12 +203,18 @@ export default function AdvisorMobileScreen({
             )}
           </div>
 
-          {/* The same three the flow's own phone carries: the Business ID, the
-              mark that opens what he finished, and the questions he came out
-              with. This page had no bar at all, so the other two were only
-              reachable by walking the flow again. */}
+          {/* The same bar the flow's own phone carries: Adventures, the
+              Business ID and My Team, with the mark floating above its right
+              end. */}
           <nav className="cx-tabbar">
-            <TabEdge />
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+              onClick={() => setTab('flow')}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -228,20 +225,19 @@ export default function AdvisorMobileScreen({
             </button>
             <button
               type="button"
-              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
-              aria-label="Adventures"
-              onClick={() => setTab('flow')}
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
             >
-              <TabMark />
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
             </button>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'questions' ? 'is-on' : ''}`}
-              onClick={() => setTab('questions')}
-            >
-              <TabQuestions />
-              <span className="cx-tab-lbl">My Questions</span>
-            </button>
+            {/* He has finished every adventure, so the mark has nothing new to
+                open: it takes him to what he finished, and on into the flow if
+                one is still open. */}
+            <KnomeeFab
+              label="Next adventure"
+              onClick={() => (rows.some((r) => r.state === 'open') && onRedo ? onRedo() : setTab('flow'))}
+            />
           </nav>
           {menuOpen && (
             <button

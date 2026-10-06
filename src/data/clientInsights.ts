@@ -16,7 +16,7 @@
 
 import { familyId } from './familyId'
 import { clientProfile as cp } from './clientProfile'
-import type { Snapshot, ToolkitTab } from './readiness'
+import type { ReadinessTab, Snapshot, ToolkitTab } from './readiness'
 
 /* ── what her profile already says ──────────────────────────────────────── */
 
@@ -184,6 +184,110 @@ export const sebastianSnapshot: Snapshot = {
     name: 'Attention',
     body: 'A relationship that is there but thin — answers given once, little asked of the advisor since.',
   },
+}
+
+/* ── the read under the snapshot ────────────────────────────────────────── */
+
+/* The prospect's three columns, for someone already a client. Conversion is
+   done, so the speed question becomes how soon they will act on what is in
+   front of them — read off goal timelines and stages, open questions and how
+   fast advisor requests come back. What drives them and what could stall them
+   mean the same after signing, so those two keep their names. The verdicts
+   are the house's own (High velocity · Moving, but not this quarter · Low
+   velocity) and sit with the tiers: Emily's Tier 1, Sebastian's Tier 2. Every
+   line rests on something on their page; nothing is said for him that only
+   she answered. */
+export type ClientRead = Pick<ReadinessTab, 'velocity' | 'motivators' | 'apprehensions'>
+
+const VELOCITY_TITLE = 'How Quickly Will This Client Act?'
+
+export const emilyRead: ClientRead = {
+  velocity: {
+    title: VELOCITY_TITLE,
+    verdict: 'High velocity',
+    points: [
+      'Emily Watson is primed to act quickly.',
+      // Purchase a new car (5) and the Oahu trip (4), both <6 months.
+      'Her new car and Oahu trip have a <6 month timeline.',
+      // Knomee Activity: advisor requests 73% done, in 4–7 days.
+      'She answers most advisor requests within a week.',
+      // Save for a down payment on a second home: Preparation, 1–3 years.
+      'Bigger decisions, like the second home, are still taking shape.',
+    ],
+  },
+  motivators: [
+    {
+      title: 'Family across generations',
+      body: 'Her kids, her parents and a first grandchild due in October run through her goals, from a family trip to moving the parents closer.',
+    },
+    {
+      title: 'Freedom on her own terms',
+      body: 'Travel, a sabbatical in 2027 and perhaps a life abroad all point the same way. Decisions that widen her options will feel most like hers.',
+    },
+    {
+      title: 'Giving that lasts',
+      body: 'She has already increased her gift to her favorite philanthropy, and a scholarship at her old school is in motion. Giving is something she follows through on.',
+    },
+  ],
+  apprehensions: [
+    {
+      title: 'Competing family needs',
+      body: 'Emily Watson worries about affording college for two kids, and about getting sick as her parents age. If these stay tangled, goals that compete with college may stall.',
+    },
+    {
+      title: 'A life in transition',
+      body: 'A separation, a career change and a possible new company are all in play at once. Longer commitments, like the trust for the grandchildren, may wait until things settle.',
+    },
+    {
+      title: 'Fear of running out',
+      body: 'Her Future You postcard looks back on a long fear of running out, and she still asks what she can afford. Left alone, it can shrink the travel and family time she values.',
+    },
+  ],
+}
+
+export const sebastianRead: ClientRead = {
+  velocity: {
+    title: VELOCITY_TITLE,
+    verdict: 'Moving, but not this quarter',
+    points: [
+      'Sebastian Watson is unlikely to act quickly.',
+      // The beach house (3) and angel investing (2) carry no timeline.
+      'Neither of his open goals has a timeline yet.',
+      // Knomee Activity: 5 of 5 adventures, last activity 61–90 days ago.
+      'He finished all five adventures, then went quiet.',
+      // Reliance and Knomee Activity: no questions, no requests answered.
+      'He has asked no questions and answered no advisor requests.',
+    ],
+  },
+  motivators: [
+    {
+      title: 'Keeping his word',
+      body: 'He values family, stability and keeping his word to the kids and to Emily. He hopes what they build now gives the kids real choices.',
+    },
+    {
+      title: 'Work that leaves room',
+      body: 'He wants fewer hours, and his future self writes from a four-day week. More time is what he is after.',
+    },
+    {
+      /* His picture, not hers: mountains and a lake, where hers is the coast. */
+      title: 'A place by a lake',
+      body: 'He pictures a small place near the mountains or a lake, with summers fishing and family visiting. Time outdoors with the kids is where his joy sits.',
+    },
+  ],
+  apprehensions: [
+    {
+      title: 'College versus retirement',
+      body: 'Sebastian Watson worries about keeping the kids’ college on track while saving enough for his and Emily’s retirement. Until both feel covered, working less and a place by a lake may stay on hold.',
+    },
+    {
+      title: 'A demanding stretch at work',
+      body: 'Being truly present for the kids while working a demanding job weighs on him. Planning that asks for more of his time may keep slipping down his list.',
+    },
+    {
+      title: 'Unsure about support',
+      body: 'He doubts an advisor does much for his confidence and is unsure he wants support on his goals. Unless advice proves its worth to him, he may leave the planning to Emily.',
+    },
+  ],
 }
 
 /* ── the toolkit ────────────────────────────────────────────────────────── */
@@ -368,6 +472,7 @@ export const moreAdventures: SuggestedAdventure[] = [
 
 export const clientInsights = {
   snapshot: clientSnapshot,
+  read: emilyRead,
   toolkit: clientToolkit,
   adventures: suggestedAdventures,
   moreAdventures,
