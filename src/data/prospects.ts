@@ -1,3 +1,5 @@
+import { advisorConfidenceAnswer, confidenceAnswers, financialId } from './financialId'
+
 export type Tier = 'tier1' | 'tier2' | 'tier3' | 'incomplete'
 
 export interface Prospect {
@@ -13,6 +15,14 @@ export interface Prospect {
   topAction: string
   tier: Tier
   isNew?: boolean // signed up since the advisor last looked
+  /* What they answered, which is all a segment is read from
+     (prospectSegments.ts). The answers are stored, never the labels, so a
+     segment cannot say something the person did not. */
+  /** Financial Joy's "I want money to help me with", ranked, up to three. */
+  joy?: string[]
+  /** The Confidence adventure's six sliders, 0–100, in its order: condition,
+      resilience, goal belief, joy spend, never-regret, advisor value. */
+  confidence?: number[]
 }
 
 export interface TierGroup {
@@ -29,7 +39,10 @@ export const tierGroups: TierGroup[] = [
 ]
 
 // The hand-authored, "featured" prospects that lead each tier. The randomly
-// distributed book below is appended to these.
+// distributed book below is appended to these. Each carries the answers its
+// top action was written from, so the purpose and posture half of its segment
+// agrees with it. The other half, vision × readiness, is read against the
+// whole book's medians, so it can say something the action did not.
 const featuredProspects: Prospect[] = [
   {
     name: 'Sarah Mitchell',
@@ -44,6 +57,10 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Call now — “worked since 13, ready for adventures”; lead with Future You vision',
     tier: 'tier1',
+    // Hers are read off her Financial ID rather than typed again, so her
+    // segment and her profile can never disagree.
+    joy: financialId.financialJoy.chips,
+    confidence: [...confidenceAnswers, advisorConfidenceAnswer].map((a) => a.value),
   },
   {
     name: 'Emma Rossi',
@@ -56,6 +73,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Urgent personal circumstances (caregiving); call to discuss home & estate plan',
     tier: 'tier1',
+    joy: ['Supporting my family', 'Security', 'Control'],
+    confidence: [70, 55, 80, 60, 65, 90],
     isNew: true,
   },
   {
@@ -69,6 +88,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Family legacy is their stated #1 life goal; lead with generational wealth',
     tier: 'tier1',
+    joy: ['Supporting my family', 'Independence', 'Security'],
+    confidence: [80, 78, 85, 70, 80, 75],
   },
   {
     name: 'Barbara Dean',
@@ -81,6 +102,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Hobby goal disconnected from financial vision; needs goal reframe session',
     tier: 'tier2',
+    joy: ['Enjoying the moment', 'Comfort', 'Simplicity'],
+    confidence: [60, 55, 65, 75, 60, 65],
   },
   {
     name: 'Sophie Dean',
@@ -93,6 +116,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Travel urgency but self-directed; send value-add travel planning content',
     tier: 'tier2',
+    joy: ['Independence', 'Enjoying the moment', 'Choice'],
+    confidence: [72, 65, 78, 80, 70, 40],
     isNew: true,
   },
   {
@@ -106,6 +131,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Grandkids focus; not thinking about goal; re-engage with legacy content',
     tier: 'tier2',
+    joy: ['Supporting my family', 'Comfort', 'Security'],
+    confidence: [55, 50, 60, 55, 62, 60],
   },
   {
     name: 'Miles Watson',
@@ -118,6 +145,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Goal driven by partner; involve both partners; relationship-based outreach',
     tier: 'tier2',
+    joy: ['Supporting my family', 'Simplicity'],
+    confidence: [45, 40, 55, 50, 45, 60],
   },
   {
     name: 'Maya Watson',
@@ -130,6 +159,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Very terse responses; minimal engagement; low-touch nurture sequence',
     tier: 'tier2',
+    joy: ['Security'],
+    confidence: [40, 45, 50, 40, 50, 45],
   },
   {
     name: 'Emily Watson',
@@ -141,6 +172,8 @@ const featuredProspects: Prospect[] = [
     signUp: '06/05/2025',
     topAction: 'Hobby-only focus; minimal urgency; quarterly light-touch check-in',
     tier: 'tier3',
+    joy: ['Enjoying the moment', 'Comfort'],
+    confidence: [50, 40, 45, 65, 50, 40],
   },
   {
     name: 'David Watson',
@@ -153,6 +186,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Financial reward only; thin Future You; send financial education series',
     tier: 'tier3',
+    joy: ['Status', 'Control'],
+    confidence: [30, 25, 35, 40, 30, 35],
   },
   {
     name: 'Janet Murphy',
@@ -165,6 +200,8 @@ const featuredProspects: Prospect[] = [
     topAction:
       'Financial reward only; thin Future You; send financial education series',
     tier: 'tier3',
+    joy: ['Status', 'Security'],
+    confidence: [35, 30, 40, 45, 35, 30],
     isNew: true,
   },
   {
@@ -295,7 +332,143 @@ function randomDate(rand: () => number): string {
   return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
-export const prospects: Prospect[] = [...featuredProspects, ...randomProspects(30, 0x5eed)]
+/* ── What the generated book answered ──────────────────────────────────────
+   A segment is read from answers (prospectSegments.ts), so every scored row
+   needs some: its ranked Financial Joy picks and its six Confidence sliders.
+   They are drawn here, after the loop above and from streams of their own, so
+   adding them moved no name, tier, KQ, date, action or receptivity it made.
+
+   Real books cluster, and the draws lean on the row the way people do: whoever
+   can see the future but is not yet moving tends to want money for living it,
+   whoever is already acting tends to want it as a shield, and confidence rises
+   with readiness. No row is handed a segment — the labels come out of the
+   rules applied to these answers, and land wherever those rules put them. */
+
+/* Separate seeds from the loop's 0x5eed, so the answers can be re-drawn
+   without disturbing the book they describe. */
+const ANSWER_SEEDS = { tilt: 0x5147, joy: 0x2772, confidence: 0x3b06 }
+
+/* The loop draws Clarity and Intent as the same KQ ± 8, so the two move
+   together and almost nobody can see the future without acting on it, or act
+   without seeing it — no real cohort looks like that, and the vision ×
+   readiness quadrants collapse onto the diagonal. Each row trades up to this
+   many points between the two, their sum kept, so Clarity and Intent still
+   centre on the row's KQ, and neither is pushed past either end. */
+const TILT = 18
+/* How far Clarity and Intent must sit apart before a row leans one way. */
+const LEAN_GAP = 4
+
+/* The actions above that vouch for a score. The trade may not move a row
+   against its own action: one that calls the picture clear never loses
+   Clarity, one that calls them ready never loses Intent, the thin-picture
+   action never gains Clarity and the low-urgency one never gains Intent. An
+   action that vouches for both keeps the loop's scores as drawn. */
+type Claim = { clarity?: 'high' | 'low'; intent?: 'high' | 'low' }
+const CLAIMS: Record<string, Claim> = {
+  [ACTIONS.tier1[0]]: { clarity: 'high', intent: 'high' },
+  [ACTIONS.tier1[1]]: { intent: 'high' },
+  [ACTIONS.tier1[2]]: { intent: 'high' },
+  [ACTIONS.tier1[3]]: { clarity: 'high', intent: 'high' },
+  [ACTIONS.tier3[1]]: { intent: 'low' },
+  [ACTIONS.tier3[3]]: { clarity: 'low' },
+}
+
+/* The prototype's Joy cards in the clusters people pick them in — whoever
+   picks Security is likely to pick Supporting my family next — plus the
+   write-in the phone suggests for giving. */
+const JOY_CLUSTERS = [
+  ['Supporting my family', 'Security', 'Control'],
+  ['Choice', 'Independence', 'Simplicity'],
+  ['Enjoying the moment', 'Comfort'],
+  ['Philanthropy and giving'],
+  ['Status'],
+]
+
+/* How strongly each kind of row reaches for each cluster above. */
+const JOY_LEAN = {
+  // Can see the future, not yet moving: money for living it, and room to choose.
+  vision: [1, 3, 5, 1, 0.3],
+  // Moving, the picture still forming: money as a shield.
+  action: [6, 2, 1, 1, 0.3],
+  even: [4, 2, 2, 1, 0.3],
+  // The nurture tail: comfort now, and what money says about them.
+  nurture: [2, 1, 4, 0.5, 2],
+}
+
+/* Where a row's confidence centres: steadier the further along it is. */
+const CONF_BASE = 15
+const CONF_SLOPE = 0.75
+
+const weighted = (weights: number[], r: number) => {
+  let x = r * weights.reduce((a, b) => a + b, 0)
+  const i = weights.findIndex((w) => (x -= w) < 0)
+  return i < 0 ? weights.length - 1 : i
+}
+
+function drawJoy(rand: () => number, lean: number[]): string[] {
+  const home = weighted(lean, rand())
+  const count = 1 + Math.floor(rand() * 3)
+  const joy: string[] = []
+  for (let k = 0; k < count; k++) {
+    // The first pick comes from the row's own cluster, and most later ones do.
+    const own = JOY_CLUSTERS[home].filter((o) => !joy.includes(o))
+    const pool =
+      own.length && (k === 0 || rand() < 0.55)
+        ? own
+        : JOY_CLUSTERS[weighted(lean.map((w, i) => (i === home ? 0 : w)), rand())].filter(
+            (o) => !joy.includes(o),
+          )
+    if (pool.length) joy.push(pool[Math.floor(rand() * pool.length)])
+  }
+  return joy
+}
+
+function drawConfidence(rand: () => number, kq: number): number[] {
+  const centre = CONF_BASE + CONF_SLOPE * kq + (rand() * 2 - 1) * 6
+  return Array.from({ length: 6 }, () => clamp(centre + (rand() * 2 - 1) * 9))
+}
+
+function withAnswers(rows: Prospect[]): Prospect[] {
+  const tilt = mulberry32(ANSWER_SEEDS.tilt)
+  const joyRand = mulberry32(ANSWER_SEEDS.joy)
+  const confRand = mulberry32(ANSWER_SEEDS.confidence)
+  return rows.map((p) => {
+    if (p.kq === null) return p
+    const c = p.clarity as number
+    const i = p.intent as number
+    // Drawn for every scored row, claimed or not, so the rows after it keep
+    // the draws they had.
+    const raw = Math.round((tilt() * 2 - 1) * TILT)
+    // A positive trade lifts Clarity and lowers Intent; a claim closes off
+    // whichever direction would argue with it.
+    const claim = CLAIMS[p.topAction] ?? {}
+    const lo = claim.clarity === 'high' || claim.intent === 'low' ? 0 : Math.max(1 - c, i - 100)
+    const hi = claim.intent === 'high' || claim.clarity === 'low' ? 0 : Math.min(100 - c, i - 1)
+    const d = Math.max(lo, Math.min(hi, raw))
+    const clarity = c + d
+    const intent = i - d
+    const lean =
+      p.tier === 'tier3'
+        ? JOY_LEAN.nurture
+        : clarity - intent >= LEAN_GAP
+          ? JOY_LEAN.vision
+          : intent - clarity >= LEAN_GAP
+            ? JOY_LEAN.action
+            : JOY_LEAN.even
+    return {
+      ...p,
+      clarity,
+      intent,
+      joy: drawJoy(joyRand, lean),
+      confidence: drawConfidence(confRand, p.kq),
+    }
+  })
+}
+
+export const prospects: Prospect[] = [
+  ...featuredProspects,
+  ...withAnswers(randomProspects(30, 0x5eed)),
+]
 
 // Pulse metrics for the dashboard, derived from the book so they can never
 // drift from the table below them. Every tab that talks about the standing

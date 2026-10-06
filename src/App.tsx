@@ -16,10 +16,10 @@ import type { HouseholdMember } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
+import { reachSegments, talkTo } from './data/prospectSegments'
 import {
   modelClusters,
   CLUSTER_KEYS,
-  talkTo,
   utmKeys,
   impactStats,
   byTier,
@@ -27,12 +27,10 @@ import {
   outcomes,
   attribution,
   marketingEffectiveness,
-  verbatims,
   buildFunnel,
   engagement,
   dropReadings,
   bySource,
-  byNiche,
   experiments,
   currentConfigSince,
   type ClusterSeg,
@@ -86,7 +84,6 @@ import {
   TargetIcon,
   TierBarsIcon,
   FunnelIcon,
-  MegaphoneIcon,
   HouseIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
@@ -212,8 +209,8 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
 // when a tier is focused.
 const TIER_META = [
   { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
-  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 4 },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 5 },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -333,20 +330,26 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
         </div>
 
         {/* Who the book is actually made of. The point of this section is the
-            question "am I reaching the people I set out to reach?" — business
-            owners, a practice sale, a family moving abroad — so the answer
-            leads, before who to call. */}
+            question "am I reaching the people I set out to reach?", so the
+            answer leads, before who to call. Each chip is a segment read off
+            the prospects' own answers — why money matters to them and how they
+            feel about it, crossed with how clearly they see the future and how
+            close they are to acting — never an audience typed in. */}
         <div className="cmd-reach">
-          <span className="cmd-reach-label">Who you’re reaching</span>
+          <span className="cmd-reach-label">
+            Who you’re reaching
+            <HelpTip
+              side="right"
+              text="Purpose × Posture crossed with Vision × Readiness, read from each prospect’s own answers."
+            />
+          </span>
           <div className="cmd-reach-list">
-            {[...verbatims]
-              .sort((a, b) => b.count - a.count)
-              .map((v) => (
-                <span className="cmd-reach-chip" key={v.niche}>
-                  {v.niche}
-                  <b>{v.count}</b>
-                </span>
-              ))}
+            {reachSegments.map((s) => (
+              <span className="cmd-reach-chip" key={s.name}>
+                {s.name}
+                <b>{s.count}</b>
+              </span>
+            ))}
           </div>
         </div>
 
@@ -374,7 +377,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
               <span className="cmd-lead-name">{lead.name}</span>
               <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>{lead.tier}</span>
               <span className="cmd-lead-kq">KQ {lead.kq}</span>
-              <span className="cmd-lead-niche">{lead.niche}</span>
+              <span className="cmd-lead-niche">{lead.segment}</span>
               <span className="cmd-lead-more">
                 {listOpen ? 'Hide' : `See All ${flagged.length}`}
                 <ChevronDown />
@@ -411,7 +414,7 @@ function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => voi
                         <span className="talk-name">{t.name}</span>
                       )
                     })()}
-                    <span className="talk-niche">{t.niche}</span>
+                    <span className="talk-niche">{t.segment}</span>
                     <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
                     <span className="talk-kq">KQ {t.kq}</span>
                   </div>
@@ -1492,7 +1495,7 @@ function ClientsScreen({
 }
 
 
-/* ── 2. Niche cross-tab: who shows up, crossed with who converts ── */
+/* ── 2. Clusters: who shows up, crossed with who converts ── */
 
 // One clustered row: share of the real respondent population (scored / model
 // total) crossed with the segment's conversion. The respondent count and
@@ -2124,12 +2127,11 @@ const FUNNEL_LEGEND = (
   </div>
 )
 
-type FunnelSplit = 'all' | 'source' | 'niche'
+type FunnelSplit = 'all' | 'source'
 
 const SPLITS: { key: FunnelSplit; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'source', label: 'By utm_source' },
-  { key: 'niche', label: 'By niche' },
 ]
 
 function SegmentBar({ s, max }: { s: Segment; max: number }) {
@@ -2153,7 +2155,7 @@ function SegmentBar({ s, max }: { s: Segment; max: number }) {
 
 function SegmentedFunnel() {
   const [split, setSplit] = useState<FunnelSplit>('all')
-  const segments = split === 'source' ? bySource : split === 'niche' ? byNiche : []
+  const segments = split === 'source' ? bySource : []
   const max = Math.max(...segments.map((s) => s.invited), 1)
   return (
     <div className="funnel-seg-block">
@@ -2182,16 +2184,11 @@ function SegmentedFunnel() {
           </p>
         </>
       ) : (
-        <>
-          <div className="seg-rows">
-            {segments.map((s) => (
-              <SegmentBar key={s.name} s={s} max={max} />
-            ))}
-          </div>
-          {split === 'niche' && (
-            <p className="seg-warn">Niches overlap — a prospect can match more than one, so these do not sum to 64.</p>
-          )}
-        </>
+        <div className="seg-rows">
+          {segments.map((s) => (
+            <SegmentBar key={s.name} s={s} max={max} />
+          ))}
+        </div>
       )}
 
       <div className="drop-readings">
@@ -2486,42 +2483,7 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
         </div>
       </section>
 
-      {/* 6 ── Verbatims */}
-      <section className="card analytics-card">
-        <header className="card-head">
-          <div className="card-title">
-            <MegaphoneIcon />
-            <span>What Your Prospects Are Actually Saying</span>
-          </div>
-          <HelpTip text="Recurring questions in the prospect's own words." />
-        </header>
-        <div className="analytics-body">
-          <div className="verbatim-grid">
-            {verbatims.map((v) => (
-              <blockquote className="verbatim" key={v.quote}>
-                <p>“{v.quote}”</p>
-                <footer>
-                  <span className="verbatim-niche">{v.niche}</span>
-                  <span className="verbatim-count">{v.count} prospects</span>
-                </footer>
-              </blockquote>
-            ))}
-          </div>
-          <div className="verbatim-uses">
-            <div className="vu">
-              <b>Opening a first conversation</b>
-              <span>Lead with the question they already asked — no discovery warm-up needed.</span>
-            </div>
-            <div className="vu">
-              <b>Ad &amp; content copy</b>
-              <span>Run these as headlines verbatim; they are the prospect's phrasing, not yours.</span>
-            </div>
-          </div>
-          <p className="analytics-note">Everything here is something your prospect told you directly.</p>
-        </div>
-      </section>
-
-      {/* 7 ── Funnel health, collapsed */}
+      {/* 6 ── Funnel health, collapsed */}
       <FunnelHealth />
     </>
   )

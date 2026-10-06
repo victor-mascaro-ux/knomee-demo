@@ -1,5 +1,7 @@
-// Advisor Analytics page — impact, niches, tiers, funnel, experiments, UTM.
-// All figures are placeholder sample data from the design handoff.
+// Advisor Analytics page — impact, clusters, tiers, funnel, experiments, UTM.
+// All figures are placeholder sample data from the design handoff. Who the
+// book is made of and who to call this week are not typed in here: they are
+// derived from the prospect rows, in prospectSegments.ts.
 
 export interface EngagementMetric {
   label: string
@@ -78,29 +80,6 @@ export const impactStats: ImpactStat[] = [
   },
 ]
 
-// ── Niches: who your prospects are, crossed with which of them convert ──
-// Niches overlap (a prospect can match more than one), so `share` deliberately
-// sums past 100% and the per-niche client counts sum past the 12 total.
-export interface Niche {
-  name: string
-  share: number // % of scored prospects
-  count: number // n prospects in this niche
-  clients: number
-  conv: number // % — clients / count
-  delta: number // percentage points vs last quarter
-}
-
-export const niches: Niche[] = [
-  { name: 'Medical professionals · practice sale', share: 34, count: 14, clients: 5, conv: 36, delta: 6 },
-  { name: 'Expat / international living', share: 28, count: 11, clients: 2, conv: 18, delta: -4 },
-  { name: 'Special needs family planning', share: 22, count: 9, clients: 1, conv: 11, delta: -2 },
-  { name: 'Business succession & exit', share: 19, count: 8, clients: 2, conv: 25, delta: 3 },
-  { name: 'HNW estate complexity', share: 16, count: 6, clients: 3, conv: 50, delta: 11 },
-  { name: 'Early retirees (pre-60)', share: 12, count: 5, clients: 0, conv: 0, delta: -5 },
-]
-
-export const nicheBenchmark = 20 // % — concentration benchmark
-
 // ── Onboarding funnel (single proportional drop-off sector bar) ──
 export interface FunnelSeg {
   stage: string
@@ -173,16 +152,6 @@ export const bySource: Segment[] = [
   { name: 'Direct', invited: 12, scored: 5, completed: 4, clients: 1 },
 ]
 
-// Niche segments overlap, so these do not sum to the practice totals.
-export const byNiche: Segment[] = [
-  { name: 'Medical · practice sale', invited: 18, scored: 14, completed: 12, clients: 5 },
-  { name: 'Expat / international', invited: 15, scored: 11, completed: 8, clients: 2 },
-  { name: 'Special needs planning', invited: 14, scored: 9, completed: 6, clients: 1 },
-  { name: 'Business succession', invited: 10, scored: 8, completed: 7, clients: 2 },
-  { name: 'HNW estate complexity', invited: 7, scored: 6, completed: 5, clients: 3 },
-  { name: 'Early retirees (pre-60)', invited: 8, scored: 5, completed: 3, clients: 0 },
-]
-
 // ── UTM attribution, ranked by clients produced rather than clicks ──
 export interface AttributionGroup {
   key: string
@@ -251,78 +220,6 @@ export const experiments: Experiment[] = [
 ]
 
 export const currentConfigSince = '6 May 2026'
-
-// ── Who to talk to this week ──
-// Every chip is something the prospect said in their own words. Tracked
-// behaviour (adventures completed, logins, scheduling state) is deliberately
-// excluded — the point of the card is that the score shows its reasoning.
-export interface TalkTo {
-  name: string
-  tier: string
-  kq: number
-  niche: string
-  said: string[]
-}
-
-export const talkTo: TalkTo[] = [
-  {
-    name: 'Emma Rossi',
-    tier: 'Tier 1',
-    kq: 88,
-    niche: 'HNW estate complexity',
-    said: ['Owns property in three countries', 'Named estate planning the top priority', 'Caring for a parent right now', 'Wants it settled before year end'],
-  },
-  {
-    name: 'Sarah Mitchell',
-    tier: 'Tier 1',
-    kq: 81,
-    niche: 'Medical · practice sale',
-    said: ['Named practice sale as top concern', 'Stated a 3-year exit horizon', 'Has worked since 13, wants adventures', 'Asked what a sale nets after tax'],
-  },
-  {
-    name: 'Jorday Ray',
-    tier: 'Tier 1',
-    kq: 76,
-    niche: 'Business succession & exit',
-    said: ['Family legacy is their stated #1 goal', 'No family successor named', 'Wants the business to outlast them', 'Asked about generational wealth'],
-  },
-  {
-    name: 'Barbara Dean',
-    tier: 'Tier 2',
-    kq: 68,
-    niche: 'Expat / international living',
-    said: ['Plans to retire to France', 'Asked whether the move is affordable', 'Unsure about cross-border tax', 'Named a 2-year timeline'],
-  },
-  {
-    name: 'Sophie Dean',
-    tier: 'Tier 2',
-    kq: 62,
-    niche: 'Special needs family planning',
-    said: ['Has an adult child with special needs', 'Named lifetime protection as the goal', 'Asked what happens after the parents', 'Wants a trust explained plainly'],
-  },
-  {
-    name: 'Sebastian Watson',
-    tier: 'Tier 2',
-    kq: 58,
-    niche: 'Early retirees (pre-60)',
-    said: ['Wants to stop working at 57', 'Named income certainty as the worry', 'Says the current plan feels vague', 'Asked for a concrete number'],
-  },
-]
-
-// ── Verbatim prospect language ──
-export interface Verbatim {
-  quote: string
-  niche: string
-  count: number
-}
-
-export const verbatims: Verbatim[] = [
-  { quote: 'Should I sell my medical practice now or in 3 years?', niche: 'Medical · practice sale', count: 9 },
-  { quote: 'Can I afford to live in France after retirement?', niche: 'Expat / international living', count: 7 },
-  { quote: 'What protection should I consider for my adult special-needs child?', niche: 'Special needs family planning', count: 6 },
-  { quote: 'How do I exit my business without a family successor?', niche: 'Business succession & exit', count: 5 },
-  { quote: 'I have multiple properties across countries — how do I plan my estate?', niche: 'HNW estate complexity', count: 4 },
-]
 
 // ── UTM tracking (labels + keys per the Marketing settings) ──
 export interface UtmKey {

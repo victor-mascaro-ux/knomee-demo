@@ -19,7 +19,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './joyFlow.css'
 import './joyResults.css'
 import './confidenceFlow.css'
-import { confidenceAnswers } from '../data/financialId'
+import { advisorConfidenceAnswer, confidenceAnswers } from '../data/financialId'
 import { Gauge } from './profileParts'
 import { AboutOverlay, useEndingOverlay, CountUp, Reveal, Typed } from './JoyResults'
 import JoyReward from './JoyReward'
@@ -40,19 +40,14 @@ export interface ConfidenceStatement {
 /* The six, in the design's order. The last is new to the adventure: whether
    working with an advisor is itself a source of confidence. */
 export const CONFIDENCE_STATEMENTS: ConfidenceStatement[] = [
-  ...confidenceAnswers.map((a) => ({
-    statement: a.statement.replace('my financial decisions', 'financial decisions'),
-    low: a.low,
-    high: a.high,
-    sample: a.value,
-  })),
-  {
-    statement: 'I believe that working with a financial advisor/planner improves my confidence.',
-    low: 'no, I don’t',
-    high: 'yes, I do',
-    sample: 84,
-  },
-]
+  ...confidenceAnswers,
+  advisorConfidenceAnswer,
+].map((a) => ({
+  statement: a.statement.replace('my financial decisions', 'financial decisions'),
+  low: a.low,
+  high: a.high,
+  sample: a.value,
+}))
 
 export interface ConfidenceAnswers {
   /** Per statement, 0–100; null while it has not been moved. */

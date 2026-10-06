@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 import './joyFlow.css'
 import './advisor-flow.css'
 
-export type IdIconKind = 'name' | 'book' | 'firm' | 'place'
+export type IdIconKind = 'name' | 'book' | 'firm' | 'place' | 'work'
 
 export interface IdField {
   key: string
@@ -77,7 +77,7 @@ export default function IdentityCardForm({
                   className={`af-idcard-chip${v ? '' : ' is-empty'}${current.key === f.key ? ' is-on' : ''}`}
                 >
                   <IdIcon k={f.icon} />
-                  {v || f.chip || f.label}
+                  <span className="af-idcard-chip-t">{v || f.chip || f.label}</span>
                 </span>
               )
             })}
@@ -123,7 +123,7 @@ export default function IdentityCardForm({
   )
 }
 
-/** The identity fields' marks: a person, a stack of coins, a building, a pin. */
+/** The identity fields' marks: a person, a stack of coins, a building, a pin, a briefcase. */
 export function IdIcon({ k }: { k: IdIconKind }) {
   const paths: Record<IdIconKind, ReactNode> = {
     name: (
@@ -150,6 +150,13 @@ export function IdIcon({ k }: { k: IdIconKind }) {
       <>
         <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
         <circle cx="12" cy="9.5" r="2.5" />
+      </>
+    ),
+    work: (
+      <>
+        <rect x="3.5" y="7.5" width="17" height="12" rx="2" />
+        <path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5" />
+        <path d="M3.5 12.5h17" />
       </>
     ),
   }
