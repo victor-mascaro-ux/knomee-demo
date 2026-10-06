@@ -21,10 +21,12 @@ const CLIENT_TIER: Record<string, string> = {
 }
 import { DownloadIcon } from '../components/icons'
 import {
+  BriefcaseIcon,
   CalendarIcon,
   CaretIcon,
   CheckIcon,
   MailIcon,
+  PinIcon,
   RowChevron,
 } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -973,6 +975,18 @@ export default function ClientProfileScreen({
               <span className="pp-meta-row tt" data-tip={client.email}>
                 <MailIcon /> <span className="pp-meta-email">{client.email}</span>
               </span>
+              {/* Where they live and what they do — the candidate rail's rows,
+                  each dropped when it was left blank. */}
+              {cp.location && (
+                <span className="pp-meta-row">
+                  <PinIcon /> {cp.location}
+                </span>
+              )}
+              {cp.occupation && (
+                <span className="pp-meta-row">
+                  <BriefcaseIcon /> {cp.occupation}
+                </span>
+              )}
             </div>
 
             {/* On the advisor's page the check-in sits with who she is, in the

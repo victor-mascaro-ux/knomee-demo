@@ -1468,6 +1468,7 @@ const CLIENT_WELCOME: Step = {
 const CLIENT_ID_FIELDS: IdField[] = [
   { key: 'name', label: 'Your name', icon: 'name' },
   { key: 'place', label: 'Where you live', hint: 'Optional', chip: 'Where you live', icon: 'place' },
+  { key: 'job', label: 'Your occupation', hint: 'Optional', chip: 'Occupation', icon: 'work' },
 ]
 
 /* Sarah's phone, restartable from her menu: a restart is a fresh run of the
@@ -1512,7 +1513,17 @@ function ClientExperienceRun({
      persona the demo is about. */
   const [intro, setIntro] = useState<'welcome' | 'you' | null>(complete ? null : 'welcome')
   const [idField, setIdField] = useState(0)
-  const [who, setWho] = useState<Record<string, string>>({ name: SARAH.name, place: '' })
+  /* The welcome and each field of the first form, for the review overlay —
+     none of them is in the address. */
+  useCcNav('cx.intro', intro, setIntro)
+  useCcNav('cx.idField', idField, setIdField)
+  /* The finished-journey demo skips the form, so it carries the answers her
+     advisor's page shows; a fresh run starts them blank. */
+  const [who, setWho] = useState<Record<string, string>>({
+    name: SARAH.name,
+    place: complete ? financialId.location : '',
+    job: complete ? financialId.occupation : '',
+  })
   const introNext = () => {
     if (intro === 'welcome') {
       setIdField(0)
@@ -1542,9 +1553,11 @@ function ClientExperienceRun({
   const [adventure, setAdventure] = useState<string | null>(null)
   useCcNav('cx.adventure', adventure, setAdventure)
   useCcNavRoots('cx', () => [
-    { 'cx.tab': 'adventures', 'cx.adventure': null },
-    ...journey.map((j) => ({ 'cx.tab': 'adventures', 'cx.adventure': j.id })),
-    { 'cx.tab': 'finid', 'cx.adventure': null },
+    { 'cx.intro': 'welcome' },
+    { 'cx.intro': 'you', 'cx.idField': 0 },
+    { 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': null },
+    ...journey.map((j) => ({ 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': j.id })),
+    { 'cx.intro': null, 'cx.tab': 'finid', 'cx.adventure': null },
   ])
   /* Reopened from her Financial ID: the adventure's ending again, with her
      answers, and back to the page after — nothing on the journey changes. */
@@ -2031,7 +2044,26 @@ function ClientExperienceRun({
                  built. */
               <ProspectProfileScreen
                 prospect={SARAH}
-                fresh={{ joy, done, conf, outlook, future, goals: goalsDone }}
+                fresh={{
+                  joy,
+                  about: { location: who.place, occupation: who.job },
+                  done,
+                  conf,
+                  outlook,
+                  future,
+                  goals: goalsDone,
+                }}
+                /* The next adventure's waiting card is a way into it, the
+                   same as its Start on My Adventures. */
+                nextAdventure={[journey.find((j) => !done[j.id])?.id].find((id) => id && BUILT.includes(id))}
+                onStartAdventure={(id) => {
+                  setRailOpen(false)
+                  /* Taken from the Adventures tab, as its Start is: the ID
+                     tab's viewport layout would clip the adventure's foot. */
+                  setTab('adventures')
+                  reopen(id)
+                  viewport.current?.scrollTo({ top: 0 })
+                }}
                 onOpenEnding={(id) => {
                   setReviewing(true)
                   setAdventure(id)

@@ -94,6 +94,10 @@ const widePhoto = (src: string, alt: string): BoardTile => ({
 
 export const clientProfile = {
   joined: 'March 2025',
+  /* Her answers to "A little about you". The rail shows them under her email
+     and drops either one left blank. */
+  location: 'Denver, CO',
+  occupation: 'Marketing consultant',
   household: 'Watson Family',
   checkIn: { mood: 'Good', level: 4, date: '05/03/2025' },
 

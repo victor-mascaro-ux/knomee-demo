@@ -3164,7 +3164,7 @@ button.name-link-btn:hover .name-text {
   color: #0e8c6b;
 }
 
-/* 2 ── Niche cross-tab */
+/* 2 ── Clusters: each segment's share crossed with its conversion */
 .niche-list {
   display: flex;
   flex-direction: column;
@@ -3188,10 +3188,6 @@ button.name-link-btn:hover .name-text {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-.niche-flag {
-  font-size: 9px;
-  color: var(--purple-bolt);
 }
 .niche-bars {
   display: flex;
@@ -3238,17 +3234,6 @@ button.name-link-btn:hover .name-text {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
-.niche-delta {
-  font-style: normal;
-  font-size: 10.5px;
-  font-weight: 700;
-}
-.niche-delta.up {
-  color: #0e8c6b;
-}
-.niche-delta.down {
-  color: #b4324b;
-}
 
 .niche-callout {
   display: flex;
@@ -3267,14 +3252,6 @@ button.name-link-btn:hover .name-text {
 .niche-callout svg {
   flex: none;
   margin-top: 2px;
-}
-.niche-foot {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 14px;
-  font-size: 12.5px;
-  color: #3a3350;
 }
 
 /* 3 ── Does the score work? */
@@ -3622,7 +3599,7 @@ button.name-link-btn:hover .name-text {
   color: #8e88a0;
 }
 
-/* 6 ── Who to talk to */
+/* Who to talk to — the dashboard's call list, not an Analytics section */
 .talk-list {
   display: flex;
   flex-direction: column;
@@ -3672,8 +3649,8 @@ button.name-link-btn:hover .name-text {
   color: #201a2e;
   font-variant-numeric: tabular-nums;
 }
-/* Who this person is — the audience they belong to — right after the name,
-   where it is read first, rather than grey at the far edge of the card. */
+/* Who this person is — the segment or cluster they land in — right after the
+   name, where it is read first, rather than grey at the far edge of the card. */
 .talk-niche {
   font-size: 12px;
   font-weight: 700;
@@ -3683,7 +3660,7 @@ button.name-link-btn:hover .name-text {
   border-radius: 999px;
 }
 
-/* "Who you're reaching": the book by audience, largest first. */
+/* "Who you're reaching": the book by crossed segment, largest first. */
 .cmd-reach {
   display: flex;
   align-items: center;
@@ -3697,6 +3674,16 @@ button.name-link-btn:hover .name-text {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #6d6a76;
+  /* Its "?" says what the segments are, the way the KQ label's does. */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* The bubble is drawn by the "?" and inherits from the label around it; it
+   reads as a sentence, not in the label's spaced capitals. */
+.cmd-reach-label .help-tip {
+  text-transform: none;
+  letter-spacing: normal;
 }
 .cmd-reach-list {
   display: flex;
@@ -3748,70 +3735,7 @@ button.name-link-btn:hover .name-text {
   color: #3a2456;
 }
 
-/* 7 ── Verbatims */
-/* Wide enough that the niche chip and its count sit on one line without
-   colliding — five quotes land as 3 + 2 rather than a ragged 4 + 1. */
-.verbatim-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 12px;
-}
-.verbatim {
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--lilac);
-  border-radius: 10px;
-  padding: 15px 16px;
-  background: #fdfcfe;
-}
-.verbatim p {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #201a2e;
-  font-weight: 500;
-}
-.verbatim footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 12px;
-}
-.verbatim-niche {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--plum);
-  background: #f3f0f9;
-  padding: 4px 9px;
-  border-radius: 6px;
-}
-.verbatim-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: #8e88a0;
-}
-.verbatim-uses {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-.vu {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12.5px;
-}
-.vu b {
-  color: var(--plum);
-}
-.vu span {
-  color: #8e88a0;
-  line-height: 1.5;
-}
-
-/* 8 ── Funnel health accordion */
+/* 6 ── Funnel health accordion */
 .fh-head {
   width: 100%;
   font-family: inherit;
@@ -3933,14 +3857,13 @@ button.name-link-btn:hover .name-text {
 /* Swapping the split replaces the rows, so they re-enter rather than pop. */
 .seg-row,
 .drop-reading,
-.talk-card,
-.verbatim {
+.talk-card {
   animation: riseIn 0.4s ease backwards;
 }
-.drop-reading:nth-child(2), .talk-card:nth-child(2), .verbatim:nth-child(2) { animation-delay: 0.05s; }
-.drop-reading:nth-child(3), .talk-card:nth-child(3), .verbatim:nth-child(3) { animation-delay: 0.1s; }
-.drop-reading:nth-child(4), .talk-card:nth-child(4), .verbatim:nth-child(4) { animation-delay: 0.15s; }
-.talk-card:nth-child(5), .verbatim:nth-child(5) { animation-delay: 0.2s; }
+.drop-reading:nth-child(2), .talk-card:nth-child(2) { animation-delay: 0.05s; }
+.drop-reading:nth-child(3), .talk-card:nth-child(3) { animation-delay: 0.1s; }
+.drop-reading:nth-child(4), .talk-card:nth-child(4) { animation-delay: 0.15s; }
+.talk-card:nth-child(5) { animation-delay: 0.2s; }
 .talk-card:nth-child(6) { animation-delay: 0.25s; }
 
 /* Funnel segments sweep in behind a clip, matching the tier distribution bar. */
@@ -3952,7 +3875,6 @@ button.name-link-btn:hover .name-text {
 .niche-row,
 .tier-hero-row,
 .drop-reading,
-.verbatim,
 .utm-list li,
 .talk-chip {
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease,
@@ -3966,14 +3888,10 @@ button.name-link-btn:hover .name-text {
   border-color: var(--stone);
   box-shadow: 0 4px 14px rgba(16, 24, 40, 0.07);
 }
-.drop-reading:hover,
-.verbatim:hover {
+.drop-reading:hover {
   transform: translateY(-2px);
   border-color: var(--stone);
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
-}
-.verbatim:hover {
-  border-left-color: var(--purple-bolt);
 }
 .talk-chip:hover {
   background: #e9e2f5;
@@ -3993,7 +3911,6 @@ button.name-link-btn:hover .name-text {
   .seg-row,
   .drop-reading,
   .talk-card,
-  .verbatim,
   .ob-bar,
   .dist-bar {
     animation: none !important;
@@ -4004,7 +3921,6 @@ button.name-link-btn:hover .name-text {
     transition: none !important;
   }
   .drop-reading:hover,
-  .verbatim:hover,
   .impact-card:hover,
   .talk-card:hover,
   .analytics-metric:hover {
@@ -4012,15 +3928,9 @@ button.name-link-btn:hover .name-text {
   }
 }
 
-/* Analytics stagger runs to 8 sections now. */
+/* Analytics stagger runs to 6 sections, the most any page has. */
 .analytics-card:nth-of-type(6) {
   animation-delay: 0.3s;
-}
-.analytics-card:nth-of-type(7) {
-  animation-delay: 0.36s;
-}
-.analytics-card:nth-of-type(8) {
-  animation-delay: 0.42s;
 }
 
 @media (max-width: 1180px) {
@@ -4042,12 +3952,7 @@ button.name-link-btn:hover .name-text {
   .niche-bar-line {
     grid-template-columns: 58px 1fr 40px;
   }
-  .niche-bar-line .niche-delta,
-  .niche-bar-line .attr-n {
-    grid-column: 2 / -1;
-  }
-  .drop-readings,
-  .verbatim-uses {
+  .drop-readings {
     grid-template-columns: 1fr;
   }
   .exp-head,

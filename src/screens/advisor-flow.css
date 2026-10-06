@@ -2064,7 +2064,6 @@ button.af-opt:hover {
   font-size: 13px;
   font-weight: 600;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   backdrop-filter: blur(4px);
 }
@@ -2072,6 +2071,13 @@ button.af-opt:hover {
   flex: none;
   width: 15px;
   height: 15px;
+}
+/* The chip's words, cut with an ellipsis when a long answer outgrows the card.
+   On the flex chip itself the text was an anonymous item, and only clipped. */
+.af-idcard-chip-t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Title over one quiet line, held together as a single block. */

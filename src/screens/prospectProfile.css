@@ -1527,6 +1527,33 @@
   font-style: italic;
   color: var(--text-secondary);
 }
+/* The waiting card of the adventure that is next starts it. It keeps the
+   locked look (greyed heading, drained art) and answers as a whole card: a
+   chevron at its head, and a lift and the link colour under the pointer. */
+.pp-card.is-next {
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.pp-card.is-next:hover {
+  border-color: rgba(118, 57, 161, 0.35);
+  box-shadow: 0 4px 14px rgba(36, 4, 70, 0.08);
+}
+.pp-card.is-next:focus-visible {
+  outline: 2px solid var(--k-grape, #7639a1);
+  outline-offset: 2px;
+}
+.pp-card-next {
+  flex: none;
+  color: var(--text-secondary);
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.pp-card.is-next:hover .pp-card-next {
+  transform: translateX(3px);
+  color: var(--text-link);
+}
+.pp-card.is-next:hover .pp-waiting {
+  color: var(--text-link);
+}
 
 /* A completed adventure's heading opens its ending again: the heading is the
    way in, with a chevron that says so and moves on hover. */

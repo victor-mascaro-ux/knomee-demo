@@ -19,7 +19,7 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
   },
   {
     statement: 'I feel confident that I can weather unexpected financial challenges and changes.',
-    value: 74,
+    value: 80,
     low: 'not confident',
     high: 'very confident',
   },
@@ -42,6 +42,17 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
     high: 'never regret',
   },
 ]
+
+/* The sixth statement, new to the adventure: whether working with an advisor
+   is itself a source of confidence. It stands apart from the five because her
+   Confidence card reads those five and its dial is their mean; the phone's
+   flow asks all six, and her prospect row carries all six. */
+export const advisorConfidenceAnswer: ConfidenceAnswer = {
+  statement: 'I believe that working with a financial advisor/planner improves my confidence.',
+  value: 84,
+  low: 'no, I don’t',
+  high: 'yes, I do',
+}
 
 // Demo content for a prospect's "Financial ID" profile page. All placeholder
 // data — one rich profile stands in for whichever prospect is opened.
@@ -107,6 +118,10 @@ export interface ProfileQuestion {
 
 export const financialId = {
   joined: 'March 2023',
+  /* Her answers to "A little about you". The rail shows them under her email
+     and drops either one left blank. */
+  location: 'San Francisco, CA',
+  occupation: 'Business owner',
   /* Whose profile this is. One prospect page is built out and it is hers, so
      only her name in the Prospects table opens it — the same rule the Clients
      table follows for Emily Watson. */

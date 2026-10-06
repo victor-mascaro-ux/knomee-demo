@@ -53,6 +53,22 @@ export const BuildingIcon = ({ size = 14 }: IconProps) => (
   </svg>
 )
 
+/** Where they live — a pin. */
+export const PinIcon = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+    <circle cx="12" cy="9.5" r="2.5" />
+  </svg>
+)
+
+/** What they do — a briefcase. */
+export const BriefcaseIcon = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3.5" y="7.5" width="17" height="12" rx="2" />
+    <path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 12.5h17" />
+  </svg>
+)
+
 /** Core values, hopes — a target. */
 export const TargetIcon = ({ size = 16 }: IconProps) => (
   <svg {...base(size)}>

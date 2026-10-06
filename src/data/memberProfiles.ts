@@ -41,6 +41,10 @@ const hisConfidence = [similarities.statement, ...differences.statements]
 const sebastian: MemberProfile = {
   ...clientProfile,
   joined: 'May 2025',
+  /* The household's city. No occupation: the family data never says what he
+     does, and his rail drops a blank row rather than borrowing hers. */
+  location: clientProfile.location,
+  occupation: '',
   owner: him.name,
   checkIn: him.checkIn,
   /* The same six questions, answered by him — only the ones he answered. One
@@ -77,6 +81,8 @@ const sebastian: MemberProfile = {
 const sarah: MemberProfile = {
   ...clientProfile,
   joined: financialId.joined,
+  location: financialId.location,
+  occupation: financialId.occupation,
   owner: financialId.owner,
   household: '',
   members: [],
