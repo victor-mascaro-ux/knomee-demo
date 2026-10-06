@@ -211,31 +211,38 @@ export const MARK_PARTS = [
 /* The floating knomee button: a white disc carrying the mark, standing just
    above the right end of the tab bar. The bar is three flat tabs now; the
    mark is no longer one of them. It lives inside the bar's <nav> so it rides
-   with the bar (and above the sheets the bar stays above), and anything the
-   page wants to draw over the mark — the client's long-press fill — goes in
-   as children. Muted while nothing it opens is open, plum while it is. */
-export const KnomeeFab = ({
-  on,
-  label,
-  onClick,
-  children,
-}: {
-  on?: boolean
-  label: string
-  onClick: () => void
-  children?: ReactNode
-}) => (
-  <button
-    type="button"
-    className={`cx-fab${on ? ' is-on' : ''}`}
-    aria-label={label}
-    aria-pressed={on}
-    onClick={onClick}
-  >
-    <TabMark />
-    {children}
-  </button>
-)
+   with the bar (and above the sheets the bar stays above). Under the finger
+   the mark's five strokes fill to plum inside-out and the whole mark pulses
+   once — on every phone, whatever the press then does; they stay filled
+   while what it opens is open. */
+export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string; onClick: () => void }) {
+  const [pressing, setPressing] = useState(false)
+  const up = () => setPressing(false)
+  return (
+    <button
+      type="button"
+      className={`cx-fab${on ? ' is-on' : ''}`}
+      aria-label={label}
+      aria-pressed={on}
+      onClick={onClick}
+      onPointerDown={() => setPressing(true)}
+      onPointerUp={up}
+      onPointerLeave={up}
+      onPointerCancel={up}
+    >
+      <TabMark />
+      {(pressing || on) && (
+        <div key={pressing ? 'press' : 'static'} className={`px-fill${on && !pressing ? ' is-static' : ''}`} aria-hidden>
+          <svg viewBox="0 0 288 288">
+            {MARK_PARTS.map((d, i) => (
+              <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
+            ))}
+          </svg>
+        </div>
+      )}
+    </button>
+  )
+}
 
 /* The selected tab's bar: the dashboards' tab underline — 3px, rounded, the
    firm's colour — laid on the bar's top edge over the selected tab, and
@@ -1692,7 +1699,6 @@ function ClientExperienceRun({
   /* Which scripted example the next long press plays. Each press takes the
      next one — a life event, a question, a goal — and then round again. */
   const [voiceAt, setVoiceAt] = useState(-1)
-  const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   /* Opening an adventure (or leaving one), or switching tabs, starts the page
@@ -1714,10 +1720,8 @@ function ClientExperienceRun({
   const pressStart = (e: React.PointerEvent) => {
     if (!(e.target as HTMLElement).closest('.cx-fab')) return
     held.current = false
-    setPressing(true)
     timer.current = window.setTimeout(() => {
       held.current = true
-      setPressing(false)
       setSheet(false)
       setVoiceAt((i) => (i + 1) % voices.length)
       setVoiceOpen(true)
@@ -1725,7 +1729,6 @@ function ClientExperienceRun({
   }
   const pressEnd = () => {
     if (timer.current) window.clearTimeout(timer.current)
-    setPressing(false)
   }
 
   const pickTab = (id: TabId) => {
@@ -2133,23 +2136,7 @@ function ClientExperienceRun({
                 <span className="cx-tab-lbl">{t.label}</span>
               </button>
             ))}
-            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee}>
-              {/* The mark's five strokes fill to plum inside-out under the finger,
-                  and stay filled while either sheet is open. */}
-              {(pressing || sheet || voiceOpen) && (
-                <div
-                  key={pressing ? 'press' : 'static'}
-                  className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
-                  aria-hidden
-                >
-                  <svg viewBox="0 0 288 288">
-                    {MARK_PARTS.map((d, i) => (
-                      <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
-                    ))}
-                  </svg>
-                </div>
-              )}
-            </KnomeeFab>
+            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />
           </nav>
           )}
 

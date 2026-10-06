@@ -710,15 +710,12 @@ svg.cx-tab-mark {
   cursor: pointer;
   transition: box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-/* The mark's states are the centre tab's, unchanged: plum but eased back on
-   hover, so the long press's plum fill reads as it runs stroke by stroke over
-   it (a full-plum hover hid it); full plum while what it opens is open. */
+/* Hover lifts the disc and leaves the mark grey: the press's plum fill then
+   runs stroke by stroke over grey, where it shows. A plum hover (even eased
+   back to 0.72) was nearly the fill's own colour, so the fill vanished into
+   it. Full plum while what it opens is open. */
 .cx-fab:hover {
-  color: var(--k-plum);
   box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.06), 0 8px 22px rgba(30, 20, 50, 0.22);
-}
-.cx-fab:hover svg.cx-tab-mark {
-  opacity: 0.72;
 }
 .cx-fab.is-on {
   color: var(--k-plum);
