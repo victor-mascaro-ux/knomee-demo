@@ -72,7 +72,7 @@ export interface JoyContent {
 const SAMPLE_TOOLS = ['Comfort', 'Supporting my family']
 const SAMPLE_WAYS: Record<string, number> = {
   'Work and career': 1,
-  'Financial planning and management': 1,
+  'Financial planning': 1,
   'Health and wellness': -1,
   'Family and relationships': -1,
   'Hobbies and interests': -1,

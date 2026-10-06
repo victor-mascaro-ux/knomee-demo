@@ -120,6 +120,15 @@
 .ap-fold:not(.is-open) .ap-fold-head {
   margin-bottom: 0;
 }
+/* A row lifts 2px on hover. The body clips (its height animates), so the top
+   row kept losing its top edge: the body keeps 6px of air inside the clip,
+   taken from the head's 14, so nothing moves. */
+.ap-fold.is-open .ap-fold-head {
+  margin-bottom: 8px;
+}
+.ap-fold-body {
+  padding-top: 6px;
+}
 .ap-fold-caret {
   display: inline-flex;
   align-items: center;

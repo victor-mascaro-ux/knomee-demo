@@ -185,6 +185,7 @@ export default function JoySwipe({
           </button>
         ))}
       </div>
+      <p className="js-hint">Tap a button, or swipe the card left, down or right.</p>
     </div>
   )
 }

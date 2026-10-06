@@ -278,6 +278,14 @@
   align-items: start;
   width: 86%;
 }
+/* How to answer, once, under the answers: close to them, not a deck's gap
+   away. */
+.js-hint {
+  margin: -28px 0 0;
+  font-size: 13px;
+  color: var(--grey-text, #6d6a76);
+  text-align: center;
+}
 .js-way.is-less {
   justify-self: start;
 }
@@ -1212,6 +1220,10 @@ html.cx-desktop .jf > :not(.jf-top, .jf-foot, .jw, .modal-backdrop, [role='dialo
 html.cx-desktop .jf:not(:has(> .jf-top, > .jf-intro)) {
   padding-top: 40px;
 }
+/* An ending opens on its Learn More, high under the app bar: less air. */
+html.cx-desktop .jf:has(> .jr) {
+  padding-top: 24px;
+}
 /* Air between the step and the foot. */
 html.cx-desktop .jf > :has(+ .jf-top) {
   margin-bottom: 40px;
@@ -1220,13 +1232,14 @@ html.cx-desktop .jf > :has(+ .jf-top) {
 /* The top bar: the full window, flush under the app bar (its sticky top:0 is
    the scroller's top), a hairline under it rather than a shadow strip. On the
    720 stage: the mark at its left, the cross at its right, and the meter,
-   capped at 360, in its middle (the same place in every adventure). One
-   height (53) whether or not the host gives the bar its mark, so what sticks
-   under it (.ol-sky, .mv-air, .fy-tally) has one offset. */
+   capped at 360, just before the cross (the same place in every adventure).
+   One height (53) whether or not the host gives the bar its mark, so what
+   sticks under it (.ol-sky, .mv-air, .fy-tally) has one offset. */
 html.cx-desktop .jf > .jf-top {
   top: 0;
   display: grid;
-  grid-template-columns: 1fr minmax(0, 360px) 1fr;
+  grid-template-columns: 1fr minmax(0, 360px) auto;
+  column-gap: 16px;
   min-height: 53px;
   margin: 0 0 40px;
   padding: 12px max(24px, calc((100% - var(--jf-stage)) / 2)) 10px;
@@ -1278,8 +1291,9 @@ html.cx-desktop .cx-viewport:has(> .jf > .jf-intro) > .jf {
 html.cx-desktop .jf > .jf-intro {
   --xp-w: 880px;
   flex: none;
-  margin-block: auto;
-  padding-block: 48px;
+  /* At the top of the window, its title row where a step's top bar is. */
+  margin-block: 0 auto;
+  padding-block: 12px 48px;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   grid-template-rows: auto repeat(5, auto) 1fr;
@@ -1292,11 +1306,13 @@ html.cx-desktop .jf-intro > .adv-badge {
   grid-row: 1;
   margin-bottom: 40px;
 }
+/* The meter beside the cross, at the steps' 360, as on every step's bar. */
 html.cx-desktop .jf-intro > .adv-badge .adv-badge-bar {
-  flex: 0 1 240px;
+  flex: 0 1 360px;
+  margin-left: auto;
 }
 html.cx-desktop .jf-intro > .adv-badge .adv-close {
-  margin-left: auto;
+  margin-left: 6px;
 }
 html.cx-desktop .jf-intro > .jf-hero {
   grid-column: 1;
@@ -1319,8 +1335,9 @@ html.cx-desktop .jf > .jf-intro:not(:has(> .adv-badge)) > .jf-hero {
 }
 /* The art card: the same box for every adventure. Each picture has a clear
    ground and is cut on its left and bottom edges, so the cut lands on the
-   card's edge. It arrives, and then holds still: a breathing picture would
-   pulse the card's edge. */
+   card's edge. It arrives, then breathes as on the phone, cut back to the
+   card's own box as it swells, so the picture moves and the card's edge
+   holds still. */
 html.cx-desktop .jf-intro .jf-hero-img {
   flex: none;
   width: 300px;
@@ -1330,7 +1347,28 @@ html.cx-desktop .jf-intro .jf-hero-img {
   object-position: left bottom;
   border-radius: 24px;
   background: #f6f3fa;
-  animation: jfHeroIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation:
+    jfHeroIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both,
+    jfBreatheInCard 6s ease-in-out 0.9s infinite;
+}
+/* jfBreathe's swell about the picture's 30% 70% origin, with the clip pulled
+   in by exactly what the swell adds on each side (0.025 x 30% or 70%, over
+   1.025), so what shows is always the card's own 300 x 220. */
+@keyframes jfBreatheInCard {
+  0%,
+  100% {
+    transform: none;
+    clip-path: inset(0 round 24px);
+  }
+  50% {
+    transform: scale(1.025);
+    clip-path: inset(1.707% 1.707% 0.732% 0.732% round 23.4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.cx-desktop .jf-intro .jf-hero-img {
+    animation: none;
+  }
 }
 html.cx-desktop .jf-intro .jf-hero-fallback,
 html.cx-desktop .jf-intro .cf-hero-fallback,
@@ -1380,18 +1418,18 @@ html.cx-desktop .jf-intro .jf-go {
 }
 
 /* ── the photo choice grid (also Future You's and The Move's) ──
-   An 880 step. Fixed tiles under the pictures' own size (132: 150 art at
-   0.88x) in a centred row that wraps: ten are 5+5, eleven 6+5 (an owner may
-   set --jf-cols / --jf-tile). The heading is centred over it, its line under
-   it at reading width. */
+   A step at the bars' 720 stage. Fixed tiles under the pictures' own size
+   (132: 150 art at 0.88x) in a row that wraps: ten are 5+5, eleven 6+5 (an
+   owner may set --jf-cols / --jf-tile). The heading and its line read from
+   the left, on the grid's left edge, the line at reading width. */
 html.cx-desktop .jf > .jf-pick {
-  --xp-w: 880px;
-  text-align: center;
+  --xp-w: 720px;
+  text-align: left;
 }
 html.cx-desktop .jf-pick > .jf-pick-sub,
 html.cx-desktop .jf-pick > .jf-pick-note {
   max-width: 560px;
-  margin-inline: auto;
+  margin-inline: 0;
 }
 html.cx-desktop .jf-photos {
   --jf-tile: 132px;
@@ -1401,7 +1439,8 @@ html.cx-desktop .jf-photos {
   justify-content: center;
   gap: 20px 14px;
   max-width: calc(var(--jf-cols) * var(--jf-tile) + (var(--jf-cols) - 1) * 14px);
-  margin-inline: auto;
+  /* On the step's left edge, under the words, however few columns. */
+  margin-inline: 0;
 }
 /* Eleven go six across, sized so the row is the bars' 720 stage exactly
    (6 x 108 + 5 x 14 = 718) — its edges on Back and the button, not past them. */
@@ -1427,7 +1466,7 @@ html.cx-desktop .jf-photo-label {
 }
 html.cx-desktop .jf-other-open {
   max-width: 440px;
-  margin-inline: auto;
+  margin-inline: 0;
   text-align: left;
 }
 
@@ -1470,4 +1509,7 @@ html.cx-desktop .jf-split .js-deck {
 html.cx-desktop .jf-split .js-ways {
   width: 380px;
   margin-inline: auto;
+}
+html.cx-desktop .jf-split .js-hint {
+  margin-top: -12px;
 }

@@ -103,7 +103,7 @@ export const JOY_OPTIONS = [
    answer is a direction — less of it, or more — not a rating. */
 export const JOY_AREAS = [
   'Work and career',
-  'Financial planning and management',
+  'Financial planning',
   'Health and wellness',
   'Family and relationships',
   'Hobbies and interests',
@@ -114,11 +114,15 @@ export const JOY_AREAS = [
 const joyPhoto = (label: string, file: string): JoyPick => ({ label, src: `./joy/${file}.png` })
 
 /* The same seven areas as cards, each with its photograph, in
-   public/joy/areas/ under the area's name. */
+   public/joy/areas/ under the area's name. A renamed area keeps its
+   photograph's file name. */
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+const AREA_PHOTO: Record<string, string> = {
+  'Financial planning': 'financial-planning-and-management',
+}
 export const JOY_AREA_CARDS: JoyPick[] = JOY_AREAS.map((label) => ({
   label,
-  src: `./joy/areas/${slug(label)}.png`,
+  src: `./joy/areas/${AREA_PHOTO[label] ?? slug(label)}.png`,
 }))
 
 /* The nine the phone shows, in the design's order. */
