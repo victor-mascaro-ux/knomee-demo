@@ -1429,7 +1429,7 @@ export default function ClientProfileScreen({
                           }}
                         >
                           <span className="pp-q-text">
-                            <StatusTags tags={q.tags} />
+                            <StatusTags tags={q.tags} knomee={q.knomee} />
                             {q.q}
                           </span>
                           <span className="pp-q-date">

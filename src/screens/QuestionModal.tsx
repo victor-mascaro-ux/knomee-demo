@@ -63,6 +63,14 @@ export function AddQuestionModal({
 
   const sentence = [starter, rest.trim()].filter(Boolean).join(' ').trim()
   const full = sentence && !/[?!.]$/.test(sentence) ? `${sentence}?` : sentence
+  /* A Knomee question reworded is no longer Knomee's words: it keeps the
+     "Knomee generated" chip only while its text is the one Knomee wrote. */
+  const saved = (): ProfileQuestion => ({
+    ...question,
+    q: full,
+    date: DEMO_TODAY,
+    knomee: question?.knomee && full === question.q ? true : undefined,
+  })
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
@@ -100,7 +108,7 @@ export function AddQuestionModal({
               placeholder="Click to start writing."
               onChange={(e) => setRest(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && full) onSave({ ...question, q: full, date: DEMO_TODAY })
+                if (e.key === 'Enter' && full) onSave(saved())
               }}
             />
             <span className="qm-pencil" aria-hidden>
@@ -128,7 +136,7 @@ export function AddQuestionModal({
             className="btn btn-primary"
             type="button"
             disabled={!full}
-            onClick={() => onSave({ ...question, q: full, date: DEMO_TODAY })}
+            onClick={() => onSave(saved())}
           >
             Save
           </button>
@@ -170,7 +178,7 @@ export default function QuestionModal({
         </div>
 
         <div className="modal-body qm-body">
-          <StatusTags tags={question.tags} />
+          <StatusTags tags={question.tags} knomee={question.knomee} />
           <div className="qm-head">
             <h3 className="qm-question">{question.q}</h3>
             {onEdit && (

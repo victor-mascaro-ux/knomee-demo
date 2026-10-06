@@ -214,9 +214,17 @@ export const MARK_PARTS = [
    with the bar (and above the sheets the bar stays above). Under the finger
    the mark's five strokes fill to plum inside-out and the whole mark pulses
    once — on every phone, whatever the press then does; they stay filled
-   while what it opens is open. */
+   while what it opens is open.
+
+   A tap runs the same fill, at the same pace, as a long press: what it opens
+   opens at once, and the fill plays out over it rather than snapping full.
+   So the fill outlives the finger (`playing`, until its pulse ends), keeps
+   one element through release and open — a new one would restart it — and
+   starts afresh on each press (`run`). */
 export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string; onClick: () => void }) {
   const [pressing, setPressing] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [run, setRun] = useState(0)
   const up = () => setPressing(false)
   return (
     <button
@@ -225,14 +233,27 @@ export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string;
       aria-label={label}
       aria-pressed={on}
       onClick={onClick}
-      onPointerDown={() => setPressing(true)}
+      onPointerDown={() => {
+        setPressing(true)
+        setPlaying(true)
+        setRun((n) => n + 1)
+      }}
       onPointerUp={up}
       onPointerLeave={up}
       onPointerCancel={up}
     >
       <TabMark />
-      {(pressing || on) && (
-        <div key={pressing ? 'press' : 'static'} className={`px-fill${on && !pressing ? ' is-static' : ''}`} aria-hidden>
+      {(pressing || playing || on) && (
+        <div
+          key={run}
+          className="px-fill"
+          aria-hidden
+          /* The pulse is the fill's last beat; the strokes' own ends bubble
+             up here too and are not it. */
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setPlaying(false)
+          }}
+        >
           <svg viewBox="0 0 288 288">
             {MARK_PARTS.map((d, i) => (
               <path key={i} d={d} style={{ animationDelay: `${i * 0.048}s` }} />
