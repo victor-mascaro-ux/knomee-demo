@@ -751,6 +751,14 @@ svg.cx-tab-mark {
 html.cx-desktop .cx-fab {
   right: var(--xp-edge);
 }
+/* Room for the disc. On every screen with the floating button the scroll runs
+   on past the last thing by the disc's own footprint (60 + the 14 it stands
+   above the bar), on top of the screen's usual 22, so the last row can always
+   be scrolled clear of it. The ID pages are the exception: they end on their
+   stripe, whose own foot already clears the disc. */
+.cx-viewport:has(~ .cx-tabbar .cx-fab):not(:has(> .pp)) {
+  padding-bottom: calc(22px + 60px + 14px);
+}
 
 .cx-home-bar {
   flex: none;
