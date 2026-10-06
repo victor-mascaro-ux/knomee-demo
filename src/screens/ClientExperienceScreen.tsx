@@ -57,7 +57,7 @@ import type { Step } from '../data/advisorFlow'
 import './advisor-flow.css'
 import SignUpScreen from './SignUpScreen'
 import { useDeviceMode } from '../deviceMode'
-import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
+import ProspectProfileScreen, { ClientTeam, type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
@@ -207,23 +207,33 @@ export const MARK_PARTS = [
   'M117.96 288C117.119 288 116.278 287.934 115.437 287.737C77.6551 279.864 45.1137 257.556 23.8938 224.815C2.67386 192.142 -4.76604 153.036 2.99733 114.653C14.7718 56.39 59.6054 11.446 117.184 0.226364C124.041 -1.08587 130.64 3.4413 131.935 10.3305C133.228 17.2854 128.764 23.9778 121.971 25.2901C74.4204 34.6069 37.415 71.6777 27.6461 119.837C21.2413 151.528 27.3872 183.809 44.9196 210.775C62.4518 237.742 89.3002 256.178 120.547 262.739C127.341 264.182 131.741 270.941 130.317 277.83C129.088 283.866 123.847 288 118.025 288H117.96Z',
 ]
 
-/* The tab bar's own top edge, arcing up around the centre mark. Drawn at the
-   screen's exact 390px width so the arc is never distorted — chord 82, rise 18,
-   a shallow swell the mark sits into rather than a dome around it. */
-export const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
-
-/* The tab bar's top edge and its swell around the centre mark. The swell is a
-   true circle at any width: it was one SVG stretched to the screen, and on a
-   screen wider than 390 the stretch flattened the circle into an ellipse. Now
-   the flat edge is the bar's own white with a hairline on top, full width, and
-   the swell is drawn separately at its own size, centred on it. */
-export const TabEdge = () => (
-  <span className="cx-tab-edge" aria-hidden>
-    <svg className="cx-tab-dome" viewBox="150 0 90 20" width="90" height="20">
-      <path d="M154 18.6a55.7 55.7 0 0 1 82 0Z" fill="#fff" />
-      <path d="M150 18h4a55.7 55.7 0 0 1 82 0h4" fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
-    </svg>
-  </span>
+/* The floating knomee button: a white disc carrying the mark, standing just
+   above the right end of the tab bar. The bar is three flat tabs now; the
+   mark is no longer one of them. It lives inside the bar's <nav> so it rides
+   with the bar (and above the sheets the bar stays above), and anything the
+   page wants to draw over the mark — the client's long-press fill — goes in
+   as children. Muted while nothing it opens is open, plum while it is. */
+export const KnomeeFab = ({
+  on,
+  label,
+  onClick,
+  children,
+}: {
+  on?: boolean
+  label: string
+  onClick: () => void
+  children?: ReactNode
+}) => (
+  <button
+    type="button"
+    className={`cx-fab${on ? ' is-on' : ''}`}
+    aria-label={label}
+    aria-pressed={on}
+    onClick={onClick}
+  >
+    <TabMark />
+    {children}
+  </button>
 )
 
 /* ── keep the whole device on screen ──────────────────────────────────────
@@ -1652,13 +1662,13 @@ function ClientExperienceRun({
   /* On a handset the frame is gone, so there is nothing to scale. */
   const scale = bare ? 1 : fitScale * zoom
 
-  // Long-press the centre mark to talk to Knomee; a plain tap opens quick
+  // Long-press the floating mark to talk to Knomee; a plain tap opens quick
   // access. The gesture rides on the tab bar itself so the mark keeps being a
   // button — `held` swallows the click that a long press would otherwise fire.
   const timer = useRef<number | null>(null)
   const held = useRef(false)
   const pressStart = (e: React.PointerEvent) => {
-    if (!(e.target as HTMLElement).closest('.cx-tab-center')) return
+    if (!(e.target as HTMLElement).closest('.cx-fab')) return
     held.current = false
     setPressing(true)
     timer.current = window.setTimeout(() => {
@@ -1675,26 +1685,25 @@ function ClientExperienceRun({
   }
 
   const pickTab = (id: TabId) => {
+    setSheet(false)
+    setVoiceOpen(false)
+    setTab(id)
+  }
+  const pickKnomee = () => {
     // Swallow the click that ends a long press — but only that one, or a
-    // stray click with no press before it would wedge the tab bar shut.
+    // stray click with no press before it would wedge the button shut.
     if (held.current) {
       held.current = false
       return
     }
-    if (id === 'knomee') {
-      if (voiceOpen) {
-        setVoiceOpen(false)
-        return
-      }
-      setSheet((v) => !v)
-    } else {
-      setSheet(false)
+    if (voiceOpen) {
       setVoiceOpen(false)
-      setTab(id)
+      return
     }
+    setSheet((v) => !v)
   }
 
-  const active: TabId = sheet || voiceOpen ? 'knomee' : tab
+  const active: TabId = tab
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -1953,6 +1962,12 @@ function ClientExperienceRun({
                 built={BUILT}
                 onAddAgain={addAgain}
               />
+            ) : tab === 'team' ? (
+              /* My Team: who on her team sees which part of her Financial ID. */
+              <div className="af-team">
+                <h2 className="af-h1">My Team</h2>
+                <ClientTeam />
+              </div>
             ) : !signedUp ? (
               /* Her Financial ID is behind an account; her advisor already has
                  her answers. Not Now takes her back to the adventures. */
@@ -2060,48 +2075,34 @@ function ClientExperienceRun({
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
-            <TabEdge />
-            {mobileTabs.map((t) =>
-              t.center ? (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`cx-tab cx-tab-center ${active === t.id ? 'is-on' : ''}`}
-                  aria-label={t.label}
-                  onClick={() => pickTab(t.id)}
+            {mobileTabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
+                onClick={() => pickTab(t.id)}
+              >
+                {t.id === 'adventures' ? <TabAdventures /> : t.id === 'finid' ? <TabFinId /> : <TabTeam />}
+                <span className="cx-tab-lbl">{t.label}</span>
+              </button>
+            ))}
+            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee}>
+              {/* The mark's five strokes fill to plum inside-out under the finger,
+                  and stay filled while either sheet is open. */}
+              {(pressing || sheet || voiceOpen) && (
+                <div
+                  key={pressing ? 'press' : 'static'}
+                  className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
+                  aria-hidden
                 >
-                  {/* The mark takes the tab's own colour — muted while the
-                      sheet is shut, plum while it is open — rather than
-                      dimming, which read as the logo being turned off. */}
-                  <TabMark />
-                  {/* The mark's five strokes fill to plum inside-out under the finger,
-                      and stay filled while either sheet is open. */}
-                  {(pressing || sheet || voiceOpen) && (
-                    <div
-                      key={pressing ? 'press' : 'static'}
-                      className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
-                      aria-hidden
-                    >
-                      <svg viewBox="0 0 288 288">
-                        {MARK_PARTS.map((d, i) => (
-                          <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
-                        ))}
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              ) : (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
-                  onClick={() => pickTab(t.id)}
-                >
-                  {t.id === 'adventures' ? <TabAdventures /> : <TabFinId />}
-                  <span className="cx-tab-lbl">{t.label}</span>
-                </button>
-              ),
-            )}
+                  <svg viewBox="0 0 288 288">
+                    {MARK_PARTS.map((d, i) => (
+                      <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
+                    ))}
+                  </svg>
+                </div>
+              )}
+            </KnomeeFab>
           </nav>
           )}
 

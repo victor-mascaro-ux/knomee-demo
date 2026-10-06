@@ -4,23 +4,22 @@
 // Content follows the "Adventures page redesign" handoff from Claude Design
 // (My Adventures.html): the five core adventures are done, so the screen is no
 // longer a list of locked cards. It shows what was completed and when, the two
-// things worth adding next, and the rest still to come — with the knomee mark
-// in the tab bar opening quick access, or voice capture on a long press.
+// things worth adding next, and the rest still to come — with the floating
+// knomee button opening quick access, or voice capture on a long press.
 
-export type TabId = 'adventures' | 'knomee' | 'finid'
+export type TabId = 'adventures' | 'finid' | 'team'
 
 export interface MobileTab {
   id: TabId
   label: string
-  /** The centre tab is the knomee mark rather than a flat icon. */
-  center?: boolean
 }
 
-// Order is deliberate: Adventures · Knomee · Financial ID, and nothing else.
+// Order is deliberate: Adventures · Financial ID · My Team, three flat tabs.
+// The knomee mark is no longer a tab: it floats above the bar's right end.
 export const mobileTabs: MobileTab[] = [
   { id: 'adventures', label: 'Adventures' },
-  { id: 'knomee', label: 'Knomee', center: true },
   { id: 'finid', label: 'Financial ID' },
+  { id: 'team', label: 'My Team' },
 ]
 
 /** Keys map to the illustration imported for each row. */
