@@ -124,7 +124,7 @@ function CandidateMetrics({
       className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
       title="Top Line Metrics"
-      hint={<HelpTip text="Totals, average RQ score, and the tier split." />}
+      hint={<HelpTip side="right" text="Totals, average RQ score, and the tier split." />}
       bodyClassName="metrics-body"
     >
       {/* RQ leads, as on the advisor's screen: it is the number the page

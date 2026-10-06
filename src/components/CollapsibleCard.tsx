@@ -4,7 +4,8 @@
    the way of the list underneath it is the same complaint on both.
 
    `hint` takes an already-rendered node rather than a string: the two screens
-   carry their own HelpTip, and the card has no business knowing which. */
+   carry their own HelpTip, and the card has no business knowing which. It
+   sits beside the title it explains, so it opens rightward (side="right"). */
 
 import { useState, type ReactNode } from 'react'
 import { ChevronUp } from './icons'
@@ -33,9 +34,9 @@ export default function CollapsibleCard({
         <div className="card-title">
           {icon}
           <span>{title}</span>
+          {hint}
         </div>
         <div className="card-head-right">
-          {hint}
           <button
             className={`show-toggle ${open ? '' : 'collapsed'}`}
             type="button"

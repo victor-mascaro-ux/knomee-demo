@@ -235,7 +235,7 @@ function ProspectsMetrics({
       className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
       title="Top Line Metrics"
-      hint={<HelpTip text="Totals, average KQ score, and the tier split." />}
+      hint={<HelpTip side="right" text="Totals, average KQ score, and the tier split." />}
       bodyClassName="metrics-body"
     >
       <div className="metric-tiles">
@@ -1036,7 +1036,7 @@ function ClientsMetrics({
       className="metrics-card"
       icon={<ChartIcon />}
       title="Top Line Metrics"
-      hint={<HelpTip text="Totals, average KR score, and the tier split." />}
+      hint={<HelpTip side="right" text="Totals, average KR score, and the tier split." />}
       bodyClassName="metrics-body"
     >
       <div className="metric-tiles">
