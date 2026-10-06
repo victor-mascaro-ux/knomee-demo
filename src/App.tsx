@@ -3792,6 +3792,12 @@ function parseHash(): { view: RouteView | null; profile: string | null } {
   if (typeof window === 'undefined') return { view: null, profile: null }
   const raw = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
   const [head, tail] = raw.split('/')
+  /* The plain step-by-step advisor flow is retired: an old #/advisor-self link
+     opens the advisor journey, and the address says so. */
+  if (head === 'advisor-self') {
+    window.history.replaceState(null, '', '#/advisor-journey')
+    return { view: 'advisor-journey', profile: null }
+  }
   const view = (ROUTE_VIEWS as readonly string[]).includes(head) ? (head as RouteView) : null
   return { view, profile: tail || null }
 }
