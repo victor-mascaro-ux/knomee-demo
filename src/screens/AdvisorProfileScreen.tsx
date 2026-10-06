@@ -810,10 +810,7 @@ function BusinessIdTab({
         <GoalModal
           goal={goals[openGoal]}
           onClose={() => setOpenGoal(null)}
-          onEdit={() => {
-            setEditingGoal(openGoal)
-            setOpenGoal(null)
-          }}
+          onSave={(g) => setEdits((e) => ({ ...e, [openGoal]: { ...goals[openGoal], ...g } }))}
         />
       )}
       {editingGoal !== null && (
