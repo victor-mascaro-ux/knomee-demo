@@ -133,6 +133,17 @@
 .rd-dims-wide {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+/* Five: three over two on a six-column track, the bottom two a half-row
+   each, so the row is full rather than holed. */
+.rd-dims-five {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.rd-dims-five .rd-dim {
+  grid-column: span 2;
+}
+.rd-dims-five .rd-dim:nth-child(n + 4) {
+  grid-column: span 3;
+}
 .rd-dim {
   padding: var(--space-14) var(--space-12) var(--space-16);
   border-radius: var(--radius-xl);
@@ -823,6 +834,10 @@
   .rd-dims,
   .rd-dims-wide {
     grid-template-columns: 1fr;
+  }
+  .rd-dims-five .rd-dim,
+  .rd-dims-five .rd-dim:nth-child(n + 4) {
+    grid-column: auto;
   }
   .rd-dim-q {
     min-height: 0;
