@@ -6,12 +6,12 @@
  * halves are stored as the one sentence they make, because that is what an
  * advisor reads.
  *
- * Reading one back is a panel with a single state on it — asked, or answered —
- * and the date it changed, which is the only fact a question carries beyond
- * its own text.
+ * Reading one back is a panel you read top to bottom — its pills, the
+ * question, where it stands — with everything you can do to it as a pill in
+ * its footer. A page that can only read it gets no footer.
  */
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import './questionModal.css'
 import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
@@ -159,6 +159,10 @@ export default function QuestionModal({
   onToggleResolved?: () => void
   onDelete?: () => void
 }) {
+  /* Delete is the one thing here that cannot be undone, so it asks first, in
+     the footer it was pressed in, not in a second panel. */
+  const [confirming, setConfirming] = useState(false)
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -167,67 +171,105 @@ export default function QuestionModal({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  /* Where it stands, said the way its row says it: resolved replaces the date
+     rather than adding a second one. Read from the data, not from whether a
+     handler was passed, so a read-only page shows it too. */
+  const status = question.resolved
+    ? `Resolved: ${question.resolved}`
+    : question.date
+      ? `Last updated: ${question.date}`
+      : null
+  /* Every action lives in the footer, so a page that offers none (an
+     advisor's Business ID) gets a panel with no footer and the same body. */
+  const hasActions = !!(onToggleResolved || onEdit || onDelete)
+
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="qm-read-title"
+    >
       <div className="modal qm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Question</h2>
+          <h2 className="modal-title" id="qm-read-title">
+            Question
+          </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
 
-        <div className="modal-body qm-body">
+        {/* Reading only, on one left edge, in the row's own order: its pills,
+            the question, where it stands. Nothing in here is a control. */}
+        <div className="modal-body qm-read">
           <StatusTags tags={question.tags} knomee={question.knomee} />
-          <div className="qm-head">
-            <h3 className="qm-question">{question.q}</h3>
-            {onEdit && (
-              <button className="goal-edit" type="button" aria-label="Edit this question" onClick={onEdit}>
-                <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden>
-                  <path
-                    d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-          {question.date && <p className="qm-asked">Last updated: {question.date}</p>}
-
-          {onToggleResolved &&
-            (question.resolved ? (
-              <p className="qm-resolved">
-                <CheckIcon /> Marked resolved: {question.resolved}
-              </p>
-            ) : (
-              <label className="goal-complete">
-                <input type="checkbox" checked={false} onChange={onToggleResolved} />
-                <span>Mark resolved</span>
-              </label>
-            ))}
-          {question.resolved && onToggleResolved && (
-            <button className="qm-unresolve" type="button" onClick={onToggleResolved}>
-              Reopen This Question
-            </button>
+          <h3 className="qm-question">{question.q}</h3>
+          {status && (
+            <p
+              className={`qm-status${question.resolved ? ' is-resolved' : ''}`}
+              aria-live="polite"
+            >
+              {question.resolved && <CheckIcon size={14} />}
+              <span>{status}</span>
+            </p>
           )}
         </div>
 
-        {onDelete && (
-          <div className="modal-footer goal-foot">
-            <button className="goal-delete" type="button" onClick={onDelete}>
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" aria-hidden>
-                <path
-                  d="M4 6h12M8.5 6V4.5h3V6M6 6l.7 9.2a1.3 1.3 0 0 0 1.3 1.2h4a1.3 1.3 0 0 0 1.3-1.2L14 6"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Delete Question
-            </button>
+        {hasActions && (
+          <div className="modal-footer qm-actions">
+            {/* Keyed so the confirm is a new set of controls, not the old
+                pills relabelled: Keep It has to mount to take the focus. */}
+            {confirming && onDelete ? (
+              <Fragment key="confirm">
+                {/* Holds the main pill's 44px so the panel doesn't recentre,
+                    and Keep It lands exactly where Delete was. */}
+                <p className="qm-confirm" id="qm-confirm-line">
+                  Delete this question?
+                </p>
+                <button
+                  className="btn btn-outline"
+                  type="button"
+                  autoFocus
+                  aria-describedby="qm-confirm-line"
+                  onClick={() => setConfirming(false)}
+                >
+                  Keep It
+                </button>
+                <button className="btn btn-danger" type="button" onClick={onDelete}>
+                  Delete
+                </button>
+              </Fragment>
+            ) : (
+              <Fragment key="actions">
+                {/* The question's state, on its own row: filled while there
+                    is something to do, outline once it is done. */}
+                {onToggleResolved && (
+                  <button
+                    className={`btn ${question.resolved ? 'btn-outline' : 'btn-primary'} qm-act-main`}
+                    type="button"
+                    onClick={onToggleResolved}
+                  >
+                    {question.resolved ? 'Reopen' : 'Mark Resolved'}
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    className="btn btn-outline qm-delete"
+                    type="button"
+                    onClick={() => setConfirming(true)}
+                  >
+                    Delete
+                  </button>
+                )}
+                {onEdit && (
+                  <button className="btn btn-outline" type="button" onClick={onEdit}>
+                    Edit
+                  </button>
+                )}
+              </Fragment>
+            )}
           </div>
         )}
       </div>

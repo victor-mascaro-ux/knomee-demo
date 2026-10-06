@@ -1,6 +1,6 @@
-/* Questions — what these two panels add to the app's modal. The shell, the
-   header, the close and the footer are index.css's own, and the checkbox and
-   the bin are the goal panel's, because they are the same two controls. */
+/* Questions: what these two panels add to the app's modal. The shell, the
+   header, the close and the pill footer are index.css's own; nothing here is
+   borrowed from the goal panel. */
 
 .modal.qm-modal {
   width: 560px;
@@ -78,48 +78,111 @@
   gap: var(--space-10);
 }
 
-/* ── reading one back ── */
-.qm-head {
+/* ── reading one back ──
+   One left edge, three things in the row's own order: the pills, the
+   question, and one status line under the words it describes. Every action
+   is a pill in the footer; none in the body. */
+.qm-read {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-12);
+  flex-direction: column;
+  gap: var(--space-8);
+}
+/* The 8px gap is the only space under the pills (StatusTags carries 4px). */
+.qm-read > .cp-goal-tags {
+  margin-bottom: 0;
 }
 .qm-question {
-  flex: 1;
-  min-width: 0;
   margin: 0;
-  font-size: var(--text-2xl);
-  /* The question as it was asked, in regular weight: the modal's header
-     already names it, and bold made a sentence read like a heading. */
+  /* The title slot every read-back has (.goal-title, .le-title), in regular
+     weight: the header already names it, and bold made a sentence read like
+     a heading. */
+  font-size: var(--text-3xl);
   font-weight: var(--weight-regular);
-  line-height: 1.3;
+  line-height: var(--leading-snug);
   color: var(--text-strong);
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
-.qm-asked {
-  margin: 0 0 var(--space-8);
-  font-size: var(--text-sm);
-  font-style: italic;
+/* Where it stands: the row's own date line at reading size. Upright, never
+   italic (DS helper rule). */
+.qm-status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   color: var(--text-secondary);
 }
-.qm-resolved {
+.qm-status.is-resolved {
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+}
+/* The tick sits on the first line, not the middle of the block. The green is
+   in the icon; the words stay at full contrast. */
+.qm-status svg {
+  flex: none;
+  margin-top: var(--space-2);
+  color: var(--k-green);
+}
+
+/* The footer: the state on its own full-width row, then Delete | Edit.
+   (0,5,1) outranks index.css `body .modal-backdrop .modal .modal-footer .btn`
+   (0,4,1) and client-experience.css `.cx-screen .modal-backdrop .modal
+   .modal-footer .btn` (0,5,0), inside this panel only. */
+body .modal-backdrop .modal .modal-footer.qm-actions {
+  flex-wrap: wrap;
+  gap: var(--space-10) var(--space-12);
+}
+body .modal-backdrop .modal .modal-footer.qm-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: var(--space-16);
+  white-space: nowrap;
+}
+body .modal-backdrop .modal .modal-footer.qm-actions .qm-act-main {
+  flex-basis: 100%;
+}
+
+/* Delete, offered: the outline pill in the warning colour, the same pairing
+   as .vb-leave-acts .vb-delete-yes and .row-menu-item.is-danger. */
+.modal .btn-outline.qm-delete {
+  border-color: var(--k-crimson);
+  color: var(--k-crimson);
+}
+.modal .btn-outline.qm-delete:hover {
+  border-color: var(--k-crimson);
+  background: var(--k-crimson-light);
+  color: var(--k-crimson);
+}
+
+/* Delete, asked: a line and two pills replace the footer in place. The line
+   takes the main pill's height, so the centred panel doesn't move under the
+   pointer. */
+.qm-confirm {
+  flex-basis: 100%;
   display: flex;
   align-items: center;
-  gap: var(--space-8);
-  margin: var(--space-8) 0 0;
-  font-size: var(--text-base);
+  min-height: var(--control-h);
+  margin: 0;
+  font-size: var(--text-md);
   font-weight: var(--weight-semibold);
-  color: var(--text-positive, #12805c);
+  line-height: var(--leading-snug);
+  color: var(--text-strong);
 }
-/* Undoing it is a smaller thing than doing it, so it is a line of text under
-   the state rather than a second control beside it. */
-.qm-unresolve {
-  align-self: flex-start;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: var(--text-sm);
-  color: var(--text-link);
-  text-decoration: underline;
-  cursor: pointer;
+/* .btn-danger's own 1px border, raised to the 2px of the modal's other pills
+   (scoped: RemoveMemberModal keeps its 1px). */
+.modal .qm-actions .btn-danger {
+  border-width: var(--border-thick);
+}
+
+/* Narrow: one step smaller, as .le-title does at ≤620px and .goal-title does
+   in the phone frame. */
+@media (max-width: 620px) {
+  .qm-question {
+    font-size: var(--text-2xl);
+  }
+}
+.cx-screen .qm-question {
+  font-size: var(--text-2xl);
 }
