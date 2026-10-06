@@ -23,7 +23,9 @@ import type { ReadinessTab, Snapshot, ToolkitTab } from './readiness'
 const goalsLive = cp.goals.filter((g) => !g.completed)
 const goalsDone = cp.goals.filter((g) => g.completed)
 const goalsMoving = goalsLive.filter((g) => g.readiness >= 4)
-const openQuestions = cp.questions.filter((q) => !q.resolved)
+/* Questions she put to her advisor: the three Knomee drew from her answers
+   are not hers to have asked. */
+const openQuestions = cp.questions.filter((q) => !q.resolved && !q.knomee)
 const recentEvents = cp.lifeEvents.slice(0, 3).map((e) => e.kind)
 
 /* ── the snapshot ───────────────────────────────────────────────────────── */

@@ -170,7 +170,7 @@ export default function QuestionModal({
         </div>
 
         <div className="modal-body qm-body">
-          <StatusTags tags={question.tags} />
+          <StatusTags tags={question.tags} knomee={question.knomee} />
           <div className="qm-head">
             <h3 className="qm-question">{question.q}</h3>
             {onEdit && (
