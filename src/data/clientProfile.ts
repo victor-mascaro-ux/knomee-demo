@@ -339,7 +339,7 @@ export const clientProfile = {
       knomee: true,
     },
     {
-      q: 'If I start a business after the layoff, how long can our year of cash carry us before it has to pay?',
+      q: 'If I start a business after the layoff, how long can our year of cash carry us before the business has to pay?',
       date: '05/03/2025',
       knomee: true,
     },

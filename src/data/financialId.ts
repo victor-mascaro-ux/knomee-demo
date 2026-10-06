@@ -302,7 +302,7 @@ export const financialId = {
       knomee: true,
     },
     {
-      q: 'Can we pay for college for both kids and still wind down from 2028, or does one of them have to move?',
+      q: 'Can we pay for college for both kids and still wind down from 2028, or does one of those plans have to move?',
       date: '05/03/2025',
       knomee: true,
     },

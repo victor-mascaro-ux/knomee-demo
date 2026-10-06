@@ -93,7 +93,7 @@ const sebastian: FamilyMemberId = {
       knomee: true,
     },
     {
-      q: 'What does a four-day week, and later part-time consulting, do to our plan if I start next year?',
+      q: 'What does a four-day week, and later part-time consulting, do to our plan — and when could I start?',
       date: '05/03/2025',
       knomee: true,
     },
