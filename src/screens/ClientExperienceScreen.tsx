@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -235,6 +236,49 @@ export const KnomeeFab = ({
     {children}
   </button>
 )
+
+/* The selected tab's bar: the dashboards' tab underline — 3px, rounded, the
+   firm's colour — laid on the bar's top edge over the selected tab, and
+   sliding to the next one as the dashboards' does. It is as wide as the
+   label plus 12 a side. Measured in the bar's own (unscaled) pixels: the
+   framed phone is scaled, and a client rect is not. A callback ref, because
+   the bar comes and goes (it gives way to Back / Continue inside a flow). */
+export function useTabInd(active: string, color?: string) {
+  const [nav, setNav] = useState<HTMLElement | null>(null)
+  const [box, setBox] = useState<{ left: number; width: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!nav) return
+    const measure = () => {
+      const lbl = nav.querySelector<HTMLElement>('.cx-tab.is-on .cx-tab-lbl')
+      if (!lbl) return setBox(null)
+      const n = nav.getBoundingClientRect()
+      const r = lbl.getBoundingClientRect()
+      const k = n.width / nav.offsetWidth || 1
+      setBox({ left: (r.left - n.left) / k - 12, width: r.width / k + 24 })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(nav)
+    /* Fonts can swap in after first paint and shift a label's width. */
+    const t = window.setTimeout(measure, 80)
+    return () => {
+      ro.disconnect()
+      window.clearTimeout(t)
+    }
+  }, [nav, active])
+  const ind = box && (
+    <span
+      className="cx-tab-ind"
+      aria-hidden
+      style={{
+        transform: `translateX(${box.left}px)`,
+        width: box.width,
+        ...(color ? { background: color } : null),
+      }}
+    />
+  )
+  return { ref: setNav, ind }
+}
 
 /* ── keep the whole device on screen ──────────────────────────────────────
    The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
@@ -1704,6 +1748,7 @@ function ClientExperienceRun({
   }
 
   const active: TabId = tab
+  const tabInd = useTabInd(active, brand?.primary)
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -2071,10 +2116,12 @@ function ClientExperienceRun({
           {!adventure && !intro && (
           <nav
             className="cx-tabbar"
+            ref={tabInd.ref}
             onPointerDown={pressStart}
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
+            {tabInd.ind}
             {mobileTabs.map((t) => (
               <button
                 key={t.id}

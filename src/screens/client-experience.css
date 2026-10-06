@@ -608,6 +608,29 @@
   padding: 0 var(--space-6);
   background: #fff;
   border-top: 1.2px solid #e6e5ea;
+  /* A soft lift off the page above it, so the bar reads as standing over
+     the content that scrolls under it. */
+  box-shadow: 0 -2px 12px rgba(36, 4, 70, 0.07);
+}
+/* The selected tab's bar (useTabInd): the dashboards' tab underline — 3px,
+   rounded, the firm's colour (plum without one) — on the bar's top edge,
+   over the hairline, sliding from tab to tab as theirs does. */
+.cx-tab-ind {
+  position: absolute;
+  top: -1.2px;
+  left: 0;
+  z-index: 2;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--plum);
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-tab-ind {
+    transition: none;
+  }
 }
 .cx-tab {
   position: relative;
