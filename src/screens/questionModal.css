@@ -151,8 +151,27 @@
   color: var(--k-green);
 }
 
-/* The footer: Delete · Mark Resolved, two equal pills, the main one filled
-   on the right.
+/* Resolved, as a checkbox under the question: the forms' tick, top-aligned
+   to its label. */
+.qm-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-10);
+  margin-top: var(--space-6);
+  font-size: var(--text-lg);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.qm-check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--text-link);
+  cursor: pointer;
+}
+
+/* The footer: Delete · Done, two equal pills, Done filled on the right.
    (0,5,1) outranks index.css `body .modal-backdrop .modal .modal-footer .btn`
    (0,4,1) and client-experience.css `.cx-screen .modal-backdrop .modal
    .modal-footer .btn` (0,5,0), inside this panel only. */
