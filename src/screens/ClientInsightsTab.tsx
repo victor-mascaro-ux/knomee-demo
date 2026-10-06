@@ -2,8 +2,10 @@
  * client's page, split the way the prospect's are: the read on the
  * relationship, then the kit for the conversation it says to have.
  *
- * Insights is what to do now and how the relationship scores. Toolkit is what
- * to say, what she will ask, and how to say it. Both are built out of the cards
+ * Insights is what to do now, how the relationship scores, and the three
+ * columns the prospect's Readiness tab carries under its score — how soon she
+ * will act, what drives her, what could get in the way. Toolkit
+ * is what to say, what she will ask, and how to say it. Both are built out of the cards
  * the Readiness and Toolkit tabs already own; nothing here re-implements one.
  * The only new panel is the one the client page adds — the adventures to put in
  * front of her next.
@@ -17,13 +19,16 @@
 import { useState } from 'react'
 import './clientInsights.css'
 import {
+  ApprehensionsCard,
   CommunicationRail,
+  MotivatorsCard,
   QuestionsCard,
   ReadinessSnapshot,
   StartersCard,
   TopAction,
+  VelocityCard,
 } from './readinessParts'
-import { clientInsights, sebastianSnapshot } from '../data/clientInsights'
+import { clientInsights, sebastianRead, sebastianSnapshot } from '../data/clientInsights'
 import type { SuggestedAdventure } from '../data/clientInsights'
 import icAdventures from '../assets/adventures/award.svg'
 import icAngelInvesting from '../assets/adventures/angel-investing.svg'
@@ -146,14 +151,27 @@ export function snapshotFor(name?: string) {
   return name && /^Sebastian/.test(name) ? sebastianSnapshot : clientInsights.snapshot
 }
 
+/* And each member's read under it, chosen the same way. */
+export function readFor(name?: string) {
+  return name && /^Sebastian/.test(name) ? sebastianRead : clientInsights.read
+}
+
 export default function ClientInsightsTab({ name }: { name?: string }) {
   const { toolkit } = clientInsights
   const snapshot = snapshotFor(name)
+  const read = readFor(name)
   return (
     <div className="rd ci">
       <TopAction d={toolkit} />
 
       <ReadinessSnapshot s={snapshot} title="Relationship Snapshot" />
+
+      {/* The prospect's three columns, read for someone already a client. */}
+      <div className="rd-cols">
+        <VelocityCard v={read.velocity} />
+        <MotivatorsCard items={read.motivators} />
+        <ApprehensionsCard items={read.apprehensions} />
+      </div>
     </div>
   )
 }
