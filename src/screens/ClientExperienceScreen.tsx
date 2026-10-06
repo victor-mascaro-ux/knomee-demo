@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -210,31 +211,81 @@ export const MARK_PARTS = [
 /* The floating knomee button: a white disc carrying the mark, standing just
    above the right end of the tab bar. The bar is three flat tabs now; the
    mark is no longer one of them. It lives inside the bar's <nav> so it rides
-   with the bar (and above the sheets the bar stays above), and anything the
-   page wants to draw over the mark — the client's long-press fill — goes in
-   as children. Muted while nothing it opens is open, plum while it is. */
-export const KnomeeFab = ({
-  on,
-  label,
-  onClick,
-  children,
-}: {
-  on?: boolean
-  label: string
-  onClick: () => void
-  children?: ReactNode
-}) => (
-  <button
-    type="button"
-    className={`cx-fab${on ? ' is-on' : ''}`}
-    aria-label={label}
-    aria-pressed={on}
-    onClick={onClick}
-  >
-    <TabMark />
-    {children}
-  </button>
-)
+   with the bar (and above the sheets the bar stays above). Under the finger
+   the mark's five strokes fill to plum inside-out and the whole mark pulses
+   once — on every phone, whatever the press then does; they stay filled
+   while what it opens is open. */
+export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string; onClick: () => void }) {
+  const [pressing, setPressing] = useState(false)
+  const up = () => setPressing(false)
+  return (
+    <button
+      type="button"
+      className={`cx-fab${on ? ' is-on' : ''}`}
+      aria-label={label}
+      aria-pressed={on}
+      onClick={onClick}
+      onPointerDown={() => setPressing(true)}
+      onPointerUp={up}
+      onPointerLeave={up}
+      onPointerCancel={up}
+    >
+      <TabMark />
+      {(pressing || on) && (
+        <div key={pressing ? 'press' : 'static'} className={`px-fill${on && !pressing ? ' is-static' : ''}`} aria-hidden>
+          <svg viewBox="0 0 288 288">
+            {MARK_PARTS.map((d, i) => (
+              <path key={i} d={d} style={{ animationDelay: `${i * 0.0925}s` }} />
+            ))}
+          </svg>
+        </div>
+      )}
+    </button>
+  )
+}
+
+/* The selected tab's bar: the dashboards' tab underline — 3px, rounded, the
+   firm's colour — laid on the bar's top edge over the selected tab, and
+   sliding to the next one as the dashboards' does. It is as wide as the
+   label plus 12 a side. Measured in the bar's own (unscaled) pixels: the
+   framed phone is scaled, and a client rect is not. A callback ref, because
+   the bar comes and goes (it gives way to Back / Continue inside a flow). */
+export function useTabInd(active: string, color?: string) {
+  const [nav, setNav] = useState<HTMLElement | null>(null)
+  const [box, setBox] = useState<{ left: number; width: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!nav) return
+    const measure = () => {
+      const lbl = nav.querySelector<HTMLElement>('.cx-tab.is-on .cx-tab-lbl')
+      if (!lbl) return setBox(null)
+      const n = nav.getBoundingClientRect()
+      const r = lbl.getBoundingClientRect()
+      const k = n.width / nav.offsetWidth || 1
+      setBox({ left: (r.left - n.left) / k - 12, width: r.width / k + 24 })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(nav)
+    /* Fonts can swap in after first paint and shift a label's width. */
+    const t = window.setTimeout(measure, 80)
+    return () => {
+      ro.disconnect()
+      window.clearTimeout(t)
+    }
+  }, [nav, active])
+  const ind = box && (
+    <span
+      className="cx-tab-ind"
+      aria-hidden
+      style={{
+        transform: `translateX(${box.left}px)`,
+        width: box.width,
+        ...(color ? { background: color } : null),
+      }}
+    />
+  )
+  return { ref: setNav, ind }
+}
 
 /* ── keep the whole device on screen ──────────────────────────────────────
    The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
@@ -1648,7 +1699,6 @@ function ClientExperienceRun({
   /* Which scripted example the next long press plays. Each press takes the
      next one — a life event, a question, a goal — and then round again. */
   const [voiceAt, setVoiceAt] = useState(-1)
-  const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   /* Opening an adventure (or leaving one), or switching tabs, starts the page
@@ -1670,18 +1720,15 @@ function ClientExperienceRun({
   const pressStart = (e: React.PointerEvent) => {
     if (!(e.target as HTMLElement).closest('.cx-fab')) return
     held.current = false
-    setPressing(true)
     timer.current = window.setTimeout(() => {
       held.current = true
-      setPressing(false)
       setSheet(false)
       setVoiceAt((i) => (i + 1) % voices.length)
       setVoiceOpen(true)
-    }, 290)
+    }, 725)
   }
   const pressEnd = () => {
     if (timer.current) window.clearTimeout(timer.current)
-    setPressing(false)
   }
 
   const pickTab = (id: TabId) => {
@@ -1704,6 +1751,7 @@ function ClientExperienceRun({
   }
 
   const active: TabId = tab
+  const tabInd = useTabInd(active, brand?.primary)
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -2071,10 +2119,12 @@ function ClientExperienceRun({
           {!adventure && !intro && (
           <nav
             className="cx-tabbar"
+            ref={tabInd.ref}
             onPointerDown={pressStart}
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
+            {tabInd.ind}
             {mobileTabs.map((t) => (
               <button
                 key={t.id}
@@ -2086,23 +2136,7 @@ function ClientExperienceRun({
                 <span className="cx-tab-lbl">{t.label}</span>
               </button>
             ))}
-            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee}>
-              {/* The mark's five strokes fill to plum inside-out under the finger,
-                  and stay filled while either sheet is open. */}
-              {(pressing || sheet || voiceOpen) && (
-                <div
-                  key={pressing ? 'press' : 'static'}
-                  className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
-                  aria-hidden
-                >
-                  <svg viewBox="0 0 288 288">
-                    {MARK_PARTS.map((d, i) => (
-                      <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
-                    ))}
-                  </svg>
-                </div>
-              )}
-            </KnomeeFab>
+            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />
           </nav>
           )}
 

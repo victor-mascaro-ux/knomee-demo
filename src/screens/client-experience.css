@@ -608,6 +608,29 @@
   padding: 0 var(--space-6);
   background: #fff;
   border-top: 1.2px solid #e6e5ea;
+  /* A soft lift off the page above it, so the bar reads as standing over
+     the content that scrolls under it. */
+  box-shadow: 0 -2px 12px rgba(36, 4, 70, 0.07);
+}
+/* The selected tab's bar (useTabInd): the dashboards' tab underline — 3px,
+   rounded, the firm's colour (plum without one) — on the bar's top edge,
+   over the hairline, sliding from tab to tab as theirs does. */
+.cx-tab-ind {
+  position: absolute;
+  top: -1.2px;
+  left: 0;
+  z-index: 2;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--plum);
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-tab-ind {
+    transition: none;
+  }
 }
 .cx-tab {
   position: relative;
@@ -687,15 +710,12 @@ svg.cx-tab-mark {
   cursor: pointer;
   transition: box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-/* The mark's states are the centre tab's, unchanged: plum but eased back on
-   hover, so the long press's plum fill reads as it runs stroke by stroke over
-   it (a full-plum hover hid it); full plum while what it opens is open. */
+/* Hover lifts the disc and leaves the mark grey: the press's plum fill then
+   runs stroke by stroke over grey, where it shows. A plum hover (even eased
+   back to 0.72) was nearly the fill's own colour, so the fill vanished into
+   it. Full plum while what it opens is open. */
 .cx-fab:hover {
-  color: var(--k-plum);
   box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.06), 0 8px 22px rgba(30, 20, 50, 0.22);
-}
-.cx-fab:hover svg.cx-tab-mark {
-  opacity: 0.72;
 }
 .cx-fab.is-on {
   color: var(--k-plum);

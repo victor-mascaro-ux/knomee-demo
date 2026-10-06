@@ -25,6 +25,7 @@ import {
   useFitToWindow,
   useZoom,
   KnomeeFab,
+  useTabInd,
   type FlowBrand,
 } from './ClientExperienceScreen'
 import AdventureList from './AdventureList'
@@ -89,6 +90,7 @@ export default function AdvisorMobileScreen({
     return () => document.removeEventListener('click', away)
   }, [accountOpen])
 
+  const tabInd = useTabInd(tab, brand?.primary)
   const openRail = useCallback(() => {
     setAccountOpen(false)
     setMenuOpen((o) => !o)
@@ -206,7 +208,8 @@ export default function AdvisorMobileScreen({
           {/* The same bar the flow's own phone carries: Adventures, the
               Business ID and My Team, with the mark floating above its right
               end. */}
-          <nav className="cx-tabbar">
+          <nav className="cx-tabbar" ref={tabInd.ref}>
+            {tabInd.ind}
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}

@@ -41,6 +41,7 @@ import {
   useFitToWindow,
   useZoom,
   KnomeeFab,
+  useTabInd,
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
@@ -1371,6 +1372,7 @@ function FlowPhone({
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
+  const tabInd = useTabInd(tab, brand?.primary)
   const closeToList = () => {
     setTab('flow')
     reset(HOME_AT)
@@ -1712,7 +1714,8 @@ function FlowPhone({
               </div>
             </div>
           ) : (
-          <nav className="cx-tabbar">
+          <nav className="cx-tabbar" ref={tabInd.ref}>
+            {tabInd.ind}
             {/* Adventures · Business ID · My Team, as on the client's phone;
                 the mark floats above the bar's right end. */}
             <button
