@@ -1403,8 +1403,14 @@ html.cx-desktop .jf-photos {
   max-width: calc(var(--jf-cols) * var(--jf-tile) + (var(--jf-cols) - 1) * 14px);
   margin-inline: auto;
 }
+/* Eleven go six across, sized so the row is the bars' 720 stage exactly
+   (6 x 108 + 5 x 14 = 718) — its edges on Back and the button, not past them. */
 html.cx-desktop .jf-photos:has(> .jf-photo:nth-child(11)) {
   --jf-cols: 6;
+  --jf-tile: 108px;
+}
+html.cx-desktop .jf-photos:has(> .jf-photo:nth-child(11)) .jf-photo-label {
+  font-size: 14px;
 }
 html.cx-desktop .jf-photos > .jf-photo {
   flex: 0 0 var(--jf-tile);

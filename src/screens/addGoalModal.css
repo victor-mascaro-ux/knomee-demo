@@ -126,6 +126,11 @@
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }
+/* The standard label-to-field gap is 6px (--space-6). The body's flex gap is
+   8 and also spaces everything else in it, so a label in it gives back 2. */
+.ag-body > .ag-label {
+  margin-bottom: calc(var(--space-6) - var(--space-8));
+}
 /* The prompt under Pros and Cons: a line of text that is also the way in, so
    it carries no button chrome — only the pointer says it can be pressed. */
 .ag-hint {

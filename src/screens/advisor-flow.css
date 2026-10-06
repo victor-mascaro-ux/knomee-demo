@@ -2114,7 +2114,8 @@ button.af-opt:hover {
   margin-top: 0;
 }
 .af-id .af-idfield .jf-other-label + .af-idinput {
-  margin-top: var(--space-10, 10px);
+  /* The standard label-to-field gap. */
+  margin-top: var(--space-6, 6px);
 }
 .af-id .af-idfield .jf-other-hint + .af-idinput {
   margin-top: var(--space-4, 4px);
@@ -2142,7 +2143,8 @@ button.af-opt:hover {
 }
 .af-id .af-idform .af-idfield .jf-other-label {
   margin-top: var(--space-20, 20px);
-  margin-bottom: var(--space-4, 4px);
+  /* 2 to the hint under it; a field comes 6 below (its own margin wins). */
+  margin-bottom: var(--space-2, 2px);
 }
 .af-id .af-idfield {
   animation: afRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;

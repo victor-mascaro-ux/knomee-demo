@@ -24,6 +24,10 @@
 .mv-q .ag-own-title {
   margin-top: var(--space-20);
 }
+/* "Or write your own" is the field's label: the standard 6px over it. */
+.mv-q .ag-own-title + .ag-own {
+  margin-top: var(--space-6);
+}
 .mv-q .jf-note {
   margin-top: var(--space-16);
 }
@@ -1015,12 +1019,14 @@
 /* The held move hugs its words instead of running the column as a lime
    strip, on the step's left edge (where the question under it starts), so
    it stays put while the steps under it change. */
+/* The goal / move it is about: the step's own width, edge to edge with the
+   field and the copy under it rather than a chip sized to its words. */
 html.cx-desktop .jf.mv > .mv-goal {
-  align-self: flex-start;
-  width: auto;
-  max-width: min(560px, calc(100% - 48px));
-  margin-left: max(24px, calc((100% - 560px) / 2));
-  margin-right: auto;
+  align-self: center;
+  box-sizing: border-box;
+  width: min(560px, calc(100% - 48px));
+  max-width: none;
+  margin-inline: auto;
 }
 
 /* The pair: under its question like every other question (not floated

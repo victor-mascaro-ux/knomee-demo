@@ -84,7 +84,8 @@
 .su-input {
   box-sizing: border-box;
   width: 100%;
-  margin-top: 8px;
+  /* The standard label-to-field gap. */
+  margin-top: var(--space-6, 6px);
   padding: 9px 12px;
   border: 1px solid #dcdce2;
   border-radius: 8px;

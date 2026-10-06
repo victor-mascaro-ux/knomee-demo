@@ -406,6 +406,12 @@ html.cx-desktop .jw.has-card .jw-next,
 html.cx-desktop .jw.has-card .mv-end {
   margin-top: 8px;
 }
+/* The badge gives way to the card on a laptop window: sized to the window's
+   height (162 at 900 tall), so the card ends above the sticky Next instead of
+   running under it; a taller window gets the phone's 240. */
+html.cx-desktop .jw.has-card .jw-badge {
+  max-width: clamp(120px, 18vh, 240px);
+}
 /* Confidence's card is one reading on one row, its word at the left and its
    dial at the right: at 560 the two sat 440 apart. It keeps a narrower card,
    so they read as one line. */
