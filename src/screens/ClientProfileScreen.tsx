@@ -1525,7 +1525,6 @@ export default function ClientProfileScreen({
             }
             setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
             setOpenQuestion(next)
-            if (next.resolved) onToast?.('Question resolved')
           }}
           onDelete={() => {
             setQuestionList((list) => list.filter((q) => q !== openQuestion))
