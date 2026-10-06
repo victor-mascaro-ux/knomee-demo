@@ -1705,3 +1705,288 @@ html.cx-desktop .cx-sheet-panel {
   border: var(--border-thin) solid #e6e3ec;
   border-radius: 16px;
 }
+
+/* ── Desktop version — journey shell ─────────────────────────────────────
+   Composed for a computer screen rather than the phone's column stretched.
+   Every rule is under html.cx-desktop: the framed phone and a real handset
+   (bare, without the class) never see any of it.
+   - The scroller centres each screen at its own measure, --xp-w: 560 for a
+     one-column step, 880 for the welcome, identity, the adventures list and
+     My Team. A screen widens itself by changing --xp-w, nothing else.
+   - An adventure (.jf) is window-wide, with no scroller padding: each of its
+     steps centres itself (joyFlow.css).
+   - The plain flows' top and foot bars run the full window, their controls on
+     one fixed 720 stage so Back, the button and the meter never jump.
+   - Every modal in an experience is a centred card, 520 unless its owner sets
+     --cx-modal-w; its pills keep their own width. */
+
+/* The scroller: padding from the screen's measure. The % is the screen's
+   width (the window), whatever the scroller's own content is. */
+html.cx-desktop .cx-viewport {
+  --xp-w: 560px;
+  padding: 40px max(24px, calc((100% - var(--xp-w)) / 2)) 48px;
+  scrollbar-width: auto;
+  cursor: auto;
+}
+/* A mouse reads a page, it does not grab it (the phone's drag hand). */
+html.cx-desktop .cx-viewport:active,
+html.cx-desktop .cx-viewport.is-dragging,
+html.cx-desktop .cx-viewport.is-dragging * {
+  cursor: auto;
+}
+/* An ID page keeps its desktop profile on the bar's edge. */
+html.cx-desktop .cx-viewport:has(> .pp, > .ap, > .af-report) {
+  padding: 0 var(--xp-edge) 40px;
+}
+/* An adventure: window-wide, each step centres itself at its own measure. */
+html.cx-desktop .cx-viewport:has(> .jf) {
+  padding: 0;
+}
+/* The wide screens. */
+html.cx-desktop .cx-viewport:has(> .af-welcome.is-intro, > .af-welcome.af-id, > .cx-adv-list, > .af-team) {
+  --xp-w: 880px;
+}
+
+/* The plain flows' bars: white across the window under a hairline, their
+   controls on one 720 stage. The meter is capped and sits between the mark
+   and the close. */
+html.cx-desktop .af-top,
+html.cx-desktop .af-foot {
+  padding-inline: max(24px, calc((100% - 720px) / 2));
+}
+/* The same heights as an adventure's own bars (joyFlow.css): 53 and 75. */
+html.cx-desktop .af-top {
+  padding-block: 12px 10px;
+  border-bottom: 1px solid #ece9f1;
+  box-shadow: none;
+}
+html.cx-desktop .af-top .af-progress {
+  flex: 0 1 360px;
+  margin-inline: auto;
+}
+html.cx-desktop .af-foot {
+  padding-block: 14px 16px;
+  border-top: 1px solid #ece9f1;
+}
+html.cx-desktop .af-foot .af-nav {
+  justify-content: space-between;
+}
+/* Back stays the round button on the left; the one action is a pill at its
+   own width on the right, with or without Back. */
+html.cx-desktop .af-foot .af-next {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 180px;
+  padding-inline: 28px;
+  margin-left: auto;
+}
+/* The welcome and identity are composed at 880: their foot's Back and button
+   sit on those edges, not inside them. */
+html.cx-desktop .cx-viewport:has(> .af-welcome.is-intro, > .af-welcome.af-id) ~ .af-foot {
+  padding-inline: max(24px, calc((100% - 880px) / 2));
+}
+
+/* Every modal opened in an experience: a centred card at its own width (the
+   phone's rule makes it the screen's), the coloured bar across its top. */
+html.cx-desktop .cx-screen .modal-backdrop {
+  padding: 24px;
+}
+html.cx-desktop .cx-screen .modal-backdrop .modal {
+  width: min(var(--cx-modal-w, 520px), 100%);
+  max-width: 100%;
+}
+html.cx-desktop .cx-screen .modal-backdrop .modal .modal-footer {
+  justify-content: flex-end;
+  gap: 10px;
+}
+html.cx-desktop .cx-screen .modal-backdrop .modal .modal-footer:has(> .btn:only-child) {
+  justify-content: center;
+}
+html.cx-desktop .cx-screen .modal-backdrop .modal .modal-footer .btn {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+
+/* My Adventures: the title and meter across 880, the cards two by two, the
+   one up next across both with Start at its own width. */
+html.cx-desktop .cx-adv-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+html.cx-desktop .cx-adv-list > .cx-adv-open {
+  grid-column: 1 / -1;
+}
+/* No card stands alone on a row: one left over before the up-next card, after
+   it, or at the end of a list with none, runs across both columns. */
+html.cx-desktop .cx-adv-list > .cx-adv:nth-child(odd):has(+ .cx-adv-open),
+html.cx-desktop .cx-adv-list > .cx-adv-open:nth-last-child(even) ~ .cx-adv:last-child,
+html.cx-desktop .cx-adv-list:not(:has(> .cx-adv-open)) > .cx-adv:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+html.cx-desktop .cx-adv-open .cx-start {
+  justify-self: start;
+  width: auto;
+  min-width: 200px;
+}
+
+/* All five done: the confetti falls the window's height, not the phone's. */
+html.cx-desktop .cx-celebrate-fall i {
+  animation-name: cxConfettiFallDesk, cxConfettiSway;
+}
+@keyframes cxConfettiFallDesk {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--r));
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(110vh) rotate(calc(var(--r) + 460deg));
+  }
+}
+
+/* The menu's account row: the name and its line keep the panel's width, and
+   the credit goes under them, on the text's edge, rather than squeezing them
+   into a narrow column beside it. */
+html.cx-desktop .cx-sheet-account {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+html.cx-desktop .cx-sheet-account > span:not(.cx-sheet-avatar) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+html.cx-desktop .cx-sheet-account > .cx-sheet-credit {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  padding-left: 45px;
+}
+
+/* A vision board on the Financial ID: tiles drawn no wider than about 0.9 of
+   their photographs (292-294 across). Three 126 columns make a wide tile 262;
+   a photograph is never stretched across a third column to close the last row
+   (the inline span the board writes for that), it keeps two. */
+html.cx-desktop .cx-screen .cp-board-grid:not(.fid-cell .cp-board-grid) {
+  grid-template-columns: repeat(3, 126px);
+  grid-auto-rows: 104px;
+  /* Centred as a box, not by its tracks: the board reads its tiles' offsets
+     from its own edge to find the last row's gap. */
+  width: fit-content;
+  margin-inline: auto;
+}
+html.cx-desktop .cx-screen .cp-board-grid > .cp-tile-photo[style*='span 3'] {
+  grid-column: span 2 !important;
+}
+
+/* Who sees it (the Financial ID's lens, and My Team): the lead at reading
+   width, the team's people two by two, and the parts of the ID as two columns
+   of cards, so a switch sits near the title it answers. */
+html.cx-desktop .cx-screen .sh {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+html.cx-desktop .cx-screen .sh > :not(.sh-card) {
+  grid-column: 1 / -1;
+}
+html.cx-desktop .cx-screen .sh-lead {
+  max-width: 600px;
+}
+html.cx-desktop .cx-screen .sh-people {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* As on My Adventures, no card or person stands alone on a row: the last of
+   an odd count runs across both columns. */
+html.cx-desktop .cx-screen .sh > .sh-card:nth-child(odd of .sh-card):nth-last-child(1 of .sh-card),
+html.cx-desktop .cx-screen .sh-people > .sh-person:nth-child(odd):last-child {
+  grid-column: 1 / -1;
+}
+
+/* Adding or changing someone on the team: the same card as every other
+   modal here, its two pills at their own width on the right. */
+html.cx-desktop .cx-screen .sh-form {
+  width: min(520px, 100%);
+  max-width: 100%;
+}
+html.cx-desktop .cx-screen .sh-form-acts {
+  justify-content: flex-end;
+  gap: 10px;
+}
+html.cx-desktop .cx-screen .sh-form-cancel,
+html.cx-desktop .cx-screen .sh-form-save {
+  flex: 0 0 auto;
+  min-width: 140px;
+  padding-inline: 20px;
+}
+
+/* The legal documents (Terms, Privacy, How your answers are used). On the
+   phone they cover the screen; here they are a centred card over a scrim,
+   the modals' coloured bar across the top and the text at reading width
+   (640, about 80 characters a line), scrolling inside the card. The card's
+   white is ::after and the scrim ::before, both under its content, so the
+   scrim catches the clicks around the card and the card keeps its shadow. It
+   fades in rather than rising: a transform would make the card the scrim's
+   containing block. */
+html.cx-desktop .cx-device.is-bare .lg-sheet {
+  /* As tall as the document, up to 760, in the middle of the window. */
+  inset: 40px 24px;
+  width: min(640px, 100% - 48px);
+  height: fit-content;
+  max-height: min(760px, 100% - 80px);
+  margin: auto;
+  background: none;
+  animation: cxSheetFade 0.2s ease both;
+}
+html.cx-desktop .cx-device.is-bare .lg-sheet::before,
+html.cx-desktop .cx-device.is-bare .lg-sheet::after {
+  content: '';
+  z-index: -1;
+}
+html.cx-desktop .cx-device.is-bare .lg-sheet::before {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 6, 26, 0.42);
+}
+html.cx-desktop .cx-device.is-bare .lg-sheet::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: var(--surface-card, #fff);
+  box-shadow: 0 24px 60px -12px rgba(20, 10, 40, 0.32);
+}
+html.cx-desktop .cx-device.is-bare .lg-head {
+  min-height: 50px;
+  box-sizing: border-box;
+  padding: 9px 14px 9px 24px;
+  border-radius: 20px 20px 0 0;
+  background: var(--surface-brand, var(--plum, #240446));
+}
+html.cx-desktop .cx-device.is-bare .lg-title {
+  font-size: 18px;
+  color: #fff;
+}
+html.cx-desktop .cx-device.is-bare .lg-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: none;
+  color: #fff;
+}
+html.cx-desktop .cx-device.is-bare .lg-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+html.cx-desktop .cx-device.is-bare .lg-tabs {
+  margin: 16px 24px 4px;
+}
+html.cx-desktop .cx-device.is-bare .lg-body {
+  padding: 14px 24px 28px;
+  border-radius: 0 0 20px 20px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.cx-desktop .cx-device.is-bare .lg-sheet {
+    animation: none;
+  }
+}

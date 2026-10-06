@@ -433,3 +433,40 @@
     animation: none !important;
   }
 }
+
+/* ============================================================
+   Desktop (html.cx-desktop) — Confidence
+   Only what Confidence adds. The intro, the top bar, the foot, the
+   results frame, the memory card's radius, Learn More and the celebration
+   all come from Joy's and the shell's desktop rules. The phone and real
+   handsets never see these.
+   ============================================================ */
+/* The statement step takes the default 560 step measure and stays centred
+   between the bars; only its breathing room is set. */
+html.cx-desktop .jf.cf > .cf-q {
+  padding-block: 24px;
+}
+/* The reading: word and dial close together, not at the ends of the sky. */
+html.cx-desktop .cfr .cfr-dial {
+  align-self: center;
+  width: min(100%, 440px);
+}
+/* What she said: six cards in two columns, each track with its ends under it.
+   Paired cards share a height, and each slider sits on its card's foot, so a
+   row's bottoms and tracks line up whatever the statement's length. */
+html.cx-desktop .cfr .cfr-answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+html.cx-desktop .cfr .cfr-answer {
+  display: flex;
+  flex-direction: column;
+}
+html.cx-desktop .cfr .cfr-answer .cfr-flag {
+  align-self: flex-start;
+}
+html.cx-desktop .cfr .cfr-answer .cfr-track {
+  margin-top: auto;
+}

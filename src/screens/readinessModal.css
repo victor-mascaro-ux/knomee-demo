@@ -128,3 +128,11 @@
     --ttm-w: 48px;
   }
 }
+
+/* ── Desktop version — Goal Readiness (html.cx-desktop) ──
+   A centred 560 card at the shell's --cx-modal-w, like Add a Goal: opened
+   over it, the two cards stack in the middle. The answers keep their own
+   width. The base 560 above is the standalone pages' and stays as it is. */
+html.cx-desktop .cx-screen .modal-backdrop .modal.rm-modal {
+  --cx-modal-w: 560px;
+}

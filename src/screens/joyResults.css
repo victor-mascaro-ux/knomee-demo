@@ -686,3 +686,43 @@
 .jr-card-open {
   background: #eeeef0;
 }
+
+/* ── Desktop version — the endings (html.cx-desktop) ──
+   Every adventure's ending reads in one 720 column (joyFlow.css centres it).
+   The hero is a card, not a band past the column's edges; the chosen pictures
+   and the preference cards keep a size their photographs hold at, more to a
+   row rather than larger. Learn More is a centred 480 card: the shell's modal
+   rule does the width, this only says how wide. */
+html.cx-desktop .jf > .jr {
+  --xp-w: 720px;
+}
+html.cx-desktop .jr .jr-memory {
+  margin-inline: 0;
+  border-radius: 24px;
+  overflow: hidden;
+}
+/* The pictures at 132 (150 art at 0.88x), the row centred in the column: there
+   are never more than three picks and her own words, so a row on the left edge
+   left an empty slot beside it. A label may run up to the phone's tile width
+   (172) under its picture, into the gap, so it breaks where the phone's does
+   ("Enterprise value" on one line). */
+html.cx-desktop .jr .jr-tools {
+  grid-template-columns: repeat(auto-fit, 132px);
+  justify-content: center;
+  gap: 20px 40px;
+}
+html.cx-desktop .jr .jr-tool .jr-pill {
+  width: max-content;
+  max-width: 172px;
+}
+html.cx-desktop .jr .jr-cards {
+  grid-template-columns: repeat(auto-fill, 112px);
+  gap: 12px;
+}
+html.cx-desktop .jr .jr-reward::before {
+  left: 0;
+  right: 0;
+}
+html.cx-desktop .cx-screen .modal-backdrop .modal.jr-about {
+  --cx-modal-w: 480px;
+}

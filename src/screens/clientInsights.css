@@ -156,7 +156,8 @@
 .ci-adv-select {
   display: block;
   width: 100%;
-  margin-top: var(--space-8);
+  /* The standard label-to-field gap. */
+  margin-top: var(--space-6);
   padding: var(--space-8) var(--space-10);
   border: var(--border-thin) solid var(--border-control);
   border-radius: var(--radius-md);
