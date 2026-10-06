@@ -225,7 +225,7 @@ const featuredProspects: Prospect[] = [
    scores that vary around it. This is what decides who is a prospect in the
    database — clients and converted prospects live in clients.ts. */
 
-function mulberry32(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
   return () => {
     seed |= 0
     seed = (seed + 0x6d2b79f5) | 0
@@ -385,7 +385,7 @@ const JOY_CLUSTERS = [
 ]
 
 /* How strongly each kind of row reaches for each cluster above. */
-const JOY_LEAN = {
+export const JOY_LEAN = {
   // Can see the future, not yet moving: money for living it, and room to choose.
   vision: [1, 3, 5, 1, 0.3],
   // Moving, the picture still forming: money as a shield.
@@ -405,7 +405,7 @@ const weighted = (weights: number[], r: number) => {
   return i < 0 ? weights.length - 1 : i
 }
 
-function drawJoy(rand: () => number, lean: number[]): string[] {
+export function drawJoy(rand: () => number, lean: number[]): string[] {
   const home = weighted(lean, rand())
   const count = 1 + Math.floor(rand() * 3)
   const joy: string[] = []

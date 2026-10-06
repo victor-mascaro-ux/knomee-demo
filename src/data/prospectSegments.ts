@@ -113,7 +113,11 @@ const median = (xs: number[]) => {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2
 }
 
-export function quadrantCuts(rows: Prospect[]): QuadrantCuts {
+/** Anyone with a Clarity and an Intent reading: a prospect's row, or a
+    client's (clientSegments.ts). */
+type Readings = Pick<Prospect, 'kq' | 'clarity' | 'intent'>
+
+export function quadrantCuts(rows: Readings[]): QuadrantCuts {
   const scored = rows.filter((p) => p.kq !== null)
   if (scored.length < 6) return { vision: 55, readiness: 45 }
   return {
@@ -123,7 +127,7 @@ export function quadrantCuts(rows: Prospect[]): QuadrantCuts {
 }
 
 /* A score on the cut counts as above it, as in the engine. */
-export function quadrant(p: Prospect, cuts: QuadrantCuts): Quadrant {
+export function quadrant(p: Pick<Readings, 'clarity' | 'intent'>, cuts: QuadrantCuts): Quadrant {
   const vivid = (p.clarity ?? 0) >= cuts.vision
   const ready = (p.intent ?? 0) >= cuts.readiness
   return vivid && ready
@@ -145,15 +149,26 @@ export interface ProspectSegment {
   name: string
 }
 
+/** The crossed segment of anyone whose answers are in hand, read against
+    their own book's cuts. */
+export function crossedSegment(
+  joy: string[] | undefined,
+  confidence: number[] | undefined,
+  readings: Pick<Readings, 'clarity' | 'intent'>,
+  cuts: QuadrantCuts,
+): ProspectSegment {
+  const family = purposeFamily(joy)
+  const pos = posture(confidence)
+  const quad = quadrant(readings, cuts)
+  return { family, posture: pos, quadrant: quad, name: `${pos} ${family} · ${quad}` }
+}
+
 const cuts = quadrantCuts(prospects)
 
 /** Null for a profile that never finished: there is nothing to read yet. */
 export function segmentOf(p: Prospect): ProspectSegment | null {
   if (p.kq === null) return null
-  const family = purposeFamily(p.joy)
-  const pos = posture(p.confidence)
-  const quad = quadrant(p, cuts)
-  return { family, posture: pos, quadrant: quad, name: `${pos} ${family} · ${quad}` }
+  return crossedSegment(p.joy, p.confidence, p, cuts)
 }
 
 /* Every scored row with its segment, once, for everything below. */
@@ -244,17 +259,17 @@ const WANTS_PHRASE: Record<string, string> = {
   Status: 'status',
 }
 
+/** The talk card's first two chips: what they want money for, and how they
+    feel about it. Empty where they did not say. */
+export function answeredChips(joy: string[] | undefined, pos: Posture): string[] {
+  const wants = [...new Set((joy ?? []).slice(0, 2).map((w) => WANTS_PHRASE[w] ?? w.toLowerCase()))]
+  return [wants.length ? `Wants money for ${wants.join(' and ')}` : '', POSTURE_CHIP[pos]].filter(Boolean)
+}
+
 /* No quadrant chip: the segment pill beside the name already says it, and a
    second wording of the same reading could only disagree with the action. */
 function said(p: Prospect, seg: ProspectSegment): string[] {
-  const wants = [
-    ...new Set((p.joy ?? []).slice(0, 2).map((w) => WANTS_PHRASE[w] ?? w.toLowerCase())),
-  ]
-  return [
-    wants.length ? `Wants money for ${wants.join(' and ')}` : '',
-    POSTURE_CHIP[seg.posture],
-    p.topAction,
-  ].filter(Boolean)
+  return [...answeredChips(p.joy, seg.posture), p.topAction].filter(Boolean)
 }
 
 export const talkTo: TalkTo[] = FLAGGED.flatMap((name) => {
