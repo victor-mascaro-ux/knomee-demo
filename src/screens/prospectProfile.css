@@ -1701,9 +1701,24 @@
 }
 
 /* The way into the person's own experience, at the foot of the rail: an
-   outline pill under everything else the rail says. */
+   outline pill pinned to the bottom of the strip, not under whatever the rail
+   happens to say last. A rail that carries it runs the window's height under
+   the two bars, and the foot takes the space left over — at least 22px of it,
+   so a full rail still sets the button apart. */
+.pp-side-inner:has(> .pp-experience-foot) {
+  min-height: calc(100vh - var(--topbar-h) - var(--pp-crumb-h));
+}
+.pp-side .pp-experience-foot {
+  margin-top: auto;
+  padding-top: 22px;
+  width: 100%;
+}
+/* Clear of the "powered by" credit, which is fixed to the window's bottom-left
+   corner — over the rail — on the white-label demos. */
+body:has(.powered-by) .pp-side-inner:has(> .pp-experience-foot) {
+  padding-bottom: 60px;
+}
 .pp-side .pp-experience {
-  margin-top: 22px;
   width: 100%;
   display: inline-flex;
   align-items: center;
@@ -1724,6 +1739,30 @@
   background: var(--k-plum, #240446);
   color: #fff;
 }
-.pp-side-inner > .pp-experience {
+.pp-side-inner > .pp-experience-foot {
   grid-column: 1 / -1;
+}
+/* Stacked under the cards on a narrow screen, the rail is a band, not a strip:
+   no window height to fill, so the foot is just the last row. */
+@container (max-width: 720px) {
+  .pp-side-inner:has(> .pp-experience-foot) {
+    min-height: 0;
+  }
+  body:has(.powered-by) .pp-side-inner:has(> .pp-experience-foot) {
+    padding-bottom: 14px;
+  }
+  .pp-side .pp-experience-foot {
+    margin-top: 0;
+    padding-top: var(--space-12);
+  }
+}
+/* Paper has no window to fill and no experience to open. */
+@media print {
+  .pp-side-inner:has(> .pp-experience-foot) {
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .pp-experience-foot {
+    display: none !important;
+  }
 }
