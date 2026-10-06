@@ -235,7 +235,7 @@ export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string;
         <div key={pressing ? 'press' : 'static'} className={`px-fill${on && !pressing ? ' is-static' : ''}`} aria-hidden>
           <svg viewBox="0 0 288 288">
             {MARK_PARTS.map((d, i) => (
-              <path key={i} d={d} style={{ animationDelay: `${i * 0.06}s` }} />
+              <path key={i} d={d} style={{ animationDelay: `${i * 0.048}s` }} />
             ))}
           </svg>
         </div>
@@ -1725,7 +1725,7 @@ function ClientExperienceRun({
       setSheet(false)
       setVoiceAt((i) => (i + 1) % voices.length)
       setVoiceOpen(true)
-    }, 460)
+    }, 375)
   }
   const pressEnd = () => {
     if (timer.current) window.clearTimeout(timer.current)
