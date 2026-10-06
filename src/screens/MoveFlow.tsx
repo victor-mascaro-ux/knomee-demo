@@ -1218,8 +1218,8 @@ export default function MoveFlow({
                   {icon('M5 5.5h14v10H10l-4 3.5v-3.5H5z', 'M10.2 9.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1', 'M12 14h.01')}
                 </span>
                 <span className="mv-end-text">
-                  <b>My Three Questions</b>
-                  <span>Put them to every firm you’re considering.</span>
+                  <b>My Questions</b>
+                  <span>The three to ask, on your Business ID.</span>
                 </span>
                 <span className="mv-end-go" aria-hidden>
                   <ArrowGo />
