@@ -205,11 +205,19 @@ export default function AdvisorMobileScreen({
             )}
           </div>
 
-          {/* The same bar the flow's own phone carries: Adventures, the
-              Business ID and My Team, with the mark floating above its right
+          {/* The same bar the flow's own phone carries: My Team, Adventures
+              and the Business ID, with the mark floating above its right
               end. */}
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
+            >
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
+            </button>
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
@@ -225,14 +233,6 @@ export default function AdvisorMobileScreen({
             >
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
-            </button>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
-            >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
             </button>
             {/* He has finished every adventure, so the mark has nothing new to
                 open: it takes him to what he finished, and on into the flow if

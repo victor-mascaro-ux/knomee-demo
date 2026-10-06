@@ -1719,8 +1719,20 @@ function FlowPhone({
           ) : (
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
-            {/* Adventures · Business ID · My Team, as on the client's phone;
-                the mark floats above the bar's right end. */}
+            {/* My Team · Adventures · Business ID: Adventures in the middle,
+                the Business ID on the right under the mark, which floats
+                above the bar's right end. */}
+            {/* My Team: the people the Business ID goes to, and which part of
+                it each of them sees. The three questions are on the ID, in its
+                Questions card. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
+            >
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
+            </button>
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
@@ -1736,17 +1748,6 @@ function FlowPhone({
             >
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
-            </button>
-            {/* My Team: the people the Business ID goes to, and which part of
-                it each of them sees. The three questions are on the ID, in its
-                Questions card. */}
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
-            >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
             </button>
             {/* The mark picks up where they left off: the next adventure
                 still open, or the list once there is none. */}
