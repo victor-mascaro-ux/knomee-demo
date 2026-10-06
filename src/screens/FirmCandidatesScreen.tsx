@@ -1,9 +1,9 @@
 /* My Candidates — the firm's pipeline, and the first tab of the Dynasty view.
 
    Deliberately the advisor's My Prospects screen, part for part: the same
-   Actionable Metrics dashboard (pulse, the one next action, the call-list, the
-   numbered reasoning behind it), the same toolbar, the same tier-grouped
-   table. Only the data underneath is the firm's, and only the columns that
+   Top Line Metrics and Actionable Insights cards (pulse, who the pipeline is
+   made of, the one next action, the call-list, the numbered reasoning behind
+   it), the same toolbar, the same tier-grouped table. Only the data underneath is the firm's, and only the columns that
    have no advisor equivalent are new — stage and route. AUM and team size
    came out: the flow never asks either, so the pipeline was reporting two
    numbers nobody in it had said.
@@ -19,6 +19,7 @@ import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import TierLegend from '../components/TierLegend'
 import CollapsibleCard from '../components/CollapsibleCard'
+import ActionableInsights from '../components/ActionableInsights'
 import RowMenu from '../components/RowMenu'
 import './firmCandidates.css'
 import {
@@ -29,13 +30,12 @@ import {
   type Candidate,
   type Tier,
 } from '../data/candidates'
-import { talkTo } from '../data/candidateInsights'
+import { insightsOf, reachOf, rowId, talkToOf } from '../data/candidateInsights'
 import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
   ChartIcon,
   ChevronDown,
-  ChevronRight,
   CloseIcon,
   DownloadIcon,
   LightningIcon,
@@ -43,12 +43,11 @@ import {
   SearchIcon,
 } from '../components/icons'
 
-/* The same three tiers the advisor's dashboard drills into, and the insight
-   each one surfaces as its "why". */
+/* The same three tiers the advisor's dashboard drills into. */
 const TIER_META = [
-  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 RQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 RQ', seg: 'seg-2', dot: 'dot-2', insightN: 7 },
-  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 RQ', seg: 'seg-3', dot: 'dot-3', insightN: 8 },
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 RQ', seg: 'seg-1', dot: 'dot-1' },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 RQ', seg: 'seg-2', dot: 'dot-2' },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 RQ', seg: 'seg-3', dot: 'dot-3' },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -99,59 +98,38 @@ function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => 
   )
 }
 
-/* ── the command centre ─────────────────────────────────────────────────────
-   The advisor's layered dashboard, unchanged in shape: pulse (state) and the
-   one next action always visible; the call-list and the reasoning are
-   discoverable layers; the tier bar is the drill-in spine. */
+/* ── the dashboard ─────────────────────────────────────────────────────────
+   The advisor's two cards, unchanged in shape: Top Line Metrics (the pulse,
+   and the tier bar that is the drill-in spine), then Actionable Insights
+   (who the pipeline is made of, the one next action, the call-list and the
+   reasoning behind it). */
 
-function CommandCenter({
-  onOpenProfile,
+function CandidateMetrics({
   stats,
-  names,
   tier,
   setTier,
 }: {
-  /** The tier the bar is focused on — held by the page, because it filters
-      the table under the card too, as the Clients dashboard's bar does. */
-  tier: TierKey | null
-  setTier: (t: TierKey | null | ((prev: TierKey | null) => TierKey | null)) => void
-  onOpenProfile: (c: Candidate) => void
   /** The pipeline's figures, over the rows on the page. */
   stats: ReturnType<typeof statsOf>
-  /** Who is on the page: the call-list only names people who are. */
-  names: Set<string>
+  /** The tier the bar is focused on. The page holds it, because it narrows
+      the Actionable Insights card and the table under it too. */
+  tier: TierKey | null
+  setTier: (t: TierKey | null | ((prev: TierKey | null) => TierKey | null)) => void
 }) {
   const tierBar = useRef<HTMLDivElement>(null)
-  const [listOpen, setListOpen] = useState(false)
-
-  const onPage = talkTo.filter((t) => names.has(t.name))
-  const flagged = tier ? onPage.filter((t) => t.tier === tier) : onPage
-  const lead = flagged[0]
-  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
-
-  const pickTier = (k: TierKey) =>
-    setTier((prev) => {
-      const next = prev === k ? null : k
-      setListOpen(next !== null)
-      return next
-    })
-  const clear = () => {
-    setTier(null)
-    setListOpen(false)
-  }
+  const pickTier = (k: TierKey) => setTier((prev) => (prev === k ? null : k))
 
   return (
     <CollapsibleCard
-      className="cmd-card"
+      className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
-      title="Actionable Metrics"
-      hint={<HelpTip text="The pipeline at a glance, who to talk to, and the reasoning behind it." />}
-      bodyClassName="cmd-body"
-      defaultOpen
+      title="Top Line Metrics"
+      hint={<HelpTip text="Totals, average RQ score, and the tier split." />}
+      bodyClassName="metrics-body"
     >
-      {/* Layer 0 — the pulse. RQ leads, as on the advisor's screen: it is the
-          number the page ranks on and the one the tier bar is a split of. */}
-      <div className="metric-tiles cmd-pulse">
+      {/* RQ leads, as on the advisor's screen: it is the number the page
+          ranks on and the one the tier bar is a split of. */}
+      <div className="metric-tiles">
           <div className="metric-tile">
             <span className="metric-label">
               AVG RQ SCORE
@@ -176,7 +154,7 @@ function CommandCenter({
             <div className="dist-head">
               <span className="metric-label">TIER DISTRIBUTION</span>
               {tier ? (
-                <button className="cmd-clear" type="button" onClick={clear}>
+                <button className="cmd-clear" type="button" onClick={() => setTier(null)}>
                   Clear Filter ✕
                 </button>
               ) : (
@@ -238,93 +216,50 @@ function CommandCenter({
             )}
           </div>
         </div>
-
-        {/* Layer 0 — the one next action */}
-        <div className="cmd-focus">
-          <p className="cmd-focus-line">
-            {meta ? (
-              <>
-                <b>
-                  {meta.key} · {meta.name}
-                </b>{' '}
-                — {flagged.length} flagged to talk to this week.
-              </>
-            ) : (
-              <>
-                <b>{flagged.length} candidates</b> flagged to talk to this week.
-              </>
-            )}
-          </p>
-          {lead ? (
-            <button
-              className="cmd-lead"
-              type="button"
-              onClick={() => setListOpen((o) => !o)}
-              aria-expanded={listOpen}
-            >
-              <span className="cmd-lead-tag">Start with</span>
-              <span className="cmd-lead-name">{lead.name}</span>
-              <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>
-                {lead.tier}
-              </span>
-              <span className="cmd-lead-kq">RQ {lead.kq}</span>
-              <span className="cmd-lead-niche">{lead.niche}</span>
-              <span className="cmd-lead-more">
-                {listOpen ? 'Hide' : `See All ${flagged.length}`}
-                <ChevronDown />
-              </span>
-            </button>
-          ) : (
-            <p className="cmd-empty">
-              None flagged in this tier this week — keep them on a light-touch nurture track.
-            </p>
-          )}
-        </div>
-
-        {/* Layer 1 — the full call-list */}
-        <div className={`collapse ${listOpen && flagged.length ? 'open' : ''}`}>
-          <div className="collapse-inner">
-            <div className="talk-list cmd-talk-list">
-              {flagged.map((t) => (
-                <div className="talk-card" key={t.name}>
-                  <div className="talk-head">
-                    {(() => {
-                      // Only the candidate whose profile is built out is a link,
-                      // the same rule the Prospects and Clients tables follow.
-                      const rec = candidates.find((c) => c.name === t.name)
-                      return rec && rec.name === profileOwner ? (
-                        <button
-                          type="button"
-                          className="talk-name name-link-btn"
-                          onClick={() => onOpenProfile(rec)}
-                        >
-                          {t.name}
-                        </button>
-                      ) : (
-                        <span className="talk-name">{t.name}</span>
-                      )
-                    })()}
-                    <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>
-                      {t.tier}
-                    </span>
-                    <span className="talk-kq">RQ {t.kq}</span>
-                    <span className="talk-niche">{t.niche}</span>
-                  </div>
-                  <div className="talk-chips">
-                    {t.said.map((s, i) => (
-                      <span className="talk-chip-wrap" key={s}>
-                        <span className="talk-chip">{s}</span>
-                        {i < t.said.length - 1 && <ChevronRight />}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
     </CollapsibleCard>
+  )
+}
+
+function CandidateInsights({
+  rows,
+  tier,
+  onOpen,
+}: {
+  /** The pipeline on the page: every count and name on the card is one of
+      its rows. */
+  rows: Candidate[]
+  tier: TierKey | null
+  onOpen: (c: Candidate) => void
+}) {
+  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
+  const talk = talkToOf(rows)
+  const insights = insightsOf(rows)
+  return (
+    <ActionableInsights
+      hint="Who the pipeline is made of, who to talk to this week, and the reasoning behind it."
+      reach={{
+        label: 'Who you’re reaching',
+        tip: 'Where each advisor stands in the decision, read from their own answers, not how big their book is.',
+        chips: reachOf(rows),
+      }}
+      noun="candidates"
+      scoreLabel="RQ"
+      talk={(meta ? talk.filter((t) => t.tier === meta.key) : talk).map((t) => ({
+        ...t,
+        score: t.kq,
+        segment: t.niche,
+      }))}
+      focus={meta && { label: `${meta.key} · ${meta.name}`, name: meta.name }}
+      insights={insights}
+      tierInsight={meta ? insights.find((i) => i.tier === meta.tierId) : undefined}
+      empty="None flagged in this tier this week — keep them on a light-touch nurture track."
+      /* A name opens what its row in the table opens, and nothing else. */
+      opens={(id) => rows.some((c) => rowId(c) === id && opensProfile(c))}
+      onOpen={(id) => {
+        const c = rows.find((x) => rowId(x) === id)
+        if (c) onOpen(c)
+      }}
+    />
   )
 }
 
@@ -710,6 +645,11 @@ export default function FirmCandidatesScreen({
   const allChecked = selected.size === allNames.length && allNames.length > 0
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
 
+  /* A row opens its report: a live sitting's from its answers, Marcus's the
+     authored one. */
+  const openRow = (c: Candidate) =>
+    'entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c)
+
   if (!loaded)
     return (
       <>
@@ -721,13 +661,8 @@ export default function FirmCandidatesScreen({
   return (
     <>
       <h1 className="page-title">My Candidates</h1>
-      <CommandCenter
-        onOpenProfile={onOpenProfile}
-        stats={statsOf(pipeline)}
-        names={new Set(pipeline.map((c) => c.name))}
-        tier={tier}
-        setTier={setTier}
-      />
+      <CandidateMetrics stats={statsOf(pipeline)} tier={tier} setTier={setTier} />
+      <CandidateInsights rows={pipeline} tier={tier} onOpen={openRow} />
 
       <div className="toolbar">
         <div className="search-box">
@@ -792,7 +727,7 @@ export default function FirmCandidatesScreen({
 
       <Table
         rows={rows}
-        onOpen={(c) => ('entryId' in c ? onOpenEntry((c as LiveCandidate).entryId) : onOpenProfile(c))}
+        onOpen={openRow}
         onRemove={setRemoving}
         onAdd={onAdd}
         selected={selected}

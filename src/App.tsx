@@ -4,6 +4,7 @@ import {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -17,6 +18,7 @@ import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
 import { reachSegments, talkTo } from './data/prospectSegments'
+import { clientReadings } from './data/clientSegments'
 import {
   modelClusters,
   CLUSTER_KEYS,
@@ -61,7 +63,6 @@ import {
   confidenceSegments,
   activeSeries,
   activeThisWeek,
-  clientInsights,
   type Client,
   type ClientTier,
 } from './data/clients'
@@ -103,6 +104,7 @@ import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
+import ActionableInsights from './components/ActionableInsights'
 import RowMenu from './components/RowMenu'
 import FeedbackButton, { useFlash } from './components/FeedbackButton'
 import { scrollPageToTop } from './reviewBridge'
@@ -215,256 +217,142 @@ const TIER_META = [
 type TierKey = (typeof TIER_META)[number]['key']
 
 
-// The single layered dashboard: pulse (state) + the one next action always
-// visible; the full call-list and the evidence are discoverable layers. The
-// tier bar is the drill-in spine — focusing a tier filters the call-list and
-// surfaces that tier's insight.
-function CommandCenter({ onOpenProfile }: { onOpenProfile?: (p: Prospect) => void }) {
-  const [tier, setTier] = useState<TierKey | null>(null)
+// The pulse: KQ, the count, and the tier bar. Focusing a tier narrows the
+// Actionable Insights card under it to that tier's people and its "why".
+function ProspectsMetrics({
+  tier,
+  onPickTier,
+  onClear,
+}: {
+  tier: TierKey | null
+  onPickTier: (k: TierKey) => void
+  onClear: () => void
+}) {
   const tierBar = useRef<HTMLDivElement>(null)
-  const [listOpen, setListOpen] = useState(false)
-  const [whyOpen, setWhyOpen] = useState(false)
-
-  const flagged = tier ? talkTo.filter((t) => t.tier === tier) : talkTo
-  const lead = flagged[0]
-  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
-  const tierInsight = meta ? insights.find((i) => i.n === meta.insightN) : undefined
-  const orderedInsights = tierInsight
-    ? [tierInsight, ...insights.filter((i) => i !== tierInsight)]
-    : insights
-
-  // Focusing a tier reveals its people; clicking it again clears the filter.
-  const pickTier = (k: TierKey) =>
-    setTier((prev) => {
-      const next = prev === k ? null : k
-      setListOpen(next !== null)
-      return next
-    })
-  const clear = () => {
-    setTier(null)
-    setListOpen(false)
-  }
 
   return (
     <CollapsibleCard
-      className="cmd-card"
+      className="metrics-card"
       icon={<ChartIcon color="#7639a1" />}
-      title="Actionable Metrics"
-      hint={<HelpTip text="Your book at a glance, who to talk to, and the reasoning behind it." />}
-      bodyClassName="cmd-body"
-      defaultOpen
+      title="Top Line Metrics"
+      hint={<HelpTip text="Totals, average KQ score, and the tier split." />}
+      bodyClassName="metrics-body"
     >
-      {/* Layer 0 — the pulse */}
-        <div className="metric-tiles cmd-pulse">
-          {/* KQ leads: it is the number the whole screen ranks on, and the one
-              the tier bar beside it is a distribution of. The count follows. */}
-          <div className="metric-tile">
-            <span className="metric-label">
-              AVG KQ SCORE
-              <HelpTip
-                side="right"
-                text="Knomee Quotient — how ready this prospect is to convert, 0–100. It scores readiness, not wealth."
-              />
-            </span>
-            <div className="metric-num">
-              <span className="metric-value metric-value-kq">{Math.round(prospectStats.avgKQ)}</span>
-            </div>
-          </div>
-          <div className="metric-tile">
-            <span className="metric-label">TOTAL PROSPECTS</span>
-            <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
-          </div>
-          <div className="metric-tile distribution">
-            <div className="dist-head">
-              <span className="metric-label">TIER DISTRIBUTION</span>
-              {tier ? (
-                <button className="cmd-clear" type="button" onClick={clear}>
-                  Clear Filter ✕
-                </button>
-              ) : (
-                <span className="dist-filter-hint">
-                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-                    <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
-                  </svg>
-                  Tap a tier to filter
-                </span>
-              )}
-            </div>
-            <div className="dist-bar cmd-dist-bar" ref={tierBar}>
-              {/* A tier with nobody in it is left off the bar and its legend. */}
-              {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => {
-                const n = prospectStats.byTier[m.tierId]
-                return (
-                  <button
-                    key={m.key}
-                    type="button"
-                    style={{ flex: n }}
-                    className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
-                      tier && tier !== m.key ? 'is-dim' : ''
-                    }`}
-                    onClick={() => pickTier(m.key)}
-                    aria-pressed={tier === m.key}
-                    data-tip={`${m.key} · ${m.name} · ${n}`}
-                  >
-                    {n}
-                  </button>
-                )
-              })}
-            </div>
-            <TierLegend
-              bar={tierBar}
-              items={TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => ({
-                key: m.key,
-                dot: m.dot,
-                name: `${m.key} · ${m.name}`,
-                range: m.range,
-              }))}
-            />
-            {prospectStats.byTier.incomplete > 0 && (
-              <p className="dist-foot">
-                {prospectStats.byTier.incomplete} incomplete profile
-                {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Who the book is actually made of. The point of this section is the
-            question "am I reaching the people I set out to reach?", so the
-            answer leads, before who to call. Each chip is a segment read off
-            the prospects' own answers — why money matters to them and how they
-            feel about it, crossed with how clearly they see the future and how
-            close they are to acting — never an audience typed in. */}
-        <div className="cmd-reach">
-          <span className="cmd-reach-label">
-            Who you’re reaching
+      <div className="metric-tiles">
+        {/* KQ leads: it is the number the whole screen ranks on, and the one
+            the tier bar beside it is a distribution of. The count follows. */}
+        <div className="metric-tile">
+          <span className="metric-label">
+            AVG KQ SCORE
             <HelpTip
               side="right"
-              text="Purpose × Posture crossed with Vision × Readiness, read from each prospect’s own answers."
+              text="Knomee Quotient — how ready this prospect is to convert, 0–100. It scores readiness, not wealth."
             />
           </span>
-          <div className="cmd-reach-list">
-            {reachSegments.map((s) => (
-              <span className="cmd-reach-chip" key={s.name}>
-                {s.name}
-                <b>{s.count}</b>
-              </span>
-            ))}
+          <div className="metric-num">
+            <span className="metric-value metric-value-kq">{Math.round(prospectStats.avgKQ)}</span>
           </div>
         </div>
-
-        {/* Layer 0 — the one next action */}
-        <div className="cmd-focus">
-          <p className="cmd-focus-line">
-            {meta ? (
-              <>
-                <b>{meta.key} · {meta.name}</b> — {flagged.length} flagged to talk to this week.
-              </>
+        <div className="metric-tile">
+          <span className="metric-label">TOTAL PROSPECTS</span>
+          <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
+        </div>
+        <div className="metric-tile distribution">
+          <div className="dist-head">
+            <span className="metric-label">TIER DISTRIBUTION</span>
+            {tier ? (
+              <button className="cmd-clear" type="button" onClick={onClear}>
+                Clear Filter ✕
+              </button>
             ) : (
-              <>
-                <b>{flagged.length} prospects</b> flagged to talk to this week.
-              </>
-            )}
-          </p>
-          {lead ? (
-            <button
-              className="cmd-lead"
-              type="button"
-              onClick={() => setListOpen((o) => !o)}
-              aria-expanded={listOpen}
-            >
-              <span className="cmd-lead-tag">Start with</span>
-              <span className="cmd-lead-name">{lead.name}</span>
-              <span className={`talk-tier ${lead.tier === 'Tier 1' ? 't1' : 't2'}`}>{lead.tier}</span>
-              <span className="cmd-lead-kq">KQ {lead.kq}</span>
-              <span className="cmd-lead-niche">{lead.segment}</span>
-              <span className="cmd-lead-more">
-                {listOpen ? 'Hide' : `See All ${flagged.length}`}
-                <ChevronDown />
+              <span className="dist-filter-hint">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                  <path d="M2.5 4h11l-4.2 4.8v3.4l-2.6 1.4V8.8L2.5 4Z" strokeLinejoin="round" strokeLinecap="round" />
+                </svg>
+                Tap a tier to filter
               </span>
-            </button>
-          ) : (
-            <p className="cmd-empty">
-              None flagged in this tier this week — keep them on a light-touch nurture track.
+            )}
+          </div>
+          <div className="dist-bar cmd-dist-bar" ref={tierBar}>
+            {/* A tier with nobody in it is left off the bar and its legend. */}
+            {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => {
+              const n = prospectStats.byTier[m.tierId]
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  style={{ flex: n }}
+                  className={`seg ${m.seg} tt ${tier === m.key ? 'is-sel' : ''} ${
+                    tier && tier !== m.key ? 'is-dim' : ''
+                  }`}
+                  onClick={() => onPickTier(m.key)}
+                  aria-pressed={tier === m.key}
+                  data-tip={`${m.key} · ${m.name} · ${n}`}
+                >
+                  {n}
+                </button>
+              )
+            })}
+          </div>
+          <TierLegend
+            bar={tierBar}
+            items={TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => ({
+              key: m.key,
+              dot: m.dot,
+              name: `${m.key} · ${m.name}`,
+              range: m.range,
+            }))}
+          />
+          {prospectStats.byTier.incomplete > 0 && (
+            <p className="dist-foot">
+              {prospectStats.byTier.incomplete} incomplete profile
+              {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown
             </p>
           )}
         </div>
-
-        {/* Layer 1 — the full call-list */}
-        <div className={`collapse ${listOpen && flagged.length ? 'open' : ''}`}>
-          <div className="collapse-inner">
-            <div className="talk-list cmd-talk-list">
-              {flagged.map((t) => (
-                <div className="talk-card" key={t.name}>
-                  <div className="talk-head">
-                    {(() => {
-                      // The card names a real person in the book — make it the
-                      // same link their row in the table is, which means only
-                      // the one whose profile is built out.
-                      const rec = prospects.find((p) => p.name === t.name)
-                      return rec && onOpenProfile && rec.name === financialId.owner ? (
-                        <button
-                          type="button"
-                          className="talk-name name-link-btn"
-                          onClick={() => onOpenProfile(rec)}
-                        >
-                          {t.name}
-                        </button>
-                      ) : (
-                        <span className="talk-name">{t.name}</span>
-                      )
-                    })()}
-                    <span className="talk-niche">{t.segment}</span>
-                    <span className={`talk-tier ${t.tier === 'Tier 1' ? 't1' : 't2'}`}>{t.tier}</span>
-                    <span className="talk-kq">KQ {t.kq}</span>
-                  </div>
-                  <div className="talk-chips">
-                    {t.said.map((s, i) => (
-                      <span className="talk-chip-wrap" key={s}>
-                        <span className="talk-chip">{s}</span>
-                        {i < t.said.length - 1 && <ChevronRight />}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Layer 1 — the evidence */}
-        <div className="cmd-why">
-          <button
-            className={`invite-preview-toggle cmd-why-toggle ${whyOpen ? 'is-open' : ''}`}
-            type="button"
-            aria-expanded={whyOpen}
-            onClick={() => setWhyOpen((o) => !o)}
-          >
-            {meta ? `Why — ${meta.name}` : 'Why these numbers'} <ChevronDown />
-          </button>
-          {meta && tierInsight && !whyOpen && (
-            <button className="cmd-why-peek" type="button" onClick={() => setWhyOpen(true)}>
-              <b>{tierInsight.title}.</b> {tierInsight.body.split('. ')[0]}.{' '}
-              <span className="cmd-why-peek-more">Read More →</span>
-            </button>
-          )}
-          <div className={`collapse ${whyOpen ? 'open' : ''}`}>
-            <div className="collapse-inner">
-              <div className="cmd-insights">
-                {orderedInsights.map((ins) => (
-                  <div className={`insight ${ins === tierInsight ? 'is-flagged' : ''}`} key={ins.n}>
-                    <div className="insight-num">{ins.n}</div>
-                    <div className="insight-text">
-                      <div className="insight-title">{ins.title}</div>
-                      <p className="insight-body">{ins.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      </div>
     </CollapsibleCard>
+  )
+}
+
+// Who the book is made of, who to talk to this week, and the reasoning. Each
+// "Who you're reaching" chip is a segment read off the prospects' own answers
+// (why money matters to them and how they feel about it, crossed with how
+// clearly they see the future and how close they are to acting), never an
+// audience typed in.
+function ProspectInsights({
+  tier,
+  onOpenProfile,
+}: {
+  tier: TierKey | null
+  onOpenProfile?: (p: Prospect) => void
+}) {
+  const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
+  // Only the one whose profile is built out is a link, the same rule as the
+  // table's.
+  const profileOf = (name: string) =>
+    name === financialId.owner ? prospects.find((p) => p.name === name) : undefined
+  return (
+    <ActionableInsights
+      hint="Who you’re reaching, who to talk to this week, and the reasoning behind it."
+      reach={{
+        label: 'Who you’re reaching',
+        tip: 'Purpose × Posture crossed with Vision × Readiness, read from each prospect’s own answers.',
+        chips: reachSegments,
+      }}
+      noun="prospects"
+      scoreLabel="KQ"
+      talk={(tier ? talkTo.filter((t) => t.tier === tier) : talkTo).map((t) => ({ ...t, score: t.kq }))}
+      focus={meta && { label: `${meta.key} · ${meta.name}`, name: meta.name }}
+      insights={insights}
+      tierInsight={meta ? insights.find((i) => i.n === meta.insightN) : undefined}
+      empty="None flagged in this tier this week — keep them on a light-touch nurture track."
+      opens={(name) => !!onOpenProfile && !!profileOf(name)}
+      onOpen={(name) => {
+        const p = profileOf(name)
+        if (p) onOpenProfile?.(p)
+      }}
+    />
   )
 }
 
@@ -792,10 +680,18 @@ function ProspectsScreen({
     })
   const allChecked = selected.size === allNames.length && allNames.length > 0
   const toggleAll = () => setSelected(allChecked ? new Set() : new Set(allNames))
+  /* The tier bar's focus, held here: it is picked in one card and narrows the
+     other. */
+  const [tier, setTier] = useState<TierKey | null>(null)
   return (
     <>
       <h1 className="page-title">My Prospects</h1>
-      <CommandCenter onOpenProfile={onOpenProfile} />
+      <ProspectsMetrics
+        tier={tier}
+        onPickTier={(k) => setTier((prev) => (prev === k ? null : k))}
+        onClear={() => setTier(null)}
+      />
+      <ProspectInsights tier={tier} onOpenProfile={onOpenProfile} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
@@ -1112,9 +1008,9 @@ function Delta({ value, note }: { value: number; note?: string }) {
 }
 
 const CLIENT_TIER_META = [
-  { tierId: 'engaged' as const, label: 'Tier 1 · Engaged', range: '70–100 KR', seg: 'seg-c1', dot: 'dot-c1' },
-  { tierId: 'attention' as const, label: 'Tier 2 · Attention', range: '40–69 KR', seg: 'seg-c2', dot: 'dot-c2' },
-  { tierId: 'reconnect' as const, label: 'Tier 3 · Reconnect', range: '0–39 KR', seg: 'seg-c3', dot: 'dot-c3' },
+  { tierId: 'engaged' as const, label: 'Tier 1 · Engaged', name: 'Engaged', range: '70–100 KR', seg: 'seg-c1', dot: 'dot-c1' },
+  { tierId: 'attention' as const, label: 'Tier 2 · Attention', name: 'Attention', range: '40–69 KR', seg: 'seg-c2', dot: 'dot-c2' },
+  { tierId: 'reconnect' as const, label: 'Tier 3 · Reconnect', name: 'Reconnect', range: '0–39 KR', seg: 'seg-c3', dot: 'dot-c3' },
 ]
 
 function ClientsMetrics({
@@ -1261,31 +1157,41 @@ function ClientsMetrics({
   )
 }
 
-function ClientInsights() {
+function ClientInsights({
+  clients,
+  tier,
+  onOpenProfile,
+}: {
+  clients: Client[]
+  /** The tier bar's focus, from the Top Line Metrics card above. */
+  tier: ClientTier | null
+  onOpenProfile: (c: Client) => void
+}) {
+  const { reach, talk, insights } = useMemo(() => clientReadings(clients), [clients])
+  const meta = CLIENT_TIER_META.find((m) => m.tierId === tier)
   return (
-    <CollapsibleCard
-      className="insights-card"
+    <ActionableInsights
+      tone="client"
       icon={<BoltIcon />}
-      title="Actionable Insights"
-      hint={<HelpTip text="Clients flagged by engagement and sentiment." />}
-      bodyClassName="client-insights-body"
-      defaultOpen={false}
-    >
-      {clientInsights.map((ins) => (
-        <div className="client-insight" key={ins.name}>
-          <div className="client-insight-head">
-            <span className="ci-warn"><WarnIcon /></span>
-            <span className="ci-name">{ins.name}</span>
-            <ChevronRight />
-          </div>
-          <div className="client-insight-body">
-            {ins.lines.map((l) => (
-              <p key={l}>{l}</p>
-            ))}
-          </div>
-        </div>
-      ))}
-    </CollapsibleCard>
+      hint="Who you’re serving, who to talk to this week, and the reasoning behind it."
+      reach={{
+        label: 'Who you’re serving',
+        tip: 'Purpose × Posture crossed with Vision × Readiness, read from each client’s own answers.',
+        chips: reach,
+      }}
+      noun="clients"
+      scoreLabel="KR"
+      talk={(meta ? talk.filter((t) => t.tierId === meta.tierId) : talk).map((t) => ({ ...t, score: t.kr }))}
+      focus={meta ? { label: meta.label, name: meta.name } : null}
+      insights={insights}
+      tierInsight={meta ? insights.find((i) => i.tier === meta.tierId) : undefined}
+      empty="None flagged in this tier this week — keep up the regular check-ins."
+      opens={hasProfile}
+      onOpen={(name) => {
+        const c = clients.find((x) => x.name === name)
+        if (c) onOpenProfile(c)
+      }}
+    />
   )
 }
 
@@ -1379,7 +1285,7 @@ function ClientsScreen({
         sentimentFilter={sentimentFilter}
         onPickSentiment={pickSentiment}
       />
-      <ClientInsights />
+      <ClientInsights clients={clients} tier={tierFilter} onOpenProfile={onOpenProfile} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
