@@ -6,19 +6,20 @@
  * halves are stored as the one sentence they make, because that is what an
  * advisor reads.
  *
- * Reading one back is a panel you read top to bottom — its pills, the
- * question, where it stands — with everything you can do to it as a pill in
- * its footer. A page that can only read it gets no footer.
+ * Reading one back: its pills, the question as a field you can simply type
+ * into (no pencil, no second panel), where it stands, and two pills — Delete
+ * and Mark Resolved. A page that can only read it gets the text and no
+ * footer.
  */
 
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './questionModal.css'
 import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
 import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
 import SelectMenu from '../components/SelectMenu'
-import { StatusTags } from './profileParts'
+import { StatusTags, withTag } from './profileParts'
 
 /* The openers, in the order the phone lists them. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
@@ -146,42 +147,75 @@ export function AddQuestionModal({
   )
 }
 
+/* A question reworded in place: dated today, said "Updated" on its row, and
+   no longer Knomee's words — so it loses "Knomee generated". */
+export function renamed(question: ProfileQuestion, q: string): ProfileQuestion {
+  return withTag({ ...question, q, date: DEMO_TODAY, knomee: undefined }, 'Updated')
+}
+
 export default function QuestionModal({
   question,
   onClose,
-  onEdit,
+  onRename,
   onToggleResolved,
   onDelete,
 }: {
   question: ProfileQuestion
   onClose: () => void
-  onEdit?: () => void
+  /** Rewording it in place. Without it the question is only read. */
+  onRename?: (q: string) => void
   onToggleResolved?: () => void
   onDelete?: () => void
 }) {
   /* Delete is the one thing here that cannot be undone, so it asks first, in
      the footer it was pressed in, not in a second panel. */
   const [confirming, setConfirming] = useState(false)
+  /* The question is its own field: what you read is what you change. */
+  const [draft, setDraft] = useState(question.q)
+  const field = useRef<HTMLTextAreaElement>(null)
+  const reverting = useRef(false)
+  useEffect(() => setDraft(question.q), [question.q])
+  /* As tall as the question, however many lines it runs to. */
+  useLayoutEffect(() => {
+    const el = field.current
+    if (!el) return
+    el.style.height = 'auto'
+    /* scrollHeight leaves out the border the field draws. */
+    el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`
+  }, [draft])
+
+  /* Saved on leaving the field (click away, Enter, or closing the panel):
+     tidied, given its question mark, and only if it actually changed. An
+     emptied field puts the question back. */
+  const commit = () => {
+    if (reverting.current) {
+      reverting.current = false
+      return
+    }
+    const t = draft.trim().replace(/\s+/g, ' ')
+    if (!t) return setDraft(question.q)
+    const full = /[?!.]$/.test(t) ? t : `${t}?`
+    if (full !== question.q) onRename?.(full)
+    else setDraft(question.q)
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      /* Escape inside the field undoes the typing; anywhere else it closes. */
+      if (e.key === 'Escape' && e.target !== field.current) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
   /* Where it stands, said the way its row says it: resolved replaces the date
-     rather than adding a second one. Read from the data, not from whether a
-     handler was passed, so a read-only page shows it too. */
+     rather than adding a second one. */
   const status = question.resolved
     ? `Resolved: ${question.resolved}`
     : question.date
       ? `Last updated: ${question.date}`
       : null
-  /* Every action lives in the footer, so a page that offers none (an
-     advisor's Business ID) gets a panel with no footer and the same body. */
-  const hasActions = !!(onToggleResolved || onEdit || onDelete)
+  const hasActions = !!(onToggleResolved || onDelete)
 
   return (
     <div
@@ -201,11 +235,33 @@ export default function QuestionModal({
           </button>
         </div>
 
-        {/* Reading only, on one left edge, in the row's own order: its pills,
-            the question, where it stands. Nothing in here is a control. */}
+        {/* On one left edge, in the row's own order: its pills, the question,
+            where it stands. */}
         <div className="modal-body qm-read">
           <StatusTags tags={question.tags} knomee={question.knomee} />
-          <h3 className="qm-question">{question.q}</h3>
+          {onRename ? (
+            <textarea
+              ref={field}
+              className="qm-question qm-edit"
+              aria-label="Question"
+              rows={1}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  e.currentTarget.blur()
+                } else if (e.key === 'Escape') {
+                  reverting.current = true
+                  setDraft(question.q)
+                  e.currentTarget.blur()
+                }
+              }}
+            />
+          ) : (
+            <h3 className="qm-question">{question.q}</h3>
+          )}
           {status && (
             <p
               className={`qm-status${question.resolved ? ' is-resolved' : ''}`}
@@ -223,8 +279,8 @@ export default function QuestionModal({
                 pills relabelled: Keep It has to mount to take the focus. */}
             {confirming && onDelete ? (
               <Fragment key="confirm">
-                {/* Holds the main pill's 44px so the panel doesn't recentre,
-                    and Keep It lands exactly where Delete was. */}
+                {/* Holds a pill's 44px so the panel doesn't recentre, and
+                    Keep It lands exactly where Delete was. */}
                 <p className="qm-confirm" id="qm-confirm-line">
                   Delete this question?
                 </p>
@@ -243,17 +299,8 @@ export default function QuestionModal({
               </Fragment>
             ) : (
               <Fragment key="actions">
-                {/* The question's state, on its own row: filled while there
-                    is something to do, outline once it is done. */}
-                {onToggleResolved && (
-                  <button
-                    className={`btn ${question.resolved ? 'btn-outline' : 'btn-primary'} qm-act-main`}
-                    type="button"
-                    onClick={onToggleResolved}
-                  >
-                    {question.resolved ? 'Reopen' : 'Mark Resolved'}
-                  </button>
-                )}
+                {/* Delete · Mark Resolved: the main action filled, on the
+                    right; once resolved, Reopen in outline. */}
                 {onDelete && (
                   <button
                     className="btn btn-outline qm-delete"
@@ -263,9 +310,13 @@ export default function QuestionModal({
                     Delete
                   </button>
                 )}
-                {onEdit && (
-                  <button className="btn btn-outline" type="button" onClick={onEdit}>
-                    Edit
+                {onToggleResolved && (
+                  <button
+                    className={`btn ${question.resolved ? 'btn-outline' : 'btn-primary'}`}
+                    type="button"
+                    onClick={onToggleResolved}
+                  >
+                    {question.resolved ? 'Reopen' : 'Mark Resolved'}
                   </button>
                 )}
               </Fragment>
