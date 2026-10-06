@@ -210,12 +210,15 @@ export default function QuestionModal({
 
   /* Where it stands, said the way its row says it: resolved replaces the date
      rather than adding a second one. */
-  const status = question.resolved
-    ? `Resolved: ${question.resolved}`
-    : question.date
-      ? `Last updated: ${question.date}`
-      : null
-  const hasActions = !!(onToggleResolved || onDelete)
+  /* Where it stands. Where it can be resolved, the checkbox says so and the
+     line keeps to the date; read-only, resolved replaces the date. */
+  const status =
+    question.resolved && !onToggleResolved
+      ? `Resolved: ${question.resolved}`
+      : question.date
+        ? `Last updated: ${question.date}`
+        : null
+  const hasActions = !!(onRename || onToggleResolved || onDelete)
 
   return (
     <div
@@ -267,9 +270,17 @@ export default function QuestionModal({
               className={`qm-status${question.resolved ? ' is-resolved' : ''}`}
               aria-live="polite"
             >
-              {question.resolved && <CheckIcon size={14} />}
+              {question.resolved && !onToggleResolved && <CheckIcon size={14} />}
               <span>{status}</span>
             </p>
+          )}
+          {/* Resolving is a state, not a button: a filled "Mark Resolved"
+              after an edit read as Save, and got pressed as one. */}
+          {onToggleResolved && (
+            <label className="qm-check">
+              <input type="checkbox" checked={!!question.resolved} onChange={onToggleResolved} />
+              <span>{question.resolved ? `Resolved · ${question.resolved}` : 'Resolved'}</span>
+            </label>
           )}
         </div>
 
@@ -299,8 +310,7 @@ export default function QuestionModal({
               </Fragment>
             ) : (
               <Fragment key="actions">
-                {/* Delete · Mark Resolved: the main action filled, on the
-                    right; once resolved, Reopen in outline. */}
+                {/* Delete · Done. */}
                 {onDelete && (
                   <button
                     className="btn btn-outline qm-delete"
@@ -310,15 +320,11 @@ export default function QuestionModal({
                     Delete
                   </button>
                 )}
-                {onToggleResolved && (
-                  <button
-                    className={`btn ${question.resolved ? 'btn-outline' : 'btn-primary'}`}
-                    type="button"
-                    onClick={onToggleResolved}
-                  >
-                    {question.resolved ? 'Reopen' : 'Mark Resolved'}
-                  </button>
-                )}
+                {/* Done closes: the field has already saved on leaving it,
+                    so the press people reach for after an edit is safe. */}
+                <button className="btn btn-primary" type="button" onClick={onClose}>
+                  Done
+                </button>
               </Fragment>
             )}
           </div>
