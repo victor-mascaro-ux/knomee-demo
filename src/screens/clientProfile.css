@@ -262,9 +262,10 @@
   background: var(--k-amber-light);
   color: var(--k-amber-ink);
 }
-/* Advisor added: provenance, not news — the neutral pair. */
+/* Advisor added / Knomee generated: provenance, not news — the neutral pair. */
 .pp-event-added,
-.le-advisor {
+.le-advisor,
+.cp-goal-tag.is-knomee {
   background: var(--k-pearl, #eeeeee);
   color: var(--text-secondary, #6a6480);
 }

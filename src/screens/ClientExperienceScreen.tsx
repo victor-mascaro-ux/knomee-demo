@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -57,7 +58,7 @@ import type { Step } from '../data/advisorFlow'
 import './advisor-flow.css'
 import SignUpScreen from './SignUpScreen'
 import { useDeviceMode } from '../deviceMode'
-import ProspectProfileScreen, { type FinIdCard } from './ProspectProfileScreen'
+import ProspectProfileScreen, { ClientTeam, type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
@@ -207,24 +208,105 @@ export const MARK_PARTS = [
   'M117.96 288C117.119 288 116.278 287.934 115.437 287.737C77.6551 279.864 45.1137 257.556 23.8938 224.815C2.67386 192.142 -4.76604 153.036 2.99733 114.653C14.7718 56.39 59.6054 11.446 117.184 0.226364C124.041 -1.08587 130.64 3.4413 131.935 10.3305C133.228 17.2854 128.764 23.9778 121.971 25.2901C74.4204 34.6069 37.415 71.6777 27.6461 119.837C21.2413 151.528 27.3872 183.809 44.9196 210.775C62.4518 237.742 89.3002 256.178 120.547 262.739C127.341 264.182 131.741 270.941 130.317 277.83C129.088 283.866 123.847 288 118.025 288H117.96Z',
 ]
 
-/* The tab bar's own top edge, arcing up around the centre mark. Drawn at the
-   screen's exact 390px width so the arc is never distorted — chord 82, rise 18,
-   a shallow swell the mark sits into rather than a dome around it. */
-export const TAB_EDGE = 'M0 18H154a55.7 55.7 0 0 1 82 0h154'
+/* The floating knomee button: a white disc carrying the mark, standing just
+   above the right end of the tab bar. The bar is three flat tabs now; the
+   mark is no longer one of them. It lives inside the bar's <nav> so it rides
+   with the bar (and above the sheets the bar stays above). Under the finger
+   the mark's five strokes fill to plum inside-out and the whole mark pulses
+   once — on every phone, whatever the press then does; they stay filled
+   while what it opens is open.
 
-/* The tab bar's top edge and its swell around the centre mark. The swell is a
-   true circle at any width: it was one SVG stretched to the screen, and on a
-   screen wider than 390 the stretch flattened the circle into an ellipse. Now
-   the flat edge is the bar's own white with a hairline on top, full width, and
-   the swell is drawn separately at its own size, centred on it. */
-export const TabEdge = () => (
-  <span className="cx-tab-edge" aria-hidden>
-    <svg className="cx-tab-dome" viewBox="150 0 90 20" width="90" height="20">
-      <path d="M154 18.6a55.7 55.7 0 0 1 82 0Z" fill="#fff" />
-      <path d="M150 18h4a55.7 55.7 0 0 1 82 0h4" fill="none" stroke="#e6e5ea" strokeWidth="1.2" />
-    </svg>
-  </span>
-)
+   A tap runs the same fill, at the same pace, as a long press: what it opens
+   opens at once, and the fill plays out over it rather than snapping full.
+   So the fill outlives the finger (`playing`, until its pulse ends), keeps
+   one element through release and open — a new one would restart it — and
+   starts afresh on each press (`run`). */
+export function KnomeeFab({ on, label, onClick }: { on?: boolean; label: string; onClick: () => void }) {
+  const [pressing, setPressing] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [run, setRun] = useState(0)
+  const up = () => setPressing(false)
+  return (
+    <button
+      type="button"
+      className={`cx-fab${on ? ' is-on' : ''}`}
+      aria-label={label}
+      aria-pressed={on}
+      onClick={onClick}
+      onPointerDown={() => {
+        setPressing(true)
+        setPlaying(true)
+        setRun((n) => n + 1)
+      }}
+      onPointerUp={up}
+      onPointerLeave={up}
+      onPointerCancel={up}
+    >
+      <TabMark />
+      {(pressing || playing || on) && (
+        <div
+          key={run}
+          className="px-fill"
+          aria-hidden
+          /* The pulse is the fill's last beat; the strokes' own ends bubble
+             up here too and are not it. */
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setPlaying(false)
+          }}
+        >
+          <svg viewBox="0 0 288 288">
+            {MARK_PARTS.map((d, i) => (
+              <path key={i} d={d} style={{ animationDelay: `${i * 0.048}s` }} />
+            ))}
+          </svg>
+        </div>
+      )}
+    </button>
+  )
+}
+
+/* The selected tab's bar: the dashboards' tab underline — 3px, rounded, the
+   firm's colour — laid on the bar's top edge over the selected tab, and
+   sliding to the next one as the dashboards' does. It is as wide as the
+   label plus 12 a side. Measured in the bar's own (unscaled) pixels: the
+   framed phone is scaled, and a client rect is not. A callback ref, because
+   the bar comes and goes (it gives way to Back / Continue inside a flow). */
+export function useTabInd(active: string, color?: string) {
+  const [nav, setNav] = useState<HTMLElement | null>(null)
+  const [box, setBox] = useState<{ left: number; width: number } | null>(null)
+  useLayoutEffect(() => {
+    if (!nav) return
+    const measure = () => {
+      const lbl = nav.querySelector<HTMLElement>('.cx-tab.is-on .cx-tab-lbl')
+      if (!lbl) return setBox(null)
+      const n = nav.getBoundingClientRect()
+      const r = lbl.getBoundingClientRect()
+      const k = n.width / nav.offsetWidth || 1
+      setBox({ left: (r.left - n.left) / k - 12, width: r.width / k + 24 })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(nav)
+    /* Fonts can swap in after first paint and shift a label's width. */
+    const t = window.setTimeout(measure, 80)
+    return () => {
+      ro.disconnect()
+      window.clearTimeout(t)
+    }
+  }, [nav, active])
+  const ind = box && (
+    <span
+      className="cx-tab-ind"
+      aria-hidden
+      style={{
+        transform: `translateX(${box.left}px)`,
+        width: box.width,
+        ...(color ? { background: color } : null),
+      }}
+    />
+  )
+  return { ref: setNav, ind }
+}
 
 /* ── keep the whole device on screen ──────────────────────────────────────
    The frame is a fixed 882 × 428, taller than most laptop windows. Rather than
@@ -1407,6 +1489,7 @@ const CLIENT_WELCOME: Step = {
 const CLIENT_ID_FIELDS: IdField[] = [
   { key: 'name', label: 'Your name', icon: 'name' },
   { key: 'place', label: 'Where you live', hint: 'Optional', chip: 'Where you live', icon: 'place' },
+  { key: 'job', label: 'Your occupation', hint: 'Optional', chip: 'Occupation', icon: 'work' },
 ]
 
 /* Sarah's phone, restartable from her menu: a restart is a fresh run of the
@@ -1451,7 +1534,17 @@ function ClientExperienceRun({
      persona the demo is about. */
   const [intro, setIntro] = useState<'welcome' | 'you' | null>(complete ? null : 'welcome')
   const [idField, setIdField] = useState(0)
-  const [who, setWho] = useState<Record<string, string>>({ name: SARAH.name, place: '' })
+  /* The welcome and each field of the first form, for the review overlay —
+     none of them is in the address. */
+  useCcNav('cx.intro', intro, setIntro)
+  useCcNav('cx.idField', idField, setIdField)
+  /* The finished-journey demo skips the form, so it carries the answers her
+     advisor's page shows; a fresh run starts them blank. */
+  const [who, setWho] = useState<Record<string, string>>({
+    name: SARAH.name,
+    place: complete ? financialId.location : '',
+    job: complete ? financialId.occupation : '',
+  })
   const introNext = () => {
     if (intro === 'welcome') {
       setIdField(0)
@@ -1481,9 +1574,11 @@ function ClientExperienceRun({
   const [adventure, setAdventure] = useState<string | null>(null)
   useCcNav('cx.adventure', adventure, setAdventure)
   useCcNavRoots('cx', () => [
-    { 'cx.tab': 'adventures', 'cx.adventure': null },
-    ...journey.map((j) => ({ 'cx.tab': 'adventures', 'cx.adventure': j.id })),
-    { 'cx.tab': 'finid', 'cx.adventure': null },
+    { 'cx.intro': 'welcome' },
+    { 'cx.intro': 'you', 'cx.idField': 0 },
+    { 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': null },
+    ...journey.map((j) => ({ 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': j.id })),
+    { 'cx.intro': null, 'cx.tab': 'finid', 'cx.adventure': null },
   ])
   /* Reopened from her Financial ID: the adventure's ending again, with her
      answers, and back to the page after — nothing on the journey changes. */
@@ -1638,7 +1733,6 @@ function ClientExperienceRun({
   /* Which scripted example the next long press plays. Each press takes the
      next one — a life event, a question, a goal — and then round again. */
   const [voiceAt, setVoiceAt] = useState(-1)
-  const [pressing, setPressing] = useState(false)
   const viewport = useRef<HTMLDivElement>(null)
   useDragScroll(viewport)
   /* Opening an adventure (or leaving one), or switching tabs, starts the page
@@ -1652,49 +1746,46 @@ function ClientExperienceRun({
   /* On a handset the frame is gone, so there is nothing to scale. */
   const scale = bare ? 1 : fitScale * zoom
 
-  // Long-press the centre mark to talk to Knomee; a plain tap opens quick
+  // Long-press the floating mark to talk to Knomee; a plain tap opens quick
   // access. The gesture rides on the tab bar itself so the mark keeps being a
   // button — `held` swallows the click that a long press would otherwise fire.
   const timer = useRef<number | null>(null)
   const held = useRef(false)
   const pressStart = (e: React.PointerEvent) => {
-    if (!(e.target as HTMLElement).closest('.cx-tab-center')) return
+    if (!(e.target as HTMLElement).closest('.cx-fab')) return
     held.current = false
-    setPressing(true)
     timer.current = window.setTimeout(() => {
       held.current = true
-      setPressing(false)
       setSheet(false)
       setVoiceAt((i) => (i + 1) % voices.length)
       setVoiceOpen(true)
-    }, 290)
+    }, 375)
   }
   const pressEnd = () => {
     if (timer.current) window.clearTimeout(timer.current)
-    setPressing(false)
   }
 
   const pickTab = (id: TabId) => {
+    setSheet(false)
+    setVoiceOpen(false)
+    setTab(id)
+  }
+  const pickKnomee = () => {
     // Swallow the click that ends a long press — but only that one, or a
-    // stray click with no press before it would wedge the tab bar shut.
+    // stray click with no press before it would wedge the button shut.
     if (held.current) {
       held.current = false
       return
     }
-    if (id === 'knomee') {
-      if (voiceOpen) {
-        setVoiceOpen(false)
-        return
-      }
-      setSheet((v) => !v)
-    } else {
-      setSheet(false)
+    if (voiceOpen) {
       setVoiceOpen(false)
-      setTab(id)
+      return
     }
+    setSheet((v) => !v)
   }
 
-  const active: TabId = sheet || voiceOpen ? 'knomee' : tab
+  const active: TabId = tab
+  const tabInd = useTabInd(active, brand?.primary)
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -1953,6 +2044,12 @@ function ClientExperienceRun({
                 built={BUILT}
                 onAddAgain={addAgain}
               />
+            ) : tab === 'team' ? (
+              /* My Team: who on her team sees which part of her Financial ID. */
+              <div className="af-team">
+                <h2 className="af-h1">My Team</h2>
+                <ClientTeam />
+              </div>
             ) : !signedUp ? (
               /* Her Financial ID is behind an account; her advisor already has
                  her answers. Not Now takes her back to the adventures. */
@@ -1968,7 +2065,26 @@ function ClientExperienceRun({
                  built. */
               <ProspectProfileScreen
                 prospect={SARAH}
-                fresh={{ joy, done, conf, outlook, future, goals: goalsDone }}
+                fresh={{
+                  joy,
+                  about: { location: who.place, occupation: who.job },
+                  done,
+                  conf,
+                  outlook,
+                  future,
+                  goals: goalsDone,
+                }}
+                /* The next adventure's waiting card is a way into it, the
+                   same as its Start on My Adventures. */
+                nextAdventure={[journey.find((j) => !done[j.id])?.id].find((id) => id && BUILT.includes(id))}
+                onStartAdventure={(id) => {
+                  setRailOpen(false)
+                  /* Taken from the Adventures tab, as its Start is: the ID
+                     tab's viewport layout would clip the adventure's foot. */
+                  setTab('adventures')
+                  reopen(id)
+                  viewport.current?.scrollTo({ top: 0 })
+                }}
                 onOpenEnding={(id) => {
                   setReviewing(true)
                   setAdventure(id)
@@ -2056,52 +2172,24 @@ function ClientExperienceRun({
           {!adventure && !intro && (
           <nav
             className="cx-tabbar"
+            ref={tabInd.ref}
             onPointerDown={pressStart}
             onPointerUp={pressEnd}
             onPointerLeave={pressEnd}
           >
-            <TabEdge />
-            {mobileTabs.map((t) =>
-              t.center ? (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`cx-tab cx-tab-center ${active === t.id ? 'is-on' : ''}`}
-                  aria-label={t.label}
-                  onClick={() => pickTab(t.id)}
-                >
-                  {/* The mark takes the tab's own colour — muted while the
-                      sheet is shut, plum while it is open — rather than
-                      dimming, which read as the logo being turned off. */}
-                  <TabMark />
-                  {/* The mark's five strokes fill to plum inside-out under the finger,
-                      and stay filled while either sheet is open. */}
-                  {(pressing || sheet || voiceOpen) && (
-                    <div
-                      key={pressing ? 'press' : 'static'}
-                      className={`px-fill${(sheet || voiceOpen) && !pressing ? ' is-static' : ''}`}
-                      aria-hidden
-                    >
-                      <svg viewBox="0 0 288 288">
-                        {MARK_PARTS.map((d, i) => (
-                          <path key={i} d={d} style={{ animationDelay: `${i * 0.037}s` }} />
-                        ))}
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              ) : (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
-                  onClick={() => pickTab(t.id)}
-                >
-                  {t.id === 'adventures' ? <TabAdventures /> : <TabFinId />}
-                  <span className="cx-tab-lbl">{t.label}</span>
-                </button>
-              ),
-            )}
+            {tabInd.ind}
+            {mobileTabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
+                onClick={() => pickTab(t.id)}
+              >
+                {t.id === 'adventures' ? <TabAdventures /> : t.id === 'finid' ? <TabFinId /> : <TabTeam />}
+                <span className="cx-tab-lbl">{t.label}</span>
+              </button>
+            ))}
+            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />
           </nav>
           )}
 

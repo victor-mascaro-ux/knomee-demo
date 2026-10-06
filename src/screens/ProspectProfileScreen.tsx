@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
 import ExperienceButton from '../components/ExperienceButton'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
@@ -21,9 +21,11 @@ const PROSPECT_TIER: Record<string, string> = {
 }
 import { DownloadIcon } from '../components/icons'
 import {
+  BriefcaseIcon,
   CalendarIcon,
   CaretIcon,
   CheckIcon,
+  PinIcon,
   RowChevron,
   MailIcon,
 } from '../components/profileIcons'
@@ -42,7 +44,7 @@ import GoalModal from './GoalModal'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
-import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import QuestionModal, { AddQuestionModal, renamed } from './QuestionModal'
 import { useVisionBoards } from './VisionBoards'
 import { clientProfile } from '../data/clientProfile'
 import type { JoyAnswers } from './JoyFlow'
@@ -53,7 +55,7 @@ import type { GoalsAnswers } from './GoalsFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
 import type { LifeEvent, ProfileQuestion } from '../data/financialId'
-import SharingView, { SharingLens } from './SharingView'
+import SharingView from './SharingView'
 
 /* The five core adventures, in the order they are taken. */
 const BADGE_ORDER = ['Financial Joy', 'Confidence', 'Outlook', 'Future You', 'Goals']
@@ -84,13 +86,21 @@ export default function ProspectProfileScreen({
   checkIn,
   fresh,
   onOpenEnding,
+  nextAdventure,
+  onStartAdventure,
 }: {
   /** A completed adventure's heading, tapped: its ending screen again. */
   onOpenEnding?: (id: string) => void
+  /** The adventure that is next on her journey. Its waiting card starts it. */
+  nextAdventure?: string
+  onStartAdventure?: (id: string) => void
   /** Her phone as a new client's: nothing on the page until an adventure has
       put it there. `joy` is what Financial Joy handed back, once it has. */
   fresh?: {
     joy: JoyAnswers | null
+    /** What she put in "A little about you". Either one left blank is no row
+        on her rail. */
+    about?: { location: string; occupation: string }
     done?: Record<string, string>
     conf?: ConfidenceAnswers | null
     outlook?: OutlookAnswers | null
@@ -122,8 +132,6 @@ export default function ProspectProfileScreen({
   only?: FinIdCard
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
-  /* Her ID read for what it says, or for who sees it. */
-  const [lens, setLens] = useState<'id' | 'sharing'>('id')
   const { printing, print } = usePrintSheet()
   /* A new client's page is empty, and fills as adventures are completed:
      only Financial Joy can be taken yet, so only what it produces appears —
@@ -190,6 +198,9 @@ export default function ProspectProfileScreen({
           more: joy ? Object.keys(joy.attention).filter((k) => joy.attention[k] === 1) : [],
           less: joy ? Object.keys(joy.attention).filter((k) => joy.attention[k] === -1) : [],
         },
+        // Hers as she typed them, or nothing — never the authored ones.
+        location: fresh.about?.location.trim() ?? '',
+        occupation: fresh.about?.occupation.trim() ?? '',
       }
     : financialId
   /* Which cards have anything in them yet. */
@@ -198,6 +209,46 @@ export default function ProspectProfileScreen({
     futureYou: !fresh || isDone('future-you'),
     outlook: !fresh || isDone('outlook'),
     confidence: !fresh || isDone('confidence'),
+  }
+  /* A card still waiting for its adventure. The one whose adventure is next
+     is the way into it: the whole card, still greyed and drained, with a
+     chevron at its head and its line saying so. The ones after it stay inert,
+     because their content unlocks in order. */
+  const waiting = (id: string, title: string) => {
+    const go = fresh && onStartAdventure && nextAdventure === id ? () => onStartAdventure(id) : undefined
+    return {
+      cls: go ? ' is-waiting is-next' : ' is-waiting',
+      tap: go
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': `Start the ${title} adventure`,
+            onClick: go,
+            onKeyDown: (e: ReactKeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                go()
+              }
+            },
+          }
+        : {},
+      chevron: go ? (
+        <svg className="pp-card-next" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden>
+          <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : null,
+      line: (
+        <p className="pp-waiting">
+          {go ? 'Start' : 'Complete'} the {title} adventure
+        </p>
+      ),
+    }
+  }
+  const wait = {
+    joy: waiting('financial-joy', 'Financial Joy'),
+    futureYou: waiting('future-you', 'Future You'),
+    outlook: waiting('outlook', 'Outlook'),
+    confidence: waiting('confidence', 'Confidence'),
   }
   // Goals run earliest stage first with the completed ones last; each card
   // opens showing a few rows and grows on demand.
@@ -364,7 +415,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('joy') && (
-                  <section className={`pp-card${has.joy ? '' : ' is-waiting'}`}>
+                  <section className={`pp-card${has.joy ? '' : wait.joy.cls}`} {...(has.joy ? {} : wait.joy.tap)}>
                     <div className="pp-card-head">
                       {fresh && has.joy && onOpenEnding ? (
                         <button
@@ -383,8 +434,9 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
                       )}
                       {has.joy && <DateSelect />}
+                      {!has.joy && wait.joy.chevron}
                     </div>
-                    {!has.joy && <p className="pp-waiting">Complete the Financial Joy adventure</p>}
+                    {!has.joy && wait.joy.line}
                     {has.joy && (
                     <>
                     {/* A question left blank is left off — no prompt over no
@@ -431,7 +483,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('future') && (
-                  <section className={`pp-card${has.futureYou ? '' : ' is-waiting'}`}>
+                  <section className={`pp-card${has.futureYou ? '' : wait.futureYou.cls}`} {...(has.futureYou ? {} : wait.futureYou.tap)}>
                     <div className="pp-card-head">
                       {fresh && has.futureYou && onOpenEnding ? (
                         <button
@@ -450,8 +502,9 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
                       )}
                       {has.futureYou && <DateSelect />}
+                      {!has.futureYou && wait.futureYou.chevron}
                     </div>
-                    {!has.futureYou && <p className="pp-waiting">Complete the Future You adventure</p>}
+                    {!has.futureYou && wait.futureYou.line}
                     {has.futureYou && (
                     <>
                     {(
@@ -481,7 +534,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('outlook') && (
-                  <section className={`pp-card${has.outlook ? '' : ' is-waiting'}`}>
+                  <section className={`pp-card${has.outlook ? '' : wait.outlook.cls}`} {...(has.outlook ? {} : wait.outlook.tap)}>
                     <div className="pp-card-head">
                       {fresh && has.outlook && onOpenEnding ? (
                         <button
@@ -500,8 +553,9 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
                       )}
                       {has.outlook && <DateSelect />}
+                      {!has.outlook && wait.outlook.chevron}
                     </div>
-                    {!has.outlook && <p className="pp-waiting">Complete the Outlook adventure</p>}
+                    {!has.outlook && wait.outlook.line}
                     {has.outlook && (
                     <>
                     {fi.outlook.concerns.length > 0 && <span className="pp-fy-label">Concerns</span>}
@@ -565,7 +619,7 @@ export default function ProspectProfileScreen({
                 {/* Right rail */}
                 <div className={only ? undefined : 'pp-rail'}>
                   {show('confidence') && (
-                  <section className={`pp-card${has.confidence ? '' : ' is-waiting'}`}>
+                  <section className={`pp-card${has.confidence ? '' : wait.confidence.cls}`} {...(has.confidence ? {} : wait.confidence.tap)}>
                     <div className="pp-card-head">
                       {fresh && has.confidence && onOpenEnding ? (
                         <button
@@ -584,8 +638,9 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
                       )}
                       {has.confidence && <DateSelect />}
+                      {!has.confidence && wait.confidence.chevron}
                     </div>
-                    {!has.confidence && <p className="pp-waiting">Complete the Confidence adventure</p>}
+                    {!has.confidence && wait.confidence.line}
                     {/* Nothing rated, no reading: no dial and no results. */}
                     {has.confidence && fi.confidence && (
                     <>
@@ -707,7 +762,7 @@ export default function ProspectProfileScreen({
                           }}
                         >
                           <span className="pp-q-text">
-                            <StatusTags tags={q.tags} />
+                            <StatusTags tags={q.tags} knomee={q.knomee} />
                             {q.q}
                           </span>
                           <span className="pp-q-date">
@@ -766,6 +821,18 @@ export default function ProspectProfileScreen({
               <span className="pp-meta-row tt" data-tip={prospect.email}>
                 <MailIcon /> <span className="pp-meta-email">{prospect.email}</span>
               </span>
+              {/* Where she lives and what she does — the candidate rail's rows,
+                  each dropped when it was left blank. */}
+              {fi.location && (
+                <span className="pp-meta-row">
+                  <PinIcon /> {fi.location}
+                </span>
+              )}
+              {fi.occupation && (
+                <span className="pp-meta-row">
+                  <BriefcaseIcon /> {fi.occupation}
+                </span>
+              )}
             </div>
             {/* On her own phone the check-in heads the page (below), so the
                 rail at its foot does not say it a second time. */}
@@ -855,25 +922,7 @@ export default function ProspectProfileScreen({
               a check-in nobody made. */}
           {checkIn && <CheckInCard checkIn={checkIn} />}
 
-          {/* Her own phone: the ID read two ways — what it says, and who
-              sees each part of it. */}
-          {mine && fresh && tab === 'id' && !printing && (
-            <SharingLens value={lens} onChange={setLens} />
-          )}
-
-          {mine && fresh && tab === 'id' && !printing && lens === 'sharing' ? (
-            <SharingView
-              cards={[
-                { id: 'goals', title: 'Goals', icon: icGoals },
-                { id: 'financial-joy', title: 'Financial Joy', icon: icFinancialJoy },
-                { id: 'confidence', title: 'Confidence', icon: icConfidence },
-                { id: 'outlook', title: 'Outlook', icon: icOutlook },
-                { id: 'future-you', title: 'Future You', icon: icFutureYou },
-                { id: 'life-events', title: 'Life Events', icon: icLifeEvents },
-                { id: 'vision', title: 'Future Vision Board', icon: icVision },
-              ]}
-            />
-          ) : !printing && tab === 'readiness' ? (
+          {!printing && tab === 'readiness' ? (
             <ReadinessTabView d={prospectReadiness} />
           ) : !printing && tab === 'toolkit' ? (
             <ToolkitTabView d={prospectToolkit} />
@@ -943,7 +992,11 @@ export default function ProspectProfileScreen({
         <QuestionModal
           question={openQuestion}
           onClose={() => setOpenQuestion(null)}
-          onEdit={() => setQuestionForm('edit')}
+          onRename={(text) => {
+            const next = renamed(openQuestion, text)
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+          }}
           onToggleResolved={() => {
             const next = {
               ...openQuestion,
@@ -951,7 +1004,6 @@ export default function ProspectProfileScreen({
             }
             setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
             setOpenQuestion(next)
-            if (next.resolved) onToast?.('Question resolved')
           }}
           onDelete={() => {
             setQuestionList((list) => list.filter((q) => q !== openQuestion))
@@ -1065,5 +1117,24 @@ export default function ProspectProfileScreen({
         />
       )}
     </div>
+  )
+}
+
+/* Her team, and who of them sees each part of her Financial ID — the My Team
+   tab on her phone. It was a second lens on the ID itself; the bar gives it a
+   tab of its own, as the advisor's phone does. */
+export function ClientTeam() {
+  return (
+    <SharingView
+      cards={[
+        { id: 'goals', title: 'Goals', icon: icGoals },
+        { id: 'financial-joy', title: 'Financial Joy', icon: icFinancialJoy },
+        { id: 'confidence', title: 'Confidence', icon: icConfidence },
+        { id: 'outlook', title: 'Outlook', icon: icOutlook },
+        { id: 'future-you', title: 'Future You', icon: icFutureYou },
+        { id: 'life-events', title: 'Life Events', icon: icLifeEvents },
+        { id: 'vision', title: 'Future Vision Board', icon: icVision },
+      ]}
+    />
   )
 }

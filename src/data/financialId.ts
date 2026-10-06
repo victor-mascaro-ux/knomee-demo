@@ -19,7 +19,7 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
   },
   {
     statement: 'I feel confident that I can weather unexpected financial challenges and changes.',
-    value: 74,
+    value: 80,
     low: 'not confident',
     high: 'very confident',
   },
@@ -42,6 +42,17 @@ export const confidenceAnswers: ConfidenceAnswer[] = [
     high: 'never regret',
   },
 ]
+
+/* The sixth statement, new to the adventure: whether working with an advisor
+   is itself a source of confidence. It stands apart from the five because her
+   Confidence card reads those five and its dial is their mean; the phone's
+   flow asks all six, and her prospect row carries all six. */
+export const advisorConfidenceAnswer: ConfidenceAnswer = {
+  statement: 'I believe that working with a financial advisor/planner improves my confidence.',
+  value: 84,
+  low: 'no, I don’t',
+  high: 'yes, I do',
+}
 
 // Demo content for a prospect's "Financial ID" profile page. All placeholder
 // data — one rich profile stands in for whichever prospect is opened.
@@ -103,10 +114,19 @@ export interface ProfileQuestion {
   q: string
   date?: string
   resolved?: string
+  /** One of the three Knomee drew from their answers — questions to bring to
+      their advisor, as an advisor's Business ID carries three to put to a
+      firm. Labelled "Knomee generated" on its row; not a question they asked,
+      so not counted as one. */
+  knomee?: boolean
 }
 
 export const financialId = {
   joined: 'March 2023',
+  /* Her answers to "A little about you". The rail shows them under her email
+     and drops either one left blank. */
+  location: 'San Francisco, CA',
+  occupation: 'Business owner',
   /* Whose profile this is. One prospect page is built out and it is hers, so
      only her name in the Prospects table opens it — the same rule the Clients
      table follows for Emily Watson. */
@@ -289,6 +309,23 @@ export const financialId = {
     { kind: 'Retirement', text: 'Targeting a wind-down from 2028', date: '02/17/2025', sentiment: 4, advisorAdded: true },
   ] as LifeEvent[],
   questions: [
+    /* The three Knomee drew from her answers: Vic's health and her own, the
+       kids' college against a 2028 wind-down, two homes. */
+    {
+      q: 'If Vic’s health or mine needs more care, what in our plan has to change — and what do we protect first?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'Can we pay for college for both kids and still wind down from 2028, or does one of those plans have to move?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'Can we keep the house in Costa Rica and still save for a second home, or is one home enough for the life we want?',
+      date: '05/03/2025',
+      knomee: true,
+    },
     { q: 'Can I afford to go to college?', date: '05/03/2025' },
     { q: 'Can I afford this family vacation?', date: '05/03/2025' },
     { q: 'Should I start a new company?', date: '05/03/2025' },

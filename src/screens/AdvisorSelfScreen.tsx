@@ -29,7 +29,7 @@ import {
   IPhone,
   SheetCredit,
   TabFinId,
-  TabMark,
+  TabAdventures,
   TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
@@ -40,7 +40,8 @@ import {
   useDarkGround,
   useFitToWindow,
   useZoom,
-  TabEdge,
+  KnomeeFab,
+  useTabInd,
 } from './ClientExperienceScreen'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
@@ -1371,9 +1372,27 @@ function FlowPhone({
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
+  const tabInd = useTabInd(tab, brand?.primary)
   const closeToList = () => {
     setTab('flow')
     reset(HOME_AT)
+  }
+  // The floating mark: straight into the next adventure still open. The
+  // trail restarts at the list rather than running `go` from wherever the
+  // flow last stood, which would count a closing card left open as passed.
+  const openNext = () => {
+    const next = (rich ? journeyStates(answers) : adventureStates(answers)).find((r) => r.state === 'open')
+    setTab('flow')
+    if (next && RICH.includes(next.id)) {
+      setTrail([HOME_AT])
+      setRichOpen(next.id)
+      toTop()
+      return
+    }
+    const at = next ? steps.findIndex((s) => s.adventure === next.id) : -1
+    setRichOpen(null)
+    setTrail(at >= 0 ? [HOME_AT, at] : [HOME_AT])
+    toTop()
   }
 
   /* The meter under the bar. On the journey page it counts only the screens
@@ -1695,12 +1714,18 @@ function FlowPhone({
               </div>
             </div>
           ) : (
-          <nav className="cx-tabbar">
-            <TabEdge />
-            {/* Business ID · the mark · Questions. The mark is the way back to
-                the adventures rather than an ornament in the middle of two
-                tabs — it is the one control on this bar that goes to them,
-                which is why it is the one wearing the brand. */}
+          <nav className="cx-tabbar" ref={tabInd.ref}>
+            {tabInd.ind}
+            {/* Adventures · Business ID · My Team, as on the client's phone;
+                the mark floats above the bar's right end. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+              onClick={closeToList}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -1708,14 +1733,6 @@ function FlowPhone({
             >
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
-            </button>
-            <button
-              type="button"
-              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
-              aria-label="Adventures"
-              onClick={closeToList}
-            >
-              <TabMark />
             </button>
             {/* My Team: the people the Business ID goes to, and which part of
                 it each of them sees. The three questions are on the ID, in its
@@ -1728,6 +1745,9 @@ function FlowPhone({
               <TabTeam />
               <span className="cx-tab-lbl">My Team</span>
             </button>
+            {/* The mark picks up where they left off: the next adventure
+                still open, or the list once there is none. */}
+            <KnomeeFab label="Next adventure" onClick={openNext} />
           </nav>
           )}
 

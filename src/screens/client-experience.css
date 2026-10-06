@@ -590,15 +590,15 @@
 }
 
 /* ---------- bottom tab bar ----------
-   The bar's top edge arcs up around the centre mark, so the mark rides on the
-   bar rather than sitting in a button of its own. The edge is an SVG drawn at
-   the screen's exact width and the buttons stack on top of it. */
+   Three flat tabs on a white bar with a hairline on top — Adventures, the ID,
+   My Team — and the knomee mark floating above the bar's right end in a white
+   disc of its own. The bar used to arc up around a centre mark; the mark is no
+   longer a tab, so the bar's edge is straight. */
 .cx-tabbar {
   position: relative;
-  /* Above the quick-access sheet (4). The mark rises out of the bar, and the
-     sheet was painting over the half of it that had risen — which is why the
-     disc came out sliced. The voice sheet (6) still covers the bar, which is
-     right: it takes the whole screen. */
+  /* Above the quick-access sheet (4), so the floating mark that opens the
+     sheet stays on top of it and can close it again. The voice sheet (6)
+     still covers the bar, which is right: it takes the whole screen. */
   z-index: 5;
   flex: none;
   height: var(--mobile-tabbar-h);
@@ -606,38 +606,31 @@
   align-items: center;
   justify-content: space-around;
   padding: 0 var(--space-6);
-}
-/* The bar's top edge, with its swell around the centre mark. Drawn at 390 and
-   stretched to whatever the bar actually is: on a handset the screen is the
-   window, which is not 390, and a fixed-width edge put the notch a few pixels
-   off the button that sits in it. */
-.cx-tab-edge {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 96px;
-  pointer-events: none;
-}
-/* The flat edge: white from the hairline down, the full width of the bar. */
-.cx-tab-edge::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 18px;
-  bottom: 0;
   background: #fff;
   border-top: 1.2px solid #e6e5ea;
+  /* A soft lift off the page above it, so the bar reads as standing over
+     the content that scrolls under it. */
+  box-shadow: 0 -2px 12px rgba(36, 4, 70, 0.07);
 }
-/* The swell, at its own size and centred, over the hairline it interrupts. */
-.cx-tab-dome {
+/* The selected tab's bar (useTabInd): the dashboards' tab underline — 3px,
+   rounded, the firm's colour (plum without one) — on the bar's top edge,
+   over the hairline, sliding from tab to tab as theirs does. */
+.cx-tab-ind {
   position: absolute;
-  top: 0.6px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: block;
-  overflow: visible;
+  top: -1.2px;
+  left: 0;
+  z-index: 2;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--plum);
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02),
+    width 0.3s cubic-bezier(0.22, 0.81, 0.28, 1.02);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-tab-ind {
+    transition: none;
+  }
 }
 .cx-tab {
   position: relative;
@@ -650,10 +643,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-6);
   color: #8c8998;
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-out);
+}
+/* Line icons at one height, so the three labels sit on one baseline. */
+.cx-tab > svg {
+  height: 24px;
+  width: auto;
 }
 .cx-tab:hover {
   color: #5c5470;
@@ -677,42 +675,89 @@
 .cx-tab.is-on .cx-tab-lbl {
   font-weight: var(--weight-bold);
 }
-/* The centre mark sits INTO the swell, label-free and sized to fill the space
-   the label used to take. The arc rises 18 above the bar's flat edge and the
-   mark rises with it, less the air the two tabs beside it keep above their own
-   icons — so the gap over the mark reads as the same gap. */
-.cx-tab-center {
-  margin-top: -17px;
-  justify-content: center;
-}
 .cx-tab-mark {
   width: 62px;
   height: 62px;
   display: block;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
-/* The mark is taller than the swell it sits in, so its top rises past the
-   bar's white and onto whatever is behind — the page, or the sheet's plum.
-   A white circle a few pixels wider than the mark, with no line around it,
-   continues the bar's own white up around it: one shape, not a badge sitting
-   on a bar. A hairline here reads as a second circle behind the first, which
-   is what it was doing before. */
-/* The mark, and nothing else: no disc, no ring, no fill behind it. It sits in
-   the swell the bar draws for it, and the only thing that changes when the
-   sheet is open is its colour. */
-/* Both journeys draw the mark inline, so both say "pressed" in colour rather
-   than by dimming, which read as the logo being switched off. Reversed out of
-   the disc, and the disc is what changes. */
+/* The mark is drawn inline, so it says "on" in colour rather than by
+   dimming, which read as the logo being switched off. */
 svg.cx-tab-mark {
   fill: currentColor;
   transition: fill var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
-.cx-tab-center:hover svg.cx-tab-mark,
-.cx-tab-center.is-on svg.cx-tab-mark {
-  fill: var(--k-plum);
+
+/* The floating knomee button. It sits in the bar's own box (so it rides with
+   the bar, on a handset as in the frame) and stands just above its right
+   end, clear of the My Team tab under it. A white disc with a soft shadow,
+   the mark muted inside it; plum while what it opens is open. */
+.cx-fab {
+  position: absolute;
+  right: var(--space-16);
+  bottom: calc(100% + 14px);
+  z-index: 2;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.05), 0 6px 18px rgba(30, 20, 50, 0.18);
+  color: #8c8998;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-.cx-tab-center:hover svg.cx-tab-mark {
-  opacity: 0.72;
+/* Hover lifts the disc and leaves the mark grey: the press's plum fill then
+   runs stroke by stroke over grey, where it shows. A plum hover (even eased
+   back to 0.72) was nearly the fill's own colour, so the fill vanished into
+   it. Full plum while what it opens is open. */
+.cx-fab:hover {
+  box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.06), 0 8px 22px rgba(30, 20, 50, 0.22);
+}
+.cx-fab.is-on {
+  color: var(--k-plum);
+}
+.cx-fab.is-on svg.cx-tab-mark {
+  opacity: 1;
+}
+/* Pressed, the mark and its fill give a little — not the disc. */
+.cx-fab:active .cx-tab-mark,
+.cx-fab:active .px-fill svg {
+  transform: scale(0.94);
+}
+/* The mark sits its circle as every icon in a circle does: its farthest point
+   0.8 of the way from the centre to the rim (the adventure icons' 120 of 150).
+   The mark's outer ring reaches 146.75 from the centre of its 288 box, so in
+   a 60 disc it is drawn at 60 × 0.4 × 288 / 146.75 = 47. */
+.cx-fab .cx-tab-mark {
+  width: 47px;
+  height: 47px;
+}
+/* The client's long-press fill, over the mark at the mark's own size. */
+.cx-fab .px-fill {
+  width: 47px;
+  height: 47px;
+  margin: -23.5px 0 0 -23.5px;
+}
+.cx-fab .px-fill svg {
+  width: 47px;
+  height: 47px;
+}
+/* Desktop: the bar's tabs spread across the content width, and the disc
+   stands over the same edge they stop at. */
+html.cx-desktop .cx-fab {
+  right: var(--xp-edge);
+}
+/* Room for the disc. On every screen with the floating button the scroll runs
+   on past the last thing by the disc's own footprint (60 + the 14 it stands
+   above the bar), on top of the screen's usual 22, so the last row can always
+   be scrolled clear of it. The ID pages are the exception: they end on their
+   stripe, whose own foot already clears the disc. */
+.cx-viewport:has(~ .cx-tabbar .cx-fab):not(:has(> .pp)) {
+  padding-bottom: calc(22px + 60px + 14px);
 }
 
 .cx-home-bar {

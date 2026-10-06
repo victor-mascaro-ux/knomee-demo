@@ -8,7 +8,7 @@ import { profileFor } from '../data/memberProfiles'
 import AddGoalModal from './AddGoalModal'
 import ReadinessModal from './ReadinessModal'
 import LifeEventModal, { AddLifeEventModal, SentimentFace } from './LifeEventModal'
-import QuestionModal, { AddQuestionModal } from './QuestionModal'
+import QuestionModal, { AddQuestionModal, renamed } from './QuestionModal'
 import type { HouseholdMember } from '../data/clientProfile'
 import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { BoardTile, ClientGoal, VisionBoard } from '../data/clientProfile'
@@ -21,10 +21,12 @@ const CLIENT_TIER: Record<string, string> = {
 }
 import { DownloadIcon } from '../components/icons'
 import {
+  BriefcaseIcon,
   CalendarIcon,
   CaretIcon,
   CheckIcon,
   MailIcon,
+  PinIcon,
   RowChevron,
 } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -973,6 +975,18 @@ export default function ClientProfileScreen({
               <span className="pp-meta-row tt" data-tip={client.email}>
                 <MailIcon /> <span className="pp-meta-email">{client.email}</span>
               </span>
+              {/* Where they live and what they do — the candidate rail's rows,
+                  each dropped when it was left blank. */}
+              {cp.location && (
+                <span className="pp-meta-row">
+                  <PinIcon /> {cp.location}
+                </span>
+              )}
+              {cp.occupation && (
+                <span className="pp-meta-row">
+                  <BriefcaseIcon /> {cp.occupation}
+                </span>
+              )}
             </div>
 
             {/* On the advisor's page the check-in sits with who she is, in the
@@ -1429,7 +1443,7 @@ export default function ClientProfileScreen({
                           }}
                         >
                           <span className="pp-q-text">
-                            <StatusTags tags={q.tags} />
+                            <StatusTags tags={q.tags} knomee={q.knomee} />
                             {q.q}
                           </span>
                           <span className="pp-q-date">
@@ -1517,7 +1531,11 @@ export default function ClientProfileScreen({
         <QuestionModal
           question={openQuestion}
           onClose={() => setOpenQuestion(null)}
-          onEdit={() => setQuestionForm('edit')}
+          onRename={(text) => {
+            const next = renamed(openQuestion, text)
+            setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
+            setOpenQuestion(next)
+          }}
           onToggleResolved={() => {
             const next = {
               ...openQuestion,
@@ -1525,7 +1543,6 @@ export default function ClientProfileScreen({
             }
             setQuestionList((list) => list.map((q) => (q === openQuestion ? next : q)))
             setOpenQuestion(next)
-            if (next.resolved) onToast?.('Question resolved')
           }}
           onDelete={() => {
             setQuestionList((list) => list.filter((q) => q !== openQuestion))

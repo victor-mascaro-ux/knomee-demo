@@ -94,6 +94,10 @@ const widePhoto = (src: string, alt: string): BoardTile => ({
 
 export const clientProfile = {
   joined: 'March 2025',
+  /* Her answers to "A little about you". The rail shows them under her email
+     and drops either one left blank. */
+  location: 'Denver, CO',
+  occupation: 'Marketing consultant',
   household: 'Watson Family',
   checkIn: { mood: 'Good', level: 4, date: '05/03/2025' },
 
@@ -331,6 +335,23 @@ export const clientProfile = {
   ] as LifeEvent[],
 
   questions: [
+    /* The three Knomee drew from her answers: college against Vic's care and
+       her parents, a business after the layoff, the separation's order. */
+    {
+      q: 'How do we pay for the kids’ college and still keep enough set aside for Vic’s care and my parents getting older?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'If I start a business after the layoff, how long can our year of cash carry us before the business has to pay?',
+      date: '05/03/2025',
+      knomee: true,
+    },
+    {
+      q: 'With the separation, which of our goals comes first — the second home, the trust for the grandchildren or my sabbatical?',
+      date: '05/03/2025',
+      knomee: true,
+    },
     { q: 'Can I afford to go to college?', date: '05/03/2025' },
     { q: 'Can I afford this family vacation?', date: '05/03/2025' },
     { q: 'Should I start a new company?', date: '04/18/2025' },

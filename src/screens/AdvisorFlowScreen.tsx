@@ -22,7 +22,7 @@ import {
   IPhone,
   SheetCredit,
   TabFinId,
-  TabMark,
+  TabAdventures,
   TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
@@ -34,7 +34,8 @@ import {
   useDarkGround,
   useFitToWindow,
   useZoom,
-  TabEdge,
+  KnomeeFab,
+  useTabInd,
 } from './ClientExperienceScreen'
 import {
   advisor,
@@ -364,9 +365,19 @@ export default function AdvisorFlowScreen({
 
   // Closing an adventure returns to the list and ends the trail there.
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
+  const tabInd = useTabInd(tab, brand?.primary)
   const closeToList = () => {
     setTab('flow')
     reset(HOME_AT)
+  }
+  // The floating mark: straight into the next adventure still open.
+  const openNext = () => {
+    const next = advisorAdventures.find((a) => a.state === 'open')
+    const at = next ? steps.findIndex((s) => s.adventure === next.id) : -1
+    setTab('flow')
+    if (at >= 0) setTrail([HOME_AT, at])
+    else setTrail([HOME_AT])
+    toTop()
   }
 
   // Inside an adventure the app bar carries its name and a way out, in place
@@ -510,12 +521,18 @@ export default function AdvisorFlowScreen({
               </div>
             </div>
           ) : (
-          <nav className="cx-tabbar">
-            <TabEdge />
-            {/* Business ID · the mark · Questions. The mark is the way back to
-                the adventures rather than an ornament in the middle of two
-                tabs — it is the one control on this bar that goes to them,
-                which is why it is the one wearing the brand. */}
+          <nav className="cx-tabbar" ref={tabInd.ref}>
+            {tabInd.ind}
+            {/* Adventures · Business ID · My Team, as on the client's phone;
+                the mark floats above the bar's right end. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+              onClick={closeToList}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -523,14 +540,6 @@ export default function AdvisorFlowScreen({
             >
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
-            </button>
-            <button
-              type="button"
-              className={`cx-tab cx-tab-center ${tab === 'flow' ? 'is-on' : ''}`}
-              aria-label="Adventures"
-              onClick={closeToList}
-            >
-              <TabMark />
             </button>
             {/* My Team: the people the Business ID goes to, and which part of
                 it each of them sees. */}
@@ -542,6 +551,9 @@ export default function AdvisorFlowScreen({
               <TabTeam />
               <span className="cx-tab-lbl">My Team</span>
             </button>
+            {/* The mark picks up where he left off: the next adventure
+                still open, or the list once there is none. */}
+            <KnomeeFab label="Next adventure" onClick={openNext} />
           </nav>
           )}
 
