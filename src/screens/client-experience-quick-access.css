@@ -39,9 +39,9 @@
    the screen by a fixed offset: that offset assumed the framed phone's home
    bar, so on a handset the fill landed 16px above the mark — two marks, the
    plum one poking out past the top of the white bump. */
-.px-fill{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;z-index:1;pointer-events:none;animation:pxPulse .25s var(--ease-out) .475s both}
+.px-fill{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;z-index:1;pointer-events:none;animation:pxPulse .16s var(--ease-out) .3s both}
 .px-fill svg{width:70px;height:70px;display:block;overflow:visible}
-.px-fill path{fill:var(--k-plum);transform-origin:50% 50%;transform-box:view-box;animation:pxFill .175s var(--ease-out) both}
+.px-fill path{fill:var(--k-plum);transform-origin:50% 50%;transform-box:view-box;animation:pxFill .11s var(--ease-out) both}
 @keyframes pxFill{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes pxPulse{50%{transform:scale(1.09)}}
 .px-fill.is-static{animation:none}
