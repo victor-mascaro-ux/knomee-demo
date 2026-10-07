@@ -580,7 +580,15 @@ You’re making great progress. Let’s keep going.`,
     adventure: 'the-move',
     eyebrow: 'The Move · 4 of 11',
     title: 'Do you want support with your move?',
-    options: ['I want to do it on my own.', 'I want help from a platform partner.'],
+    /* A scale of five, its ends the two answers it began with — so a sitting
+       saved when it had only those still reads as the same end. */
+    options: [
+      'I want to do it on my own.',
+      'I want to do most of it on my own.',
+      'I want a bit of both.',
+      'I want a platform partner for most of it.',
+      'I want help from a platform partner.',
+    ],
     chosen: ['I want help from a platform partner.'],
   },
   {

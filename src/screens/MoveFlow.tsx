@@ -27,6 +27,7 @@ import './addGoalModal.css'
 import './readinessModal.css'
 import './futureYouFlow.css'
 import './moveFlow.css'
+import './confidenceFlow.css'
 import { steps as flowSteps } from '../data/advisorFlow'
 import { emptyAnswers, STAGES, STAGE_BODY, stageOf, type Answers } from '../data/advisorAnswers'
 import type { Goal } from '../data/financialId'
@@ -545,48 +546,66 @@ function Pills({
   )
 }
 
-/* A two-answer question as two photographs side by side, Practice Joy's
-   cells: the picture says the answer before the words do. The tapped one
-   takes the lime ring and a check, the other steps back, and the page turns
-   after the same beat the answer cards hold. `pictures` follows the order of
-   `options`; `labels` shortens an answer for under its picture, and the answer
-   kept is still the option's own words. */
-function PhotoPair({
+/* A question answered on a scale, Confidence's way: one card in the middle
+   of the screen, the question on it, and five points between two pictures
+   that are its ends — `pictures` the first and last of `options`, and
+   `labels` their short names. The side the chosen point leans to holds its
+   picture up and the far one steps back; the point's own words read under
+   the scale, and the answer kept is still the option's own words. */
+function ScaleCard({
+  title,
   options,
   pictures,
   labels,
   value,
   onPick,
 }: {
+  title: string
   options: string[]
   pictures: string[]
   labels?: Record<string, string>
   value: string | null
   onPick: (v: string) => void
 }) {
-  const [tapped, setTapped] = useState<string | null>(null)
-  const picked = tapped ?? value
+  const at = value ? options.indexOf(value) : -1
+  const mid = (options.length - 1) / 2
+  const ends = [0, options.length - 1]
   return (
-    <div className={`jf-photos mv-photos${tapped ? ' is-chosen' : ''}`}>
-      {options.map((o, i) => (
-        <button
-          key={o}
-          type="button"
-          className={`jf-photo mv-photo${picked === o ? ' is-on' : ''}`}
-          style={{ ['--i' as string]: i }}
-          aria-pressed={picked === o}
-          onClick={() => {
-            setTapped(o)
-            onPick(o)
-          }}
-        >
-          <span className="jf-photo-frame">
-            <Photo src={pictures[i]} fallback="jf-photo-fallback" />
-            <PhotoCheck />
-          </span>
-          <span className="jf-photo-label">{labels?.[o] ?? o}</span>
-        </button>
-      ))}
+    <div className="cf-card mv-scale-card">
+      <p className="cf-statement">{title}</p>
+      <div className={`mv-scale${at < 0 ? ' is-untouched' : at === mid ? '' : ' is-leaning'}`}>
+        <div className="mv-scale-ends">
+          {ends.map((i, side) => (
+            <figure
+              key={i}
+              className={`mv-scale-end${at >= 0 && (side ? at > mid : at < mid) ? ' is-near' : ''}`}
+            >
+              <span className="jf-photo-frame">
+                <Photo src={pictures[side]} fallback="jf-photo-fallback" />
+              </span>
+              <figcaption>{labels?.[options[i]] ?? options[i]}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <div className="mv-scale-stops" role="radiogroup" aria-label={title}>
+          {options.map((o, i) => (
+            <button
+              key={o}
+              type="button"
+              role="radio"
+              aria-checked={i === at}
+              aria-label={o}
+              className={`mv-scale-stop${i === at ? ' is-on' : ''}`}
+              onClick={() => onPick(o)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <p className="mv-scale-said" aria-live="polite">
+          {at >= 0 ? options[at] : 'Tap the point that fits you.'}
+        </p>
+      </div>
     </div>
   )
 }
@@ -695,8 +714,9 @@ export const ADVISOR_MOVE: MoveContent = {
     cheer: 'That’s the heart of it ✦',
   },
   support: {
-    /* Asked as a how rather than a yes or no, so it is answered by the two
-       pictures under it. Here only: the invite flow keeps its own wording. */
+    /* Asked as a how rather than a yes or no, so it is answered on the scale
+       between the two pictures. Here only: the plain flow keeps its own
+       wording. */
     title: 'How do you want to make your move?',
     options: opts('mv-q4'),
     pictures: SUPPORT_PICTURES,
@@ -1029,14 +1049,14 @@ export default function MoveFlow({
       )}
 
       {at === 'support' && (
-        <div className="mv-q mv-q-pair">
-          <h2 className="fy-h fy-h-sm">{c.support.title}</h2>
-          <PhotoPair
+        <div className="cf-q mv-q-scale">
+          <ScaleCard
+            title={c.support.title}
             options={c.support.options}
             pictures={c.support.pictures}
             labels={c.support.labels}
             value={m.support}
-            onPick={(v) => pickAndGo('support', v)}
+            onPick={(v) => set('support', v)}
           />
         </div>
       )}

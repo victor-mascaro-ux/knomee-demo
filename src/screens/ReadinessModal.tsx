@@ -33,7 +33,15 @@ export const QUESTIONS: Question[] = [
     lead: 'How do you envision ',
     strong: 'support',
     tail: ' from your financial advisor when working towards your goal?',
-    options: [{ label: 'I want to do it on my own' }, { label: 'I want help from my advisor' }],
+    /* A scale of five, the Goals adventure's: its ends the two answers it
+       began with, so a goal saved with one of those keeps it. */
+    options: [
+      { label: 'I want to do it on my own' },
+      { label: 'I want to do most of it on my own' },
+      { label: 'I want a bit of both' },
+      { label: 'I want my advisor’s help with most of it' },
+      { label: 'I want help from my advisor' },
+    ],
   },
   {
     lead: 'Are you thinking about ',

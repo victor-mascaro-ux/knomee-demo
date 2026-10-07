@@ -14,7 +14,7 @@
 
 import { advisor, businessId, steps, type BusinessId } from './advisorFlow'
 import { RECOMMENDATIONS_KEY, type ToolkitTab, type ReadinessTab } from './readiness'
-import { rqFromSheet } from './rqSheet'
+import { rqFromSheet, supportOf } from './rqSheet'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
 
@@ -89,7 +89,7 @@ export const rq = rqFromSheet({
   firm: statement(0)?.value,
   clarity: step('fy-clarity')?.scale?.value,
   platform: statement(5)?.value,
-  support: rankOf('mv-q4') === 1 ? 'yes' : rankOf('mv-q4') === 0 ? 'no' : undefined,
+  support: supportOf(rankOf('mv-q4')),
 })
 
 export const dimensions: Dimension[] = [

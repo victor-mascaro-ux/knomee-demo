@@ -577,14 +577,126 @@
   right: 18px;
 }
 
-/* ── a two-answer question, pictured ──
-   The photo cells' standard (joyFlow.css) does the arrival, the hover and the
-   check; a single answer adds that the other one steps back. */
-.mv-photos {
-  margin-top: var(--space-20);
+/* ── a question on a scale ──
+   Confidence's card and its centring (confidenceFlow.css); inside it, the two
+   pictures that are the scale's ends, the five points under them — the first
+   and last under each picture's middle — and the chosen point's words. */
+.mv-scale-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-16);
 }
-.mv-photos.is-chosen .mv-photo:not(.is-on) {
-  opacity: 0.4;
+.mv-scale-end {
+  width: min(44%, 168px);
+  margin: 0;
+  text-align: center;
+  transition:
+    opacity 0.3s var(--ease-out),
+    filter 0.3s var(--ease-out),
+    transform 0.3s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+/* The photo cell's frame, outside the cell that would make it a block. */
+.mv-scale-end .jf-photo-frame {
+  display: block;
+}
+.mv-scale-end figcaption {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  color: var(--text-strong);
+}
+/* Leaning one way: that end keeps its picture with the lime ring the photo
+   cells wear when chosen; the far end steps back. The middle point leans
+   neither way, so both stay as they are. */
+.mv-scale-end.is-near .jf-photo-frame::after {
+  box-shadow: inset 0 0 0 5px var(--k-lime);
+}
+.mv-scale.is-leaning .mv-scale-end:not(.is-near) {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+  transform: scale(0.94);
+}
+.mv-scale-stops {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  /* The ends' pictures are min(44%, 168px) wide: half that, less half a
+     point, puts the first and last point under their middles. */
+  margin: var(--space-20) calc(min(22%, 84px) - 18px) 0;
+}
+.mv-scale-stops::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  background: var(--k-grape-light, #e9d9f4);
+}
+.mv-scale-stop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  border-radius: 50%;
+  background: #fff;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold, 700);
+  color: var(--k-grape, #7639a1);
+  cursor: pointer;
+  transition:
+    background-color 0.18s var(--ease-out),
+    border-color 0.18s var(--ease-out),
+    transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.mv-scale-stop:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+.mv-scale-stop.is-on {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-plum, #240446);
+  color: var(--k-lime, #bff65b);
+  transform: scale(1.14);
+}
+.mv-scale-stop:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+/* Untouched, the points breathe in turn to say they can be tapped — the
+   sun's beckon, spread along the scale. */
+.mv-scale.is-untouched .mv-scale-stop {
+  animation: cfBeckon 1.8s ease-in-out infinite;
+  animation-delay: calc(0.6s + var(--n, 0) * 0.12s);
+}
+.mv-scale-stop:nth-child(2) { --n: 1; }
+.mv-scale-stop:nth-child(3) { --n: 2; }
+.mv-scale-stop:nth-child(4) { --n: 3; }
+.mv-scale-stop:nth-child(5) { --n: 4; }
+.mv-scale-said {
+  min-height: 2.9em;
+  margin: var(--space-16) 0 0;
+  font-size: var(--text-base);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-strong);
+}
+.mv-scale.is-untouched .mv-scale-said {
+  color: var(--text-secondary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-scale-end,
+  .mv-scale-stop {
+    transition: none;
+  }
+  .mv-scale.is-untouched .mv-scale-stop {
+    animation: none;
+  }
 }
 
 /* ── a disc that carries an icon ──
@@ -886,17 +998,6 @@
   }
 }
 
-/* A question answered by a pair of pictures sits in the middle of the
-   screen, between the move card and the foot — the question on the left as
-   every other question is, the two pictures under it. */
-.mv-q-pair {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-bottom: var(--space-32, 32px);
-}
-
 /* ── the last celebration ──
    The Move ends every adventure, so its celebration names no next one. Under
    the badge: the news, then two white cards on the plum — the Business ID it
@@ -1029,20 +1130,9 @@ html.cx-desktop .jf.mv > .mv-goal {
   margin-inline: auto;
 }
 
-/* The pair: under its question like every other question (not floated
-   mid-window), two 270 tiles that fill the 560 step with a 20 gap, edge to
-   edge with the question over them, from 540–1080 art (0.5x or less). */
-html.cx-desktop .mv .mv-q-pair {
-  flex: none;
-  justify-content: flex-start;
-}
-html.cx-desktop .mv .mv-photos {
-  --jf-tile: 270px;
-  --jf-cols: 2;
-  column-gap: 20px;
-  max-width: none;
-  justify-content: center;
-  margin-inline: 0;
+/* The scale's card, centred between the bars as Confidence's statements are. */
+html.cx-desktop .jf.mv > .mv-q-scale {
+  padding-block: 24px;
 }
 
 /* The road too: under the held move, not floated to the window's middle. */

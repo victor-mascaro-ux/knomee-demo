@@ -23,6 +23,16 @@ const TTM_RAMP = [20, 40, 60, 80, 90]
 const LIKERT_RAMP = [25, 45, 65, 85, 95]
 const SUPPORT = { yes: 98, no: 58 }
 
+/** The support question is a scale of five now; the sheet still asks it as a
+    yes or a no. `at` is where it was left (0–4, -1 for unanswered): the two
+    points toward a partner are a yes, the two toward going alone a no, and the
+    middle says neither, so it counts as a blank does. */
+export function supportOf(at: number): 'yes' | 'no' | undefined {
+  if (at >= 3) return 'yes'
+  if (at === 0 || at === 1) return 'no'
+  return undefined
+}
+
 const likert = (raw: number) => LIKERT_RAMP[Math.min(5, Math.max(1, raw)) - 1]
 
 export interface RqInputs {
