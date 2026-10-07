@@ -96,7 +96,7 @@ import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
 import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
 import { emptyAnswers, sampleAnswers } from './data/advisorAnswers'
-import { backToProfile, openExperience, setDeviceMode, useDeviceMode } from './deviceMode'
+import { backToProfile, isPhoneScreen, openExperience, setDeviceMode, useDeviceMode } from './deviceMode'
 import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
@@ -3886,6 +3886,17 @@ export default function App() {
     return () => {
       live = false
     }
+  }, [inviteToken])
+  /* An invited advisor gets the version for the device they opened the link
+     on: the phone's on a phone (no frame — a handset is never drawn inside a
+     phone) and the desktop's on a computer, decided again if the window is
+     resized. The demo's own experiences keep the presenter's D-panel choice. */
+  useEffect(() => {
+    if (!inviteToken) return
+    const pick = () => setDeviceMode(isPhoneScreen() ? 'mobile' : 'desktop')
+    pick()
+    window.addEventListener('resize', pick)
+    return () => window.removeEventListener('resize', pick)
   }, [inviteToken])
   // Dev toggle between the advisor persona (the default demo) and the manager /
   // admin persona who oversees 100 advisors. Off = advisor.
