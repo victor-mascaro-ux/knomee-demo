@@ -73,7 +73,7 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--k-lime, #bff65b);
+  background: var(--k-grape-light, #e9d9f4);
   color: var(--k-plum, #240446);
   cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.2, 1.6, 0.4, 1);
@@ -219,11 +219,11 @@
 }
 .sh-chip.is-on {
   opacity: 1;
-  border-color: var(--k-lime, #bff65b);
+  border-color: var(--k-grape, #7639a1);
 }
 .sh-chip.is-on .sh-chip-av {
   background: var(--k-plum, #240446);
-  color: var(--k-lime, #bff65b);
+  color: #fff;
 }
 .sh-chip-text {
   display: grid;
@@ -382,6 +382,11 @@
 .sh-switch i {
   transition: background 0.25s ease;
 }
+/* On is the page's purple, not the journey switch's green: one colour family
+   on a page where every person and every card is already purple. */
+.sh-switch.af-switch[aria-checked='true'] i {
+  background: var(--k-grape, #7639a1);
+}
 .sh-switch i::after {
   transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1);
 }
@@ -501,8 +506,8 @@
 .sh-tag {
   padding: 1px 7px;
   border-radius: 999px;
-  background: var(--k-lime-light, #ecfbd3);
-  color: #3d5a0f;
+  background: var(--k-grape-light, #e9d9f4);
+  color: var(--k-plum, #240446);
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.02em;
