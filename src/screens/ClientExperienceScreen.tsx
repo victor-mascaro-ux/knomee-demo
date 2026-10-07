@@ -478,11 +478,10 @@ export function useZoom() {
 
 /* ── the firm's colours, inside the phone ──────────────────────────
    A journey is the client's or the advisor's first sight of the firm, so the
-   phone wears the same white label the desktop shell does rather than knomee's
-   plum. Only what the deal actually recolours: the bar, and the plum and grape
-   the screens paint buttons and accents with. `--text-strong` resolves at
-   :root, so headlines stay the app's own dark whatever brand is on — which is
-   the rule the shell already follows. */
+   phone wears the same white label the desktop shell does: the firm's colour
+   on its bars, and nowhere else. Nothing inside the content takes the firm's
+   colours — a firm's colour is not one the design can guarantee legibility
+   against — so buttons, headings, tabs and panels keep the app's own. */
 export interface FlowBrand {
   primary: string
   accent: string
@@ -491,16 +490,7 @@ export interface FlowBrand {
 
 export function brandVars(brand?: FlowBrand | null): CSSProperties {
   if (!brand) return {}
-  return {
-    '--surface-brand': brand.primary,
-    '--action-primary': brand.primary,
-    '--action-primary-hover': brand.accent,
-    '--border-strong': brand.primary,
-    '--k-plum': brand.primary,
-    '--plum': brand.primary,
-    '--k-grape': brand.accent,
-    '--purple-bolt': brand.accent,
-  } as CSSProperties
+  return { '--brand-bar': brand.primary } as CSSProperties
 }
 
 /** What sits at the left of every phone app bar: the firm's mark if the demo
