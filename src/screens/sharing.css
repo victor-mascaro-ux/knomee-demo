@@ -101,9 +101,8 @@
 }
 /* Every initial on this page is the one disc the app's people wear: the
    light purple, the plum letter, a white rim and a soft plum shadow, in the
-   team list and on every card's chips alike. */
-.sh-avatar,
-.sh-chip-av {
+   team list and over the sharing grid's columns alike. */
+.sh-avatar {
   flex: none;
   display: grid;
   place-items: center;
@@ -183,71 +182,136 @@
   color: var(--k-plum, #240446);
 }
 
-/* ── a card, with the people it goes to ── */
-.sh-switch {
-  margin-left: auto;
+/* ── every part on one grid: a row each, a column for each person ── */
+.sh-grid {
+  padding: 6px 10px 4px;
 }
-.sh-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8, 8px);
-  margin-top: var(--space-6, 6px);
+/* Five people fit across a phone; a longer team scrolls sideways inside the
+   card rather than squeezing. Never up and down: the rows rising in would
+   bring a scrollbar that takes the width the fifth person needs. */
+.sh-mx-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
-.sh-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 4px 4px;
-  /* No outline at rest; it comes in on hover (below). Kept as a transparent
-     border so the chip does not move when it does. */
-  border: 1.5px solid transparent;
-  border-radius: 999px;
-  background: #fff;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  opacity: 0.55;
-  transition:
-    border-color 0.3s var(--ease-out, ease),
-    opacity 0.3s var(--ease-out, ease),
-    transform 0.3s var(--ease-out, ease);
+.sh-mx {
+  width: 100%;
+  border-collapse: collapse;
 }
-.sh-chip:active {
-  transform: scale(0.96);
+.sh-mx th,
+.sh-mx td {
+  padding: 0;
+  font-weight: inherit;
+  vertical-align: middle;
 }
-.sh-chip .sh-chip-av {
+.sh-mx thead th {
+  padding: 8px 0 10px;
+  vertical-align: bottom;
+}
+.sh-mx-who {
+  min-width: 34px;
+  text-align: center;
+}
+.sh-mx-who .sh-avatar {
   width: 28px;
   height: 28px;
+  margin: 0 auto 4px;
   font-size: 12px;
 }
-/* On or off is the chip's to say (the whole chip dimmed when off), not the
-   disc's: the disc is the person, the same either way. */
-.sh-chip.is-on {
-  opacity: 1;
-}
-.sh-chip-text {
-  display: grid;
-  line-height: 1.15;
-}
-.sh-chip-text b {
-  font-size: 13px;
-  font-weight: var(--weight-semibold, 600);
-  color: var(--text-strong);
-}
-.sh-chip-text span {
+.sh-mx-name {
+  display: block;
+  max-width: 72px;
+  margin: 0 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 11px;
+  font-weight: var(--weight-semibold, 600);
   color: var(--text-secondary, #6b6478);
 }
-.sh-card.is-private .pp-card-title {
-  opacity: 0.7;
+.sh-mx tbody tr {
+  border-top: 1px solid var(--line, #e7e4ee);
+  animation: shIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.12s + var(--i, 0) * 0.04s);
 }
-.sh-private {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  font-size: var(--text-sm, 13px);
+.sh-mx-part {
+  width: 36%;
+  padding: 10px 6px 10px 0 !important;
+  text-align: left;
+}
+/* The part's own icon and name, as on its card in the ID; a name that wraps
+   keeps the icon on its first line. */
+.sh-mx-title {
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13px;
+  line-height: 22px;
+  transition: opacity 0.3s var(--ease-out, ease);
+}
+.sh-mx tr.is-private .sh-mx-title {
+  opacity: 0.6;
+}
+.sh-mx-cell {
+  text-align: center;
+}
+.sh-box {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 34px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.sh-box i {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid #d4cfdc;
+  border-radius: 7px;
+  background: #fff;
+  color: transparent;
+  transition:
+    background 0.2s var(--ease-out, ease),
+    border-color 0.2s var(--ease-out, ease),
+    color 0.2s var(--ease-out, ease),
+    transform 0.25s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.sh-box:hover i {
+  border-color: var(--k-grape, #7639a1);
+}
+.sh-box:active i {
+  transform: scale(0.88);
+}
+.sh-box.is-on i {
+  border-color: var(--k-grape, #7639a1);
+  background: var(--k-grape, #7639a1);
+  color: #fff;
+}
+.sh-mx-lock {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  color: #b9b4c3;
+  animation: shLock 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.sh-mx-sw {
+  width: 1%;
+  padding-left: 6px !important;
+  white-space: nowrap;
+  text-align: right;
+}
+thead .sh-mx-sw {
+  font-size: 11px;
+  font-weight: var(--weight-semibold, 600);
   color: var(--text-secondary, #6b6478);
+}
+.sh-mx-sw .sh-switch {
+  vertical-align: middle;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -275,14 +339,6 @@
 .sh-person:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 14px -10px rgba(36, 4, 70, 0.35);
-}
-.sh-chips {
-  gap: var(--space-10, 10px);
-  margin-top: var(--space-8, 8px);
-}
-.sh .pp-fy-label {
-  display: block;
-  margin-top: var(--space-4, 4px);
 }
 
 /* The two faces as one control: a white pill slides under the one showing. */
@@ -314,48 +370,7 @@
   transform: translateX(calc(100% + 2px));
 }
 
-/* A card's body folds open and shut with its switch. */
-.sh-fold {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease;
-}
-.sh-fold.is-open {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-.sh-fold-in {
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* The chips arrive one after another; a chip tapped pops its avatar. */
-.sh-chip {
-  animation: shIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  animation-delay: calc(0.15s + var(--i, 0) * 0.04s);
-}
-.sh-chip:hover {
-  border-color: var(--k-grape, #7639a1);
-  transform: translateY(-1px);
-}
-.sh-chip-av {
-  animation: shPop 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
-}
-.sh-person .sh-avatar {
-  animation: none;
-}
-@keyframes shPop {
-  from {
-    transform: scale(0.5) rotate(-20deg);
-  }
-}
-.sh-private-lock {
-  display: inline-grid;
-  animation: shLock 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
-}
+/* A part switched off locks across its row. */
 @keyframes shLock {
   0% {
     transform: scale(0.4) rotate(-25deg);
@@ -364,10 +379,6 @@
     transform: scale(1.2) rotate(8deg);
   }
 }
-.sh-card.is-private {
-  background: #f7f6f9;
-}
-
 /* The count ticks when it changes. */
 .sh-tick {
   display: inline-block;
@@ -395,13 +406,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sh-lens-pill,
-  .sh-fold {
+  .sh-lens-pill {
     transition: none;
   }
-  .sh-chip,
-  .sh-chip-av,
-  .sh-private-lock,
+  .sh-mx tbody tr,
+  .sh-mx-lock,
   .sh-tick {
     animation: none;
   }
