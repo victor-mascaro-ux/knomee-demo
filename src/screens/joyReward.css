@@ -332,9 +332,11 @@
   margin: 0 0 var(--space-8);
 }
 /* The pill elsewhere follows a name; here it starts the line, on the card's
-   left edge. */
+   left edge, wearing the glow the meter's new segment wears: the two are the
+   same news. */
 .jw-card-k .new-tag {
   margin-left: 0;
+  box-shadow: 0 0 12px rgba(233, 217, 244, 0.85);
 }
 .jw-card-body {
   color: var(--text-strong);

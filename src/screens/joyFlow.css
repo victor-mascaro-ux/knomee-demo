@@ -1279,32 +1279,41 @@ html.cx-desktop .jf > .jf-foot .jf-ok {
 }
 
 /* ── the intro: one composition for every adventure ──
-   An 880 group in the middle of the window: the title row across the top;
-   the picture as a fixed art card with its quote under it on the left; the
-   question, the two lines and Get Started on the right. The rows are explicit
-   and the last one takes the slack, so the tall picture column never pulls
-   the words apart. */
+   The title row stays at the top of the window, where a step's top bar is;
+   under it, an 880 group in the middle of what is left: the picture as a
+   fixed art card with its quote under it on the left; the question, the two
+   lines and Get Started on the right, Get Started level with the foot of the
+   quote. The rows are explicit and the last one takes the slack, so the tall
+   picture column never pulls the words apart. */
 html.cx-desktop .cx-viewport:has(> .jf > .jf-intro) > .jf {
   height: auto;
   min-height: 100%;
+  position: relative;
+}
+/* Room for the title row, which is drawn over the top of the screen. */
+html.cx-desktop .cx-viewport:has(> .jf > .jf-intro > .adv-badge) > .jf {
+  padding-top: 76px;
 }
 html.cx-desktop .jf > .jf-intro {
   --xp-w: 880px;
   flex: none;
-  /* At the top of the window, its title row where a step's top bar is. */
-  margin-block: 0 auto;
-  padding-block: 12px 48px;
+  margin-block: auto;
+  padding-block: 0 40px;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
-  grid-template-rows: auto repeat(5, auto) 1fr;
+  grid-template-rows: repeat(6, auto) 1fr;
   column-gap: 64px;
   row-gap: 0;
   align-items: start;
 }
+/* The title row, pinned to the top of the screen on the 880 group's edges,
+   whatever the group below it does. */
 html.cx-desktop .jf-intro > .adv-badge {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  margin-bottom: 40px;
+  position: absolute;
+  top: 12px;
+  left: max(24px, calc((100% - 880px) / 2));
+  right: max(24px, calc((100% - 880px) / 2));
+  margin: 0;
 }
 /* The meter beside the cross, at the steps' 360, as on every step's bar. */
 html.cx-desktop .jf-intro > .adv-badge .adv-badge-bar {
@@ -1316,7 +1325,10 @@ html.cx-desktop .jf-intro > .adv-badge .adv-close {
 }
 html.cx-desktop .jf-intro > .jf-hero {
   grid-column: 1;
-  grid-row: 2 / -1;
+  grid-row: 1 / -1;
+  /* As tall as the words beside it, where they are the taller column: the
+     art card takes the difference (below). */
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1328,22 +1340,22 @@ html.cx-desktop .jf-intro > .jf-hero {
 html.cx-desktop .jf-intro > :not(.adv-badge, .jf-hero) {
   grid-column: 2;
 }
-/* A host that gives the adventure no title row: the picture and the words
-   both start on the first row. */
-html.cx-desktop .jf > .jf-intro:not(:has(> .adv-badge)) > .jf-hero {
-  grid-row: 1 / -1;
-}
 /* The art card: the same box for every adventure. Each picture has a clear
    ground and is cut on its left and bottom edges, so the cut lands on the
    card's edge. It arrives, then breathes as on the phone, cut back to the
    card's own box as it swells, so the picture moves and the card's edge
    holds still. */
 html.cx-desktop .jf-intro .jf-hero-img {
-  flex: none;
+  /* 220 tall at least, and taller where the words beside it are (Future You,
+     with no quote under its picture), so the card ends level with them. The
+     picture fills the card from its left and bottom edges, the cut it is
+     drawn with; what gives is its right, the circle's open side. */
+  flex: 1 0 220px;
   width: 300px;
-  height: 220px;
+  height: auto;
+  min-height: 220px;
   max-width: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: left bottom;
   border-radius: 24px;
   background: #f6f3fa;
@@ -1375,9 +1387,10 @@ html.cx-desktop .jf-intro .cf-hero-fallback,
 html.cx-desktop .jf-intro .ol-hero-fallback,
 html.cx-desktop .jf-intro .fy-hero-fallback,
 html.cx-desktop .jf-intro .gl-hero-fallback {
-  flex: none;
+  flex: 1 0 220px;
   width: 300px;
-  height: 220px;
+  height: auto;
+  min-height: 220px;
   max-width: 100%;
   aspect-ratio: auto;
   border-radius: 24px;
@@ -1406,7 +1419,11 @@ html.cx-desktop .jf-intro .jf-title {
 html.cx-desktop .jf-intro > .jf-hero + * {
   margin-top: 0;
 }
+/* Get Started in the last row, the one that takes the slack, at its foot: it
+   sits level with the end of the quote under the picture. */
 html.cx-desktop .jf-intro .jf-start {
+  grid-row: -2 / -1;
+  align-self: end;
   justify-self: start;
   align-items: flex-start;
   margin-top: 28px;
@@ -1432,6 +1449,10 @@ html.cx-desktop .jf-pick > .jf-pick-note {
   margin-inline: 0;
 }
 html.cx-desktop .jf-photos {
+  /* Clearly more air between the words and the pictures than between two
+     rows of pictures (20), so the heading reads as the grid's, not as a row
+     of it. (The note's own 10 collapses into this.) */
+  margin-top: 32px;
   --jf-tile: 132px;
   --jf-cols: 5;
   display: flex;
