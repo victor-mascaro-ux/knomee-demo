@@ -744,9 +744,10 @@ export const businessId = {
     when: '< 12 months from now',
     worthIt: 'Ownership, my name on it, equity for Ana and Dev, choosing who we take on',
     challenging: 'Client attrition, disruption during the move, deferred comp, timing it around year-end',
+    why: 'Everything we build belongs to someone else. I want it to belong to us — including to the two people who have carried me for six years.',
+    support: 'I want help from a platform partner.',
     stakeholders: 'My team · My spouse or family',
     blocker: 'Proof the top relationships come across — he wants that number before he signs.',
-    brand: 'Not sure yet',
   },
   badges: ['Practice Joy', 'Confidence', 'Outlook', 'Future You', 'The Move'],
   questions: [
