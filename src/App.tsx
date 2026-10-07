@@ -4454,9 +4454,7 @@ export default function App() {
     <div
       className={`page ${brand ? 'brand-client' : ''}`}
       style={
-        brand
-          ? ({ '--plum': brand.primary, '--purple-bolt': brand.accent } as CSSProperties)
-          : undefined
+        brand ? ({ '--brand-bar': brand.primary } as CSSProperties) : undefined
       }
     >
       {/* The product's own bar. Shared, because a page that lives outside this

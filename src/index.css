@@ -69,7 +69,10 @@ body {
   top: 0;
   z-index: 100;
   height: var(--topbar-h);
-  background: var(--plum);
+  /* A client brand colours this bar and nothing under it (--brand-bar, set on
+     .page): content keeps the app's own colours, which are the ones its
+     legibility is designed against. */
+  background: var(--brand-bar, var(--plum));
   display: flex;
   align-items: center;
   /* No border. --line is the hairline that separates one light surface from

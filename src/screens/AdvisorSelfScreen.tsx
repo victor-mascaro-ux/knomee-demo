@@ -1912,12 +1912,8 @@ function FlowReport({
     <div
       className={`page af-report${viewing ? ' af-report-viewed' : ''}${brand ? ' brand-client' : ''}`}
       /* The same white label the shell's pages wear: the bar's colour and the
-         firm's logo in it. */
-      style={
-        brand
-          ? ({ '--plum': brand.primary, '--purple-bolt': brand.accent } as React.CSSProperties)
-          : undefined
-      }
+         firm's logo in it, and nothing under the bar. */
+      style={brand ? ({ '--brand-bar': brand.primary } as React.CSSProperties) : undefined}
     >
       {/* Reading somebody else's answers is a desktop page in the firm's own
           product, so it wears the product's own bar — brand and account menu,

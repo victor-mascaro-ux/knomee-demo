@@ -104,7 +104,9 @@
 .cx-appbar {
   flex: none;
   height: var(--mobile-appbar-h);
-  background: var(--surface-brand);
+  /* The firm's colour, where a brand is on: the bars are the only place it
+     goes (brandVars). */
+  background: var(--brand-bar, var(--surface-brand));
   display: flex;
   align-items: center;
   justify-content: space-between;
