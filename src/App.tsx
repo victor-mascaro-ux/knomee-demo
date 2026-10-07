@@ -4028,6 +4028,12 @@ export default function App() {
   }, [])
 
   // ── Routing: URL hash ⇄ nav state ──
+  /* Whether the route about to be written came from the address itself: the
+     first load, or a hash the browser just moved to (Back, a link, the
+     overlay). Then a different spelling is only tidied in place. Anything else
+     is a step taken in the app — a name clicked, a tab changed — and gets its
+     own history entry, or the browser's Back skips straight past it. */
+  const routeFromAddress = useRef(true)
   useEffect(() => {
     const applyView = (v: RouteView, slug: string | null) => {
       // A profile is a layer over a view, and the route carries which one — so
@@ -4075,7 +4081,9 @@ export default function App() {
     }
     const syncFromHash = () => {
       const { view, profile } = parseHash()
-      if (view) applyView(view, profile)
+      if (!view) return
+      routeFromAddress.current = true
+      applyView(view, profile)
     }
     // The parent (comment-overlay) frame forwards its address-bar hash here.
     const onMessage = (e: MessageEvent) => {
@@ -4117,8 +4125,10 @@ export default function App() {
                       : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
-      window.history.replaceState(null, '', hash)
+      if (routeFromAddress.current) window.history.replaceState(null, '', hash)
+      else window.history.pushState(null, '', hash)
     }
+    routeFromAddress.current = false
     if (window.parent && window.parent !== window) {
       try {
         window.parent.postMessage({ type: 'cc-route', hash }, '*')
