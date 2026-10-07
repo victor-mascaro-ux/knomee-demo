@@ -99,16 +99,22 @@
   animation: shIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: calc(0.1s + var(--i, 0) * 0.05s);
 }
+/* Every initial on this page is the one disc the app's people wear: the
+   light purple, the plum letter, a white rim and a soft plum shadow, in the
+   team list and on every card's chips alike. */
 .sh-avatar,
 .sh-chip-av {
   flex: none;
   display: grid;
   place-items: center;
+  box-sizing: border-box;
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  border: 2px solid #fff;
   background: var(--k-grape-light, #e9d9f4);
   color: var(--k-plum, #240446);
+  box-shadow: 0 2px 8px -3px rgba(36, 4, 70, 0.3);
   font-size: 14px;
   font-weight: var(--weight-bold, 700);
 }
@@ -211,19 +217,12 @@
   width: 28px;
   height: 28px;
   font-size: 12px;
-  background: #ece9f1;
-  color: #8a8792;
-  transition:
-    background 0.3s var(--ease-out, ease),
-    color 0.3s var(--ease-out, ease);
 }
+/* On or off is the chip's to say (its outline, and the whole chip dimmed when
+   off), not the disc's: the disc is the person, the same either way. */
 .sh-chip.is-on {
   opacity: 1;
   border-color: var(--k-grape, #7639a1);
-}
-.sh-chip.is-on .sh-chip-av {
-  background: var(--k-plum, #240446);
-  color: #fff;
 }
 .sh-chip-text {
   display: grid;
