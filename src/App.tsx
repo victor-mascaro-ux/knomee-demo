@@ -17,7 +17,7 @@ import type { HouseholdMember } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
 import { insights } from './data/insights'
-import { reachSegments, talkTo } from './data/prospectSegments'
+import { reachSegments, segmentTip, talkTo } from './data/prospectSegments'
 import { clientReadings } from './data/clientSegments'
 import {
   modelClusters,
@@ -347,6 +347,7 @@ function ProspectInsights({
       insights={insights}
       tierInsight={meta ? insights.find((i) => i.n === meta.insightN) : undefined}
       empty="None flagged in this tier this week — keep them on a light-touch nurture track."
+      explain={segmentTip}
       opens={(name) => !!onOpenProfile && !!profileOf(name)}
       onOpen={(name) => {
         const p = profileOf(name)
@@ -1186,6 +1187,7 @@ function ClientInsights({
       insights={insights}
       tierInsight={meta ? insights.find((i) => i.tier === meta.tierId) : undefined}
       empty="None flagged in this tier this week — keep up the regular check-ins."
+      explain={segmentTip}
       opens={hasProfile}
       onOpen={(name) => {
         const c = clients.find((x) => x.name === name)

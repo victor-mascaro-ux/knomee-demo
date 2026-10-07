@@ -218,6 +218,10 @@ export const clusterLead = `${largest.size} of ${candidateStats.scored} advisors
    reach strip, `talkTo` and `insights`, each a function of the rows the page
    shows, so they read the pipeline in the table and not an invented one. */
 
+/** What a cluster's name means, for the hover on its pill: the behaviour
+    that defines it. */
+export const clusterTip = (name: string) => COPY.find((c) => c.name === name)?.spine
+
 /** "Who you're reaching": the clusters among the rows, largest first. One
     advisor on their own is not a group, so a cluster needs two. */
 export function reachOf(rows: Candidate[]): { name: string; count: number }[] {

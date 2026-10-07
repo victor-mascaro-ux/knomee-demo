@@ -30,7 +30,7 @@ import {
   type Candidate,
   type Tier,
 } from '../data/candidates'
-import { insightsOf, reachOf, rowId, talkToOf } from '../data/candidateInsights'
+import { clusterTip, insightsOf, reachOf, rowId, talkToOf } from '../data/candidateInsights'
 import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
@@ -253,6 +253,7 @@ function CandidateInsights({
       insights={insights}
       tierInsight={meta ? insights.find((i) => i.tier === meta.tierId) : undefined}
       empty="None flagged in this tier this week — keep them on a light-touch nurture track."
+      explain={clusterTip}
       /* A name opens what its row in the table opens, and nothing else. */
       opens={(id) => rows.some((c) => rowId(c) === id && opensProfile(c))}
       onOpen={(id) => {

@@ -59,6 +59,7 @@ export default function ActionableInsights({
   empty,
   opens,
   onOpen,
+  explain,
 }: {
   hint: string
   icon?: ReactNode
@@ -79,6 +80,8 @@ export default function ActionableInsights({
   tierInsight?: InsightItem
   /** What the call-list says when the focused tier has nobody on it. */
   empty: string
+  /** What a segment's name means, shown on hovering its pill. */
+  explain?: (segment: string) => string | undefined
   /** Whose name is a link: only someone with a page behind it. Both take a
       talk item's id, or its name where it has none. */
   opens?: (id: string) => boolean
@@ -98,6 +101,12 @@ export default function ActionableInsights({
   const lead = talk[0]
   const ordered = tierInsight ? [tierInsight, ...insights.filter((i) => i !== tierInsight)] : insights
   const pill = (tier: string) => `talk-tier ${tone === 'client' ? 'c' : 't'}${tier.slice(-1)}`
+  /* A segment pill says what it means on hover, where there is a meaning. */
+  const tip = (segment: string) => {
+    const t = explain?.(segment)
+    return t ? { 'data-tip': t, tabIndex: 0 } : {}
+  }
+  const tipped = (segment: string) => (explain?.(segment) ? ' tt tt-wrap' : '')
 
   return (
     <CollapsibleCard
@@ -118,7 +127,7 @@ export default function ActionableInsights({
           </span>
           <div className="cmd-reach-list">
             {reach.chips.map((s) => (
-              <span className="cmd-reach-chip" key={s.name}>
+              <span className={`cmd-reach-chip${tipped(s.name)}`} key={s.name} {...tip(s.name)}>
                 {s.name}
                 <b>{s.count}</b>
               </span>
@@ -156,7 +165,11 @@ export default function ActionableInsights({
             <span className="cmd-lead-kq">
               {scoreLabel} {lead.score}
             </span>
-            {lead.segment && <span className="cmd-lead-niche">{lead.segment}</span>}
+            {lead.segment && (
+              <span className={`cmd-lead-niche${tipped(lead.segment)}`} {...tip(lead.segment)}>
+                {lead.segment}
+              </span>
+            )}
             <span className="cmd-lead-more">
               {listOpen ? 'Hide' : `See All ${talk.length}`}
               <ChevronDown />
@@ -185,7 +198,11 @@ export default function ActionableInsights({
                   ) : (
                     <span className="talk-name">{t.name}</span>
                   )}
-                  {t.segment && <span className="talk-niche">{t.segment}</span>}
+                  {t.segment && (
+                    <span className={`talk-niche${tipped(t.segment)}`} {...tip(t.segment)}>
+                      {t.segment}
+                    </span>
+                  )}
                   <span className={pill(t.tier)}>{t.tier}</span>
                   <span className="talk-kq">
                     {scoreLabel} {t.score}
