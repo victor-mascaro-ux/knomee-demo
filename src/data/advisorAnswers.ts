@@ -12,7 +12,7 @@
  * someone actually answered.
  */
 
-import { rqFromSheet } from './rqSheet'
+import { rqFromSheet, supportOf } from './rqSheet'
 import {
   advisor,
   advisorAdventures,
@@ -719,13 +719,12 @@ const THEME_QUESTIONS: Record<ThemeKey, ThemeQuestion> = {
    scores, asked of a business decision, and scored the way the sheet's RQ
    calculator does it (rqSheet.ts), so a number can be walked back to a tap. */
 function rqOf(a: Answers) {
-  const w = rank('mv-q4', a)
   return rqFromSheet({
     ttm: STAGES.indexOf(stageOf(a)) + 1,
     firm: a.scaleSet['cf-q']?.[0],
     clarity: a.scale['fy-clarity'],
     platform: a.scaleSet['cf-q']?.[5],
-    support: w === 1 ? 'yes' : w === 0 ? 'no' : undefined,
+    support: supportOf(rank('mv-q4', a)),
   })
 }
 
