@@ -34,13 +34,23 @@ import {
   useCollapsed,
   StatusTags,
 } from './profileParts'
-import GoalModal from './GoalModal'
-import QuestionModal from './QuestionModal'
+import GoalModal, { type GoalField } from './GoalModal'
+import QuestionModal, { renamed } from './QuestionModal'
 import AddGoalModal from './AddGoalModal'
-import type { Goal } from '../data/financialId'
+import type { Goal, ProfileQuestion } from '../data/financialId'
+import { steps as flowSteps } from '../data/advisorFlow'
+import { today } from '../data/advisorAnswers'
 
 import { DownloadIcon } from '../components/icons'
-import { BuildingIcon, CalendarIcon, CaretIcon, CoinsIcon, MailIcon, RowChevron } from '../components/profileIcons'
+import {
+  BuildingIcon,
+  CalendarIcon,
+  CaretIcon,
+  CheckIcon,
+  CoinsIcon,
+  MailIcon,
+  RowChevron,
+} from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
 import icPracticeJoy from '../assets/adventures/financial-joy.svg'
 import icConfidence from '../assets/adventures/confidence.svg'
@@ -412,6 +422,17 @@ export function AdvisorTeam({ name }: { name: string }) {
   )
 }
 
+/* Everything else The Move asks, beyond the goal form's own fields, each the
+   way the flow asks it: its options are the flow's own, so the two cannot
+   drift. The retired brand question is not among them. */
+const moveOptions = (id: string) =>
+  (flowSteps.find((s) => s.id === id)?.options ?? []).filter((o) => o !== 'Other')
+const MOVE_FIELDS: GoalField[] = [
+  { label: 'Support', kind: 'one', options: moveOptions('mv-q4') },
+  { label: 'Who it involves', kind: 'many', options: moveOptions('mv-q10') },
+  { label: 'Holding back', kind: 'text' },
+]
+
 /* ── Tab 1 — Business ID ─────────────────────────────────────────────
    The Financial ID page itself, card for card and rail for rail, carrying the
    advisor's answers instead of the client's: the change he named where the
@@ -441,9 +462,15 @@ function BusinessIdTab({
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
   const [openGoal, setOpenGoal] = useState<number | null>(null)
-  /* One of the three questions, opened on the card a client's question opens
-     on — read-only: they come out of the adventures, not a form. */
-  const [openQuestion, setOpenQuestion] = useState<string | null>(null)
+  /* The three questions, opened on the panel a client's question opens on
+     and changed the way hers are: reworded, resolved or deleted, held on
+     this page. */
+  const [questionEdits, setQuestionEdits] = useState<ProfileQuestion[] | null>(null)
+  const questions: ProfileQuestion[] =
+    questionEdits ?? d.questions.map((q) => ({ q, date: d.header.completed, knomee: true }))
+  const [openQuestion, setOpenQuestion] = useState<number | null>(null)
+  const changeQuestion = (i: number, q: ProfileQuestion | null) =>
+    setQuestionEdits(questions.flatMap((x, j) => (j !== i ? [x] : q ? [q] : [])))
   /* A goal edited here — its stage by taking the assessment again — laid over
      the one the flow put together, by its place in the list. */
   const [edits, setEdits] = useState<Record<number, Goal>>({})
@@ -466,14 +493,13 @@ function BusinessIdTab({
       timeline: d.move.when,
       pros: listOf(d.move.worthIt),
       cons: listOf(d.move.challenging),
+      note: d.move.why || undefined,
       extra: [
+        ...(d.move.support ? [{ label: 'Support', value: d.move.support }] : []),
         ...(d.move.stakeholders
           ? [{ label: 'Who it involves', value: d.move.stakeholders }]
           : []),
         ...(d.move.blocker ? [{ label: 'Holding back', value: d.move.blocker }] : []),
-        ...(d.move.brand
-          ? [{ label: 'Letting go of their brand', value: d.move.brand }]
-          : []),
       ],
     }
   ))
@@ -764,28 +790,36 @@ function BusinessIdTab({
                 to every platform he is considering — live here, on his ID,
                 where a client's questions sit. Before anything is answered
                 there are none, and the tray is the way in to asking one. */}
-            {d.questions.length > 0 ? (
+            {questions.length > 0 ? (
               /* The question rows the Financial ID's Questions card uses —
                  the question, and the day the adventures gave it. */
               <div className="pp-questions">
-                {d.questions.map((q) => (
+                {questions.map((q, i) => (
                   <div
-                    className="pp-question is-open-able"
-                    key={q}
+                    className={`pp-question is-open-able${q.resolved ? ' is-resolved' : ''}`}
+                    key={i}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setOpenQuestion(q)}
+                    onClick={() => setOpenQuestion(i)}
                     onKeyDown={(k) => {
-                      if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(q)
+                      if (k.key === 'Enter' || k.key === ' ') setOpenQuestion(i)
                     }}
                   >
-                    {/* Every one of the three is Knomee's, drawn from their
-                        answers — said on the row, as on a client's ID. */}
+                    {/* Knomee's, drawn from their answers, until it is
+                        reworded — said on the row, as on a client's ID. */}
                     <span className="pp-q-text">
-                      <StatusTags knomee />
-                      {q}
+                      <StatusTags tags={q.tags} knomee={q.knomee} />
+                      {q.q}
                     </span>
-                    <span className="pp-q-date">{d.header.completed}</span>
+                    <span className="pp-q-date">
+                      {q.resolved ? (
+                        <>
+                          <CheckIcon /> Resolved: {q.resolved}
+                        </>
+                      ) : (
+                        q.date
+                      )}
+                    </span>
                     <span className="pp-goal-caret">
                       <RowChevron />
                     </span>
@@ -801,17 +835,31 @@ function BusinessIdTab({
         </div>
       </div>
 
-      {openQuestion !== null && (
+      {openQuestion !== null && questions[openQuestion] && (
         <QuestionModal
-          question={{ q: openQuestion, date: d.header.completed, knomee: true }}
+          question={questions[openQuestion]}
           onClose={() => setOpenQuestion(null)}
+          /* Dated the way the rest of the Business ID is (09.09.2026). */
+          onRename={(text) =>
+            changeQuestion(openQuestion, { ...renamed(questions[openQuestion], text), date: today() })
+          }
+          onToggleResolved={() => {
+            const q = questions[openQuestion]
+            changeQuestion(openQuestion, { ...q, resolved: q.resolved ? undefined : today() })
+          }}
+          onDelete={() => {
+            changeQuestion(openQuestion, null)
+            setOpenQuestion(null)
+          }}
         />
       )}
-      {/* Their move, opened. Read-only: these are their answers, and a rep
-          reading them has nothing to rename or throw away. */}
+      {/* Their move, opened on the panel a client's goal opens on, with
+          everything else The Move asks as its own fields. */}
       {openGoal !== null && (
         <GoalModal
           goal={goals[openGoal]}
+          fields={MOVE_FIELDS}
+          stamp={today()}
           onClose={() => setOpenGoal(null)}
           onSave={(g) => setEdits((e) => ({ ...e, [openGoal]: { ...goals[openGoal], ...g } }))}
         />

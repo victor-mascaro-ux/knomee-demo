@@ -805,11 +805,12 @@ function buildBusinessId(a: Answers, themes: ThemeKey[]): BusinessId {
     move: {
       change: picked('mv-q1', a),
       when: picked('mv-q2', a),
+      why: said('mv-q3', a),
+      support: picked('mv-q4', a),
       worthIt: said('mv-q8', a),
       challenging: said('mv-q9', a),
       stakeholders: chosen('mv-q10', a).join(' · '),
       blocker: said('mv-q10b', a),
-      brand: picked('mv-brand', a),
     },
     badges: advisorAdventures.filter((r) => adventureDone(r.id, a)).map((r) => r.title),
     questions: themes.slice(0, 3).map((k) => askFor(k, a)),

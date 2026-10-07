@@ -176,6 +176,53 @@
   border-radius: 0 0 9px 9px;
 }
 
+/* ---------- it fits the window ----------
+   A goal with every field is taller than a laptop window, and centred it ran
+   off the top and the bottom. The bar and Delete · Done stay; the fields
+   between them scroll. */
+.goal-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 40px);
+}
+.goal-modal > .modal-header,
+.goal-modal > .modal-footer {
+  flex: none;
+}
+.goal-modal > .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ---------- several picks ----------
+   A question answered with as many as apply: its options as pills, each on
+   or off. */
+.goal-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.goal-pick {
+  padding: 8px 14px;
+  border: 1px solid var(--line, #e6e3ec);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-strong, #240446);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.goal-pick:hover {
+  border-color: var(--k-grape, #7639a1);
+}
+.goal-pick.is-on {
+  background: var(--k-grape-light, #eadff4);
+  border-color: var(--k-grape, #7639a1);
+  font-weight: 600;
+}
+
 /* ---------- inside a phone ----------
    A goal opened on the phone belongs to the phone: the backdrop covers the
    screen rather than the window, and the panel is the width of the device it
