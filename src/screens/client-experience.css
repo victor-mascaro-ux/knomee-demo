@@ -1899,16 +1899,8 @@ html.cx-desktop .cx-screen .cp-board-grid > .cp-tile-photo[style*='span 3'] {
 }
 
 /* Who sees it (the Financial ID's lens, and My Team): the lead at reading
-   width, the team's people two by two, and the parts of the ID as two columns
-   of cards, so a switch sits near the title it answers. */
-html.cx-desktop .cx-screen .sh {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-}
-html.cx-desktop .cx-screen .sh > :not(.sh-card) {
-  grid-column: 1 / -1;
-}
+   width, the team's people two by two, and the parts of the ID on one grid
+   across the page. */
 html.cx-desktop .cx-screen .sh-lead {
   max-width: 600px;
 }
@@ -1916,9 +1908,8 @@ html.cx-desktop .cx-screen .sh-people {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-/* As on My Adventures, no card or person stands alone on a row: the last of
-   an odd count runs across both columns. */
-html.cx-desktop .cx-screen .sh > .sh-card:nth-child(odd of .sh-card):nth-last-child(1 of .sh-card),
+/* As on My Adventures, no person stands alone on a row: the last of an odd
+   count runs across both columns. */
 html.cx-desktop .cx-screen .sh-people > .sh-person:nth-child(odd):last-child {
   grid-column: 1 / -1;
 }

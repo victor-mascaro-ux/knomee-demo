@@ -2,9 +2,9 @@
  *
  * The same page, read for who can see each part of it rather than for what it
  * says: her team first (the people her answers can go to, each with a role),
- * then every card of the ID with its own switch and the people it goes to.
- * On by default, one tap to take a person off a card or the card off
- * everybody. It is her data; this is where that is visible.
+ * then every part of the ID on one grid, a row each with its own switch and a
+ * column for each person. On by default, one tap to take a person off a part
+ * or the part off everybody. It is her data; this is where that is visible.
  *
  * Kept on this device: a demo convenience, so the choices survive switching
  * tabs and reloading. Nothing here is sent anywhere.
@@ -197,75 +197,96 @@ export default function SharingView({
         of {cards.length} parts shared
       </p>
 
-      {/* Every card of the ID, with its switch and the people it goes to. */}
-      {cards.map((c, n) => {
-        const a = of(c.id)
-        return (
-          <section className={`pp-card sh-card${a.on ? '' : ' is-private'}`} key={c.id} style={{ ['--i' as string]: n }}>
-            <div className="pp-card-head">
-              <span className="pp-card-title">
-                <img className="pp-card-ic" src={c.icon} alt="" />
-                {c.title}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={a.on}
-                aria-label={`Share ${c.title}`}
-                className="af-switch sh-switch"
-                onClick={() => setCard(c.id, { on: !a.on })}
-              >
-                <span>{a.on ? 'Shared' : 'Private'}</span>
-                <i aria-hidden />
-              </button>
-            </div>
-            <div className={`sh-fold${a.on ? ' is-open' : ''}`}>
-              <div className="sh-fold-in">
-                <span className="pp-fy-label">Shared with</span>
-                {everyone.length === 0 && (
-                  <p className="sh-none">Add the people on your team, then choose who sees this.</p>
-                )}
-                <div className="sh-chips">
-                  {everyone.map((p, k) => {
-                    const on = !a.off.includes(p.id)
-                    return (
+      {/* Every part of the ID on one grid: a row each, its switch at the end,
+          and a column for each person on the team. A private part's row is
+          locked across. */}
+      <section className="pp-card sh-grid">
+        {everyone.length === 0 && (
+          <p className="sh-none">Add the people on your team, then choose who sees each part.</p>
+        )}
+        <div className="sh-mx-scroll">
+          <table className="sh-mx">
+            <thead>
+              <tr>
+                <td />
+                {everyone.map((p) => (
+                  <th scope="col" key={p.id} className="sh-mx-who" title={`${p.name} · ${p.role}`}>
+                    <span className="sh-avatar" aria-hidden>
+                      {(p.name || '?').charAt(0).toUpperCase()}
+                    </span>
+                    <span className="sh-mx-name">{(p.name || 'New').split(' ')[0]}</span>
+                  </th>
+                ))}
+                <th scope="col" className="sh-mx-sw">
+                  Shared
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {cards.map((c, n) => {
+                const a = of(c.id)
+                return (
+                  <tr key={c.id} className={a.on ? undefined : 'is-private'} style={{ ['--i' as string]: n }}>
+                    <th scope="row" className="sh-mx-part">
+                      <span className="pp-card-title sh-mx-title">
+                        <img className="pp-card-ic" src={c.icon} alt="" />
+                        {c.title}
+                      </span>
+                    </th>
+                    {everyone.map((p) => {
+                      const on = !a.off.includes(p.id)
+                      return (
+                        <td key={p.id} className="sh-mx-cell">
+                          {a.on ? (
+                            <button
+                              type="button"
+                              role="checkbox"
+                              aria-checked={on}
+                              aria-label={`${c.title}: ${p.name || 'New'}`}
+                              className={`sh-box${on ? ' is-on' : ''}`}
+                              onClick={() =>
+                                setCard(c.id, { off: on ? [...a.off, p.id] : a.off.filter((x) => x !== p.id) })
+                              }
+                            >
+                              <i aria-hidden>
+                                <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+                                  <path
+                                    d="M3.5 8.5l3 3 6-7"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </i>
+                            </button>
+                          ) : (
+                            <span className="sh-mx-lock" aria-label={`${c.title} is private`}>
+                              <Lock />
+                            </span>
+                          )}
+                        </td>
+                      )
+                    })}
+                    <td className="sh-mx-sw">
                       <button
-                        key={p.id}
                         type="button"
-                        style={{ ['--i' as string]: k }}
-                        tabIndex={a.on ? 0 : -1}
-                        className={`sh-chip${on ? ' is-on' : ''}`}
-                        aria-pressed={on}
-                        onClick={() =>
-                          setCard(c.id, { off: on ? [...a.off, p.id] : a.off.filter((x) => x !== p.id) })
-                        }
+                        role="switch"
+                        aria-checked={a.on}
+                        aria-label={`Share ${c.title}`}
+                        className="af-switch sh-switch"
+                        onClick={() => setCard(c.id, { on: !a.on })}
                       >
-                        <span className="sh-chip-av" aria-hidden key={on ? 'on' : 'off'}>
-                          {on ? (p.name || '?').charAt(0).toUpperCase() : <Lock />}
-                        </span>
-                        <span className="sh-chip-text">
-                          <b>{p.name || 'New'}</b>
-                          <span>{p.role}</span>
-                        </span>
+                        <i aria-hidden />
                       </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-            <div className={`sh-fold${a.on ? '' : ' is-open'}`}>
-              <div className="sh-fold-in">
-                <p className="sh-private">
-                  <span className="sh-private-lock" key={a.on ? 'on' : 'off'}>
-                    <Lock />
-                  </span>
-                  Only you can see this.
-                </p>
-              </div>
-            </div>
-          </section>
-        )
-      })}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
       {form && (
         <PersonForm
           person={form}
