@@ -57,7 +57,7 @@ import IdentityCardForm, { type IdField } from './IdentityCard'
 import type { Step } from '../data/advisorFlow'
 import './advisor-flow.css'
 import SignUpScreen from './SignUpScreen'
-import { useDeviceMode } from '../deviceMode'
+import { isPhoneScreen, useDeviceMode } from '../deviceMode'
 import ProspectProfileScreen, { ClientTeam, type FinIdCard } from './ProspectProfileScreen'
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
@@ -372,7 +372,9 @@ export function useFitToWindow() {
       } catch {
         /* cross-origin — keep our own */
       }
-      const bare = w <= BARE_MAX
+      /* A narrow window, or a real phone held either way: the screen is the
+         window, with no frame drawn round it. */
+      const bare = w <= BARE_MAX || isPhoneScreen()
       setFit({
         scale: bare
           ? 1

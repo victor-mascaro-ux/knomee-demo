@@ -33,6 +33,20 @@ export function setDeviceMode(next: DeviceMode) {
   subs.forEach((f) => f())
 }
 
+/** A phone in the hand: the screen's short side is a phone's, whichever way
+    it is held, or the window is too narrow for anything else. Such a screen
+    is the journey's own screen — never drawn inside a phone frame — and an
+    invited advisor on one gets the phone version; anyone else, the desktop. */
+export function isPhoneScreen(): boolean {
+  try {
+    /* A screen that reports no size (some embeds) is not taken for a phone. */
+    const short = Math.min(window.screen.width, window.screen.height)
+    return (short > 0 && short <= 600) || window.innerWidth <= 640
+  } catch {
+    return false
+  }
+}
+
 export function useDeviceMode(): DeviceMode {
   return useSyncExternalStore(
     (f) => {
