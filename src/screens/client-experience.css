@@ -1667,13 +1667,13 @@ html.cx-desktop .cx-viewport > .pp > .pp-layout > .pp-side {
    pushed it down. */
 html.cx-desktop .cx-viewport .pp-side-inner {
   top: 0;
-  /* The title's own top inset (8px) over the column's 36. */
-  padding-top: 44px;
+  /* The title's own top inset (8px) over the column's 18. */
+  padding-top: 26px;
 }
 /* Room above the title, under the bar — and the rail's portrait starts at the
    same height, so the two columns begin on one line. */
 html.cx-desktop .cx-viewport .pp-main {
-  padding-top: 36px;
+  padding-top: 18px;
 }
 /* The rail is on the page, so the portrait that opens it as a drawer on the
    phone has nothing to open. */
