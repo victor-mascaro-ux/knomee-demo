@@ -1645,6 +1645,23 @@ html.cx-desktop .cx-viewport {
 html.cx-desktop .cx-viewport:has(> .pp, > .ap, > .af-report) {
   padding: 0 var(--xp-edge) 40px;
 }
+/* The rail runs all the way down, to the bottom bar, however short the page:
+   the page fills the scroller, its layout takes all of it (the desktop page's
+   own minimum, counted from a window with a top bar, does not apply in
+   here), and the rail reaches through the scroller's 40px foot, the room
+   left to scroll past the Knomee button. */
+html.cx-desktop .cx-viewport > .pp {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+html.cx-desktop .cx-viewport > .pp > .pp-layout {
+  flex: 1 0 auto;
+  min-height: 0;
+}
+html.cx-desktop .cx-viewport > .pp > .pp-layout > .pp-side {
+  margin-bottom: -40px;
+}
 /* The rail starts at the top of its column: in here the page scrolls inside
    the viewport, under no top bar, so the desktop page's offset for one only
    pushed it down. */
