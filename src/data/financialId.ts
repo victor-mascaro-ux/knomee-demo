@@ -116,7 +116,7 @@ export interface ProfileQuestion {
   resolved?: string
   /** One of the three Knomee drew from their answers — questions to bring to
       their advisor, as an advisor's Business ID carries three to put to a
-      firm. Labelled "Knomee generated" on its row; not a question they asked,
+      firm. Labelled "Knomee added" on its row; not a question they asked,
       so not counted as one. */
   knomee?: boolean
 }

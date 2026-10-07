@@ -66,7 +66,7 @@ export function AddQuestionModal({
   const sentence = [starter, rest.trim()].filter(Boolean).join(' ').trim()
   const full = sentence && !/[?!.]$/.test(sentence) ? `${sentence}?` : sentence
   /* A Knomee question reworded is no longer Knomee's words: it keeps the
-     "Knomee generated" chip only while its text is the one Knomee wrote. */
+     "Knomee added" chip only while its text is the one Knomee wrote. */
   const saved = (): ProfileQuestion => ({
     ...question,
     q: full,
@@ -149,7 +149,7 @@ export function AddQuestionModal({
 }
 
 /* A question reworded in place: dated today, said "Updated" on its row, and
-   no longer Knomee's words — so it loses "Knomee generated". */
+   no longer Knomee's words — so it loses "Knomee added". */
 export function renamed(question: ProfileQuestion, q: string): ProfileQuestion {
   return withTag({ ...question, q, date: DEMO_TODAY, knomee: undefined }, 'Updated')
 }

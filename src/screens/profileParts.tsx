@@ -758,7 +758,7 @@ export function withTag<T extends { tags?: string[] }>(x: T, tag: 'New' | 'Updat
   return { ...x, tags: [t, ...(x.tags ?? []).filter((v) => v !== 'New' && v !== 'Updated')] }
 }
 
-/* A row's pills. "Knomee generated" leads them: where the row came from, said
+/* A row's pills. "Knomee added" leads them: where the row came from, said
    before what was just done to it. */
 export function StatusTags({
   tags,
@@ -772,7 +772,7 @@ export function StatusTags({
   if (!tags?.length && !knomee) return null
   return (
     <span className="cp-goal-tags">
-      {knomee && <span className="cp-goal-tag is-knomee">Knomee generated</span>}
+      {knomee && <span className="cp-goal-tag is-knomee">Knomee added</span>}
       {(tags ?? []).map((t) => (
         <span className={`cp-goal-tag is-${t.toLowerCase()}`} key={t}>
           {t}
