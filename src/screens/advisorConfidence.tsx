@@ -11,7 +11,7 @@
  */
 
 import { steps as flowSteps } from '../data/advisorFlow'
-import { confidenceBandOf, type Answers } from '../data/advisorAnswers'
+import { CONFIDENCE_ENDING, confidenceBandOf, type Answers } from '../data/advisorAnswers'
 import { CountUp } from './JoyResults'
 import type { ConfidenceAnswers, ConfidenceContent } from './ConfidenceFlow'
 import bgBadge from '../assets/badges/confidence-on-plum.svg'
@@ -39,17 +39,17 @@ export const ADVISOR_CONFIDENCE: ConfidenceContent = {
     image: './confidence/intro.png',
     quote: 'Confidence in your abilities directly influences your performance, motivation, and behavior.',
     source: intro?.cite ?? 'Albert Bandura, psychologist and self-efficacy pioneer',
-    lead: 'Let’s explore how you feel about your practice, and about the decision in front of you.',
+    lead: 'Let’s explore how you feel about your practice, to help with decisions in front of you.',
     minutes: 1,
   },
   // An advisor answering for real skips what they leave alone.
   samples: false,
   reading: (values) => confidenceBandOf(values.map(toScale)),
-  means: {
-    Strong: 'You feel sure of the practice you are building and where it is going. That is a strong place to decide from.',
-    Balanced: 'You feel steady in some places and less so in others.',
-    Weak: 'The practice is taking more out of you than it gives back right now. That is worth knowing before you decide anything.',
-  },
+  /* The ending the plain flow's closing card gives, its heading and body as
+     one line under the dial. */
+  means: Object.fromEntries(
+    Object.entries(CONFIDENCE_ENDING).map(([band, e]) => [band, `${e.title} ${e.body}`]),
+  ),
   results: {
     title: 'You found your confidence',
     sub: 'This is how you feel about your practice today:',

@@ -297,6 +297,62 @@ export const journeyProgress = (a: Answers) => ({
 export const withFinished = (a: Answers, id: AdventureId): Answers =>
   a.finished?.[id] ? a : { ...a, finished: { ...(a.finished ?? {}), [id]: today() } }
 
+/* The question a bucket's key belongs to: `pj-q1`, or `pj-q1:other`. */
+const stepKey = (k: string) => k.split(':')[0]
+
+/** The sheet with every adventure before `id` taken to its end — Marcus's
+    sample wherever one of its questions is still blank — so `id` is the one up
+    next. Sarah's phone does the same when a greyed adventure is tapped. */
+export function withSkippedTo(a: Answers, id: AdventureId): Answers {
+  const upTo = advisorAdventures.findIndex((r) => r.id === id)
+  const before = advisorAdventures
+    .slice(0, Math.max(upTo, 0))
+    .filter((r) => !journeyDone(r.id, a))
+    .map((r) => r.id)
+  if (!before.length) return a
+  const blank = steps
+    .filter((s) => s.adventure && before.includes(s.adventure) && isQuestion(s) && !isAnswered(s, a))
+    .map((s) => s.id)
+  const sample = sampleAnswers()
+  function fill<T>(mine: Record<string, T>, theirs: Record<string, T>): Record<string, T> {
+    return { ...mine, ...Object.fromEntries(Object.entries(theirs).filter(([k]) => blank.includes(stepKey(k)))) }
+  }
+  const filled: Answers = {
+    ...a,
+    choice: fill(a.choice, sample.choice),
+    other: fill(a.other, sample.other),
+    grid: fill(a.grid, sample.grid),
+    text: fill(a.text, sample.text),
+    scale: fill(a.scale, sample.scale),
+    scaleSet: fill(a.scaleSet, sample.scaleSet),
+    shared: fill(a.shared ?? {}, sample.shared),
+  }
+  return before.reduce(withFinished, filled)
+}
+
+/** The sheet taken back to just before `id`: it and every adventure after it
+    unanswered and not finished, so the journey stands at `id` again. What was
+    shared stays shared — that is a choice about the question, not an answer. */
+export function withRestartAt(a: Answers, id: AdventureId): Answers {
+  const from = advisorAdventures.findIndex((r) => r.id === id)
+  if (from < 0) return a
+  const gone = advisorAdventures.slice(from).map((r) => r.id as string)
+  const ids = steps.filter((s) => s.adventure && gone.includes(s.adventure)).map((s) => s.id)
+  function drop<T>(rec: Record<string, T>): Record<string, T> {
+    return Object.fromEntries(Object.entries(rec).filter(([k]) => !ids.includes(stepKey(k))))
+  }
+  return {
+    ...a,
+    choice: drop(a.choice),
+    other: drop(a.other),
+    grid: drop(a.grid),
+    text: drop(a.text),
+    scale: drop(a.scale),
+    scaleSet: drop(a.scaleSet),
+    finished: Object.fromEntries(Object.entries(a.finished ?? {}).filter(([k]) => !gone.includes(k))),
+  }
+}
+
 /** A picked option, with the words typed into "Other" standing in for the word
     "Other" — nobody's Business ID should read "Other". */
 function chosen(id: string, a: Answers): string[] {
@@ -1225,31 +1281,23 @@ export const STAGE_SHARE: Record<Stage, string> = {
   Maintenance: '9% of respondents are also in this stage.',
 }
 
-const CONFIDENCE_TITLE: Record<string, string> = {
-  Weak: 'Your relationship with your practice is under strain.',
-  Balanced: 'Your relationship with your practice is balanced.',
-  Strong: 'Your relationship with your practice is strong.',
-}
-
-/* The three bands read as one set, the way the client's three do: what this
-   band means, then the same closing line whichever band you land in, because
-   the insight is having the reading at all rather than which one it is.
-
-   All three titles existed; only the balanced body and footnote did. Anybody
-   who answered their way to Weak or Strong was being told they were balanced
-   in the two lines under a headline that said otherwise. */
-const CONFIDENCE_CLOSE = 'Knowing your current level of confidence is a powerful insight.'
-
-const CONFIDENCE_BODY: Record<string, string> = {
-  Weak: `The practice may be taking more out of you than it is giving back right now. Plenty of advisors are in the same boat.
-
-${CONFIDENCE_CLOSE}`,
-  Balanced: `It creates some strain, and you find resilience.
-
-${CONFIDENCE_CLOSE}`,
-  Strong: `Confidence in what you are able to build supports the decisions in front of you.
-
-${CONFIDENCE_CLOSE}`,
+/* Confidence's three endings, one per band. The plain flow's closing card
+   prints each as heading and body; the journey's ending types the two together
+   under the dial. Every band has its own pair, so nobody who lands on Weak or
+   Strong is told they are balanced under a headline that says otherwise. */
+export const CONFIDENCE_ENDING: Record<string, { title: string; body: string }> = {
+  Weak: {
+    title: 'The relationship with your practice is under strain.',
+    body: 'The practice may be taking more out of you than it is giving back right now. Plenty of advisors are in the same boat.',
+  },
+  Balanced: {
+    title: 'The relationship with your practice is balanced.',
+    body: 'It creates some strain, and you find resilience.',
+  },
+  Strong: {
+    title: 'The relationship with your practice is strong.',
+    body: 'Confidence in what you are able to build supports the decisions in front of you.',
+  },
 }
 
 const CONFIDENCE_STAT: Record<string, string> = {
@@ -1304,8 +1352,8 @@ function unlockViewAll(id: string, a: Answers): UnlockView {
         null,
       )
       return {
-        title: CONFIDENCE_TITLE[band],
-        body: CONFIDENCE_BODY[band],
+        title: CONFIDENCE_ENDING[band].title,
+        body: CONFIDENCE_ENDING[band].body,
         stat: CONFIDENCE_STAT[band],
         lines: [
           { label: 'Highest', value: high ? statements[high.i]?.text ?? DASH : DASH },

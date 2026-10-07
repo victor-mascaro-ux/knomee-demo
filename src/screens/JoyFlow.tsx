@@ -239,7 +239,7 @@ export default function JoyFlow({
   /* The footer is the flow's own: the one thing to press, and where you are.
      The last screen hands the answers over and leaves. */
   const cta =
-    step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge' || step.kind === 'pause'
+    step.kind === 'intro' || step.kind === 'done' || step.kind === 'badge'
       ? step.cta
       : blank
         ? 'Skip This Question'
@@ -371,14 +371,6 @@ export default function JoyFlow({
             placeholder={step.other.placeholder}
             onChange={(v) => setA((prev) => ({ ...prev, other: v }))}
           />
-        </div>
-      )}
-
-      {step.kind === 'pause' && (
-        <div className="af-reflect">
-          <h2 className="af-h2">{step.title}</h2>
-          {step.body && <p className="af-body">{step.body}</p>}
-          {step.image && <JoyImage className="jf-pause-img" src={step.image} fallback="jf-pause-fallback" />}
         </div>
       )}
 

@@ -59,7 +59,6 @@ const AREAS: JoyPick[] = (stepOf('pj-q2').rows ?? []).map((r) => ({
 }))
 
 const intro = stepOf('pj-intro')
-const pause = stepOf('pj-reflect')
 const q1 = stepOf('pj-q1')
 
 const REFLECT_EYEBROW: Record<(typeof REFLECT_IDS)[number], string> = {
@@ -128,13 +127,6 @@ const STEPS: JoyStep[] = [
     max: q1.max ?? 3,
     other: { label: 'Other', hint: 'Or write your answer.', placeholder: 'Freedom to choose my clients' },
   },
-  {
-    kind: 'pause',
-    title: pause.title ?? '',
-    body: pause.body ?? '',
-    cta: pause.cta ?? 'Continue',
-    image: './advisor/joy/pause-and-reflect.png',
-  },
   { kind: 'split', eyebrow: 'Where your attention goes', areas: AREAS.map((a) => a.label) },
   ...REFLECT_IDS.map(reflect),
   {
@@ -191,12 +183,12 @@ export const ADVISOR_JOY: JoyContent = {
             ? `You want less of your attention going to ${less}.`
             : 'You are happy with where your attention goes today.',
     about: {
-      title: 'You found what the work is for',
+      title: 'You clarified your business purpose',
       share: 61,
       want: 'want their practice to give them',
       why: [
         'Advisors who are clear about what their practice is for make better decisions.',
-        'Knowing how you find fulfillment in your practice before exploring a move helps you evaluate options based on what matters most to you.',
+        'Identifying what the practice is for helps align how you spend your days with what matters most.',
       ],
     },
   },

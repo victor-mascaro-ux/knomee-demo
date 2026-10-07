@@ -206,13 +206,6 @@ export const steps: Step[] = [
     chosen: ['Equity', 'Control', 'My team’s future'],
   },
   {
-    id: 'pj-reflect',
-    kind: 'reflect',
-    adventure: 'practice-joy',
-    title: 'Pause and reflect — what do you really want out of your practice?',
-    cta: 'Reflect & Continue',
-  },
-  {
     id: 'pj-q2',
     kind: 'grid',
     adventure: 'practice-joy',
@@ -282,10 +275,10 @@ export const steps: Step[] = [
     eyebrow: 'Confidence · 1 of 1',
     title: 'How much do you agree?',
     statements: [
-      { text: 'I’m confident my current firm gets me the practice I want.', low: 'Not confident', high: 'Very confident', value: 2 },
+      { text: 'I’m confident my current firm enables me to build the practice I want.', low: 'Not confident', high: 'Very confident', value: 2 },
       { text: 'I feel confident I could weather a disrupted transition.', low: 'Not confident', high: 'Very confident', value: 3 },
       { text: 'I believe I can build the practice I have in mind.', low: 'Not confident', high: 'Very confident', value: 5 },
-      { text: 'I spend my time on the work that brings me joy.', low: 'Never', high: 'Most of the time', value: 2 },
+      { text: 'I spend my time on work that brings me joy.', low: 'Never', high: 'Most of the time', value: 2 },
       { text: 'I second-guess big decisions about my business.', low: 'Often regret', high: 'Never regret', value: 2 },
       { text: 'I believe the right platform partner would improve my confidence.', low: 'No, I don’t', high: 'Yes, I do', value: 4 },
     ],
@@ -294,8 +287,8 @@ export const steps: Step[] = [
     id: 'cf-unlock',
     kind: 'unlock',
     adventure: 'confidence',
-    title: 'Your relationship with your practice is balanced.',
-    body: 'It creates some strain, and you find resilience. Knowing your current level of confidence is a powerful insight.',
+    title: 'The relationship with your practice is balanced.',
+    body: 'It creates some strain, and you find resilience.',
     lines: [
       { label: 'Highest', value: 'Belief you can build the practice you have in mind' },
       { label: 'Lowest', value: 'That your current firm gets you there — and time spent on work you enjoy' },

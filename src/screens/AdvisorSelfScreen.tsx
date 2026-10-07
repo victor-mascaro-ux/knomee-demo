@@ -67,6 +67,8 @@ import {
   journeyStates,
   today,
   withFinished,
+  withRestartAt,
+  withSkippedTo,
   loadAnswers,
   privateSteps,
   redact,
@@ -716,12 +718,16 @@ function StepBody({
   onSend,
   onAdventure,
   journey = false,
+  lockedOpens = false,
   idField = 0,
   onIdNext = () => {},
 }: {
   /** Which identity field is showing, and how to move past it. */
   idField?: number
   onIdNext?: () => void
+  /** A locked row on the journey's list opens too — Marcus's phone, where a
+      greyed adventure skips ahead to it. */
+  lockedOpens?: boolean
   /** The journey page: the list counts an adventure taken to its end as
       complete, and a locked row does not open. */
   journey?: boolean
@@ -750,7 +756,7 @@ function StepBody({
           required={d.progress.required}
           completedOn={a.completed}
           onOpen={onAdventure}
-          lockedOpens={!journey}
+          lockedOpens={!journey || lockedOpens}
           doneLast={journey}
           clientLayout={journey}
         />
@@ -1288,7 +1294,14 @@ function FlowPhone({
   const [demoSignedUp, setDemoSignedUp] = useState(false)
   useCcNav('self.idField', idField, setIdField)
   const onId = step.kind === 'identity'
-  const next = () => (onId && idField < ID_FIELDS.length - 1 ? setIdField(idField + 1) : go(i + 1))
+  const next = () => {
+    if (onId && idField < ID_FIELDS.length - 1) setIdField(idField + 1)
+    /* The journey's welcome runs straight into the first adventure still
+       open — Practice Joy, for somebody new — rather than stopping on the
+       adventures list first; leaving it lands on the list. */
+    else if (rich && steps[i + 1]?.kind === 'home') openNext()
+    else go(i + 1)
+  }
   const prev = () => (onId && idField > 0 ? setIdField(idField - 1) : back())
 
   // A fresh start rather than another screen on the trail — Back after this
@@ -1316,8 +1329,17 @@ function FlowPhone({
   ])
   const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
+  /* Marcus's phone — the one page that hands its restart to its owner — moves
+     about its list the way Sarah's does: a greyed adventure skips ahead to it,
+     his sample in every one before it, and a finished one is taken again with
+     everything after it back to waiting. Either way it opens on its welcome. */
+  const persona = rich && !!onRestartDemo
+
   // Tapping a row on the adventures list drops you at that adventure's intro.
   const openAdventure = (id: AdventureId) => {
+    const row = persona ? journeyStates(answers).find((r) => r.id === id) : undefined
+    if (row?.state === 'locked') edit.apply((a) => withSkippedTo(a, id))
+    if (row?.state === 'done') edit.apply((a) => withRestartAt(a, id))
     if (RICH.includes(id)) {
       setTab('flow')
       setRichOpen(id)
@@ -1676,6 +1698,7 @@ function FlowPhone({
                 onSend={onSend}
                 onAdventure={openAdventure}
                 journey={rich}
+                lockedOpens={persona}
                 idField={idField}
                 onIdNext={next}
               />
