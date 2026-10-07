@@ -1542,7 +1542,12 @@ function ClientExperienceRun({
       setIdField(0)
       setIntro('you')
     } else if (idField < CLIENT_ID_FIELDS.length - 1) setIdField(idField + 1)
-    else setIntro(null)
+    else {
+      /* The welcome runs straight into Financial Joy rather than stopping on
+         the adventures list first; leaving it lands on the list. */
+      setIntro(null)
+      setAdventure('financial-joy')
+    }
     viewport.current?.scrollTo({ top: 0 })
   }
   const introBack = () => {
