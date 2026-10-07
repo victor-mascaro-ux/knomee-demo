@@ -198,7 +198,9 @@
   align-items: center;
   gap: 8px;
   padding: 4px 12px 4px 4px;
-  border: 1.5px solid var(--k-grape-light, #e9d9f4);
+  /* No outline at rest; it comes in on hover (below). Kept as a transparent
+     border so the chip does not move when it does. */
+  border: 1.5px solid transparent;
   border-radius: 999px;
   background: #fff;
   font: inherit;
@@ -218,11 +220,10 @@
   height: 28px;
   font-size: 12px;
 }
-/* On or off is the chip's to say (its outline, and the whole chip dimmed when
-   off), not the disc's: the disc is the person, the same either way. */
+/* On or off is the chip's to say (the whole chip dimmed when off), not the
+   disc's: the disc is the person, the same either way. */
 .sh-chip.is-on {
   opacity: 1;
-  border-color: var(--k-grape, #7639a1);
 }
 .sh-chip-text {
   display: grid;
