@@ -286,3 +286,32 @@ export const talkTo: TalkTo[] = FLAGGED.flatMap((name) => {
     },
   ]
 })
+
+/* ── What a segment's name means ──────────────────────────────────────────────
+   The hover on a segment pill: one line for each half of its name. How they
+   feel about money (the posture), why money matters to them (Model B's own
+   line for the family) and where they stand on the road (Model C's own
+   reading of the quadrant, its first sentence). */
+const POSTURE_MEANS: Record<Posture, string> = {
+  Assured: 'confident in where they stand with money',
+  'Working on it': 'confidence with money still building',
+  Uneasy: 'uneasy about money right now',
+  Unrated: '',
+}
+const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1)
+
+export function segmentTip(name: string): string | undefined {
+  const [left, quad] = name.split(' · ')
+  if (!left || !quad) return undefined
+  const family = left.split(' ').pop() as string
+  const pos = left.slice(0, -family.length).trim() as Posture
+  const why = segModels.B.segments.find((s) => s.name === family)?.blurb
+  const where = segModels.C.segments.find((s) => s.name === quad)?.blurb.split(/\.\s+/)[0]
+  return [
+    POSTURE_MEANS[pos] ? `${pos} — ${POSTURE_MEANS[pos]}.` : '',
+    why ? `${family} — ${lowerFirst(why)}` : '',
+    where ? `${quad} — ${lowerFirst(where.replace(/\.$/, ''))}.` : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+}

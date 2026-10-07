@@ -498,7 +498,7 @@ export function CheckInCard({
 export function ShowToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <button className="pp-show" type="button" aria-expanded={open} onClick={onToggle}>
-      {open ? 'See Less' : 'See More'} <CaretIcon up={open} />
+      {open ? 'Show Less' : 'Show More'} <CaretIcon up={open} />
     </button>
   )
 }

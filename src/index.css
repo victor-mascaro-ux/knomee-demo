@@ -1656,6 +1656,18 @@ button.name-link-btn:hover .name-text {
   border-bottom-color: transparent;
   border-top-color: #240446;
 }
+/* A bubble of a few short lines (a segment's meaning, a line per half of its
+   name): it keeps its line breaks and wraps at a reading width. */
+.tt-wrap::after {
+  white-space: pre-line;
+  max-width: 260px;
+  text-align: left;
+  font-weight: 500;
+}
+.tt-wrap:focus-visible::after,
+.tt-wrap:focus-visible::before {
+  opacity: 1;
+}
 
 /* Card help tips open to the LEFT of the "?" and are vertically centred on it,
    with the arrow on the tooltip's right edge pointing back at the glyph. The
