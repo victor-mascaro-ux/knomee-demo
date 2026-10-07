@@ -523,18 +523,15 @@ export default function AdvisorFlowScreen({
           ) : (
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
-            {/* My Team · Adventures · Business ID: Adventures in the middle,
-                the Business ID on the right under the mark, which floats
-                above the bar's right end. */}
-            {/* My Team: the people the Business ID goes to, and which part of
-                it each of them sees. */}
+            {/* Business ID · Adventures · My Team: the ID first, Adventures in
+                the middle; the mark floats above the bar's right end. */}
             <button
               type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
+              className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
+              onClick={() => setTab('finid')}
             >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
+              <TabFinId />
+              <span className="cx-tab-lbl">Business ID</span>
             </button>
             <button
               type="button"
@@ -544,13 +541,15 @@ export default function AdvisorFlowScreen({
               <TabAdventures />
               <span className="cx-tab-lbl">Adventures</span>
             </button>
+            {/* My Team: the people the Business ID goes to, and which part of
+                it each of them sees. */}
             <button
               type="button"
-              className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
-              onClick={() => setTab('finid')}
+              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
+              onClick={() => setTab('team')}
             >
-              <TabFinId />
-              <span className="cx-tab-lbl">Business ID</span>
+              <TabTeam />
+              <span className="cx-tab-lbl">My Team</span>
             </button>
             {/* The mark picks up where he left off: the next adventure
                 still open, or the list once there is none. */}

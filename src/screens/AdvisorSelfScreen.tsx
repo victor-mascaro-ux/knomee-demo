@@ -1719,9 +1719,24 @@ function FlowPhone({
           ) : (
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
-            {/* My Team · Adventures · Business ID: Adventures in the middle,
-                the Business ID on the right under the mark, which floats
-                above the bar's right end. */}
+            {/* Business ID · Adventures · My Team: the ID first, Adventures in
+                the middle; the mark floats above the bar's right end. */}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
+              onClick={() => setTab('finid')}
+            >
+              <TabFinId />
+              <span className="cx-tab-lbl">Business ID</span>
+            </button>
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+              onClick={closeToList}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
             {/* My Team: the people the Business ID goes to, and which part of
                 it each of them sees. The three questions are on the ID, in its
                 Questions card. */}
@@ -1732,22 +1747,6 @@ function FlowPhone({
             >
               <TabTeam />
               <span className="cx-tab-lbl">My Team</span>
-            </button>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
-              onClick={closeToList}
-            >
-              <TabAdventures />
-              <span className="cx-tab-lbl">Adventures</span>
-            </button>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
-              onClick={() => setTab('finid')}
-            >
-              <TabFinId />
-              <span className="cx-tab-lbl">Business ID</span>
             </button>
             {/* The mark picks up where they left off: the next adventure
                 still open, or the list once there is none. */}
