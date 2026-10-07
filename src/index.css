@@ -306,6 +306,17 @@ body {
 .cx-page.is-bare ~ .powered-by {
   display: none;
 }
+/* A desktop experience is frameless too, but it is a page in a window like
+   every other desktop page, so it carries the credit in the same place. */
+html.cx-desktop .cx-page.is-bare ~ .powered-by {
+  display: inline-flex;
+}
+/* Where a bottom bar runs along the window (the tabs, an adventure's Back and
+   OK), the bar's left end is too short on a laptop window to hold it beside
+   the first tab, so it rides just above the bar (78 high) instead. */
+html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-by {
+  bottom: calc(78px + 14px);
+}
 
 .tab {
   background: none;

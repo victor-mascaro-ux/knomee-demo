@@ -4268,6 +4268,7 @@ export default function App() {
           onExit={() => setClientExpOpen(false)}
           onBackToProfile={() => backToProfile('#/prospects/sarah-mitchell')}
         />
+        {brand && <PoweredBy />}
       </>
     )
   }
