@@ -2199,18 +2199,14 @@ button.af-opt:hover {
    The scroller sets the measure (client-experience.css): 880 for the welcome
    and identity, 560 for a step. Here each screen is composed in it. */
 
-/* The welcome: one block in the middle of the window. Copy at reading
-   width, the three cards side by side under it, each icon on its text's
-   first line; Get Started sits on the foot's stage. */
+/* The welcome: one block in the middle of the window. Copy across the
+   content's full width — the same edge as the cards row, so a short line
+   does not wrap halfway — the three cards side by side under it, each icon on
+   its text's first line; Get Started sits on the foot's stage. */
 html.cx-desktop .af-welcome.is-intro {
   min-height: 100%;
   justify-content: safe center;
   padding-top: 0;
-}
-html.cx-desktop .af-welcome.is-intro > .jf-title,
-html.cx-desktop .af-welcome.is-intro > .jf-body,
-html.cx-desktop .af-welcome.is-intro > .af-aside {
-  max-width: 560px;
 }
 html.cx-desktop .af-welcome.is-intro .af-gets-head {
   margin-top: 40px;
