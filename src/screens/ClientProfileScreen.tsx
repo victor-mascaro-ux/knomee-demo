@@ -817,16 +817,20 @@ export default function ClientProfileScreen({
   onToast,
   startFlow,
   onStartFlowDone,
+  checkIn,
 }: {
   client: Client
   onBack: () => void
   /** The app's own toast, for the two things this page can add to a list. */
   onToast?: (msg: string) => void
   /** Open straight into one of the page's own forms. The client's phone has
-      the same three things on a quick-access sheet, and a sheet that lands you
+      the same four things on a quick-access sheet, and a sheet that lands you
       on the right page with the form shut has not saved you the taps. */
-  startFlow?: 'goal' | 'event' | 'question' | null
+  startFlow?: 'goal' | 'event' | 'question' | 'vision' | null
   onStartFlowDone?: () => void
+  /** A check-in given just now on her phone's quick-access sheet, in place of
+      the one on file. */
+  checkIn?: { mood: string; level: number; date: string; note?: string }
   /* The phone frame hands in the control that opens the rail as a drawer. It
      belongs above the client's name, next to the person it is about, not in
      the app bar — the app bar's burger is the advisor's own menu, as it is on
@@ -908,11 +912,17 @@ export default function ClientProfileScreen({
 
   /* Handed in from outside — the quick-access sheet on the phone — and cleared
      as soon as it is honoured, so closing the form does not reopen it. */
+  /* Save a Vision, handed to the vision board card, which owns its panel. */
+  const [visionNow, setVisionNow] = useState(false)
+  const shownCheckIn = checkIn ?? cp.checkIn
   useEffect(() => {
     if (!startFlow) return
+    /* The forms live on the ID, not on the Who-sees-it lens. */
+    setLens('id')
     if (startFlow === 'goal') setAddingGoal(true)
     if (startFlow === 'event') setEventForm('add')
     if (startFlow === 'question') setQuestionForm('add')
+    if (startFlow === 'vision') setVisionNow(true)
     onStartFlowDone?.()
   }, [startFlow, onStartFlowDone])
   const goals = useCollapsed(orderGoals(goalList), COLLAPSED_GOALS)
@@ -992,7 +1002,7 @@ export default function ClientProfileScreen({
             {/* On the advisor's page the check-in sits with who she is, in the
                 rail beside her name; on her own phone the rail is a drawer, so
                 there it goes under the title instead. */}
-            {!mine && <CheckInCard checkIn={cp.checkIn} />}
+            {!mine && <CheckInCard checkIn={shownCheckIn} />}
 
             {/* Her score where the candidate page has the RQ: the number, and
                 the tier it puts her in. None until her profile is complete. */}
@@ -1110,7 +1120,7 @@ export default function ClientProfileScreen({
 
           {/* How she last said she felt, under the name of the page she said it
               on — the same card her own phone shows her, in the same place. */}
-          {mine && <CheckInCard checkIn={cp.checkIn} />}
+          {mine && <CheckInCard checkIn={shownCheckIn} />}
 
           {sharing && tab === 'id' && !printing && <SharingLens value={lens} onChange={setLens} />}
 
@@ -1323,7 +1333,13 @@ export default function ClientProfileScreen({
 
                   {/* Keyed by who, so another client's page starts from their
                       own boards rather than the last one's edits. */}
-                  <VisionBoardCard key={client.name} initial={cp.boards} onToast={onToast} />
+                  <VisionBoardCard
+                    key={client.name}
+                    initial={cp.boards}
+                    onToast={onToast}
+                    addNow={visionNow}
+                    onAddNowDone={() => setVisionNow(false)}
+                  />
                 </div>
 
                 {/* Right rail */}

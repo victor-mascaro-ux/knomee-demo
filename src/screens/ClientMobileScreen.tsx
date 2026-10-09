@@ -10,17 +10,25 @@ import { RailFace } from './profileParts'
 import './client-experience.css'
 import ClientProfileScreen from './ClientProfileScreen'
 import {
+  AdventuresScreen,
   DEVICE_H,
   DEVICE_W,
   IPhone,
+  KnomeeFab,
+  KnomeeSheet,
+  TabAdventures,
+  TabFinId,
   ZOOM_CONTROLS_TITLE,
   clampZoom,
   useDarkGround,
   useFitToWindow,
+  useTabInd,
   useZoom,
 } from './ClientExperienceScreen'
+import { moneyHistory, moods } from '../data/experience'
 import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
+import { DesktopIcon, GearIcon, ShieldIcon, SignOutIcon } from '../components/profileIcons'
 import { clientProfile } from '../data/clientProfile'
 import type { Client } from '../data/clients'
 import { useDropdown } from '../components/useDropdown'
@@ -82,6 +90,24 @@ export default function ClientMobileScreen({
   }, [accountOpen])
   /* Drag to scroll, as a finger would. */
   useDragScroll(viewport)
+  /* The bottom bar every phone has: her Financial ID, the knomee mark, and
+     her adventures — all five finished. */
+  const [tab, setTab] = useState<'finid' | 'adventures'>('finid')
+  const tabInd = useTabInd(tab)
+  /* A tab opens at its top, not wherever the last one was scrolled to. */
+  useEffect(() => {
+    viewport.current?.scrollTo({ top: 0 })
+  }, [tab])
+  /* The knomee mark's quick-access sheet. Its four actions open the same
+     forms on her Financial ID; a mood saved on it is her check-in. */
+  const [sheet, setSheet] = useState(false)
+  const [flow, setFlow] = useState<'goal' | 'event' | 'question' | 'vision' | null>(null)
+  const [checkIn, setCheckIn] = useState<{ mood: string; level: number; date: string; note?: string } | null>(null)
+  const pick = (f: 'goal' | 'event' | 'question' | 'vision') => {
+    setSheet(false)
+    setTab('finid')
+    setFlow(f)
+  }
 
   return (
     <div
@@ -94,7 +120,7 @@ export default function ClientMobileScreen({
         className="cx-fit"
         style={bare ? undefined : { height: DEVICE_H * scale, width: DEVICE_W * scale }}
       >
-        <IPhone scale={scale} bare={bare}>
+        <IPhone scale={scale} bare={bare} dim={sheet}>
           {/* The advisor's own bar. The page inside the frame is the advisor's
               product, not the client's app, so it keeps the plum header it has
               on a desktop rather than opening straight onto a white page. */}
@@ -127,6 +153,25 @@ export default function ClientMobileScreen({
                     <span className="menu-avatar">A</span>
                     <span className="menu-name">Alex Advisor</span>
                   </div>
+                  {/* In groups, as on every phone: the account, then the ways
+                      out. */}
+                  <button
+                    className="menu-item"
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountOpen(false)
+                      onAccountSettings?.()
+                    }}
+                  >
+                    <GearIcon size={18} />
+                    Account Settings
+                  </button>
+                  <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
+                    <ShieldIcon size={18} />
+                    Legal &amp; Privacy
+                  </button>
+                  <hr className="menu-sep" />
                   {onBackToProfile && (
                     <button
                       className="menu-item"
@@ -137,24 +182,12 @@ export default function ClientMobileScreen({
                         onBackToProfile()
                       }}
                     >
+                      <DesktopIcon size={18} />
                       Back to Profile
                     </button>
                   )}
-                  <button
-                    className="menu-item"
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setAccountOpen(false)
-                      onAccountSettings?.()
-                    }}
-                  >
-                    Account Settings
-                  </button>
-                  <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
-                    Legal &amp; Privacy
-                  </button>
                   <button className="menu-item" type="button" role="menuitem">
+                    <SignOutIcon size={18} />
                     Sign Out
                   </button>
                 </div>
@@ -166,10 +199,19 @@ export default function ClientMobileScreen({
             className={`cx-viewport cxm-viewport${menuOpen ? ' is-menu-open' : ''}`}
             ref={viewport}
           >
+            {tab === 'adventures' ? (
+              /* All five finished. A finished one, or Add Goal / Add Life
+                 Event, goes to her Financial ID, where its answers and its
+                 forms are. */
+              <AdventuresScreen onPick={pick} onOpenAdventure={() => setTab('finid')} />
+            ) : (
             <ClientProfileScreen
               client={client}
               mine
               sharing
+              startFlow={flow}
+              onStartFlowDone={() => setFlow(null)}
+              checkIn={checkIn ?? undefined}
               onBack={() => force((n) => n + 1)}
               ownerMenu={
                 /* Emily's own initial, above her name, opening her rail. The
@@ -189,6 +231,7 @@ export default function ClientMobileScreen({
                 </button>
               }
             />
+            )}
           </div>
           {menuOpen && (
             <button
@@ -198,6 +241,55 @@ export default function ClientMobileScreen({
               onClick={() => setMenuOpen(false)}
             />
           )}
+          {sheet && (
+            <KnomeeSheet
+              /* She has finished the five, so what is next is the adventure
+                 after them. */
+              next={{ a: moneyHistory, go: () => setSheet(false) }}
+              onClose={() => setSheet(false)}
+              onPick={pick}
+              onSaveMood={(mood, note) => {
+                const level = moods.findIndex((m) => m.id === mood)
+                const d = new Date()
+                const two = (n: number) => String(n).padStart(2, '0')
+                setCheckIn({
+                  mood: moods[level].word,
+                  level,
+                  note: note || undefined,
+                  date: `${two(d.getMonth() + 1)}/${two(d.getDate())}/${d.getFullYear()}`,
+                })
+                setSheet(false)
+                setTab('finid')
+              }}
+            />
+          )}
+          <nav className="cx-tabbar" ref={tabInd.ref}>
+            {tabInd.ind}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
+              onClick={() => {
+                setSheet(false)
+                setTab('finid')
+              }}
+            >
+              <TabFinId />
+              <span className="cx-tab-lbl">Financial ID</span>
+            </button>
+            <KnomeeFab on={sheet} label="Knomee" onClick={() => setSheet((s) => !s)} />
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'adventures' ? 'is-on' : ''}`}
+              onClick={() => {
+                setSheet(false)
+                setTab('adventures')
+              }}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
+          </nav>
+          <div className="cx-home-bar" />
         </IPhone>
       </div>
 
