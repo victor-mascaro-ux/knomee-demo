@@ -84,6 +84,8 @@ export const advisor = {
   role: 'Lead advisor · team of four',
   book: '$840M',
   firm: 'Wirehouse',
+  /* Who he most enjoys working with, from the first form. */
+  serves: ['Business owners', 'Corporate executives', 'Retirees'],
   email: 'marcus.hale@example.com',
   completedOn: '09.09.2026',
 }
@@ -151,6 +153,52 @@ export const advisorProgress = {
   done: advisorAdventures.filter((a) => a.state === 'done').length,
   required: advisorAdventures.length,
 }
+
+/* ── who they serve ──────────────────────────────────────────────────────
+   Asked on the first form, beside the book and the firm, as "who do you most
+   enjoy working with" — the specialty, without the word. The list is the old
+   client matching quiz's, said from the advisor's side, in five kinds that
+   stay shut until tapped so the first screen of the flow is six short rows
+   rather than twenty-two chips. The same list on the client side is what
+   would let the two be matched.
+
+   Generalist comes first and on its own, so nobody reads the question as a
+   push into a niche — and picking it is an answer worth having. */
+
+export const GENERALIST = 'Everyone — I’m a generalist'
+
+/** At most this many, said nowhere: at the cap the oldest pick makes room. */
+export const SERVES_MAX = 3
+
+/** Each kind names the mark its row wears (drawn in ServesPicker). */
+export type ServesIcon = 'hourglass' | 'signpost' | 'briefcase' | 'gem' | 'heart'
+
+export const CLIENT_GROUPS: { label: string; icon: ServesIcon; options: string[] }[] = [
+  { label: 'Life stage', icon: 'hourglass', options: ['Gen Z', 'Millennials', 'Gen X', 'Empty nesters', 'Retirees', 'Students'] },
+  { label: 'Life transitions', icon: 'signpost', options: ['Divorce or separation', 'Career transitions', 'Families with special needs'] },
+  {
+    label: 'Work',
+    icon: 'briefcase',
+    options: [
+      'Business owners',
+      'Corporate executives',
+      'Medical professionals',
+      'Government or military',
+      'Athletes, entertainers, influencers',
+    ],
+  },
+  {
+    label: 'Complex assets',
+    icon: 'gem',
+    options: [
+      'Equity comp or stock options',
+      'Angel, VC or LP investors',
+      'Real estate or 1031 exchanges',
+      'Expats or international assets',
+    ],
+  },
+  { label: 'Community and values', icon: 'heart', options: ['Women', 'LGBTQ+', 'Values-focused investors', 'Philanthropy and nonprofits'] },
+]
 
 /* ── the flow ────────────────────────────────────────────────────────────── */
 
@@ -768,7 +816,7 @@ export type BusinessId = typeof businessId
    the conversion video does this in three lines, and a rep about to dial needs
    three, not nine. */
 export const conversionSnapshot = [
-  { k: 'Who', v: 'Lead advisor, team of four, $840M, wirehouse. Breakaway — building, not exiting.' },
+  { k: 'Who', v: 'Lead advisor, team of four, $840M, wirehouse. Breakaway — building, not exiting. Serves business owners, executives and retirees.' },
   { k: 'Readiness', v: 'Action. Moving within 12 months; steps already taken.' },
   { k: 'Driving', v: 'Ownership and control. Income ranked low — do not lead with payout.' },
   { k: 'Blocking', v: 'Client attrition, then obligation to two junior advisors.' },

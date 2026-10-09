@@ -46,6 +46,15 @@ export const CoinsIcon = ({ size = 14 }: IconProps) => (
   </svg>
 )
 
+/** Who they serve — two people. */
+export const PeopleIcon = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="9" cy="8" r="3.4" />
+    <path d="M3 19.5c.9-3.3 3.3-5 6-5s5.1 1.7 6 5" />
+    <path d="M15.5 4.9a3.4 3.4 0 0 1 0 6.3M17.5 14.8c1.7.6 3 2.2 3.5 4.7" />
+  </svg>
+)
+
 /** A firm — a building. */
 export const BuildingIcon = ({ size = 14 }: IconProps) => (
   <svg {...base(size)}>

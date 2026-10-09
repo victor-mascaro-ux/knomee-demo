@@ -33,6 +33,9 @@ export interface Identity {
   role: string
   book: string
   firm: string
+  /** Who they most enjoy working with, from the first form — the specialty.
+      Absent on sheets from before the question was asked. */
+  serves?: string[]
   /** Given at sign-up, just before the Business ID — absent until then. */
   email?: string
 }
@@ -110,7 +113,14 @@ const SAMPLE_SITTING = 's-sample-marcus-hale'
 export function sampleAnswers(): Answers {
   const a = emptyAnswers()
   a.sittingId = SAMPLE_SITTING
-  a.identity = { name: advisor.name, role: 'Lead advisor', book: advisor.book, firm: advisor.firm, email: advisor.email }
+  a.identity = {
+    name: advisor.name,
+    role: 'Lead advisor',
+    book: advisor.book,
+    firm: advisor.firm,
+    serves: [...advisor.serves],
+    email: advisor.email,
+  }
   a.completed = advisor.completedOn
   for (const s of steps) {
     if (s.chosen?.length) a.choice[s.id] = [...s.chosen]
@@ -1237,6 +1247,7 @@ export function derive(a: Answers): Derived {
       // What the first form and sign-up gave; a blank one drops out of the rail.
       book: a.identity.book.trim() || undefined,
       firm: a.identity.firm.trim() || undefined,
+      serves: a.identity.serves?.length ? a.identity.serves : undefined,
       email: a.identity.email?.trim() || undefined,
     },
     id,
