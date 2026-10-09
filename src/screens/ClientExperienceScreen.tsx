@@ -1491,7 +1491,7 @@ function MobileMenu({
                 onBackToProfile()
               }}
             >
-              Back to Profile
+              Close Experience
             </SheetItem>
           )}
           <SheetItem icon={<SignOutIcon />} onClick={onClose}>

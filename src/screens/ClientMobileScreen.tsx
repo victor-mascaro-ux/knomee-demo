@@ -73,8 +73,8 @@ export default function ClientMobileScreen({
      page on a phone. The burger brings it up as a drawer so it is a tap away
      rather than a long scroll. */
   const [menuOpen, setMenuOpen] = useState(false)
-  /* The advisor's account menu is a separate thing from the client's rail, so
-     it gets its own control on its own side of the bar. */
+  /* Her account menu is a separate thing from her rail, so it gets its own
+     control on its own side of the bar. */
   const account = useDropdown()
   const accountOpen = account.open
   const setAccountOpen = account.setOpen
@@ -129,9 +129,9 @@ export default function ClientMobileScreen({
               {/* Her own phone, so the client app's mark — not the advisor's. */}
               <img src="./knomee-logo-white.svg" alt="knomee" />
             </div>
-            {/* The burger is the account menu, the same one the desktop top bar
-                opens — same glyph, same items, same right-hand corner, so it
-                drops from the edge it sits on. */}
+            {/* The burger is her account menu — same glyph, same right-hand
+                corner as the desktop top bar's, so it drops from the edge it
+                sits on. */}
             <div className="menu-wrap cxm-account" ref={accountRef}>
               <button
                 className="cx-appbar-burger"
@@ -149,9 +149,13 @@ export default function ClientMobileScreen({
               </button>
               {account.shown && (
                 <div className={`menu-pop cxm-menu-pop drop-anim${account.closing ? ' is-closing' : ''}`} role="menu">
+                  {/* Her own phone, so her own account: her face and her
+                      name, as Sarah's menu has hers. */}
                   <div className="menu-account">
-                    <span className="menu-avatar">A</span>
-                    <span className="menu-name">Alex Advisor</span>
+                    <span className="menu-avatar">
+                      <RailFace name={client.name} />
+                    </span>
+                    <span className="menu-name">{client.name}</span>
                   </div>
                   {/* In groups, as on every phone: the account, then the ways
                       out. */}
@@ -183,7 +187,7 @@ export default function ClientMobileScreen({
                       }}
                     >
                       <DesktopIcon size={18} />
-                      Back to Profile
+                      Close Experience
                     </button>
                   )}
                   <button className="menu-item" type="button" role="menuitem">

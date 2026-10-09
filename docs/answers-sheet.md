@@ -113,7 +113,7 @@ is appended if the flow ever grows a question.
 
 | Group | Columns |
 | --- | --- |
-| Who and when | `Sitting ID`, `Recorded at`, `Name`, `Role`, `Assets`, `Firm`, `Completed` |
+| Who and when | `Sitting ID`, `Recorded at`, `Name`, `Role`, `Assets`, `Firm`, `Enjoys working with`, `Completed` |
 | What they answered | one column per question — a scale set spends a column per statement (`cf-q.1` … `cf-q.6`) and the attention grid one per area, so a column can be read down |
 
 **Nothing computed goes on a tab.** The EQ, the tier, the three dimensions, the
