@@ -33,6 +33,7 @@ import {
   COLLAPSED_ROWS,
   useCollapsed,
   StatusTags,
+  StartAdventure,
 } from './profileParts'
 import GoalModal, { type GoalField } from './GoalModal'
 import QuestionModal, { renamed } from './QuestionModal'
@@ -107,8 +108,19 @@ export type IdCard = 'move' | 'joy' | 'future' | 'outlook' | 'confidence'
 export type WaitingCards = Partial<Record<IdCard, boolean>>
 
 /* A card whose adventure is still to come: its head, greyed, and the line the
-   client's Financial ID says in the same place. */
-function Waiting({ icon, title, adventure }: { icon: string; title: string; adventure: string }) {
+   client's Financial ID says in the same place — and, on the one whose
+   adventure is next, the same Start button hers carries. */
+function Waiting({
+  icon,
+  title,
+  adventure,
+  onStart,
+}: {
+  icon: string
+  title: string
+  adventure: string
+  onStart?: () => void
+}) {
   return (
     <section className="pp-card is-waiting">
       <div className="pp-card-head">
@@ -118,6 +130,7 @@ function Waiting({ icon, title, adventure }: { icon: string; title: string; adve
         </span>
       </div>
       <p className="pp-waiting">Complete {/^The /.test(adventure) ? adventure : `the ${adventure}`} adventure</p>
+      {onStart && <StartAdventure title={adventure.replace(/^The /, '')} onStart={onStart} />}
     </section>
   )
 }
@@ -133,12 +146,18 @@ export default function AdvisorProfileScreen({
   data = marcusProfile,
   noBadges = false,
   waiting,
+  nextWaiting,
+  onStartNext,
 }: {
   /** Leave out the Badges card — the advisor journey page does without badges. */
   noBadges?: boolean
   /** Cards still waiting for their adventure, as the client's Financial ID
       has them: the title greyed, and "Complete the … adventure". */
   waiting?: WaitingCards
+  /** The waiting card whose adventure is next; it carries a Start button
+      that calls `onStartNext`. */
+  nextWaiting?: IdCard
+  onStartNext?: () => void
   onBack: () => void
   onAdd?: () => void
   /** The person's own experience, from the foot of the rail. */
@@ -328,7 +347,15 @@ export default function AdvisorProfileScreen({
           {/* Who on his team sees each part of it is the phone's My Team
               tab now, so the ID is read one way: what it says. */}
           {(printing || tab === 'id') && (
-            <BusinessIdTab d={d} confidence={data.confidence} stageLevel={stageLevel} noBadges={noBadges} waiting={waiting} />
+            <BusinessIdTab
+              d={d}
+              confidence={data.confidence}
+              stageLevel={stageLevel}
+              noBadges={noBadges}
+              waiting={waiting}
+              nextWaiting={nextWaiting}
+              onStartNext={onStartNext}
+            />
           )}
           {(printing || tab === 'readiness') && (
             <div className={printing ? 'print-page' : undefined}>
@@ -454,6 +481,8 @@ function BusinessIdTab({
   stageLevel,
   noBadges = false,
   waiting = {},
+  nextWaiting,
+  onStartNext,
   only,
 }: {
   /** Just this one adventure's card, as the page draws it — for the
@@ -461,10 +490,14 @@ function BusinessIdTab({
   only?: IdCard
   noBadges?: boolean
   waiting?: WaitingCards
+  nextWaiting?: IdCard
+  onStartNext?: () => void
   d: AdvisorProfileData['id']
   confidence: AdvisorProfileData['confidence']
   stageLevel: number
 }) {
+  /* The next adventure's waiting card is the one with a way in. */
+  const start = (card: IdCard) => (card === nextWaiting ? onStartNext : undefined)
   const [confidence, setConfidence] = useState(false)
   const [postcard, setPostcard] = useState(false)
   const [openGoal, setOpenGoal] = useState<number | null>(null)
@@ -543,7 +576,7 @@ function BusinessIdTab({
         {/* Left content column */}
         <div className={only ? undefined : 'pp-col-main'}>
           {!show('move') ? null : waiting.move ? (
-            <Waiting icon={icTheMove} title="The Move" adventure="The Move" />
+            <Waiting icon={icTheMove} title="The Move" adventure="The Move" onStart={start('move')} />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
@@ -583,7 +616,7 @@ function BusinessIdTab({
           )}
 
           {!show('joy') ? null : waiting.joy ? (
-            <Waiting icon={icPracticeJoy} title="Practice Joy" adventure="Practice Joy" />
+            <Waiting icon={icPracticeJoy} title="Practice Joy" adventure="Practice Joy" onStart={start('joy')} />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
@@ -638,7 +671,7 @@ function BusinessIdTab({
           )}
 
           {!show('future') ? null : waiting.future ? (
-            <Waiting icon={icFutureYou} title="Future You" adventure="Future You" />
+            <Waiting icon={icFutureYou} title="Future You" adventure="Future You" onStart={start('future')} />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
@@ -694,7 +727,7 @@ function BusinessIdTab({
           )}
 
           {!show('outlook') ? null : waiting.outlook ? (
-            <Waiting icon={icOutlook} title="Outlook" adventure="Outlook" />
+            <Waiting icon={icOutlook} title="Outlook" adventure="Outlook" onStart={start('outlook')} />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
@@ -746,7 +779,7 @@ function BusinessIdTab({
         {/* Right rail */}
         <div className={only ? undefined : 'pp-rail'}>
           {!show('confidence') ? null : waiting.confidence ? (
-            <Waiting icon={icConfidence} title="Confidence" adventure="Confidence" />
+            <Waiting icon={icConfidence} title="Confidence" adventure="Confidence" onStart={start('confidence')} />
           ) : (
           <section className="pp-card">
             <div className="pp-card-head">
