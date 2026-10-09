@@ -410,6 +410,8 @@ export interface AdvisorProfileData {
     book?: string
     role?: string
     firm?: string
+    /** Who they most enjoy working with, from the first form. */
+    serves?: string[]
     /** The address they signed up with, once they have. */
     email?: string
   }
@@ -430,6 +432,7 @@ export const marcusProfile: AdvisorProfileData = {
     book: advisor.book,
     role: advisor.role,
     firm: advisor.firm,
+    serves: advisor.serves,
     email: advisor.email,
   },
   id: businessId,

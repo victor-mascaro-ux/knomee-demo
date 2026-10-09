@@ -108,6 +108,7 @@ import AdvisorWelcome from './AdvisorWelcome'
 import SignUpScreen from './SignUpScreen'
 import { openExperience } from '../deviceMode'
 import IdentityCardForm, { type IdField } from './IdentityCard'
+import ServesPicker from './ServesPicker'
 import { LegalLink, openLegal } from '../components/Legal'
 import { MicButton, speechCtor } from './Dictation'
 import './advisor-flow.css'
@@ -467,7 +468,20 @@ const ID_FIELDS: IdField[] = [
   { key: 'name', label: 'Your name', icon: 'name' },
   { key: 'book', label: 'Assets you advise on', hint: 'A rough figure is fine', chip: 'Assets', icon: 'book' },
   { key: 'firm', label: 'Name of your firm', hint: 'Optional', chip: 'Firm', icon: 'firm' },
+  /* The specialty, asked warmly and last: a few taps, never a test. */
+  {
+    key: 'serves',
+    label: 'Who do you most enjoy working with?',
+    hint: 'Optional · pick a few, or skip',
+    chip: 'Clients',
+    icon: 'clients',
+    custom: true,
+  },
 ]
+
+/** The card's chip for who they serve: the first pick, and how many more. */
+const servesChip = (picks: string[] = []) =>
+  picks.length ? `${picks[0]}${picks.length > 1 ? ` +${picks.length - 1}` : ''}` : ''
 
 /* One field at a time under the card, the way every question after it
    arrives; the foot's Continue and Back step through them (`field`). */
@@ -491,8 +505,18 @@ function IdentityForm({
       sub={sub}
       idName="Business ID"
       fields={ID_FIELDS}
-      values={{ name: a.identity.name, book: a.identity.book, firm: a.identity.firm }}
+      values={{
+        name: a.identity.name,
+        book: a.identity.book,
+        firm: a.identity.firm,
+        serves: servesChip(a.identity.serves),
+      }}
       onChange={(key, value) => edit.identity({ [key]: value })}
+      renderField={(key) =>
+        key === 'serves' ? (
+          <ServesPicker picks={a.identity.serves ?? []} onChange={(serves) => edit.identity({ serves })} />
+        ) : null
+      }
       field={field}
       onNext={onNext}
       foot={

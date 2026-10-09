@@ -49,6 +49,7 @@ import {
   CheckIcon,
   CoinsIcon,
   MailIcon,
+  PeopleIcon,
   RowChevron,
 } from '../components/profileIcons'
 import icKeyHighlights from '../assets/adventures/key-highlights.svg'
@@ -250,6 +251,11 @@ export default function AdvisorProfileScreen({
                 {who.firm && (
                   <span className="pp-meta-row">
                     <BuildingIcon /> {who.firm}
+                  </span>
+                )}
+                {!!who.serves?.length && (
+                  <span className="pp-meta-row">
+                    <PeopleIcon /> {who.serves.join(', ')}
                   </span>
                 )}
               </div>

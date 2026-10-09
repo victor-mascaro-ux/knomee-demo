@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 import './joyFlow.css'
 import './advisor-flow.css'
 
-export type IdIconKind = 'name' | 'book' | 'firm' | 'place' | 'work'
+export type IdIconKind = 'name' | 'book' | 'firm' | 'place' | 'work' | 'clients'
 
 export interface IdField {
   key: string
@@ -18,6 +18,9 @@ export interface IdField {
   /** What the field's chip on the card says while it is blank. */
   chip?: string
   icon: IdIconKind
+  /** Drawn by the owner (`renderField`) instead of a text box — a choice
+      rather than a thing to type. */
+  custom?: boolean
 }
 
 export default function IdentityCardForm({
@@ -30,7 +33,10 @@ export default function IdentityCardForm({
   field,
   onNext,
   foot,
+  renderField,
 }: {
+  /** The control for a `custom` field. */
+  renderField?: (key: string) => ReactNode
   title: string
   sub: string
   /** "Business ID", "Financial ID" — the card's eyebrow. */
@@ -99,6 +105,9 @@ export default function IdentityCardForm({
             {current.label}
           </label>
           {current.hint && <span className="jf-other-hint">{current.hint}</span>}
+          {current.custom && renderField ? (
+            renderField(current.key)
+          ) : (
           <span className="af-idinput">
             <IdIcon k={current.icon} />
             <input
@@ -116,6 +125,7 @@ export default function IdentityCardForm({
               }}
             />
           </span>
+          )}
         </div>
       </div>
       {foot && <p className="lg-consent is-left">{foot}</p>}
@@ -150,6 +160,13 @@ export function IdIcon({ k }: { k: IdIconKind }) {
       <>
         <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
         <circle cx="12" cy="9.5" r="2.5" />
+      </>
+    ),
+    clients: (
+      <>
+        <circle cx="9" cy="8" r="3.4" />
+        <path d="M3 19.5c.9-3.3 3.3-5 6-5s5.1 1.7 6 5" />
+        <path d="M15.5 4.9a3.4 3.4 0 0 1 0 6.3M17.5 14.8c1.7.6 3 2.2 3.5 4.7" />
       </>
     ),
     work: (

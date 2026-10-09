@@ -2284,3 +2284,129 @@ html.cx-desktop .aq .jr-memory.aq-hero {
   margin-inline: 0;
   border-radius: 24px;
 }
+
+/* ── who they serve, on the first form ──
+   The generalist chip, a quiet line, then the kinds as short rows that open
+   one at a time — light enough for the first screen of a flow. */
+.af-serves {
+  margin-top: var(--space-12, 12px);
+}
+.af-serves-lead {
+  display: flex;
+}
+.af-serves-or {
+  margin: var(--space-12, 12px) 0 var(--space-6, 6px);
+  font-size: 13px;
+  color: var(--text-secondary, #6d6a76);
+}
+.af-serves-groups {
+  border: 1.5px solid #e6e4ea;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+.af-serves-group + .af-serves-group {
+  border-top: 1px solid #efedf2;
+}
+.af-serves-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--text-strong, #240446);
+  text-align: left;
+  cursor: pointer;
+}
+.af-serves-name {
+  flex: 1;
+}
+.af-serves-n {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--k-plum, #240446);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+.af-serves-caret {
+  flex: none;
+  color: #9a96a6;
+  transition: transform 0.2s ease;
+}
+.af-serves-group.is-open .af-serves-caret {
+  transform: rotate(90deg);
+}
+.af-serves-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 14px;
+  animation: jrDeal 0.3s var(--ease-out, ease-out) both;
+}
+.af-serve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid #d9d4e2;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  color: #3f3c49;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.af-serve.is-on {
+  border-color: var(--k-plum, #240446);
+  background: var(--k-plum, #240446);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Each kind's mark on a disc of its own colour — the Future You palette, so
+   the first form and the adventures read as one family. The fifth kind takes
+   tangerine rather than plum: plum is the generalist's, and a pick in
+   Community and values must not look like "everyone". Lime and tangerine are
+   light, so their marks are drawn in plum. */
+.af-serves-group[data-tone='0'] { --sv-acc: var(--k-grape, #7639a1); --sv-ink: #fff; }
+.af-serves-group[data-tone='1'] { --sv-acc: var(--k-ocean, #086375); --sv-ink: #fff; }
+.af-serves-group[data-tone='2'] { --sv-acc: var(--k-lime, #affc41); --sv-ink: var(--k-plum, #240446); }
+.af-serves-group[data-tone='3'] { --sv-acc: var(--k-bolt, #9b51e0); --sv-ink: #fff; }
+.af-serves-group[data-tone='4'] { --sv-acc: var(--k-tangerine, #ff9525); --sv-ink: var(--k-plum, #240446); }
+.af-serves-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--sv-acc);
+  color: var(--sv-ink);
+}
+.af-serve svg {
+  flex: none;
+}
+
+/* A pick wears its kind's colour, and so does the kind's count — so what is
+   chosen in Work is lime wherever it shows. The generalist, outside the
+   kinds, stays plum. */
+.af-serves-group .af-serve.is-on {
+  border-color: var(--sv-acc);
+  background: var(--sv-acc);
+  color: var(--sv-ink);
+}
+.af-serves-group .af-serves-n {
+  background: var(--sv-acc);
+  color: var(--sv-ink);
+}
