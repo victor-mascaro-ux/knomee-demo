@@ -14,13 +14,13 @@ export interface MobileTab {
   label: string
 }
 
-// Order is deliberate: Financial ID · Adventures · My Team, three flat tabs —
-// the ID first, as the advisor's phones put their Business ID.
-// The knomee mark is no longer a tab: it floats above the bar's right end.
+// Order is deliberate: Financial ID on the left, Adventures on the right, and
+// the knomee mark between them in the bar's raised circle — as the advisor's
+// phones put their Business ID. My Team ('team') is still a screen, opened
+// from the burger menu rather than the bar.
 export const mobileTabs: MobileTab[] = [
   { id: 'finid', label: 'Financial ID' },
   { id: 'adventures', label: 'Adventures' },
-  { id: 'team', label: 'My Team' },
 ]
 
 /** Keys map to the illustration imported for each row. */

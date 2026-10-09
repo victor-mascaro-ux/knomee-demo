@@ -158,6 +158,60 @@ export const CaretIcon = ({ size = 13, up }: IconProps & { up?: boolean }) => (
   </svg>
 )
 
+/* ── the phone menu's marks ──────────────────────────────────────────────
+   One per item in the burger menu on every phone, so each row can be found by
+   its shape before its words. Same construction as the rest of this file. */
+
+/** Account Settings — a cog. */
+export const GearIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+)
+
+/** Legal & Privacy — a shield. */
+export const ShieldIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M12 21.5s7.5-3.4 7.5-9.6V5.6L12 2.8 4.5 5.6v6.3c0 6.2 7.5 9.6 7.5 9.6z" />
+    <path d="m9 12 2.2 2.2L15.4 10" />
+  </svg>
+)
+
+/** Start over — an arrow coming round to where it began. */
+export const RestartIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" />
+    <path d="M3.5 3.5V8H8" />
+  </svg>
+)
+
+/** Sign Out — out through a door. */
+export const SignOutIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M9.5 20.5H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h3.5" />
+    <path d="M16 16.5 20.5 12 16 7.5M20.5 12H9.5" />
+  </svg>
+)
+
+/** Back to the firm's side — a desktop screen. */
+export const DesktopIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="2.8" y="3.8" width="18.4" height="12.4" rx="2" />
+    <path d="M8.5 20.5h7M12 16.2v4.3" />
+  </svg>
+)
+
+/** A dashboard — four panes. */
+export const DashboardIcon = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3.2" y="3.2" width="7.6" height="9.6" rx="1.6" />
+    <rect x="13.2" y="3.2" width="7.6" height="5.6" rx="1.6" />
+    <rect x="13.2" y="11.2" width="7.6" height="9.6" rx="1.6" />
+    <rect x="3.2" y="15.2" width="7.6" height="5.6" rx="1.6" />
+  </svg>
+)
+
 /** Named so data files can carry a key rather than a glyph. */
 export const HIGHLIGHT_ICON = {
   target: TargetIcon,

@@ -230,27 +230,51 @@
   font-weight: var(--weight-bold);
 }
 .cx-sheet-item {
-  /* The hover wash reaches past the words on both sides, so the label and
-     its arrow sit inside it rather than on its edge; the negative margin
-     keeps the text where it was, aligned with the account row above. */
+  /* The hover wash reaches past the words on both sides, so the mark and the
+     label sit inside it rather than on its edge; the negative margin keeps
+     the mark aligned with the account row above. */
   width: calc(100% + 2 * var(--space-8));
-  margin: var(--space-12) calc(-1 * var(--space-8)) 0;
+  margin: var(--space-4) calc(-1 * var(--space-8)) 0;
   background: none;
   border: none;
   font: inherit;
   font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
+  /* Regular, to sit with the marks' light line rather than outweigh them. */
+  font-weight: var(--weight-regular);
   color: var(--text-strong);
   padding: var(--space-12) calc(var(--space-8) + 2px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-12);
   cursor: pointer;
   border-radius: var(--radius-lg);
   transition: background var(--dur-fast) var(--ease-out);
 }
-.cx-sheet-item:hover {
+.cx-sheet-item:hover,
+.cx-sheet-item.is-on {
   background: #f6f2fb;
+}
+/* The row's mark, in its words' own colour. The label starts right after it,
+   on the left. */
+.cx-sheet-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+.cx-sheet-lbl {
+  flex: 1;
+  text-align: left;
+}
+/* Groups of rows — where to go, the account, starting over, leaving — each
+   set off from the one above by the account row's own hairline. */
+.cx-sheet-group {
+  margin-top: var(--space-8);
+}
+.cx-sheet-group + .cx-sheet-group {
+  padding-top: var(--space-8);
+  border-top: var(--border-thin) solid #ededf0;
 }
 .cx-sheet-hint {
   font-size: var(--text-sm);
@@ -592,10 +616,9 @@
 }
 
 /* ---------- bottom tab bar ----------
-   Three flat tabs on a white bar with a hairline on top — Adventures, the ID,
-   My Team — and the knomee mark floating above the bar's right end in a white
-   disc of its own. The bar used to arc up around a centre mark; the mark is no
-   longer a tab, so the bar's edge is straight. */
+   A white bar with a hairline on top: the ID on the left, Adventures on the
+   right, and between them the knomee mark in a white circle the bar's edge
+   rises round — the bar bumps up into it. My Team is in the burger menu. */
 .cx-tabbar {
   position: relative;
   /* Above the quick-access sheet (4), so the floating mark that opens the
@@ -690,34 +713,53 @@ svg.cx-tab-mark {
   transition: fill var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
-/* The floating knomee button. It sits in the bar's own box (so it rides with
-   the bar, on a handset as in the frame) and stands just above its right
-   end, clear of the My Team tab under it. A white disc with a soft shadow,
-   the mark muted inside it; plum while what it opens is open. */
+/* The knomee button, in the middle of the bar between the two tabs. A white
+   disc that rises 30 above the bar's edge; its white covers the bar's
+   hairline where the two cross, and its ::before draws that hairline and the
+   bar's soft lift on round the part above the edge — clipped there, so inside
+   the bar there is no second outline and the circle reads as the bar bumping
+   up, not a button laid on it. The mark muted inside; plum while what it
+   opens is open. As big as the centre mark was before it floated: an 80
+   disc, so the mark inside it comes out at 63 (the old mark was 62). */
 .cx-fab {
-  position: absolute;
-  right: var(--space-16);
-  bottom: calc(100% + 14px);
+  --fab: 80px;
+  --fab-mark: 63px;
+  --fab-rise: 30px;
+  position: relative;
   z-index: 2;
-  width: 60px;
-  height: 60px;
+  flex: none;
+  align-self: flex-start;
+  margin-top: calc(-1 * var(--fab-rise));
+  width: var(--fab);
+  height: var(--fab);
   padding: 0;
   border: none;
   border-radius: var(--radius-circle);
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.05), 0 6px 18px rgba(30, 20, 50, 0.18);
   color: #8c8998;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out);
 }
-/* Hover lifts the disc and leaves the mark grey: the press's plum fill then
-   runs stroke by stroke over grey, where it shows. A plum hover (even eased
-   back to 0.72) was nearly the fill's own colour, so the fill vanished into
-   it. Full plum while what it opens is open. */
-.cx-fab:hover {
-  box-shadow: 0 0 0 1px rgba(30, 20, 50, 0.06), 0 8px 22px rgba(30, 20, 50, 0.22);
+.cx-fab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  border: 1.2px solid #e6e5ea;
+  box-shadow: 0 -2px 12px rgba(36, 4, 70, 0.07);
+  clip-path: inset(-24px -24px calc(100% - var(--fab-rise)) -24px);
+  pointer-events: none;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+/* Hover lifts the bump a touch and leaves the mark grey: the press's plum
+   fill then runs stroke by stroke over grey, where it shows. A plum hover
+   (even eased back to 0.72) was nearly the fill's own colour, so the fill
+   vanished into it. Full plum while what it opens is open. */
+.cx-fab:hover::before {
+  box-shadow: 0 -3px 14px rgba(36, 4, 70, 0.12);
 }
 .cx-fab.is-on {
   color: var(--k-plum);
@@ -733,33 +775,28 @@ svg.cx-tab-mark {
 /* The mark sits its circle as every icon in a circle does: its farthest point
    0.8 of the way from the centre to the rim (the adventure icons' 120 of 150).
    The mark's outer ring reaches 146.75 from the centre of its 288 box, so in
-   a 60 disc it is drawn at 60 × 0.4 × 288 / 146.75 = 47. */
+   an 80 disc it is drawn at 80 × 0.4 × 288 / 146.75 = 63. */
 .cx-fab .cx-tab-mark {
-  width: 47px;
-  height: 47px;
+  width: var(--fab-mark);
+  height: var(--fab-mark);
 }
 /* The client's long-press fill, over the mark at the mark's own size. */
 .cx-fab .px-fill {
-  width: 47px;
-  height: 47px;
-  margin: -23.5px 0 0 -23.5px;
+  width: var(--fab-mark);
+  height: var(--fab-mark);
+  margin: calc(var(--fab-mark) / -2) 0 0 calc(var(--fab-mark) / -2);
 }
 .cx-fab .px-fill svg {
-  width: 47px;
-  height: 47px;
+  width: var(--fab-mark);
+  height: var(--fab-mark);
 }
-/* Desktop: the bar's tabs spread across the content width, and the disc
-   stands over the same edge they stop at. */
-html.cx-desktop .cx-fab {
-  right: var(--xp-edge);
-}
-/* Room for the disc. On every screen with the floating button the scroll runs
-   on past the last thing by the disc's own footprint (60 + the 14 it stands
-   above the bar), on top of the screen's usual 22, so the last row can always
-   be scrolled clear of it. The ID pages are the exception: they end on their
-   stripe, whose own foot already clears the disc. */
+/* Room for the bump. On every screen with the knomee button the scroll runs
+   on past the last thing by the 30 the circle rises above the bar, on top of
+   the screen's usual 22, so the last row can always be scrolled clear of it.
+   The ID pages are the exception: they end on their stripe, whose own foot
+   already clears it. */
 .cx-viewport:has(~ .cx-tabbar .cx-fab):not(:has(> .pp)) {
-  padding-bottom: calc(22px + 60px + 14px);
+  padding-bottom: calc(22px + 30px);
 }
 
 .cx-home-bar {
@@ -1041,6 +1078,25 @@ html.cx-desktop .cx-fab {
   width: 216px;
   right: -2px;
   top: calc(100% + 8px);
+}
+/* Its rows as every phone's menu has them: a mark in the label's colour, the
+   label right after it, groups set off by a hairline. */
+.cxm-menu-pop .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cxm-menu-pop .menu-item svg {
+  flex: none;
+}
+.cxm-menu-pop .menu-item.is-here {
+  background: var(--k-plum-wash);
+}
+.cxm-menu-pop .menu-sep {
+  height: 0;
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--k-line);
 }
 
 /* The profile goes into the frame without the .content wrapper that carries

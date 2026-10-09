@@ -22,15 +22,15 @@ import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
 import {
-  ArrowRight,
   CheckIcon,
   DEVICE_H,
   DEVICE_W,
   IPhone,
   SheetCredit,
+  SheetGroup,
+  SheetItem,
   TabFinId,
   TabAdventures,
-  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -43,6 +43,7 @@ import {
   KnomeeFab,
   useTabInd,
 } from './ClientExperienceScreen'
+import { DesktopIcon, GearIcon, PeopleIcon, RestartIcon, ShieldIcon, SignOutIcon } from '../components/profileIcons'
 import { advisorAdventures, steps as flowSteps, type AdventureId, type Step } from '../data/advisorFlow'
 import JoyFlow from './JoyFlow'
 import { ADVISOR_JOY, ADVISOR_JOY_SAMPLE, sheetWithJoy } from './advisorJoy'
@@ -1766,8 +1767,8 @@ function FlowPhone({
           ) : (
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
-            {/* Business ID · Adventures · My Team: the ID first, Adventures in
-                the middle; the mark floats above the bar's right end. */}
+            {/* Business ID · the mark in its raised circle · Adventures. My
+                Team is in the burger menu. */}
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -1776,6 +1777,9 @@ function FlowPhone({
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
             </button>
+            {/* The mark picks up where they left off: the next adventure
+                still open, or the list once there is none. */}
+            <KnomeeFab label="Next adventure" onClick={openNext} />
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
@@ -1784,20 +1788,6 @@ function FlowPhone({
               <TabAdventures />
               <span className="cx-tab-lbl">Adventures</span>
             </button>
-            {/* My Team: the people the Business ID goes to, and which part of
-                it each of them sees. The three questions are on the ID, in its
-                Questions card. */}
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
-            >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
-            </button>
-            {/* The mark picks up where they left off: the next adventure
-                still open, or the list once there is none. */}
-            <KnomeeFab label="Next adventure" onClick={openNext} />
           </nav>
           )}
 
@@ -1828,62 +1818,76 @@ function FlowPhone({
                   </span>
                   <SheetCredit />
                 </div>
-                {/* The product's own account menu, as mocks, on every phone:
-                    each answers the tap and goes nowhere. The demo's own ways
-                    around — restart, samples, the report — live in the demo
-                    menu, not in somebody's app. */}
-                {onBackToProfile && (
-                  <button
-                    className="cx-sheet-item"
-                    type="button"
+                {/* In groups, as on every phone: My Team (off the bottom bar);
+                    the account; starting over; the ways out. The product's own
+                    account rows are mocks: they answer the tap and go nowhere.
+                    The demo's own ways around — samples, the report — live in
+                    the demo menu, not in somebody's app. */}
+                <SheetGroup>
+                  {/* My Team: the people the Business ID goes to, and which
+                      part of it each of them sees. */}
+                  <SheetItem
+                    icon={<PeopleIcon size={20} />}
+                    on={tab === 'team'}
                     onClick={() => {
                       setMenuOpen(false)
-                      onBackToProfile()
+                      setTab('team')
                     }}
                   >
-                    Back to Profile
-                    <ArrowRight />
-                  </button>
-                )}
-                <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
-                  Account Settings
-                  <ArrowRight />
-                </button>
+                    My Team
+                  </SheetItem>
+                </SheetGroup>
+                <SheetGroup>
+                  <SheetItem icon={<GearIcon />} onClick={() => setMenuOpen(false)}>
+                    Account Settings
+                  </SheetItem>
+                  <SheetItem
+                    icon={<ShieldIcon />}
+                    onClick={() => {
+                      setMenuOpen(false)
+                      openLegal('terms')
+                    }}
+                  >
+                    Legal &amp; Privacy
+                  </SheetItem>
+                </SheetGroup>
                 {((!viewing && onRestart) || onRestartDemo) && (
-                  <button
-                    className={`cx-sheet-item${restartArmed ? ' is-armed' : ''}`}
-                    type="button"
-                    onClick={() => {
-                      if (!restartArmed) return setRestartArmed(true)
-                      setMenuOpen(false)
-                      if (onRestartDemo) return onRestartDemo()
-                      setRichOpen(null)
-                      onRestart?.()
-                      // Starting over starts at the beginning: the welcome —
-                      // from whichever tab the menu was opened on.
-                      setTab('flow')
-                      reset(0)
-                    }}
-                  >
-                    {restartArmed ? 'Tap Again to Start Over' : 'Restart Adventures'}
-                    <ArrowRight />
-                  </button>
+                  <SheetGroup>
+                    <SheetItem
+                      icon={<RestartIcon />}
+                      armed={restartArmed}
+                      onClick={() => {
+                        if (!restartArmed) return setRestartArmed(true)
+                        setMenuOpen(false)
+                        if (onRestartDemo) return onRestartDemo()
+                        setRichOpen(null)
+                        onRestart?.()
+                        // Starting over starts at the beginning: the welcome —
+                        // from whichever tab the menu was opened on.
+                        setTab('flow')
+                        reset(0)
+                      }}
+                    >
+                      {restartArmed ? 'Tap Again to Start Over' : 'Restart Adventures'}
+                    </SheetItem>
+                  </SheetGroup>
                 )}
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    openLegal('terms')
-                  }}
-                >
-                  Legal &amp; Privacy
-                  <ArrowRight />
-                </button>
-                <button className="cx-sheet-item" type="button" onClick={() => setMenuOpen(false)}>
-                  Sign Out
-                  <ArrowRight />
-                </button>
+                <SheetGroup>
+                  {onBackToProfile && (
+                    <SheetItem
+                      icon={<DesktopIcon />}
+                      onClick={() => {
+                        setMenuOpen(false)
+                        onBackToProfile()
+                      }}
+                    >
+                      Back to Profile
+                    </SheetItem>
+                  )}
+                  <SheetItem icon={<SignOutIcon />} onClick={() => setMenuOpen(false)}>
+                    Sign Out
+                  </SheetItem>
+                </SheetGroup>
               </div>
             </div>
           )}

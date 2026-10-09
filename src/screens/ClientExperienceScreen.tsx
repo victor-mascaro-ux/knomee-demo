@@ -66,6 +66,7 @@ import './client-experience-quick-access.css'
 import { AdventureMarkContext } from './AdventureMark'
 import SheetExits from './SheetExits'
 import { useCcNav, useCcNavRoots } from '../ccNav'
+import { DesktopIcon, GearIcon, PeopleIcon, RestartIcon, ShieldIcon, SignOutIcon } from '../components/profileIcons'
 
 const art: Record<ArtKey, string> = {
   'financial-joy': icFinancialJoy,
@@ -118,11 +119,6 @@ const DotsIcon = () => (
     </g>
   </svg>
 )
-export const ArrowRight = ({ size = 15 }: { size?: number }) => (
-  <svg viewBox="0 0 16 16" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.7">
-    <path d="M3 8h9.2M8.6 4.4 12.2 8l-3.6 3.6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
 export const TabAdventures = () => (
   <svg viewBox="0 0 28 28" width="27" height="27" fill="none" aria-hidden>
     <circle
@@ -173,18 +169,6 @@ export const TabMark = () => (
 
 /* The bubble is taller than it was — more room above and below the question
    mark — with the mark re-centred in it and the tail unchanged. */
-/* My Team: three figures, the one in front larger. */
-export const TabTeam = () => (
-  <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <circle cx="16" cy="8.4" r="4" />
-    <path d="M9.4 21.4c1-3.4 3.6-5.2 6.6-5.2s5.6 1.8 6.6 5.2" strokeLinecap="round" />
-    <circle cx="5.4" cy="10.4" r="3.1" />
-    <path d="M1 20.6c.7-2.6 2.4-4 4.4-4" strokeLinecap="round" />
-    <circle cx="26.6" cy="10.4" r="3.1" />
-    <path d="M31 20.6c-.7-2.6-2.4-4-4.4-4" strokeLinecap="round" />
-  </svg>
-)
-
 export const TabQuestions = () => (
   <svg viewBox="0 0 32 29" width="34" height="31" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path
@@ -208,10 +192,11 @@ export const MARK_PARTS = [
   'M117.96 288C117.119 288 116.278 287.934 115.437 287.737C77.6551 279.864 45.1137 257.556 23.8938 224.815C2.67386 192.142 -4.76604 153.036 2.99733 114.653C14.7718 56.39 59.6054 11.446 117.184 0.226364C124.041 -1.08587 130.64 3.4413 131.935 10.3305C133.228 17.2854 128.764 23.9778 121.971 25.2901C74.4204 34.6069 37.415 71.6777 27.6461 119.837C21.2413 151.528 27.3872 183.809 44.9196 210.775C62.4518 237.742 89.3002 256.178 120.547 262.739C127.341 264.182 131.741 270.941 130.317 277.83C129.088 283.866 123.847 288 118.025 288H117.96Z',
 ]
 
-/* The floating knomee button: a white disc carrying the mark, standing just
-   above the right end of the tab bar. The bar is three flat tabs now; the
-   mark is no longer one of them. It lives inside the bar's <nav> so it rides
-   with the bar (and above the sheets the bar stays above). Under the finger
+/* The knomee button: a white disc carrying the mark, in the middle of the
+   tab bar between the ID and Adventures, the bar's edge rising round it in a
+   circle — a bump of the bar, not a button floating over it. It lives inside
+   the bar's <nav> so it rides with the bar (and above the sheets the bar
+   stays above). Under the finger
    the mark's five strokes fill to plum inside-out and the whole mark pulses
    once — on every phone, whatever the press then does; they stay filled
    while what it opens is open.
@@ -638,6 +623,42 @@ export function SheetCredit() {
       <span aria-hidden>powered by</span>
       <img src="./knomee-logo-plum.svg" alt="knomee" />
     </div>
+  )
+}
+
+/* The menu's rows, on every phone: a mark that says what the row is before
+   its words do, in their colour, and the label beside it — no arrow, regular
+   weight, so the two read as one line. Rows come in groups — where you can
+   go in the app, your account, starting over, leaving — each group set off
+   from the one above by a hairline. */
+export function SheetGroup({ children }: { children: ReactNode }) {
+  return <div className="cx-sheet-group">{children}</div>
+}
+export function SheetItem({
+  icon,
+  children,
+  onClick,
+  armed,
+  on,
+}: {
+  icon: ReactNode
+  children: ReactNode
+  onClick: () => void
+  /** Asking for the second tap of a two-tap row. */
+  armed?: boolean
+  /** The screen this row opens is the one showing. */
+  on?: boolean
+}) {
+  return (
+    <button
+      className={`cx-sheet-item${armed ? ' is-armed' : ''}${on ? ' is-on' : ''}`}
+      type="button"
+      aria-current={on ? 'page' : undefined}
+      onClick={onClick}
+    >
+      <span className="cx-sheet-ic">{icon}</span>
+      <span className="cx-sheet-lbl">{children}</span>
+    </button>
   )
 }
 
@@ -1122,19 +1143,8 @@ function KnomeeSheet({
           </div>
         </div>
       ) : null}
-      <div className="kx-next">
-        {/* Start does what the card says is next: the flow its art names,
-            the same one the tile below it opens. */}
-        {next ? (
-          <ActionRow a={next.a} onAct={next.go} onRow={next.go} />
-        ) : (
-          <ActionRow
-            a={quickNext}
-            onAct={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
-            onRow={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
-          />
-        )}
-      </div>
+      {/* The knomee actions first — the quick things the sheet is for — and
+          the next adventure under them. */}
       <div className="kx-actions">
         {quickActions.map((q, i) => (
           <button
@@ -1153,6 +1163,19 @@ function KnomeeSheet({
             {q.label}
           </button>
         ))}
+      </div>
+      <div className="kx-next">
+        {/* Start does what the card says is next: the flow its art names,
+            the same one the tile above it opens. */}
+        {next ? (
+          <ActionRow a={next.a} onAct={next.go} onRow={next.go} />
+        ) : (
+          <ActionRow
+            a={quickNext}
+            onAct={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+            onRow={QUICK_FLOW[quickNext.art] ? () => onPick(QUICK_FLOW[quickNext.art]!) : undefined}
+          />
+        )}
       </div>
       <div className={`kx-arc ${mood ? 'is-asking' : ''}`}>
         {moods.map((m, i) => {
@@ -1384,12 +1407,16 @@ const completedToday = () => {
 const SARAH = prospects.find((p) => p.name === financialId.owner) ?? prospects[0]
 
 /* The in-phone menu. The only way back to the advisor side lives here, so the
-   demo is driven entirely from inside the device. */
+   demo is driven entirely from inside the device. In groups: My Team (off the
+   bottom bar, which keeps the ID, the knomee mark and Adventures); her
+   account; starting over; and the two ways out. */
 function MobileMenu({
   onClose,
   progress,
   onRestart,
   onBackToProfile,
+  onTeam,
+  teamOn,
 }: {
   onClose: () => void
   onBackToProfile?: () => void
@@ -1397,6 +1424,9 @@ function MobileMenu({
   onRestart?: () => void
   /** Where she is on the five, said under her name. */
   progress: string
+  /** My Team: who on her team sees which part of her Financial ID. */
+  onTeam: () => void
+  teamOn?: boolean
 }) {
   const [armed, setArmed] = useState(false)
   return (
@@ -1414,50 +1444,57 @@ function MobileMenu({
           </span>
           <SheetCredit />
         </div>
-        {onBackToProfile && (
-          <button
-            className="cx-sheet-item"
-            type="button"
+        <SheetGroup>
+          <SheetItem
+            icon={<PeopleIcon size={20} />}
+            on={teamOn}
             onClick={() => {
               onClose()
-              onBackToProfile()
+              onTeam()
             }}
           >
-            Back to Profile
-            <ArrowRight />
-          </button>
-        )}
-        {/* The product's own account menu, as mocks: each answers the tap and
-            goes nowhere. */}
-        <button className="cx-sheet-item" type="button" onClick={onClose}>
-          Account Settings
-          <ArrowRight />
-        </button>
-        <button
-          className="cx-sheet-item"
-          type="button"
-          onClick={() => {
-            onClose()
-            openLegal('terms')
-          }}
-        >
-          Legal &amp; Privacy
-          <ArrowRight />
-        </button>
-        {onRestart && (
-          <button
-            className={`cx-sheet-item${armed ? ' is-armed' : ''}`}
-            type="button"
-            onClick={() => (armed ? onRestart() : setArmed(true))}
+            My Team
+          </SheetItem>
+        </SheetGroup>
+        {/* The product's own account menu, as mocks: Account Settings and
+            Sign Out answer the tap and go nowhere. */}
+        <SheetGroup>
+          <SheetItem icon={<GearIcon />} onClick={onClose}>
+            Account Settings
+          </SheetItem>
+          <SheetItem
+            icon={<ShieldIcon />}
+            onClick={() => {
+              onClose()
+              openLegal('terms')
+            }}
           >
-            {armed ? 'Tap Again to Start Over' : 'Restart Adventures'}
-            <ArrowRight />
-          </button>
+            Legal &amp; Privacy
+          </SheetItem>
+        </SheetGroup>
+        {onRestart && (
+          <SheetGroup>
+            <SheetItem icon={<RestartIcon />} armed={armed} onClick={() => (armed ? onRestart() : setArmed(true))}>
+              {armed ? 'Tap Again to Start Over' : 'Restart Adventures'}
+            </SheetItem>
+          </SheetGroup>
         )}
-        <button className="cx-sheet-item" type="button" onClick={onClose}>
-          Sign Out
-          <ArrowRight />
-        </button>
+        <SheetGroup>
+          {onBackToProfile && (
+            <SheetItem
+              icon={<DesktopIcon />}
+              onClick={() => {
+                onClose()
+                onBackToProfile()
+              }}
+            >
+              Back to Profile
+            </SheetItem>
+          )}
+          <SheetItem icon={<SignOutIcon />} onClick={onClose}>
+            Sign Out
+          </SheetItem>
+        </SheetGroup>
       </div>
     </div>
   )
@@ -2175,18 +2212,19 @@ function ClientExperienceRun({
             onPointerLeave={pressEnd}
           >
             {tabInd.ind}
-            {mobileTabs.map((t) => (
+            {/* Financial ID · the mark in its raised circle · Adventures. */}
+            {mobileTabs.map((t, i) => [
+              i === 1 && <KnomeeFab key="fab" on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />,
               <button
                 key={t.id}
                 type="button"
                 className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
                 onClick={() => pickTab(t.id)}
               >
-                {t.id === 'adventures' ? <TabAdventures /> : t.id === 'finid' ? <TabFinId /> : <TabTeam />}
+                {t.id === 'adventures' ? <TabAdventures /> : <TabFinId />}
                 <span className="cx-tab-lbl">{t.label}</span>
-              </button>
-            ))}
-            <KnomeeFab on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />
+              </button>,
+            ])}
           </nav>
           )}
 
@@ -2199,6 +2237,8 @@ function ClientExperienceRun({
               onClose={() => setMenuOpen(false)}
               onRestart={onRestart}
               onBackToProfile={onBackToProfile}
+              onTeam={() => pickTab('team')}
+              teamOn={active === 'team'}
               progress={`${journey.filter((j) => j.core && done[j.id]).length} of 5 adventures complete`}
             />
           )}

@@ -15,15 +15,15 @@ import AdventureList from './AdventureList'
 import { RailFace } from './profileParts'
 import { useDragScroll } from './mobileGestures'
 import {
-  ArrowRight,
   CheckIcon,
   DEVICE_H,
   DEVICE_W,
   IPhone,
   SheetCredit,
+  SheetGroup,
+  SheetItem,
   TabFinId,
   TabAdventures,
-  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -37,6 +37,7 @@ import {
   KnomeeFab,
   useTabInd,
 } from './ClientExperienceScreen'
+import { DashboardIcon, PeopleIcon, RestartIcon } from '../components/profileIcons'
 import {
   advisor,
   advisorAdventures,
@@ -523,8 +524,8 @@ export default function AdvisorFlowScreen({
           ) : (
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
-            {/* Business ID · Adventures · My Team: the ID first, Adventures in
-                the middle; the mark floats above the bar's right end. */}
+            {/* Business ID · the mark in its raised circle · Adventures. My
+                Team is in the burger menu. */}
             <button
               type="button"
               className={`cx-tab ${tab === 'finid' ? 'is-on' : ''}`}
@@ -533,6 +534,9 @@ export default function AdvisorFlowScreen({
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
             </button>
+            {/* The mark picks up where he left off: the next adventure
+                still open, or the list once there is none. */}
+            <KnomeeFab label="Next adventure" onClick={openNext} />
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
@@ -541,19 +545,6 @@ export default function AdvisorFlowScreen({
               <TabAdventures />
               <span className="cx-tab-lbl">Adventures</span>
             </button>
-            {/* My Team: the people the Business ID goes to, and which part of
-                it each of them sees. */}
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
-            >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
-            </button>
-            {/* The mark picks up where he left off: the next adventure
-                still open, or the list once there is none. */}
-            <KnomeeFab label="Next adventure" onClick={openNext} />
           </nav>
           )}
 
@@ -579,22 +570,39 @@ export default function AdvisorFlowScreen({
                   </span>
                   <SheetCredit />
                 </div>
-                <button
-                  className="cx-sheet-item"
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setTab('flow')
-                    reset(0)
-                  }}
-                >
-                  Restart the Flow
-                  <ArrowRight />
-                </button>
-                <button className="cx-sheet-item" type="button" onClick={onExit}>
-                  Recruitment Dashboard
-                  <ArrowRight />
-                </button>
+                {/* In groups, as on every phone: My Team (off the bottom bar);
+                    starting over; the way out to the firm's side. */}
+                <SheetGroup>
+                  {/* My Team: the people the Business ID goes to, and which
+                      part of it each of them sees. */}
+                  <SheetItem
+                    icon={<PeopleIcon size={20} />}
+                    on={tab === 'team'}
+                    onClick={() => {
+                      setMenuOpen(false)
+                      setTab('team')
+                    }}
+                  >
+                    My Team
+                  </SheetItem>
+                </SheetGroup>
+                <SheetGroup>
+                  <SheetItem
+                    icon={<RestartIcon />}
+                    onClick={() => {
+                      setMenuOpen(false)
+                      setTab('flow')
+                      reset(0)
+                    }}
+                  >
+                    Restart the Flow
+                  </SheetItem>
+                </SheetGroup>
+                <SheetGroup>
+                  <SheetItem icon={<DashboardIcon />} onClick={onExit}>
+                    Recruitment Dashboard
+                  </SheetItem>
+                </SheetGroup>
                 <div className="cx-sheet-hint">
                   The firm's side of this: where Marcus's answers land.
                 </div>
