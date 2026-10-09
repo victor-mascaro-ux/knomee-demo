@@ -31,6 +31,7 @@ import {
 import { clientInsights, sebastianRead, sebastianSnapshot } from '../data/clientInsights'
 import type { SuggestedAdventure } from '../data/clientInsights'
 import icAdventures from '../assets/adventures/award.svg'
+import icMoneyHistory from '../assets/adventures/money-history.svg'
 import icAngelInvesting from '../assets/adventures/angel-investing.svg'
 import icSubtracting from '../assets/adventures/subtracting.svg'
 import icLegacy from '../assets/adventures/legacy.svg'
@@ -44,6 +45,7 @@ import SelectMenu from '../components/SelectMenu'
    rather than imported into the data, which is how every other page carrying
    this artwork does it. */
 const ADVENTURE_ART: Record<string, string> = {
+  'money-history': icMoneyHistory,
   'angel-investing': icAngelInvesting,
   subtracting: icSubtracting,
   legacy: icLegacy,

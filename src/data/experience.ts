@@ -34,6 +34,7 @@ export type ArtKey =
   | 'questions'
   | 'vision'
   | 'divorce'
+  | 'money-history'
 
 /* ── the adventures list ─────────────────────────────────────────────────── */
 
@@ -101,6 +102,17 @@ export const quickNext: AdventureAction = {
   title: 'Life Events',
   art: 'life-events',
   blurb: 'Next up · add a new life event.',
+  minutes: 3,
+  label: 'Start',
+}
+
+/* What the Knomee sheet offers next once the five are done — the life events
+   stage: the adventure after them, also first on the advisor's suggested
+   list (Client Playbook). Not built yet; its Start just closes the sheet. */
+export const moneyHistory: AdventureAction = {
+  title: 'Money History',
+  art: 'money-history',
+  blurb: 'Look back at how money has shaped you.',
   minutes: 3,
   label: 'Start',
 }

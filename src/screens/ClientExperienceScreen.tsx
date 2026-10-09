@@ -23,6 +23,7 @@ import {
   completedAdventures,
   lockedAdventures,
   mobileTabs,
+  moneyHistory,
   moodQuestion,
   journey,
   moods,
@@ -45,6 +46,7 @@ import icLifeEvents from '../assets/adventures/life-events.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import imgVision from '../assets/adventures/vision-board.svg'
 import imgDivorce from '../assets/adventures/divorce.png'
+import icMoneyHistory from '../assets/adventures/money-history.svg'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
 import moodNeutral from '../assets/moods/neutral.svg'
@@ -78,6 +80,7 @@ const art: Record<ArtKey, string> = {
   questions: icQuestions,
   vision: imgVision,
   divorce: imgDivorce,
+  'money-history': icMoneyHistory,
 }
 
 /** An adventure's icon, for the pieces that draw it outside this file. */
@@ -1732,15 +1735,11 @@ function ClientExperienceRun({
      Financial ID's own Add panel, not the adventure over again. */
   const addAgain = (id: string) => openFlow(id === 'goals' ? 'goal' : 'event')
   /* The quick sheet's card is the journey's own next step: the adventure up
-     next, or once all are done, one more goal. */
-  const upNext = journey.find((j) => !done[j.id])
-  const sheetNext =
-    upNext?.id === 'life-events'
-      ? {
-          a: { title: upNext.title, art: upNext.art!, minutes: upNext.minutes, outline: true, ...REPEAT['life-events'] },
-          go: () => addAgain('life-events'),
-        }
-      : upNext
+     next, or once the five are done — the life events stage, and after it —
+     the adventure that follows them, Money History. It is not built yet, so
+     its Start answers by closing the sheet. */
+  const upNext = journey.find((j) => j.core && !done[j.id])
+  const sheetNext = upNext
     ? {
         a: {
           title: upNext.title,
@@ -1755,14 +1754,9 @@ function ClientExperienceRun({
               setTab('adventures')
               setAdventure(upNext.id)
             }
-          : upNext.id === 'life-events'
-            ? () => openFlow('event')
-            : undefined,
+          : undefined,
       }
-    : {
-        a: { title: 'Goals', art: 'goals' as const, minutes: 3, outline: true, ...REPEAT.goals },
-        go: () => addAgain('goals'),
-      }
+    : { a: moneyHistory, go: () => setSheet(false) }
   const [voiceOpen, setVoiceOpen] = useState(false)
   /* Which scripted example the next long press plays. Each press takes the
      next one — a life event, a question, a goal — and then round again. */
