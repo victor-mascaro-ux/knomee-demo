@@ -1527,32 +1527,38 @@
   font-style: italic;
   color: var(--text-secondary);
 }
-/* The waiting card of the adventure that is next starts it. It keeps the
-   locked look (greyed heading, drained art) and answers as a whole card: a
-   chevron at its head, and a lift and the link colour under the pointer. */
-.pp-card.is-next {
+/* The waiting card of the adventure that is next carries a button that
+   starts it (StartAdventure). The card itself keeps the locked look — greyed
+   heading, drained art, the italic line — so the button is the only thing on
+   it in colour: the product's primary pill, small, under the line. */
+.pp-waiting-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-12);
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--action-primary, #240446);
+  color: var(--text-inverse, #fff);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition: background var(--dur-fast) var(--ease-out);
 }
-.pp-card.is-next:hover {
-  border-color: rgba(118, 57, 161, 0.35);
-  box-shadow: 0 4px 14px rgba(36, 4, 70, 0.08);
+.pp-waiting-start:hover {
+  background: var(--k-plum-hover, #34105e);
 }
-.pp-card.is-next:focus-visible {
+.pp-waiting-start svg {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.pp-waiting-start:hover svg {
+  transform: translateX(2px);
+}
+.pp-waiting-start:focus-visible {
   outline: 2px solid var(--k-grape, #7639a1);
   outline-offset: 2px;
-}
-.pp-card-next {
-  flex: none;
-  color: var(--text-secondary);
-  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
-}
-.pp-card.is-next:hover .pp-card-next {
-  transform: translateX(3px);
-  color: var(--text-link);
-}
-.pp-card.is-next:hover .pp-waiting {
-  color: var(--text-link);
 }
 
 /* A completed adventure's heading opens its ending again: the heading is the

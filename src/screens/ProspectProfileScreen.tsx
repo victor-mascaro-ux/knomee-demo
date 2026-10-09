@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import ExperienceButton from '../components/ExperienceButton'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
@@ -11,7 +11,7 @@ import moodGreat from '../assets/moods/great.svg'
 const MOOD_FACE = [moodWorried, moodUnsure, moodNeutral, moodGood, moodGreat]
 import { prospectToolkit, prospectReadiness } from '../data/readiness'
 import { ToolkitTabView, ReadinessTabView } from './readinessParts'
-import { AddButton, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
+import { AddButton, StartAdventure, EMPTY_ART, EmptyFold, EmptyState, StatusTags, sortFresh, withTag, HeadToggle, LifeEventIcon, COLLAPSED_GOALS, COLLAPSED_ROWS, DateSelect, ConfidenceResults, ShowToggle, orderGoals, useCollapsed, HighlightIcon, BadgeMedallion, Gauge, ReadinessLevel, RailFace, GoalDetail, PostcardSection, CheckInCard } from './profileParts'
 import type { Prospect } from '../data/prospects'
 
 const PROSPECT_TIER: Record<string, string> = {
@@ -210,37 +210,19 @@ export default function ProspectProfileScreen({
     outlook: !fresh || isDone('outlook'),
     confidence: !fresh || isDone('confidence'),
   }
-  /* A card still waiting for its adventure. The one whose adventure is next
-     is the way into it: the whole card, still greyed and drained, with a
-     chevron at its head and its line saying so. The ones after it stay inert,
-     because their content unlocks in order. */
+  /* A card still waiting for its adventure: greyed and drained, with its
+     line. The one whose adventure is next also carries a Start button — the
+     way into it — and keeps the same empty look. The ones after it have
+     none, because their content unlocks in order. */
   const waiting = (id: string, title: string) => {
     const go = fresh && onStartAdventure && nextAdventure === id ? () => onStartAdventure(id) : undefined
     return {
-      cls: go ? ' is-waiting is-next' : ' is-waiting',
-      tap: go
-        ? {
-            role: 'button',
-            tabIndex: 0,
-            'aria-label': `Start the ${title} adventure`,
-            onClick: go,
-            onKeyDown: (e: ReactKeyboardEvent) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                go()
-              }
-            },
-          }
-        : {},
-      chevron: go ? (
-        <svg className="pp-card-next" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden>
-          <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ) : null,
+      cls: ' is-waiting',
       line: (
-        <p className="pp-waiting">
-          {go ? 'Start' : 'Complete'} the {title} adventure
-        </p>
+        <>
+          <p className="pp-waiting">Complete the {title} adventure</p>
+          {go && <StartAdventure title={title} onStart={go} />}
+        </>
       ),
     }
   }
@@ -415,7 +397,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('joy') && (
-                  <section className={`pp-card${has.joy ? '' : wait.joy.cls}`} {...(has.joy ? {} : wait.joy.tap)}>
+                  <section className={`pp-card${has.joy ? '' : wait.joy.cls}`}>
                     <div className="pp-card-head">
                       {fresh && has.joy && onOpenEnding ? (
                         <button
@@ -434,7 +416,6 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icFinancialJoy} alt="" />Financial Joy</span>
                       )}
                       {has.joy && <DateSelect />}
-                      {!has.joy && wait.joy.chevron}
                     </div>
                     {!has.joy && wait.joy.line}
                     {has.joy && (
@@ -483,7 +464,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('future') && (
-                  <section className={`pp-card${has.futureYou ? '' : wait.futureYou.cls}`} {...(has.futureYou ? {} : wait.futureYou.tap)}>
+                  <section className={`pp-card${has.futureYou ? '' : wait.futureYou.cls}`}>
                     <div className="pp-card-head">
                       {fresh && has.futureYou && onOpenEnding ? (
                         <button
@@ -502,7 +483,6 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icFutureYou} alt="" />Future You</span>
                       )}
                       {has.futureYou && <DateSelect />}
-                      {!has.futureYou && wait.futureYou.chevron}
                     </div>
                     {!has.futureYou && wait.futureYou.line}
                     {has.futureYou && (
@@ -534,7 +514,7 @@ export default function ProspectProfileScreen({
                   )}
 
                   {show('outlook') && (
-                  <section className={`pp-card${has.outlook ? '' : wait.outlook.cls}`} {...(has.outlook ? {} : wait.outlook.tap)}>
+                  <section className={`pp-card${has.outlook ? '' : wait.outlook.cls}`}>
                     <div className="pp-card-head">
                       {fresh && has.outlook && onOpenEnding ? (
                         <button
@@ -553,7 +533,6 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icOutlook} alt="" />Outlook</span>
                       )}
                       {has.outlook && <DateSelect />}
-                      {!has.outlook && wait.outlook.chevron}
                     </div>
                     {!has.outlook && wait.outlook.line}
                     {has.outlook && (
@@ -619,7 +598,7 @@ export default function ProspectProfileScreen({
                 {/* Right rail */}
                 <div className={only ? undefined : 'pp-rail'}>
                   {show('confidence') && (
-                  <section className={`pp-card${has.confidence ? '' : wait.confidence.cls}`} {...(has.confidence ? {} : wait.confidence.tap)}>
+                  <section className={`pp-card${has.confidence ? '' : wait.confidence.cls}`}>
                     <div className="pp-card-head">
                       {fresh && has.confidence && onOpenEnding ? (
                         <button
@@ -638,7 +617,6 @@ export default function ProspectProfileScreen({
                         <span className="pp-card-title"><img className="pp-card-ic" src={icConfidence} alt="" />Confidence</span>
                       )}
                       {has.confidence && <DateSelect />}
-                      {!has.confidence && wait.confidence.chevron}
                     </div>
                     {!has.confidence && wait.confidence.line}
                     {/* Nothing rated, no reading: no dial and no results. */}

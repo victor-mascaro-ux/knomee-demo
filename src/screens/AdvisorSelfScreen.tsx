@@ -480,6 +480,15 @@ const ID_FIELDS: IdField[] = [
   },
 ]
 
+/** Which Business ID card each journey adventure fills. */
+const ID_CARD: Partial<Record<string, IdCard>> = {
+  'practice-joy': 'joy',
+  confidence: 'confidence',
+  outlook: 'outlook',
+  'future-you': 'future',
+  'the-move': 'move',
+}
+
 /** The card's chip for who they serve: the first pick, and how many more. */
 const servesChip = (picks: string[] = []) =>
   picks.length ? `${picks[0]}${picks.length > 1 ? ` +${picks.length - 1}` : ''}` : ''
@@ -1694,6 +1703,10 @@ function FlowPhone({
                         }
                       : undefined
                   }
+                  /* The card of the adventure still open next carries Start,
+                     which opens it the way the knomee mark does. */
+                  nextWaiting={rich ? ID_CARD[journeyStates(answers).find((r) => r.state === 'open')?.id ?? ''] : undefined}
+                  onStartNext={openNext}
                   data={d}
                   onBack={() => setTab('flow')}
                   ownerMenu={

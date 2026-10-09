@@ -808,3 +808,19 @@ export function RailFace({ name, fallback }: { name: string; fallback?: string }
     </span>
   )
 }
+
+/* The way into the adventure that is next, on its still-waiting ID card —
+   the client's Financial ID and the advisor's Business ID alike. The card
+   keeps its empty, locked look (greyed heading, drained art, the italic
+   line); only this button says it can be started. The cards after it, whose
+   adventures come later, have none. */
+export function StartAdventure({ title, onStart }: { title: string; onStart: () => void }) {
+  return (
+    <button type="button" className="pp-waiting-start" aria-label={`Start the ${title} adventure`} onClick={onStart}>
+      Start
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden>
+        <path d="M3 8h9.2M8.6 4.4 12.2 8l-3.6 3.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  )
+}
