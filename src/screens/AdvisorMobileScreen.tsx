@@ -18,7 +18,6 @@ import {
   IPhone,
   TabFinId,
   TabAdventures,
-  TabTeam,
   ZOOM_CONTROLS_TITLE,
   clampZoom,
   useDarkGround,
@@ -32,6 +31,7 @@ import AdventureList from './AdventureList'
 import { adventureStates, derive, sampleAnswers } from '../data/advisorAnswers'
 import { useDragScroll } from './mobileGestures'
 import { BurgerMenu } from '../components/icons'
+import { GearIcon, PeopleIcon, ShieldIcon, SignOutIcon } from '../components/profileIcons'
 import { advisor } from '../data/advisorFlow'
 import { useDropdown } from '../components/useDropdown'
 import { openLegal } from '../components/Legal'
@@ -135,6 +135,22 @@ export default function AdvisorMobileScreen({
                     <span className="menu-avatar">A</span>
                     <span className="menu-name">Alex Advisor</span>
                   </div>
+                  {/* In groups, as on every phone: My Team (off the bottom
+                      bar); the account; the way out. */}
+                  <button
+                    className={`menu-item${tab === 'team' ? ' is-here' : ''}`}
+                    type="button"
+                    role="menuitem"
+                    aria-current={tab === 'team' ? 'page' : undefined}
+                    onClick={() => {
+                      setAccountOpen(false)
+                      setTab('team')
+                    }}
+                  >
+                    <PeopleIcon size={18} />
+                    My Team
+                  </button>
+                  <hr className="menu-sep" />
                   <button
                     className="menu-item"
                     type="button"
@@ -144,12 +160,16 @@ export default function AdvisorMobileScreen({
                       onAccountSettings?.()
                     }}
                   >
+                    <GearIcon size={18} />
                     Account Settings
                   </button>
                   <button className="menu-item" type="button" role="menuitem" onClick={() => openLegal('terms')}>
+                    <ShieldIcon size={18} />
                     Legal &amp; Privacy
                   </button>
+                  <hr className="menu-sep" />
                   <button className="menu-item" type="button" role="menuitem">
+                    <SignOutIcon size={18} />
                     Sign Out
                   </button>
                 </div>
@@ -205,9 +225,9 @@ export default function AdvisorMobileScreen({
             )}
           </div>
 
-          {/* The same bar the flow's own phone carries: the Business ID,
-              Adventures and My Team, with the mark floating above its right
-              end. */}
+          {/* The same bar the flow's own phone carries: the Business ID, the
+              mark in its raised circle, and Adventures. My Team is in the
+              burger menu. */}
           <nav className="cx-tabbar" ref={tabInd.ref}>
             {tabInd.ind}
             <button
@@ -218,6 +238,13 @@ export default function AdvisorMobileScreen({
               <TabFinId />
               <span className="cx-tab-lbl">Business ID</span>
             </button>
+            {/* He has finished every adventure, so the mark has nothing new to
+                open: it takes him to what he finished, and on into the flow if
+                one is still open. */}
+            <KnomeeFab
+              label="Next adventure"
+              onClick={() => (rows.some((r) => r.state === 'open') && onRedo ? onRedo() : setTab('flow'))}
+            />
             <button
               type="button"
               className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
@@ -226,21 +253,6 @@ export default function AdvisorMobileScreen({
               <TabAdventures />
               <span className="cx-tab-lbl">Adventures</span>
             </button>
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'team' ? 'is-on' : ''}`}
-              onClick={() => setTab('team')}
-            >
-              <TabTeam />
-              <span className="cx-tab-lbl">My Team</span>
-            </button>
-            {/* He has finished every adventure, so the mark has nothing new to
-                open: it takes him to what he finished, and on into the flow if
-                one is still open. */}
-            <KnomeeFab
-              label="Next adventure"
-              onClick={() => (rows.some((r) => r.state === 'open') && onRedo ? onRedo() : setTab('flow'))}
-            />
           </nav>
           {menuOpen && (
             <button

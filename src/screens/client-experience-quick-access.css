@@ -282,10 +282,12 @@
   object-fit: contain;
 }
 
-/* The four quick actions are the sheet's main business, so they take all the
-   room between the next adventure and the mood arc, and stop the sheet's own
-   gap short of the arc's top — the same space as above them. */
-.kx-actions{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;margin-bottom:var(--kx-arc-clear,258px)}
+/* The four quick actions are the sheet's main business, so they come first
+   and take all the room down to the next adventure; the next adventure, last,
+   stops the sheet's own gap short of the arc's top — the same space as above
+   the actions. */
+.kx-actions{flex:1 1 auto;min-height:0;grid-auto-rows:1fr}
+.kx-next{margin-bottom:var(--kx-arc-clear,258px)}
 .kx-action{justify-content:center;gap:var(--space-12);font-size:16px}
 .kx-action span{width:56px;height:56px}
 /* Nor is there a status bar above the app bar on a handset, so both sheets
@@ -294,7 +296,7 @@
 .cx-page.is-bare .vx-sheet{top:calc(var(--mobile-appbar-h) - 1px)}
 
 /* When the tiles get less height than their tall form needs — the framed
-   phone, with the next adventure's card above them — they turn on their side:
+   phone, with the next adventure's card under them — they turn on their side:
    the art beside the label, sized to the room they have, never under the arc. */
 .kx-actions{container-type:size;grid-auto-rows:minmax(0,1fr)}
 .kx-action{min-height:0;overflow:hidden}
