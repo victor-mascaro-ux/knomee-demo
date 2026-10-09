@@ -1493,6 +1493,22 @@ button.name-link-btn:hover .name-text {
 .show-toggle:hover {
   color: #333;
 }
+/* A collapsible card's whole header is its toggle (CollapsibleCard): the
+   pointer anywhere on it, and SHOW MORE / LESS answering the hover as if the
+   pointer were on the words. */
+.card-head.is-toggle {
+  cursor: pointer;
+}
+.card-head.is-toggle:hover .show-toggle {
+  color: #333;
+}
+/* The help tip beside the title keeps its own hover and tap; its wrapper
+   adds nothing to the title's layout. */
+.card-hint {
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
 
 /* ---------- Entrance animations ---------- */
 @keyframes fadeUp {

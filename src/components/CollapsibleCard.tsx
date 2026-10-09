@@ -30,17 +30,24 @@ export default function CollapsibleCard({
   const [open, setOpen] = useState(defaultOpen)
   return (
     <section className={`card ${className ?? ''}`}>
-      <header className="card-head">
+      {/* The whole header opens and shuts the card, not just its SHOW MORE —
+          the button stays as the control the keyboard reaches and the words
+          that say what a click does; its click bubbles up to the header. The
+          help tip keeps its own hover and tap. */}
+      <header className="card-head is-toggle" onClick={() => setOpen((v) => !v)}>
         <div className="card-title">
           {icon}
           <span>{title}</span>
-          {hint}
+          {hint && (
+            <span className="card-hint" onClick={(e) => e.stopPropagation()}>
+              {hint}
+            </span>
+          )}
         </div>
         <div className="card-head-right">
           <button
             className={`show-toggle ${open ? '' : 'collapsed'}`}
             type="button"
-            onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
           >
             {open ? 'SHOW LESS' : 'SHOW MORE'} <ChevronUp />

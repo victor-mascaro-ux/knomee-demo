@@ -55,7 +55,7 @@ const InfoIcon = () => (
 
 function Tip({ text }: { text: string }) {
   return (
-    <span className="help-tip tt" data-tip={text} tabIndex={0} role="img" aria-label={text}>
+    <span className="help-tip tt help-tip-right" data-tip={text} tabIndex={0} role="img" aria-label={text}>
       <InfoIcon />
     </span>
   )
@@ -78,8 +78,9 @@ function Card({
         <div className="card-title">
           {icon}
           <span>{title}</span>
+          {/* Beside the title it explains, as every header's tip is. */}
+          {tip && <Tip text={tip} />}
         </div>
-        {tip && <Tip text={tip} />}
       </header>
       <div className="analytics-body">{children}</div>
     </section>

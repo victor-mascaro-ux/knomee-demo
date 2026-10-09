@@ -1215,6 +1215,9 @@
      email — keeps its icon on the first line, not centred on both. */
   align-items: flex-start;
   line-height: 18px;
+  /* A row that wraps — who an advisor works with — reads from the left,
+     under its own first line, not centred the way the rail's name is. */
+  text-align: left;
 }
 .pp-meta-row > svg {
   margin-top: 2px;
