@@ -223,9 +223,11 @@ export const teamSize = 4
 
 /* ── the Recruiting Toolkit ────────────────────────────────────────────── */
 
+/* The same line the rule in `advisorAnswers.ts` writes from his sheet: when,
+   what his answers say, what to bring. */
 export const topAction = {
-  title: 'Answer the attrition question with evidence, in the first ten minutes.',
-  body: `He wrote it himself: “${said('ol-q1')}” Nothing else on this page moves until that is answered, and a rep who opens anywhere else has spent the meeting.`,
+  title: `Call now — moving within a year, for equity; bring retention data for ${advisor.book} books`,
+  body: `Ready Now, with the move inside the year — the week matters. And he wrote the question himself: “${said('ol-q1')}” Bring the page, not a figure: retention by team size and AUM band, the two worst moves included.`,
 }
 
 export type StarterTag =
@@ -376,7 +378,7 @@ export const readinessTab: ReadinessTab = {
 export const toolkitTab: ToolkitTab = {
   topAction: topAction.title,
   topActionWhy: topAction.body,
-  topActionSource: 'Outlook · Q1 — the concern he wrote in his own words.',
+  topActionSource: `The Move · Q2 — “${picked('mv-q2')}”; Practice Joy · Q1 — “Equity” picked first; Outlook · Q1 — the concern he wrote in his own words.`,
   starters: starters.map((s) => ({ quote: s.line, why: s.why, tags: [s.tag], source: s.source })),
   key: RECOMMENDATIONS_KEY,
   questions: questionsTheyAsk.map((q) => ({
