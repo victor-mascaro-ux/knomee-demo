@@ -1074,20 +1074,170 @@ function starters(a: Answers, themes: ThemeKey[], clarity: number) {
   return out
 }
 
-function buildToolkit(a: Answers, themes: ThemeKey[], clarity: number): ToolkitTab {
-  const top = themes[0]
+/* ── the top action ─────────────────────────────────────────────────────────
+   The one line a recruiter reads on the pipeline row, shaped like the
+   prospects' ones: when to reach out — what this advisor's sheet says — what
+   to bring. It used to be "Answer the attrition question with evidence", and
+   since nearly everybody writes about their clients it read the same on every
+   row. So it is built from the answers that differ most from one advisor to
+   the next: the window, the first thing they want the practice to give them,
+   the move they named, and only then the theme they wrote about most. */
+
+/** Why they would move, from their first pick in Practice Joy. */
+const JOY_REASON: Record<string, string> = {
+  Equity: 'for equity',
+  Ownership: 'for ownership',
+  Control: 'for control',
+  'Control over how I serve': 'for control',
+  Independence: 'for independence',
+  'Enterprise value': 'for enterprise value',
+  Security: 'for security',
+  Income: 'for income',
+  'My team’s future': 'for their team’s future',
+  Reputation: 'for their reputation',
+  Simplicity: 'for a simpler practice',
+  Legacy: 'for legacy',
+  Time: 'for their time back',
+}
+
+/** With no timeline picked, the stage says how far along they are instead. */
+const STAGE_SIGNAL: Record<Stage, string> = {
+  'Pre-Contemplation': 'not looking yet',
+  Contemplation: 'weighing a move',
+  Preparation: 'lining up the steps',
+  Action: 'already moving',
+  Maintenance: 'already moved',
+}
+
+/** "$840M", "1.2B" or "$500K" → "$840M books"; a figure the rule cannot
+    read gives nothing rather than a guess. */
+function bookSize(a: Answers): string | undefined {
+  const m = a.identity.book.replace(/[, ]/g, '').match(/\$?(\d+(?:\.\d+)?)([KMB])/i)
+  if (!m) return undefined
+  return `$${m[1]}${m[2].toUpperCase()} books`
+}
+
+/** The thing to put in front of them, by what they wrote about most. A meeting
+    gets something to bring; a nurture row gets something to send. */
+const BRING: Record<ThemeKey, (a: Answers) => string> = {
+  clients: (a) => `bring retention data for ${bookSize(a) ?? 'books their size'}`,
+  team: (a) => `bring day-one equity terms for ${teamWord(a).replace(/^my /, 'their ')}`,
+  economics: (a) =>
+    /deferred/i.test(allProse(a))
+      ? 'model the deferred comp they’d forfeit, with dates'
+      : 'bring a two-year model with their own numbers',
+  transition: () => 'bring a dated move plan with an owner per step',
+  brand: (a) =>
+    /must/i.test(chosen('mv-brand', a)[0] ?? '')
+      ? 'show advisors here who kept their own brand'
+      : 'walk a real enterprise-value outcome',
+  family: () => 'offer to bring their family into the conversation',
+  purpose: () => 'lead with what they’d never have to change',
+}
+
+const SEND: Record<ThemeKey, string> = {
+  clients: 'send retention stories from comparable moves',
+  team: 'send how other teams share equity',
+  economics: 'send the two-year economics explainer',
+  transition: 'send the 90-day transition map',
+  brand: 'send stories of advisors who kept their brand',
+  family: 'send a family’s-eye account of a move',
+  purpose: 'send stories of advisors who kept their way of serving',
+}
+
+/** A move that is not a breakaway changes the meeting before the theme does. */
+const MOVE_ACTION: Record<string, { act: string; why: string }> = {
+  'Sell or merge my book': {
+    act: 'open on valuation and how they’d be paid',
+    why: 'They named a sale, not a breakaway. A build-your-own-firm pitch would spend the meeting on something they did not ask for.',
+  },
+  'Buy another practice': {
+    act: 'bring financing terms for the acquisition',
+    why: 'They want to buy, not leave. The firm that can fund the deal is the one they will listen to.',
+  },
+  'Bring in a successor': {
+    act: 'lead with successor options, not independence',
+    why: 'They are planning who comes after them. Independence is the wrong pitch; continuity for the clients is the right one.',
+  },
+}
+
+const STAYING = 'Change nothing, but fix the parts that don’t work'
+
+function topActionOf(a: Answers, themes: ThemeKey[], kq: number) {
+  /* What is holding the decision is the one thing to settle first, so when it
+     names a theme that theme decides what to bring — ahead of the one they
+     wrote about most overall. */
+  const blocker = said('mv-q10b', a)
+  const top = themes.find((k) => hits(blocker, k)) ?? themes[0]
+  const stage = stageOf(a)
+  // Only the three stops on the road read as a window; anything else is
+  // left to the stage.
+  const when = /^[<\d]/.test(picked('mv-q2', a)) ? picked('mv-q2', a) : ''
+  const move = (a.choice['mv-q1'] ?? [])[0] ?? ''
+  const joy = chosen('pj-q1', a)[0] ?? ''
+  // A window inside the year is soon; with no window, already acting is.
+  const soon = when ? when.startsWith('<') : stage === 'Action'
+
+  const cadence =
+    kq >= 70 ? (soon ? 'Call now' : 'Call this week') : kq >= 40 ? (soon ? 'Meet this month' : 'Meet this quarter') : 'Quarterly check-in'
+  const window = when.startsWith('<')
+    ? 'moving within a year'
+    : when
+      ? `moving${whenPhrase(when)}`
+      : STAGE_SIGNAL[stage]
+  const signal = [window, JOY_REASON[joy]].filter(Boolean).join(', ')
+  const pace =
+    kq >= 70
+      ? soon
+        ? `Ready Now, at RQ ${kq}${when ? ', with the move inside the year' : ', and already moving'} — the week matters.`
+        : `Ready Now, at RQ ${kq}. The window is longer, so book it while the interest is warm.`
+      : kq >= 40
+        ? `Considering, at RQ ${kq}${soon ? (when ? ', but the window is under a year' : ', and already moving') : ''} — work them on their timeline.`
+        : `Nurture, at RQ ${kq}. Nothing is moving yet, so stay useful without asking for a meeting.`
+
+  /* What the line was built from, and nothing it was not. */
+  const fromMove = `The Move · Q1 — “${picked('mv-q1', a)}”`
+  const source = (...rest: string[]) =>
+    [
+      when && `The Move · Q2 — “${when}”`,
+      JOY_REASON[joy] && `Practice Joy · Q1 — “${joy}” picked first`,
+      ...rest,
+    ]
+      .filter(Boolean)
+      .join('; ')
+
+  if (move === STAYING)
+    return {
+      text: `${kq >= 40 ? 'Meet this quarter' : 'Quarterly check-in'} — staying put; ask what they’d fix first, don’t pitch a move`,
+      why: 'They chose to change nothing and fix what does not work. A move pitch reads as not listening; their list of fixes is the way in.',
+      source: fromMove,
+    }
+  const moveAction = MOVE_ACTION[move]
+  if (moveAction)
+    return {
+      text: `${cadence} — ${signal}; ${moveAction.act}`,
+      why: `${pace} ${moveAction.why}`,
+      source: source(fromMove),
+    }
+  return {
+    text: `${cadence} — ${signal}; ${kq >= 40 ? BRING[top](a) : SEND[top]}`,
+    why: `${pace} ${THEME_QUESTIONS[top].guidance}`,
+    source: source(
+      themes.find((k) => hits(blocker, k))
+        ? `The Move · Q11 — what is holding the decision: “${firstSentence(blocker, 120)}”`
+        : `What they wrote about most — ${APPREHENSION_LABEL[top].toLowerCase()}`,
+    ),
+  }
+}
+
+function buildToolkit(a: Answers, themes: ThemeKey[], clarity: number, kq: number): ToolkitTab {
   const prose = allProse(a)
   const joy = chosen('pj-q1', a)
+  const top = topActionOf(a, themes, kq)
   return {
-    topAction: said('ol-q1', a)
-      ? `Answer ${THEME_QUESTIONS[top].label} with evidence, in the first ten minutes.`
-      : 'Open by asking what they want the practice to give them. The sheet does not say yet.',
-    topActionSource: said('ol-q1', a)
-      ? `Outlook · Q1 — they wrote: “${firstSentence(said('ol-q1', a), 160)}”`
-      : undefined,
-    topActionWhy: said('ol-q1', a)
-      ? 'It is the question they brought. Nothing else in the meeting moves until it is answered, so a rep who opens anywhere else has spent the meeting.'
-      : 'Nothing they wrote names a first question yet, so the meeting starts by finding it.',
+    topAction: top.text,
+    topActionSource: top.source,
+    topActionWhy: top.why,
     starters: starters(a, themes, clarity),
     key: RECOMMENDATIONS_KEY,
     questions: themes.slice(0, 3).map((k) => ({
@@ -1255,7 +1405,7 @@ export function derive(a: Answers): Derived {
     kq,
     tier: { tier: tier.tier, name: tier.name },
     readiness,
-    toolkit: buildToolkit(a, themes, clarity),
+    toolkit: buildToolkit(a, themes, clarity, kq),
     progress: { done, required: advisorAdventures.length },
     empty: done === 0,
     themes,
