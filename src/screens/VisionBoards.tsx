@@ -8,7 +8,7 @@
  * authored one back.
  */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { VisionBoard } from '../data/clientProfile'
 import AddVisionBoardModal from './AddVisionBoardModal'
 import VisionBoardEditor from './VisionBoardEditor'
@@ -101,11 +101,23 @@ export function useVisionBoards(initial: VisionBoard[], onToast?: (msg: string) 
 export function VisionBoardCard({
   initial,
   onToast,
+  addNow,
+  onAddNowDone,
 }: {
   initial: VisionBoard[]
   onToast?: (msg: string) => void
+  /** Open the new-board panel straight away — "Save a Vision" on the phone's
+      quick-access sheet — and say so once it is open. */
+  addNow?: boolean
+  onAddNowDone?: () => void
 }) {
   const v = useVisionBoards(initial, onToast)
+  const { add } = v
+  useEffect(() => {
+    if (!addNow) return
+    add()
+    onAddNowDone?.()
+  }, [addNow, add, onAddNowDone])
   return (
     <section className="pp-card">
       <EmptyFold

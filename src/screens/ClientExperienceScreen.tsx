@@ -901,7 +901,7 @@ export function LockedRow({
   )
 }
 
-function AdventuresScreen({
+export function AdventuresScreen({
   onPick,
   onOpenAdventure,
   done,
@@ -1058,7 +1058,7 @@ const MOOD_SAMPLE: Record<MoodId, string> = {
   great: 'We paid off the car and booked the family trip without worrying about it.',
 }
 
-function KnomeeSheet({
+export function KnomeeSheet({
   onClose,
   onPick,
   onSaveMood,
