@@ -1122,6 +1122,7 @@ function ClientsMetrics({
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">OVERALL CLIENT CONFIDENCE SCORE</span>
+              <HelpTip side="right" text="Blended client sentiment, from frustrated to delighted. Measured weekly." />
               {sentimentFilter != null && (
                 <button
                   className="cmd-clear"
@@ -1135,7 +1136,6 @@ function ClientsMetrics({
             <span className="chart-head-r">
               <span className="chart-figure">{confidenceScore}</span>
               <Delta value={2} note="this week" />
-              <HelpTip text="Blended client sentiment, from frustrated to delighted. Measured weekly." />
             </span>
           </div>
           <ConfidencePie activeSentiment={sentimentFilter} onPick={onPickSentiment} />
@@ -1144,11 +1144,11 @@ function ClientsMetrics({
           <div className="chart-head">
             <span className="chart-head-l">
               <span className="metric-label">CLIENTS ACTIVE THIS WEEK</span>
+              <HelpTip side="right" text="Share of clients logging in each week." />
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{activeThisWeek}%</span>
               <Delta value={activeSeries[activeSeries.length - 1].value - activeSeries[activeSeries.length - 2].value} />
-              <HelpTip text="Share of clients logging in each week." />
             </span>
           </div>
           <ActiveChart />
@@ -1732,8 +1732,8 @@ function AdminScreen() {
           <div className="card-title">
             <TargetIcon />
             <span>Are Your Advisors Using Knomee?</span>
+            <HelpTip side="right" text="Adoption first (are they using it), then production (is it working)." />
           </div>
-          <HelpTip text="Adoption first (are they using it), then production (is it working)." />
         </header>
         <div className="analytics-body">
           <div className="impact-grid">
@@ -1771,8 +1771,8 @@ function AdminScreen() {
           <div className="card-title">
             <FunnelIcon />
             <span>Advisor Adoption Funnel</span>
+            <HelpTip side="right" text="Where advisors drop out of using the product at all." />
           </div>
-          <HelpTip text="Where advisors drop out of using the product at all." />
         </header>
         <div className="analytics-body">
           <div className="adopt-list">
@@ -1811,8 +1811,8 @@ function AdminScreen() {
           <div className="card-title">
             <TierBarsIcon />
             <span>How Conversion Is Spread</span>
+            <HelpTip side="right" text="The spread across advisors is the story, not the average." />
           </div>
-          <HelpTip text="The spread across advisors is the story, not the average." />
         </header>
         <div className="analytics-body">
           <div className="conv-dist">
@@ -1842,8 +1842,8 @@ function AdminScreen() {
           <div className="card-title">
             <ChartIcon />
             <span>Advisor Leaderboard</span>
+            <HelpTip side="right" text="All 100 advisors, ranked by clients converted." />
           </div>
-          <HelpTip text="All 100 advisors, ranked by clients converted." />
         </header>
         <div className="analytics-body">
           <div className="table-wrap admin-table-wrap">
@@ -2266,8 +2266,8 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           <div className="card-title">
             <TargetIcon />
             <span>Your Practice, With Knomee</span>
+            <HelpTip side="right" text="Each number against its target or benchmark." />
           </div>
-          <HelpTip text="Each number against its target or benchmark." />
         </header>
         <div className="analytics-body">
           <div className="impact-grid">
@@ -2289,8 +2289,8 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           <div className="card-title">
             <ChartIcon />
             <span>Who Your Prospects Are — And Which Convert</span>
+            <HelpTip side="right" text="Cluster the book by any of the four models. Each row is a segment — click it to see what the label means and how prospects land in it." />
           </div>
-          <HelpTip text="Cluster the book by any of the four models. Each row is a segment — click it to see what the label means and how prospects land in it." />
         </header>
         <div className="analytics-body">
           <ProspectClusters />
@@ -2303,8 +2303,8 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           <div className="card-title">
             <TierBarsIcon />
             <span>Does the Score Work?</span>
+            <HelpTip side="right" text="Whether a higher KQ score predicts a client." />
           </div>
-          <HelpTip text="Whether a higher KQ score predicts a client." />
         </header>
         <div className="analytics-body">
           <TierSector />
@@ -2354,8 +2354,8 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           <div className="card-title">
             <FunnelIcon />
             <span>Is Your Marketing Reaching the Right People?</span>
+            <HelpTip side="right" text="Where prospects drop out, and which sources convert." />
           </div>
-          <HelpTip text="Where prospects drop out, and which sources convert." />
         </header>
         <div className="analytics-body">
           <div className="analytics-sub-head">Drop-off, segmented</div>
@@ -2383,8 +2383,8 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           <div className="card-title">
             <CheckIcon />
             <span>Onboarding Experiments</span>
+            <HelpTip side="right" text="Each configuration with the outcome it produced." />
           </div>
-          <HelpTip text="Each configuration with the outcome it produced." />
         </header>
         <div className="analytics-body">
           <ExperimentTable />
