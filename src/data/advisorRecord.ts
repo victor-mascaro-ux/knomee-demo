@@ -62,6 +62,8 @@ const LEAD = [
   'Role',
   'Assets',
   'Firm',
+  // "Who do you most enjoy working with?" — the first form's fourth field.
+  'Enjoys working with',
   'Completed',
 ] as const
 
@@ -127,6 +129,9 @@ export function sittingOf(a: Answers, id: string): Sitting {
     Role: a.identity.role.trim(),
     Assets: a.identity.book.trim(),
     Firm: a.identity.firm.trim(),
+    // Picks joined as a multi-choice answer's are; blank on sheets from
+    // before the question was asked.
+    'Enjoys working with': (a.identity.serves ?? []).join(' | '),
     Completed: a.completed,
   }
   for (const c of questionColumns()) values[c.header] = cell(c, a)

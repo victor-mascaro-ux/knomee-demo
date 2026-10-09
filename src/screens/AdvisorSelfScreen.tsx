@@ -1894,7 +1894,7 @@ function FlowPhone({
                         onBackToProfile()
                       }}
                     >
-                      Back to Profile
+                      Close Experience
                     </SheetItem>
                   )}
                   <SheetItem icon={<SignOutIcon />} onClick={() => setMenuOpen(false)}>
