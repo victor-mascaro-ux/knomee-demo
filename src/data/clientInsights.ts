@@ -440,6 +440,13 @@ export interface SuggestedAdventure {
 }
 
 export const suggestedAdventures: SuggestedAdventure[] = [
+  /* First: the adventure that follows the five on her phone — the Knomee
+     sheet offers it next once they are done. */
+  {
+    name: 'Money History',
+    blurb: 'Look back at how money has shaped you.',
+    art: 'money-history',
+  },
   {
     name: 'Angel Investing',
     blurb: 'Consider the risks and rewards of funding innovation.',
