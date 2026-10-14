@@ -691,39 +691,34 @@ export function Board({
 
   return (
     <div className={`cp-board${head ? ' is-editing' : ''}`}>
-      {head ? (
-        <div className="cp-board-head">
-          <h4 className="cp-board-title">
-            <StatusTags tags={board.tags} />
-            {board.title}
-          </h4>
+      {/* The pills above the row, so what Edit lines up with is the title. */}
+      <StatusTags tags={board.tags} />
+      {/* The title and its line in one column, Edit (or, being edited, Cancel
+          and Save) beside the title: the line can sit close under the title
+          without running under the button. */}
+      <div className="cp-board-head">
+        <div className="cp-board-words">
+          <h4 className="cp-board-title">{board.title}</h4>
+          <p className="cp-board-blurb">{board.blurb}</p>
+        </div>
+        {head ? (
           <span className="cp-board-acts">{head}</span>
-        </div>
-      ) : onEdit ? (
-        <div className="cp-board-head">
-          <h4 className="cp-board-title">
-            <StatusTags tags={board.tags} />
-            {board.title}
-          </h4>
-          <button type="button" className="cp-board-edit" onClick={onEdit}>
-            <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
-              <path
-                d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Edit
-          </button>
-        </div>
-      ) : (
-        <h4 className="cp-board-title">
-            <StatusTags tags={board.tags} />
-            {board.title}
-          </h4>
-      )}
-      <p className="cp-board-blurb">{board.blurb}</p>
+        ) : (
+          onEdit && (
+            <button type="button" className="cp-board-edit" onClick={onEdit}>
+              <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
+                <path
+                  d="M13.6 3.3a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2 8-8Z"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Edit
+            </button>
+          )
+        )}
+      </div>
       <div
         className={`cp-board-grid${onMove ? ' is-movable' : ''}${carried !== null ? ' is-carrying' : ''}`}
         ref={grid}
@@ -933,12 +928,9 @@ export default function ClientProfileScreen({
   useEffect(() => setEventList(cp.lifeEvents), [cp])
   const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
   const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
-  /* Done events go to the end, the way completed goals do; the rest keep
-     their order. */
-  const orderedEvents = useMemo(
-    () => sortFresh([...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)]),
-    [eventList],
-  )
+  /* Done events go to the end, the way completed goals do (sortFresh sinks
+     them); the rest keep their order. */
+  const orderedEvents = useMemo(() => sortFresh(eventList), [eventList])
   const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
   /* And the questions, which behave the same way: asked from the plus, opened
      to read, reworded, marked answered. */

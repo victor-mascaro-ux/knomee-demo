@@ -46,6 +46,17 @@
   cursor: pointer;
 }
 
+/* The starters: the adventures' pills (memoryAsk.css), 6px under their label
+   like every field, and the one picked filled in. */
+.qm-starters {
+  margin-bottom: 0;
+}
+.mem-starter.is-on,
+.mem-starter.is-on:hover {
+  border-color: var(--k-grape, #7639a1);
+  background: var(--k-grape-light, #e9d9f4);
+}
+
 .qm-field {
   position: relative;
 }

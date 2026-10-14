@@ -6667,6 +6667,7 @@ button.name-link-btn:hover .name-text {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+  .cp-board-head,
   .cp-board-title,
   .cp-board-blurb {
     break-after: avoid;

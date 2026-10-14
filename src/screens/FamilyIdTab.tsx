@@ -36,6 +36,7 @@ import {
   GoalDetail,
   ShowToggle,
   orderGoals,
+  sortFresh,
   useCollapsed,
   CheckInCard,
   withTag,
@@ -321,7 +322,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             />
           ) : (
             <div className="pp-events">
-              {events.cut(m.lifeEvents).map((e, i) => (
+              {events.cut(sortFresh(m.lifeEvents)).map((e, i) => (
                 <div className={`pp-event ${events.entering(i) ?? ''}`} style={events.delay(i)} key={i}>
                   <LifeEventIcon kind={e.kind} text={e.text} />
                   <span className="pp-event-body">
@@ -358,7 +359,7 @@ export default function FamilyIdTab({ members: live }: { members: HouseholdMembe
             />
           ) : (
             <div className="pp-questions">
-              {questions.cut(m.questions).map((q, i) => (
+              {questions.cut(sortFresh(m.questions)).map((q, i) => (
                 <div
                   className={`pp-question ${q.resolved ? 'is-resolved' : ''} ${
                     questions.entering(i) ?? ''
