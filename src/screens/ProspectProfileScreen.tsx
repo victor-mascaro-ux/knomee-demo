@@ -269,12 +269,9 @@ export default function ProspectProfileScreen({
   const [eventList, setEventList] = useState<LifeEvent[]>(fi.lifeEvents)
   const [openEvent, setOpenEvent] = useState<LifeEvent | null>(null)
   const [eventForm, setEventForm] = useState<'add' | 'edit' | null>(null)
-  /* Done events go to the end, the way completed goals do; the rest keep
-     their order. */
-  const orderedEvents = useMemo(
-    () => sortFresh([...eventList.filter((e) => !e.completed), ...eventList.filter((e) => e.completed)]),
-    [eventList],
-  )
+  /* Done events go to the end, the way completed goals do (sortFresh sinks
+     them); the rest keep their order. */
+  const orderedEvents = useMemo(() => sortFresh(eventList), [eventList])
   const events = useCollapsed(orderedEvents, COLLAPSED_ROWS)
   /* And the questions, which behave the same way. */
   const [questionList, setQuestionList] = useState<ProfileQuestion[]>(fi.questions)

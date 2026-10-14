@@ -119,6 +119,7 @@
 .vb-preview {
   margin-top: var(--space-4);
 }
+.vb-preview .cp-board > .cp-goal-tags,
 .vb-preview .cp-board-title,
 .vb-preview .cp-board-blurb {
   display: none;

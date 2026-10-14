@@ -13,16 +13,16 @@
  */
 
 import { useEffect, useState } from 'react'
+import './memoryAsk.css'
 import './questionModal.css'
 import type { ProfileQuestion } from '../data/financialId'
 import { DEMO_TODAY } from '../data/financialId'
 import { CheckIcon } from '../components/profileIcons'
 import { CloseIcon } from '../components/icons'
-import SelectMenu from '../components/SelectMenu'
 import { StatusTags, withTag } from './profileParts'
 import { InlineTitle, ReadBackCheck, ReadBackFoot, closesOnEscape } from './ReadBack'
 
-/* The openers, in the order the phone lists them. They are the shapes a money
+/* The openers, as the pills the adventures start an answer with. They are the shapes a money
    question actually takes: can I, when will I, what happens if, how much, how
    do I, which is better. */
 const STARTERS = [
@@ -85,19 +85,30 @@ export function AddQuestionModal({
         </div>
 
         <div className="modal-body qm-body">
-          <label className="qm-label" htmlFor="qm-starter">
+          <span className="qm-label" id="qm-starter">
             Pick a question starter
-          </label>
-          <SelectMenu
-            id="qm-starter"
-            className="qm-input"
-            value={starter}
-            placeholder="Choose one option"
-            /* The ellipsis is the list saying "carry on", not part of what
-               they are asking — so it is in the label and not the value. */
-            options={STARTERS.map((s) => ({ value: s, label: `${s}…` }))}
-            onChange={setStarter}
-          />
+          </span>
+          {/* The adventures' starter pills: one picked at a time, and picked
+              again to let it go — the question can be worded without one. */}
+          <div className="mem-starters qm-starters" role="group" aria-labelledby="qm-starter">
+            {STARTERS.map((s, i) => (
+              <button
+                key={s}
+                type="button"
+                className={`mem-starter${starter === s ? ' is-on' : ''}`}
+                style={{ ['--i' as string]: i }}
+                aria-pressed={starter === s}
+                onClick={() => {
+                  setStarter(starter === s ? '' : s)
+                  document.getElementById('qm-rest')?.focus()
+                }}
+              >
+                {/* The ellipsis is the pill saying "carry on", not part of what
+                    they are asking — so it is on the pill and not the value. */}
+                {s}…
+              </button>
+            ))}
+          </div>
 
           <label className="qm-label" htmlFor="qm-rest">
             Add the rest of your question

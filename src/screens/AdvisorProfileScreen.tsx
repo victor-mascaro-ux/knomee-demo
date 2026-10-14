@@ -34,6 +34,7 @@ import {
   useCollapsed,
   StatusTags,
   StartAdventure,
+  sortFresh,
 } from './profileParts'
 import GoalModal, { type GoalField } from './GoalModal'
 import QuestionModal, { renamed } from './QuestionModal'
@@ -505,11 +506,16 @@ function BusinessIdTab({
      and changed the way hers are: reworded, resolved or deleted, held on
      this page. */
   const [questionEdits, setQuestionEdits] = useState<ProfileQuestion[] | null>(null)
-  const questions: ProfileQuestion[] =
-    questionEdits ?? d.questions.map((q) => ({ q, date: d.header.completed, knomee: true }))
+  const questions: ProfileQuestion[] = sortFresh(
+    questionEdits ?? d.questions.map((q) => ({ q, date: d.header.completed, knomee: true })),
+  )
   const [openQuestion, setOpenQuestion] = useState<number | null>(null)
-  const changeQuestion = (i: number, q: ProfileQuestion | null) =>
-    setQuestionEdits(questions.flatMap((x, j) => (j !== i ? [x] : q ? [q] : [])))
+  const changeQuestion = (i: number, q: ProfileQuestion | null) => {
+    const next = sortFresh(questions.flatMap((x, j) => (j !== i ? [x] : q ? [q] : [])))
+    setQuestionEdits(next)
+    /* Resolved, it sinks to the bottom: the panel follows it there. */
+    if (q) setOpenQuestion(next.indexOf(q))
+  }
   /* A goal edited here — its stage by taking the assessment again — laid over
      the one the flow put together, by its place in the list. */
   const [edits, setEdits] = useState<Record<number, Goal>>({})

@@ -1941,22 +1941,6 @@ html.cx-desktop .cx-sheet-account > .cx-sheet-credit {
   padding-left: 45px;
 }
 
-/* A vision board on the Financial ID: tiles drawn no wider than about 0.9 of
-   their photographs (292-294 across). Three 126 columns make a wide tile 262;
-   a photograph is never stretched across a third column to close the last row
-   (the inline span the board writes for that), it keeps two. */
-html.cx-desktop .cx-screen .cp-board-grid:not(.fid-cell .cp-board-grid) {
-  grid-template-columns: repeat(3, 126px);
-  grid-auto-rows: 104px;
-  /* Centred as a box, not by its tracks: the board reads its tiles' offsets
-     from its own edge to find the last row's gap. */
-  width: fit-content;
-  margin-inline: auto;
-}
-html.cx-desktop .cx-screen .cp-board-grid > .cp-tile-photo[style*='span 3'] {
-  grid-column: span 2 !important;
-}
-
 /* Who sees it (the Financial ID's lens, and My Team): the lead at reading
    width, the team's people two by two, and the parts of the ID on one grid
    across the page. */

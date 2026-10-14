@@ -282,11 +282,15 @@
   margin: 0;
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
+  /* Set, not "normal": Edit centres itself on this line (.cp-board-edit). */
+  line-height: 1.25;
   color: var(--text-link);
 }
+/* Close under the title — the line belongs to it. */
 .cp-board-blurb {
-  margin: 2px 0 var(--space-12);
+  margin: 0 0 var(--space-12);
   font-size: var(--text-sm);
+  line-height: 1.35;
   color: var(--text-secondary);
 }
 /* Three columns of equal width; a tall tile spans two rows, which is what gives
@@ -569,15 +573,26 @@
   color: var(--text-strong);
 }
 
-/* A board that can be changed: its title and an Edit on one line. */
+/* A board's title and its line, and Edit (or Cancel and Save) beside the
+   title. */
 .cp-board-head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-10);
 }
-.cp-board-head .cp-board-title {
+.cp-board-words {
+  flex: 1 1 auto;
   min-width: 0;
+}
+/* Centred on the title's first line whatever its own height: its top at the
+   line's middle, then lifted by half of itself. A transform moves it without
+   taking room, so the title and its line stay where they are. */
+.cp-board-edit,
+.cp-board-head > .cp-board-acts {
+  align-self: flex-start;
+  margin-top: calc(var(--text-base) * 1.25 / 2);
+  transform: translateY(-50%);
 }
 .cp-board-edit {
   flex: none;
@@ -727,7 +742,7 @@
 
 /* A pill sits on its own line above what it marks. */
 .pp-q-text > .cp-goal-tags,
-.cp-board-title > .cp-goal-tags {
+.cp-board > .cp-goal-tags {
   display: flex;
   width: fit-content;
 }

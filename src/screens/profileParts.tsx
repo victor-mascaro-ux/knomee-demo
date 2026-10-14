@@ -254,12 +254,7 @@ export function DateSelect({ dates = CHECKIN_DATES }: { dates?: string[] }) {
 export function orderGoals<T extends { readiness: number; completed?: string; tags?: string[] }>(
   goals: T[],
 ) {
-  return [...goals].sort((a, b) => {
-    const fresh = freshRank(a) - freshRank(b)
-    if (fresh !== 0) return fresh
-    const done = Number(Boolean(a.completed)) - Number(Boolean(b.completed))
-    return done !== 0 ? done : b.readiness - a.readiness
-  })
+  return [...goals].sort((a, b) => doneRank(a) - doneRank(b) || freshRank(a) - freshRank(b) || b.readiness - a.readiness)
 }
 
 /* Whatever was just added leads its list, whatever was just saved follows,
@@ -267,8 +262,13 @@ export function orderGoals<T extends { readiness: number; completed?: string; ta
 export function freshRank(x: { tags?: string[] }) {
   return x.tags?.includes('New') ? 0 : x.tags?.includes('Updated') ? 1 : 2
 }
-export function sortFresh<T extends { tags?: string[] }>(list: T[]) {
-  return [...list].sort((a, b) => freshRank(a) - freshRank(b))
+/* A question resolved, a goal or life event completed: done, so it goes to the
+   bottom of its list — even the moment it is ticked, when it is also fresh. */
+export function doneRank(x: { completed?: string; resolved?: string }) {
+  return x.completed || x.resolved ? 1 : 0
+}
+export function sortFresh<T extends { tags?: string[]; completed?: string; resolved?: string }>(list: T[]) {
+  return [...list].sort((a, b) => doneRank(a) - doneRank(b) || freshRank(a) - freshRank(b))
 }
 
 /* Cards open showing a few rows and grow on demand. Four for goals, which sit
