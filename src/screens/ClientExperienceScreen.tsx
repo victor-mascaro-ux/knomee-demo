@@ -45,7 +45,7 @@ import icGoals from '../assets/adventures/goals.svg'
 import icLifeEvents from '../assets/adventures/life-events.svg'
 import icQuestions from '../assets/adventures/questions.svg'
 import imgVision from '../assets/adventures/vision-board.svg'
-import imgDivorce from '../assets/adventures/divorce.png'
+import icDivorce from '../assets/life-events/divorce.svg'
 import icMoneyHistory from '../assets/adventures/money-history.svg'
 import moodWorried from '../assets/moods/worried.svg'
 import moodUnsure from '../assets/moods/unsure.svg'
@@ -80,7 +80,8 @@ const art: Record<ArtKey, string> = {
   'life-events': icLifeEvents,
   questions: icQuestions,
   vision: imgVision,
-  divorce: imgDivorce,
+  // The road sign its row on the Financial ID wears, so the card is that row.
+  divorce: icDivorce,
   'money-history': icMoneyHistory,
 }
 
@@ -1391,9 +1392,9 @@ function VoiceSheet({
           <button className="vx-card" type="button" onClick={() => made && onOpen(made)}>
             <span className="cx-adv-art has-img is-open">
               <img
-                /* Raster art has no disc of its own, so it is inset to the
-                   size the drawn ones reach — the quick sheet's rule. */
-                className={/\.png($|\?)/.test(art[script.result.art]) ? 'is-raster' : undefined}
+                /* A life event's glyph has no disc of its own, so it is inset
+                   the way its row on the Financial ID insets it. */
+                className={script.result.art === 'divorce' ? 'is-inset' : undefined}
                 src={art[script.result.art]}
                 alt=""
               />

@@ -12,7 +12,10 @@
  *   suggestions to the goal's details, a life event opening its list — used
  *   to snap to the new height on some steps and ease on others. Each sheet is
  *   measured, and whenever its height changes after it has opened, it glides
- *   from the old height to the new one.
+ *   from the old height to the new one. A change that is itself animating —
+ *   a life event's category folding open — is not glided: the glide took the
+ *   fold's first frame for the new height, held the sheet there while the list
+ *   kept opening inside it, then snapped. The sheet just follows the fold.
  */
 
 import { useEffect, useRef } from 'react'
@@ -23,6 +26,19 @@ const LEAVE_MS = 300
 const RESIZE_MS = 280
 /* How long a modal takes to open; a height change inside that is the opening. */
 const SETTLE_MS = 420
+/* Something inside the sheet is animating its own size — a fold opening or
+   closing — so the sheet's height is already moving, frame by frame. */
+const SIZE_PROPS = ['grid-template-rows', 'height', 'max-height']
+const folding = (el: Element) =>
+  el
+    .getAnimations({ subtree: true })
+    .some(
+      (a) =>
+        a.playState === 'running' &&
+        typeof CSSTransition !== 'undefined' &&
+        a instanceof CSSTransition &&
+        SIZE_PROPS.includes(a.transitionProperty),
+    )
 
 export default function SheetExits() {
   const mark = useRef<HTMLSpanElement>(null)
@@ -47,6 +63,7 @@ export default function SheetExits() {
               if (was === undefined || moving.has(el)) continue
               if (Date.now() - (since.get(el) ?? 0) < SETTLE_MS) continue
               if (Math.abs(h - was) < 2) continue
+              if (folding(el)) continue
               moving.add(el)
               const anim = el.animate([{ height: `${was}px` }, { height: `${h}px` }], {
                 duration: RESIZE_MS,
