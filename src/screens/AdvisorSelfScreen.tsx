@@ -83,7 +83,6 @@ import {
 import {
   entryOf,
   greeting,
-  listEntries,
   putEntry,
   touchInvite,
   type Entry,
@@ -1057,58 +1056,17 @@ export default function AdvisorSelfScreen({
     Object.keys(answers.choice).length > 0 ||
     (!!typedName && typedName !== (invite?.name.trim() ?? ''))
 
-  /* Their link opened on another device — or this one after its storage was
-     cleared — picks up the sitting already in the directory under it: the
-     answers they shared and the adventures they finished, as the same row.
-     Answers kept private were never sent, so those are asked again. While
-     the directory is being read nothing is written, so an untouched sheet
-     cannot overwrite the sitting it is about to pick up. */
-  const [resumed, setResumed] = useState(() => !(mode === 'invited' && invite))
+  /* A link opened on a device that has never answered it starts at the
+     beginning, as a sitting of its own. It used to pick up whatever sitting
+     the directory already held under the token — but a link gets forwarded,
+     and the directory cannot tell the same advisor on a second phone from a
+     colleague they passed it to. So everybody after the first person opened
+     it on that person's progress — 5/5 once they had finished — looking at
+     their answers, and wrote over their row. Each device now keeps its own sheet (a reload still resumes it) and
+     writes its own row under the same invite. */
   useEffect(() => {
-    if (resumed || !invite) return
-    let live = true
-    void listEntries().then(({ values }) => {
-      if (!live) return
-      const mine = values
-        .filter((e) => e.token === invite.token && e.answered > 0)
-        .sort((x, y) => y.answered - x.answered || (y.at ?? '').localeCompare(x.at ?? ''))[0]
-      if (mine) {
-        /* A sitting that was complete stays complete: every adventure is
-           marked taken to its end, whatever the flow has gained since. */
-        const done = mine.total > 0 && mine.answered >= mine.total
-        const finished = done
-          ? Object.fromEntries(advisorAdventures.map((r) => [r.id, mine.answers.completed || today()]))
-          : mine.answers.finished
-        setAnswers((local) => {
-          const touched =
-            Object.keys(local.text).length > 0 ||
-            Object.keys(local.choice).length > 0 ||
-            (!!local.identity.name.trim() && local.identity.name.trim() !== invite.name.trim())
-          /* Nothing here yet: the directory's sitting, whole. Answered here
-             already: this device's answers, with every adventure the
-             directory has as finished kept finished — so a copy saved before
-             a sitting was repaired cannot write it back unfinished. */
-          if (!touched)
-            return {
-              ...emptyAnswers(),
-              ...mine.answers,
-              ...(finished ? { finished } : {}),
-              sittingId: mine.answers.sittingId || mine.id,
-            }
-          return finished ? { ...local, finished: { ...finished, ...(local.finished ?? {}) } } : local
-        })
-      }
-      setResumed(true)
-    })
-    return () => {
-      live = false
-    }
-    // Once, on opening the link.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-  useEffect(() => {
-    if (answered && !quiet && resumed) noteSitting(visible, answers.sittingId)
-  }, [visible, answers.sittingId, answered, quiet, resumed])
+    if (answered && !quiet) noteSitting(visible, answers.sittingId)
+  }, [visible, answers.sittingId, answered, quiet])
 
   /* And the third store: the shared directory, so the person who sent the link
      can see that it was answered. The ledger above is this device's; this one
@@ -1120,14 +1078,14 @@ export default function AdvisorSelfScreen({
      doing that for now", and the row is a whole sheet each time rather than a
      delta, so a lost write costs nothing but freshness. */
   useEffect(() => {
-    if (quiet || !answered || !resumed) return
+    if (quiet || !answered) return
     const fallback = invite?.name ?? ''
     const id = window.setTimeout(() => {
       void putEntry(entryOf(answers, invite?.token ?? null, fallback, visible))
       if (invite) void touchInvite(invite.token, true)
     }, 1000)
     return () => window.clearTimeout(id)
-  }, [answers, visible, answered, quiet, invite, resumed])
+  }, [answers, visible, answered, quiet, invite])
 
   /* An opened link is worth knowing about on its own: it separates "has not
      looked at it yet" from "looked, and did not answer", which are two
@@ -1175,9 +1133,6 @@ export default function AdvisorSelfScreen({
 
   return (
     <FlowPhone
-      /* Drawn again once the directory has been read, so a sitting picked up
-         from it opens where that sitting is. */
-      key={resumed ? 'ready' : 'reading'}
       answers={answers}
       edit={edit}
       d={d}
