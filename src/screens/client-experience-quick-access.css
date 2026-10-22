@@ -277,8 +277,8 @@
   margin-top: 2px;
 }
 /* One optical size for every record's art: the drawn ones fill the disc with
-   their own margin; a raster one is inset to match. */
-.vx-card .cx-adv-art img.is-raster {
+   their own margin; a life event's glyph is inset to match. */
+.vx-card .cx-adv-art img.is-inset {
   width: 62%;
   height: 62%;
   object-fit: contain;
