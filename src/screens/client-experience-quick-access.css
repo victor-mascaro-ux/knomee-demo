@@ -283,6 +283,22 @@
   height: 62%;
   object-fit: contain;
 }
+/* The card is a button: tapped, it opens the record on her Financial ID. It
+   keeps the card's own look, and answers the pointer with its edge. */
+.vx-card {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.vx-card:hover {
+  border-color: var(--border-strong);
+}
+.vx-card:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+  border-color: var(--border-strong);
+}
 
 /* The four quick actions are the sheet's main business, so they come first
    and take all the room down to the next adventure; the next adventure, last,

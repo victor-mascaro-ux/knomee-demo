@@ -64,6 +64,7 @@ import ProspectProfileScreen, { ClientTeam, type FinIdCard } from './ProspectPro
 import type { ComponentProps } from 'react'
 import { prospects } from '../data/prospects'
 import { financialId } from '../data/financialId'
+import type { Goal, LifeEvent, ProfileQuestion } from '../data/financialId'
 import './client-experience-quick-access.css'
 import { AdventureMarkContext } from './AdventureMark'
 import SheetExits from './SheetExits'
@@ -1239,10 +1240,23 @@ const MicGlyph = () => (
   </svg>
 )
 
-function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => void }) {
+function VoiceSheet({
+  script,
+  onClose,
+  onMake,
+  onOpen,
+}: {
+  script: VoiceScript
+  onClose: () => void
+  /** Puts the record on her Financial ID, and hands back its row. */
+  onMake: () => object
+  /** The card, tapped: that row, on her Financial ID. */
+  onOpen: (row: object) => void
+}) {
   const swipe = useSwipeDown(onClose)
   const [phase, setPhase] = useState<VoicePhase>('listen')
   const [heard, setHeard] = useState(0)
+  const [made, setMade] = useState<object | null>(null)
   const said = script.said
 
   useEffect(() => {
@@ -1350,7 +1364,14 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
             Cancel
           </button>
           {/* The button says what it will make, not that it will send. */}
-          <button className="vx-primary" type="button" onClick={() => setPhase('done')}>
+          <button
+            className="vx-primary"
+            type="button"
+            onClick={() => {
+              setMade(onMake())
+              setPhase('done')
+            }}
+          >
             {script.action}
           </button>
         </div>
@@ -1364,8 +1385,10 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
           </div>
           {/* The same anatomy the event will have on the Financial ID — the
               adventure row's art disc, then category, title and meta — so the
-              client is looking at the record itself, not a receipt for it. */}
-          <div className="vx-card">
+              client is looking at the record itself, not a receipt for it.
+              Tapped, it goes there: her Financial ID, at that row and its
+              New pill. */}
+          <button className="vx-card" type="button" onClick={() => made && onOpen(made)}>
             <span className="cx-adv-art has-img is-open">
               <img
                 /* Raster art has no disc of its own, so it is inset to the
@@ -1375,12 +1398,12 @@ function VoiceSheet({ script, onClose }: { script: VoiceScript; onClose: () => v
                 alt=""
               />
             </span>
-            <div className="vx-card-main">
+            <span className="vx-card-main">
               <span className="vx-card-tag">{script.result.tag}</span>
               <b>{script.result.title}</b>
               <i>{script.result.meta}</i>
-            </div>
-          </div>
+            </span>
+          </button>
           <button className="vx-dismiss" type="button" onClick={onClose}>
             Done for Now
           </button>
@@ -1774,6 +1797,52 @@ function ClientExperienceRun({
   /* On a handset the frame is gone, so there is nothing to scale. */
   const scale = bare ? 1 : fitScale * zoom
 
+  /* What the voice shortcut has made. It is kept here, not on the page, so it
+     stays on her Financial ID however often she leaves that tab. */
+  const [voiceMade, setVoiceMade] = useState<{ events: LifeEvent[]; questions: ProfileQuestion[]; goals: Goal[] }>({
+    events: [],
+    questions: [],
+    goals: [],
+  })
+  /* The one whose card she tapped, until the page has shown it to her. */
+  const [voiceShow, setVoiceShow] = useState<object | null>(null)
+  const makeVoice = (r: VoiceScript['record']): object => {
+    const date = completedToday().replace(/\./g, '/')
+    if (r.list === 'events') {
+      const e: LifeEvent = { kind: r.kind, text: r.text, date }
+      setVoiceMade((m) => ({ ...m, events: [...m.events, e] }))
+      return e
+    }
+    if (r.list === 'questions') {
+      const q: ProfileQuestion = { q: r.q, date }
+      setVoiceMade((m) => ({ ...m, questions: [...m.questions, q] }))
+      return q
+    }
+    // No rung until she takes one, as the page's own Add Goal leaves it.
+    const g: Goal = { title: r.title, timeline: r.timeline, readiness: 0 }
+    setVoiceMade((m) => ({ ...m, goals: [...m.goals, g] }))
+    return g
+  }
+  const openVoiceRow = (row: object) => {
+    setVoiceOpen(false)
+    setSheet(false)
+    setRailOpen(false)
+    setVoiceShow(row)
+    setTab('finid')
+  }
+  /* Its card, scrolled to once the tab has opened at its top. The frame is
+     scaled and its scroll is not, so the distance is measured back out of it. */
+  const revealVoiceRow = (card: HTMLElement) => {
+    setVoiceShow(null)
+    window.setTimeout(() => {
+      const v = viewport.current
+      if (!v) return
+      const top = v.scrollTop + (card.getBoundingClientRect().top - v.getBoundingClientRect().top) / scale - 12
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      v.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' })
+    }, 180)
+  }
+
   // Long-press the floating mark to talk to Knomee; a plain tap opens quick
   // access. The gesture rides on the tab bar itself so the mark keeps being a
   // button — `held` swallows the click that a long press would otherwise fire.
@@ -2131,6 +2200,9 @@ function ClientExperienceRun({
                 }
                 startFlow={flow}
                 onStartFlowDone={() => setFlow(null)}
+                added={voiceMade}
+                reveal={voiceShow}
+                onReveal={revealVoiceRow}
                 onBack={() => setTab('adventures')}
                 ownerMenu={
                   <button
@@ -2172,6 +2244,8 @@ function ClientExperienceRun({
               key={voiceAt}
               script={voices[Math.max(0, voiceAt)]}
               onClose={() => setVoiceOpen(false)}
+              onMake={() => makeVoice(voices[Math.max(0, voiceAt)].record)}
+              onOpen={openVoiceRow}
             />
           )}
 
