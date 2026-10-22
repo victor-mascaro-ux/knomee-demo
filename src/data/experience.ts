@@ -160,6 +160,12 @@ export interface VoiceScript {
   /** Said once it has. */
   done: string
   result: { tag: string; title: string; meta: string; art: ArtKey }
+  /** The row it puts on her Financial ID, in that list's own terms. Tapping the
+      card goes there and shows it. */
+  record:
+    | { list: 'events'; kind: string; text: string }
+    | { list: 'questions'; q: string }
+    | { list: 'goals'; title: string; timeline: string }
 }
 
 export const voices: VoiceScript[] = [
@@ -173,6 +179,8 @@ export const voices: VoiceScript[] = [
       meta: 'Added to Life Events · 3 min to finish',
       art: 'divorce',
     },
+    // Her own words are its line, so the row does not read "Divorce" twice.
+    record: { list: 'events', kind: 'Divorce', text: 'I just got divorced' },
   },
   {
     said: ['Can', 'I', 'afford', 'to', 'retire', 'at', 'sixty?'],
@@ -184,6 +192,7 @@ export const voices: VoiceScript[] = [
       meta: 'Sent to your advisor · Added to Questions',
       art: 'questions',
     },
+    record: { list: 'questions', q: 'Can I afford to retire at 60?' },
   },
   {
     said: ['I', 'want', 'a', 'lake', 'house', 'in', 'five', 'years'],
@@ -195,6 +204,7 @@ export const voices: VoiceScript[] = [
       meta: 'Added to Goals · 3–5 years',
       art: 'goals',
     },
+    record: { list: 'goals', title: 'Buy a lake house', timeline: '3–5 years' },
   },
 ]
 

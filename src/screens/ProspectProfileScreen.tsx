@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import ExperienceButton from '../components/ExperienceButton'
 import './prospectProfile.css'
 import moodWorried from '../assets/moods/worried.svg'
@@ -54,7 +54,7 @@ import type { FutureYouAnswers } from './FutureYouFlow'
 import type { GoalsAnswers } from './GoalsFlow'
 import icVision from '../assets/adventures/vision-board.svg'
 import { DEMO_TODAY, financialId } from '../data/financialId'
-import type { LifeEvent, ProfileQuestion } from '../data/financialId'
+import type { Goal, LifeEvent, ProfileQuestion } from '../data/financialId'
 import SharingView from './SharingView'
 
 /* The five core adventures, in the order they are taken. */
@@ -88,6 +88,9 @@ export default function ProspectProfileScreen({
   onOpenEnding,
   nextAdventure,
   onStartAdventure,
+  added,
+  reveal,
+  onReveal,
 }: {
   /** A completed adventure's heading, tapped: its ending screen again. */
   onOpenEnding?: (id: string) => void
@@ -130,6 +133,12 @@ export default function ProspectProfileScreen({
   /** Just this one adventure's card, as the page draws it — for the
       celebration at the end of that adventure. */
   only?: FinIdCard
+  /** What her phone's voice shortcut has made. Each row joins its list the way
+      the page's own forms add one: at the head, with a New pill. */
+  added?: { events: LifeEvent[]; questions: ProfileQuestion[]; goals: Goal[] }
+  /** One of those, to show her: the page hands back the card it landed on. */
+  reveal?: object | null
+  onReveal?: (card: HTMLElement) => void
 }) {
   const [tab, setTab] = useState<ProfileTab>('id')
   const { printing, print } = usePrintSheet()
@@ -279,6 +288,33 @@ export default function ProspectProfileScreen({
   const [questionForm, setQuestionForm] = useState<'add' | 'edit' | null>(null)
   const questions = useCollapsed(useMemo(() => sortFresh(questionList), [questionList]), COLLAPSED_ROWS)
 
+  /* The voice shortcut's rows, each taken in once. The phone hands in the same
+     arrays on every render, so what has joined is remembered by identity. */
+  const joined = useRef(new Set<object>())
+  useEffect(() => {
+    if (!added) return
+    const unseen = <T extends object>(xs: T[]) => xs.filter((x) => !joined.current.has(x)).reverse()
+    const ev = unseen(added.events)
+    const qs = unseen(added.questions)
+    const gs = unseen(added.goals)
+    for (const x of [...ev, ...qs, ...gs]) joined.current.add(x)
+    if (ev.length) setEventList((list) => [...ev.map((e) => withTag(e, 'New')), ...list])
+    if (qs.length) setQuestionList((list) => [...qs.map((q) => withTag(q, 'New')), ...list])
+    if (gs.length) setGoalList((list) => [...gs.map((g) => withTag(g, 'New')), ...list])
+  }, [added])
+  /* The card a revealed row heads, handed back once the row is in it. */
+  const cardOf = useRef<Record<'events' | 'questions' | 'goals', HTMLElement | null>>({
+    events: null,
+    questions: null,
+    goals: null,
+  })
+  useEffect(() => {
+    if (!reveal || !added || !joined.current.has(reveal)) return
+    const list = (['events', 'questions', 'goals'] as const).find((k) => (added[k] as object[]).includes(reveal))
+    const card = list && cardOf.current[list]
+    if (card) onReveal?.(card)
+  }, [reveal, added, eventList, questionList, goalList, onReveal])
+
   // Open the profile scrolled to the top, regardless of where the prospect's
   // row sat in the table when it was clicked. On the live site the app runs in
   // a full-height iframe and the PARENT page scrolls, so reset that too — and
@@ -343,7 +379,7 @@ export default function ProspectProfileScreen({
                 {/* Left content column */}
                 <div className={only ? undefined : 'pp-col-main'}>
                   {show('goals') && (
-                  <section className="pp-card">
+                  <section className="pp-card" ref={(el) => { cardOf.current.goals = el }}>
                     {/* No way back to the Goals ending here: each goal opens its
                           own card, which is the reading the ending gave. */}
                     <EmptyFold
@@ -652,7 +688,7 @@ export default function ProspectProfileScreen({
 
                   {!only && (
                   <>
-                  <section className="pp-card">
+                  <section className="pp-card" ref={(el) => { cardOf.current.events = el }}>
                     <EmptyFold
                       empty={events.shown.length === 0}
                       title={<span className="pp-card-title"><img className="pp-card-ic" src={icLifeEvents} alt="" />Life Events</span>}
@@ -711,7 +747,7 @@ export default function ProspectProfileScreen({
                     {events.overflows && <ShowToggle open={events.open} onToggle={events.toggle} />}
                   </section>
 
-                  <section className="pp-card">
+                  <section className="pp-card" ref={(el) => { cardOf.current.questions = el }}>
                     <EmptyFold
                       empty={questions.shown.length === 0}
                       title={<span className="pp-card-title"><img className="pp-card-ic" src={icQuestions} alt="" />Questions</span>}
