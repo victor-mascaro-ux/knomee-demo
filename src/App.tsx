@@ -101,6 +101,7 @@ import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
+import ActivationAnalyticsScreen from './screens/ActivationAnalyticsScreen'
 import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
@@ -3640,7 +3641,9 @@ const dashTabs: DashTab[] = [
 ]
 const analyticsTabs: DashTab[] = [
   { id: 'firm-analytics', label: 'Candidate Analytics', firm: true },
-  { id: 'analytics', label: 'Prospect Analytics' },
+  /* #/analytics opens on the activation funnel; the prospect page it used to
+     open on is a button away, at #/analytics/prospects. */
+  { id: 'analytics', label: 'Activation Analytics' },
 ]
 
 // ── Hash routing ──────────────────────────────────────────────────────────
@@ -3812,6 +3815,10 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
+  /* Prospect Analytics, kept whole behind a button on Activation Analytics. */
+  const [prospectAnalyticsOpen, setProspectAnalyticsOpen] = useState(
+    initialView === 'analytics' && initialProfile === 'prospects',
+  )
   const [apiStoreOpen, setApiStoreOpen] = useState(initialView === 'api-store')
   const [apiProduct, setApiProduct] = useState<string | null>(
     initialView === 'api-store' ? initialProfile : null,
@@ -4095,6 +4102,7 @@ export default function App() {
       setCandidateOpen(v === 'firm-candidates' && slug === profileSlug(candidate.name))
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
+      setProspectAnalyticsOpen(v === 'analytics' && slug === 'prospects')
       setApiStoreOpen(v === 'api-store')
       setApiProduct(v === 'api-store' ? slug : null)
       setAdvisorFlowOpen(v === 'advisor-flow')
@@ -4157,7 +4165,9 @@ export default function App() {
                     ? clientMobileSlug
                     : currentView === 'api-store' && apiProduct
                       ? apiProduct
-                      : null
+                      : currentView === 'analytics' && prospectAnalyticsOpen
+                        ? 'prospects'
+                        : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       if (routeFromAddress.current) window.history.replaceState(null, '', hash)
@@ -4184,6 +4194,7 @@ export default function App() {
     clientExpComplete,
     clientMobileSlug,
     apiProduct,
+    prospectAnalyticsOpen,
   ])
 
   // Esc closes the convert modal.
@@ -4479,6 +4490,7 @@ export default function App() {
       setFirmView(true)
     } else {
       setScreen(t.id as Screen)
+      setProspectAnalyticsOpen(false)
       setFirmView(false)
     }
     scrollPageToTop()
@@ -4711,7 +4723,26 @@ export default function App() {
           (emptyMode ? (
             <EmptyScreen variant="analytics" />
           ) : (
-            <AnalyticsScreen onSegmentation={() => setSegmentationOpen(true)} />
+            prospectAnalyticsOpen ? (
+              <>
+                <button
+                  className="settings-back"
+                  type="button"
+                  onClick={() => setProspectAnalyticsOpen(false)}
+                >
+                  ‹ Back to Activation Analytics
+                </button>
+                <AnalyticsScreen onSegmentation={() => setSegmentationOpen(true)} />
+              </>
+            ) : (
+              <ActivationAnalyticsScreen
+                onProspectAnalytics={() => {
+                  setProspectAnalyticsOpen(true)
+                  scrollPageToTop()
+                }}
+                onRemind={(name) => showToast(`Reminder sent to ${name}`)}
+              />
+            )
           ))}
       </main>
       )}
