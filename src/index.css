@@ -237,6 +237,11 @@ body {
      distance under whatever bar is above it on every page. The full page inset
      read as a gap between the bar and the navigation that hangs off it. */
   padding-top: 16px;
+  /* A white band under the row while it holds, so the table scrolling up
+     fades out below the line rather than running into it. A shadow, not
+     padding: it takes no room, so the line keeps its distance from the page
+     title (24px at the least, the band 16px of it). */
+  box-shadow: 0 16px 0 0 var(--surface-page);
 }
 .content:has(> .tabs) {
   padding-top: 0;
@@ -350,21 +355,25 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   border-radius: 3px;
 }
 
-/* The tab that holds other tabs (TabMenu): at the row's far right, its icon
-   and caret in the label's colour, so they grey and go plum with the text. */
-.tab-menu {
-  margin-left: auto;
+/* Every tab in the row leads with its icon, in the label's colour, so it
+   greys and goes plum with the text. */
+.tabs > .tab {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
-.tab-menu.is-open:not(.tab-active) {
-  color: #333;
-}
-.tab-menu > svg {
+.tabs > .tab > svg {
   flex: none;
   width: 16px;
   height: 16px;
+}
+/* The tab that holds other tabs (TabMenu): at the row's far right, its caret
+   after the label. */
+.tab-menu {
+  margin-left: auto;
+}
+.tab-menu.is-open:not(.tab-active) {
+  color: #333;
 }
 .tab-menu-caret {
   display: inline-flex;
@@ -5139,11 +5148,148 @@ button.name-link-btn:hover .name-text {
   color: var(--grey-text);
   margin-bottom: 12px;
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.invite-preview-meta-text {
+  display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 .invite-preview-meta b {
   color: #201a2e;
+}
+.invite-preview-tools {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  margin: -4px -6px 0 0;
+}
+/* Small text actions over the email: Edit Email, Done, Reset to Sample. */
+.invite-text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--purple-bolt);
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.invite-text-btn:hover {
+  background: var(--k-plum-wash, #f7f2fc);
+  color: var(--plum);
+}
+
+/* Which email: the toolkit's samples, and the toolkit they come from. */
+.invite-template-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.invite-toolkit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--purple-bolt);
+  text-decoration: none;
+}
+.invite-toolkit-link:hover {
+  color: var(--plum);
+}
+/* The recipient's field, as a dropdown. */
+button.invite-select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+/* A {{placeholder}} still to fill, inline in the email — the toolkit's own
+   field (activation-playbook firm.css .tk-field): a grape wash with a line
+   under it, red underneath once Send has asked for it. */
+.invite-fill {
+  box-sizing: content-box;
+  field-sizing: content;
+  min-width: 3ch;
+  max-width: 100%;
+  margin: 0 1px;
+  padding: 0 0.4em;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--k-grape, #7639a1) 10%, #fff);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--k-grape, #7639a1) 50%, transparent);
+  font: inherit;
+  color: #201a2e;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.invite-fill::placeholder {
+  color: color-mix(in srgb, var(--k-grape, #7639a1) 75%, #6d6478);
+}
+.invite-fill:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--k-grape, #7639a1);
+}
+.invite-fill.is-bad,
+.invite-fill.is-bad:focus {
+  box-shadow: inset 0 -2px 0 #d81e4a;
+}
+.invite-fill-hint {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d81e4a;
+}
+
+/* The email's words, opened to edit. The button stays where it is. */
+.invite-edit .invite-field-label {
+  margin-top: 12px;
+}
+.invite-edit .invite-field-label:first-child {
+  margin-top: 0;
+}
+.invite-edit-field {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #3a3247;
+  resize: none;
+  overflow: hidden;
+}
+.invite-edit-field:focus {
+  outline: none;
+  border-color: var(--lilac);
+}
+.invite-edit .invite-cta {
+  margin: 14px 0 0;
+}
+.invite-edit-note {
+  font-size: 12px !important;
+  color: var(--grey-text) !important;
+  margin: 10px 0 0 !important;
 }
 .invite-preview-card {
   border: 1px solid var(--line);
@@ -5172,28 +5318,28 @@ button.name-link-btn:hover .name-text {
   line-height: 1.5;
   margin: 0 0 14px;
 }
-.invite-accept {
-  border: none;
-  background: #5b53d9;
+.invite-preview-card > :last-child {
+  margin-bottom: 0;
+}
+/* The firm's logo over its email, in its colour; knomee's own otherwise. */
+.invite-mail-logo {
+  display: inline-flex;
+  color: var(--brand-bar, var(--plum));
+}
+.invite-mail-logo .client-logo {
+  height: 22px;
+}
+/* The email's one button, in the firm's colour: the top bar's --brand-bar,
+   knomee plum without a brand. A pill, as the toolkit copies it. */
+.invite-cta {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--brand-bar, var(--plum));
   color: #fff;
-  font: inherit;
   font-size: 13px;
   font-weight: 600;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 14px;
-}
-.invite-accept:hover {
-  background: #4a43c4;
-}
-.invite-preview-foot {
-  font-size: 12px !important;
-  color: var(--grey-text) !important;
-  margin: 0 !important;
-}
-.invite-preview-foot a {
-  color: var(--purple-bolt);
 }
 /* Share link + QR */
 .invite-share {
@@ -5309,18 +5455,6 @@ button.name-link-btn:hover .name-text {
   transform: scale(0.96);
 }
 
-/* Accept button in the invite preview */
-.invite-accept {
-  transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.2s ease;
-}
-.invite-accept:hover {
-  box-shadow: 0 6px 16px rgba(91, 83, 217, 0.4);
-  transform: translateY(-1px);
-}
-.invite-accept:active {
-  transform: translateY(0) scale(0.98);
-}
-
 /* Tab-switch: the panel below the pills cross-fades on each `key` change. */
 .invite-panel {
   animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
@@ -5391,7 +5525,6 @@ button.name-link-btn:hover .name-text {
   .btn:active,
   .talk-card:hover,
   .insight:hover,
-  .invite-accept:hover,
   .invite-send:hover svg,
   .invite-tab:active,
   .cluster-switch-btn:active,
