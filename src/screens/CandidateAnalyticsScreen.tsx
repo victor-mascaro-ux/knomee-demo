@@ -32,6 +32,7 @@ import {
   TierBarsIcon,
   WarnIcon,
 } from '../components/icons'
+import KnomeeLoader from '../components/KnomeeLoader'
 
 const MINUTES = 10
 const SINCE = shortDate(COLLECTING_SINCE)
@@ -213,14 +214,28 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
   const withoutAum = f ? f.signed - f.signedWithAum : 0
   const base = recruitBaseline
 
+  const titleRow = (
+    <div className="page-title-row">
+      <h1 className="page-title">Candidate Analytics</h1>
+      <button className="btn btn-outline" type="button" onClick={onOlderVersion}>
+        Older Version
+      </button>
+    </div>
+  )
+
+  /* Until the directory has been read, the page is waiting, as Candidates
+     does — the knomee mark turning, not cards of dots. */
+  if (!f)
+    return (
+      <>
+        {titleRow}
+        <KnomeeLoader title="Hold tight!" note="Gathering your analytics…" />
+      </>
+    )
+
   return (
     <>
-      <div className="page-title-row">
-        <h1 className="page-title">Candidate Analytics</h1>
-        <button className="btn btn-outline" type="button" onClick={onOlderVersion}>
-          Older Version
-        </button>
-      </div>
+      {titleRow}
 
       {/* 1 ── the header: are advisors taking the flow */}
       <section className="card analytics-card">
