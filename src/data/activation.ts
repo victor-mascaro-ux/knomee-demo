@@ -14,6 +14,7 @@
 // no meeting step: it goes from a completed profile to a client.
 
 import { engagement, outcomes } from './analytics'
+import { CLIENT_ANNUAL_RATE, CONVERSION_RATE } from './billing'
 
 const count = (label: string) => engagement.find((m) => m.label === label)?.value ?? 0
 
@@ -24,8 +25,91 @@ export const prospectTotals = {
   clients: outcomes.converted,
 }
 
-/** The firm's own figure, entered once; the revenue tile is only ever an estimate from it. */
-export const revenuePerClient = 8500
+// ── ROI ───────────────────────────────────────────────────────────────────
+// Three ways to answer "how much did Knomee bring us, and how do we know it
+// was Knomee": the assets an advisor enters when they convert a client, the
+// firm's numbers from before Knomee against its numbers since, and each
+// client's trail from the invitation that started it.
+
+/** The firm's own figures, entered once at onboarding. */
+export const revenuePerClient = 8500 // average first-year revenue per new client, before Knomee
+export const firmFeeRate = 0.01 // the firm's advisory fee, so assets entered at conversion become revenue
+
+/** First-year revenue from the assets an advisor enters on Convert to Client. */
+export const revenueFrom = (assets: number) => Math.round(assets * firmFeeRate)
+
+/* The firm's baseline from the toolkit's "Know Your Baseline" (Prospect
+   Toolkit), entered at onboarding. The toolkit's other two baseline numbers,
+   time to first meeting and meetings to close, depend on meetings, which
+   Knomee doesn't see — they stay in the firm's CRM. */
+export const baseline = {
+  conversionRate: 0.11, // of prospects the firm reached out to
+  daysToClient: 74, // first contact to signed client
+  revenuePerClient,
+}
+
+export interface KnomeeClient {
+  name: string
+  advisor: string
+  /** The template whose tagged link the prospect came in on; null = a link without a tag. */
+  template: string | null
+  invited: string
+  signedUp: string
+  complete: string
+  converted: string
+  /** Entered by the advisor on Convert to Client; null = left blank. */
+  assets: number | null
+}
+
+/* The 12 clients, consistent with the rest of the page: by advisor (Alex 3,
+   Priya 3, Dana 2, Sam 2, Jordan 1, Taylor 1) and by template (the template
+   table's 8 clients, plus 4 who came in on an untagged link). Dates are 2026. */
+export const knomeeClients: KnomeeClient[] = [
+  { name: 'Grace Liu', advisor: 'Alex Advisor', template: 'Before we meet', invited: '2026-03-02', signedUp: '2026-03-03', complete: '2026-03-04', converted: '2026-03-24', assets: 1250000 },
+  { name: 'Marco Bianchi', advisor: 'Priya Shah', template: 'Before we meet', invited: '2026-03-16', signedUp: '2026-03-16', complete: '2026-03-18', converted: '2026-04-21', assets: 820000 },
+  { name: 'Hannah Okafor', advisor: 'Alex Advisor', template: 'How well does your financial advisor really know you?', invited: '2026-02-09', signedUp: '2026-02-20', complete: '2026-02-22', converted: '2026-04-28', assets: 540000 },
+  { name: 'Leo Fischer', advisor: 'Dana Brooks', template: 'Before we meet', invited: '2026-04-06', signedUp: '2026-04-07', complete: '2026-04-07', converted: '2026-05-04', assets: 2100000 },
+  { name: 'Nina Patel', advisor: 'Sam Rivera', template: null, invited: '2026-04-13', signedUp: '2026-04-15', complete: '2026-04-19', converted: '2026-05-26', assets: null },
+  { name: 'Owen Clarke', advisor: 'Priya Shah', template: 'What do I actually want my money to make possible?', invited: '2026-04-20', signedUp: '2026-04-29', complete: '2026-05-01', converted: '2026-06-15', assets: 960000 },
+  { name: 'Clara Mendes', advisor: 'Jordan Ellis', template: null, invited: '2026-05-11', signedUp: '2026-05-12', complete: '2026-05-14', converted: '2026-06-22', assets: 700000 },
+  { name: 'Ethan Walsh', advisor: 'Alex Advisor', template: 'Before we meet', invited: '2026-06-01', signedUp: '2026-06-01', complete: '2026-06-02', converted: '2026-06-30', assets: 1480000 },
+  { name: 'Ruth Adler', advisor: 'Dana Brooks', template: 'Before your next financial decision', invited: '2026-05-25', signedUp: '2026-06-08', complete: '2026-06-09', converted: '2026-07-21', assets: null },
+  { name: 'Daniel Reyes', advisor: 'Taylor Kim', template: null, invited: '2026-06-29', signedUp: '2026-07-01', complete: '2026-07-02', converted: '2026-08-11', assets: 610000 },
+  { name: 'Lena Hoffman', advisor: 'Priya Shah', template: 'A quick reminder before we meet', invited: '2026-07-27', signedUp: '2026-07-28', complete: '2026-07-28', converted: '2026-08-25', assets: 1050000 },
+  { name: 'Tom Ishida', advisor: 'Sam Rivera', template: null, invited: '2026-08-10', signedUp: '2026-08-13', complete: '2026-08-15', converted: '2026-09-22', assets: null },
+]
+
+const day = (d: string) => Date.parse(d) / 864e5
+export const daysToClient = (c: KnomeeClient) => Math.round(day(c.converted) - day(c.invited))
+
+const reported = knomeeClients.filter((c) => c.assets != null)
+const reportedRevenue = reported.reduce((a, c) => a + revenueFrom(c.assets as number), 0)
+const unreported = knomeeClients.length - reported.length
+
+export const roi = {
+  reportedClients: reported.length,
+  reportedRevenue,
+  estimatedClients: unreported,
+  estimatedRevenue: unreported * revenuePerClient,
+  totalRevenue: reportedRevenue + unreported * revenuePerClient,
+  /** Average first-year revenue of the clients whose assets were entered. */
+  revenuePerClient: Math.round(reportedRevenue / Math.max(reported.length, 1)),
+  daysToClient: Math.round(knomeeClients.reduce((a, c) => a + daysToClient(c), 0) / knomeeClients.length),
+  conversionRate: outcomes.converted / count('Prospects Invited'),
+  /** What Knomee charged for these clients: each conversion once, and a year of each client. */
+  cost: knomeeClients.length * (CONVERSION_RATE + CLIENT_ANNUAL_RATE),
+}
+
+/* The lift, in clients and in revenue: what the same invitations would have
+   brought at the firm's baseline rate, and what Knomee brought on top. The
+   extra clients are valued at the firm's own pre-Knomee average, so the
+   figure leans low rather than high. */
+const expectedAtBaseline = Math.round(count('Prospects Invited') * baseline.conversionRate)
+export const lift = {
+  expectedAtBaseline,
+  extraClients: outcomes.converted - expectedAtBaseline,
+  extraRevenue: (outcomes.converted - expectedAtBaseline) * revenuePerClient,
+}
 
 // ── Advisors ──────────────────────────────────────────────────────────────
 export type AdvisorStatus = 'sending' | 'copied' | 'opened' | 'idle'
