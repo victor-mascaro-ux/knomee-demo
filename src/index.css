@@ -5025,12 +5025,12 @@ button.name-link-btn:hover .name-text {
   flex-direction: column;
   gap: 6px;
 }
-/* Tab pills */
+/* Tab pills. No inset: the dark pill fills the track's height, so the
+   toggle and its picked side both start on the body's left edge, with the
+   tabs and fields under it. */
 .invite-tabs {
   display: inline-flex;
   align-self: flex-start;
-  gap: 4px;
-  padding: 4px;
   background: var(--pearl);
   border-radius: 999px;
   margin-bottom: 10px;
@@ -5042,7 +5042,7 @@ button.name-link-btn:hover .name-text {
   font-size: 13px;
   font-weight: 600;
   color: var(--grey-text);
-  padding: 7px 16px;
+  padding: 9px 18px;
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.14s, color 0.14s;
@@ -5054,11 +5054,47 @@ button.name-link-btn:hover .name-text {
   background: var(--plum);
   color: #fff;
 }
-.invite-section {
+/* Email · Link · QR Code: the dashboard's underline tabs, sized for the
+   modal. No side padding, so the first label starts on the body's left edge
+   and each bar sits exactly under its label. */
+.invite-channels {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.invite-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  font: inherit;
   font-size: 14px;
-  font-weight: 700;
+  color: var(--grey-text);
+  padding: 0 0 10px;
+  cursor: pointer;
+}
+.invite-channel:hover {
   color: var(--plum);
-  margin: 12px 0 8px;
+}
+.invite-channel.is-on {
+  color: var(--plum);
+  font-weight: 600;
+}
+.invite-channel > svg {
+  flex: none;
+}
+.invite-channel-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--grey-text);
+}
+/* Every panel at least as tall as Email's with its preview closed (and its
+   timing note in), so switching tabs doesn't resize the centred modal and
+   move the tabs out from under the pointer. */
+.invite-panel {
+  min-height: 274px;
 }
 .invite-field-label {
   display: block;
@@ -5345,16 +5381,7 @@ button.name-link-btn:hover .name-text {
   font-size: 13px;
   font-weight: 600;
 }
-/* Share link + QR */
-.invite-share {
-  display: flex;
-  gap: 18px;
-  align-items: flex-start;
-}
-.invite-share-link {
-  flex: 1;
-  min-width: 0;
-}
+/* Link + QR */
 .invite-link-box {
   display: flex;
   align-items: center;
@@ -5392,8 +5419,8 @@ button.name-link-btn:hover .name-text {
 }
 .invite-qr-box {
   position: relative;
-  width: 118px;
-  height: 118px;
+  width: 168px;
+  height: 168px;
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 8px;
@@ -5408,14 +5435,6 @@ button.name-link-btn:hover .name-text {
   top: 4px;
   right: 4px;
   background: rgba(255, 255, 255, 0.9);
-}
-@media (max-width: 560px) {
-  .invite-share {
-    flex-direction: column;
-  }
-  .invite-qr-box {
-    align-self: flex-start;
-  }
 }
 
 /* ---------- Micro-interactions & animation polish ---------- */
