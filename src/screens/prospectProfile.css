@@ -208,6 +208,8 @@
   top: calc(var(--topbar-h) + var(--pp-crumb-h));
   z-index: 5;
   background: #fff;
+  /* The dashboard tab bar's soft shadow (.tabs), under the line only. */
+  box-shadow: 0 6px 10px -6px rgba(36, 4, 70, 0.14);
 }
 .pp-tab {
   position: relative;

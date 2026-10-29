@@ -173,7 +173,9 @@ export function Reading({ children }: { children: React.ReactNode }) {
 }
 
 /** One step of the funnel: its bar against the group's first step, and what it lost.
-    `tip`, where given, opens from the step's name (what records the step). */
+    `tip`, where given, opens from the step's name (what records the step). A
+    bar is at least a sliver so a small count still shows, but a zero is an
+    empty track: a sliver beside "0" read as somebody counted. */
 export function Step({ s, unit, flag, tip }: { s: FunnelStep; unit: string; flag?: boolean; tip?: string }) {
   const share = pct(s.count, s.base)
   return (
@@ -184,7 +186,7 @@ export function Step({ s, unit, flag, tip }: { s: FunnelStep; unit: string; flag
       <span className="act-track">
         <span
           className="act-bar tt"
-          style={{ width: `${Math.max(share, 2)}%` }}
+          style={{ width: `${s.count > 0 ? Math.max(share, 2) : 0}%` }}
           data-tip={`${s.label}: ${s.count} ${unit} · ${share}% of ${s.base}`}
           tabIndex={0}
         />
