@@ -5487,10 +5487,13 @@ button.name-link-btn:hover .name-text {
   height: 100%;
   display: block;
 }
-/* Copy at the panel's right edge, under the QR: the modal's action side. */
-.invite-qr-copy {
-  align-self: flex-end;
-  margin-top: 12px;
+/* The QR and its Copy on one row: Copy at the panel's right edge, its foot
+   level with the QR's. */
+.invite-qr-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 /* ---------- Micro-interactions & animation polish ---------- */

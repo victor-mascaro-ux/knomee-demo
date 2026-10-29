@@ -36,19 +36,15 @@ export interface InviteEmail {
 
 const SIGNED = 'Best,\n{{Advisor Name}}\n{{Firm Name}}'
 
+/* A prospect gets two emails from the product, each one fixed, nothing to
+   pick: Invite Prospect sends the Hot lead's Confirmation, and a row's Resend
+   Invite Link sends the Cold lead's "No Strings" nudge. The toolkit's other
+   prospect emails are sent from the toolkit, not from here. */
+export const PROSPECT_INVITE_EMAIL = 'hot-1'
+export const PROSPECT_RESEND_EMAIL = 'cold-2'
+
 export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
   prospect: [
-    {
-      id: 'cold-1',
-      stage: 'Cold',
-      name: 'Curiosity',
-      option: 1,
-      subject: 'How well does your financial advisor really know you?',
-      message:
-        'Hi {{First Name}},\n\nMost financial advisors know your portfolio.\n\nFar fewer understand what’s actually driving your decisions.\n\nWe’ve created a short, 8-minute experience that helps uncover what’s most important to you, what’s changing in your life, and the questions worth discussing with an advisor.\n\nAt the end, you’ll receive a personalized summary that’s yours to keep.\n\nNo sales pitch. No obligation. Just a clearer picture of what matters most to you — and whether your financial plan reflects it.',
-      cta: 'Take the Assessment →',
-      signoff: SIGNED,
-    },
     {
       id: 'cold-2',
       stage: 'Cold',
@@ -61,27 +57,6 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       signoff: SIGNED,
     },
     {
-      id: 'warm-1',
-      stage: 'Warm',
-      name: 'Nurture',
-      option: 1,
-      subject: 'Before your next financial decision',
-      message:
-        'Hi {{First Name}},\n\nYou’ve probably spent time thinking about your investments.\n\nBut have you spent time thinking about what you actually want them to accomplish?\n\nWe’ve partnered with Knomee to offer a free, research-backed experience that helps you better understand what’s driving your financial decisions.\n\nIn about 8 minutes, you’ll receive:\n- Personalized insights about your financial priorities\n- Your top three money questions\n- A summary you can keep and use in future financial conversations\n\nWhether you’re planning your next move or simply looking for more clarity, it’s a worthwhile investment of eight minutes.',
-      cta: 'Get My Personalized Summary →',
-      signoff: SIGNED,
-    },
-    {
-      id: 'warm-2',
-      stage: 'Warm',
-      name: 'Newsletter Feature',
-      subject: 'A new way to get clear on what matters',
-      message:
-        'We’re excited to partner with Knomee, a research-backed experience to help you explore what matters most, what you want next, and what you want your wealth to make possible.\n\nIn just 8 minutes, you’ll discover what’s shaping your financial priorities, uncover your top three money questions, and receive personalized insights you can keep.\n\nIt’s a different way to prepare for your next financial conversation, and perhaps a better one.',
-      cta: 'Discover Your Personalized Profile →',
-      signoff: '',
-    },
-    {
       id: 'hot-1',
       stage: 'Hot',
       name: 'Confirmation',
@@ -90,27 +65,6 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
         'Hi {{First Name}},\n\nI’m looking forward to meeting you.\n\nBefore we do, take about 8 minutes for this guided experience. It will help you organize your thoughts, uncover your top three money questions, and see what’s driving your financial decisions, with personalized insights that are yours to keep.\n\nYou’ll come to our meeting with more clarity, and rather than spending it on basic fact-finding, we’ll focus on the questions, goals, and opportunities that matter most to you.',
       cta: 'Get My Personalized Insights →',
       signoff: 'I’m looking forward to our conversation.\n\n' + SIGNED,
-    },
-    {
-      id: 'hot-2',
-      stage: 'Hot',
-      name: 'Reminder',
-      note: '2 days before',
-      subject: 'A quick reminder before we meet',
-      message:
-        'Hi {{First Name}},\n\nI’m looking forward to our conversation on {{Day}}.\n\nIf you haven’t had a chance yet, there’s still time to take the short 8-minute experience I sent over.\n\nIt will help you clarify what’s most important to you and identify your top three money questions, so you can come to our conversation knowing what you want to get out of it.\n\nI’ll review your responses in advance so we can spend less time on background questions and more time discussing what’s most relevant to you.\n\nThe personalized insights are yours to keep, whatever you decide.',
-      cta: 'Start Here →',
-      signoff: 'Looking forward to speaking with you.\n\n' + SIGNED,
-    },
-    {
-      id: 'hot-3',
-      stage: 'Hot',
-      name: 'Meeting Follow-Up',
-      subject: 'Thank you',
-      message:
-        'Hi {{First Name}},\n\nThank you again for meeting with me. I enjoyed our conversation.\n\nAs you reflect on what we discussed, the 8-minute Knomee experience is a useful way to take that thinking further. You’ll clarify what you want your wealth to make possible, uncover your 3 most important financial questions, and receive personalized insights to keep.',
-      cta: 'Continue the Conversation →',
-      signoff: 'I’m happy to answer any questions as you consider what comes next.\n\n' + SIGNED,
     },
   ],
   client: [
