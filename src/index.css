@@ -5039,7 +5039,8 @@ button.name-link-btn:hover .name-text {
   align-self: flex-start;
   background: var(--pearl);
   border-radius: 999px;
-  margin-bottom: 10px;
+  /* 24px to the tabs under it, with the body's 6. */
+  margin-bottom: 18px;
 }
 .invite-tab {
   border: none;
@@ -5102,11 +5103,6 @@ button.name-link-btn:hover .name-text {
   display: flex;
   flex-direction: column;
   min-height: 0;
-}
-/* Link and QR Code share QR Code's height, so the centred modal holds still
-   between them and the tabs stay under the pointer. */
-.invite-panel-share {
-  min-height: 242px;
 }
 /* 16px under the tabs to whatever a panel starts with: the tab row's 10 and
    the body's 6, nothing of the first thing's own. */
