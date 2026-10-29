@@ -180,15 +180,15 @@
   width: 100%;
   flex: none;
 }
-/* Send as heads it, above the name: a label over the Invite modal's own
-   toggle (index.css .invite-tabs) — a grey pill track, the picked side a plum
-   pill filling it, each side as wide as its word. Plum for either brand: a
-   firm's colour stays on the bars. */
+/* Send as heads it, above the name, centred as the Invite modal's own
+   toggle is: its label over that toggle (index.css .invite-tabs) — a grey
+   pill track, the picked side a plum pill filling it, each side as wide as
+   its word. Plum for either brand: a firm's colour stays on the bars. */
 .fc-invite-modal .adir-seg-wrap {
   order: -1;
-  align-self: flex-start;
+  align-self: center;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
 }
 .fc-invite-modal .adir-seg-label {
