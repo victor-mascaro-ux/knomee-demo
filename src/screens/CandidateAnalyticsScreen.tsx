@@ -42,8 +42,8 @@ const aum = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1).replace(/\.0$/
 
 /** What records each step, shown from the step's name. */
 const RECORDED: Record<string, string> = {
-  'Opened the toolkit': 'Recorded by the toolkit’s own “open” event, per firm link.\nCounts once the Firestore rule is in.',
-  'Copied an invitation': 'Recorded by the toolkit’s “copy” event, from Copy Text.\nCounts once the Firestore rule is in.',
+  'Opened the toolkit': 'Recorded by the toolkit’s own “open” event, per firm link.',
+  'Copied an invitation': 'Recorded by the toolkit’s “copy” event, from Copy Text.',
   'Template links opened': `Recorded by the link’s UTM tags, kept on the invite when it’s first opened.\nCounting since ${SINCE}.`,
   'Sent a link': 'Recorded by Invite, on Candidates.\nLive.',
   'Opened the link': 'Recorded by the flow, the first time the link opens.\nLive.',
@@ -81,7 +81,7 @@ function ToolkitStep({ label, count, base, status }: { label: string; count: num
         {count != null ? (
           <span
             className="act-bar tt"
-            style={{ width: `${Math.max(share, 2)}%` }}
+            style={{ width: `${count > 0 ? Math.max(share, 2) : 0}%` }}
             data-tip={`${label}: ${count} of ${base} links`}
             tabIndex={0}
           />
@@ -136,7 +136,7 @@ function LiftRow({
             <span className="act-track">
               <span
                 className="act-bar tt"
-                style={{ width: `${Math.max((after / max) * 100, 2)}%` }}
+                style={{ width: `${after > 0 ? Math.max((after / max) * 100, 2) : 0}%` }}
                 data-tip={`With Knomee: ${show(after)}`}
                 tabIndex={0}
               />

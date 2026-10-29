@@ -237,6 +237,9 @@ body {
      distance under whatever bar is above it on every page. The full page inset
      read as a gap between the bar and the navigation that hangs off it. */
   padding-top: 16px;
+  /* A soft shadow under the line, so the row reads as a bar the page slides
+     beneath. Pulled in by its spread, it shows below the line only. */
+  box-shadow: 0 6px 10px -6px rgba(36, 4, 70, 0.14);
 }
 .content:has(> .tabs) {
   padding-top: 0;
