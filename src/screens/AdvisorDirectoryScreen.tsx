@@ -237,7 +237,7 @@ export function InvitePanel({
             not arrive wearing a firm's branding unless you chose that. */}
         <span className="adir-seg-wrap">
           <span className="adir-seg-label" id="adir-send-as">
-            Send as:
+            Send as
           </span>
           <span className="adir-seg" role="group" aria-labelledby="adir-send-as">
             {SEND_AS.map((b) => (

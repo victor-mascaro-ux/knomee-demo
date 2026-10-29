@@ -5045,12 +5045,11 @@ button.name-link-btn:hover .name-text {
   flex-direction: column;
   gap: 6px;
 }
-/* Tab pills. No inset: the dark pill fills the track's height, so the
-   toggle and its picked side both start on the body's left edge, with the
-   tabs and fields under it. */
+/* Tab pills, centred over the modal: who is being invited heads it. No
+   inset: the dark pill fills the track's height. */
 .invite-tabs {
   display: inline-flex;
-  align-self: flex-start;
+  align-self: center;
   background: var(--pearl);
   border-radius: 999px;
   /* 32px to the tabs under it, with the body's 6. */
@@ -5466,8 +5465,8 @@ button.name-link-btn:hover .name-text {
 .invite-fill.is-bad:focus {
   box-shadow: inset 0 -2px 0 #d81e4a;
 }
-/* Beside Send, in the foot's own row: two lines at most, so the foot keeps
-   its height and Send stays put. */
+/* Beside Send, in the foot's own row: a short line for each thing left, two
+   at most, so the foot keeps its height and Send stays put. */
 .invite-fill-hint {
   flex: 1 1 0;
   min-width: 0;
@@ -5477,6 +5476,9 @@ button.name-link-btn:hover .name-text {
   font-size: 12px;
   font-weight: 600;
   color: #d81e4a;
+}
+.invite-fill-hint > span {
+  display: block;
 }
 
 .invite-mail-brand {
