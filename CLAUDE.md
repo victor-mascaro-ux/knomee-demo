@@ -23,4 +23,6 @@ Do not ask "want me to merge?" — just do the full push → PR → merge.
 - React + TS + Vite prototype under `src/`, prebuilt into `app/` (Pages has no
   build step). Root `index.html` is a hand-maintained comment overlay that
   iframes `./app/app.html`.
-- All figures are placeholder/demo data.
+- All figures are placeholder/demo data, except Candidate Analytics
+  (`#/firm-analytics`), which counts the real advisor directory — see
+  `docs/candidate-analytics.md`.

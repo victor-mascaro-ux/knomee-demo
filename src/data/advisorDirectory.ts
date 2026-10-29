@@ -64,7 +64,14 @@ export interface Invite {
   openedAt: string | null
   /** When a sitting under this token last reached the directory. */
   answeredAt: string | null
+  /** The UTM tags the link carried the first time it was opened — set when it
+      came from an activation toolkit template. Absent on invites opened before
+      Oct 29, 2026, when this started being recorded. */
+  openedVia?: LinkTags | null
 }
+
+/** A link's UTM tags, without the `utm_` prefix. */
+export type LinkTags = Partial<Record<'source' | 'medium' | 'campaign' | 'content', string>>
 
 export interface Entry {
   /** The sitting id, so answering more of the flow updates one row rather than
@@ -211,9 +218,39 @@ export async function deleteInvite(token: string): Promise<Trouble> {
   return drop(`${ROOT}/invites/${token}`)
 }
 
-/** Stamps the invite the first time its link is opened, and again whenever a
-    sitting under it reaches the directory. Failures are swallowed: an advisor
-    answering questions should never be stopped by bookkeeping. */
+/** The UTM tags the page was opened with, read once as the app loads — before
+    the router tidies the address. The activation toolkit tags every link a
+    template copies (utm_source=knomee-toolkit, utm_content=<the template>) and
+    adds them at the very end, after `#/flow/<token>`, so they are looked for
+    in the hash as well as the query, and in the review overlay's address too,
+    since the app runs in its iframe. */
+function readTags(): LinkTags | null {
+  if (typeof window === 'undefined') return null
+  const places = [window.location.hash.split('?')[1] ?? '', window.location.search]
+  try {
+    if (window.parent !== window)
+      places.push(window.parent.location.hash.split('?')[1] ?? '', window.parent.location.search)
+  } catch {
+    /* cross-origin parent: our own address is all there is */
+  }
+  for (const q of places) {
+    const p = new URLSearchParams(q)
+    if (!p.get('utm_source')) continue
+    const tags: LinkTags = {}
+    for (const k of ['source', 'medium', 'campaign', 'content'] as const) {
+      const v = p.get(`utm_${k}`)
+      if (v) tags[k] = v.slice(0, 60)
+    }
+    return tags
+  }
+  return null
+}
+const ARRIVED_WITH = readTags()
+
+/** Stamps the invite the first time its link is opened — with the tags the link
+    arrived with — and again whenever a sitting under it reaches the directory.
+    Failures are swallowed: an advisor answering questions should never be
+    stopped by bookkeeping. */
 export async function touchInvite(token: string, answered: boolean) {
   const { value } = await readInvite(token)
   if (!value) return
@@ -221,6 +258,7 @@ export async function touchInvite(token: string, answered: boolean) {
   await put(`${ROOT}/invites/${token}`, {
     ...value,
     openedAt: value.openedAt ?? now,
+    ...(value.openedAt ? {} : { openedVia: ARRIVED_WITH }),
     answeredAt: answered ? now : value.answeredAt,
   })
 }
@@ -270,6 +308,26 @@ export async function readEntry(id: string) {
     keeps its row; this removes the shared one the directory lists. */
 export async function deleteEntry(id: string): Promise<Trouble> {
   return drop(`${ROOT}/sittings/${id}`)
+}
+
+/* ── added to the Network ───────────────────────────────────────────────── */
+
+/** The candidate funnel's last step: Add to Network, on a sitting the
+    directory holds. Kept in a collection of its own, keyed by sitting, because
+    the flow writes the sitting's document whole on every answer and would drop
+    a field added beside it. Recorded since Oct 29, 2026. */
+export interface Added {
+  id: string
+  token: string | null
+  at: string
+}
+
+export async function noteAdded(id: string, token: string | null): Promise<Trouble> {
+  return put(`${ROOT}/added/${id}`, { id, token, at: new Date().toISOString() } satisfies Added)
+}
+
+export async function listAdded() {
+  return list<Added>('added')
 }
 
 /* ── what a screen shows ────────────────────────────────────────────────── */

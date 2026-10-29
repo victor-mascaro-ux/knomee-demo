@@ -93,10 +93,15 @@ function SegmentView({ title, rows, note }: { title: string; rows: FirmSegment[]
   )
 }
 
-export default function FirmAnalyticsScreen() {
+/** `older`: shown behind Candidate Analytics' "Older Version" button, which
+    now carries this page's name, so the title says which one this is. */
+export default function FirmAnalyticsScreen({ older }: { older?: boolean }) {
   return (
     <>
-      <h1 className="page-title">Candidate Analytics</h1>
+      <h1 className="page-title">
+        Candidate Analytics
+        {older && <span className="page-title-tag">Older Version</span>}
+      </h1>
 
       {/* 1 ── the header */}
       <section className="card analytics-card">

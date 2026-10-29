@@ -1,4 +1,5 @@
-/* Activation Analytics — the page #/analytics opens on.
+/* Prospect Analytics — the page #/analytics opens on (the menu's "Prospect
+   Analytics").
 
    The tracking the activation toolkit is building, surfaced the way a firm
    would read it: is the firm using Knomee, which step of prospect conversion
@@ -6,8 +7,9 @@
    nudge. Advisors come first because prospects only arrive once an advisor
    sends something. Card structure and bar treatments follow the advisor and
    candidate analytics; every number is in `activation.ts`, and the prospect
-   side reads the same totals the Prospect Analytics page does — which is one
-   button away, opposite the title. */
+   side reads the same totals the older Prospect Analytics page does — which
+   is one button away, opposite the title ("Older Version"). Candidate
+   Analytics borrows this page's parts (Step, Reading, HelpTip). */
 
 import { Fragment, useState } from 'react'
 import './activationAnalytics.css'
@@ -46,7 +48,7 @@ import {
   WarnIcon,
 } from '../components/icons'
 
-function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
+export function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
     <span
       className={`help-tip tt${side === 'right' ? ' help-tip-right' : ''}`}
@@ -60,13 +62,13 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   )
 }
 
-const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0)
+export const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0)
 const usd = (n: number) => `$${n.toLocaleString('en-US')}`
 const usdShort = (n: number) => (n >= 10000 ? `$${Math.round(n / 1000)}K` : usd(n))
 const assetsShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(2).replace(/\.?0+$/, '')}M` : usdShort(n))
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 /** "2026-03-02" → "Mar 2", read off the string so no time zone moves the day. */
-const shortDate = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
+export const shortDate = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 
 /** One baseline measure: the firm before Knomee against the same measure since, each bar
     against the larger of the two. */
@@ -152,7 +154,7 @@ function Trail({ c }: { c: KnomeeClient }) {
   )
 }
 
-function Reading({ children }: { children: React.ReactNode }) {
+export function Reading({ children }: { children: React.ReactNode }) {
   return (
     <p className="act-reading">
       <span className="act-fix">Fix</span>
@@ -162,7 +164,7 @@ function Reading({ children }: { children: React.ReactNode }) {
 }
 
 /** One step of the funnel: its bar against the group's first step, and what it lost. */
-function Step({ s, unit, flag }: { s: FunnelStep; unit: string; flag?: boolean }) {
+export function Step({ s, unit, flag }: { s: FunnelStep; unit: string; flag?: boolean }) {
   const share = pct(s.count, s.base)
   return (
     <div className={`act-step ${flag ? 'is-flagged' : ''}`}>
@@ -196,11 +198,11 @@ function Step({ s, unit, flag }: { s: FunnelStep; unit: string; flag?: boolean }
 }
 
 export default function ActivationAnalyticsScreen({
-  onProspectAnalytics,
+  onOlderVersion,
   onRemind,
 }: {
-  /** Opens the Prospect Analytics page this one replaced as the landing. */
-  onProspectAnalytics: () => void
+  /** Opens the older Prospect Analytics page this one replaced as the landing. */
+  onOlderVersion: () => void
   /** A nudge to an advisor who isn't sending (the demo only confirms it). */
   onRemind: (name: string) => void
 }) {
@@ -215,9 +217,9 @@ export default function ActivationAnalyticsScreen({
   return (
     <>
       <div className="page-title-row">
-        <h1 className="page-title">Activation Analytics</h1>
-        <button className="btn btn-outline" type="button" onClick={onProspectAnalytics}>
-          Prospect Analytics
+        <h1 className="page-title">Prospect Analytics</h1>
+        <button className="btn btn-outline" type="button" onClick={onOlderVersion}>
+          Older Version
         </button>
       </div>
 

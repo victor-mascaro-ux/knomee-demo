@@ -408,6 +408,20 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
 .page-title-row .btn {
   flex: none;
 }
+/* An older page kept behind a button, under the name the new one now carries:
+   a quiet tag beside the title says which one this is. */
+.page-title-tag {
+  display: inline-block;
+  margin-left: var(--space-12);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--k-pearl);
+  color: var(--k-slate);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
 .page-title {
   font-size: var(--text-5xl);
   font-weight: 600;
