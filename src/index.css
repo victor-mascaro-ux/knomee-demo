@@ -5188,7 +5188,9 @@ button.name-link-btn:hover .name-text {
   color: var(--plum);
 }
 
-/* Which email: the toolkit's samples, and the toolkit they come from. */
+/* Which email: the toolkit's lead type and its emails, as the adventures'
+   starter pills (memoryAsk.css, picked as in questionModal.css), and the
+   toolkit they come from. */
 .invite-template-head {
   display: flex;
   align-items: baseline;
@@ -5208,16 +5210,17 @@ button.name-link-btn:hover .name-text {
 .invite-toolkit-link:hover {
   color: var(--plum);
 }
-/* The recipient's field, as a dropdown. */
-button.invite-select {
-  width: 100%;
-  font: inherit;
-  font-size: 14px;
-  padding: 11px 13px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  color: #1a1a1a;
-  background: #fff;
+.mem-starters.invite-picks {
+  margin-bottom: 0;
+}
+.invite-type-label {
+  margin-top: 14px;
+}
+/* When the picked email is sent, where the toolkit says. */
+.invite-pick-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--grey-text);
 }
 
 /* A {{placeholder}} still to fill, inline in the email — the toolkit's own
@@ -5330,12 +5333,13 @@ button.invite-select {
   height: 22px;
 }
 /* The email's one button, in the firm's colour: the top bar's --brand-bar,
-   knomee plum without a brand. A pill, as the toolkit copies it. */
+   knomee plum without a brand. The design system's button (.btn): a rounded
+   square, as the Invite button that opens this modal. */
 .invite-cta {
   display: inline-block;
   margin: 0 0 14px;
-  padding: 10px 20px;
-  border-radius: 999px;
+  padding: 11px 20px;
+  border-radius: 10px;
   background: var(--brand-bar, var(--plum));
   color: #fff;
   font-size: 13px;

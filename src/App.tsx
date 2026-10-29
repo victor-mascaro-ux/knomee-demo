@@ -125,8 +125,15 @@ import moodNeutral from './assets/moods/neutral.svg'
 import moodGood from './assets/moods/good.svg'
 import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS, type ClientBrand } from './components/clientBrands'
-import { INVITE_EMAILS, placeholdersIn, toolkitFirmName, toolkitUrl, type InviteEmail } from './data/inviteEmails'
-import SelectMenu from './components/SelectMenu'
+import {
+  INVITE_EMAILS,
+  emailLabel,
+  placeholdersIn,
+  stagesOf,
+  toolkitFirmName,
+  toolkitUrl,
+  type InviteEmail,
+} from './data/inviteEmails'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
@@ -3127,6 +3134,11 @@ function InviteModal({
   const [flagged, setFlagged] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
   const samples = INVITE_EMAILS[kind]
+  const pick = (id: string) => {
+    setPicks((p) => ({ ...p, [kind]: id }))
+    setFlagged(false)
+    setPreviewOpen(true)
+  }
   const sample = samples.find((e) => e.id === picks[kind]) ?? samples[0]
   const draft = drafts[sample.id] ?? sample
   const edited =
@@ -3252,10 +3264,13 @@ function InviteModal({
                 <SendGlyph />
               </FeedbackButton>
             </div>
+            {/* Which email: the toolkit's lead (or client) type, then the
+                emails it has for that type — the adventures' starter pills,
+                one picked at a time. */}
             <div className="invite-template-head">
-              <label className="invite-field-label" htmlFor="invite-template">
-                Template
-              </label>
+              <span className="invite-field-label" id="invite-stage">
+                {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
+              </span>
               <a
                 className="invite-toolkit-link"
                 href={toolkitUrl(kind, sample.stage, brandId)}
@@ -3265,17 +3280,43 @@ function InviteModal({
                 Open {label} Toolkit <ExternalGlyph />
               </a>
             </div>
-            <SelectMenu
-              id="invite-template"
-              className="invite-select"
-              value={sample.id}
-              options={samples.map((e) => ({ value: e.id, label: `${e.stage} · ${e.subject}` }))}
-              onChange={(id) => {
-                setPicks((p) => ({ ...p, [kind]: id }))
-                setFlagged(false)
-                setPreviewOpen(true)
-              }}
-            />
+            <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
+              {stagesOf(kind).map((stage, i) => (
+                <button
+                  key={stage}
+                  type="button"
+                  className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
+                  style={{ ['--i' as string]: i }}
+                  aria-pressed={sample.stage === stage}
+                  onClick={() => {
+                    if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
+                  }}
+                >
+                  {stage}
+                </button>
+              ))}
+            </div>
+            <span className="invite-field-label invite-type-label" id="invite-type">
+              Email Type
+            </span>
+            {/* Keyed on the type, so its emails come in as the type changes. */}
+            <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
+              {samples
+                .filter((e) => e.stage === sample.stage)
+                .map((e, i) => (
+                  <button
+                    key={e.id}
+                    type="button"
+                    className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
+                    style={{ ['--i' as string]: i }}
+                    aria-pressed={e.id === sample.id}
+                    onClick={() => pick(e.id)}
+                  >
+                    {emailLabel(e)}
+                  </button>
+                ))}
+            </div>
+            {sample.note && <p className="invite-pick-note">{sample.note}</p>}
             <button
               className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
               type="button"

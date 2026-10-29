@@ -19,8 +19,12 @@ export interface InviteEmail {
   id: string
   /** The lead or client type it is written for — the toolkit's section. */
   stage: string
-  /** The toolkit's own label for it. */
-  type: string
+  /** What kind of email it is, from the toolkit's label for it
+      ("Email · Nurture · Option 1"): the name, the option, and the note on
+      when to send it. */
+  name: string
+  option?: number
+  note?: string
   subject: string
   /** Above the button. Paragraphs are split by a blank line. */
   message: string
@@ -37,7 +41,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'cold-1',
       stage: 'Cold',
-      type: 'Email · Curiosity · Option 1',
+      name: 'Curiosity',
+      option: 1,
       subject: 'How well does your financial advisor really know you?',
       message:
         'Hi {{First Name}},\n\nMost financial advisors know your portfolio.\n\nFar fewer understand what’s actually driving your decisions.\n\nWe’ve created a short, 8-minute experience that helps uncover what’s most important to you, what’s changing in your life, and the questions worth discussing with an advisor.\n\nAt the end, you’ll receive a personalized summary that’s yours to keep.\n\nNo sales pitch. No obligation. Just a clearer picture of what matters most to you — and whether your financial plan reflects it.',
@@ -47,7 +52,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'cold-2',
       stage: 'Cold',
-      type: 'Email · No Strings · Option 2',
+      name: 'No Strings',
+      option: 2,
       subject: 'Most financial conversations start in the wrong place',
       message:
         'Hi {{First Name}},\n\nMost financial conversations start with your money. Here’s a different place to start: you.\n\nI’m offering a free 8-minute guided experience that helps you clarify what you want your money to make possible, what matters most right now, and the financial questions you want answered.\n\nYou’ll walk away with:\n- A clearer understanding of what’s most important to you\n- Personalized insights about your financial priorities\n- Better questions to ask any financial advisor\n\nNo appointment required.',
@@ -57,7 +63,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'warm-1',
       stage: 'Warm',
-      type: 'Email · Nurture · Option 1',
+      name: 'Nurture',
+      option: 1,
       subject: 'Before your next financial decision',
       message:
         'Hi {{First Name}},\n\nYou’ve probably spent time thinking about your investments.\n\nBut have you spent time thinking about what you actually want them to accomplish?\n\nWe’ve partnered with Knomee to offer a free, research-backed experience that helps you better understand what’s driving your financial decisions.\n\nIn about 8 minutes, you’ll receive:\n- Personalized insights about your financial priorities\n- Your top three money questions\n- A summary you can keep and use in future financial conversations\n\nWhether you’re planning your next move or simply looking for more clarity, it’s a worthwhile investment of eight minutes.',
@@ -67,7 +74,7 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'warm-2',
       stage: 'Warm',
-      type: 'Email · Newsletter Feature',
+      name: 'Newsletter Feature',
       subject: 'A new way to get clear on what matters',
       message:
         'We’re excited to partner with Knomee, a research-backed experience to help you explore what matters most, what you want next, and what you want your wealth to make possible.\n\nIn just 8 minutes, you’ll discover what’s shaping your financial priorities, uncover your top three money questions, and receive personalized insights you can keep.\n\nIt’s a different way to prepare for your next financial conversation, and perhaps a better one.',
@@ -77,7 +84,7 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'hot-1',
       stage: 'Hot',
-      type: 'Email · Confirmation',
+      name: 'Confirmation',
       subject: 'Before we meet',
       message:
         'Hi {{First Name}},\n\nI’m looking forward to meeting you.\n\nBefore we do, take about 8 minutes for this guided experience. It will help you organize your thoughts, uncover your top three money questions, and see what’s driving your financial decisions, with personalized insights that are yours to keep.\n\nYou’ll come to our meeting with more clarity, and rather than spending it on basic fact-finding, we’ll focus on the questions, goals, and opportunities that matter most to you.',
@@ -87,7 +94,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'hot-2',
       stage: 'Hot',
-      type: 'Email · Reminder · 2 days before',
+      name: 'Reminder',
+      note: '2 days before',
       subject: 'A quick reminder before we meet',
       message:
         'Hi {{First Name}},\n\nI’m looking forward to our conversation on {{Day}}.\n\nIf you haven’t had a chance yet, there’s still time to take the short 8-minute experience I sent over.\n\nIt will help you clarify what’s most important to you and identify your top three money questions, so you can come to our conversation knowing what you want to get out of it.\n\nI’ll review your responses in advance so we can spend less time on background questions and more time discussing what’s most relevant to you.\n\nThe personalized insights are yours to keep, whatever you decide.',
@@ -97,7 +105,7 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'hot-3',
       stage: 'Hot',
-      type: 'Email · Meeting Follow-Up',
+      name: 'Meeting Follow-Up',
       subject: 'Thank you',
       message:
         'Hi {{First Name}},\n\nThank you again for meeting with me. I enjoyed our conversation.\n\nAs you reflect on what we discussed, the 8-minute Knomee experience is a useful way to take that thinking further. You’ll clarify what you want your wealth to make possible, uncover your 3 most important financial questions, and receive personalized insights to keep.',
@@ -109,7 +117,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'eng-1',
       stage: 'Engaged',
-      type: 'Email · Pre-Meeting Invite · 2 weeks before',
+      name: 'Pre-Meeting Invite',
+      note: '2 weeks before',
       subject: 'A quick check-in before we connect',
       message:
         'Hi {{First Name}},\n\nAhead of our meeting, I want to make sure our conversation is focused on what matters most to you right now.\n\nKnomee is a brief experience that helps you reflect on your goals, priorities, and what’s top of mind. Take a few minutes with it before we meet — you’ll get a personal summary to keep, and you’ll come to our conversation clearer on what you want from it:',
@@ -119,7 +128,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'eng-2',
       stage: 'Engaged',
-      type: 'Email · Mid-Year Pulse · between reviews',
+      name: 'Mid-Year Pulse',
+      note: 'Between reviews',
       subject: 'A quick mid-year check-in',
       message:
         'Hi {{First Name}},\n\nA lot can change between reviews. I wanted to reach out with a quick mid-year check-in.\n\nIf anything has shifted, Knomee is a simple way to take stock of what’s changed for you, so our next meeting starts with what matters now.',
@@ -129,7 +139,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'eng-3',
       stage: 'Engaged',
-      type: 'Email · Meeting Recap · 1–2 days after',
+      name: 'Meeting Recap',
+      note: '1–2 days after',
       subject: 'Great connecting today',
       message:
         'Hi {{First Name}},\n\nThank you for meeting today. As a recap, the main areas we discussed: {{Priority 1}}, {{Priority 2}}, {{Priority 3}}. Next steps: {{Next Step 1}}, {{Next Step 2}}.\n\nI’ll keep your Knomee responses in mind as we continue working together.',
@@ -139,7 +150,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'dis-1',
       stage: 'Disengaged',
-      type: 'Email · Annual Check-In · the default re-opener',
+      name: 'Annual Check-In',
+      note: 'The default re-opener',
       subject: 'A quick check-in to make sure we’re focused on what matters',
       message:
         'Hi {{First Name}},\n\nIt’s been a while since we connected, and I wanted to reach out with a quick check-in.\n\nRather than assume your priorities are the same, I’d like to give you a simple way to see what’s top of mind for you now. Knomee is a brief experience that helps you reflect on what may have changed, and you’ll get a personal summary to keep.',
@@ -149,7 +161,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
     {
       id: 'dis-2',
       stage: 'Disengaged',
-      type: 'Email · Life-Event Check-In · when something changed',
+      name: 'Life-Event Check-In',
+      note: 'When something changed',
       subject: 'A quick check-in on changes in your financial picture',
       message:
         'Hi {{First Name}},\n\nI wanted to check in on whether anything has changed in your financial picture or planning needs since we last spoke.\n\nIf new responsibilities or questions have come up, Knomee is a helpful starting point. It helps you sort out what’s changed and what you most want answered, and you’ll get a personal summary to keep.',
@@ -157,6 +170,20 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       signoff: SIGNED,
     },
   ],
+}
+
+const ALL = [...INVITE_EMAILS.prospect, ...INVITE_EMAILS.client]
+
+/** The lead or client types, in the toolkit's order. */
+export function stagesOf(audience: InviteAudience): string[] {
+  return [...new Set(INVITE_EMAILS[audience].map((e) => e.stage))]
+}
+
+/** "Curiosity · Option 1" — but an Option 1 with no other option beside it
+    in its stage is not a choice between two, so it is just its name. */
+export function emailLabel(e: InviteEmail): string {
+  const paired = !!e.option && ALL.some((o) => o !== e && o.stage === e.stage && o.option)
+  return paired ? `${e.name} · Option ${e.option}` : e.name
 }
 
 /* Only firms with their own toolkit edition (activation-playbook's firms/)
