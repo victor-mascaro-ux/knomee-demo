@@ -343,9 +343,9 @@ export default function ActivationAnalyticsScreen({
             change={`+${pct(roi.revenuePerClient - baseline.revenuePerClient, baseline.revenuePerClient)}%`}
           />
           <p className="analytics-note">
-            Your baseline is what you entered at onboarding, from the toolkit’s “Know Your Baseline”. Days run from the
+            Your baseline is the three numbers you entered at onboarding, in the toolkit’s Baseline. Days run from the
             invitation to Convert to Client; revenue per client counts the {roi.reportedClients} clients with assets
-            entered. Time to first meeting and meetings to close stay in your CRM: Knomee doesn’t see meetings.
+            entered.
           </p>
           <Reading>
             {roi.estimatedClients} of the {prospectTotals.clients} clients were converted without their assets, so
