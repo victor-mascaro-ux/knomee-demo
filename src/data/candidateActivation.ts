@@ -6,8 +6,9 @@
 // advisor. Only counts leave this file — no name, firm or answer is shown.
 //
 // Where each step comes from:
-// - Recruit Toolkit opened, invite template copied: the toolkit's own events
-//   (toolkit-events, kit "recruit"), not counted until the Firestore rule is in
+// - Recruit Toolkit opened, invite template copied: the toolkit's own events,
+//   written beside the directory (kit "recruit"), one per browser, the team's
+//   own visits and local servers left out (since Oct 29, 2026)
 // - link opened from a toolkit template: the UTM tags the toolkit adds to the
 //   link, stamped on the invite the first time it is opened (since Oct 29, 2026)
 // - invited: the Invite button on Candidates
@@ -20,7 +21,7 @@
 
 import { advisorAdventures } from './advisorFlow'
 import { initials, journeyProgress, journeyStates, type Answers } from './advisorAnswers'
-import { listEntries, listInvites, listJoined, type Entry, type Trouble } from './advisorDirectory'
+import { listEntries, listInvites, listJoined, listToolkitEvents, type Entry, type Trouble } from './advisorDirectory'
 import { funnelSteps, type FunnelStep } from './activation'
 
 /** The day the steps the directory didn't hold before began to be recorded. */
@@ -89,6 +90,10 @@ export interface CandidateFunnel {
   unlinked: number
   /** Links marked as a test when they were made: left out of every count. */
   tests: number
+  /** Recruiters who opened the Recruit Toolkit, and who copied an invitation
+      from it: one per browser. */
+  toolkitOpened: number
+  toolkitCopied: number
   joinedAdvisors: JoinedAdvisor[]
   roi: CandidateRoi
   trouble: Trouble
@@ -119,7 +124,17 @@ function stoppedIn(e: Entry): string {
 }
 
 export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
-  const [inv, ent, sig] = await Promise.all([listInvites(), listEntries(), listJoined()])
+  const [inv, ent, sig, tk] = await Promise.all([
+    listInvites(),
+    listEntries(),
+    listJoined(),
+    listToolkitEvents('recruit'),
+  ])
+  /* The Recruit Toolkit's own events, as recruiters rather than page loads:
+     one per browser. The Knomee team's visits (staff) and local servers (dev)
+     are left out. */
+  const recruiters = (type: string) =>
+    new Set(tk.values.filter((e) => e.type === type && e.env === 'live' && !e.staff).map((e) => e.vid)).size
   /* A link marked as a test when it was made is the team trying the flow, not
      a candidate: it, and every sitting under it, is left out. */
   const invites = inv.values.filter((i) => !i.test)
@@ -231,8 +246,10 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     })),
     unlinked: ent.values.filter((e) => !e.token && e.answered > 0).length,
     tests: inv.values.length - invites.length,
+    toolkitOpened: recruiters('open'),
+    toolkitCopied: recruiters('copy'),
     joinedAdvisors: joinedAdvisors.sort((a, b) => (a.joined < b.joined ? 1 : -1)),
     roi,
-    trouble: inv.trouble ?? ent.trouble ?? sig.trouble,
+    trouble: inv.trouble ?? ent.trouble ?? sig.trouble ?? tk.trouble,
   }
 }
