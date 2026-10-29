@@ -5013,13 +5013,8 @@ button.name-link-btn:hover .name-text {
 }
 
 /* ---------- Invite modal ---------- */
-/* Held at the top of the screen, not centred: Email is tall, Link and QR
-   Code are short, and switching between them moves only the modal's foot,
-   never the tabs under the pointer. As tall as the backdrop allows, in a
-   window or in the comment overlay's band. */
-.modal-backdrop:has(> .invite-modal) {
-  align-items: flex-start;
-}
+/* Centred, as every modal is. As tall as the backdrop allows, in a window or
+   in the comment overlay's band. */
 .invite-modal {
   width: 540px;
   max-height: 100%;
@@ -5107,6 +5102,11 @@ button.name-link-btn:hover .name-text {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+/* Link and QR Code share QR Code's height, so the centred modal holds still
+   between them and the tabs stay under the pointer. */
+.invite-panel-share {
+  min-height: 242px;
 }
 /* 16px under the tabs to whatever a panel starts with: the tab row's 10 and
    the body's 6, nothing of the first thing's own. */
@@ -5491,8 +5491,9 @@ button.name-link-btn:hover .name-text {
   height: 100%;
   display: block;
 }
+/* Copy at the panel's right edge, under the QR: the modal's action side. */
 .invite-qr-copy {
-  align-self: flex-start;
+  align-self: flex-end;
   margin-top: 12px;
 }
 
