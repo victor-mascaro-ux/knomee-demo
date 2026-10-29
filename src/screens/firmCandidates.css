@@ -242,28 +242,28 @@
   background: #b8173e;
 }
 
-/* Signed: the section under the incomplete profiles, in the deep teal this
+/* Joined: the section under the incomplete profiles, in the deep teal this
    design system uses for done. Its rows keep their scores; the top action
-   gives way to when they signed and what they bring, and the bolt becomes a
+   gives way to when they joined and what they bring, and the bolt becomes a
    check that says it was done. (Doubled up with .fc-table: index.css loads
    after this sheet and sets every bolt purple.) */
-.fc-table .group-signed .group-header-inner {
+.fc-table .group-joined .group-header-inner {
   background: var(--k-ocean);
   color: #fff;
 }
-.fc-table .bolt-btn.bolt-signed {
+.fc-table .bolt-btn.bolt-joined {
   background: var(--k-teal-light);
   cursor: default;
 }
-.fc-table .bolt-btn.bolt-signed:hover,
-.fc-table .bolt-btn.bolt-signed:active {
+.fc-table .bolt-btn.bolt-joined:hover,
+.fc-table .bolt-btn.bolt-joined:active {
   transform: none;
   box-shadow: none;
 }
-.fc-table .bolt-signed svg {
+.fc-table .bolt-joined svg {
   stroke: var(--k-ocean);
 }
-.fc-signed-note {
+.fc-joined-note {
   font-weight: 600;
   color: var(--k-ocean);
 }

@@ -14,13 +14,13 @@
 // - opened: the flow, the first time the link is opened
 // - started: the first answer that reaches the directory
 // - finished: every adventure taken to its end
-// - signed: Mark as Signed on Candidates, with the AUM if known (since Oct 29, 2026)
+// - joined: Mark as Joined on Candidates, with the AUM if known (since Oct 29, 2026)
 // Sittings started from the demo itself rather than from a link are the team
 // showing the flow, so they are left out.
 
 import { advisorAdventures } from './advisorFlow'
 import { initials, journeyProgress, journeyStates, type Answers } from './advisorAnswers'
-import { listEntries, listInvites, listSigned, type Entry, type Trouble } from './advisorDirectory'
+import { listEntries, listInvites, listJoined, type Entry, type Trouble } from './advisorDirectory'
 import { funnelSteps, type FunnelStep } from './activation'
 
 /** The day the steps the directory didn't hold before began to be recorded. */
@@ -30,14 +30,14 @@ export const COLLECTING_SINCE = '2026-10-29'
    entered at onboarding (ACME's numbers, from firms/acme.json in
    activation-playbook). The same three numbers the ROI card measures. */
 export const recruitBaseline = {
-  signedRate: 0.15, // first conversation to signed
-  daysToDecision: 150, // first conversation to signed
-  aumPerAdvisor: 250, // $M per signed advisor
+  joinedRate: 0.15, // first conversation to joined
+  daysToDecision: 150, // first conversation to joined
+  aumPerAdvisor: 250, // $M per joined advisor
 }
 
-/** One advisor marked as signed, and the path that brought them. Initials
+/** One advisor marked as joined, and the path that brought them. Initials
     only: the page names nobody. */
-export interface SignedAdvisor {
+export interface JoinedAdvisor {
   key: string
   who: string
   /** The toolkit template the link was copied from, if it carried one. */
@@ -46,23 +46,23 @@ export interface SignedAdvisor {
   opened: string | null
   /** When their finished sitting was last written. */
   finished: string | null
-  signed: string
+  joined: string
   aum: number | null
   days: number
 }
 
 /** What Knomee brought, against the baseline. Null where nothing is counted yet. */
 export interface CandidateRoi {
-  /** Advisors who finished the flow since signing began to be recorded: the
-      ones a signed rate can fairly be read against. */
+  /** Advisors who finished the flow since joining began to be recorded: the
+      ones a joined rate can fairly be read against. */
   finishedSince: number
-  signedRate: number | null
+  joinedRate: number | null
   daysToDecision: number | null
   aumPerAdvisor: number | null
-  /** AUM entered, plus your average for each advisor signed without it ($M). */
+  /** AUM entered, plus your average for each advisor joined without it ($M). */
   aumTotal: number
   expectedAtBaseline: number
-  extraSigned: number | null
+  extraJoined: number | null
 }
 
 export interface CandidateFunnel {
@@ -72,14 +72,14 @@ export interface CandidateFunnel {
   opened: number
   started: number
   finished: number
-  signed: number
-  /** The AUM entered when they were signed, in $M, and how many it covers. */
-  signedAum: number
-  signedWithAum: number
+  joined: number
+  /** The AUM entered when they were joined, in $M, and how many it covers. */
+  joinedAum: number
+  joinedWithAum: number
   /** Links opened from an activation toolkit template (its UTM tags). */
   fromToolkit: number
   steps: FunnelStep[]
-  /** The step that loses the most people. Signed is left out: it has only
+  /** The step that loses the most people. Joined is left out: it has only
       been recorded since Oct 29, 2026. */
   biggestLoss: FunnelStep | null
   /** Advisors who started and didn't finish, by where they stopped: the name
@@ -87,7 +87,7 @@ export interface CandidateFunnel {
   stopped: { where: string; count: number }[]
   /** Sittings started from the demo rather than a link — left out. */
   unlinked: number
-  signedAdvisors: SignedAdvisor[]
+  joinedAdvisors: JoinedAdvisor[]
   roi: CandidateRoi
   trouble: Trouble
 }
@@ -117,9 +117,9 @@ function stoppedIn(e: Entry): string {
 }
 
 export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
-  const [inv, ent, sig] = await Promise.all([listInvites(), listEntries(), listSigned()])
+  const [inv, ent, sig] = await Promise.all([listInvites(), listEntries(), listJoined()])
   const invites = inv.values
-  const signedBy = new Map(sig.values.map((v) => [v.id, v]))
+  const joinedBy = new Map(sig.values.map((v) => [v.id, v]))
   const byToken = new Map<string, Entry[]>()
   for (const e of ent.values) {
     if (!e.token) continue
@@ -129,15 +129,15 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
   let opened = 0
   let started = 0
   let finished = 0
-  let signed = 0
-  let signedAum = 0
-  let signedWithAum = 0
+  let joined = 0
+  let joinedAum = 0
+  let joinedWithAum = 0
   let fromToolkit = 0
   let finishedSince = 0
-  /* Of those, the ones signed: the rate's own numerator, so an advisor who
-     finished before signing was recorded can't push it past 100%. */
-  let signedOfSince = 0
-  const signedAdvisors: SignedAdvisor[] = []
+  /* Of those, the ones joined: the rate's own numerator, so an advisor who
+     finished before joining was recorded can't push it past 100%. */
+  let joinedOfSince = 0
+  const joinedAdvisors: JoinedAdvisor[] = []
   const stops = new Map<string, number>()
   const days = (from: string, to: string) => Math.max(0, Math.round((Date.parse(to) - Date.parse(from)) / 864e5))
   for (const i of invites) {
@@ -152,23 +152,23 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     if (didFinish) finished++
     const finishedLately = !!done && done.at >= COLLECTING_SINCE
     if (finishedLately) finishedSince++
-    const mark = sittings.map((e) => signedBy.get(e.id)).find(Boolean)
+    const mark = sittings.map((e) => joinedBy.get(e.id)).find(Boolean)
     if (mark) {
-      signed++
-      if (finishedLately) signedOfSince++
+      joined++
+      if (finishedLately) joinedOfSince++
       if (mark.aum) {
-        signedAum += mark.aum
-        signedWithAum++
+        joinedAum += mark.aum
+        joinedWithAum++
       }
       const furthest = sittings.reduce((a, b) => (b.answered > a.answered ? b : a))
-      signedAdvisors.push({
+      joinedAdvisors.push({
         key: mark.id,
         who: initials(furthest.name || i.name) || 'Advisor',
         template: i.openedVia?.source === 'knomee-toolkit' ? (i.openedVia.content ?? null) : null,
         sent: i.createdAt,
         opened: i.openedAt,
         finished: done?.at ?? null,
-        signed: mark.at,
+        joined: mark.at,
         aum: mark.aum,
         days: days(i.createdAt, mark.at),
       })
@@ -187,22 +187,22 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     { label: 'Opened the link', count: opened, lostLabel: 'never opened it' },
     { label: 'Started answering', count: started, lostLabel: 'opened, answered nothing' },
     { label: 'Finished the flow', count: finished, lostLabel: 'stopped partway' },
-    { label: 'Signed', count: signed, lostLabel: 'finished, not signed yet' },
+    { label: 'Joined', count: joined, lostLabel: 'finished, not joined yet' },
   ])
   const measured = steps.slice(1, 4)
   const biggestLoss = measured.reduce<FunnelStep | null>(
     (a, b) => ((b.lost ?? 0) > (a?.lost ?? 0) ? b : a),
     null,
   )
-  const expectedAtBaseline = Math.round(finishedSince * recruitBaseline.signedRate)
+  const expectedAtBaseline = Math.round(finishedSince * recruitBaseline.joinedRate)
   const roi: CandidateRoi = {
     finishedSince,
-    signedRate: signedOfSince && finishedSince ? signedOfSince / finishedSince : null,
-    daysToDecision: signed ? Math.round(signedAdvisors.reduce((a, s) => a + s.days, 0) / signed) : null,
-    aumPerAdvisor: signedWithAum ? signedAum / signedWithAum : null,
-    aumTotal: signedAum + (signed - signedWithAum) * recruitBaseline.aumPerAdvisor,
+    joinedRate: joinedOfSince && finishedSince ? joinedOfSince / finishedSince : null,
+    daysToDecision: joined ? Math.round(joinedAdvisors.reduce((a, s) => a + s.days, 0) / joined) : null,
+    aumPerAdvisor: joinedWithAum ? joinedAum / joinedWithAum : null,
+    aumTotal: joinedAum + (joined - joinedWithAum) * recruitBaseline.aumPerAdvisor,
     expectedAtBaseline,
-    extraSigned: signedOfSince ? signedOfSince - expectedAtBaseline : null,
+    extraJoined: joinedOfSince ? joinedOfSince - expectedAtBaseline : null,
   }
   const since = invites.reduce<string | null>(
     (a, i) => (i.createdAt && (!a || i.createdAt < a) ? i.createdAt : a),
@@ -215,9 +215,9 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     opened,
     started,
     finished,
-    signed,
-    signedAum,
-    signedWithAum,
+    joined,
+    joinedAum,
+    joinedWithAum,
     fromToolkit,
     steps,
     biggestLoss,
@@ -226,7 +226,7 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
       count: stops.get(where) ?? 0,
     })),
     unlinked: ent.values.filter((e) => !e.token && e.answered > 0).length,
-    signedAdvisors: signedAdvisors.sort((a, b) => (a.signed < b.signed ? 1 : -1)),
+    joinedAdvisors: joinedAdvisors.sort((a, b) => (a.joined < b.joined ? 1 : -1)),
     roi,
     trouble: inv.trouble ?? ent.trouble ?? sig.trouble,
   }
