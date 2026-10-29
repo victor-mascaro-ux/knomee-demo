@@ -310,24 +310,32 @@ export async function deleteEntry(id: string): Promise<Trouble> {
   return drop(`${ROOT}/sittings/${id}`)
 }
 
-/* ── added to the Network ───────────────────────────────────────────────── */
+/* ── signed ─────────────────────────────────────────────────────────────── */
 
-/** The candidate funnel's last step: Add to Network, on a sitting the
-    directory holds. Kept in a collection of its own, keyed by sitting, because
-    the flow writes the sitting's document whole on every answer and would drop
-    a field added beside it. Recorded since Oct 29, 2026. */
-export interface Added {
+/** The candidate funnel's last step: Mark as Signed, the firm's Convert to
+    Client, on a sitting the directory holds. Kept in a collection of its own,
+    keyed by sitting, because the flow writes the sitting's document whole on
+    every answer and would drop a field added beside it. Recorded since Oct 29,
+    2026. */
+export interface Signed {
   id: string
   token: string | null
   at: string
+  /** The book coming over, in $M, when the recruiter knows it. */
+  aum: number | null
 }
 
-export async function noteAdded(id: string, token: string | null): Promise<Trouble> {
-  return put(`${ROOT}/added/${id}`, { id, token, at: new Date().toISOString() } satisfies Added)
+export async function noteSigned(id: string, token: string | null, aum: number | null): Promise<Trouble> {
+  return put(`${ROOT}/signed/${id}`, { id, token, at: new Date().toISOString(), aum } satisfies Signed)
 }
 
-export async function listAdded() {
-  return list<Added>('added')
+/** Undo: the advisor goes back to their tier. */
+export async function dropSigned(id: string): Promise<Trouble> {
+  return drop(`${ROOT}/signed/${id}`)
+}
+
+export async function listSigned() {
+  return list<Signed>('signed')
 }
 
 /* ── what a screen shows ────────────────────────────────────────────────── */

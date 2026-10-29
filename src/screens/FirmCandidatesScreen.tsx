@@ -13,7 +13,7 @@
    screen cannot disagree. */
 
 import { InvitePanel } from './AdvisorDirectoryScreen'
-import { deleteEntry, deleteInvite, inviteLink, listEntries, noteAdded, type Trouble } from '../data/advisorDirectory'
+import { deleteEntry, deleteInvite, inviteLink, listEntries, type Signed, type Trouble } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -35,6 +35,7 @@ import KnomeeLoader from '../components/KnomeeLoader'
 import {
   CaretDown,
   ChartIcon,
+  CheckIcon,
   ChevronDown,
   CloseIcon,
   DownloadIcon,
@@ -266,17 +267,30 @@ function CandidateInsights({
 
 /* ── the table ──────────────────────────────────────────────────────────── */
 
+/** How a signed mark is filed: a live sitting by its id, the worked example
+    by name. */
+export const signKey = (c: Candidate) => ('entryId' in c ? (c as LiveCandidate).entryId : c.name)
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+/** "2026-10-29T…" → "Oct 29", read off the string so no time zone moves the day. */
+const shortDay = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
+
 function Row({
   c,
+  mark,
   onOpen,
-  onAdd,
+  onSign,
+  onUnsign,
   onRemove,
   checked,
   onToggle,
 }: {
   c: Candidate
+  /** Set once the advisor is marked as signed. */
+  mark?: Signed
   onOpen: (c: Candidate) => void
-  onAdd: (c: Candidate) => void
+  onSign: (c: Candidate) => void
+  onUnsign: (c: Candidate) => void
   /** Only a live sitting can be removed; the worked example cannot. */
   onRemove?: (c: LiveCandidate) => void
   checked: boolean
@@ -284,7 +298,7 @@ function Row({
 }) {
   const incomplete = c.tier === 'incomplete'
   return (
-    <tr className={incomplete ? 'row-incomplete' : undefined}>
+    <tr className={incomplete ? 'row-incomplete' : mark ? 'row-signed' : undefined}>
       <td className="col-check">
         <input
           type="checkbox"
@@ -337,28 +351,41 @@ function Row({
       )}
       <td className="col-completed">{c.completed ?? '–'}</td>
       <td className="col-action">
-        <div className="top-action">
-          <div className="top-action-text">{c.topAction}</div>
-          <div className="top-action-pop">{c.topAction}</div>
-        </div>
+        {mark ? (
+          <div className="fc-signed-note">
+            Signed {shortDay(mark.at)} · {mark.aum != null ? `$${mark.aum.toLocaleString('en-US')}M AUM` : 'AUM not entered'}
+          </div>
+        ) : (
+          <div className="top-action">
+            <div className="top-action-text">{c.topAction}</div>
+            <div className="top-action-pop">{c.topAction}</div>
+          </div>
+        )}
       </td>
-      {/* The advisor's bolt converts a prospect; this one adds an advisor to
-          the network. Same control, same place, because it is the same move —
-          the row's one action, taken without opening the profile. */}
+      {/* The advisor's bolt converts a prospect; this one marks an advisor as
+          signed. Same control, same place, because it is the same move — the
+          row's one action, taken without opening the profile. Once signed, it
+          shows that it was done. */}
       <td className="col-bolt">
-        <button
-          className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${c.tier}`}`}
-          type="button"
-          title={incomplete ? undefined : 'Add to Network'}
-          aria-label={incomplete ? undefined : 'Add to Network'}
-          onClick={() => {
-            if (!incomplete) onAdd(c)
-          }}
-        >
-          <LightningIcon
-            color={incomplete ? '#c9c9c9' : c.tier === 'tier3' ? '#240446' : '#ffffff'}
-          />
-        </button>
+        {mark ? (
+          <span className="bolt-btn bolt-signed" title={`Signed ${shortDay(mark.at)}`} aria-label="Signed">
+            <CheckIcon />
+          </span>
+        ) : (
+          <button
+            className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${c.tier}`}`}
+            type="button"
+            title={incomplete ? undefined : 'Mark as Signed'}
+            aria-label={incomplete ? undefined : 'Mark as Signed'}
+            onClick={() => {
+              if (!incomplete) onSign(c)
+            }}
+          >
+            <LightningIcon
+              color={incomplete ? '#c9c9c9' : c.tier === 'tier3' ? '#240446' : '#ffffff'}
+            />
+          </button>
+        )}
       </td>
       <td className="col-dots">
         <RowMenu
@@ -366,7 +393,9 @@ function Row({
             ...(incomplete
               ? [{ label: 'View Profile', disabled: true }]
               : [
-                  { label: 'Add to Network', onClick: () => onAdd(c) },
+                  mark
+                    ? { label: 'Undo Signed', onClick: () => onUnsign(c) }
+                    : { label: 'Mark as Signed', onClick: () => onSign(c) },
                   {
                     label: 'View Profile',
                     disabled: !opensProfile(c),
@@ -398,8 +427,10 @@ function Row({
 
 function Table({
   rows,
+  signed,
   onOpen,
-  onAdd,
+  onSign,
+  onUnsign,
   onRemove,
   selected,
   onToggle,
@@ -407,8 +438,10 @@ function Table({
   onToggleAll,
 }: {
   rows: Candidate[]
+  signed: Record<string, Signed>
   onOpen: (c: Candidate) => void
-  onAdd: (c: Candidate) => void
+  onSign: (c: Candidate) => void
+  onUnsign: (c: Candidate) => void
   onRemove: (c: LiveCandidate) => void
   selected: Set<string>
   onToggle: (name: string) => void
@@ -431,11 +464,14 @@ function Table({
     )
     return [...scored, ...rs.filter((c) => c.kq === null)]
   }
-  const orderedGroups = (() => {
+  /* Signed advisors leave their tier for a section of their own, last, under
+     the incomplete profiles: the pipeline's finished business. */
+  const orderedGroups: { id: string; title: string; range?: string }[] = (() => {
     const scored = tierGroups.filter((g) => g.id !== 'incomplete')
     const rest = tierGroups.filter((g) => g.id === 'incomplete')
-    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest]
+    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest, { id: 'signed', title: 'SIGNED' }]
   })()
+  const markOf = (c: Candidate) => signed[signKey(c)]
 
   return (
     <div className="table-wrap">
@@ -479,7 +515,9 @@ function Table({
         </thead>
         <tbody>
           {orderedGroups.map((group) => {
-            const inGroup = rows.filter((c) => c.tier === (group.id as Tier))
+            const inGroup = rows.filter((c) =>
+              group.id === 'signed' ? !!markOf(c) : !markOf(c) && c.tier === (group.id as Tier),
+            )
             if (inGroup.length === 0) return null
             const isCollapsed = collapsed.has(group.id)
             return (
@@ -517,9 +555,11 @@ function Table({
                   sortRows(inGroup).map((c) => (
                     <Row
                       c={c}
+                      mark={markOf(c)}
                       key={'entryId' in c ? (c as LiveCandidate).entryId : c.name}
                       onOpen={onOpen}
-                      onAdd={onAdd}
+                      onSign={onSign}
+                      onUnsign={onUnsign}
                       onRemove={onRemove}
                       checked={selected.has(c.name)}
                       onToggle={() => onToggle(c.name)}
@@ -578,7 +618,9 @@ export default function FirmCandidatesScreen({
   onOpenProfile,
   onOpenEntry,
   onDownload,
-  onAdd,
+  signed,
+  onSign,
+  onUnsign,
   onRemoved,
 }: {
   /** An entry removed from the pipeline. */
@@ -587,7 +629,11 @@ export default function FirmCandidatesScreen({
   /** A live sitting's row: opens the report built from its answers. */
   onOpenEntry: (entryId: string) => void
   onDownload: () => void
-  onAdd: (c: Candidate) => void
+  /** Advisors marked as signed, by `signKey`. */
+  signed: Record<string, Signed>
+  /** Mark as Signed: the firm's Convert to Client (App asks for the AUM). */
+  onSign: (c: Candidate) => void
+  onUnsign: (c: Candidate) => void
 }) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
@@ -610,13 +656,6 @@ export default function FirmCandidatesScreen({
     const newest = rowsLive.reduce<LiveCandidate | null>((a, c) => (!a || c.at > a.at ? c : a), null)
     setLive(rowsLive.map((c) => ({ ...c, isNew: c === newest })))
   }, [])
-  /* Adding a live row to the Network is the candidate funnel's last step, so
-     it is recorded (Candidate Analytics counts it); a placeholder row only
-     confirms. */
-  const add = (c: Candidate) => {
-    if ('entryId' in c) void noteAdded((c as LiveCandidate).entryId, (c as LiveCandidate).token)
-    onAdd(c)
-  }
   /* Removing a sitting: asked once, since it throws its answers away. */
   const [removing, setRemoving] = useState<LiveCandidate | null>(null)
   const remove = async (c: LiveCandidate) => {
@@ -737,7 +776,9 @@ export default function FirmCandidatesScreen({
         rows={rows}
         onOpen={openRow}
         onRemove={setRemoving}
-        onAdd={add}
+        signed={signed}
+        onSign={onSign}
+        onUnsign={onUnsign}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}

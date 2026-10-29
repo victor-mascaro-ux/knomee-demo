@@ -1,27 +1,59 @@
 /* Candidate Analytics — the page #/firm-analytics opens on.
 
    The recruiting side of the activation tracking, built like Prospect
-   Analytics (its cards, KPI tiles and funnel steps are that page's) but on
-   real data: the advisor directory, read each time the page opens. A
-   recruiter sends a link from the Recruit Toolkit; the advisor opens it,
-   starts answering, finishes, and is added to the Network. The two toolkit
+   Analytics (its cards, KPI tiles, funnel steps, ROI card and trails are that
+   page's) but on real data: the advisor directory, read each time the page
+   opens. A recruiter sends a link from the Recruit Toolkit; the advisor opens
+   it, starts answering, finishes, and is marked as signed. The two toolkit
    steps aren't counted until the toolkit's events can be written, and two
-   steps are recorded from Oct 29, 2026 — each step says where it comes from.
-   Counts only: no name, firm or answer is shown. The older candidate page,
-   with its placeholder pipeline, is one button away, opposite the title. */
+   steps are recorded from Oct 29, 2026 — each step's name says, on hover,
+   what records it. The ROI card measures the firm against the Recruit
+   Toolkit's Baseline. No names: counts, and initials on a signed advisor's
+   trail. The older candidate page, with its placeholder pipeline, is one
+   button away, opposite the title. */
 
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import './activationAnalytics.css'
-import { COLLECTING_SINCE, loadCandidateFunnel, type CandidateFunnel } from '../data/candidateActivation'
-import { HelpTip, pct, Reading, shortDate, Step } from './ActivationAnalyticsScreen'
-import { ChartIcon, CheckIcon, FunnelIcon, TargetIcon, WarnIcon } from '../components/icons'
+import {
+  COLLECTING_SINCE,
+  loadCandidateFunnel,
+  recruitBaseline,
+  type CandidateFunnel,
+  type SignedAdvisor,
+} from '../data/candidateActivation'
+import { HelpTip, pct, Reading, shortDate, Step, StepName } from './ActivationAnalyticsScreen'
+import {
+  CheckIcon,
+  ChevronDown,
+  ChevronUp,
+  FunnelIcon,
+  KnomeeMark,
+  TargetIcon,
+  TierBarsIcon,
+  WarnIcon,
+} from '../components/icons'
 
 const MINUTES = 10
+const SINCE = shortDate(COLLECTING_SINCE)
 
-type Status = 'live' | 'since' | 'waiting'
+/** $M, as recruiters say it: $250M, $1.2B. */
+const aum = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1).replace(/\.0$/, '')}B` : `$${Math.round(m)}M`)
+
+/** What records each step, shown from the step's name. */
+const RECORDED: Record<string, string> = {
+  'Opened the toolkit': 'Recorded by the toolkit’s own “open” event, per firm link.\nCounts once the Firestore rule is in.',
+  'Copied an invitation': 'Recorded by the toolkit’s “copy” event, from Copy Text.\nCounts once the Firestore rule is in.',
+  'Template links opened': `Recorded by the link’s UTM tags, kept on the invite when it’s first opened.\nCounting since ${SINCE}.`,
+  'Sent a link': 'Recorded by Invite, on Candidates.\nLive.',
+  'Opened the link': 'Recorded by the flow, the first time the link opens.\nLive.',
+  'Started answering': 'Recorded by the flow, on the first answer.\nLive.',
+  'Finished the flow': 'Recorded by the flow, once every adventure is taken to its end.\nLive.',
+  Signed: `Recorded by Mark as Signed, on Candidates, with the AUM if known.\nCounting since ${SINCE}.`,
+}
+
+type Status = 'since' | 'waiting'
 const statusChip: Record<Status, { cls: string; label: string }> = {
-  live: { cls: 'is-sending', label: 'Live' },
-  since: { cls: 'is-sending', label: `Since ${shortDate(COLLECTING_SINCE)}` },
+  since: { cls: 'is-sending', label: `Since ${SINCE}` },
   waiting: { cls: 'is-opened', label: 'Needs the Firestore rule' },
 }
 
@@ -41,7 +73,9 @@ function ToolkitStep({ label, count, base, status }: { label: string; count: num
   const share = count != null ? pct(count, base) : 0
   return (
     <div className={`act-step ${count == null ? 'is-pending' : ''}`}>
-      <span className="act-step-label">{label}</span>
+      <span className="act-step-label">
+        <StepName label={label} tip={RECORDED[label]} />
+      </span>
       <span className="act-track">
         {count != null ? (
           <span
@@ -62,17 +96,99 @@ function ToolkitStep({ label, count, base, status }: { label: string; count: num
   )
 }
 
-/** The sources, step by step: what records it, and whether it is counting. */
-const SOURCES: { step: string; by: string; status: Status }[] = [
-  { step: 'Opened the Recruit Toolkit', by: 'The toolkit’s own “open” event, per firm link', status: 'waiting' },
-  { step: 'Copied an invitation', by: 'The toolkit’s “copy” event, from Copy Text', status: 'waiting' },
-  { step: 'Opened a link from a template', by: 'The link’s UTM tags, kept on the invite when it’s first opened', status: 'since' },
-  { step: 'Sent a link', by: 'Invite, on Candidates', status: 'live' },
-  { step: 'Opened the link', by: 'The flow, the first time the link opens', status: 'live' },
-  { step: 'Started answering', by: 'The flow, on the first answer', status: 'live' },
-  { step: 'Finished the flow', by: 'The flow, once every adventure is taken to its end', status: 'live' },
-  { step: 'Added to Network', by: 'Add to Network, on Candidates', status: 'since' },
-]
+/** One baseline measure: the firm before Knomee against the same measure
+    since, each bar against the larger of the two (Prospect Analytics' LiftRow).
+    Until something is counted, the Knomee line says so instead of drawing 0. */
+function LiftRow({
+  label,
+  before,
+  after,
+  show,
+  better,
+}: {
+  label: string
+  before: number
+  after: number | null
+  show: (n: number) => string
+  /** How the change reads, when there is one: words and whether it is good. */
+  better: (before: number, after: number) => { words: string; good: boolean }
+}) {
+  const max = Math.max(before, after ?? 0)
+  const change = after != null ? better(before, after) : null
+  return (
+    <div className="act-lift-row">
+      <span className="act-lift-label">{label}</span>
+      <span className="act-lift-bars">
+        <span className="act-lift-line">
+          <span className="act-track">
+            <span
+              className="act-bar is-before tt"
+              style={{ width: `${(before / max) * 100}%` }}
+              data-tip={`Before Knomee: ${show(before)}`}
+              tabIndex={0}
+            />
+          </span>
+          <span className="act-lift-num is-before">{show(before)}</span>
+        </span>
+        <span className="act-lift-line">
+          {after != null ? (
+            <span className="act-track">
+              <span
+                className="act-bar tt"
+                style={{ width: `${Math.max((after / max) * 100, 2)}%` }}
+                data-tip={`With Knomee: ${show(after)}`}
+                tabIndex={0}
+              />
+            </span>
+          ) : (
+            <span className="act-track act-track-empty">
+              <span className="act-pending-text">Not counted yet</span>
+            </span>
+          )}
+          <span className="act-lift-num">{after != null ? show(after) : '—'}</span>
+        </span>
+      </span>
+      {change ? (
+        <span className={`act-lift-change ${change.good ? '' : 'is-worse'}`}>
+          {change.good ? <CheckIcon /> : <WarnIcon color="currentColor" />}
+          {change.words}
+        </span>
+      ) : (
+        <span className="act-lift-wait">Counting since {SINCE}</span>
+      )}
+    </div>
+  )
+}
+
+/** A signed advisor's path, from the link that started it to the signing. */
+function Trail({ a }: { a: SignedAdvisor }) {
+  return (
+    <ol className="act-trail">
+      <li>
+        <b>Link sent</b>
+        <span>{shortDate(a.sent)}</span>
+        <i>{a.template ? `from the “${a.template}” template` : 'a link without a template tag'}</i>
+      </li>
+      <li>
+        <b>Opened</b>
+        <span>{a.opened ? shortDate(a.opened) : '—'}</span>
+      </li>
+      <li>
+        <b>Finished the flow</b>
+        <span>{a.finished ? shortDate(a.finished) : '—'}</span>
+      </li>
+      <li className="is-client">
+        <b>Signed</b>
+        <span>{shortDate(a.signed)}</span>
+        <i>
+          {a.aum != null
+            ? `${aum(a.aum)} in AUM`
+            : `AUM not entered · ≈ ${aum(recruitBaseline.aumPerAdvisor)}, your average`}
+        </i>
+      </li>
+    </ol>
+  )
+}
 
 export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVersion: () => void }) {
   const [f, setF] = useState<CandidateFunnel | null>(null)
@@ -82,12 +198,20 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
   useEffect(() => {
     void load()
   }, [load])
+  /* One advisor's trail open at a time; the newest is open so the card shows what a trail is. */
+  const [openKey, setOpenKey] = useState<string | null>(null)
+  useEffect(() => {
+    if (f?.signedAdvisors[0]) setOpenKey(f.signedAdvisors[0].key)
+  }, [f])
 
   const loss = f?.biggestLoss ?? null
   const unfinished = f ? f.started - f.finished : 0
   const topStop = f?.stopped.reduce((a, b) => (b.count > a.count ? b : a), f.stopped[0])
   const stoppedMax = f ? Math.max(...f.stopped.map((s) => s.count), 1) : 1
   const num = (n: number | undefined) => (f ? n : '…')
+  const r = f?.roi
+  const withoutAum = f ? f.signed - f.signedWithAum : 0
+  const base = recruitBaseline
 
   return (
     <>
@@ -143,13 +267,116 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
         </div>
       </section>
 
-      {/* 2 ── the funnel: the recruiter's toolkit, then the advisor's flow */}
+      {/* 2 ── ROI: what Knomee brought, against the firm's recruiting from before */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <TierBarsIcon />
+            <span>What Knomee Brought Your Firm</span>
+            <HelpTip
+              side="right"
+              text="AUM from the advisors marked as signed, against your recruiting numbers from before Knomee."
+            />
+          </div>
+        </header>
+        <div className="analytics-body">
+          <div className="act-roi">
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">AUM from Knomee advisors</div>
+              <div className="act-roi-num">{f && f.signed ? aum(r!.aumTotal) : '—'}</div>
+              <div className="act-roi-sub">
+                {!f
+                  ? ' '
+                  : f.signed
+                    ? `${aum(f.signedAum)} entered for ${f.signedWithAum} signed${withoutAum ? `, plus ${withoutAum} at your ${aum(base.aumPerAdvisor)} average` : ''}`
+                    : `No advisor marked as signed yet. Mark as Signed on Candidates counts here from ${SINCE}.`}
+              </div>
+            </div>
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">Above your baseline</div>
+              <div className="act-roi-num">
+                {r?.extraSigned != null ? `${r.extraSigned >= 0 ? '+' : '−'}${Math.abs(r.extraSigned)} signed` : '—'}
+              </div>
+              <div className="act-roi-sub">
+                {!r
+                  ? ' '
+                  : r.finishedSince
+                    ? `${r.finishedSince} finished the flow since ${SINCE}; at your ${Math.round(base.signedRate * 100)}% that’s ${r.expectedAtBaseline} signed.${r.extraSigned && r.extraSigned > 0 ? ` The extra ${r.extraSigned} ≈ ${aum(r.extraSigned * base.aumPerAdvisor)} in AUM.` : ''}`
+                    : `Read against the advisors who finish the flow from ${SINCE} on, at your ${Math.round(base.signedRate * 100)}%.`}
+              </div>
+            </div>
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">Advisors signed</div>
+              <div className="act-roi-num">{f ? f.signed : '…'}</div>
+              <div className="act-roi-sub">
+                {f ? `Of the ${f.finished} who finished the flow and the ${f.invited} links sent` : ' '}
+              </div>
+            </div>
+          </div>
+
+          <div className="act-group-head">
+            <span className="analytics-sub-head">Before Knomee, and since</span>
+            <span className="act-legend">
+              <span>
+                <i className="act-swatch is-before" /> Your baseline
+              </span>
+              <span>
+                <i className="act-swatch" /> With Knomee
+              </span>
+            </span>
+          </div>
+          <LiftRow
+            label="Finished the flow → signed"
+            before={base.signedRate * 100}
+            after={r?.signedRate != null ? r.signedRate * 100 : null}
+            show={(n) => `${Math.round(n)}%`}
+            better={(b, a) => {
+              const d = Math.round(a - b)
+              return { words: `${d >= 0 ? '+' : '−'}${Math.abs(d)} points`, good: d >= 0 }
+            }}
+          />
+          <LiftRow
+            label="Days to a decision"
+            before={base.daysToDecision}
+            after={r?.daysToDecision ?? null}
+            show={(n) => `${Math.round(n)} days`}
+            better={(b, a) => ({ words: b >= a ? `${b - a} days sooner` : `${a - b} days later`, good: b >= a })}
+          />
+          <LiftRow
+            label="AUM per signed advisor"
+            before={base.aumPerAdvisor}
+            after={r?.aumPerAdvisor ?? null}
+            show={aum}
+            better={(b, a) => {
+              const d = pct(a - b, b)
+              return { words: `${d >= 0 ? '+' : '−'}${Math.abs(d)}%`, good: d >= 0 }
+            }}
+          />
+          <p className="analytics-note">
+            Your baseline is the three numbers in the Recruit Toolkit’s Baseline, from onboarding: first conversation to
+            signed, its days, and AUM per signed advisor. With Knomee, finishing the flow stands in for the first
+            conversation, and only advisors who finished it since {SINCE}, when signing began to be recorded, count.
+            Days run from the link sent to Mark as Signed.
+          </p>
+          {withoutAum > 0 && (
+            <Reading>
+              {withoutAum} of the {f!.signed} signed were marked without their AUM, so theirs is your average. Ask
+              recruiters to fill in the one field when they mark someone as signed.
+            </Reading>
+          )}
+        </div>
+      </section>
+
+      {/* 3 ── the funnel: the recruiter's toolkit, then the advisor's flow */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <FunnelIcon />
             <span>From Toolkit to Candidate</span>
-            <HelpTip side="right" text="Counted per invite link, so the step to fix is the one that loses the most people." />
+            <HelpTip
+              side="right"
+              text="Counted per invite link. Hover a step's name to see what records it."
+            />
           </div>
         </header>
         <div className="analytics-body">
@@ -170,7 +397,13 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                 <span className="act-period">{f.since ? `Since ${shortDate(f.since)} · live` : 'Live'}</span>
               </div>
               {f.steps.map((s) => (
-                <Step s={s} unit="advisors" flag={s === loss && (s.lost ?? 0) > 0} key={s.label} />
+                <Step
+                  s={s}
+                  unit="advisors"
+                  flag={s === loss && (s.lost ?? 0) > 0}
+                  tip={RECORDED[s.label]}
+                  key={s.label}
+                />
               ))}
 
               {unfinished > 0 && (
@@ -199,6 +432,12 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                       : `${loss.lost} started and stopped partway${topStop?.count ? `, most at “${topStop.where}”` : ''}. Remind them a day later where they left off${topStop?.count ? `, and look at what “${topStop.where}” asks` : ''}.`}
                 </Reading>
               )}
+              <p className="analytics-note">
+                Real data, read from the directory each time this page opens: counts only, no names. It includes links
+                the team made to try the flow
+                {f.unlinked ? `; the ${f.unlinked} sittings started from the demo itself, not from a link, are left out` : ''}.
+                The toolkit steps count once the toolkit’s events can be written to Firestore.
+              </p>
               {f.trouble && (
                 <p className="analytics-note">
                   {f.trouble}{' '}
@@ -212,43 +451,80 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
         </div>
       </section>
 
-      {/* 3 ── where each number comes from */}
+      {/* 4 ── each signed advisor's trail: the record that says it was Knomee */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
-            <ChartIcon />
-            <span>Where Each Number Comes From</span>
-            <HelpTip side="right" text="What records each step, and whether it is counting yet." />
+            <KnomeeMark size={18} />
+            <span>Advisors Knomee Brought In</span>
+            <HelpTip side="right" text="Each signed advisor's path from the link that started it — open one to see it." />
           </div>
         </header>
         <div className="analytics-body">
-          <div className="act-table-wrap">
-            <table className="act-table">
-              <thead>
-                <tr>
-                  <th>Step</th>
-                  <th>Recorded by</th>
-                  <th>Counting</th>
-                </tr>
-              </thead>
-              <tbody>
-                {SOURCES.map((s) => (
-                  <tr key={s.step}>
-                    <td className="act-adv-name">{s.step}</td>
-                    <td>{s.by}</td>
-                    <td>
-                      <Chip status={s.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="analytics-note">
-            Real data, read from the directory each time this page opens: counts only, no names. It includes links
-            the team made to try the flow{f && f.unlinked ? `; the ${f.unlinked} sittings started from the demo itself, not from a link, are left out` : ''}.
-            The toolkit steps count once the toolkit’s events can be written to Firestore.
-          </p>
+          {f && f.signedAdvisors.length ? (
+            <>
+              <div className="act-table-wrap">
+                <table className="act-table act-clients">
+                  <thead>
+                    <tr>
+                      <th>Advisor</th>
+                      <th>Came in through</th>
+                      <th className="num">Days to a decision</th>
+                      <th className="num">AUM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {f.signedAdvisors.map((a) => {
+                      const open = openKey === a.key
+                      return (
+                        <Fragment key={a.key}>
+                          <tr className={open ? 'is-open' : ''}>
+                            <td>
+                              <button
+                                className="act-client-btn"
+                                type="button"
+                                aria-expanded={open}
+                                onClick={() => setOpenKey(open ? null : a.key)}
+                              >
+                                {open ? <ChevronUp /> : <ChevronDown />}
+                                {a.who}
+                              </button>
+                            </td>
+                            <td>{a.template ? `“${a.template}”` : <i className="act-muted">Link without a template tag</i>}</td>
+                            <td className="num">{a.days}</td>
+                            <td className="num">
+                              {a.aum != null ? (
+                                <b>{aum(a.aum)}</b>
+                              ) : (
+                                <span className="act-est">≈ {aum(base.aumPerAdvisor)}</span>
+                              )}
+                            </td>
+                          </tr>
+                          {open && (
+                            <tr className="act-trail-row">
+                              <td colSpan={4}>
+                                <Trail a={a} />
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="analytics-note">
+                Every advisor here came in on a Knomee link and was marked with Mark as Signed. Initials only. AUM with ≈
+                is your average: none was entered when they were signed.
+              </p>
+            </>
+          ) : (
+            <p className="analytics-note">
+              {f
+                ? `No advisor marked as signed yet. Each one marked with Mark as Signed on Candidates shows here, initials only, with the path from the link that brought them.`
+                : 'Reading the directory…'}
+            </p>
+          )}
         </div>
       </section>
     </>

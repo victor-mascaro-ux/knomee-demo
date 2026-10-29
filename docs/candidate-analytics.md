@@ -18,13 +18,22 @@ placeholder pipeline, is behind **Older Version** at `#/firm-analytics/older`.
 | Opened the link | the flow, on first open | `invites/<token>.openedAt` | live |
 | Started answering | the flow, on the first thing answered (their name included) | `invites/<token>.answeredAt`, `sittings/<id>` | live |
 | Finished the flow | every adventure taken to its end | `sittings/<id>` (answers, `answered` / `total`) | live |
-| Added to Network | Add to Network on a live row of Candidates | `added/<sitting id>` | since Oct 29, 2026 |
+| Signed | Mark as Signed on a live row of Candidates (the bolt, the row menu, or the profile), with the AUM in $M if known; Undo Signed removes it | `signed/<sitting id>` (`at`, `aum`) | since Oct 29, 2026 |
 
 All of it sits under `video-feedback/knomee-demo-directory/` (see
 `src/data/advisorDirectory.ts`). Each invite is one advisor, however many
 phones answered it. Sittings started from the demo itself, not from a link, are
 the team showing the flow and are left out. Links the team made to try the flow
 are counted.
+
+**What Knomee brought** (the ROI card) reads the signed advisors against the
+Recruit Toolkit's Baseline: ACME's 15% first conversation to signed, 150 days,
+and $250M per signed advisor (`recruitBaseline` in `candidateActivation.ts`,
+from activation-playbook `firms/acme.json`). Finishing the flow stands in for
+the first conversation, and only advisors who finished it since Oct 29, 2026
+count toward the signed rate. Days run from the link sent to Mark as Signed. An
+advisor signed without AUM counts at the baseline's $250M. A signed advisor's
+trail shows initials only.
 
 **Where they stop**: for each advisor who started and didn't finish, the
 furthest sitting's first adventure still open, or *A little about you* when

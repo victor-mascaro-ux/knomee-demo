@@ -571,7 +571,8 @@
 
 /* ── Candidate Analytics: a step not counted yet keeps its row, with an empty
    dashed track that says so ── */
-.act-step.is-pending .act-track {
+.act-step.is-pending .act-track,
+.act-track.act-track-empty {
   display: flex;
   align-items: center;
   background: none;
@@ -588,4 +589,44 @@
 .act-step-num > i:only-child {
   margin-left: 0;
   color: var(--k-slate);
+}
+
+/* A step's name that explains itself on hover: a dotted underline says there
+   is more, and the bubble hangs from the name's left edge (a centred one would
+   run off the card's left side under a short name). */
+.act-step-name {
+  text-decoration: underline dotted var(--k-ash);
+  text-underline-offset: 4px;
+  cursor: help;
+  outline: none;
+}
+.act-step-name.tt::after {
+  left: 0;
+  transform: translateY(3px);
+  max-width: 280px;
+}
+.act-step-name.tt:hover::after,
+.act-step-name.tt:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+.act-step-name.tt::before {
+  left: 16px;
+}
+.act-step-name:focus-visible {
+  text-decoration-color: var(--k-grape);
+}
+
+/* Candidate Analytics' ROI: a measure not counted yet says so in muted words
+   where the change would be; a change for the worse is amber with a warning,
+   never the colour alone. */
+.act-lift-wait {
+  justify-self: start;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--k-slate);
+}
+.act-lift-change.is-worse {
+  background: var(--k-amber-light);
+  color: var(--k-amber-ink);
 }
