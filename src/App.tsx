@@ -927,7 +927,12 @@ function ConfidencePie({
   )
 }
 
-function ActiveChart() {
+/* A week's share of the book as people: the chart reads in percent, but the
+   advisor acts on clients. */
+const activeCount = (pct: number, total: number) => Math.round((pct / 100) * total)
+const clientsWord = (n: number) => `${n} client${n === 1 ? '' : 's'}`
+
+function ActiveChart({ total }: { total: number }) {
   const [hover, setHover] = useState<number | null>(null)
   const w = 560
   const h = 190
@@ -979,16 +984,21 @@ function ActiveChart() {
       {hover !== null &&
         (() => {
           const d = activeSeries[hover]
-          const tw = 44
-          const th = 21
+          const tw = 64
+          const th = 34
           const cxp = x(hover)
           const tx = Math.max(padL, Math.min(cxp - tw / 2, w - padR - tw))
-          const ty = y(d.value) - th - 9
+          // Above the point, or under it where a high week leaves no room.
+          const above = y(d.value) - th - 9
+          const ty = above >= 2 ? above : y(d.value) + 9
           return (
             <g pointerEvents="none">
               <rect x={tx} y={ty} width={tw} height={th} rx="6" fill="#240446" />
-              <text x={tx + tw / 2} y={ty + th / 2 + 4} textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">
+              <text x={tx + tw / 2} y={ty + 15} textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">
                 {d.value}%
+              </text>
+              <text x={tx + tw / 2} y={ty + 27} textAnchor="middle" fontSize="9" fontWeight="500" fill="#fff" fillOpacity="0.8">
+                {clientsWord(activeCount(d.value, total))}
               </text>
             </g>
           )
@@ -999,11 +1009,18 @@ function ActiveChart() {
 
 // Small week-over-week delta: an up/down triangle + magnitude, colored by
 // direction. `note` (e.g. "this week") makes the weekly cadence explicit.
-function Delta({ value, note }: { value: number; note?: string }) {
+// `unit` keeps a change in a share from reading as a count ("▼ 6" read as six
+// fewer clients); `tip` says what the change is in people.
+function Delta({ value, unit = '', note, tip }: { value: number; unit?: string; note?: string; tip?: string }) {
   const up = value >= 0
   return (
-    <span className={`chart-delta ${up ? 'is-up' : 'is-down'}`}>
+    <span
+      className={`chart-delta ${up ? 'is-up' : 'is-down'}${tip ? ' tt tt-end' : ''}`}
+      data-tip={tip}
+      tabIndex={tip ? 0 : undefined}
+    >
       {up ? '▲' : '▼'} {Math.abs(value)}
+      {unit}
       {note ? <span className="chart-delta-note">{note}</span> : null}
     </span>
   )
@@ -1032,6 +1049,12 @@ function ClientsMetrics({
   const tierBar = useRef<HTMLDivElement>(null)
   const incomplete = count('incomplete')
   const total = clients.length
+  // This week against last, in clients as well as in share.
+  const activeNow = activeSeries[activeSeries.length - 1]
+  const activePrev = activeSeries[activeSeries.length - 2]
+  const activeNowN = activeCount(activeNow.value, total)
+  const activePrevN = activeCount(activePrev.value, total)
+  const activeDiff = activeNowN - activePrevN
 
   return (
     <CollapsibleCard
@@ -1149,10 +1172,18 @@ function ClientsMetrics({
             </span>
             <span className="chart-head-r">
               <span className="chart-figure">{activeThisWeek}%</span>
-              <Delta value={activeSeries[activeSeries.length - 1].value - activeSeries[activeSeries.length - 2].value} />
+              <Delta
+                value={activeNow.value - activePrev.value}
+                unit="%"
+                tip={
+                  activeDiff === 0
+                    ? `Same number of clients as last week (${activeNowN} of ${total})`
+                    : `${Math.abs(activeDiff)} ${activeDiff < 0 ? 'fewer' : 'more'} client${Math.abs(activeDiff) === 1 ? '' : 's'} than last week (${activePrevN} → ${activeNowN} of ${total})`
+                }
+              />
             </span>
           </div>
-          <ActiveChart />
+          <ActiveChart total={total} />
         </div>
       </div>
     </CollapsibleCard>
