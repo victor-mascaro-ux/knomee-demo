@@ -5045,12 +5045,11 @@ button.name-link-btn:hover .name-text {
   flex-direction: column;
   gap: 6px;
 }
-/* Tab pills. No inset: the dark pill fills the track's height, so the
-   toggle and its picked side both start on the body's left edge, with the
-   tabs and fields under it. */
+/* Tab pills, centred over the modal: who is being invited heads it. No
+   inset: the dark pill fills the track's height. */
 .invite-tabs {
   display: inline-flex;
-  align-self: flex-start;
+  align-self: center;
   background: var(--pearl);
   border-radius: 999px;
   /* 32px to the tabs under it, with the body's 6. */
