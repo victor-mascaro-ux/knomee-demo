@@ -2757,7 +2757,8 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
 }
 
 /* ── Invite flow ─────────────────────────────────────────────────────────
-   One modal, two tabs (prospect / client). Opened from the Invite button on
+   One modal, two kinds (prospect / client) and three ways to send the invite
+   (email, link, QR code), each in its own tab. Opened from the Invite button on
    either dashboard, defaulting to that dashboard's kind. Sending an email,
    copying the link, or copying the QR each confirms in its own button (a
    check, for a moment) rather than in a toast. All data
@@ -2805,6 +2806,7 @@ function useViewportBand(active: boolean) {
 }
 
 type InviteKind = 'prospect' | 'client'
+type InviteChannel = 'email' | 'link' | 'qr'
 
 // Paper-plane send glyph, matching the mockup's input affordance.
 function SendGlyph() {
@@ -2835,6 +2837,43 @@ function ExternalGlyph() {
     </svg>
   )
 }
+
+// The three ways to send an invite, each a tab with its glyph: an envelope, a
+// chain link, a QR's corner squares — three shapes, not one with a mark.
+function MailGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+      <path d="m3.2 5.6 6.8 5.4 6.8-5.4" />
+    </svg>
+  )
+}
+
+function LinkGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8.6 11.4a3.2 3.2 0 0 0 4.5 0l2.6-2.6a3.2 3.2 0 0 0-4.5-4.5l-1 1" />
+      <path d="M11.4 8.6a3.2 3.2 0 0 0-4.5 0l-2.6 2.6a3.2 3.2 0 0 0 4.5 4.5l1-1" />
+    </svg>
+  )
+}
+
+function QrGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="3" width="5.2" height="5.2" rx="1" />
+      <rect x="11.8" y="3" width="5.2" height="5.2" rx="1" />
+      <rect x="3" y="11.8" width="5.2" height="5.2" rx="1" />
+      <path d="M11.8 11.8h2.4v2.4h-2.4zM14.6 14.6H17V17h-2.4z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+const INVITE_CHANNELS: { id: InviteChannel; label: string; icon: ReactNode }[] = [
+  { id: 'email', label: 'Email', icon: <MailGlyph /> },
+  { id: 'link', label: 'Link', icon: <LinkGlyph /> },
+  { id: 'qr', label: 'QR Code', icon: <QrGlyph /> },
+]
 
 // Decorative QR: three finder patterns + a seeded field of modules. It encodes
 // nothing — the link beside it is the real (placeholder) share target.
@@ -3119,6 +3158,8 @@ function InviteModal({
   const [email, setEmail] = useState('')
   const [previewOpen, setPreviewOpen] = useState(false)
   const tabInd = useSlideIndicator(kind)
+  const [channel, setChannel] = useState<InviteChannel>('email')
+  const chanInd = useSlideIndicator(channel)
   const label = kind === 'prospect' ? 'Prospect' : 'Client'
   const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
 
@@ -3237,126 +3278,155 @@ function InviteModal({
             ))}
           </div>
 
-          {/* Keyed on `kind` so the panel re-runs its enter animation on each
-              tab switch — the content cross-fades instead of snapping. */}
-          <div className="invite-panel" key={kind}>
-            <h3 className="invite-section">Send Invite Email</h3>
-            <label className="invite-field-label" htmlFor="invite-email">
-              Email
-            </label>
-            <div className="invite-email-row">
-              <input
-                id="invite-email"
-                type="email"
-                placeholder={`Add ${kind} email`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && send()}
+          {/* How it goes out. The same three for a prospect or a client, so
+              the pick holds across the toggle above. */}
+          <div className="invite-channels slide-nav" role="tablist" aria-label="Send as" ref={chanInd.ref}>
+            {chanInd.box && (
+              <span
+                className="slide-ind slide-ind-underline"
+                style={{
+                  transform: `translateX(${chanInd.box.left}px)`,
+                  width: chanInd.box.width,
+                }}
               />
-              <FeedbackButton
-                className="invite-send"
-                aria-label={`Send ${kind} invite`}
-                onClick={send}
-                flashing={sent.is()}
-                done={<DoneGlyph />}
-                announce={`${label} email sent`}
+            )}
+            {INVITE_CHANNELS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={channel === c.id}
+                data-active={channel === c.id}
+                className={`invite-channel${channel === c.id ? ' is-on' : ''}`}
+                onClick={() => setChannel(c.id)}
               >
-                <SendGlyph />
-              </FeedbackButton>
-            </div>
-            {/* Which email: the toolkit's lead (or client) type, then the
-                emails it has for that type — the adventures' starter pills,
-                one picked at a time. */}
-            <div className="invite-template-head">
-              <span className="invite-field-label" id="invite-stage">
-                {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
-              </span>
-              <a
-                className="invite-toolkit-link"
-                href={toolkitUrl(kind, sample.stage, brandId)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open {label} Toolkit <ExternalGlyph />
-              </a>
-            </div>
-            <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
-              {stagesOf(kind).map((stage, i) => (
-                <button
-                  key={stage}
-                  type="button"
-                  className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
-                  style={{ ['--i' as string]: i }}
-                  aria-pressed={sample.stage === stage}
-                  onClick={() => {
-                    if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
-                  }}
-                >
-                  {stage}
-                </button>
-              ))}
-            </div>
-            <span className="invite-field-label invite-type-label" id="invite-type">
-              Email Type
-            </span>
-            {/* Keyed on the type, so its emails come in as the type changes. */}
-            <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
-              {samples
-                .filter((e) => e.stage === sample.stage)
-                .map((e, i) => (
-                  <button
-                    key={e.id}
-                    type="button"
-                    className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
-                    style={{ ['--i' as string]: i }}
-                    aria-pressed={e.id === sample.id}
-                    onClick={() => pick(e.id)}
-                  >
-                    {emailLabel(e)}
-                  </button>
-                ))}
-            </div>
-            {sample.note && <p className="invite-pick-note">{sample.note}</p>}
-            <button
-              className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
-              type="button"
-              aria-expanded={previewOpen}
-              onClick={() => setPreviewOpen((v) => !v)}
-            >
-              Preview <ChevronDown />
-            </button>
-            {/* Height-animated reveal so the preview expands rather than pops. */}
-            <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`} ref={previewRef}>
-              <div className="collapse-inner">
-                <InviteEmailPreview
-                  sample={sample}
-                  draft={draft}
-                  edited={edited}
-                  onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
-                  onReset={() =>
-                    setDrafts((all) => {
-                      const rest = { ...all }
-                      delete rest[sample.id]
-                      return rest
-                    })
-                  }
-                  editing={editing}
-                  onEditing={setEditing}
-                  missing={missing}
-                  brand={brand}
-                  link={link}
-                  known={known}
-                  fields={fields}
-                  onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
-                  flagged={flagged}
-                />
-              </div>
-            </div>
+                {c.icon}
+                {c.label}
+              </button>
+            ))}
+          </div>
 
-            <h3 className="invite-section">Share {label} Link</h3>
-            <div className="invite-share">
-              <div className="invite-share-col invite-share-link">
-                <label className="invite-field-label">Link</label>
+          {/* Keyed on both, so the panel re-runs its enter animation on each
+              switch — the content cross-fades instead of snapping. */}
+          <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`}>
+            {channel === 'email' && (
+              <>
+                {/* "To", not "Email": the tab above already says Email. */}
+                <label className="invite-field-label" htmlFor="invite-email">
+                  To
+                </label>
+                <div className="invite-email-row">
+                  <input
+                    id="invite-email"
+                    type="email"
+                    placeholder={`Add ${kind} email`}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && send()}
+                  />
+                  <FeedbackButton
+                    className="invite-send"
+                    aria-label={`Send ${kind} invite`}
+                    onClick={send}
+                    flashing={sent.is()}
+                    done={<DoneGlyph />}
+                    announce={`${label} email sent`}
+                  >
+                    <SendGlyph />
+                  </FeedbackButton>
+                </div>
+                {/* Which email: the toolkit's lead (or client) type, then the
+                    emails it has for that type — the adventures' starter pills,
+                    one picked at a time. */}
+                <div className="invite-template-head">
+                  <span className="invite-field-label" id="invite-stage">
+                    {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
+                  </span>
+                  <a
+                    className="invite-toolkit-link"
+                    href={toolkitUrl(kind, sample.stage, brandId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open {label} Toolkit <ExternalGlyph />
+                  </a>
+                </div>
+                <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
+                  {stagesOf(kind).map((stage, i) => (
+                    <button
+                      key={stage}
+                      type="button"
+                      className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
+                      style={{ ['--i' as string]: i }}
+                      aria-pressed={sample.stage === stage}
+                      onClick={() => {
+                        if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
+                      }}
+                    >
+                      {stage}
+                    </button>
+                  ))}
+                </div>
+                <span className="invite-field-label invite-type-label" id="invite-type">
+                  Email Type
+                </span>
+                {/* Keyed on the type, so its emails come in as the type changes. */}
+                <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
+                  {samples
+                    .filter((e) => e.stage === sample.stage)
+                    .map((e, i) => (
+                      <button
+                        key={e.id}
+                        type="button"
+                        className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
+                        style={{ ['--i' as string]: i }}
+                        aria-pressed={e.id === sample.id}
+                        onClick={() => pick(e.id)}
+                      >
+                        {emailLabel(e)}
+                      </button>
+                    ))}
+                </div>
+                {sample.note && <p className="invite-pick-note">{sample.note}</p>}
+                <button
+                  className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
+                  type="button"
+                  aria-expanded={previewOpen}
+                  onClick={() => setPreviewOpen((v) => !v)}
+                >
+                  Preview <ChevronDown />
+                </button>
+                {/* Height-animated reveal so the preview expands rather than pops. */}
+                <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`} ref={previewRef}>
+                  <div className="collapse-inner">
+                    <InviteEmailPreview
+                      sample={sample}
+                      draft={draft}
+                      edited={edited}
+                      onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
+                      onReset={() =>
+                        setDrafts((all) => {
+                          const rest = { ...all }
+                          delete rest[sample.id]
+                          return rest
+                        })
+                      }
+                      editing={editing}
+                      onEditing={setEditing}
+                      missing={missing}
+                      brand={brand}
+                      link={link}
+                      known={known}
+                      fields={fields}
+                      onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
+                      flagged={flagged}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            {channel === 'link' && (
+              <>
                 <div className="invite-link-box">
                   <span className="invite-link-text">{link}</span>
                   <FeedbackButton
@@ -3369,9 +3439,11 @@ function InviteModal({
                     <CopyGlyph />
                   </FeedbackButton>
                 </div>
-              </div>
-              <div className="invite-share-col">
-                <label className="invite-field-label">QR Code</label>
+                <p className="invite-channel-hint">Share it anywhere: your website, a post, a text message.</p>
+              </>
+            )}
+            {channel === 'qr' && (
+              <>
                 <div className="invite-qr-box">
                   <QrCode seed={kind === 'prospect' ? 7 : 23} />
                   <FeedbackButton
@@ -3384,8 +3456,9 @@ function InviteModal({
                     <CopyGlyph />
                   </FeedbackButton>
                 </div>
-              </div>
-            </div>
+                <p className="invite-channel-hint">For print and in person: a flyer, a slide, an event table.</p>
+              </>
+            )}
           </div>
         </div>
       </div>
