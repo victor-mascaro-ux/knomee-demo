@@ -1715,6 +1715,28 @@ button.name-link-btn:hover .name-text {
   border-bottom-color: transparent;
   border-top-color: #240446;
 }
+/* End-anchored variant: the bubble hangs from the host's right edge, for a
+   host at a card's right edge (a chart's delta), where a centred bubble would
+   run off the card. The wedge stays under the host. */
+.tt-end::after {
+  left: auto;
+  right: 0;
+  transform: translateY(3px);
+}
+.tt-end:hover::after,
+.tt-end:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tt-end::before {
+  left: auto;
+  right: 4px;
+  transform: none;
+}
+.tt-end:focus-visible::before {
+  opacity: 1;
+}
+
 /* A bubble of a few short lines (a segment's meaning, a line per half of its
    name): it keeps its line breaks and wraps at a reading width. */
 .tt-wrap::after {
@@ -2454,7 +2476,10 @@ button.name-link-btn:hover .name-text {
 .pie-slice.dim {
   opacity: 0.4;
 }
+/* The legend takes the rest of the row, so its percentages end on the card's
+   right edge, under the score in the head, instead of floating mid-card. */
 .pie-legend {
+  flex: 1;
   list-style: none;
   display: flex;
   flex-direction: column;
@@ -5435,8 +5460,13 @@ button.name-link-btn:hover .name-text {
   position: relative;
   transition: opacity 0.2s ease, box-shadow 0.18s ease, filter 0.16s ease, transform 0.12s ease;
 }
+/* The filter makes the hovered segment a stacking context, which keeps its
+   tooltip (.tt, z-index 60) inside it, so the legend's labels under the bar,
+   positioned and later on the page, painted over the bubble. The segment
+   itself is raised over them, and its bubble with it. */
 .cmd-dist-bar .seg:hover {
   filter: brightness(1.07);
+  z-index: 2;
 }
 .cmd-dist-bar .seg:active {
   transform: scale(0.98);
@@ -5447,6 +5477,11 @@ button.name-link-btn:hover .name-text {
 }
 .cmd-dist-bar .seg.is-dim {
   opacity: 0.38;
+}
+/* Pointed at, a dimmed tier comes back to full strength. Its opacity would
+   otherwise fade its own tooltip to the same 38%. */
+.cmd-dist-bar .seg.is-dim:hover {
+  opacity: 1;
 }
 .cmd-clear {
   border: 0;
