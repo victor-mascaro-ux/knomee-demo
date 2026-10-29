@@ -5013,11 +5013,22 @@ button.name-link-btn:hover .name-text {
 }
 
 /* ---------- Invite modal ---------- */
+/* Held at the top of the screen, not centred: Email is tall, Link and QR
+   Code are short, and switching between them moves only the modal's foot,
+   never the tabs under the pointer. As tall as the backdrop allows, in a
+   window or in the comment overlay's band. */
+.modal-backdrop:has(> .invite-modal) {
+  align-items: flex-start;
+}
 .invite-modal {
   width: 540px;
-  max-height: calc(100vh - 40px);
+  max-height: 100%;
   display: flex;
   flex-direction: column;
+}
+/* At full height the body gives way, never the bar. */
+.invite-modal > .modal-header {
+  flex: none;
 }
 .invite-body {
   overflow-y: auto;
@@ -5090,11 +5101,12 @@ button.name-link-btn:hover .name-text {
   font-size: 12px;
   color: var(--grey-text);
 }
-/* Every panel at least as tall as Email's with its preview closed (and its
-   timing note in), so switching tabs doesn't resize the centred modal and
-   move the tabs out from under the pointer. */
+/* A column that gives way when the modal is at its full height, so the
+   email's message scrolls inside its window rather than the whole body. */
 .invite-panel {
-  min-height: 274px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 .invite-field-label {
   display: block;
@@ -5102,49 +5114,6 @@ button.name-link-btn:hover .name-text {
   font-weight: 600;
   color: #201a2e;
   margin-bottom: 6px;
-}
-/* Email input + send */
-.invite-email-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.invite-email-row input {
-  flex: 1;
-  font: inherit;
-  font-size: 14px;
-  padding: 11px 44px 11px 13px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  color: #1a1a1a;
-  background: #fff;
-}
-.invite-email-row input::placeholder {
-  color: var(--ash);
-  font-style: italic;
-}
-.invite-email-row input:focus {
-  outline: none;
-  border-color: var(--lilac);
-}
-.invite-send {
-  position: absolute;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: var(--purple-bolt);
-  border-radius: 7px;
-  cursor: pointer;
-  transition: background 0.14s, color 0.14s;
-}
-.invite-send:hover {
-  background: #f2ebfa;
-  color: var(--plum);
 }
 /* Preview toggle */
 .invite-preview-toggle {
@@ -5172,38 +5141,117 @@ button.name-link-btn:hover .name-text {
 .invite-preview-toggle.is-open svg {
   transform: rotate(180deg);
 }
-/* Email preview */
-.invite-preview {
-  border: 1px dashed var(--line);
-  border-radius: 10px;
-  padding: 14px;
-  margin: 6px 0 4px;
-}
-.invite-preview-meta {
-  font-size: 12px;
-  color: var(--grey-text);
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-.invite-preview-meta-text {
+/* The email as a compose window: the design system's modal in small — a
+   plum bar, hairline From / To / Subject lines, the message, pill Send at
+   the foot. Only the message scrolls. */
+.invite-mail {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+  min-height: 0;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 28px -14px rgba(20, 10, 40, 0.28);
 }
-.invite-preview-meta b {
-  color: #201a2e;
+.invite-mail-bar {
+  flex: none;
+  padding: 9px 14px;
+  background: var(--plum);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
 }
-.invite-preview-tools {
+.invite-mail-line {
   flex: none;
   display: flex;
-  gap: 2px;
-  margin: -4px -6px 0 0;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 40px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+  color: #201a2e;
+  transition: box-shadow 0.15s;
 }
-/* Small text actions over the email: Edit Email, Done, Reset to Sample. */
+.invite-mail-line:focus-within {
+  box-shadow: inset 0 -2px 0 var(--k-grape, #7639a1);
+}
+.invite-mail-line.is-bad {
+  box-shadow: inset 0 -2px 0 #d81e4a;
+}
+.invite-mail-key {
+  flex: none;
+  width: 56px;
+  font-size: 12.5px;
+  color: var(--grey-text);
+}
+.invite-mail-line.is-bad .invite-mail-key {
+  color: #d81e4a;
+}
+.invite-mail-val {
+  flex: 1;
+  min-width: 0;
+}
+.invite-mail-subject {
+  font-weight: 600;
+}
+.invite-mail-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+.invite-mail-input::placeholder {
+  color: var(--ash);
+}
+.invite-mail-input:focus {
+  outline: none;
+}
+.invite-mail-body {
+  flex: 0 1 auto;
+  min-height: 160px;
+  overflow-y: auto;
+  padding: 18px 18px 20px;
+}
+.invite-mail-foot {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px 10px 8px;
+  border-top: 1px solid var(--line);
+  background: var(--pearl);
+}
+.invite-mail-send {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--plum);
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.invite-mail-send:hover {
+  background: #a56ccc;
+}
+.invite-mail-send svg {
+  width: 16px;
+  height: 16px;
+}
+/* Small text actions in the email's foot: Edit Email, Done, Reset to Sample. */
 .invite-text-btn {
   display: inline-flex;
   align-items: center;
@@ -5289,22 +5337,30 @@ button.name-link-btn:hover .name-text {
 .invite-fill.is-bad:focus {
   box-shadow: inset 0 -2px 0 #d81e4a;
 }
+/* Beside Send, in the foot's own row: two lines at most, so the foot keeps
+   its height and Send stays put. */
 .invite-fill-hint {
-  margin: -4px 0 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0 4px;
+  text-align: right;
+  line-height: 1.3;
   font-size: 12px;
   font-weight: 600;
   color: #d81e4a;
 }
 
-/* The email's words, opened to edit. The button stays where it is. */
-.invite-edit .invite-field-label {
-  margin-top: 12px;
-}
-.invite-edit .invite-field-label:first-child {
-  margin-top: 0;
+/* The email's words, opened to edit where they stand. The button stays a
+   button. */
+.invite-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
 }
 .invite-edit-field {
   display: block;
+  align-self: stretch;
   box-sizing: border-box;
   width: 100%;
   padding: 9px 11px;
@@ -5323,20 +5379,14 @@ button.name-link-btn:hover .name-text {
   border-color: var(--lilac);
 }
 .invite-edit .invite-cta {
-  margin: 14px 0 0;
+  margin: 0;
 }
-.invite-edit-note {
-  font-size: 12px !important;
-  color: var(--grey-text) !important;
-  margin: 10px 0 0 !important;
+.invite-mail-body .invite-edit-note {
+  font-size: 12px;
+  color: var(--grey-text);
+  margin: 0;
 }
-.invite-preview-card {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px;
-  background: #fff;
-}
-.invite-preview-brand {
+.invite-mail-brand {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -5345,19 +5395,13 @@ button.name-link-btn:hover .name-text {
   color: var(--plum);
   margin-bottom: 14px;
 }
-.invite-preview-card h4 {
-  font-size: 17px;
-  font-weight: 700;
-  color: #201a2e;
-  margin: 0 0 10px;
-}
-.invite-preview-card p {
+.invite-mail-body p {
   font-size: 13.5px;
   color: #3a3247;
   line-height: 1.5;
   margin: 0 0 14px;
 }
-.invite-preview-card > :last-child {
+.invite-mail-body > :last-child {
   margin-bottom: 0;
 }
 /* The firm's logo over its email, in its colour; knomee's own otherwise. */
@@ -5451,10 +5495,10 @@ button.name-link-btn:hover .name-text {
 }
 
 /* Invite send plane nudges toward "send" on hover */
-.invite-send svg {
+.invite-mail-send svg {
   transition: transform 0.16s ease;
 }
-.invite-send:hover svg {
+.invite-mail-send:hover svg {
   transform: translate(2px, -2px);
 }
 /* Copy buttons press in */
@@ -5497,17 +5541,6 @@ button.name-link-btn:hover .name-text {
   display: inline-block;
   animation: invitePanelIn 0.26s cubic-bezier(0.22, 0.81, 0.28, 1.05);
 }
-/* Email preview: height reveal (via .collapse) plus a fade on its contents. */
-.invite-preview-collapse .collapse-inner {
-  opacity: 0;
-  transition: opacity 0.3s ease 0.04s;
-}
-.invite-preview-collapse.open .collapse-inner {
-  opacity: 1;
-}
-.invite-preview {
-  transform-origin: top center;
-}
 
 /* Interactive list cards get a gentle hover lift */
 .talk-card {
@@ -5540,15 +5573,14 @@ button.name-link-btn:hover .name-text {
   .invite-title-word {
     animation: none;
   }
-  .invite-preview-toggle svg,
-  .invite-preview-collapse .collapse-inner {
+  .invite-preview-toggle svg {
     transition: none;
   }
   .btn-primary:hover,
   .btn:active,
   .talk-card:hover,
   .insight:hover,
-  .invite-send:hover svg,
+  .invite-mail-send:hover svg,
   .invite-tab:active,
   .cluster-switch-btn:active,
   .seg-switch-btn:active,
