@@ -5039,8 +5039,8 @@ button.name-link-btn:hover .name-text {
   align-self: flex-start;
   background: var(--pearl);
   border-radius: 999px;
-  /* 24px to the tabs under it, with the body's 6. */
-  margin-bottom: 18px;
+  /* 32px to the tabs under it, with the body's 6. */
+  margin-bottom: 26px;
 }
 .invite-tab {
   border: none;
