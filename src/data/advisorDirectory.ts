@@ -316,14 +316,14 @@ export async function deleteEntry(id: string): Promise<Trouble> {
   return drop(`${ROOT}/sittings/${id}`)
 }
 
-/* ── signed ─────────────────────────────────────────────────────────────── */
+/* ── joined ─────────────────────────────────────────────────────────────── */
 
-/** The candidate funnel's last step: Mark as Signed, the firm's Convert to
+/** The candidate funnel's last step: Mark as Joined, the firm's Convert to
     Client, on a sitting the directory holds. Kept in a collection of its own,
     keyed by sitting, because the flow writes the sitting's document whole on
     every answer and would drop a field added beside it. Recorded since Oct 29,
     2026. */
-export interface Signed {
+export interface Joined {
   id: string
   token: string | null
   at: string
@@ -331,17 +331,17 @@ export interface Signed {
   aum: number | null
 }
 
-export async function noteSigned(id: string, token: string | null, aum: number | null): Promise<Trouble> {
-  return put(`${ROOT}/signed/${id}`, { id, token, at: new Date().toISOString(), aum } satisfies Signed)
+export async function noteJoined(id: string, token: string | null, aum: number | null): Promise<Trouble> {
+  return put(`${ROOT}/joined/${id}`, { id, token, at: new Date().toISOString(), aum } satisfies Joined)
 }
 
 /** Undo: the advisor goes back to their tier. */
-export async function dropSigned(id: string): Promise<Trouble> {
-  return drop(`${ROOT}/signed/${id}`)
+export async function dropJoined(id: string): Promise<Trouble> {
+  return drop(`${ROOT}/joined/${id}`)
 }
 
-export async function listSigned() {
-  return list<Signed>('signed')
+export async function listJoined() {
+  return list<Joined>('joined')
 }
 
 /* ── what a screen shows ────────────────────────────────────────────────── */

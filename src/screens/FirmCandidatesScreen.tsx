@@ -19,7 +19,7 @@ import {
   inviteLink,
   listEntries,
   listInvites,
-  type Signed,
+  type Joined,
   type Trouble,
 } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
@@ -283,9 +283,9 @@ function CandidateInsights({
 
 /* ── the table ──────────────────────────────────────────────────────────── */
 
-/** How a signed mark is filed: a live sitting by its id, the worked example
+/** How a joined mark is filed: a live sitting by its id, the worked example
     by name. */
-export const signKey = (c: Candidate) => ('entryId' in c ? (c as LiveCandidate).entryId : c.name)
+export const joinKey = (c: Candidate) => ('entryId' in c ? (c as LiveCandidate).entryId : c.name)
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 /** "2026-10-29T…" → "Oct 29", read off the string so no time zone moves the day. */
@@ -295,18 +295,18 @@ function Row({
   c,
   mark,
   onOpen,
-  onSign,
-  onUnsign,
+  onJoin,
+  onUnjoin,
   onRemove,
   checked,
   onToggle,
 }: {
   c: Candidate
-  /** Set once the advisor is marked as signed. */
-  mark?: Signed
+  /** Set once the advisor is marked as joined. */
+  mark?: Joined
   onOpen: (c: Candidate) => void
-  onSign: (c: Candidate) => void
-  onUnsign: (c: Candidate) => void
+  onJoin: (c: Candidate) => void
+  onUnjoin: (c: Candidate) => void
   /** Only a live sitting can be removed; the worked example cannot. */
   onRemove?: (c: LiveCandidate) => void
   checked: boolean
@@ -314,7 +314,7 @@ function Row({
 }) {
   const incomplete = c.tier === 'incomplete'
   return (
-    <tr className={incomplete ? 'row-incomplete' : mark ? 'row-signed' : undefined}>
+    <tr className={incomplete ? 'row-incomplete' : mark ? 'row-joined' : undefined}>
       <td className="col-check">
         <input
           type="checkbox"
@@ -368,8 +368,8 @@ function Row({
       <td className="col-completed">{c.completed ?? '–'}</td>
       <td className="col-action">
         {mark ? (
-          <div className="fc-signed-note">
-            Signed {shortDay(mark.at)} · {mark.aum != null ? `$${mark.aum.toLocaleString('en-US')}M AUM` : 'AUM not entered'}
+          <div className="fc-joined-note">
+            Joined {shortDay(mark.at)} · {mark.aum != null ? `$${mark.aum.toLocaleString('en-US')}M AUM` : 'AUM not entered'}
           </div>
         ) : (
           <div className="top-action">
@@ -379,22 +379,22 @@ function Row({
         )}
       </td>
       {/* The advisor's bolt converts a prospect; this one marks an advisor as
-          signed. Same control, same place, because it is the same move — the
-          row's one action, taken without opening the profile. Once signed, it
+          joined. Same control, same place, because it is the same move — the
+          row's one action, taken without opening the profile. Once joined, it
           shows that it was done. */}
       <td className="col-bolt">
         {mark ? (
-          <span className="bolt-btn bolt-signed" title={`Signed ${shortDay(mark.at)}`} aria-label="Signed">
+          <span className="bolt-btn bolt-joined" title={`Joined ${shortDay(mark.at)}`} aria-label="Joined">
             <CheckIcon />
           </span>
         ) : (
           <button
             className={`bolt-btn ${incomplete ? 'bolt-disabled' : `bolt-${c.tier}`}`}
             type="button"
-            title={incomplete ? undefined : 'Mark as Signed'}
-            aria-label={incomplete ? undefined : 'Mark as Signed'}
+            title={incomplete ? undefined : 'Mark as Joined'}
+            aria-label={incomplete ? undefined : 'Mark as Joined'}
             onClick={() => {
-              if (!incomplete) onSign(c)
+              if (!incomplete) onJoin(c)
             }}
           >
             <LightningIcon
@@ -410,8 +410,8 @@ function Row({
               ? [{ label: 'View Profile', disabled: true }]
               : [
                   mark
-                    ? { label: 'Undo Signed', onClick: () => onUnsign(c) }
-                    : { label: 'Mark as Signed', onClick: () => onSign(c) },
+                    ? { label: 'Undo Joined', onClick: () => onUnjoin(c) }
+                    : { label: 'Mark as Joined', onClick: () => onJoin(c) },
                   {
                     label: 'View Profile',
                     disabled: !opensProfile(c),
@@ -443,10 +443,10 @@ function Row({
 
 function Table({
   rows,
-  signed,
+  joined,
   onOpen,
-  onSign,
-  onUnsign,
+  onJoin,
+  onUnjoin,
   onRemove,
   selected,
   onToggle,
@@ -454,10 +454,10 @@ function Table({
   onToggleAll,
 }: {
   rows: Candidate[]
-  signed: Record<string, Signed>
+  joined: Record<string, Joined>
   onOpen: (c: Candidate) => void
-  onSign: (c: Candidate) => void
-  onUnsign: (c: Candidate) => void
+  onJoin: (c: Candidate) => void
+  onUnjoin: (c: Candidate) => void
   onRemove: (c: LiveCandidate) => void
   selected: Set<string>
   onToggle: (name: string) => void
@@ -480,14 +480,14 @@ function Table({
     )
     return [...scored, ...rs.filter((c) => c.kq === null)]
   }
-  /* Signed advisors leave their tier for a section of their own, last, under
+  /* Joined advisors leave their tier for a section of their own, last, under
      the incomplete profiles: the pipeline's finished business. */
   const orderedGroups: { id: string; title: string; range?: string }[] = (() => {
     const scored = tierGroups.filter((g) => g.id !== 'incomplete')
     const rest = tierGroups.filter((g) => g.id === 'incomplete')
-    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest, { id: 'signed', title: 'SIGNED' }]
+    return [...(sortDir === 'asc' ? [...scored].reverse() : scored), ...rest, { id: 'joined', title: 'JOINED' }]
   })()
-  const markOf = (c: Candidate) => signed[signKey(c)]
+  const markOf = (c: Candidate) => joined[joinKey(c)]
 
   return (
     <div className="table-wrap">
@@ -532,7 +532,7 @@ function Table({
         <tbody>
           {orderedGroups.map((group) => {
             const inGroup = rows.filter((c) =>
-              group.id === 'signed' ? !!markOf(c) : !markOf(c) && c.tier === (group.id as Tier),
+              group.id === 'joined' ? !!markOf(c) : !markOf(c) && c.tier === (group.id as Tier),
             )
             if (inGroup.length === 0) return null
             const isCollapsed = collapsed.has(group.id)
@@ -574,8 +574,8 @@ function Table({
                       mark={markOf(c)}
                       key={'entryId' in c ? (c as LiveCandidate).entryId : c.name}
                       onOpen={onOpen}
-                      onSign={onSign}
-                      onUnsign={onUnsign}
+                      onJoin={onJoin}
+                      onUnjoin={onUnjoin}
                       onRemove={onRemove}
                       checked={selected.has(c.name)}
                       onToggle={() => onToggle(c.name)}
@@ -634,9 +634,9 @@ export default function FirmCandidatesScreen({
   onOpenProfile,
   onOpenEntry,
   onDownload,
-  signed,
-  onSign,
-  onUnsign,
+  joined,
+  onJoin,
+  onUnjoin,
   onRemoved,
 }: {
   /** An entry removed from the pipeline. */
@@ -645,11 +645,11 @@ export default function FirmCandidatesScreen({
   /** A live sitting's row: opens the report built from its answers. */
   onOpenEntry: (entryId: string) => void
   onDownload: () => void
-  /** Advisors marked as signed, by `signKey`. */
-  signed: Record<string, Signed>
-  /** Mark as Signed: the firm's Convert to Client (App asks for the AUM). */
-  onSign: (c: Candidate) => void
-  onUnsign: (c: Candidate) => void
+  /** Advisors marked as joined, by `joinKey`. */
+  joined: Record<string, Joined>
+  /** Mark as Joined: the firm's Convert to Client (App asks for the AUM). */
+  onJoin: (c: Candidate) => void
+  onUnjoin: (c: Candidate) => void
 }) {
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
@@ -794,9 +794,9 @@ export default function FirmCandidatesScreen({
         rows={rows}
         onOpen={openRow}
         onRemove={setRemoving}
-        signed={signed}
-        onSign={onSign}
-        onUnsign={onUnsign}
+        joined={joined}
+        onJoin={onJoin}
+        onUnjoin={onUnjoin}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}

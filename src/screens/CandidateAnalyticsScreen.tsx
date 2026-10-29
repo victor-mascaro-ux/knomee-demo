@@ -4,12 +4,12 @@
    Analytics (its cards, KPI tiles, funnel steps, ROI card and trails are that
    page's) but on real data: the advisor directory, read each time the page
    opens. A recruiter sends a link from the Recruit Toolkit; the advisor opens
-   it, starts answering, finishes, and is marked as signed. The two toolkit
+   it, starts answering, finishes, and is marked as joined. The two toolkit
    steps aren't counted until the toolkit's events can be written, and two
    steps are recorded from Oct 29, 2026 — each step's name says, on hover,
    what records it. The ROI card measures the firm against the Recruit
-   Toolkit's Baseline. No names: counts, and initials on a signed advisor's
-   trail. The older candidate page, with its placeholder pipeline, is one
+   Toolkit's Baseline. No names: counts, and initials on the trail of each
+   advisor who joined. The older candidate page, with its placeholder pipeline, is one
    button away, opposite the title. */
 
 import { Fragment, useCallback, useEffect, useState } from 'react'
@@ -19,7 +19,7 @@ import {
   loadCandidateFunnel,
   recruitBaseline,
   type CandidateFunnel,
-  type SignedAdvisor,
+  type JoinedAdvisor,
 } from '../data/candidateActivation'
 import { HelpTip, pct, Reading, shortDate, Step, StepName } from './ActivationAnalyticsScreen'
 import {
@@ -49,7 +49,7 @@ const RECORDED: Record<string, string> = {
   'Opened the link': 'Recorded by the flow, the first time the link opens.\nLive.',
   'Started answering': 'Recorded by the flow, on the first answer.\nLive.',
   'Finished the flow': 'Recorded by the flow, once every adventure is taken to its end.\nLive.',
-  Signed: `Recorded by Mark as Signed, on Candidates, with the AUM if known.\nCounting since ${SINCE}.`,
+  Joined: `Recorded by Mark as Joined, on Candidates, with the AUM if known.\nCounting since ${SINCE}.`,
 }
 
 type Status = 'since' | 'waiting'
@@ -161,8 +161,8 @@ function LiftRow({
   )
 }
 
-/** A signed advisor's path, from the link that started it to the signing. */
-function Trail({ a }: { a: SignedAdvisor }) {
+/** An advisor's path, from the link that started it to joining the firm. */
+function Trail({ a }: { a: JoinedAdvisor }) {
   return (
     <ol className="act-trail">
       <li>
@@ -179,8 +179,8 @@ function Trail({ a }: { a: SignedAdvisor }) {
         <span>{a.finished ? shortDate(a.finished) : '—'}</span>
       </li>
       <li className="is-client">
-        <b>Signed</b>
-        <span>{shortDate(a.signed)}</span>
+        <b>Joined</b>
+        <span>{shortDate(a.joined)}</span>
         <i>
           {a.aum != null
             ? `${aum(a.aum)} in AUM`
@@ -202,7 +202,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
   /* One advisor's trail open at a time; the newest is open so the card shows what a trail is. */
   const [openKey, setOpenKey] = useState<string | null>(null)
   useEffect(() => {
-    if (f?.signedAdvisors[0]) setOpenKey(f.signedAdvisors[0].key)
+    if (f?.joinedAdvisors[0]) setOpenKey(f.joinedAdvisors[0].key)
   }, [f])
 
   const loss = f?.biggestLoss ?? null
@@ -211,7 +211,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
   const stoppedMax = f ? Math.max(...f.stopped.map((s) => s.count), 1) : 1
   const num = (n: number | undefined) => (f ? n : '…')
   const r = f?.roi
-  const withoutAum = f ? f.signed - f.signedWithAum : 0
+  const withoutAum = f ? f.joined - f.joinedWithAum : 0
   const base = recruitBaseline
 
   const titleRow = (
@@ -290,7 +290,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
             <span>What Knomee Brought Your Firm</span>
             <HelpTip
               side="right"
-              text="AUM from the advisors marked as signed, against your recruiting numbers from before Knomee."
+              text="AUM from the advisors marked as joined, against your recruiting numbers from before Knomee."
             />
           </div>
         </header>
@@ -298,31 +298,31 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
           <div className="act-roi">
             <div className="act-roi-stat">
               <div className="analytics-lbl">AUM from Knomee advisors</div>
-              <div className="act-roi-num">{f && f.signed ? aum(r!.aumTotal) : '—'}</div>
+              <div className="act-roi-num">{f && f.joined ? aum(r!.aumTotal) : '—'}</div>
               <div className="act-roi-sub">
                 {!f
                   ? ' '
-                  : f.signed
-                    ? `${aum(f.signedAum)} entered for ${f.signedWithAum} signed${withoutAum ? `, plus ${withoutAum} at your ${aum(base.aumPerAdvisor)} average` : ''}`
-                    : `No advisor marked as signed yet. Mark as Signed on Candidates counts here from ${SINCE}.`}
+                  : f.joined
+                    ? `${aum(f.joinedAum)} entered for ${f.joinedWithAum} who joined${withoutAum ? `, plus ${withoutAum} at your ${aum(base.aumPerAdvisor)} average` : ''}`
+                    : `No advisor marked as joined yet. Mark as Joined on Candidates counts here from ${SINCE}.`}
               </div>
             </div>
             <div className="act-roi-stat">
               <div className="analytics-lbl">Above your baseline</div>
               <div className="act-roi-num">
-                {r?.extraSigned != null ? `${r.extraSigned >= 0 ? '+' : '−'}${Math.abs(r.extraSigned)} signed` : '—'}
+                {r?.extraJoined != null ? `${r.extraJoined >= 0 ? '+' : '−'}${Math.abs(r.extraJoined)} joined` : '—'}
               </div>
               <div className="act-roi-sub">
                 {!r
                   ? ' '
                   : r.finishedSince
-                    ? `${r.finishedSince} finished the flow since ${SINCE}; at your ${Math.round(base.signedRate * 100)}% that’s ${r.expectedAtBaseline} signed.${r.extraSigned && r.extraSigned > 0 ? ` The extra ${r.extraSigned} ≈ ${aum(r.extraSigned * base.aumPerAdvisor)} in AUM.` : ''}`
-                    : `Read against the advisors who finish the flow from ${SINCE} on, at your ${Math.round(base.signedRate * 100)}%.`}
+                    ? `${r.finishedSince} finished the flow since ${SINCE}; at your ${Math.round(base.joinedRate * 100)}% that’s ${r.expectedAtBaseline} joined.${r.extraJoined && r.extraJoined > 0 ? ` The extra ${r.extraJoined} ≈ ${aum(r.extraJoined * base.aumPerAdvisor)} in AUM.` : ''}`
+                    : `Read against the advisors who finish the flow from ${SINCE} on, at your ${Math.round(base.joinedRate * 100)}%.`}
               </div>
             </div>
             <div className="act-roi-stat">
-              <div className="analytics-lbl">Advisors signed</div>
-              <div className="act-roi-num">{f ? f.signed : '…'}</div>
+              <div className="analytics-lbl">Advisors joined</div>
+              <div className="act-roi-num">{f ? f.joined : '…'}</div>
               <div className="act-roi-sub">
                 {f ? `Of the ${f.finished} who finished the flow and the ${f.invited} links sent` : ' '}
               </div>
@@ -341,9 +341,9 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
             </span>
           </div>
           <LiftRow
-            label="Finished the flow → signed"
-            before={base.signedRate * 100}
-            after={r?.signedRate != null ? r.signedRate * 100 : null}
+            label="Finished the flow → joined"
+            before={base.joinedRate * 100}
+            after={r?.joinedRate != null ? r.joinedRate * 100 : null}
             show={(n) => `${Math.round(n)}%`}
             better={(b, a) => {
               const d = Math.round(a - b)
@@ -358,7 +358,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
             better={(b, a) => ({ words: b >= a ? `${b - a} days sooner` : `${a - b} days later`, good: b >= a })}
           />
           <LiftRow
-            label="AUM per signed advisor"
+            label="AUM per advisor who joined"
             before={base.aumPerAdvisor}
             after={r?.aumPerAdvisor ?? null}
             show={aum}
@@ -369,14 +369,14 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
           />
           <p className="analytics-note">
             Your baseline is the three numbers in the Recruit Toolkit’s Baseline, from onboarding: first conversation to
-            signed, its days, and AUM per signed advisor. With Knomee, finishing the flow stands in for the first
-            conversation, and only advisors who finished it since {SINCE}, when signing began to be recorded, count.
-            Days run from the link sent to Mark as Signed.
+            joining, the days it takes, and AUM per advisor who joined. With Knomee, finishing the flow stands in for the first
+            conversation, and only advisors who finished it since {SINCE}, when joining began to be recorded, count.
+            Days run from the link sent to Mark as Joined.
           </p>
           {withoutAum > 0 && (
             <Reading>
-              {withoutAum} of the {f!.signed} signed were marked without their AUM, so theirs is your average. Ask
-              recruiters to fill in the one field when they mark someone as signed.
+              {withoutAum} of the {f!.joined} who joined were marked without their AUM, so theirs is your average. Ask
+              recruiters to fill in the one field when they mark someone as joined.
             </Reading>
           )}
         </div>
@@ -467,17 +467,17 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
         </div>
       </section>
 
-      {/* 4 ── each signed advisor's trail: the record that says it was Knomee */}
+      {/* 4 ── the trail of each advisor who joined: the record that says it was Knomee */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
             <KnomeeMark size={18} />
             <span>Advisors Knomee Brought In</span>
-            <HelpTip side="right" text="Each signed advisor's path from the link that started it — open one to see it." />
+            <HelpTip side="right" text="The path of each advisor who joined, from the link that started it — open one to see it." />
           </div>
         </header>
         <div className="analytics-body">
-          {f && f.signedAdvisors.length ? (
+          {f && f.joinedAdvisors.length ? (
             <>
               <div className="act-table-wrap">
                 <table className="act-table act-clients">
@@ -490,7 +490,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                     </tr>
                   </thead>
                   <tbody>
-                    {f.signedAdvisors.map((a) => {
+                    {f.joinedAdvisors.map((a) => {
                       const open = openKey === a.key
                       return (
                         <Fragment key={a.key}>
@@ -530,14 +530,14 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                 </table>
               </div>
               <p className="analytics-note">
-                Every advisor here came in on a Knomee link and was marked with Mark as Signed. Initials only. AUM with ≈
-                is your average: none was entered when they were signed.
+                Every advisor here came in on a Knomee link and was marked with Mark as Joined. Initials only. AUM with ≈
+                is your average: none was entered when they were marked as joined.
               </p>
             </>
           ) : (
             <p className="analytics-note">
               {f
-                ? `No advisor marked as signed yet. Each one marked with Mark as Signed on Candidates shows here, initials only, with the path from the link that brought them.`
+                ? `No advisor marked as joined yet. Each one marked with Mark as Joined on Candidates shows here, initials only, with the path from the link that brought them.`
                 : 'Reading the directory…'}
             </p>
           )}
