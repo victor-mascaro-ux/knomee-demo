@@ -68,6 +68,10 @@ export interface Invite {
       came from an activation toolkit template. Absent on invites opened before
       Oct 29, 2026, when this started being recorded. */
   openedVia?: LinkTags | null
+  /** Made to try the flow rather than to invite somebody: Candidate Analytics
+      leaves it out, and Candidates marks its row. Absent on invites made
+      before Oct 29, 2026, when the box was added. */
+  test?: boolean
 }
 
 /** A link's UTM tags, without the `utm_` prefix. */
@@ -190,6 +194,7 @@ export function newToken(): string {
 export async function createInvite(
   name: string,
   brand: InviteBrand = 'knomee',
+  test = false,
 ): Promise<{ invite: Invite; trouble: Trouble }> {
   const invite: Invite = {
     token: newToken(),
@@ -198,6 +203,7 @@ export async function createInvite(
     createdAt: new Date().toISOString(),
     openedAt: null,
     answeredAt: null,
+    test,
   }
   const trouble = await put(`${ROOT}/invites/${invite.token}`, invite)
   return { invite, trouble }

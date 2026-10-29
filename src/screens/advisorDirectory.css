@@ -70,6 +70,27 @@
 .adir-name {
   width: 260px;
 }
+/* A test link: made to try the flow, left out of Candidate Analytics and
+   marked on Candidates. The box in plum, the note after it in grey. */
+.adir-test {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+.adir-test input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--k-plum);
+  cursor: pointer;
+}
+.adir-test-hint {
+  color: var(--grey-text);
+}
 .adir-name:focus,
 .adir-link:focus {
   border-color: var(--k-grape);

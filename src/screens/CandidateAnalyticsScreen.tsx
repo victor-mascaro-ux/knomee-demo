@@ -448,9 +448,10 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                 </Reading>
               )}
               <p className="analytics-note">
-                Real data, read from the directory each time this page opens: counts only, no names. It includes links
-                the team made to try the flow
-                {f.unlinked ? `; the ${f.unlinked} sittings started from the demo itself, not from a link, are left out` : ''}.
+                Real data, read from the directory each time this page opens: counts only, no names. Links marked as a
+                test when they were made are left out{f.tests ? ` (${f.tests} so far)` : ''}; links the team made to try
+                the flow before that box was there still count
+                {f.unlinked ? `, and the ${f.unlinked} sittings started from the demo itself, not from a link, are left out` : ''}.
                 The toolkit steps count once the toolkit’s events can be written to Firestore.
               </p>
               {f.trouble && (

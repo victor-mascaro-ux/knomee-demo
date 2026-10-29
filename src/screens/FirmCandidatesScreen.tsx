@@ -13,7 +13,15 @@
    screen cannot disagree. */
 
 import { InvitePanel } from './AdvisorDirectoryScreen'
-import { deleteEntry, deleteInvite, inviteLink, listEntries, type Signed, type Trouble } from '../data/advisorDirectory'
+import {
+  deleteEntry,
+  deleteInvite,
+  inviteLink,
+  listEntries,
+  listInvites,
+  type Signed,
+  type Trouble,
+} from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -74,8 +82,16 @@ const opensProfile = (c: Candidate) =>
 
 function CandidateName({ c, onOpen }: { c: Candidate; onOpen: (c: Candidate) => void }) {
   const isOwner = opensProfile(c)
-  /* The "new" pill sits on the name's line, as it does in the advisor's tables. */
-  const tag = c.isNew ? <span className="new-tag cp-goal-tag is-new">New</span> : null
+  /* The "new" pill sits on the name's line, as it does in the advisor's tables;
+     a test link's row wears "Test" beside it, in teal. */
+  const isTest = 'entryId' in c && (c as LiveCandidate).test
+  const tag =
+    c.isNew || isTest ? (
+      <>
+        {c.isNew && <span className="new-tag cp-goal-tag is-new">New</span>}
+        {isTest && <span className="new-tag cp-goal-tag is-test">Test</span>}
+      </>
+    ) : null
   return (
     <div className="name-block">
       {isOwner ? (
@@ -646,15 +662,17 @@ export default function FirmCandidatesScreen({
   /* Until the sittings arrive, the page is waiting — not a pipeline of one. */
   const [loaded, setLoaded] = useState(false)
   const loadLive = useCallback(async () => {
-    const { values, trouble: t } = await listEntries()
+    const [{ values, trouble: t }, inv] = await Promise.all([listEntries(), listInvites()])
     setLoaded(true)
-    setTrouble(t)
+    setTrouble(t ?? inv.trouble)
+    /* Rows that came through a link marked as a test when it was made. */
+    const tests = new Set(inv.values.filter((i) => i.test).map((i) => i.token))
     const authored = new Set(candidates.map((c) => c.name))
     const rowsLive = values.filter((e) => e.answered > 0 && !authored.has(e.name)).map(candidateFromEntry)
     /* "New" is the latest arrival only: the pill moves on when somebody newer
        comes in. */
     const newest = rowsLive.reduce<LiveCandidate | null>((a, c) => (!a || c.at > a.at ? c : a), null)
-    setLive(rowsLive.map((c) => ({ ...c, isNew: c === newest })))
+    setLive(rowsLive.map((c) => ({ ...c, isNew: c === newest, test: !!c.token && tests.has(c.token) })))
   }, [])
   /* Removing a sitting: asked once, since it throws its answers away. */
   const [removing, setRemoving] = useState<LiveCandidate | null>(null)

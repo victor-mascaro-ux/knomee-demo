@@ -87,6 +87,8 @@ export interface CandidateFunnel {
   stopped: { where: string; count: number }[]
   /** Sittings started from the demo rather than a link — left out. */
   unlinked: number
+  /** Links marked as a test when they were made: left out of every count. */
+  tests: number
   signedAdvisors: SignedAdvisor[]
   roi: CandidateRoi
   trouble: Trouble
@@ -118,7 +120,9 @@ function stoppedIn(e: Entry): string {
 
 export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
   const [inv, ent, sig] = await Promise.all([listInvites(), listEntries(), listSigned()])
-  const invites = inv.values
+  /* A link marked as a test when it was made is the team trying the flow, not
+     a candidate: it, and every sitting under it, is left out. */
+  const invites = inv.values.filter((i) => !i.test)
   const signedBy = new Map(sig.values.map((v) => [v.id, v]))
   const byToken = new Map<string, Entry[]>()
   for (const e of ent.values) {
@@ -226,6 +230,7 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
       count: stops.get(where) ?? 0,
     })),
     unlinked: ent.values.filter((e) => !e.token && e.answered > 0).length,
+    tests: inv.values.length - invites.length,
     signedAdvisors: signedAdvisors.sort((a, b) => (a.signed < b.signed ? 1 : -1)),
     roi,
     trouble: inv.trouble ?? ent.trouble ?? sig.trouble,
