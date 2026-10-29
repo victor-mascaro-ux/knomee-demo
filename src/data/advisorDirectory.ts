@@ -344,6 +344,64 @@ export async function listJoined() {
   return list<Joined>('joined')
 }
 
+/* ── the toolkit's own events ───────────────────────────────────────────── */
+
+/** One usage event of the activation toolkit (activation-playbook firm.js),
+    which writes them beside this directory, under the same collection the
+    rules allow. Only the fields counted here. The toolkit writes them through
+    the Firebase SDK, so they are typed fields, not our one `json` string. */
+export interface ToolkitEvent {
+  type: string
+  kit: string
+  firm: string
+  /** A random id per browser: one recruiter, however often they come back. */
+  vid: string
+  /** `live`, or `dev` on a local server. */
+  env: string
+  /** The browser unlocked the toolkit's editor: the Knomee team. */
+  staff: boolean
+  at: string
+}
+
+const EVENTS = 'video-feedback/activation-playbook-events'
+
+/** A kit's events. A query on `kit` alone, so Firestore's own one-field
+    index serves it; the rest is sorted out by whoever counts. */
+export async function listToolkitEvents(kit: string): Promise<{ values: ToolkitEvent[]; trouble: Trouble }> {
+  try {
+    const res = await fetch(`${BASE}/${EVENTS}:runQuery?key=${KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'events' }],
+          where: { fieldFilter: { field: { fieldPath: 'kit' }, op: 'EQUAL', value: { stringValue: kit } } },
+        },
+      }),
+    })
+    if (!res.ok) return { values: [], trouble: `The toolkit's events refused the read (${res.status}).` }
+    type Field = { stringValue?: string; booleanValue?: boolean; timestampValue?: string }
+    const rows = (await res.json()) as { document?: { fields?: Record<string, Field> } }[]
+    const values: ToolkitEvent[] = []
+    for (const r of rows) {
+      const f = r.document?.fields
+      if (!f) continue
+      values.push({
+        type: f.type?.stringValue ?? '',
+        kit: f.kit?.stringValue ?? '',
+        firm: f.firm?.stringValue ?? '',
+        vid: f.vid?.stringValue ?? '',
+        env: f.env?.stringValue ?? '',
+        staff: f.staff?.booleanValue === true,
+        at: f.at?.timestampValue ?? '',
+      })
+    }
+    return { values, trouble: null }
+  } catch {
+    return { values: [], trouble: "Could not reach the toolkit's events." }
+  }
+}
+
 /* ── what a screen shows ────────────────────────────────────────────────── */
 
 /** The greeting the flow opens with. A blank invite is not an error — an admin

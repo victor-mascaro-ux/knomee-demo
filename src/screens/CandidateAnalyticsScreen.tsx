@@ -5,9 +5,9 @@
    page's) but on real data: the advisor directory, read each time the page
    opens. A recruiter sends a link from the Recruit Toolkit; the advisor opens
    it, starts answering, finishes, and is marked as joined. The two toolkit
-   steps aren't counted until the toolkit's events can be written, and two
-   steps are recorded from Oct 29, 2026 — each step's name says, on hover,
-   what records it. The ROI card measures the firm against the Recruit
+   steps are the Recruit Toolkit's own events, which it writes beside the
+   directory; they, and two other steps, are recorded from Oct 29, 2026 — each
+   step's name says, on hover, what records it. The ROI card measures the firm against the Recruit
    Toolkit's Baseline. No names: counts, and initials on the trail of each
    advisor who joined. The older candidate page, with its placeholder pipeline, is one
    button away, opposite the title. */
@@ -42,8 +42,8 @@ const aum = (m: number) => (m >= 1000 ? `$${(m / 1000).toFixed(1).replace(/\.0$/
 
 /** What records each step, shown from the step's name. */
 const RECORDED: Record<string, string> = {
-  'Opened the toolkit': 'Recorded by the toolkit’s own “open” event, per firm link.',
-  'Copied an invitation': 'Recorded by the toolkit’s “copy” event, from Copy Text.',
+  'Opened the toolkit': `Recorded by the Recruit Toolkit each time it opens: one per recruiter’s browser, the Knomee team’s own visits left out.\nCounting since ${SINCE}.`,
+  'Copied an invitation': `Recorded by the Recruit Toolkit’s Copy Text: one per recruiter’s browser.\nCounting since ${SINCE}.`,
   'Template links opened': `Recorded by the link’s UTM tags, kept on the invite when it’s first opened.\nCounting since ${SINCE}.`,
   'Sent a link': 'Recorded by Invite, on Candidates.\nLive.',
   'Opened the link': 'Recorded by the flow, the first time the link opens.\nLive.',
@@ -52,46 +52,38 @@ const RECORDED: Record<string, string> = {
   Joined: `Recorded by Mark as Joined, on Candidates, with the AUM if known.\nCounting since ${SINCE}.`,
 }
 
-type Status = 'since' | 'waiting'
-const statusChip: Record<Status, { cls: string; label: string }> = {
-  since: { cls: 'is-sending', label: `Since ${SINCE}` },
-  waiting: { cls: 'is-opened', label: 'Needs the Firestore rule' },
-}
-
-function Chip({ status }: { status: Status }) {
-  const c = statusChip[status]
+/** When a toolkit step started counting. */
+function Since() {
   return (
-    <span className={`act-status ${c.cls}`}>
-      {status === 'waiting' ? <WarnIcon color="currentColor" /> : <CheckIcon />}
-      {c.label}
+    <span className="act-status is-sending">
+      <CheckIcon />
+      Since {SINCE}
     </span>
   )
 }
 
-/** A toolkit step: a count when there is one, otherwise an empty track that
-    says it isn't counted yet. */
-function ToolkitStep({ label, count, base, status }: { label: string; count: number | null; base: number; status: Status }) {
-  const share = count != null ? pct(count, base) : 0
+/** A toolkit step: its count, its bar against `base` (a step that is its own
+    base fills the track), in recruiters or links. */
+function ToolkitStep({ label, count, base, unit }: { label: string; count: number; base: number; unit: string }) {
+  const share = pct(count, base)
   return (
-    <div className={`act-step ${count == null ? 'is-pending' : ''}`}>
+    <div className="act-step">
       <span className="act-step-label">
         <StepName label={label} tip={RECORDED[label]} />
       </span>
       <span className="act-track">
-        {count != null ? (
-          <span
-            className="act-bar tt"
-            style={{ width: `${count > 0 ? Math.max(share, 2) : 0}%` }}
-            data-tip={`${label}: ${count} of ${base} links`}
-            tabIndex={0}
-          />
-        ) : (
-          <span className="act-pending-text">Not counted yet</span>
-        )}
+        <span
+          className="act-bar tt"
+          style={{ width: `${count > 0 ? Math.max(share, 2) : 0}%` }}
+          data-tip={`${label}: ${count} ${unit}${base !== count ? ` of ${base}` : ''}`}
+          tabIndex={0}
+        />
       </span>
-      <span className="act-step-num">{count != null ? <b>{count}</b> : <i>—</i>}</span>
+      <span className="act-step-num">
+        <b>{count}</b>
+      </span>
       <span className="act-step-lost">
-        <Chip status={status} />
+        <Since />
       </span>
     </div>
   )
@@ -403,9 +395,16 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                 <span className="analytics-sub-head">The Recruit Toolkit</span>
                 <span className="act-period">Recruiters at your firm</span>
               </div>
-              <ToolkitStep label="Opened the toolkit" count={null} base={f.invited} status="waiting" />
-              <ToolkitStep label="Copied an invitation" count={null} base={f.invited} status="waiting" />
-              <ToolkitStep label="Template links opened" count={f.fromToolkit} base={f.invited} status="since" />
+              {/* Recruiters, one per browser: the copiers against those who
+                  opened it. Template links are links, against those sent. */}
+              <ToolkitStep label="Opened the toolkit" count={f.toolkitOpened} base={f.toolkitOpened} unit="recruiters" />
+              <ToolkitStep
+                label="Copied an invitation"
+                count={f.toolkitCopied}
+                base={f.toolkitOpened}
+                unit="recruiters"
+              />
+              <ToolkitStep label="Template links opened" count={f.fromToolkit} base={f.invited} unit="links" />
 
               <div className="act-group-head">
                 <span className="analytics-sub-head">The advisors they invited</span>
@@ -452,7 +451,8 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                 test when they were made are left out{f.tests ? ` (${f.tests} so far)` : ''}; links the team made to try
                 the flow before that box was there still count
                 {f.unlinked ? `, and the ${f.unlinked} sittings started from the demo itself, not from a link, are left out` : ''}.
-                The toolkit steps count once the toolkit’s events can be written to Firestore.
+                The toolkit steps count recruiters from the Recruit Toolkit’s own events, one per browser, since{' '}
+                {SINCE}; the Knomee team’s own visits are left out.
               </p>
               {f.trouble && (
                 <p className="analytics-note">
