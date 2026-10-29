@@ -15,7 +15,8 @@
 // - opened: the flow, the first time the link is opened
 // - started: the first answer that reaches the directory
 // - finished: every adventure taken to its end
-// - joined: Mark as Joined on Candidates, with the AUM if known (since Oct 29, 2026)
+// - joined: Mark as Joined on Candidates, with the day they joined (today, or
+//   earlier for an advisor caught up) and the AUM if known
 // Sittings started from the demo itself rather than from a link are the team
 // showing the flow, so they are left out.
 
@@ -54,9 +55,10 @@ export interface JoinedAdvisor {
 
 /** What Knomee brought, against the baseline. Null where nothing is counted yet. */
 export interface CandidateRoi {
-  /** Advisors who finished the flow since joining began to be recorded: the
-      ones a joined rate can fairly be read against. */
-  finishedSince: number
+  /** Every advisor who finished the flow: what the joined rate is read
+      against. Earlier joiners are marked with the day they joined, so the
+      rate reaches back to the first link. */
+  finished: number
   joinedRate: number | null
   daysToDecision: number | null
   aumPerAdvisor: number | null
@@ -152,10 +154,9 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
   let joinedAum = 0
   let joinedWithAum = 0
   let fromToolkit = 0
-  let finishedSince = 0
-  /* Of those, the ones joined: the rate's own numerator, so an advisor who
-     finished before joining was recorded can't push it past 100%. */
-  let joinedOfSince = 0
+  /* Of the finishers, the ones joined: the rate's own numerator, so somebody
+     marked as joined without finishing can't push it past 100%. */
+  let joinedOfFinished = 0
   const joinedAdvisors: JoinedAdvisor[] = []
   const stops = new Map<string, number>()
   const days = (from: string, to: string) => Math.max(0, Math.round((Date.parse(to) - Date.parse(from)) / 864e5))
@@ -169,12 +170,10 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     if (i.openedAt || didStart) opened++
     if (didStart) started++
     if (didFinish) finished++
-    const finishedLately = !!done && done.at >= COLLECTING_SINCE
-    if (finishedLately) finishedSince++
     const mark = sittings.map((e) => joinedBy.get(e.id)).find(Boolean)
     if (mark) {
       joined++
-      if (finishedLately) joinedOfSince++
+      if (didFinish) joinedOfFinished++
       if (mark.aum) {
         joinedAum += mark.aum
         joinedWithAum++
@@ -213,15 +212,18 @@ export async function loadCandidateFunnel(): Promise<CandidateFunnel> {
     (a, b) => ((b.lost ?? 0) > (a?.lost ?? 0) ? b : a),
     null,
   )
-  const expectedAtBaseline = Math.round(finishedSince * recruitBaseline.joinedRate)
+  const expectedAtBaseline = Math.round(finished * recruitBaseline.joinedRate)
+  /* The rate and the lift wait for the first advisor marked as joined: until
+     somebody is, 0% would say the firm signed nobody, when it may just not
+     have marked them yet. */
   const roi: CandidateRoi = {
-    finishedSince,
-    joinedRate: joinedOfSince && finishedSince ? joinedOfSince / finishedSince : null,
+    finished,
+    joinedRate: joined && finished ? joinedOfFinished / finished : null,
     daysToDecision: joined ? Math.round(joinedAdvisors.reduce((a, s) => a + s.days, 0) / joined) : null,
     aumPerAdvisor: joinedWithAum ? joinedAum / joinedWithAum : null,
     aumTotal: joinedAum + (joined - joinedWithAum) * recruitBaseline.aumPerAdvisor,
     expectedAtBaseline,
-    extraJoined: joinedOfSince ? joinedOfSince - expectedAtBaseline : null,
+    extraJoined: joined ? joinedOfFinished - expectedAtBaseline : null,
   }
   const since = invites.reduce<string | null>(
     (a, i) => (i.createdAt && (!a || i.createdAt < a) ? i.createdAt : a),

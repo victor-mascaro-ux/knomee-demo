@@ -326,13 +326,20 @@ export async function deleteEntry(id: string): Promise<Trouble> {
 export interface Joined {
   id: string
   token: string | null
+  /** When they joined: now, or the day the recruiter gave for an advisor who
+      joined before it could be recorded. */
   at: string
   /** The book coming over, in $M, when the recruiter knows it. */
   aum: number | null
 }
 
-export async function noteJoined(id: string, token: string | null, aum: number | null): Promise<Trouble> {
-  return put(`${ROOT}/joined/${id}`, { id, token, at: new Date().toISOString(), aum } satisfies Joined)
+export async function noteJoined(
+  id: string,
+  token: string | null,
+  aum: number | null,
+  at = new Date().toISOString(),
+): Promise<Trouble> {
+  return put(`${ROOT}/joined/${id}`, { id, token, at, aum } satisfies Joined)
 }
 
 /** Undo: the advisor goes back to their tier. */

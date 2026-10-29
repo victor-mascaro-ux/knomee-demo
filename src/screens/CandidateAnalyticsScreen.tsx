@@ -49,7 +49,7 @@ const RECORDED: Record<string, string> = {
   'Opened the link': 'Recorded by the flow, the first time the link opens.\nLive.',
   'Started answering': 'Recorded by the flow, on the first answer.\nLive.',
   'Finished the flow': 'Recorded by the flow, once every adventure is taken to its end.\nLive.',
-  Joined: `Recorded by Mark as Joined, on Candidates, with the AUM if known.\nCounting since ${SINCE}.`,
+  Joined: 'Recorded by Mark as Joined, on Candidates, with the day they joined and the AUM if known.\nAn earlier joiner can be marked with their own day.',
 }
 
 /** When a toolkit step started counting. */
@@ -147,7 +147,7 @@ function LiftRow({
           {change.words}
         </span>
       ) : (
-        <span className="act-lift-wait">Counting since {SINCE}</span>
+        <span className="act-lift-wait">From the first advisor joined</span>
       )}
     </div>
   )
@@ -296,7 +296,7 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
                   ? ' '
                   : f.joined
                     ? `${aum(f.joinedAum)} entered for ${f.joinedWithAum} who joined${withoutAum ? `, plus ${withoutAum} at your ${aum(base.aumPerAdvisor)} average` : ''}`
-                    : `No advisor marked as joined yet. Mark as Joined on Candidates counts here from ${SINCE}.`}
+                    : 'No advisor marked as joined yet. Mark as Joined on Candidates counts here, earlier joiners with the day they joined.'}
               </div>
             </div>
             <div className="act-roi-stat">
@@ -307,9 +307,9 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
               <div className="act-roi-sub">
                 {!r
                   ? ' '
-                  : r.finishedSince
-                    ? `${r.finishedSince} finished the flow since ${SINCE}; at your ${Math.round(base.joinedRate * 100)}% that’s ${r.expectedAtBaseline} joined.${r.extraJoined && r.extraJoined > 0 ? ` The extra ${r.extraJoined} ≈ ${aum(r.extraJoined * base.aumPerAdvisor)} in AUM.` : ''}`
-                    : `Read against the advisors who finish the flow from ${SINCE} on, at your ${Math.round(base.joinedRate * 100)}%.`}
+                  : r.finished
+                    ? `${r.finished} finished the flow; at your ${Math.round(base.joinedRate * 100)}% that’s ${r.expectedAtBaseline} joined.${r.extraJoined && r.extraJoined > 0 ? ` The extra ${r.extraJoined} ≈ ${aum(r.extraJoined * base.aumPerAdvisor)} in AUM.` : ''}`
+                    : `Read against the advisors who finish the flow, at your ${Math.round(base.joinedRate * 100)}%.`}
               </div>
             </div>
             <div className="act-roi-stat">
@@ -362,8 +362,8 @@ export default function CandidateAnalyticsScreen({ onOlderVersion }: { onOlderVe
           <p className="analytics-note">
             Your baseline is the three numbers in the Recruit Toolkit’s Baseline, from onboarding: first conversation to
             joining, the days it takes, and AUM per advisor who joined. With Knomee, finishing the flow stands in for the first
-            conversation, and only advisors who finished it since {SINCE}, when joining began to be recorded, count.
-            Days run from the link sent to Mark as Joined.
+            conversation, and every advisor who finished it counts: mark an advisor who joined earlier with the day they
+            joined. Days run from the link sent to the day they joined.
           </p>
           {withoutAum > 0 && (
             <Reading>

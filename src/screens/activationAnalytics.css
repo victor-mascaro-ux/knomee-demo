@@ -500,6 +500,11 @@
   gap: 4px;
   text-align: left;
 }
+/* Two fields in one dialog (Mark as Joined: the day, then the AUM): the
+   lead's own room between them. */
+.cv-field + .cv-field {
+  margin-top: var(--space-16);
+}
 .cv-label {
   font-size: 13px;
   font-weight: 600;
