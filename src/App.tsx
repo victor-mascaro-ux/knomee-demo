@@ -2989,7 +2989,17 @@ function FillText({ text, ...fill }: Fill & { text: string }) {
 }
 
 /* A text field as tall as its text, so a paragraph is edited at its length. */
-function AutoTextarea({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+function AutoTextarea({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (v: string) => void
+}) {
   const ref = useRef<HTMLTextAreaElement>(null)
   useLayoutEffect(() => {
     const t = ref.current
@@ -3001,6 +3011,7 @@ function AutoTextarea({ id, value, onChange }: { id: string; value: string; onCh
     <textarea
       ref={ref}
       id={id}
+      aria-label={label}
       className="invite-edit-field"
       rows={2}
       value={value}
@@ -3017,7 +3028,10 @@ function PencilGlyph() {
   )
 }
 
-function InviteEmailPreview({
+/* The invite as a mail app's compose window: its bar, the From, To and
+   Subject lines, the message, and Send at the foot. The message scrolls
+   inside the window, so Send stays in sight however long the email is. */
+function InviteCompose({
   sample,
   draft,
   edited,
@@ -3028,6 +3042,13 @@ function InviteEmailPreview({
   missing,
   brand,
   link,
+  kind,
+  label,
+  to,
+  onTo,
+  toBad,
+  onSend,
+  sending,
   ...fill
 }: Fill & {
   sample: InviteEmail
@@ -3040,47 +3061,74 @@ function InviteEmailPreview({
   missing: string[]
   brand: ClientBrand | null
   link: string
+  kind: InviteKind
+  label: string
+  to: string
+  onTo: (v: string) => void
+  /** Send was pressed with no address: the To line shows it. */
+  toBad: boolean
+  onSend: () => unknown
+  /** Send confirming itself, in the button. */
+  sending: boolean
 }) {
+  const noTo = toBad && !to.trim()
+  const unfilled = fill.flagged && !editing ? missing.length : 0
+  const fields = unfilled === 1 ? 'the highlighted field' : `the ${unfilled} highlighted fields`
+  const hint =
+    noTo && unfilled
+      ? `Add an email address and fill in ${fields} to send it.`
+      : noTo
+        ? 'Add an email address to send it.'
+        : unfilled
+          ? `Fill in ${fields} to send it.`
+          : null
   return (
-    <div className="invite-preview">
-      <div className="invite-preview-meta">
-        <div className="invite-preview-meta-text">
-          <div>
-            From: <b>{fill.known['Advisor Name']}</b> · {fill.known['Firm Name']}
-          </div>
-          {!editing && (
-            <div>
-              Subject:{' '}
-              <b>
-                <FillLine text={draft.subject} {...fill} />
-              </b>
-            </div>
-          )}
-        </div>
-        <div className="invite-preview-tools">
-          {editing && edited && (
-            <button className="invite-text-btn" type="button" onClick={onReset}>
-              Reset to Sample
-            </button>
-          )}
-          <button className="invite-text-btn" type="button" aria-pressed={editing} onClick={() => onEditing(!editing)}>
-            {editing ? (
-              'Done'
-            ) : (
-              <>
-                <PencilGlyph /> Edit Email
-              </>
-            )}
-          </button>
-        </div>
+    <div className="invite-mail">
+      <div className="invite-mail-bar">New Message</div>
+      <div className="invite-mail-line">
+        <span className="invite-mail-key">From</span>
+        <span className="invite-mail-val">
+          <b>{fill.known['Advisor Name']}</b> · {fill.known['Firm Name']}
+        </span>
       </div>
-      {fill.flagged && missing.length > 0 && !editing && (
-        <p className="invite-fill-hint" role="status">
-          Fill in the {missing.length === 1 ? 'highlighted field' : `${missing.length} highlighted fields`} to send it.
-        </p>
-      )}
-      <div className="invite-preview-card">
-        <div className="invite-preview-brand">
+      <div className={`invite-mail-line${noTo ? ' is-bad' : ''}`}>
+        <label className="invite-mail-key" htmlFor="invite-email">
+          To
+        </label>
+        <input
+          id="invite-email"
+          className="invite-mail-input"
+          type="email"
+          placeholder={`Add ${kind} email`}
+          value={to}
+          onChange={(e) => onTo(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && onSend()}
+        />
+      </div>
+      <div className="invite-mail-line">
+        {editing ? (
+          <>
+            <label className="invite-mail-key" htmlFor="invite-edit-subject">
+              Subject
+            </label>
+            <input
+              id="invite-edit-subject"
+              className="invite-mail-input"
+              value={draft.subject}
+              onChange={(e) => onDraft({ ...draft, subject: e.target.value })}
+            />
+          </>
+        ) : (
+          <>
+            <span className="invite-mail-key">Subject</span>
+            <span className="invite-mail-val invite-mail-subject">
+              <FillLine text={draft.subject} {...fill} />
+            </span>
+          </>
+        )}
+      </div>
+      <div className="invite-mail-body">
+        <div className="invite-mail-brand">
           {brand ? (
             <span className="invite-mail-logo">{brand.logo}</span>
           ) : (
@@ -3091,31 +3139,18 @@ function InviteEmailPreview({
         </div>
         {editing ? (
           <div className="invite-edit">
-            <label className="invite-field-label" htmlFor="invite-edit-subject">
-              Subject
-            </label>
-            <input
-              id="invite-edit-subject"
-              className="invite-edit-field"
-              value={draft.subject}
-              onChange={(e) => onDraft({ ...draft, subject: e.target.value })}
-            />
-            <label className="invite-field-label" htmlFor="invite-edit-message">
-              Message
-            </label>
             <AutoTextarea
               id="invite-edit-message"
+              label="Message"
               value={draft.message}
               onChange={(message) => onDraft({ ...draft, message })}
             />
             <span className="invite-cta" title={`Opens ${link}`}>
               {sample.cta}
             </span>
-            <label className="invite-field-label" htmlFor="invite-edit-signoff">
-              Sign-off
-            </label>
             <AutoTextarea
               id="invite-edit-signoff"
+              label="Sign-off"
               value={draft.signoff}
               onChange={(signoff) => onDraft({ ...draft, signoff })}
             />
@@ -3130,6 +3165,41 @@ function InviteEmailPreview({
             <FillText text={draft.signoff} {...fill} />
           </>
         )}
+      </div>
+      <div className="invite-mail-foot">
+        <button className="invite-text-btn" type="button" aria-pressed={editing} onClick={() => onEditing(!editing)}>
+          {editing ? (
+            'Done'
+          ) : (
+            <>
+              <PencilGlyph /> Edit Email
+            </>
+          )}
+        </button>
+        {editing && edited && (
+          <button className="invite-text-btn" type="button" onClick={onReset}>
+            Reset to Sample
+          </button>
+        )}
+        {hint && (
+          <p className="invite-fill-hint" role="status">
+            {hint}
+          </p>
+        )}
+        <FeedbackButton
+          className="invite-mail-send"
+          aria-label={`Send ${kind} invite`}
+          onClick={onSend}
+          flashing={sending}
+          done={
+            <>
+              <DoneGlyph /> Sent
+            </>
+          }
+          announce={`${label} email sent`}
+        >
+          <SendGlyph /> Send
+        </FeedbackButton>
       </div>
     </div>
   )
@@ -3156,7 +3226,6 @@ function InviteModal({
 }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
   const [email, setEmail] = useState('')
-  const [previewOpen, setPreviewOpen] = useState(false)
   const tabInd = useSlideIndicator(kind)
   const [channel, setChannel] = useState<InviteChannel>('email')
   const chanInd = useSlideIndicator(channel)
@@ -3173,12 +3242,12 @@ function InviteModal({
   const [fields, setFields] = useState<Record<string, string>>({})
   const [editing, setEditing] = useState(false)
   const [flagged, setFlagged] = useState(false)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const [toBad, setToBad] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
   const samples = INVITE_EMAILS[kind]
   const pick = (id: string) => {
     setPicks((p) => ({ ...p, [kind]: id }))
     setFlagged(false)
-    setPreviewOpen(true)
   }
   const sample = samples.find((e) => e.id === picks[kind]) ?? samples[0]
   const draft = drafts[sample.id] ?? sample
@@ -3215,14 +3284,20 @@ function InviteModal({
   // does not claim to have.
   const sent = useFlash()
   const send = () => {
-    if (!email.trim()) return false
-    /* Not with a field still empty — "Hi {{First Name}}" is not sent. The
-       email opens on the first one, as the toolkit's Copy Text waits for it. */
-    if (missing.length) {
-      setFlagged(true)
-      setEditing(false)
-      setPreviewOpen(true)
-      window.setTimeout(() => previewRef.current?.querySelector<HTMLInputElement>('.invite-fill.is-bad')?.focus(), 60)
+    /* Not without an address, nor with a field still empty — "Hi {{First
+       Name}}" is not sent. The window marks what's left and puts the cursor in
+       the first of it, as the toolkit's Copy Text waits for it. */
+    const noTo = !email.trim()
+    if (noTo || missing.length) {
+      setToBad(noTo)
+      if (missing.length) {
+        setFlagged(true)
+        setEditing(false)
+      }
+      window.setTimeout(
+        () => panelRef.current?.querySelector<HTMLInputElement>(noTo ? '#invite-email' : '.invite-fill.is-bad')?.focus(),
+        60,
+      )
       return false
     }
     sent.flash()
@@ -3230,6 +3305,7 @@ function InviteModal({
     /* The next invite is to someone else. */
     setFields({})
     setFlagged(false)
+    setToBad(false)
   }
 
   const bandStyle = useViewportBand(true)
@@ -3271,6 +3347,7 @@ function InviteModal({
                 onClick={() => {
                   setKind(k)
                   setFlagged(false)
+                  setToBad(false)
                 }}
               >
                 Invite {k === 'prospect' ? 'Prospect' : 'Client'}
@@ -3308,33 +3385,9 @@ function InviteModal({
 
           {/* Keyed on both, so the panel re-runs its enter animation on each
               switch — the content cross-fades instead of snapping. */}
-          <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`}>
+          <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`} ref={panelRef}>
             {channel === 'email' && (
               <>
-                {/* "To", not "Email": the tab above already says Email. */}
-                <label className="invite-field-label" htmlFor="invite-email">
-                  To
-                </label>
-                <div className="invite-email-row">
-                  <input
-                    id="invite-email"
-                    type="email"
-                    placeholder={`Add ${kind} email`}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && send()}
-                  />
-                  <FeedbackButton
-                    className="invite-send"
-                    aria-label={`Send ${kind} invite`}
-                    onClick={send}
-                    flashing={sent.is()}
-                    done={<DoneGlyph />}
-                    announce={`${label} email sent`}
-                  >
-                    <SendGlyph />
-                  </FeedbackButton>
-                </div>
                 {/* Which email: the toolkit's lead (or client) type, then the
                     emails it has for that type — the adventures' starter pills,
                     one picked at a time. */}
@@ -3388,41 +3441,35 @@ function InviteModal({
                     ))}
                 </div>
                 {sample.note && <p className="invite-pick-note">{sample.note}</p>}
-                <button
-                  className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
-                  type="button"
-                  aria-expanded={previewOpen}
-                  onClick={() => setPreviewOpen((v) => !v)}
-                >
-                  Preview <ChevronDown />
-                </button>
-                {/* Height-animated reveal so the preview expands rather than pops. */}
-                <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`} ref={previewRef}>
-                  <div className="collapse-inner">
-                    <InviteEmailPreview
-                      sample={sample}
-                      draft={draft}
-                      edited={edited}
-                      onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
-                      onReset={() =>
-                        setDrafts((all) => {
-                          const rest = { ...all }
-                          delete rest[sample.id]
-                          return rest
-                        })
-                      }
-                      editing={editing}
-                      onEditing={setEditing}
-                      missing={missing}
-                      brand={brand}
-                      link={link}
-                      known={known}
-                      fields={fields}
-                      onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
-                      flagged={flagged}
-                    />
-                  </div>
-                </div>
+                <InviteCompose
+                  sample={sample}
+                  draft={draft}
+                  edited={edited}
+                  onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
+                  onReset={() =>
+                    setDrafts((all) => {
+                      const rest = { ...all }
+                      delete rest[sample.id]
+                      return rest
+                    })
+                  }
+                  editing={editing}
+                  onEditing={setEditing}
+                  missing={missing}
+                  brand={brand}
+                  link={link}
+                  kind={kind}
+                  label={label}
+                  to={email}
+                  onTo={setEmail}
+                  toBad={toBad}
+                  onSend={send}
+                  sending={sent.is()}
+                  known={known}
+                  fields={fields}
+                  onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
+                  flagged={flagged}
+                />
               </>
             )}
             {channel === 'link' && (
