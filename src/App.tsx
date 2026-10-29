@@ -86,8 +86,8 @@ import {
   TierBarsIcon,
   FunnelIcon,
   HouseIcon,
-  PersonPlusIcon,
-  PersonSearchIcon,
+  BriefcaseIcon,
+  LensIcon,
   PeopleIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
@@ -3999,8 +3999,8 @@ type FirmScreen = 'firm-candidates' | 'firm-analytics'
    one Analytics menu at the row's far right — candidates' first again. */
 type DashTab = { id: Screen | FirmScreen; label: string; firm?: boolean; icon?: ReactNode }
 const dashTabs: DashTab[] = [
-  { id: 'firm-candidates', label: 'Candidates', firm: true, icon: <PersonPlusIcon /> },
-  { id: 'prospects', label: 'Prospects', icon: <PersonSearchIcon /> },
+  { id: 'firm-candidates', label: 'Candidates', firm: true, icon: <BriefcaseIcon /> },
+  { id: 'prospects', label: 'Prospects', icon: <LensIcon /> },
   { id: 'clients', label: 'Clients', icon: <PeopleIcon /> },
 ]
 const analyticsTabs: DashTab[] = [

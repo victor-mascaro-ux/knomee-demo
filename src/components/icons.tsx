@@ -43,39 +43,40 @@ export function ChartIcon({ color = '#086375' }: { color?: string }) {
 }
 
 /* The dashboard tabs' set, drawn like ChartIcon (Analytics): solid shapes,
-   1.6 strokes, the same 18 grid and baseline. A person each, told apart by
-   what is with them: a plus for the candidates a firm recruits, a lens for the
-   prospects an advisor looks for, a second person for the clients they have. */
-export function PersonPlusIcon({ color = 'currentColor' }: { color?: string }) {
+   the same 18 grid and baseline. Each is its own silhouette, so the tabs read
+   apart at 16px: a briefcase for the candidates a firm recruits, a lens for
+   the prospects an advisor looks for, two people for the clients they have.
+   (A person each with a small mark beside it — a plus, a lens — all looked
+   the same.) */
+export function BriefcaseIcon({ color = 'currentColor' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <circle cx="7" cy="5.6" r="2.9" fill={color} />
-      <path d="M1.6 15.5a5.4 5.4 0 0 1 10.8 0z" fill={color} />
-      <path d="M14.4 5.2v4M12.4 7.2h4" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M6.6 5.4V4A1.4 1.4 0 0 1 8 2.6h2A1.4 1.4 0 0 1 11.4 4v1.4" stroke={color} strokeWidth="1.6" />
+      <path d="M2 9V6.8a1.6 1.6 0 0 1 1.6-1.6h10.8A1.6 1.6 0 0 1 16 6.8V9z" fill={color} />
+      <path d="M2 10.2h14v3.7a1.6 1.6 0 0 1-1.6 1.6H3.6A1.6 1.6 0 0 1 2 13.9z" fill={color} />
+      <rect x="7.8" y="8.1" width="2.4" height="3" rx="0.7" fill={color} />
     </svg>
   )
 }
 
-export function PersonSearchIcon({ color = 'currentColor' }: { color?: string }) {
+export function LensIcon({ color = 'currentColor' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <circle cx="6" cy="5.6" r="2.8" fill={color} />
-      <path d="M1.2 15.5a4.8 4.8 0 0 1 9.6 0z" fill={color} />
-      <circle cx="13.2" cy="10.6" r="2.4" stroke={color} strokeWidth="1.6" />
-      <path d="m15 12.4 1.7 1.7" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="7.8" cy="7.8" r="5" stroke={color} strokeWidth="2" />
+      <path d="m11.7 11.7 3.4 3.4" stroke={color} strokeWidth="2.6" strokeLinecap="round" />
     </svg>
   )
 }
 
+/* The one behind is cut where the front one overlaps it, so both stay solid
+   and the pair still reads as two. */
 export function PeopleIcon({ color = 'currentColor' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <g opacity="0.5">
-        <circle cx="12.6" cy="6.2" r="2.4" fill={color} />
-        <path d="M8.2 15.5a4.4 4.4 0 0 1 8.8 0z" fill={color} />
-      </g>
-      <circle cx="6.4" cy="5.8" r="2.8" fill={color} />
-      <path d="M1.2 15.5a5.2 5.2 0 0 1 10.4 0z" fill={color} />
+      <circle cx="6.2" cy="5.8" r="2.8" fill={color} />
+      <path d="M1.2 15.5a5 5 0 0 1 10 0z" fill={color} />
+      <circle cx="12.8" cy="7" r="2.3" fill={color} />
+      <path d="M11.08 11.67A4.2 4.2 0 0 1 17 15.5h-4.6a6.2 6.2 0 0 0-1.32-3.83z" fill={color} />
     </svg>
   )
 }
