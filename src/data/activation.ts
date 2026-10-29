@@ -38,10 +38,9 @@ export const firmFeeRate = 0.01 // the firm's advisory fee, so assets entered at
 /** First-year revenue from the assets an advisor enters on Convert to Client. */
 export const revenueFrom = (assets: number) => Math.round(assets * firmFeeRate)
 
-/* The firm's baseline from the toolkit's "Know Your Baseline" (Prospect
-   Toolkit), entered at onboarding. The toolkit's other two baseline numbers,
-   time to first meeting and meetings to close, depend on meetings, which
-   Knomee doesn't see — they stay in the firm's CRM. */
+/* The firm's baseline from the Prospect Toolkit's Baseline section, entered at
+   onboarding: the same three numbers this ROI card measures (conversion rate,
+   time to client, revenue per client). ACME's toolkit opens with these. */
 export const baseline = {
   conversionRate: 0.11, // of prospects the firm reached out to
   daysToClient: 74, // first contact to signed client
