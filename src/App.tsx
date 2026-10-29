@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -2858,13 +2859,24 @@ function LinkGlyph() {
   )
 }
 
+// A QR code in small: three finder squares, each with its dot, and a scatter
+// of modules in the fourth corner.
 function QrGlyph() {
   return (
-    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="3" width="5.2" height="5.2" rx="1" />
-      <rect x="11.8" y="3" width="5.2" height="5.2" rx="1" />
-      <rect x="3" y="11.8" width="5.2" height="5.2" rx="1" />
-      <path d="M11.8 11.8h2.4v2.4h-2.4zM14.6 14.6H17V17h-2.4z" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+      <rect x="2.75" y="2.75" width="5.5" height="5.5" rx="1.2" />
+      <rect x="11.75" y="2.75" width="5.5" height="5.5" rx="1.2" />
+      <rect x="2.75" y="11.75" width="5.5" height="5.5" rx="1.2" />
+      <g fill="currentColor" stroke="none">
+        <rect x="4.5" y="4.5" width="2" height="2" rx=".4" />
+        <rect x="13.5" y="4.5" width="2" height="2" rx=".4" />
+        <rect x="4.5" y="13.5" width="2" height="2" rx=".4" />
+        <rect x="11" y="11" width="2.4" height="2.4" rx=".5" />
+        <rect x="15.4" y="11" width="2.4" height="2.4" rx=".5" />
+        <rect x="13.2" y="13.2" width="2.4" height="2.4" rx=".5" />
+        <rect x="11" y="15.4" width="2.4" height="2.4" rx=".5" />
+        <rect x="15.4" y="15.4" width="2.4" height="2.4" rx=".5" />
+      </g>
     </svg>
   )
 }
@@ -2924,11 +2936,13 @@ function QrCode({ seed }: { seed: number }) {
    Toolkit's samples (data/inviteEmails.ts), its {{placeholders}} as fields to
    fill in place — the way the toolkit opens a sample — and its button in the
    firm's colour, the colour the toolkit copies it in, linked to this invite.
-   Edit Email opens the words themselves; the button stays a button. */
-type InviteDraft = Pick<InviteEmail, 'subject' | 'message' | 'signoff'>
+   Every word of it, the button's too, is edited where it stands: click and
+   type. */
+type InviteDraft = Pick<InviteEmail, 'subject' | 'message' | 'cta' | 'signoff'>
 
 type Fill = {
-  /** Filled in from the demo: the advisor's name, the firm's. */
+  /** Filled in from the demo: the advisor's name, the firm's. Still fields,
+      only filled already. */
   known: Record<string, string>
   /** Typed in by the advisor. One value per placeholder, wherever it appears. */
   fields: Record<string, string>
@@ -2937,87 +2951,142 @@ type Fill = {
   flagged: boolean
 }
 
+/** What a placeholder holds now: what was typed, else the demo's own. */
+function fieldValue(k: string, { known, fields }: Pick<Fill, 'known' | 'fields'>) {
+  return fields[k] ?? known[k] ?? ''
+}
+
 /* A field is as wide as what it holds, or its name while empty. The browser
    measures that itself where it can (field-sizing); elsewhere a count of
    characters stands in, a little wide for this face. */
 const SIZES_ITSELF = typeof CSS !== 'undefined' && CSS.supports('field-sizing', 'content')
 
-function FillLine({ text, known, fields, onField, flagged }: Fill & { text: string }) {
-  return (
-    <>
-      {text.split(/(\{\{[^}]+\}\})/).map((part, i) => {
-        const m = /^\{\{([^}]+)\}\}$/.exec(part)
-        if (!m) return part
-        const k = m[1].trim()
-        if (known[k]) return known[k]
-        const v = fields[k] ?? ''
-        return (
-          <input
-            key={i}
-            className={`invite-fill${flagged && !v.trim() ? ' is-bad' : ''}`}
-            value={v}
-            placeholder={k}
-            aria-label={k}
-            style={SIZES_ITSELF ? undefined : { width: `${Math.max(v.length, k.length) + 1}ch` }}
-            onChange={(e) => onField(k, e.target.value)}
-          />
-        )
-      })}
-    </>
-  )
+/* The words around the fields, read back off the page: text, line breaks,
+   and each field as {{its name}}. */
+function readFill(node: Node): string {
+  let out = ''
+  node.childNodes.forEach((n) => {
+    if (n.nodeType === Node.TEXT_NODE) out += (n as Text).data.replace(/ /g, ' ')
+    else if (n instanceof HTMLElement) {
+      if (n.dataset.fill) out += `{{${n.dataset.fill}}}`
+      else if (n.tagName === 'BR') out += '\n'
+      else out += (out && !out.endsWith('\n') ? '\n' : '') + readFill(n)
+    }
+  })
+  return out
 }
 
-/* Paragraphs split by a blank line; a single line break stays one. */
-function FillText({ text, ...fill }: Fill & { text: string }) {
-  return (
-    <>
-      {text
-        .split(/\n{2,}/)
-        .filter((para) => para.trim())
-        .map((para, i) => (
-          <p key={i}>
-            {para.split('\n').map((line, j) => (
-              <Fragment key={j}>
-                {j > 0 && <br />}
-                <FillLine text={line} {...fill} />
-              </Fragment>
-            ))}
-          </p>
-        ))}
-    </>
-  )
-}
-
-/* A text field as tall as its text, so a paragraph is edited at its length. */
-function AutoTextarea({
-  id,
+/* A stretch of the email edited where it stands: its words typed straight
+   into it, its placeholders kept as fields. While it is edited the words are
+   the browser's — React redrawing them would throw the caret — so they are
+   built from the text only when it changes from outside (another sample,
+   Reset to Sample), and read back on every keystroke. */
+function FillEditor({
+  text,
+  onText,
   label,
-  value,
-  onChange,
-}: {
-  id: string
+  single,
+  className,
+  ...fill
+}: Fill & {
+  text: string
+  onText: (t: string) => void
   label: string
-  value: string
-  onChange: (v: string) => void
+  /** One line, as the subject: Enter doesn't break it. */
+  single?: boolean
+  className?: string
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const shown = useRef<string | null>(null)
+  const latest = useRef(fill)
+  latest.current = fill
+
   useLayoutEffect(() => {
-    const t = ref.current
-    if (!t) return
-    t.style.height = 'auto'
-    t.style.height = `${t.scrollHeight + t.offsetHeight - t.clientHeight}px`
-  }, [value])
+    const el = ref.current
+    if (!el || text === shown.current) return
+    shown.current = text
+    el.replaceChildren(
+      ...text
+        .split(/(\{\{[^}]+\}\})/)
+        .filter(Boolean)
+        .map((part) => {
+          const m = /^\{\{([^}]+)\}\}$/.exec(part)
+          if (!m) return document.createTextNode(part)
+          const k = m[1].trim()
+          const chip = document.createElement('span')
+          chip.contentEditable = 'false'
+          chip.dataset.fill = k
+          const input = document.createElement('input')
+          input.className = 'invite-fill'
+          input.placeholder = k
+          input.setAttribute('aria-label', k)
+          input.addEventListener('input', () => latest.current.onField(k, input.value))
+          chip.append(input)
+          return chip
+        }),
+    )
+  }, [text])
+
+  // Each field shows its value — one per placeholder, however often it
+  // appears — and, once Send has asked, whether it is still empty.
+  useLayoutEffect(() => {
+    ref.current?.querySelectorAll<HTMLElement>('[data-fill]').forEach((chip) => {
+      const k = chip.dataset.fill!
+      const input = chip.querySelector('input')
+      if (!input) return
+      const v = fieldValue(k, fill)
+      if (input.value !== v) input.value = v
+      input.classList.toggle('is-bad', fill.flagged && !v.trim())
+      if (!SIZES_ITSELF) input.style.width = `${Math.max(v.length, k.length) + 1}ch`
+    })
+  })
+
   return (
-    <textarea
+    <div
       ref={ref}
-      id={id}
+      className={`invite-editable${className ? ` ${className}` : ''}`}
+      contentEditable="plaintext-only"
+      suppressContentEditableWarning
+      role="textbox"
+      aria-multiline={!single}
       aria-label={label}
-      className="invite-edit-field"
-      rows={2}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onInput={(e) => {
+        if (e.target !== e.currentTarget) return // a field's own typing
+        const t = readFill(e.currentTarget)
+        shown.current = t
+        onText(single ? t.replace(/\n/g, ' ') : t)
+      }}
+      onKeyDown={(e) => {
+        if (single && e.key === 'Enter' && e.target === e.currentTarget) e.preventDefault()
+      }}
     />
   )
+}
+
+/* Click anywhere in the email to edit it: a click beside the words — a line's
+   label, the margin round the message — goes to the nearest place to type. */
+function editNearest(e: ReactMouseEvent<HTMLElement>) {
+  const t = e.target as HTMLElement
+  if (t.closest('input, button, a, .invite-editable')) return
+  const zone = t.closest<HTMLElement>('.invite-mail-line, .invite-mail-body')
+  const spots = zone ? [...zone.querySelectorAll<HTMLElement>('.invite-editable, input')] : []
+  if (!spots.length) return
+  const y = e.clientY
+  const off = (el: HTMLElement) => {
+    const r = el.getBoundingClientRect()
+    return y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0
+  }
+  const el = spots.reduce((a, b) => (off(b) < off(a) ? b : a))
+  e.preventDefault()
+  el.focus()
+  if (el.isContentEditable) {
+    const r = document.createRange()
+    r.selectNodeContents(el)
+    r.collapse(y < el.getBoundingClientRect().top)
+    const sel = window.getSelection()
+    sel?.removeAllRanges()
+    sel?.addRange(r)
+  }
 }
 
 function PencilGlyph() {
@@ -3037,8 +3106,6 @@ function InviteCompose({
   edited,
   onDraft,
   onReset,
-  editing,
-  onEditing,
   missing,
   brand,
   link,
@@ -3056,8 +3123,6 @@ function InviteCompose({
   edited: boolean
   onDraft: (d: InviteDraft) => void
   onReset: () => void
-  editing: boolean
-  onEditing: (on: boolean) => void
   missing: string[]
   brand: ClientBrand | null
   link: string
@@ -3072,7 +3137,7 @@ function InviteCompose({
   sending: boolean
 }) {
   const noTo = toBad && !to.trim()
-  const unfilled = fill.flagged && !editing ? missing.length : 0
+  const unfilled = fill.flagged ? missing.length : 0
   const fields = unfilled === 1 ? 'the highlighted field' : `the ${unfilled} highlighted fields`
   const hint =
     noTo && unfilled
@@ -3083,7 +3148,7 @@ function InviteCompose({
           ? `Fill in ${fields} to send it.`
           : null
   return (
-    <div className="invite-mail">
+    <div className="invite-mail" onMouseDown={editNearest}>
       <div className="invite-mail-bar">New Message</div>
       <div className="invite-mail-line">
         <span className="invite-mail-key">From</span>
@@ -3106,26 +3171,15 @@ function InviteCompose({
         />
       </div>
       <div className="invite-mail-line">
-        {editing ? (
-          <>
-            <label className="invite-mail-key" htmlFor="invite-edit-subject">
-              Subject
-            </label>
-            <input
-              id="invite-edit-subject"
-              className="invite-mail-input"
-              value={draft.subject}
-              onChange={(e) => onDraft({ ...draft, subject: e.target.value })}
-            />
-          </>
-        ) : (
-          <>
-            <span className="invite-mail-key">Subject</span>
-            <span className="invite-mail-val invite-mail-subject">
-              <FillLine text={draft.subject} {...fill} />
-            </span>
-          </>
-        )}
+        <span className="invite-mail-key">Subject</span>
+        <FillEditor
+          className="invite-mail-subject"
+          label="Subject"
+          single
+          text={draft.subject}
+          onText={(subject) => onDraft({ ...draft, subject })}
+          {...fill}
+        />
       </div>
       <div className="invite-mail-body">
         <div className="invite-mail-brand">
@@ -3137,49 +3191,39 @@ function InviteCompose({
             </>
           )}
         </div>
-        {editing ? (
-          <div className="invite-edit">
-            <AutoTextarea
-              id="invite-edit-message"
-              label="Message"
-              value={draft.message}
-              onChange={(message) => onDraft({ ...draft, message })}
-            />
-            <span className="invite-cta" title={`Opens ${link}`}>
-              {sample.cta}
-            </span>
-            <AutoTextarea
-              id="invite-edit-signoff"
-              label="Sign-off"
-              value={draft.signoff}
-              onChange={(signoff) => onDraft({ ...draft, signoff })}
-            />
-            <p className="invite-edit-note">Text in {'{{double braces}}'} is filled in before it&rsquo;s sent.</p>
-          </div>
-        ) : (
-          <>
-            <FillText text={draft.message} {...fill} />
-            <span className="invite-cta" title={`Opens ${link}`}>
-              {sample.cta}
-            </span>
-            <FillText text={draft.signoff} {...fill} />
-          </>
-        )}
+        <FillEditor
+          label="Message"
+          text={draft.message}
+          onText={(message) => onDraft({ ...draft, message })}
+          {...fill}
+        />
+        <span className="invite-cta" title={`Opens ${link}`}>
+          <input
+            className="invite-cta-text"
+            aria-label="Button text"
+            placeholder="Button text"
+            value={draft.cta}
+            style={SIZES_ITSELF ? undefined : { width: `${Math.max(draft.cta.length, 11) + 1}ch` }}
+            onChange={(e) => onDraft({ ...draft, cta: e.target.value })}
+          />
+        </span>
+        <FillEditor
+          label="Sign-off"
+          text={draft.signoff}
+          onText={(signoff) => onDraft({ ...draft, signoff })}
+          {...fill}
+        />
       </div>
       <div className="invite-mail-foot">
-        <button className="invite-text-btn" type="button" aria-pressed={editing} onClick={() => onEditing(!editing)}>
-          {editing ? (
-            'Done'
-          ) : (
-            <>
-              <PencilGlyph /> Edit Email
-            </>
-          )}
-        </button>
-        {editing && edited && (
+        {/* Once it's been changed, the way back to the toolkit's own words. */}
+        {edited ? (
           <button className="invite-text-btn" type="button" onClick={onReset}>
             Reset to Sample
           </button>
+        ) : (
+          <span className="invite-mail-tip">
+            <PencilGlyph /> Click anywhere to edit
+          </span>
         )}
         {hint && (
           <p className="invite-fill-hint" role="status">
@@ -3187,7 +3231,7 @@ function InviteCompose({
           </p>
         )}
         <FeedbackButton
-          className="invite-mail-send"
+          className="invite-pill invite-mail-send"
           aria-label={`Send ${kind} invite`}
           onClick={onSend}
           flashing={sending}
@@ -3240,7 +3284,6 @@ function InviteModal({
   })
   const [drafts, setDrafts] = useState<Record<string, InviteDraft>>({})
   const [fields, setFields] = useState<Record<string, string>>({})
-  const [editing, setEditing] = useState(false)
   const [flagged, setFlagged] = useState(false)
   const [toBad, setToBad] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -3252,14 +3295,17 @@ function InviteModal({
   const sample = samples.find((e) => e.id === picks[kind]) ?? samples[0]
   const draft = drafts[sample.id] ?? sample
   const edited =
-    draft.subject !== sample.subject || draft.message !== sample.message || draft.signoff !== sample.signoff
+    draft.subject !== sample.subject ||
+    draft.message !== sample.message ||
+    draft.cta !== sample.cta ||
+    draft.signoff !== sample.signoff
   const brandId = brand?.id ?? null
   const known: Record<string, string> = {
     'Advisor Name': 'Alex Advisor',
     'Firm Name': toolkitFirmName(brandId) ?? brand?.name ?? 'Beacon Planning',
   }
   const missing = placeholdersIn([draft.subject, draft.message, draft.signoff].join('\n')).filter(
-    (k) => !known[k] && !fields[k]?.trim(),
+    (k) => !fieldValue(k, { known, fields }).trim(),
   )
 
   useEffect(() => {
@@ -3280,6 +3326,32 @@ function InviteModal({
     }
   }
 
+  // The QR as a picture, for a flyer or a slide. It's drawn once Copy is
+  // pressed, so the clipboard is handed a promise of it.
+  const copyQr = () => {
+    const svg = panelRef.current?.querySelector('.invite-qr-svg')
+    if (!svg) return
+    try {
+      const art = svg.cloneNode(true) as SVGSVGElement
+      art.setAttribute('width', '600')
+      art.setAttribute('height', '600')
+      const png = new Promise<Blob>((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+          const c = document.createElement('canvas')
+          c.width = c.height = 600
+          c.getContext('2d')?.drawImage(img, 0, 0, 600, 600)
+          c.toBlob((b) => (b ? resolve(b) : reject(new Error('no image'))), 'image/png')
+        }
+        img.onerror = reject
+        img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(art))}`
+      })
+      navigator.clipboard?.write([new ClipboardItem({ 'image/png': png })]).catch(() => {})
+    } catch {
+      /* ignore — demo still confirms in the button */
+    }
+  }
+
   // The send button confirms itself; an empty field sends nothing, so it
   // does not claim to have.
   const sent = useFlash()
@@ -3290,10 +3362,7 @@ function InviteModal({
     const noTo = !email.trim()
     if (noTo || missing.length) {
       setToBad(noTo)
-      if (missing.length) {
-        setFlagged(true)
-        setEditing(false)
-      }
+      if (missing.length) setFlagged(true)
       window.setTimeout(
         () => panelRef.current?.querySelector<HTMLInputElement>(noTo ? '#invite-email' : '.invite-fill.is-bad')?.focus(),
         60,
@@ -3453,8 +3522,6 @@ function InviteModal({
                       return rest
                     })
                   }
-                  editing={editing}
-                  onEditing={setEditing}
                   missing={missing}
                   brand={brand}
                   link={link}
@@ -3474,16 +3541,23 @@ function InviteModal({
             )}
             {channel === 'link' && (
               <>
+                {/* Shown, not a field: the link is the invite's own and isn't
+                    typed into. Copy is Send's pill. */}
                 <div className="invite-link-box">
+                  <LinkGlyph />
                   <span className="invite-link-text">{link}</span>
                   <FeedbackButton
-                    className="invite-copy"
+                    className="invite-pill"
                     aria-label={`Copy ${kind} link`}
                     onClick={() => copy(link)}
-                    done={<DoneGlyph />}
+                    done={
+                      <>
+                        <DoneGlyph /> Copied
+                      </>
+                    }
                     announce={`${label} link copied`}
                   >
-                    <CopyGlyph />
+                    <CopyGlyph /> Copy
                   </FeedbackButton>
                 </div>
                 <p className="invite-channel-hint">Share it anywhere: your website, a post, a text message.</p>
@@ -3493,16 +3567,20 @@ function InviteModal({
               <>
                 <div className="invite-qr-box">
                   <QrCode seed={kind === 'prospect' ? 7 : 23} />
-                  <FeedbackButton
-                    className="invite-copy invite-qr-copy"
-                    aria-label={`Copy ${kind} QR code`}
-                    onClick={() => copy(link)}
-                    done={<DoneGlyph />}
-                    announce={`${label} QR code copied`}
-                  >
-                    <CopyGlyph />
-                  </FeedbackButton>
                 </div>
+                <FeedbackButton
+                  className="invite-pill invite-qr-copy"
+                  aria-label={`Copy ${kind} QR code`}
+                  onClick={copyQr}
+                  done={
+                    <>
+                      <DoneGlyph /> Copied
+                    </>
+                  }
+                  announce={`${label} QR code copied`}
+                >
+                  <CopyGlyph /> Copy
+                </FeedbackButton>
                 <p className="invite-channel-hint">For print and in person: a flyer, a slide, an event table.</p>
               </>
             )}

@@ -5,7 +5,7 @@
  * Copied from the sample store of prospect-toolkit.html and client-toolkit.html,
  * ids and all, emails only: the ads, postcards and social posts there are not
  * something this modal sends. The toolkit sets a few lines in bold; here the
- * text is plain, because the advisor edits it in a plain text field. A change
+ * text is plain, because the advisor edits it as plain text, in place. A change
  * to a sample there has to be made here too.
  *
  * {{Placeholders}} are the toolkit's own. Advisor Name and Firm Name are filled

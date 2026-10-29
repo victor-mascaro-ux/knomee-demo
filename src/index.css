@@ -5072,7 +5072,7 @@ button.name-link-btn:hover .name-text {
   display: flex;
   gap: 24px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .invite-channel {
   display: inline-flex;
@@ -5107,6 +5107,11 @@ button.name-link-btn:hover .name-text {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+/* 16px under the tabs to whatever a panel starts with: the tab row's 10 and
+   the body's 6, nothing of the first thing's own. */
+.invite-panel > :first-child {
+  margin-top: 0;
 }
 .invite-field-label {
   display: block;
@@ -5196,6 +5201,8 @@ button.name-link-btn:hover .name-text {
   min-width: 0;
 }
 .invite-mail-subject {
+  flex: 1;
+  min-width: 0;
   font-weight: 600;
 }
 .invite-mail-input {
@@ -5217,7 +5224,37 @@ button.name-link-btn:hover .name-text {
   flex: 0 1 auto;
   min-height: 160px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
   padding: 18px 18px 20px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #3a3247;
+}
+.invite-mail-body > .invite-editable {
+  align-self: stretch;
+}
+/* The words, typed into where they stand. A faint wash on hover says so; a
+   grape ring holds the one being edited. Pulled out by its own padding, so
+   the text stays on the window's margin. */
+.invite-editable {
+  margin: -3px -6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.invite-editable:hover {
+  background: color-mix(in srgb, var(--k-grape, #7639a1) 5%, #fff);
+}
+.invite-editable:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--k-grape, #7639a1) 55%, transparent);
 }
 .invite-mail-foot {
   flex: none;
@@ -5229,10 +5266,12 @@ button.name-link-btn:hover .name-text {
   border-top: 1px solid var(--line);
   background: var(--pearl);
 }
-.invite-mail-send {
+/* The modal's pill action: Send at the email's foot, Copy on Link and QR
+   Code. */
+.invite-pill {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
   padding: 8px 18px;
   border: 0;
   border-radius: 999px;
@@ -5244,14 +5283,26 @@ button.name-link-btn:hover .name-text {
   cursor: pointer;
   transition: background 0.14s ease;
 }
-.invite-mail-send:hover {
+.invite-pill:hover {
   background: #a56ccc;
 }
-.invite-mail-send svg {
+.invite-pill svg {
   width: 16px;
   height: 16px;
 }
-/* Small text actions in the email's foot: Edit Email, Done, Reset to Sample. */
+.invite-mail-send {
+  margin-left: auto;
+}
+/* Where Edit Email was: how to edit, until something has been. */
+.invite-mail-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 12.5px;
+  color: var(--grey-text);
+}
+/* Small text actions in the email's foot: Reset to Sample. */
 .invite-text-btn {
   display: inline-flex;
   align-items: center;
@@ -5350,42 +5401,6 @@ button.name-link-btn:hover .name-text {
   color: #d81e4a;
 }
 
-/* The email's words, opened to edit where they stand. The button stays a
-   button. */
-.invite-edit {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-.invite-edit-field {
-  display: block;
-  align-self: stretch;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 9px 11px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: #fff;
-  font: inherit;
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: #3a3247;
-  resize: none;
-  overflow: hidden;
-}
-.invite-edit-field:focus {
-  outline: none;
-  border-color: var(--lilac);
-}
-.invite-edit .invite-cta {
-  margin: 0;
-}
-.invite-mail-body .invite-edit-note {
-  font-size: 12px;
-  color: var(--grey-text);
-  margin: 0;
-}
 .invite-mail-brand {
   display: flex;
   align-items: center;
@@ -5393,16 +5408,6 @@ button.name-link-btn:hover .name-text {
   font-size: 17px;
   font-weight: 700;
   color: var(--plum);
-  margin-bottom: 14px;
-}
-.invite-mail-body p {
-  font-size: 13.5px;
-  color: #3a3247;
-  line-height: 1.5;
-  margin: 0 0 14px;
-}
-.invite-mail-body > :last-child {
-  margin-bottom: 0;
 }
 /* The firm's logo over its email, in its colour; knomee's own otherwise. */
 .invite-mail-logo {
@@ -5414,52 +5419,64 @@ button.name-link-btn:hover .name-text {
 }
 /* The email's one button, in the firm's colour: the top bar's --brand-bar,
    knomee plum without a brand. The design system's button (.btn): a rounded
-   square, as the Invite button that opens this modal. */
+   square, as the Invite button that opens this modal. Its words are typed
+   into it. */
 .invite-cta {
   display: inline-block;
-  margin: 0 0 14px;
   padding: 11px 20px;
   border-radius: 10px;
   background: var(--brand-bar, var(--plum));
   color: #fff;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.4;
+  cursor: text;
+  transition: box-shadow 0.15s;
 }
-/* Link + QR */
+.invite-cta:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--k-grape, #7639a1) 30%, transparent);
+}
+.invite-cta-text {
+  field-sizing: content;
+  min-width: 4ch;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  caret-color: #fff;
+}
+.invite-cta-text:focus {
+  outline: none;
+}
+.invite-cta-text::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+/* Link + QR. The link is shown, not a field: a filled band with no border
+   and no text cursor, the link glyph before it, Copy at its end. */
 .invite-link-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  padding: 10px 10px 10px 13px;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 6px 6px 6px 14px;
+  background: var(--pearl);
+  color: var(--grey-text);
+}
+.invite-link-box > svg {
+  flex: none;
 }
 .invite-link-text {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
-  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  color: #201a2e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.invite-copy {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: var(--grey-text);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.14s, color 0.14s;
-}
-.invite-copy:hover {
-  background: var(--pearl);
-  color: var(--plum);
+  cursor: default;
+  user-select: all;
 }
 .invite-qr-box {
   position: relative;
@@ -5475,10 +5492,8 @@ button.name-link-btn:hover .name-text {
   display: block;
 }
 .invite-qr-copy {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(255, 255, 255, 0.9);
+  align-self: flex-start;
+  margin-top: 12px;
 }
 
 /* ---------- Micro-interactions & animation polish ---------- */
@@ -5501,12 +5516,12 @@ button.name-link-btn:hover .name-text {
 .invite-mail-send:hover svg {
   transform: translate(2px, -2px);
 }
-/* Copy buttons press in */
-.invite-copy {
-  transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+/* Send and Copy press in */
+.invite-pill {
+  transition: background 0.14s ease, transform 0.12s ease;
 }
-.invite-copy:active {
-  transform: scale(0.86);
+.invite-pill:active {
+  transform: scale(0.96);
 }
 
 /* Pills & switches: press feedback (hover/colour already handled above) */
@@ -5584,7 +5599,7 @@ button.name-link-btn:hover .name-text {
   .invite-tab:active,
   .cluster-switch-btn:active,
   .seg-switch-btn:active,
-  .invite-copy:active {
+  .invite-pill:active {
     transform: none;
   }
 }
