@@ -86,6 +86,9 @@ import {
   TierBarsIcon,
   FunnelIcon,
   HouseIcon,
+  PersonPlusIcon,
+  PersonSearchIcon,
+  PeopleIcon,
 } from './components/icons'
 import SegmentationScreen from './screens/SegmentationScreen'
 import ProspectProfileScreen from './screens/ProspectProfileScreen'
@@ -121,7 +124,9 @@ import moodUnsure from './assets/moods/unsure.svg'
 import moodNeutral from './assets/moods/neutral.svg'
 import moodGood from './assets/moods/good.svg'
 import moodGreat from './assets/moods/great.svg'
-import { CLIENT_BRANDS } from './components/clientBrands'
+import { CLIENT_BRANDS, type ClientBrand } from './components/clientBrands'
+import { INVITE_EMAILS, placeholdersIn, toolkitFirmName, toolkitUrl, type InviteEmail } from './data/inviteEmails'
+import SelectMenu from './components/SelectMenu'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
@@ -2814,6 +2819,16 @@ function CopyGlyph() {
   )
 }
 
+// Arrow out of a box: the link opens another site.
+function ExternalGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5" />
+      <path d="M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" />
+    </svg>
+  )
+}
+
 // Decorative QR: three finder patterns + a seeded field of modules. It encodes
 // nothing — the link beside it is the real (placeholder) share target.
 function QrCode({ seed }: { seed: number }) {
@@ -2859,35 +2874,216 @@ function QrCode({ seed }: { seed: number }) {
   )
 }
 
-function InvitePreview({ kind }: { kind: InviteKind }) {
+/* The invite email, as the person will get it: one of the Activation
+   Toolkit's samples (data/inviteEmails.ts), its {{placeholders}} as fields to
+   fill in place — the way the toolkit opens a sample — and its button in the
+   firm's colour, the colour the toolkit copies it in, linked to this invite.
+   Edit Email opens the words themselves; the button stays a button. */
+type InviteDraft = Pick<InviteEmail, 'subject' | 'message' | 'signoff'>
+
+type Fill = {
+  /** Filled in from the demo: the advisor's name, the firm's. */
+  known: Record<string, string>
+  /** Typed in by the advisor. One value per placeholder, wherever it appears. */
+  fields: Record<string, string>
+  onField: (k: string, v: string) => void
+  /** Send was pressed with fields still empty: they show it. */
+  flagged: boolean
+}
+
+/* A field is as wide as what it holds, or its name while empty. The browser
+   measures that itself where it can (field-sizing); elsewhere a count of
+   characters stands in, a little wide for this face. */
+const SIZES_ITSELF = typeof CSS !== 'undefined' && CSS.supports('field-sizing', 'content')
+
+function FillLine({ text, known, fields, onField, flagged }: Fill & { text: string }) {
+  return (
+    <>
+      {text.split(/(\{\{[^}]+\}\})/).map((part, i) => {
+        const m = /^\{\{([^}]+)\}\}$/.exec(part)
+        if (!m) return part
+        const k = m[1].trim()
+        if (known[k]) return known[k]
+        const v = fields[k] ?? ''
+        return (
+          <input
+            key={i}
+            className={`invite-fill${flagged && !v.trim() ? ' is-bad' : ''}`}
+            value={v}
+            placeholder={k}
+            aria-label={k}
+            style={SIZES_ITSELF ? undefined : { width: `${Math.max(v.length, k.length) + 1}ch` }}
+            onChange={(e) => onField(k, e.target.value)}
+          />
+        )
+      })}
+    </>
+  )
+}
+
+/* Paragraphs split by a blank line; a single line break stays one. */
+function FillText({ text, ...fill }: Fill & { text: string }) {
+  return (
+    <>
+      {text
+        .split(/\n{2,}/)
+        .filter((para) => para.trim())
+        .map((para, i) => (
+          <p key={i}>
+            {para.split('\n').map((line, j) => (
+              <Fragment key={j}>
+                {j > 0 && <br />}
+                <FillLine text={line} {...fill} />
+              </Fragment>
+            ))}
+          </p>
+        ))}
+    </>
+  )
+}
+
+/* A text field as tall as its text, so a paragraph is edited at its length. */
+function AutoTextarea({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const t = ref.current
+    if (!t) return
+    t.style.height = 'auto'
+    t.style.height = `${t.scrollHeight + t.offsetHeight - t.clientHeight}px`
+  }, [value])
+  return (
+    <textarea
+      ref={ref}
+      id={id}
+      className="invite-edit-field"
+      rows={2}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  )
+}
+
+function PencilGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M10.8 2.7a1.6 1.6 0 0 1 2.3 2.3L5.6 12.5 2.5 13.5l1-3.1 7.3-7.7Z" />
+    </svg>
+  )
+}
+
+function InviteEmailPreview({
+  sample,
+  draft,
+  edited,
+  onDraft,
+  onReset,
+  editing,
+  onEditing,
+  missing,
+  brand,
+  link,
+  ...fill
+}: Fill & {
+  sample: InviteEmail
+  draft: InviteDraft
+  edited: boolean
+  onDraft: (d: InviteDraft) => void
+  onReset: () => void
+  editing: boolean
+  onEditing: (on: boolean) => void
+  missing: string[]
+  brand: ClientBrand | null
+  link: string
+}) {
   return (
     <div className="invite-preview">
       <div className="invite-preview-meta">
-        <div>
-          From: <b>info@knomee.com</b>
+        <div className="invite-preview-meta-text">
+          <div>
+            From: <b>{fill.known['Advisor Name']}</b> · {fill.known['Firm Name']}
+          </div>
+          {!editing && (
+            <div>
+              Subject:{' '}
+              <b>
+                <FillLine text={draft.subject} {...fill} />
+              </b>
+            </div>
+          )}
         </div>
-        <div>
-          Subject: <b>Invitation to Join Beacon Planning</b>
+        <div className="invite-preview-tools">
+          {editing && edited && (
+            <button className="invite-text-btn" type="button" onClick={onReset}>
+              Reset to Sample
+            </button>
+          )}
+          <button className="invite-text-btn" type="button" aria-pressed={editing} onClick={() => onEditing(!editing)}>
+            {editing ? (
+              'Done'
+            ) : (
+              <>
+                <PencilGlyph /> Edit Email
+              </>
+            )}
+          </button>
         </div>
       </div>
+      {fill.flagged && missing.length > 0 && !editing && (
+        <p className="invite-fill-hint" role="status">
+          Fill in the {missing.length === 1 ? 'highlighted field' : `${missing.length} highlighted fields`} to send it.
+        </p>
+      )}
       <div className="invite-preview-card">
         <div className="invite-preview-brand">
-          <KnomeeMark size={20} /> knomee
+          {brand ? (
+            <span className="invite-mail-logo">{brand.logo}</span>
+          ) : (
+            <>
+              <KnomeeMark size={20} /> knomee
+            </>
+          )}
         </div>
-        <h4>Your Invitation</h4>
-        <p>
-          Alex Advisor has invited you to join Beacon Planning on Knomee
-          {kind === 'client' ? ' as a client' : ''}.
-        </p>
-        <button className="invite-accept" type="button">
-          Accept Invitation
-        </button>
-        <p className="invite-preview-foot">
-          If you&rsquo;re having trouble with the above please email us at:{' '}
-          <a href="mailto:info@knomee.com" onClick={(e) => e.preventDefault()}>
-            info@knomee.com
-          </a>
-        </p>
+        {editing ? (
+          <div className="invite-edit">
+            <label className="invite-field-label" htmlFor="invite-edit-subject">
+              Subject
+            </label>
+            <input
+              id="invite-edit-subject"
+              className="invite-edit-field"
+              value={draft.subject}
+              onChange={(e) => onDraft({ ...draft, subject: e.target.value })}
+            />
+            <label className="invite-field-label" htmlFor="invite-edit-message">
+              Message
+            </label>
+            <AutoTextarea
+              id="invite-edit-message"
+              value={draft.message}
+              onChange={(message) => onDraft({ ...draft, message })}
+            />
+            <span className="invite-cta" title={`Opens ${link}`}>
+              {sample.cta}
+            </span>
+            <label className="invite-field-label" htmlFor="invite-edit-signoff">
+              Sign-off
+            </label>
+            <AutoTextarea
+              id="invite-edit-signoff"
+              value={draft.signoff}
+              onChange={(signoff) => onDraft({ ...draft, signoff })}
+            />
+            <p className="invite-edit-note">Text in {'{{double braces}}'} is filled in before it&rsquo;s sent.</p>
+          </div>
+        ) : (
+          <>
+            <FillText text={draft.message} {...fill} />
+            <span className="invite-cta" title={`Opens ${link}`}>
+              {sample.cta}
+            </span>
+            <FillText text={draft.signoff} {...fill} />
+          </>
+        )}
       </div>
     </div>
   )
@@ -2904,9 +3100,12 @@ function DoneGlyph() {
 
 function InviteModal({
   initialKind,
+  brand,
   onClose,
 }: {
   initialKind: InviteKind
+  /** The demo's brand: the email's logo, its button's colour, its firm. */
+  brand: ClientBrand | null
   onClose: () => void
 }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
@@ -2915,6 +3114,31 @@ function InviteModal({
   const tabInd = useSlideIndicator(kind)
   const label = kind === 'prospect' ? 'Prospect' : 'Client'
   const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
+
+  /* The email: a toolkit sample per tab, the advisor's edits to each sample
+     kept while the modal is open, and what they typed into its fields. */
+  const [picks, setPicks] = useState<Record<InviteKind, string>>({
+    prospect: INVITE_EMAILS.prospect[0].id,
+    client: INVITE_EMAILS.client[0].id,
+  })
+  const [drafts, setDrafts] = useState<Record<string, InviteDraft>>({})
+  const [fields, setFields] = useState<Record<string, string>>({})
+  const [editing, setEditing] = useState(false)
+  const [flagged, setFlagged] = useState(false)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const samples = INVITE_EMAILS[kind]
+  const sample = samples.find((e) => e.id === picks[kind]) ?? samples[0]
+  const draft = drafts[sample.id] ?? sample
+  const edited =
+    draft.subject !== sample.subject || draft.message !== sample.message || draft.signoff !== sample.signoff
+  const brandId = brand?.id ?? null
+  const known: Record<string, string> = {
+    'Advisor Name': 'Alex Advisor',
+    'Firm Name': toolkitFirmName(brandId) ?? brand?.name ?? 'Beacon Planning',
+  }
+  const missing = placeholdersIn([draft.subject, draft.message, draft.signoff].join('\n')).filter(
+    (k) => !known[k] && !fields[k]?.trim(),
+  )
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -2939,8 +3163,20 @@ function InviteModal({
   const sent = useFlash()
   const send = () => {
     if (!email.trim()) return false
+    /* Not with a field still empty — "Hi {{First Name}}" is not sent. The
+       email opens on the first one, as the toolkit's Copy Text waits for it. */
+    if (missing.length) {
+      setFlagged(true)
+      setEditing(false)
+      setPreviewOpen(true)
+      window.setTimeout(() => previewRef.current?.querySelector<HTMLInputElement>('.invite-fill.is-bad')?.focus(), 60)
+      return false
+    }
     sent.flash()
     setEmail('')
+    /* The next invite is to someone else. */
+    setFields({})
+    setFlagged(false)
   }
 
   const bandStyle = useViewportBand(true)
@@ -2979,7 +3215,10 @@ function InviteModal({
                 aria-selected={kind === k}
                 data-active={kind === k}
                 className={`invite-tab ${kind === k ? 'is-on' : ''}`}
-                onClick={() => setKind(k)}
+                onClick={() => {
+                  setKind(k)
+                  setFlagged(false)
+                }}
               >
                 Invite {k === 'prospect' ? 'Prospect' : 'Client'}
               </button>
@@ -3013,6 +3252,30 @@ function InviteModal({
                 <SendGlyph />
               </FeedbackButton>
             </div>
+            <div className="invite-template-head">
+              <label className="invite-field-label" htmlFor="invite-template">
+                Template
+              </label>
+              <a
+                className="invite-toolkit-link"
+                href={toolkitUrl(kind, sample.stage, brandId)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open {label} Toolkit <ExternalGlyph />
+              </a>
+            </div>
+            <SelectMenu
+              id="invite-template"
+              className="invite-select"
+              value={sample.id}
+              options={samples.map((e) => ({ value: e.id, label: `${e.stage} · ${e.subject}` }))}
+              onChange={(id) => {
+                setPicks((p) => ({ ...p, [kind]: id }))
+                setFlagged(false)
+                setPreviewOpen(true)
+              }}
+            />
             <button
               className={`invite-preview-toggle ${previewOpen ? 'is-open' : ''}`}
               type="button"
@@ -3022,9 +3285,30 @@ function InviteModal({
               Preview <ChevronDown />
             </button>
             {/* Height-animated reveal so the preview expands rather than pops. */}
-            <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`}>
+            <div className={`collapse invite-preview-collapse ${previewOpen ? 'open' : ''}`} ref={previewRef}>
               <div className="collapse-inner">
-                <InvitePreview kind={kind} />
+                <InviteEmailPreview
+                  sample={sample}
+                  draft={draft}
+                  edited={edited}
+                  onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
+                  onReset={() =>
+                    setDrafts((all) => {
+                      const rest = { ...all }
+                      delete rest[sample.id]
+                      return rest
+                    })
+                  }
+                  editing={editing}
+                  onEditing={setEditing}
+                  missing={missing}
+                  brand={brand}
+                  link={link}
+                  known={known}
+                  fields={fields}
+                  onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
+                  flagged={flagged}
+                />
               </div>
             </div>
 
@@ -3672,11 +3956,11 @@ type FirmScreen = 'firm-candidates' | 'firm-analytics'
 /* One tab bar for the whole dashboard: the recruiting pipeline sits beside
    the advisor's own book, candidates first. Each side's analytics fold under
    one Analytics menu at the row's far right — candidates' first again. */
-type DashTab = { id: Screen | FirmScreen; label: string; firm?: boolean }
+type DashTab = { id: Screen | FirmScreen; label: string; firm?: boolean; icon?: ReactNode }
 const dashTabs: DashTab[] = [
-  { id: 'firm-candidates', label: 'Candidates', firm: true },
-  { id: 'prospects', label: 'Prospects' },
-  { id: 'clients', label: 'Clients' },
+  { id: 'firm-candidates', label: 'Candidates', firm: true, icon: <PersonPlusIcon /> },
+  { id: 'prospects', label: 'Prospects', icon: <PersonSearchIcon /> },
+  { id: 'clients', label: 'Clients', icon: <PeopleIcon /> },
 ]
 const analyticsTabs: DashTab[] = [
   { id: 'firm-analytics', label: 'Candidate Analytics', firm: true },
@@ -4553,6 +4837,7 @@ export default function App() {
           data-active={dashActive === t.id}
           onClick={() => goDashTab(t)}
         >
+          {t.icon}
           {t.label}
         </button>
       ))}
@@ -4815,6 +5100,7 @@ export default function App() {
       {inviteKind && (
         <InviteModal
           initialKind={inviteKind}
+          brand={brand}
           onClose={() => setInviteKind(null)}
         />
       )}

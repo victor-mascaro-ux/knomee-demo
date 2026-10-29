@@ -42,6 +42,44 @@ export function ChartIcon({ color = '#086375' }: { color?: string }) {
   )
 }
 
+/* The dashboard tabs' set, drawn like ChartIcon (Analytics): solid shapes,
+   1.6 strokes, the same 18 grid and baseline. A person each, told apart by
+   what is with them: a plus for the candidates a firm recruits, a lens for the
+   prospects an advisor looks for, a second person for the clients they have. */
+export function PersonPlusIcon({ color = 'currentColor' }: { color?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+      <circle cx="7" cy="5.6" r="2.9" fill={color} />
+      <path d="M1.6 15.5a5.4 5.4 0 0 1 10.8 0z" fill={color} />
+      <path d="M14.4 5.2v4M12.4 7.2h4" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function PersonSearchIcon({ color = 'currentColor' }: { color?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+      <circle cx="6" cy="5.6" r="2.8" fill={color} />
+      <path d="M1.2 15.5a4.8 4.8 0 0 1 9.6 0z" fill={color} />
+      <circle cx="13.2" cy="10.6" r="2.4" stroke={color} strokeWidth="1.6" />
+      <path d="m15 12.4 1.7 1.7" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function PeopleIcon({ color = 'currentColor' }: { color?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
+      <g opacity="0.5">
+        <circle cx="12.6" cy="6.2" r="2.4" fill={color} />
+        <path d="M8.2 15.5a4.4 4.4 0 0 1 8.8 0z" fill={color} />
+      </g>
+      <circle cx="6.4" cy="5.8" r="2.8" fill={color} />
+      <path d="M1.2 15.5a5.2 5.2 0 0 1 10.4 0z" fill={color} />
+    </svg>
+  )
+}
+
 export function BoltIcon({ color = '#086375' }: { color?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>

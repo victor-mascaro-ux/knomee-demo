@@ -208,6 +208,10 @@
   top: calc(var(--topbar-h) + var(--pp-crumb-h));
   z-index: 5;
   background: #fff;
+  /* The dashboard's white band under a held tab row (.tabs): 16px, no more
+     than the margin down to the title (20px, 16px on a phone), so it shows
+     only once the page scrolls under it. */
+  box-shadow: 0 16px 0 0 #fff;
 }
 .pp-tab {
   position: relative;
