@@ -141,13 +141,9 @@ import moodGreat from './assets/moods/great.svg'
 import { CLIENT_BRANDS, type ClientBrand } from './components/clientBrands'
 import {
   INVITE_EMAILS,
-  emailLabel,
   placeholdersIn,
-  stagesOf,
   toolkitFirmName,
-  toolkitUrl,
   type InviteEmail,
-  PROSPECT_INVITE_EMAIL,
   PROSPECT_RESEND_EMAIL,
 } from './data/inviteEmails'
 import { segModels, segMethod } from './data/segmentation'
@@ -2786,12 +2782,13 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
 }
 
 /* ── Invite flow ─────────────────────────────────────────────────────────
-   One modal, two kinds (prospect / client) and three ways to send the invite
-   (email, link, QR code), each in its own tab. Opened from the Invite button on
-   either dashboard, defaulting to that dashboard's kind. Sending an email,
-   copying the link, or copying the QR each confirms in its own button (a
-   check, for a moment) rather than in a toast. All data
-   is demo-fake: the link is a placeholder and the QR is decorative. */
+   One modal, two kinds (prospect / client) and two ways to hand the invite
+   over (link, QR code), each in its own tab. Opened from the Invite button on
+   either dashboard, defaulting to that dashboard's kind. A prospect's invite
+   is sent again as an email from their row (Resend Invite Link). Copying the
+   link or the QR, and sending, each confirm in their own button (a check, for
+   a moment) rather than in a toast. All data is demo-fake: the link is a
+   placeholder and the QR is decorative. */
 
 // Modal positioning across embeddings.
 //
@@ -2835,7 +2832,7 @@ function useViewportBand(active: boolean) {
 }
 
 type InviteKind = 'prospect' | 'client'
-type InviteChannel = 'email' | 'link' | 'qr'
+type InviteChannel = 'link' | 'qr'
 
 // Paper-plane send glyph, matching the mockup's input affordance.
 function SendGlyph() {
@@ -2857,27 +2854,8 @@ function CopyGlyph() {
   )
 }
 
-// Arrow out of a box: the link opens another site.
-function ExternalGlyph() {
-  return (
-    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5" />
-      <path d="M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" />
-    </svg>
-  )
-}
-
-// The three ways to send an invite, each a tab with its glyph: an envelope, a
-// chain link, a QR's corner squares — three shapes, not one with a mark.
-function MailGlyph() {
-  return (
-    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
-      <path d="m3.2 5.6 6.8 5.4 6.8-5.4" />
-    </svg>
-  )
-}
-
+// The two ways to hand an invite over, each a tab with its glyph: a chain
+// link, a QR's corner squares — two shapes, not one with a mark.
 function LinkGlyph() {
   return (
     <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -2910,7 +2888,6 @@ function QrGlyph() {
 }
 
 const INVITE_CHANNELS: { id: InviteChannel; label: string; icon: ReactNode }[] = [
-  { id: 'email', label: 'Email', icon: <MailGlyph /> },
   { id: 'link', label: 'Link', icon: <LinkGlyph /> },
   { id: 'qr', label: 'QR Code', icon: <QrGlyph /> },
 ]
@@ -3298,62 +3275,14 @@ function DoneGlyph() {
   )
 }
 
-function InviteModal({
-  initialKind,
-  resend,
-  brand,
-  onClose,
-}: {
-  initialKind: InviteKind
-  /** Sending one prospect's invite again: just the email, to them, by name. */
-  resend?: Prospect
-  /** The demo's brand: the email's logo, its button's colour, its firm. */
-  brand: ClientBrand | null
-  onClose: () => void
-}) {
+function InviteModal({ initialKind, onClose }: { initialKind: InviteKind; onClose: () => void }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
-  const [email, setEmail] = useState(resend?.email ?? '')
   const tabInd = useSlideIndicator(kind)
-  const [channel, setChannel] = useState<InviteChannel>('email')
+  const [channel, setChannel] = useState<InviteChannel>('link')
   const chanInd = useSlideIndicator(channel)
   const label = kind === 'prospect' ? 'Prospect' : 'Client'
   const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
-
-  /* The email: a toolkit sample per tab, the advisor's edits to each sample
-     kept while the modal is open, and what they typed into its fields. */
-  const [picks, setPicks] = useState<Record<InviteKind, string>>({
-    prospect: INVITE_EMAILS.prospect[0].id,
-    client: INVITE_EMAILS.client[0].id,
-  })
-  const [drafts, setDrafts] = useState<Record<string, InviteDraft>>({})
-  const [fields, setFields] = useState<Record<string, string>>({})
-  const [flagged, setFlagged] = useState(false)
-  const [toBad, setToBad] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
-  const samples = INVITE_EMAILS[kind]
-  const pick = (id: string) => {
-    setPicks((p) => ({ ...p, [kind]: id }))
-    setFlagged(false)
-  }
-  /* A prospect's email is fixed, nothing to pick (data/inviteEmails.ts); a
-     client's is picked from the toolkit's. */
-  const fixed = resend ? PROSPECT_RESEND_EMAIL : kind === 'prospect' ? PROSPECT_INVITE_EMAIL : null
-  const sample = samples.find((e) => e.id === (fixed ?? picks[kind])) ?? samples[0]
-  const draft = drafts[sample.id] ?? sample
-  const edited =
-    draft.subject !== sample.subject ||
-    draft.message !== sample.message ||
-    draft.cta !== sample.cta ||
-    draft.signoff !== sample.signoff
-  const brandId = brand?.id ?? null
-  const known: Record<string, string> = {
-    'Advisor Name': 'Alex Advisor',
-    'Firm Name': toolkitFirmName(brandId) ?? brand?.name ?? 'Beacon Planning',
-    ...(resend && { 'First Name': resend.name.split(' ')[0] }),
-  }
-  const missing = placeholdersIn([draft.subject, draft.message, draft.signoff].join('\n')).filter(
-    (k) => !fieldValue(k, { known, fields }).trim(),
-  )
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -3399,32 +3328,6 @@ function InviteModal({
     }
   }
 
-  // The send button confirms itself; an empty field sends nothing, so it
-  // does not claim to have.
-  const sent = useFlash()
-  const send = () => {
-    /* Not without an address, nor with a field still empty — "Hi {{First
-       Name}}" is not sent. The window marks what's left and puts the cursor in
-       the first of it, as the toolkit's Copy Text waits for it. */
-    const noTo = !email.trim()
-    if (noTo || missing.length) {
-      setToBad(noTo)
-      if (missing.length) setFlagged(true)
-      window.setTimeout(
-        () => panelRef.current?.querySelector<HTMLInputElement>(noTo ? '#invite-email' : '.invite-fill.is-bad')?.focus(),
-        60,
-      )
-      return false
-    }
-    sent.flash()
-    setFlagged(false)
-    setToBad(false)
-    /* The next invite is to someone else — unless this one was a resend. */
-    if (resend) return
-    setEmail('')
-    setFields({})
-  }
-
   const bandStyle = useViewportBand(true)
 
   return (
@@ -3432,179 +3335,77 @@ function InviteModal({
       <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">
-            {resend ? (
-              'Resend Invite Link'
-            ) : (
-              <>
-                Invite{' '}
-                <span className="invite-title-word" key={kind}>
-                  {label}
-                </span>
-              </>
-            )}
+            Invite{' '}
+            <span className="invite-title-word" key={kind}>
+              {label}
+            </span>
           </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
         <div className="modal-body invite-body">
-          {!resend && (
-            <>
-              <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
-                {tabInd.box && (
-                  <span
-                    className="slide-ind slide-ind-round"
-                    style={{
-                      transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
-                      width: tabInd.box.width,
-                      height: tabInd.box.height,
-                    }}
-                  />
-                )}
-                {(['prospect', 'client'] as InviteKind[]).map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    role="tab"
-                    aria-selected={kind === k}
-                    data-active={kind === k}
-                    className={`invite-tab ${kind === k ? 'is-on' : ''}`}
-                    onClick={() => {
-                      setKind(k)
-                      setFlagged(false)
-                      setToBad(false)
-                    }}
-                  >
-                    Invite {k === 'prospect' ? 'Prospect' : 'Client'}
-                  </button>
-                ))}
-              </div>
+          <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
+            {tabInd.box && (
+              <span
+                className="slide-ind slide-ind-round"
+                style={{
+                  transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
+                  width: tabInd.box.width,
+                  height: tabInd.box.height,
+                }}
+              />
+            )}
+            {(['prospect', 'client'] as InviteKind[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                aria-selected={kind === k}
+                data-active={kind === k}
+                className={`invite-tab ${kind === k ? 'is-on' : ''}`}
+                onClick={() => setKind(k)}
+              >
+                Invite {k === 'prospect' ? 'Prospect' : 'Client'}
+              </button>
+            ))}
+          </div>
 
-              {/* How it goes out. The same three for a prospect or a client, so
-                  the pick holds across the toggle above. */}
-              <div className="invite-channels slide-nav" role="tablist" aria-label="Send as" ref={chanInd.ref}>
-                {chanInd.box && (
-                  <span
-                    className="slide-ind slide-ind-underline"
-                    style={{
-                      transform: `translateX(${chanInd.box.left}px)`,
-                      width: chanInd.box.width,
-                    }}
-                  />
-                )}
-                {INVITE_CHANNELS.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={channel === c.id}
-                    data-active={channel === c.id}
-                    className={`invite-channel${channel === c.id ? ' is-on' : ''}`}
-                    onClick={() => setChannel(c.id)}
-                  >
-                    {c.icon}
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          {/* How it goes out. The same two for a prospect or a client, so the
+              pick holds across the toggle above. */}
+          <div className="invite-channels slide-nav" role="tablist" aria-label="Share as" ref={chanInd.ref}>
+            {chanInd.box && (
+              <span
+                className="slide-ind slide-ind-underline"
+                style={{
+                  transform: `translateX(${chanInd.box.left}px)`,
+                  width: chanInd.box.width,
+                }}
+              />
+            )}
+            {INVITE_CHANNELS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={channel === c.id}
+                data-active={channel === c.id}
+                className={`invite-channel${channel === c.id ? ' is-on' : ''}`}
+                onClick={() => setChannel(c.id)}
+              >
+                {c.icon}
+                {c.label}
+              </button>
+            ))}
+          </div>
 
           {/* Keyed on both, so the panel re-runs its enter animation on each
               switch — the content cross-fades instead of snapping. */}
           <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`} ref={panelRef}>
-            {channel === 'email' && (
-              <>
-                {/* Which email: the toolkit's client type, then the emails it
-                    has for that type — the adventures' starter pills, one
-                    picked at a time. A prospect's email is fixed. */}
-                {!fixed && (
-                  <>
-                    <div className="invite-template-head">
-                      <span className="invite-field-label" id="invite-stage">
-                        {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
-                      </span>
-                      <a
-                        className="invite-toolkit-link"
-                        href={toolkitUrl(kind, sample.stage, brandId)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Open {label} Toolkit <ExternalGlyph />
-                      </a>
-                    </div>
-                    <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
-                      {stagesOf(kind).map((stage, i) => (
-                        <button
-                          key={stage}
-                          type="button"
-                          className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
-                          style={{ ['--i' as string]: i }}
-                          aria-pressed={sample.stage === stage}
-                          onClick={() => {
-                            if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
-                          }}
-                        >
-                          {stage}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="invite-field-label invite-type-label" id="invite-type">
-                      Email Type
-                    </span>
-                    {/* Keyed on the type, so its emails come in as the type changes. */}
-                    <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
-                      {samples
-                        .filter((e) => e.stage === sample.stage)
-                        .map((e, i) => (
-                          <button
-                            key={e.id}
-                            type="button"
-                            className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
-                            style={{ ['--i' as string]: i }}
-                            aria-pressed={e.id === sample.id}
-                            onClick={() => pick(e.id)}
-                          >
-                            {emailLabel(e)}
-                          </button>
-                        ))}
-                    </div>
-                    {sample.note && <p className="invite-pick-note">{sample.note}</p>}
-                  </>
-                )}
-                <InviteCompose
-                  sample={sample}
-                  draft={draft}
-                  edited={edited}
-                  onDraft={(d) => setDrafts((all) => ({ ...all, [sample.id]: d }))}
-                  onReset={() =>
-                    setDrafts((all) => {
-                      const rest = { ...all }
-                      delete rest[sample.id]
-                      return rest
-                    })
-                  }
-                  missing={missing}
-                  brand={brand}
-                  link={link}
-                  kind={kind}
-                  label={label}
-                  to={email}
-                  onTo={setEmail}
-                  toBad={toBad}
-                  onSend={send}
-                  sending={sent.is()}
-                  known={known}
-                  fields={fields}
-                  onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
-                  flagged={flagged}
-                />
-              </>
-            )}
             {channel === 'link' && (
               <>
                 {/* Shown, not a field: the link is the invite's own and isn't
-                    typed into. Copy is Send's pill. */}
+                    typed into. Copy is the modal's pill. */}
                 <div className="invite-link-box">
                   <LinkGlyph />
                   <span className="invite-link-text">{link}</span>
@@ -3648,6 +3449,115 @@ function InviteModal({
                 <p className="invite-channel-hint">For print and in person: a flyer, a slide, an event table.</p>
               </>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* Resend Invite Link, from a prospect's row: their invite again, as the
+   toolkit's Cold "No Strings" email (data/inviteEmails.ts) in the compose
+   window, already addressed to them and greeting them by name. */
+function ResendModal({
+  prospect,
+  brand,
+  onClose,
+}: {
+  prospect: Prospect
+  /** The demo's brand: the email's logo, its button's colour, its firm. */
+  brand: ClientBrand | null
+  onClose: () => void
+}) {
+  const [email, setEmail] = useState(prospect.email)
+  const link = 'knomee.com/kIIKLERH034847'
+  const sample = INVITE_EMAILS.prospect.find((e) => e.id === PROSPECT_RESEND_EMAIL) ?? INVITE_EMAILS.prospect[0]
+  /* The advisor's edits to the email, and what they typed into its fields. */
+  const [edits, setEdits] = useState<InviteDraft | null>(null)
+  const [fields, setFields] = useState<Record<string, string>>({})
+  const [flagged, setFlagged] = useState(false)
+  const [toBad, setToBad] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const draft = edits ?? sample
+  const edited =
+    draft.subject !== sample.subject ||
+    draft.message !== sample.message ||
+    draft.cta !== sample.cta ||
+    draft.signoff !== sample.signoff
+  const brandId = brand?.id ?? null
+  const known: Record<string, string> = {
+    'Advisor Name': 'Alex Advisor',
+    'Firm Name': toolkitFirmName(brandId) ?? brand?.name ?? 'Beacon Planning',
+    'First Name': prospect.name.split(' ')[0],
+  }
+  const missing = placeholdersIn([draft.subject, draft.message, draft.signoff].join('\n')).filter(
+    (k) => !fieldValue(k, { known, fields }).trim(),
+  )
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // The send button confirms itself; an empty field sends nothing, so it
+  // does not claim to have.
+  const sent = useFlash()
+  const send = () => {
+    /* Not without an address, nor with a field still empty — "Hi {{First
+       Name}}" is not sent. The window marks what's left and puts the cursor in
+       the first of it, as the toolkit's Copy Text waits for it. */
+    const noTo = !email.trim()
+    if (noTo || missing.length) {
+      setToBad(noTo)
+      if (missing.length) setFlagged(true)
+      window.setTimeout(
+        () => panelRef.current?.querySelector<HTMLInputElement>(noTo ? '#invite-email' : '.invite-fill.is-bad')?.focus(),
+        60,
+      )
+      return false
+    }
+    sent.flash()
+    setFlagged(false)
+    setToBad(false)
+  }
+
+  const bandStyle = useViewportBand(true)
+
+  return (
+    <div className="modal-backdrop" style={bandStyle} onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Resend Invite Link</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+        <div className="modal-body invite-body">
+          <div className="invite-panel" ref={panelRef}>
+            <InviteCompose
+              sample={sample}
+              draft={draft}
+              edited={edited}
+              onDraft={setEdits}
+              onReset={() => setEdits(null)}
+              missing={missing}
+              brand={brand}
+              link={link}
+              kind="prospect"
+              label="Prospect"
+              to={email}
+              onTo={setEmail}
+              toBad={toBad}
+              onSend={send}
+              sending={sent.is()}
+              known={known}
+              fields={fields}
+              onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
+              flagged={flagged}
+            />
           </div>
         </div>
       </div>
@@ -5612,16 +5522,8 @@ export default function App() {
           onSubmit={addFamilyMember}
         />
       )}
-      {inviteKind && (
-        <InviteModal
-          initialKind={inviteKind}
-          brand={brand}
-          onClose={() => setInviteKind(null)}
-        />
-      )}
-      {resendTo && (
-        <InviteModal initialKind="prospect" resend={resendTo} brand={brand} onClose={() => setResendTo(null)} />
-      )}
+      {inviteKind && <InviteModal initialKind={inviteKind} onClose={() => setInviteKind(null)} />}
+      {resendTo && <ResendModal prospect={resendTo} brand={brand} onClose={() => setResendTo(null)} />}
       <Toast show={toast.show} message={toast.msg} />
       <Confetti ref={confettiRef} />
       {/* Under a client's brand the product is still knomee's, and the credit
