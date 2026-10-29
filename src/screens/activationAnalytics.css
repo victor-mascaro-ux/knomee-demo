@@ -106,7 +106,7 @@
   flex-shrink: 0;
 }
 
-/* Where the ones who never signed up stopped: a small ranked list under the step. */
+/* Where the ones who never joined up stopped: a small ranked list under the step. */
 .act-stopped {
   margin: var(--space-14) 0 0;
   padding: var(--space-14) var(--space-16);
