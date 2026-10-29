@@ -56,12 +56,21 @@
   height: 100%;
   border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   background: var(--k-grape);
-  transition: filter 0.15s ease;
+  transition: background-color 0.15s ease;
 }
+/* The bar's tooltip (.tt::after) hangs below it, across the next row, so the
+   bar being read rises above the rows after it. The hover is a colour change,
+   not a filter: a filter makes the bar its own layer and traps the tooltip
+   under the next row's bar. Keyboard focus shows the same tooltip. */
 .act-bar:hover,
 .act-bar:focus-visible {
-  filter: brightness(1.15);
+  background: var(--k-bolt);
   outline: none;
+  z-index: 5;
+}
+.act-bar:focus-visible::after,
+.act-bar:focus-visible::before {
+  opacity: 1;
 }
 .act-step-num {
   font-variant-numeric: tabular-nums;

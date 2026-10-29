@@ -1,16 +1,17 @@
 // Activation Analytics — the tracking behind the activation toolkit, as a firm
 // would see it: are advisors using Knomee, and where does prospect conversion
 // break? Placeholder data, built to roll up to the Prospect Analytics totals
-// (analytics.ts): 64 invited · 40 signed up · 33 complete · 27 meetings · 12
-// clients. Those five are read from there, never retyped, so the two pages
-// cannot disagree.
+// (analytics.ts): 64 invited · 40 signed up · 33 complete · 12 clients. Those
+// four are read from there, never retyped, so the two pages cannot disagree.
 //
 // Where each number would come from once the tracking is live:
 // - toolkit opens and template copies: the toolkit's own events, per firm link
 // - invitations sent: Knomee
 // - signed up, completed, where they stopped: Typeform
-// - meetings and clients: reported by the advisors
+// - clients: the advisor's Convert to Client button in Knomee
 // - which template a prospect came from: the utm_content tag the toolkit adds
+// Whether a meeting happened is not something Knomee sees, so the funnel has
+// no meeting step: it goes from a completed profile to a client.
 
 import { engagement, outcomes } from './analytics'
 
@@ -20,7 +21,6 @@ export const prospectTotals = {
   invited: count('Prospects Invited'),
   signedUp: count('Signed Up'),
   complete: count('Profile Complete'),
-  meetings: count('Meetings Booked'),
   clients: outcomes.converted,
 }
 
@@ -109,8 +109,7 @@ export const prospectFunnel = steps([
   { label: 'Invited', count: prospectTotals.invited },
   { label: 'Signed up', count: prospectTotals.signedUp, lostLabel: 'never signed up' },
   { label: 'Profile complete', count: prospectTotals.complete, lostLabel: 'stopped partway' },
-  { label: 'Meeting booked', count: prospectTotals.meetings, lostLabel: 'no meeting yet' },
-  { label: 'Became a client', count: prospectTotals.clients, lostLabel: 'met, not yet a client' },
+  { label: 'Became a client', count: prospectTotals.clients, lostLabel: 'not converted yet' },
 ])
 
 /** The step that loses the most people — where fixing pays off first. */

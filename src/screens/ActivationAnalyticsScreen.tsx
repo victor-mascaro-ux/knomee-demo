@@ -325,8 +325,8 @@ export default function ActivationAnalyticsScreen({
           </Reading>
           <p className="analytics-note">
             Placeholder data. Opens and copies come from the activation toolkit’s own events, per firm link;
-            invitations from Knomee; sign-ups and completions from Typeform; meetings and clients as advisors report
-            them.
+            invitations from Knomee; sign-ups and completions from Typeform; clients from the Convert to Client
+            button.
           </p>
         </div>
       </section>

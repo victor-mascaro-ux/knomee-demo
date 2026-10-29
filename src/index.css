@@ -4049,6 +4049,25 @@ button.name-link-btn:hover .name-text {
 .settings-back:hover {
   color: var(--plum);
 }
+/* A back link heading a page in the content grid sits on the left, over the
+   title it leads back from. As a grid item it was stretched across all twelve
+   columns, and a button centres its own text, so it floated off to the middle
+   of the page. Under a tab row it keeps the block gap from the row's line; the
+   title under it comes up close, so the two read as one heading. */
+.content > .settings-back {
+  justify-self: start;
+  text-align: left;
+}
+.content > .tabs + .settings-back {
+  margin-top: var(--block-gap);
+}
+.content > .settings-back:has(+ .page-title, + .page-title-row) {
+  padding-bottom: 0;
+}
+.content > .settings-back + .page-title,
+.content > .settings-back + .page-title-row {
+  margin-top: var(--space-8);
+}
 /* `clip`, not `hidden`: both trim the sidebar's fill to the rounded corner,
    but `hidden` makes this box a scroll container, and a scroll container is
    the scrollport its sticky descendants measure against — so the lateral menu
