@@ -106,6 +106,7 @@ import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import ActivationAnalyticsScreen from './screens/ActivationAnalyticsScreen'
+import CandidateAnalyticsScreen from './screens/CandidateAnalyticsScreen'
 import { firmFeeRate, revenueFrom } from './data/activation'
 import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
@@ -2301,7 +2302,9 @@ function FunnelHealth() {
   )
 }
 
-function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
+/** The older Prospect Analytics. `older` tags its title, since the page
+    #/analytics opens on now carries the same name. */
+function AnalyticsScreen({ onSegmentation, older }: { onSegmentation?: () => void; older?: boolean }) {
   return (
     <>
       {/* Segmentation reads the same book this page does, cut a different way,
@@ -2309,7 +2312,10 @@ function AnalyticsScreen({ onSegmentation }: { onSegmentation?: () => void }) {
           title rather than in the tab row, because it takes the page over
           instead of filling the tab body. */}
       <div className="page-title-row">
-        <h1 className="page-title">Prospect Analytics</h1>
+        <h1 className="page-title">
+          Prospect Analytics
+          {older && <span className="page-title-tag">Older Version</span>}
+        </h1>
         {onSegmentation && (
           <button className="btn btn-outline" type="button" onClick={onSegmentation}>
             Segmentation
@@ -4236,10 +4242,11 @@ const dashTabs: DashTab[] = [
   { id: 'clients', label: 'Clients', icon: <PeopleIcon /> },
 ]
 const analyticsTabs: DashTab[] = [
+  /* Each opens on its activation funnel; the page it used to open on is an
+     "Older Version" button away, at #/firm-analytics/older and
+     #/analytics/prospects. */
   { id: 'firm-analytics', label: 'Candidate Analytics', firm: true },
-  /* #/analytics opens on the activation funnel; the prospect page it used to
-     open on is a button away, at #/analytics/prospects. */
-  { id: 'analytics', label: 'Activation Analytics' },
+  { id: 'analytics', label: 'Prospect Analytics' },
 ]
 
 // ── Hash routing ──────────────────────────────────────────────────────────
@@ -4294,7 +4301,10 @@ const HOUSEHOLD_SLUG = profileSlug(clientProfile.household)
 
 function parseHash(): { view: RouteView | null; profile: string | null } {
   if (typeof window === 'undefined') return { view: null, profile: null }
-  const raw = window.location.hash.replace(/^#\/?/, '').trim().toLowerCase()
+  /* A link the activation toolkit copied carries its UTM tags at the very end,
+     after the route (#/flow/<token>?utm_source=…). The route is what comes
+     before them; advisorDirectory reads the tags. */
+  const raw = window.location.hash.replace(/^#\/?/, '').split('?')[0].trim().toLowerCase()
   const [head, tail] = raw.split('/')
   /* The plain step-by-step advisor flow is retired: an old #/advisor-self link
      opens the advisor journey, and the address says so. */
@@ -4413,9 +4423,13 @@ export default function App() {
   // Reached from the burger menu rather than the tab bar: it describes how the
   // segments are derived, which is a level below the day-to-day dashboards.
   const [segmentationOpen, setSegmentationOpen] = useState(initialView === 'segmentation')
-  /* Prospect Analytics, kept whole behind a button on Activation Analytics. */
+  /* The older Prospect Analytics, kept whole behind a button on the new one. */
   const [prospectAnalyticsOpen, setProspectAnalyticsOpen] = useState(
     initialView === 'analytics' && initialProfile === 'prospects',
+  )
+  /* And the older Candidate Analytics, the same way. */
+  const [candidateAnalyticsOlder, setCandidateAnalyticsOlder] = useState(
+    initialView === 'firm-analytics' && initialProfile === 'older',
   )
   const [apiStoreOpen, setApiStoreOpen] = useState(initialView === 'api-store')
   const [apiProduct, setApiProduct] = useState<string | null>(
@@ -4701,6 +4715,7 @@ export default function App() {
       setSettingsOpen(v === 'settings')
       setSegmentationOpen(v === 'segmentation')
       setProspectAnalyticsOpen(v === 'analytics' && slug === 'prospects')
+      setCandidateAnalyticsOlder(v === 'firm-analytics' && slug === 'older')
       setApiStoreOpen(v === 'api-store')
       setApiProduct(v === 'api-store' ? slug : null)
       setAdvisorFlowOpen(v === 'advisor-flow')
@@ -4765,7 +4780,9 @@ export default function App() {
                       ? apiProduct
                       : currentView === 'analytics' && prospectAnalyticsOpen
                         ? 'prospects'
-                        : null
+                        : currentView === 'firm-analytics' && candidateAnalyticsOlder
+                          ? 'older'
+                          : null
     const hash = open ? `#/${currentView}/${open}` : `#/${currentView}`
     if (window.location.hash !== hash) {
       if (routeFromAddress.current) window.history.replaceState(null, '', hash)
@@ -4793,6 +4810,7 @@ export default function App() {
     clientMobileSlug,
     apiProduct,
     prospectAnalyticsOpen,
+    candidateAnalyticsOlder,
   ])
 
   // Esc closes the convert modal.
@@ -5085,6 +5103,7 @@ export default function App() {
     if (t.firm) {
       setFirmScreen(t.id as FirmScreen)
       setCandidateOpen(false)
+      setCandidateAnalyticsOlder(false)
       setFirmView(true)
     } else {
       setScreen(t.id as Screen)
@@ -5190,7 +5209,26 @@ export default function App() {
                 onRemoved={() => showToast('Entry removed')}
               />
             )}
-            {firmScreen === 'firm-analytics' && <FirmAnalyticsScreen />}
+            {firmScreen === 'firm-analytics' &&
+              (candidateAnalyticsOlder ? (
+                <>
+                  <button
+                    className="settings-back"
+                    type="button"
+                    onClick={() => setCandidateAnalyticsOlder(false)}
+                  >
+                    ‹ Back to Candidate Analytics
+                  </button>
+                  <FirmAnalyticsScreen older />
+                </>
+              ) : (
+                <CandidateAnalyticsScreen
+                  onOlderVersion={() => {
+                    setCandidateAnalyticsOlder(true)
+                    scrollPageToTop()
+                  }}
+                />
+              ))}
           </main>
         )
       ) : householdOpen && family ? (
@@ -5330,13 +5368,13 @@ export default function App() {
                   type="button"
                   onClick={() => setProspectAnalyticsOpen(false)}
                 >
-                  ‹ Back to Activation Analytics
+                  ‹ Back to Prospect Analytics
                 </button>
-                <AnalyticsScreen onSegmentation={() => setSegmentationOpen(true)} />
+                <AnalyticsScreen older onSegmentation={() => setSegmentationOpen(true)} />
               </>
             ) : (
               <ActivationAnalyticsScreen
-                onProspectAnalytics={() => {
+                onOlderVersion={() => {
                   setProspectAnalyticsOpen(true)
                   scrollPageToTop()
                 }}

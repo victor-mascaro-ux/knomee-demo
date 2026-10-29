@@ -174,7 +174,7 @@ export interface FunnelStep {
   lostLabel?: string
 }
 
-function steps(rows: { label: string; count: number; lostLabel?: string }[]): FunnelStep[] {
+export function funnelSteps(rows: { label: string; count: number; lostLabel?: string }[]): FunnelStep[] {
   return rows.map((r, i) => ({
     ...r,
     base: rows[0].count,
@@ -182,14 +182,14 @@ function steps(rows: { label: string; count: number; lostLabel?: string }[]): Fu
   }))
 }
 
-export const advisorFunnel = steps([
+export const advisorFunnel = funnelSteps([
   { label: 'Have access', count: withAccess },
   { label: 'Opened the toolkit', count: opened, lostLabel: 'never opened it' },
   { label: 'Copied a template', count: copied, lostLabel: 'looked, copied nothing' },
   { label: 'Sent an adventure', count: sending, lostLabel: 'copied, sent nothing' },
 ])
 
-export const prospectFunnel = steps([
+export const prospectFunnel = funnelSteps([
   { label: 'Invited', count: prospectTotals.invited },
   { label: 'Signed up', count: prospectTotals.signedUp, lostLabel: 'never signed up' },
   { label: 'Profile complete', count: prospectTotals.complete, lostLabel: 'stopped partway' },

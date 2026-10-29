@@ -13,7 +13,7 @@
    screen cannot disagree. */
 
 import { InvitePanel } from './AdvisorDirectoryScreen'
-import { deleteEntry, deleteInvite, inviteLink, listEntries, type Trouble } from '../data/advisorDirectory'
+import { deleteEntry, deleteInvite, inviteLink, listEntries, noteAdded, type Trouble } from '../data/advisorDirectory'
 import { candidateFromEntry, type LiveCandidate } from '../data/liveCandidates'
 import './advisorDirectory.css'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -610,6 +610,13 @@ export default function FirmCandidatesScreen({
     const newest = rowsLive.reduce<LiveCandidate | null>((a, c) => (!a || c.at > a.at ? c : a), null)
     setLive(rowsLive.map((c) => ({ ...c, isNew: c === newest })))
   }, [])
+  /* Adding a live row to the Network is the candidate funnel's last step, so
+     it is recorded (Candidate Analytics counts it); a placeholder row only
+     confirms. */
+  const add = (c: Candidate) => {
+    if ('entryId' in c) void noteAdded((c as LiveCandidate).entryId, (c as LiveCandidate).token)
+    onAdd(c)
+  }
   /* Removing a sitting: asked once, since it throws its answers away. */
   const [removing, setRemoving] = useState<LiveCandidate | null>(null)
   const remove = async (c: LiveCandidate) => {
@@ -730,7 +737,7 @@ export default function FirmCandidatesScreen({
         rows={rows}
         onOpen={openRow}
         onRemove={setRemoving}
-        onAdd={onAdd}
+        onAdd={add}
         selected={selected}
         onToggle={toggle}
         allChecked={allChecked}
