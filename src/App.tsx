@@ -3728,6 +3728,10 @@ function ConvertModal({
   )
 }
 
+/** A day as the person at the screen calls it: YYYY-MM-DD, local, not UTC. */
+const localDay = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
 /** Who Mark as Joined is about to mark: a live sitting carries its ids, so the
     mark can be recorded; the worked example has none. */
 interface JoinTarget {
@@ -3754,12 +3758,15 @@ function JoinModal({
       starts there and stays editable. */
   prefill: number | null
   onCancel: () => void
-  /** With the AUM entered, in $M, if any. */
-  onConfirm: (aum: number | null) => void
+  /** With the AUM entered, in $M, if any, and the day they joined
+      (YYYY-MM-DD, today unless an earlier joiner is being caught up). */
+  onConfirm: (aum: number | null, day: string) => void
 }) {
   const bandStyle = useViewportBand(true)
   const [aum, setAum] = useState(prefill ? String(prefill) : '')
   const amount = Number(aum) || 0
+  const today = localDay(new Date())
+  const [day, setDay] = useState(today)
   return (
     <div className="modal-backdrop" style={bandStyle} onClick={onCancel} role="dialog" aria-modal="true">
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -3772,13 +3779,28 @@ function JoinModal({
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            onConfirm(amount || null)
+            onConfirm(amount || null, day && day <= today ? day : today)
           }}
         >
           <div className="modal-body">
             <p className="cv-lead">
               <b>{name}</b> will move to <b>Joined</b>, at the bottom of your Candidates.
             </p>
+            {/* Today for someone joining now; an earlier day for an advisor who
+                joined before joining could be recorded, so their time to a
+                decision is the real one. */}
+            <label className="cv-field" htmlFor="sg-day">
+              <span className="cv-label">Joined on</span>
+              <span className="cv-help">Change it for an advisor who joined earlier.</span>
+              <input
+                id="sg-day"
+                className="cv-input"
+                type="date"
+                max={today}
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+              />
+            </label>
             <label className="cv-field" htmlFor="sg-aum">
               <span className="cv-label">AUM coming over ($M)</span>
               <span className="cv-help">
@@ -4958,11 +4980,15 @@ export default function App() {
     entryId: 'entryId' in c ? (c as LiveCandidate).entryId : null,
     token: 'entryId' in c ? (c as LiveCandidate).token : null,
   })
-  const confirmJoin = (aum: number | null) => {
+  const confirmJoin = (aum: number | null, day: string) => {
     if (!joinTarget) return
     const t = joinTarget
-    setJoinedMarks((m) => ({ ...m, [t.key]: { id: t.key, token: t.token, at: new Date().toISOString(), aum } }))
-    if (t.entryId) void noteJoined(t.entryId, t.token, aum)
+    /* Today keeps the moment; an earlier day is held at its noon, UTC, so the
+       day read back off the string is the one picked, wherever it's read. */
+    const now = new Date()
+    const at = day === localDay(now) ? now.toISOString() : `${day}T12:00:00.000Z`
+    setJoinedMarks((m) => ({ ...m, [t.key]: { id: t.key, token: t.token, at, aum } }))
+    if (t.entryId) void noteJoined(t.entryId, t.token, aum, at)
     confettiRef.current?.fire()
     setJoinTarget(null)
     showToast(aum ? `Marked as Joined · $${aum.toLocaleString('en-US')}M AUM recorded` : 'Marked as Joined')
