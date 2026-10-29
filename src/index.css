@@ -5156,64 +5156,124 @@ button.name-link-btn:hover .name-text {
 .invite-preview-toggle.is-open svg {
   transform: rotate(180deg);
 }
-/* The email as a compose window: the design system's modal in small — a
-   plum bar, hairline From / To / Subject lines, the message, pill Send at
-   the foot. Only the message scrolls. */
+/* The email as the toolkit draws its samples (activation-playbook
+   prospect-playbook.html .email): a white card under a mail window's grey bar,
+   a pale head with the sender and the subject, the message in light ink. No
+   plum but the sender's name and the subject; the To line and Send are the
+   modal's own. Only the message scrolls. */
 .invite-mail {
   display: flex;
   flex-direction: column;
   min-height: 0;
   margin-top: 16px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 10px 28px -14px rgba(20, 10, 40, 0.28);
+  box-shadow: 0 2px 10px rgba(36, 4, 70, 0.06);
 }
 .invite-mail-bar {
   flex: none;
-  padding: 9px 14px;
-  background: var(--plum);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: #eeeef0;
+  border-bottom: 1px solid #dcdce0;
 }
-.invite-mail-line {
+.invite-mail-dots {
+  display: flex;
+  gap: 5px;
+}
+.invite-mail-dots i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.invite-mail-dots i:nth-child(1) {
+  background: #ff5f57;
+}
+.invite-mail-dots i:nth-child(2) {
+  background: #febc2e;
+}
+.invite-mail-dots i:nth-child(3) {
+  background: #28c840;
+}
+.invite-mail-title {
+  flex: 1;
+  padding: 2px 10px;
+  border: 1px solid #d8d8de;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 12.5px;
+  color: #8a8a92;
+}
+.invite-mail-head {
+  flex: none;
+  padding: 14px 19px 13px;
+  border-bottom: 1px solid var(--line);
+  background: #f8fafa;
+}
+.invite-mail-from {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+}
+.invite-mail-from b {
+  font-weight: 600;
+  color: var(--plum);
+}
+.invite-mail-org {
+  font-weight: 300;
+  color: var(--grey-text);
+}
+.invite-mail-av {
   flex: none;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--k-grape, #7639a1), #2dd2b0);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* To, typed into: a hairline under it that darkens while it's in use, red
+   once Send has asked for it. */
+.invite-mail-line {
+  display: flex;
   align-items: baseline;
-  gap: 10px;
-  min-height: 40px;
-  padding: 10px 14px;
-  box-sizing: border-box;
+  gap: 8px;
+  margin: 10px 0 9px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--line);
-  font-size: 13.5px;
-  color: #201a2e;
-  transition: box-shadow 0.15s;
+  font-size: 14px;
+  color: #221833;
+  transition: border-color 0.15s;
 }
 .invite-mail-line:focus-within {
-  box-shadow: inset 0 -2px 0 var(--k-grape, #7639a1);
+  border-bottom-color: #55555f;
 }
 .invite-mail-line.is-bad {
-  box-shadow: inset 0 -2px 0 #d81e4a;
+  border-bottom-color: #d81e4a;
 }
 .invite-mail-key {
   flex: none;
-  width: 56px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--grey-text);
 }
 .invite-mail-line.is-bad .invite-mail-key {
   color: #d81e4a;
 }
-.invite-mail-val {
-  flex: 1;
-  min-width: 0;
-}
 .invite-mail-subject {
-  flex: 1;
-  min-width: 0;
+  font-size: 18px;
   font-weight: 600;
+  line-height: 1.35;
+  color: var(--plum);
 }
 .invite-mail-input {
   flex: 1;
@@ -5238,16 +5298,17 @@ button.name-link-btn:hover .name-text {
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  padding: 18px 18px 20px;
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: #3a3247;
+  padding: 19px 21px 21px;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: #463a57;
 }
 .invite-mail-body > .invite-editable {
   align-self: stretch;
 }
-/* The words, typed into where they stand. A faint wash on hover says so; a
-   grape ring holds the one being edited. Pulled out by its own padding, so
+/* The words, typed into where they stand. A faint grey wash on hover says so;
+   a grey ring holds the one being edited. Pulled out by its own padding, so
    the text stays on the window's margin. */
 .invite-editable {
   margin: -3px -6px;
@@ -5259,12 +5320,12 @@ button.name-link-btn:hover .name-text {
   transition: background 0.15s, box-shadow 0.15s;
 }
 .invite-editable:hover {
-  background: color-mix(in srgb, var(--k-grape, #7639a1) 5%, #fff);
+  background: #f4f4f6;
 }
 .invite-editable:focus {
   outline: none;
   background: #fff;
-  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--k-grape, #7639a1) 55%, transparent);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, #55555f 40%, transparent);
 }
 .invite-mail-foot {
   flex: none;
@@ -5368,10 +5429,12 @@ button.name-link-btn:hover .name-text {
   color: var(--grey-text);
 }
 
-/* A {{placeholder}} still to fill, inline in the email — the toolkit's own
-   field (activation-playbook firm.css .tk-field): a grape wash with a line
-   under it, red underneath once Send has asked for it. */
+/* A {{placeholder}}, inline in the email — the toolkit's own field
+   (activation-playbook firm.css .tk-field) in its grey, the Cold lead's: a
+   wash with a line under it, lighter once filled, red underneath once Send
+   has asked for it. */
 .invite-fill {
+  --fill: #55555f;
   box-sizing: content-box;
   field-sizing: content;
   min-width: 3ch;
@@ -5380,19 +5443,24 @@ button.name-link-btn:hover .name-text {
   padding: 0 0.4em;
   border: 0;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--k-grape, #7639a1) 10%, #fff);
-  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--k-grape, #7639a1) 50%, transparent);
+  background: color-mix(in srgb, var(--fill) 10%, #fff);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--fill) 50%, transparent);
   font: inherit;
-  color: #201a2e;
+  color: #221833;
   transition: background 0.15s, box-shadow 0.15s;
 }
 .invite-fill::placeholder {
-  color: color-mix(in srgb, var(--k-grape, #7639a1) 75%, #6d6478);
+  color: color-mix(in srgb, var(--fill) 75%, #6d6478);
 }
-.invite-fill:focus {
+.invite-fill.is-done {
+  background: color-mix(in srgb, var(--fill) 5%, #fff);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--fill) 30%, transparent);
+}
+.invite-fill:focus,
+.invite-fill.is-done:focus {
   outline: none;
   background: #fff;
-  box-shadow: inset 0 0 0 1.5px var(--k-grape, #7639a1);
+  box-shadow: inset 0 0 0 1.5px var(--fill);
 }
 .invite-fill.is-bad,
 .invite-fill.is-bad:focus {

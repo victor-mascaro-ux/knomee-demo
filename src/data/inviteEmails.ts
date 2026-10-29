@@ -91,17 +91,6 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       signoff: SIGNED,
     },
     {
-      id: 'eng-3',
-      stage: 'Engaged',
-      name: 'Meeting Recap',
-      note: '1–2 days after',
-      subject: 'Great connecting today',
-      message:
-        'Hi {{First Name}},\n\nThank you for meeting today. As a recap, the main areas we discussed: {{Priority 1}}, {{Priority 2}}, {{Priority 3}}. Next steps: {{Next Step 1}}, {{Next Step 2}}.\n\nI’ll keep your Knomee responses in mind as we continue working together.',
-      cta: 'View Your Knomee Summary →',
-      signoff: SIGNED,
-    },
-    {
       id: 'dis-1',
       stage: 'Disengaged',
       name: 'Annual Check-In',

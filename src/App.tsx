@@ -3052,6 +3052,7 @@ function FillEditor({
       if (!input) return
       const v = fieldValue(k, fill)
       if (input.value !== v) input.value = v
+      input.classList.toggle('is-done', !!v.trim())
       input.classList.toggle('is-bad', fill.flagged && !v.trim())
       if (!SIZES_ITSELF) input.style.width = `${Math.max(v.length, k.length) + 1}ch`
     })
@@ -3084,7 +3085,7 @@ function FillEditor({
 function editNearest(e: ReactMouseEvent<HTMLElement>) {
   const t = e.target as HTMLElement
   if (t.closest('input, button, a, .invite-editable')) return
-  const zone = t.closest<HTMLElement>('.invite-mail-line, .invite-mail-body')
+  const zone = t.closest<HTMLElement>('.invite-mail-head, .invite-mail-body')
   const spots = zone ? [...zone.querySelectorAll<HTMLElement>('.invite-editable, input')] : []
   if (!spots.length) return
   const y = e.clientY
@@ -3153,6 +3154,7 @@ function InviteCompose({
   sending: boolean
 }) {
   const noTo = toBad && !to.trim()
+  const sender = fieldValue('Advisor Name', fill).trim() || fill.known['Advisor Name']
   const unfilled = fill.flagged ? missing.length : 0
   const fields = unfilled === 1 ? 'the highlighted field' : `the ${unfilled} highlighted fields`
   const hint =
@@ -3165,29 +3167,41 @@ function InviteCompose({
           : null
   return (
     <div className="invite-mail" onMouseDown={editNearest}>
-      <div className="invite-mail-bar">New Email</div>
-      <div className="invite-mail-line">
-        <span className="invite-mail-key">From</span>
-        <span className="invite-mail-val">
-          <b>{fill.known['Advisor Name']}</b> · {fill.known['Firm Name']}
+      {/* The toolkit's sample email (activation-playbook .email): a mail
+          window's bar, then a pale head with the sender and the subject. */}
+      <div className="invite-mail-bar">
+        <span className="invite-mail-dots" aria-hidden>
+          <i />
+          <i />
+          <i />
         </span>
+        <span className="invite-mail-title">New Email</span>
       </div>
-      <div className={`invite-mail-line${noTo ? ' is-bad' : ''}`}>
-        <label className="invite-mail-key" htmlFor="invite-email">
-          To
-        </label>
-        <input
-          id="invite-email"
-          className="invite-mail-input"
-          type="email"
-          placeholder={`Add ${kind} email`}
-          value={to}
-          onChange={(e) => onTo(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && onSend()}
-        />
-      </div>
-      <div className="invite-mail-line">
-        <span className="invite-mail-key">Subject</span>
+      <div className="invite-mail-head">
+        {/* The sender follows the sign-off's name as it's typed, as the
+            toolkit's From line does. */}
+        <div className="invite-mail-from">
+          <span className="invite-mail-av" aria-hidden>
+            {sender.charAt(0).toUpperCase()}
+          </span>
+          <span>
+            <b>{sender}</b> <span className="invite-mail-org">{fill.known['Firm Name']}</span>
+          </span>
+        </div>
+        <div className={`invite-mail-line${noTo ? ' is-bad' : ''}`}>
+          <label className="invite-mail-key" htmlFor="invite-email">
+            To
+          </label>
+          <input
+            id="invite-email"
+            className="invite-mail-input"
+            type="email"
+            placeholder={`Add ${kind} email`}
+            value={to}
+            onChange={(e) => onTo(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onSend()}
+          />
+        </div>
         <FillEditor
           className="invite-mail-subject"
           label="Subject"
