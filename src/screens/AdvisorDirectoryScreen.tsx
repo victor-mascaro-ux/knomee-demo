@@ -135,6 +135,9 @@ export function InvitePanel({
 }) {
   const [name, setName] = useState('')
   const [brand, setBrand] = useState<InviteBrand>('knomee')
+  /* Unticked to start, and again for each new link, so a real invite is never
+     left out of the numbers by a box still ticked from the last one. */
+  const [test, setTest] = useState(false)
   const [made, setMade] = useState<Invite | null>(null)
   const [busy, setBusy] = useState(false)
   /* Feedback lives in the buttons: the link view opens with Copy Link saying
@@ -144,7 +147,7 @@ export function InvitePanel({
 
   const make = async () => {
     setBusy(true)
-    const { invite, trouble } = await createInvite(name, brand)
+    const { invite, trouble } = await createInvite(name, brand, test)
     setBusy(false)
     onTrouble(trouble)
     // A link that never reached the directory would open to nothing, so it is
@@ -192,6 +195,7 @@ export function InvitePanel({
             onClick={() => {
               setMade(null)
               setName('')
+              setTest(false)
             }}
           >
             Invite Another
@@ -232,6 +236,13 @@ export function InvitePanel({
             if (e.key === 'Enter') void make()
           }}
         />
+        {/* A link made to try the flow, not to invite anybody. */}
+        <label className="adir-test">
+          <input type="checkbox" checked={test} onChange={(e) => setTest(e.target.checked)} />
+          <span>
+            This is a test <span className="adir-test-hint">· not counted in Candidate Analytics</span>
+          </span>
+        </label>
         {/* Who the advisor is told they are talking to. knomee leads because it
             is the default — a link to somebody who has signed nothing should
             not arrive wearing a firm's branding unless you chose that. */}

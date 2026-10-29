@@ -23,6 +23,8 @@ export interface LiveCandidate extends Candidate {
   token: string | null
   /** When it was last written — the newest one wears the "new" pill. */
   at: string
+  /** Its link was marked as a test when it was made: the row wears "Test". */
+  test?: boolean
 }
 
 const STAGE: Record<string, Stage> = {

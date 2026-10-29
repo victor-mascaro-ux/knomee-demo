@@ -1381,6 +1381,12 @@ input[type='checkbox'] {
 .name-line .new-tag {
   align-self: center;
 }
+/* Test: a row from a link marked as a test when it was made. Teal, so it
+   never reads as the grape New beside it. */
+.new-tag.is-test {
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+}
 /* Names are 400 in both tables. In the prospect table only Sarah's was: hers is
    a <button> to open her profile, and `font: inherit` on that button was
    quietly overriding .name-line's 600, so the one clickable name was also the
