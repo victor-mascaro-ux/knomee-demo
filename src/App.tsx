@@ -3454,7 +3454,12 @@ function InviteModal({
 
           {/* Keyed on both, so the panel re-runs its enter animation on each
               switch — the content cross-fades instead of snapping. */}
-          <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`} ref={panelRef}>
+          <div
+            className={`invite-panel${channel === 'email' ? '' : ' invite-panel-share'}`}
+            role="tabpanel"
+            key={`${kind}-${channel}`}
+            ref={panelRef}
+          >
             {channel === 'email' && (
               <>
                 {/* Which email: the toolkit's lead (or client) type, then the
