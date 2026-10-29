@@ -106,6 +106,7 @@ import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
 import ActionableInsights from './components/ActionableInsights'
 import RowMenu from './components/RowMenu'
+import TabMenu from './components/TabMenu'
 import FeedbackButton, { useFlash } from './components/FeedbackButton'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
@@ -3598,12 +3599,15 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
 type FirmScreen = 'firm-candidates' | 'firm-analytics'
 
 /* One tab bar for the whole dashboard: the recruiting pipeline sits beside
-   the advisor's own book, candidates first, and each side's analytics after
-   Clients — candidates' first again. */
-const dashTabs: { id: Screen | FirmScreen; label: string; firm?: boolean }[] = [
+   the advisor's own book, candidates first. Each side's analytics fold under
+   one Analytics menu at the row's far right — candidates' first again. */
+type DashTab = { id: Screen | FirmScreen; label: string; firm?: boolean }
+const dashTabs: DashTab[] = [
   { id: 'firm-candidates', label: 'Candidates', firm: true },
   { id: 'prospects', label: 'Prospects' },
   { id: 'clients', label: 'Clients' },
+]
+const analyticsTabs: DashTab[] = [
   { id: 'firm-analytics', label: 'Candidate Analytics', firm: true },
   { id: 'analytics', label: 'Prospect Analytics' },
 ]
@@ -4437,6 +4441,17 @@ export default function App() {
   }
 
   const dashActive = firmView ? firmScreen : screen
+  const goDashTab = (t: DashTab) => {
+    if (t.firm) {
+      setFirmScreen(t.id as FirmScreen)
+      setCandidateOpen(false)
+      setFirmView(true)
+    } else {
+      setScreen(t.id as Screen)
+      setFirmView(false)
+    }
+    scrollPageToTop()
+  }
   const dashNav = (
     <nav className="tabs slide-nav" ref={dashInd.ref}>
       {dashInd.box && (
@@ -4454,21 +4469,18 @@ export default function App() {
           className={`tab ${dashActive === t.id ? 'tab-active' : ''}`}
           type="button"
           data-active={dashActive === t.id}
-          onClick={() => {
-            if (t.firm) {
-              setFirmScreen(t.id as FirmScreen)
-              setCandidateOpen(false)
-              setFirmView(true)
-            } else {
-              setScreen(t.id as Screen)
-              setFirmView(false)
-            }
-            scrollPageToTop()
-          }}
+          onClick={() => goDashTab(t)}
         >
           {t.label}
         </button>
       ))}
+      <TabMenu
+        label="Analytics"
+        icon={<ChartIcon color="currentColor" />}
+        items={analyticsTabs}
+        active={dashActive}
+        onPick={goDashTab}
+      />
     </nav>
   )
 
