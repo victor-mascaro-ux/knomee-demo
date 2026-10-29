@@ -165,8 +165,8 @@
   min-width: 32px;
 }
 
-/* In the modal the invite reads top to bottom — their name, who it is sent
-   as — with Generate link at the right edge, where a modal's action goes. */
+/* In the modal the invite reads top to bottom — who it is sent as, their
+   name — with Generate link at the right edge, where a modal's action goes. */
 .fc-invite-modal .adir-invite-head {
   display: none;
 }
@@ -180,8 +180,45 @@
   width: 100%;
   flex: none;
 }
+/* Send as heads it, above the name: a label over the Invite modal's own
+   toggle (index.css .invite-tabs) — a grey pill track, the picked side a plum
+   pill filling it, each side as wide as its word. Plum for either brand: a
+   firm's colour stays on the bars. */
 .fc-invite-modal .adir-seg-wrap {
+  order: -1;
   align-self: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.fc-invite-modal .adir-seg-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong, #240446);
+}
+.fc-invite-modal .adir-seg {
+  height: auto;
+  gap: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--pearl);
+}
+.fc-invite-modal .adir-seg-btn {
+  flex: none;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-text);
+  transition: background 0.14s, color 0.14s;
+}
+.fc-invite-modal .adir-seg-btn:hover {
+  color: var(--plum);
+}
+.fc-invite-modal .adir-seg-btn.is-on {
+  background: var(--plum);
+  color: #fff;
+  font-weight: 600;
 }
 .fc-invite-modal .adir-link-row > .btn-primary {
   align-self: flex-end;
