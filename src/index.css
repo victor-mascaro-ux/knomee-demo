@@ -237,11 +237,6 @@ body {
      distance under whatever bar is above it on every page. The full page inset
      read as a gap between the bar and the navigation that hangs off it. */
   padding-top: 16px;
-  /* A white band under the row while it holds, so the table scrolling up
-     fades out below the line rather than running into it. A shadow, not
-     padding: it takes no room, so the line keeps its distance from the page
-     title (24px at the least, the band 16px of it). */
-  box-shadow: 0 16px 0 0 var(--surface-page);
 }
 .content:has(> .tabs) {
   padding-top: 0;
