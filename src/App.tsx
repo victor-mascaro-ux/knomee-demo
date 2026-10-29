@@ -98,12 +98,24 @@ import ClientMobileScreen from './screens/ClientMobileScreen'
 import AdvisorFlowScreen from './screens/AdvisorFlowScreen'
 import AdvisorSelfScreen from './screens/AdvisorSelfScreen'
 import AdvisorDirectoryScreen from './screens/AdvisorDirectoryScreen'
-import { entryOf, readEntry, readInvite, type Entry, type Invite } from './data/advisorDirectory'
+import {
+  dropSigned,
+  entryOf,
+  listSigned,
+  noteSigned,
+  readEntry,
+  readInvite,
+  type Entry,
+  type Invite,
+  type Signed,
+} from './data/advisorDirectory'
+import type { Candidate } from './data/candidates'
+import type { LiveCandidate } from './data/liveCandidates'
 import { emptyAnswers, sampleAnswers } from './data/advisorAnswers'
 import { backToProfile, isPhoneScreen, openExperience, setDeviceMode, useDeviceMode } from './deviceMode'
 import { advisorAdventures } from './data/advisorFlow'
 import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
-import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
+import FirmCandidatesScreen, { signKey } from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import ActivationAnalyticsScreen from './screens/ActivationAnalyticsScreen'
 import CandidateAnalyticsScreen from './screens/CandidateAnalyticsScreen'
@@ -3716,6 +3728,79 @@ function ConvertModal({
   )
 }
 
+/** Who Mark as Signed is about to sign: a live sitting carries its ids, so the
+    mark can be recorded; the worked example has none. */
+interface SignTarget {
+  key: string
+  name: string
+  entryId: string | null
+  token: string | null
+}
+
+/* Mark as Signed — the candidate side's Convert to Client. The advisor moves
+   to the Signed section of Candidates, and the AUM they bring, if the
+   recruiter knows it, becomes theirs in Candidate Analytics' ROI. */
+function SignModal({
+  name,
+  onCancel,
+  onConfirm,
+}: {
+  name: string
+  onCancel: () => void
+  /** With the AUM entered, in $M, if any. */
+  onConfirm: (aum: number | null) => void
+}) {
+  const bandStyle = useViewportBand(true)
+  const [aum, setAum] = useState('')
+  const amount = Number(aum) || 0
+  return (
+    <div className="modal-backdrop" style={bandStyle} onClick={onCancel} role="dialog" aria-modal="true">
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Mark as Signed</h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onCancel}>
+            <CloseIcon />
+          </button>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            onConfirm(amount || null)
+          }}
+        >
+          <div className="modal-body">
+            <p className="cv-lead">
+              <b>{name}</b> will move to <b>Signed</b>, at the bottom of your Candidates.
+            </p>
+            <label className="cv-field" htmlFor="sg-aum">
+              <span className="cv-label">AUM coming over ($M)</span>
+              <span className="cv-help">Optional. It becomes this advisor’s AUM in Candidate Analytics.</span>
+              <input
+                id="sg-aum"
+                className="cv-input"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="e.g. 250"
+                value={aum}
+                onChange={(e) => setAum(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+              />
+            </label>
+            {amount > 0 && <p className="cv-result">${amount.toLocaleString('en-US')}M in AUM</p>}
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" type="button" onClick={onCancel}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" type="submit">
+              Mark as Signed
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 // Confetti burst on conversion — ported from the original converting flow.
 // Exposes an imperative fire() so it starts the instant Convert is clicked
 // (no waiting on the Clients screen to re-render). Pieces spawn across the
@@ -4835,6 +4920,53 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [convertTarget])
 
+  /* Mark as Signed — the firm's Convert to Client. A live sitting's mark is
+     kept in the directory, where Candidate Analytics counts it; the worked
+     example's (Marcus) lasts the session. Read again each time the firm view
+     opens, so a mark made on another machine shows. */
+  const [signedMarks, setSignedMarks] = useState<Record<string, Signed>>({})
+  const [signTarget, setSignTarget] = useState<SignTarget | null>(null)
+  useEffect(() => {
+    if (!firmView) return
+    void listSigned().then(({ values }) =>
+      setSignedMarks((m) => ({ ...Object.fromEntries(values.map((v) => [v.id, v])), ...m })),
+    )
+  }, [firmView])
+  useEffect(() => {
+    if (!signTarget) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSignTarget(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [signTarget])
+  const signTargetOf = (c: Candidate): SignTarget => ({
+    key: signKey(c),
+    name: c.name,
+    entryId: 'entryId' in c ? (c as LiveCandidate).entryId : null,
+    token: 'entryId' in c ? (c as LiveCandidate).token : null,
+  })
+  const confirmSign = (aum: number | null) => {
+    if (!signTarget) return
+    const t = signTarget
+    setSignedMarks((m) => ({ ...m, [t.key]: { id: t.key, token: t.token, at: new Date().toISOString(), aum } }))
+    if (t.entryId) void noteSigned(t.entryId, t.token, aum)
+    confettiRef.current?.fire()
+    setSignTarget(null)
+    showToast(aum ? `Marked as Signed · $${aum.toLocaleString('en-US')}M AUM recorded` : 'Marked as Signed')
+  }
+  /* And back: the advisor returns to their tier. */
+  const unsign = (c: Candidate) => {
+    const key = signKey(c)
+    setSignedMarks((m) => {
+      const n = { ...m }
+      delete n[key]
+      return n
+    })
+    if ('entryId' in c) void dropSigned((c as LiveCandidate).entryId)
+    showToast('Signed undone')
+  }
+
   const confirmConvert = (assets: number | null = null) => {
     if (!convertTarget) return
     const already = converted.some((c) => c.email === convertTarget.email)
@@ -5199,7 +5331,8 @@ export default function App() {
           <main className="content content-profile">
             <AdvisorProfileScreen
               onBack={() => setCandidateOpen(false)}
-              onAdd={() => showToast('Added to Network')}
+              signed={!!signedMarks[candidate.name]}
+              onSign={() => setSignTarget({ key: candidate.name, name: candidate.name, entryId: null, token: null })}
               onOpenExperience={() => openExperience('#/advisor-mobile')}
             />
           </main>
@@ -5217,7 +5350,9 @@ export default function App() {
                   setViewEntryId(id)
                 }}
                 onDownload={() => showToast('CSV downloaded')}
-                onAdd={() => showToast('Added to Network')}
+                signed={signedMarks}
+                onSign={(c) => setSignTarget(signTargetOf(c))}
+                onUnsign={unsign}
                 onRemoved={() => showToast('Entry removed')}
               />
             )}
@@ -5403,6 +5538,9 @@ export default function App() {
           onCancel={() => setConvertTarget(null)}
           onConfirm={confirmConvert}
         />
+      )}
+      {signTarget && (
+        <SignModal name={signTarget.name} onCancel={() => setSignTarget(null)} onConfirm={confirmSign} />
       )}
       {familyModal && (
         <FamilyModal

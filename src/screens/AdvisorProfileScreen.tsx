@@ -138,7 +138,8 @@ function Waiting({
 
 export default function AdvisorProfileScreen({
   onBack,
-  onAdd,
+  onSign,
+  signed,
   onOpenExperience,
   ownerMenu,
   mine,
@@ -160,7 +161,10 @@ export default function AdvisorProfileScreen({
   nextWaiting?: IdCard
   onStartNext?: () => void
   onBack: () => void
-  onAdd?: () => void
+  /** Mark as Signed: the firm's Convert to Client. */
+  onSign?: () => void
+  /** Already marked as signed: the button says so and does nothing. */
+  signed?: boolean
   /** The person's own experience, from the foot of the rail. */
   onOpenExperience?: () => void
   /** What the breadcrumb calls the list behind this page. A candidate opened
@@ -290,8 +294,8 @@ export default function AdvisorProfileScreen({
                 what left this a name and a date last time. */}
             {mine ? null : (
               <>
-                <button className="pp-convert" type="button" onClick={() => onAdd?.()}>
-                  Add to Network
+                <button className="pp-convert" type="button" disabled={signed} onClick={() => onSign?.()}>
+                  {signed ? 'Signed' : 'Mark as Signed'}
                 </button>
                 <div className="ap-side-stat">
                   <span className="ap-side-stat-k">Recruitment Quotient</span>

@@ -154,6 +154,15 @@ function Trail({ c }: { c: KnomeeClient }) {
   )
 }
 
+/** A step's name that says, on hover or focus, what records it. */
+export function StepName({ label, tip }: { label: string; tip: string }) {
+  return (
+    <span className="act-step-name tt tt-wrap" data-tip={tip} tabIndex={0}>
+      {label}
+    </span>
+  )
+}
+
 export function Reading({ children }: { children: React.ReactNode }) {
   return (
     <p className="act-reading">
@@ -163,12 +172,15 @@ export function Reading({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** One step of the funnel: its bar against the group's first step, and what it lost. */
-export function Step({ s, unit, flag }: { s: FunnelStep; unit: string; flag?: boolean }) {
+/** One step of the funnel: its bar against the group's first step, and what it lost.
+    `tip`, where given, opens from the step's name (what records the step). */
+export function Step({ s, unit, flag, tip }: { s: FunnelStep; unit: string; flag?: boolean; tip?: string }) {
   const share = pct(s.count, s.base)
   return (
     <div className={`act-step ${flag ? 'is-flagged' : ''}`}>
-      <span className="act-step-label">{s.label}</span>
+      <span className="act-step-label">
+        {tip ? <StepName label={s.label} tip={tip} /> : s.label}
+      </span>
       <span className="act-track">
         <span
           className="act-bar tt"
