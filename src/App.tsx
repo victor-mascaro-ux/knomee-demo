@@ -134,6 +134,8 @@ import {
   toolkitFirmName,
   toolkitUrl,
   type InviteEmail,
+  PROSPECT_INVITE_EMAIL,
+  PROSPECT_RESEND_EMAIL,
 } from './data/inviteEmails'
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
@@ -408,12 +410,14 @@ function Avatar({ name, avatar }: { name: string; avatar?: string }) {
 function ProspectRow({
   p,
   onConvert,
+  onResend,
   onOpenProfile,
   checked,
   onToggle,
 }: {
   p: Prospect
   onConvert: (p: Prospect) => void
+  onResend: (p: Prospect) => void
   onOpenProfile: (p: Prospect) => void
   checked: boolean
   onToggle: () => void
@@ -483,11 +487,11 @@ function ProspectRow({
       </td>
       <td className="col-dots">
         <RowMenu
-          items={
-            incomplete
-              ? [{ label: 'View Profile', disabled: true }]
-              : [{ label: 'Convert to Client', onClick: () => onConvert(p) }, { label: 'View Profile', disabled: true }]
-          }
+          items={[
+            { label: 'Resend Invite Link', onClick: () => onResend(p) },
+            ...(incomplete ? [] : [{ label: 'Convert to Client', onClick: () => onConvert(p) }]),
+            { label: 'View Profile', disabled: true },
+          ]}
         />
       </td>
     </tr>
@@ -511,6 +515,7 @@ function TopActionCell({ text }: { text: string }) {
 
 function ProspectsTable({
   onConvert,
+  onResend,
   onOpenProfile,
   hidden,
   selected,
@@ -519,6 +524,7 @@ function ProspectsTable({
   onToggleAll,
 }: {
   onConvert: (p: Prospect) => void
+  onResend: (p: Prospect) => void
   onOpenProfile: (p: Prospect) => void
   /** Prospects converted to clients: they have left this table. */
   hidden?: Set<string>
@@ -627,6 +633,7 @@ function ProspectsTable({
                       p={p}
                       key={p.name}
                       onConvert={onConvert}
+                      onResend={onResend}
                       onOpenProfile={onOpenProfile}
                       checked={selected.has(p.name)}
                       onToggle={() => onToggle(p.name)}
@@ -675,6 +682,7 @@ function Toolbar({
 
 function ProspectsScreen({
   onConvert,
+  onResend,
   onDownload,
   onInvite,
   onOpenProfile,
@@ -682,6 +690,7 @@ function ProspectsScreen({
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
+  onResend: (p: Prospect) => void
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (p: Prospect) => void
@@ -712,6 +721,7 @@ function ProspectsScreen({
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
+        onResend={onResend}
         onOpenProfile={onOpenProfile}
         hidden={hidden}
         selected={selected}
@@ -3149,7 +3159,7 @@ function InviteCompose({
           : null
   return (
     <div className="invite-mail" onMouseDown={editNearest}>
-      <div className="invite-mail-bar">New Message</div>
+      <div className="invite-mail-bar">New Email</div>
       <div className="invite-mail-line">
         <span className="invite-mail-key">From</span>
         <span className="invite-mail-val">
@@ -3260,16 +3270,19 @@ function DoneGlyph() {
 
 function InviteModal({
   initialKind,
+  resend,
   brand,
   onClose,
 }: {
   initialKind: InviteKind
+  /** Sending one prospect's invite again: just the email, to them, by name. */
+  resend?: Prospect
   /** The demo's brand: the email's logo, its button's colour, its firm. */
   brand: ClientBrand | null
   onClose: () => void
 }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(resend?.email ?? '')
   const tabInd = useSlideIndicator(kind)
   const [channel, setChannel] = useState<InviteChannel>('email')
   const chanInd = useSlideIndicator(channel)
@@ -3292,7 +3305,10 @@ function InviteModal({
     setPicks((p) => ({ ...p, [kind]: id }))
     setFlagged(false)
   }
-  const sample = samples.find((e) => e.id === picks[kind]) ?? samples[0]
+  /* A prospect's email is fixed, nothing to pick (data/inviteEmails.ts); a
+     client's is picked from the toolkit's. */
+  const fixed = resend ? PROSPECT_RESEND_EMAIL : kind === 'prospect' ? PROSPECT_INVITE_EMAIL : null
+  const sample = samples.find((e) => e.id === (fixed ?? picks[kind])) ?? samples[0]
   const draft = drafts[sample.id] ?? sample
   const edited =
     draft.subject !== sample.subject ||
@@ -3303,6 +3319,7 @@ function InviteModal({
   const known: Record<string, string> = {
     'Advisor Name': 'Alex Advisor',
     'Firm Name': toolkitFirmName(brandId) ?? brand?.name ?? 'Beacon Planning',
+    ...(resend && { 'First Name': resend.name.split(' ')[0] }),
   }
   const missing = placeholdersIn([draft.subject, draft.message, draft.signoff].join('\n')).filter(
     (k) => !fieldValue(k, { known, fields }).trim(),
@@ -3370,11 +3387,12 @@ function InviteModal({
       return false
     }
     sent.flash()
-    setEmail('')
-    /* The next invite is to someone else. */
-    setFields({})
     setFlagged(false)
     setToBad(false)
+    /* The next invite is to someone else — unless this one was a resend. */
+    if (resend) return
+    setEmail('')
+    setFields({})
   }
 
   const bandStyle = useViewportBand(true)
@@ -3384,132 +3402,146 @@ function InviteModal({
       <div className="modal invite-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">
-            Invite{' '}
-            <span className="invite-title-word" key={kind}>
-              {label}
-            </span>
+            {resend ? (
+              'Resend Invite Link'
+            ) : (
+              <>
+                Invite{' '}
+                <span className="invite-title-word" key={kind}>
+                  {label}
+                </span>
+              </>
+            )}
           </h2>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
         <div className="modal-body invite-body">
-          <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
-            {tabInd.box && (
-              <span
-                className="slide-ind slide-ind-round"
-                style={{
-                  transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
-                  width: tabInd.box.width,
-                  height: tabInd.box.height,
-                }}
-              />
-            )}
-            {(['prospect', 'client'] as InviteKind[]).map((k) => (
-              <button
-                key={k}
-                type="button"
-                role="tab"
-                aria-selected={kind === k}
-                data-active={kind === k}
-                className={`invite-tab ${kind === k ? 'is-on' : ''}`}
-                onClick={() => {
-                  setKind(k)
-                  setFlagged(false)
-                  setToBad(false)
-                }}
-              >
-                Invite {k === 'prospect' ? 'Prospect' : 'Client'}
-              </button>
-            ))}
-          </div>
+          {!resend && (
+            <>
+              <div className="invite-tabs slide-nav" role="tablist" ref={tabInd.ref}>
+                {tabInd.box && (
+                  <span
+                    className="slide-ind slide-ind-round"
+                    style={{
+                      transform: `translate(${tabInd.box.left}px, ${tabInd.box.top}px)`,
+                      width: tabInd.box.width,
+                      height: tabInd.box.height,
+                    }}
+                  />
+                )}
+                {(['prospect', 'client'] as InviteKind[]).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="tab"
+                    aria-selected={kind === k}
+                    data-active={kind === k}
+                    className={`invite-tab ${kind === k ? 'is-on' : ''}`}
+                    onClick={() => {
+                      setKind(k)
+                      setFlagged(false)
+                      setToBad(false)
+                    }}
+                  >
+                    Invite {k === 'prospect' ? 'Prospect' : 'Client'}
+                  </button>
+                ))}
+              </div>
 
-          {/* How it goes out. The same three for a prospect or a client, so
-              the pick holds across the toggle above. */}
-          <div className="invite-channels slide-nav" role="tablist" aria-label="Send as" ref={chanInd.ref}>
-            {chanInd.box && (
-              <span
-                className="slide-ind slide-ind-underline"
-                style={{
-                  transform: `translateX(${chanInd.box.left}px)`,
-                  width: chanInd.box.width,
-                }}
-              />
-            )}
-            {INVITE_CHANNELS.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="tab"
-                aria-selected={channel === c.id}
-                data-active={channel === c.id}
-                className={`invite-channel${channel === c.id ? ' is-on' : ''}`}
-                onClick={() => setChannel(c.id)}
-              >
-                {c.icon}
-                {c.label}
-              </button>
-            ))}
-          </div>
+              {/* How it goes out. The same three for a prospect or a client, so
+                  the pick holds across the toggle above. */}
+              <div className="invite-channels slide-nav" role="tablist" aria-label="Send as" ref={chanInd.ref}>
+                {chanInd.box && (
+                  <span
+                    className="slide-ind slide-ind-underline"
+                    style={{
+                      transform: `translateX(${chanInd.box.left}px)`,
+                      width: chanInd.box.width,
+                    }}
+                  />
+                )}
+                {INVITE_CHANNELS.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={channel === c.id}
+                    data-active={channel === c.id}
+                    className={`invite-channel${channel === c.id ? ' is-on' : ''}`}
+                    onClick={() => setChannel(c.id)}
+                  >
+                    {c.icon}
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Keyed on both, so the panel re-runs its enter animation on each
               switch — the content cross-fades instead of snapping. */}
           <div className="invite-panel" role="tabpanel" key={`${kind}-${channel}`} ref={panelRef}>
             {channel === 'email' && (
               <>
-                {/* Which email: the toolkit's lead (or client) type, then the
-                    emails it has for that type — the adventures' starter pills,
-                    one picked at a time. */}
-                <div className="invite-template-head">
-                  <span className="invite-field-label" id="invite-stage">
-                    {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
-                  </span>
-                  <a
-                    className="invite-toolkit-link"
-                    href={toolkitUrl(kind, sample.stage, brandId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open {label} Toolkit <ExternalGlyph />
-                  </a>
-                </div>
-                <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
-                  {stagesOf(kind).map((stage, i) => (
-                    <button
-                      key={stage}
-                      type="button"
-                      className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
-                      style={{ ['--i' as string]: i }}
-                      aria-pressed={sample.stage === stage}
-                      onClick={() => {
-                        if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
-                      }}
-                    >
-                      {stage}
-                    </button>
-                  ))}
-                </div>
-                <span className="invite-field-label invite-type-label" id="invite-type">
-                  Email Type
-                </span>
-                {/* Keyed on the type, so its emails come in as the type changes. */}
-                <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
-                  {samples
-                    .filter((e) => e.stage === sample.stage)
-                    .map((e, i) => (
-                      <button
-                        key={e.id}
-                        type="button"
-                        className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
-                        style={{ ['--i' as string]: i }}
-                        aria-pressed={e.id === sample.id}
-                        onClick={() => pick(e.id)}
+                {/* Which email: the toolkit's client type, then the emails it
+                    has for that type — the adventures' starter pills, one
+                    picked at a time. A prospect's email is fixed. */}
+                {!fixed && (
+                  <>
+                    <div className="invite-template-head">
+                      <span className="invite-field-label" id="invite-stage">
+                        {kind === 'prospect' ? 'Lead Type' : 'Client Type'}
+                      </span>
+                      <a
+                        className="invite-toolkit-link"
+                        href={toolkitUrl(kind, sample.stage, brandId)}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        {emailLabel(e)}
-                      </button>
-                    ))}
-                </div>
-                {sample.note && <p className="invite-pick-note">{sample.note}</p>}
+                        Open {label} Toolkit <ExternalGlyph />
+                      </a>
+                    </div>
+                    <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-stage">
+                      {stagesOf(kind).map((stage, i) => (
+                        <button
+                          key={stage}
+                          type="button"
+                          className={`mem-starter${sample.stage === stage ? ' is-on' : ''}`}
+                          style={{ ['--i' as string]: i }}
+                          aria-pressed={sample.stage === stage}
+                          onClick={() => {
+                            if (sample.stage !== stage) pick(samples.find((e) => e.stage === stage)!.id)
+                          }}
+                        >
+                          {stage}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="invite-field-label invite-type-label" id="invite-type">
+                      Email Type
+                    </span>
+                    {/* Keyed on the type, so its emails come in as the type changes. */}
+                    <div className="mem-starters invite-picks" role="group" aria-labelledby="invite-type" key={sample.stage}>
+                      {samples
+                        .filter((e) => e.stage === sample.stage)
+                        .map((e, i) => (
+                          <button
+                            key={e.id}
+                            type="button"
+                            className={`mem-starter${e.id === sample.id ? ' is-on' : ''}`}
+                            style={{ ['--i' as string]: i }}
+                            aria-pressed={e.id === sample.id}
+                            onClick={() => pick(e.id)}
+                          >
+                            {emailLabel(e)}
+                          </button>
+                        ))}
+                    </div>
+                    {sample.note && <p className="invite-pick-note">{sample.note}</p>}
+                  </>
+                )}
                 <InviteCompose
                   sample={sample}
                   draft={draft}
@@ -3565,22 +3597,24 @@ function InviteModal({
             )}
             {channel === 'qr' && (
               <>
-                <div className="invite-qr-box">
-                  <QrCode seed={kind === 'prospect' ? 7 : 23} />
+                <div className="invite-qr-row">
+                  <div className="invite-qr-box">
+                    <QrCode seed={kind === 'prospect' ? 7 : 23} />
+                  </div>
+                  <FeedbackButton
+                    className="invite-pill invite-qr-copy"
+                    aria-label={`Copy ${kind} QR code`}
+                    onClick={copyQr}
+                    done={
+                      <>
+                        <DoneGlyph /> Copied
+                      </>
+                    }
+                    announce={`${label} QR code copied`}
+                  >
+                    <CopyGlyph /> Copy
+                  </FeedbackButton>
                 </div>
-                <FeedbackButton
-                  className="invite-pill invite-qr-copy"
-                  aria-label={`Copy ${kind} QR code`}
-                  onClick={copyQr}
-                  done={
-                    <>
-                      <DoneGlyph /> Copied
-                    </>
-                  }
-                  announce={`${label} QR code copied`}
-                >
-                  <CopyGlyph /> Copy
-                </FeedbackButton>
                 <p className="invite-channel-hint">For print and in person: a flyer, a slide, an event table.</p>
               </>
             )}
@@ -4320,6 +4354,8 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(initialView === 'settings')
   // Invite modal: null when closed, otherwise the tab it opens on.
   const [inviteKind, setInviteKind] = useState<InviteKind | null>(null)
+  /* The prospect whose invite is being sent again, from their row's menu. */
+  const [resendTo, setResendTo] = useState<Prospect | null>(null)
 
   /* A household is not something an advisor sets up and then fills: it exists
      because there is a second person in it. So the app starts with Emily in no
@@ -5264,6 +5300,7 @@ export default function App() {
             <ProspectsScreen
               hidden={convertedEmails}
               onConvert={setConvertTarget}
+              onResend={setResendTo}
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('prospect')}
               onOpenProfile={setProfileProspect}
@@ -5342,6 +5379,9 @@ export default function App() {
           brand={brand}
           onClose={() => setInviteKind(null)}
         />
+      )}
+      {resendTo && (
+        <InviteModal initialKind="prospect" resend={resendTo} brand={brand} onClose={() => setResendTo(null)} />
       )}
       <Toast show={toast.show} message={toast.msg} />
       <Confetti ref={confettiRef} />
