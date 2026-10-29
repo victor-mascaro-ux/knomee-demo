@@ -15,9 +15,12 @@ interface Recognition {
   lang: string
   start: () => void
   stop: () => void
-  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null
+  abort: () => void
+  onresult:
+    | ((e: { results: ArrayLike<{ isFinal: boolean; 0: { transcript: string; confidence: number } }> }) => void)
+    | null
   onend: (() => void) | null
-  onerror: (() => void) | null
+  onerror: ((e: { error: string }) => void) | null
 }
 
 export function speechCtor(): (new () => Recognition) | undefined {
@@ -26,40 +29,103 @@ export function speechCtor(): (new () => Recognition) | undefined {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition
 }
 
-export function useDictation(onFinal: (text: string) => void) {
+/* Pieces of speech arrive with or without their own spaces; one space apart. */
+const joinSaid = (...parts: string[]) =>
+  parts
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join(' ')
+
+/* Chrome on Android hands each settled phrase over twice, the copy with no
+   confidence at all; counting it would write everything said twice. */
+const ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
+
+/** Listens until it is told to stop, and passes on everything heard so far
+    each time it hears more — the settled words and the ones it is still
+    guessing at — so the words appear while they are said, the way dictation
+    does, rather than all at once when the person stops. */
+export function useDictation(onHeard: (text: string) => void) {
   const Ctor = speechCtor()
   const [on, setOn] = useState(false)
   const rec = useRef<Recognition | null>(null)
-  const cb = useRef(onFinal)
-  cb.current = onFinal
-  useEffect(() => () => rec.current?.stop(), [])
+  // The person has not pressed stop: a pause that ends the browser's
+  // listening is not the end of what they are saying.
+  const wanted = useRef(false)
+  const cb = useRef(onHeard)
+  cb.current = onHeard
+
+  /* Stops at once and drops whatever was still on its way in. */
+  const cancel = () => {
+    wanted.current = false
+    const r = rec.current
+    rec.current = null
+    r?.abort()
+    setOn(false)
+  }
+  useEffect(() => cancel, [])
+
+  /* One stretch of listening. `kept` is what earlier stretches heard. */
+  const listen = (Rec: new () => Recognition, kept: string) => {
+    const r = new Rec()
+    r.continuous = true
+    r.interimResults = true
+    r.lang = navigator.language || 'en-US'
+    // By position, and read afresh every time, so a phrase that firms up
+    // replaces its guess rather than following it.
+    const settled: string[] = []
+    let guess = ''
+    let failed = false
+    r.onresult = (e) => {
+      if (rec.current !== r) return
+      guess = ''
+      for (let n = 0; n < e.results.length; n++) {
+        const res = e.results[n]
+        if (!res.isFinal) guess = joinSaid(guess, res[0].transcript)
+        else if (!(ANDROID && res[0].confidence === 0)) settled[n] = res[0].transcript
+      }
+      cb.current(joinSaid(kept, ...settled.filter(Boolean), guess))
+    }
+    // Silence is not a reason to stop listening; being refused the mic is.
+    r.onerror = (e) => {
+      if (e.error !== 'no-speech') failed = true
+    }
+    r.onend = () => {
+      if (rec.current !== r) return
+      if (wanted.current && !failed) {
+        try {
+          listen(Rec, joinSaid(kept, ...settled.filter(Boolean), guess))
+          return
+        } catch {
+          /* it would not start again: stop below */
+        }
+      }
+      rec.current = null
+      wanted.current = false
+      setOn(false)
+    }
+    rec.current = r
+    r.start()
+  }
+
   const toggle = () => {
     if (!Ctor) return
     if (on) {
+      // Ends listening; the last guess firms up in place and stays.
+      wanted.current = false
       rec.current?.stop()
       return
     }
-    const r = new Ctor()
-    r.continuous = true
-    r.interimResults = false
-    r.lang = navigator.language || 'en-US'
-    r.onresult = (e) => {
-      for (let n = e.resultIndex; n < e.results.length; n++) {
-        const res = e.results[n]
-        if (res.isFinal) cb.current(res[0].transcript.trim())
-      }
-    }
-    r.onend = () => setOn(false)
-    r.onerror = () => setOn(false)
-    rec.current = r
+    wanted.current = true
     try {
-      r.start()
+      listen(Ctor, '')
       setOn(true)
     } catch {
+      rec.current = null
+      wanted.current = false
       setOn(false)
     }
   }
-  return { supported: !!Ctor, on, toggle }
+  return { supported: !!Ctor, on, toggle, cancel }
 }
 
 function MicIcon() {
@@ -72,7 +138,8 @@ function MicIcon() {
 }
 
 /** The microphone under a free-text box: what is said is added to what is
-    there. Nothing at all where the browser cannot listen. */
+    there, word by word as it is said. Nothing at all where the browser cannot
+    listen. */
 export function MicButton({
   value,
   onChange,
@@ -84,23 +151,39 @@ export function MicButton({
       wave that moves while it listens. */
   big?: boolean
 }) {
-  const latest = useRef(value)
-  latest.current = value
+  // What was in the box when they started talking. Everything heard follows
+  // it, and the whole is written again each time more is heard.
+  const before = useRef(value)
+  // Every version of the box the microphone has written. One that is none of
+  // them was typed: typing takes over from listening.
+  const wrote = useRef(new Set<string>())
   const mic = useDictation((heard) => {
     if (!heard) return
-    const had = latest.current.trim()
+    const had = before.current.trim()
     const next = had ? `${had} ${heard}` : heard.charAt(0).toUpperCase() + heard.slice(1)
-    latest.current = next
+    wrote.current.add(next)
     onChange(next)
   })
+  useEffect(() => {
+    if (!mic.on || value === before.current || wrote.current.has(value)) return
+    if (wrote.current.size) mic.cancel()
+    else before.current = value
+  }, [value, mic.on])
   if (!mic.supported) return null
+  const toggle = () => {
+    if (!mic.on) {
+      before.current = value
+      wrote.current = new Set()
+    }
+    mic.toggle()
+  }
   if (big)
     return (
       <button
         type="button"
         className={`af-mic af-mic-big${mic.on ? ' is-on' : ''}`}
         aria-pressed={mic.on}
-        onClick={mic.toggle}
+        onClick={toggle}
       >
         <MicIcon />
         <span>{mic.on ? 'Listening… Tap to Stop' : 'Tell It Instead'}</span>
@@ -117,7 +200,7 @@ export function MicButton({
       type="button"
       className={`af-mic${mic.on ? ' is-on' : ''}`}
       aria-pressed={mic.on}
-      onClick={mic.toggle}
+      onClick={toggle}
     >
       {mic.on ? <i className="af-mic-dot" aria-hidden /> : <MicIcon />}
       {mic.on ? 'Listening… Tap to Stop' : 'Say Your Answer'}
