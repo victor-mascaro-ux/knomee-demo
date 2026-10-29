@@ -102,6 +102,7 @@ import AdvisorProfileScreen from './screens/AdvisorProfileScreen'
 import FirmCandidatesScreen from './screens/FirmCandidatesScreen'
 import FirmAnalyticsScreen from './screens/FirmAnalyticsScreen'
 import ActivationAnalyticsScreen from './screens/ActivationAnalyticsScreen'
+import { firmFeeRate, revenueFrom } from './data/activation'
 import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
@@ -3074,9 +3075,16 @@ function ConvertModal({
 }: {
   prospect: Prospect
   onCancel: () => void
-  onConfirm: () => void
+  /** With the assets the advisor entered, if any. */
+  onConfirm: (assets: number | null) => void
 }) {
   const bandStyle = useViewportBand(true)
+  /* What the client is bringing over, if the advisor knows it. It becomes this
+     client's revenue on Activation Analytics, instead of the firm's average —
+     the one field that turns "Knomee brought clients" into dollars. */
+  const [assets, setAssets] = useState('')
+  const amount = Number(assets.replace(/[^0-9]/g, '')) || 0
+  const dollars = (n: number) => `$${n.toLocaleString('en-US')}`
   return (
     <div className="modal-backdrop" style={bandStyle} onClick={onCancel} role="dialog" aria-modal="true">
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -3086,17 +3094,48 @@ function ConvertModal({
             <CloseIcon />
           </button>
         </div>
-        <div className="modal-body">
-          <b>{prospect.name}</b> will be sent to your <b>Clients</b> Dashboard.
-        </div>
-        <div className="modal-footer">
-          <button className="btn btn-outline" type="button" onClick={onCancel}>
-            Cancel
-          </button>
-          <button className="btn btn-primary" type="button" onClick={onConfirm}>
-            Convert
-          </button>
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            onConfirm(amount || null)
+          }}
+        >
+          <div className="modal-body">
+            <p className="cv-lead">
+              <b>{prospect.name}</b> will be sent to your <b>Clients</b> Dashboard.
+            </p>
+            <label className="cv-field" htmlFor="cv-assets">
+              <span className="cv-label">Assets coming in</span>
+              <span className="cv-help">
+                Optional. With your {(firmFeeRate * 100).toFixed(2)}% fee, it becomes this client’s revenue in
+                Activation Analytics.
+              </span>
+              <input
+                id="cv-assets"
+                className="cv-input"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="e.g. $850,000"
+                value={assets}
+                onChange={(e) => {
+                  const n = Number(e.target.value.replace(/[^0-9]/g, ''))
+                  setAssets(n ? dollars(n) : '')
+                }}
+              />
+            </label>
+            {amount > 0 && (
+              <p className="cv-result">≈ {dollars(revenueFrom(amount))} first-year revenue</p>
+            )}
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-outline" type="button" onClick={onCancel}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" type="submit">
+              Convert
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
@@ -4207,7 +4246,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [convertTarget])
 
-  const confirmConvert = () => {
+  const confirmConvert = (assets: number | null = null) => {
     if (!convertTarget) return
     const already = converted.some((c) => c.email === convertTarget.email)
     if (!already) {
@@ -4223,7 +4262,7 @@ export default function App() {
     }
     setConvertTarget(null)
     setScreen('clients')
-    showToast('Converted to Client')
+    showToast(assets ? `Converted to Client · $${assets.toLocaleString('en-US')} in assets recorded` : 'Converted to Client')
   }
   /* And back: a converted prospect returns to the Prospects table. */
   const demote = (c: Client) => {

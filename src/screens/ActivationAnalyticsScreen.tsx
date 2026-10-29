@@ -9,23 +9,42 @@
    side reads the same totals the Prospect Analytics page does — which is one
    button away, opposite the title. */
 
+import { Fragment, useState } from 'react'
 import './activationAnalytics.css'
 import {
   advisorFunnel,
   advisors,
   advisorTotals,
+  baseline,
   biggestLoss,
+  daysToClient,
+  knomeeClients,
+  lift,
   prospectFunnel,
   prospectTotals,
+  revenueFrom,
   revenuePerClient,
+  roi,
   statusLabel,
   statusOf,
   templates,
   templateTotals,
   whereTheyStopped,
   type FunnelStep,
+  type KnomeeClient,
 } from '../data/activation'
-import { ChartIcon, CheckIcon, FunnelIcon, MegaphoneIcon, TargetIcon, WarnIcon } from '../components/icons'
+import {
+  ChartIcon,
+  CheckIcon,
+  ChevronDown,
+  ChevronUp,
+  FunnelIcon,
+  KnomeeMark,
+  MegaphoneIcon,
+  TargetIcon,
+  TierBarsIcon,
+  WarnIcon,
+} from '../components/icons'
 
 function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   return (
@@ -44,6 +63,94 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
 const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0)
 const usd = (n: number) => `$${n.toLocaleString('en-US')}`
 const usdShort = (n: number) => (n >= 10000 ? `$${Math.round(n / 1000)}K` : usd(n))
+const assetsShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(2).replace(/\.?0+$/, '')}M` : usdShort(n))
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+/** "2026-03-02" → "Mar 2", read off the string so no time zone moves the day. */
+const shortDate = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
+
+/** One baseline measure: the firm before Knomee against the same measure since, each bar
+    against the larger of the two. */
+function LiftRow({
+  label,
+  before,
+  after,
+  show,
+  change,
+}: {
+  label: string
+  before: number
+  after: number
+  show: (n: number) => string
+  change: string
+}) {
+  const max = Math.max(before, after)
+  return (
+    <div className="act-lift-row">
+      <span className="act-lift-label">{label}</span>
+      <span className="act-lift-bars">
+        <span className="act-lift-line">
+          <span className="act-track">
+            <span
+              className="act-bar is-before tt"
+              style={{ width: `${(before / max) * 100}%` }}
+              data-tip={`Before Knomee: ${show(before)}`}
+              tabIndex={0}
+            />
+          </span>
+          <span className="act-lift-num is-before">{show(before)}</span>
+        </span>
+        <span className="act-lift-line">
+          <span className="act-track">
+            <span
+              className="act-bar tt"
+              style={{ width: `${(after / max) * 100}%` }}
+              data-tip={`With Knomee: ${show(after)}`}
+              tabIndex={0}
+            />
+          </span>
+          <span className="act-lift-num">{show(after)}</span>
+        </span>
+      </span>
+      <span className="act-lift-change">
+        <CheckIcon />
+        {change}
+      </span>
+    </div>
+  )
+}
+
+/** A client's path, from the invitation that started it to the conversion. */
+function Trail({ c }: { c: KnomeeClient }) {
+  const revenue = c.assets != null ? revenueFrom(c.assets) : null
+  return (
+    <ol className="act-trail">
+      <li>
+        <b>Invited</b>
+        <span>{shortDate(c.invited)}</span>
+        <i>
+          by {c.advisor} · {c.template ? `“${c.template}”` : 'a link without a template tag'}
+        </i>
+      </li>
+      <li>
+        <b>Signed up</b>
+        <span>{shortDate(c.signedUp)}</span>
+      </li>
+      <li>
+        <b>Profile complete</b>
+        <span>{shortDate(c.complete)}</span>
+      </li>
+      <li className="is-client">
+        <b>Became a client</b>
+        <span>{shortDate(c.converted)}</span>
+        <i>
+          {c.assets != null
+            ? `${assetsShort(c.assets)} in assets · ${usd(revenue as number)} a year`
+            : `Assets not entered · ≈ ${usd(revenuePerClient)}, your average`}
+        </i>
+      </li>
+    </ol>
+  )
+}
 
 function Reading({ children }: { children: React.ReactNode }) {
   return (
@@ -102,6 +209,8 @@ export default function ActivationAnalyticsScreen({
   const copiedOnly = advisors.filter((a) => statusOf(a) === 'copied').length
   const stoppedMax = Math.max(...whereTheyStopped.map((w) => w.count))
   const untagged = prospectTotals.signedUp - templateTotals.signedUp
+  /* One client's trail open at a time; the first is open so the page shows what a trail is. */
+  const [openClient, setOpenClient] = useState<string | null>(knomeeClients[0]?.name ?? null)
 
   return (
     <>
@@ -148,18 +257,102 @@ export default function ActivationAnalyticsScreen({
               <div className="impact-detail good">Once they start, most finish</div>
             </div>
             <div className="impact-card">
-              <div className="analytics-lbl">Revenue from Knomee clients</div>
-              <div className="impact-num">{usdShort(prospectTotals.clients * revenuePerClient)}</div>
+              <div className="analytics-lbl">Clients from Knomee</div>
+              <div className="impact-num">{prospectTotals.clients}</div>
               <div className="impact-compare">
-                {prospectTotals.clients} clients × {usd(revenuePerClient)} first-year revenue
+                {pct(prospectTotals.clients, prospectTotals.invited)}% of the {prospectTotals.invited} invited this year
               </div>
-              <div className="impact-detail">Estimate, from your firm’s average per new client</div>
+              <div className="impact-detail">{roi.daysToClient} days from invitation, on average</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2 ── the funnel: advisors, then their prospects */}
+      {/* 2 ── ROI: what Knomee brought, against the firm's own numbers from before */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <TierBarsIcon />
+            <span>What Knomee Brought Your Firm</span>
+            <HelpTip
+              side="right"
+              text="Revenue from the assets entered on Convert to Client, against your numbers from before Knomee."
+            />
+          </div>
+        </header>
+        <div className="analytics-body">
+          <div className="act-roi">
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">Revenue from Knomee clients</div>
+              <div className="act-roi-num">{usdShort(roi.totalRevenue)}</div>
+              <div className="act-roi-sub">
+                {usdShort(roi.reportedRevenue)} from the assets entered for {roi.reportedClients} clients, plus{' '}
+                {roi.estimatedClients} at your {usd(revenuePerClient)} average
+              </div>
+            </div>
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">Above your baseline</div>
+              <div className="act-roi-num">+{lift.extraClients} clients</div>
+              <div className="act-roi-sub">
+                {prospectTotals.invited} invitations at your {Math.round(baseline.conversionRate * 100)}% would have
+                brought {lift.expectedAtBaseline}. The extra {lift.extraClients} ≈ {usdShort(lift.extraRevenue)} a year.
+              </div>
+            </div>
+            <div className="act-roi-stat">
+              <div className="analytics-lbl">What Knomee cost</div>
+              <div className="act-roi-num">{usd(roi.cost)}</div>
+              <div className="act-roi-sub">
+                {Math.round(roi.totalRevenue / roi.cost)}× back in revenue; the extra clients alone,{' '}
+                {Math.round(lift.extraRevenue / roi.cost)}×
+              </div>
+            </div>
+          </div>
+
+          <div className="act-group-head">
+            <span className="analytics-sub-head">Before Knomee, and since</span>
+            <span className="act-legend">
+              <span>
+                <i className="act-swatch is-before" /> Your baseline
+              </span>
+              <span>
+                <i className="act-swatch" /> With Knomee
+              </span>
+            </span>
+          </div>
+          <LiftRow
+            label="Prospects who become clients"
+            before={baseline.conversionRate * 100}
+            after={roi.conversionRate * 100}
+            show={(n) => `${Math.round(n)}%`}
+            change={`+${Math.round(roi.conversionRate * 100 - baseline.conversionRate * 100)} points`}
+          />
+          <LiftRow
+            label="Days to a new client"
+            before={baseline.daysToClient}
+            after={roi.daysToClient}
+            show={(n) => `${Math.round(n)} days`}
+            change={`${baseline.daysToClient - roi.daysToClient} days sooner`}
+          />
+          <LiftRow
+            label="First-year revenue per client"
+            before={baseline.revenuePerClient}
+            after={roi.revenuePerClient}
+            show={(n) => usd(Math.round(n))}
+            change={`+${pct(roi.revenuePerClient - baseline.revenuePerClient, baseline.revenuePerClient)}%`}
+          />
+          <p className="analytics-note">
+            Your baseline is what you entered at onboarding, from the toolkit’s “Know Your Baseline”. Days run from the
+            invitation to Convert to Client; revenue per client counts the {roi.reportedClients} clients with assets
+            entered. Time to first meeting and meetings to close stay in your CRM: Knomee doesn’t see meetings.
+          </p>
+          <Reading>
+            {roi.estimatedClients} of the {prospectTotals.clients} clients were converted without their assets, so
+            their revenue is your average. Ask advisors to fill in the one field when they convert.
+          </Reading>
+        </div>
+      </section>
+
+      {/* 3 ── the funnel: advisors, then their prospects */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
@@ -206,7 +399,7 @@ export default function ActivationAnalyticsScreen({
         </div>
       </section>
 
-      {/* 3 ── templates: copies, and what their tagged links brought in */}
+      {/* 4 ── templates: copies, and what their tagged links brought in */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">
@@ -265,7 +458,79 @@ export default function ActivationAnalyticsScreen({
         </div>
       </section>
 
-      {/* 4 ── advisors: who's sending, who to nudge */}
+      {/* 5 ── each client's trail: the record that says it was Knomee */}
+      <section className="card analytics-card">
+        <header className="card-head">
+          <div className="card-title">
+            <KnomeeMark size={18} />
+            <span>Clients Knomee Brought In</span>
+            <HelpTip
+              side="right"
+              text="Each client's path from the invitation that started it — open one to see it."
+            />
+          </div>
+        </header>
+        <div className="analytics-body">
+          <div className="act-table-wrap">
+            <table className="act-table act-clients">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Advisor</th>
+                  <th>Came in through</th>
+                  <th className="num">Days to client</th>
+                  <th className="num">First-year revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {knomeeClients.map((c) => {
+                  const open = openClient === c.name
+                  return (
+                    <Fragment key={c.name}>
+                      <tr className={open ? 'is-open' : ''}>
+                        <td>
+                          <button
+                            className="act-client-btn"
+                            type="button"
+                            aria-expanded={open}
+                            onClick={() => setOpenClient(open ? null : c.name)}
+                          >
+                            {open ? <ChevronUp /> : <ChevronDown />}
+                            {c.name}
+                          </button>
+                        </td>
+                        <td>{c.advisor}</td>
+                        <td>{c.template ? `“${c.template}”` : <i className="act-muted">Link without a template tag</i>}</td>
+                        <td className="num">{daysToClient(c)}</td>
+                        <td className="num">
+                          {c.assets != null ? (
+                            <b>{usd(revenueFrom(c.assets))}</b>
+                          ) : (
+                            <span className="act-est">≈ {usd(revenuePerClient)}</span>
+                          )}
+                        </td>
+                      </tr>
+                      {open && (
+                        <tr className="act-trail-row">
+                          <td colSpan={5}>
+                            <Trail c={c} />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="analytics-note">
+            Every client here started from a Knomee invitation and was marked a client with Convert to Client.
+            Revenue with ≈ is your average: no assets were entered when they converted.
+          </p>
+        </div>
+      </section>
+
+      {/* 6 ── advisors: who's sending, who to nudge */}
       <section className="card analytics-card">
         <header className="card-head">
           <div className="card-title">

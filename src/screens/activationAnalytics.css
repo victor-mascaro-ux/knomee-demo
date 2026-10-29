@@ -282,6 +282,276 @@
   background: var(--k-plum-050);
 }
 
+/* ── ROI: the money, then the firm before Knomee against since ── */
+.act-roi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-14);
+  margin-bottom: var(--space-24);
+}
+.act-roi-stat {
+  border: 1px solid var(--k-line);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+}
+.act-roi-num {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: #201a2e;
+  margin: 10px 0 8px;
+}
+.act-roi-sub {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--k-ink-soft);
+}
+
+.act-legend {
+  display: inline-flex;
+  gap: var(--space-14);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--k-slate);
+}
+.act-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.act-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--k-grape);
+}
+.act-swatch.is-before,
+.act-bar.is-before {
+  background: var(--k-ash);
+}
+.act-bar.is-before:hover,
+.act-bar.is-before:focus-visible {
+  background: var(--k-slate);
+}
+
+/* One measure: its label, the two bars (baseline over Knomee), what changed. */
+.act-lift-row {
+  display: grid;
+  grid-template-columns: 210px minmax(160px, 1fr) 170px;
+  gap: var(--space-12);
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--k-line);
+}
+.act-lift-row:last-of-type {
+  border-bottom: 0;
+}
+.act-lift-label {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--k-ink-soft);
+}
+.act-lift-bars {
+  display: grid;
+  gap: 5px;
+}
+.act-lift-line {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 80px;
+  gap: var(--space-10);
+  align-items: center;
+}
+.act-lift-line .act-track {
+  height: 14px;
+}
+.act-lift-num {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--k-plum);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.act-lift-num.is-before {
+  font-weight: 600;
+  color: var(--k-slate);
+}
+.act-lift-change {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--k-teal-light);
+  color: var(--k-ocean);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.act-lift-change svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+}
+
+/* ── clients and their trail ── */
+.act-client-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--k-plum-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.act-client-btn svg {
+  color: var(--k-slate);
+  flex-shrink: 0;
+}
+.act-client-btn:hover {
+  color: var(--k-grape);
+}
+.act-clients tr.is-open td {
+  border-bottom-color: transparent;
+  background: var(--k-plum-050);
+}
+.act-muted {
+  font-style: normal;
+  color: var(--k-slate);
+}
+.act-est {
+  color: var(--k-slate);
+  font-weight: 600;
+}
+.act-trail-row td {
+  background: var(--k-plum-050);
+  padding: 4px 16px 18px;
+}
+/* Four steps left to right, joined by a line; the last, the client, in the accent. */
+.act-trail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.act-trail li {
+  position: relative;
+  padding-top: 18px;
+  display: grid;
+  gap: 2px;
+}
+.act-trail li::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--k-lilac);
+  box-shadow: 0 0 0 2px var(--k-white);
+}
+.act-trail li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 16px;
+  right: -6px;
+  height: 2px;
+  background: var(--k-lilac);
+  opacity: 0.6;
+}
+.act-trail li.is-client::before {
+  background: var(--k-grape);
+}
+.act-trail b {
+  font-size: var(--text-sm);
+  color: var(--k-plum-ink);
+}
+.act-trail span {
+  font-size: var(--text-sm);
+  color: var(--k-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.act-trail i {
+  font-style: normal;
+  font-size: var(--text-xs);
+  color: var(--k-slate);
+  line-height: 1.4;
+}
+.act-trail li.is-client i {
+  color: var(--k-plum);
+  font-weight: 600;
+}
+
+/* ── Convert to Client: the assets field (the tokens README's form field: label,
+   helper, field, in that order and one look) ── */
+.cv-lead {
+  margin: 0 0 var(--space-16);
+}
+.cv-field {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+.cv-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong, #240446);
+}
+.cv-help {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-secondary, #6d6a76);
+}
+.cv-input {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 4px;
+  padding: 11px 12px;
+  border: 1.5px solid var(--border-default, #e7e4ee);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-strong, #240446);
+}
+.cv-input::placeholder {
+  color: #a19cad;
+}
+.cv-input:focus {
+  outline: none;
+  border-color: var(--k-grape);
+}
+.cv-result {
+  margin: var(--space-10) 0 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--k-plum);
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .act-roi {
+    grid-template-columns: 1fr;
+  }
+  .act-lift-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .act-trail {
+    grid-template-columns: 1fr;
+  }
+  .act-trail li:not(:last-child)::after {
+    display: none;
+  }
+}
+
 /* ── narrow windows: a step stacks its label over its bar ── */
 @media (max-width: 720px) {
   .act-step {
