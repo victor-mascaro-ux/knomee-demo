@@ -5466,8 +5466,8 @@ button.name-link-btn:hover .name-text {
 .invite-fill.is-bad:focus {
   box-shadow: inset 0 -2px 0 #d81e4a;
 }
-/* Beside Send, in the foot's own row: two lines at most, so the foot keeps
-   its height and Send stays put. */
+/* Beside Send, in the foot's own row: a short line for each thing left, two
+   at most, so the foot keeps its height and Send stays put. */
 .invite-fill-hint {
   flex: 1 1 0;
   min-width: 0;
@@ -5477,6 +5477,9 @@ button.name-link-btn:hover .name-text {
   font-size: 12px;
   font-weight: 600;
   color: #d81e4a;
+}
+.invite-fill-hint > span {
+  display: block;
 }
 
 .invite-mail-brand {
