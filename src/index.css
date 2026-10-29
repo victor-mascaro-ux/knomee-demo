@@ -5397,40 +5397,6 @@ button.name-link-btn:hover .name-text {
   color: var(--plum);
 }
 
-/* Which email: the toolkit's lead type and its emails, as the adventures'
-   starter pills (memoryAsk.css, picked as in questionModal.css), and the
-   toolkit they come from. */
-.invite-template-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-}
-.invite-toolkit-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--purple-bolt);
-  text-decoration: none;
-}
-.invite-toolkit-link:hover {
-  color: var(--plum);
-}
-.mem-starters.invite-picks {
-  margin-bottom: 0;
-}
-.invite-type-label {
-  margin-top: 14px;
-}
-/* When the picked email is sent, where the toolkit says. */
-.invite-pick-note {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--grey-text);
-}
 
 /* A {{placeholder}}, inline in the email — the toolkit's own field
    (activation-playbook firm.css .tk-field) in its grey, the Cold lead's: a

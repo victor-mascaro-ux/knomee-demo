@@ -36,11 +36,10 @@ export interface InviteEmail {
 
 const SIGNED = 'Best,\n{{Advisor Name}}\n{{Firm Name}}'
 
-/* A prospect gets two emails from the product, each one fixed, nothing to
-   pick: Invite Prospect sends the Hot lead's Confirmation, and a row's Resend
-   Invite Link sends the Cold lead's "No Strings" nudge. The toolkit's other
-   prospect emails are sent from the toolkit, not from here. */
-export const PROSPECT_INVITE_EMAIL = 'hot-1'
+/* The product sends one of these: a prospect row's Resend Invite Link sends
+   the Cold lead's "No Strings" nudge. The Invite modal hands over a link or a
+   QR code rather than an email, so the others are the toolkit's copy, sent
+   from the toolkit, not from here. */
 export const PROSPECT_RESEND_EMAIL = 'cold-2'
 
 export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
@@ -115,33 +114,13 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
   ],
 }
 
-const ALL = [...INVITE_EMAILS.prospect, ...INVITE_EMAILS.client]
-
-/** The lead or client types, in the toolkit's order. */
-export function stagesOf(audience: InviteAudience): string[] {
-  return [...new Set(INVITE_EMAILS[audience].map((e) => e.stage))]
-}
-
-/** "Curiosity · Option 1" — but an Option 1 with no other option beside it
-    in its stage is not a choice between two, so it is just its name. */
-export function emailLabel(e: InviteEmail): string {
-  const paired = !!e.option && ALL.some((o) => o !== e && o.stage === e.stage && o.option)
-  return paired ? `${e.name} · Option ${e.option}` : e.name
-}
-
-/* Only firms with their own toolkit edition (activation-playbook's firms/)
-   get a link to it; any other brand, and knomee itself, opens the knomee one.
-   The name is the one that edition fills {{Firm Name}} with. */
+/* Only firms with their own toolkit edition (activation-playbook's firms/):
+   the name that edition fills {{Firm Name}} with. Any other brand, and knomee
+   itself, has none. */
 const TOOLKIT_FIRMS: Record<string, string> = { acme: 'Acme Advisors' }
 
 export function toolkitFirmName(brandId: string | null): string | undefined {
   return brandId ? TOOLKIT_FIRMS[brandId] : undefined
-}
-
-/** The toolkit page the samples come from, open on the sample's own section. */
-export function toolkitUrl(audience: InviteAudience, stage: string, brandId: string | null): string {
-  const firm = brandId && TOOLKIT_FIRMS[brandId] ? brandId : 'none'
-  return `https://activation.knomee.com/${audience}-toolkit.html?firm=${firm}#${stage.toLowerCase()}`
 }
 
 /** The placeholders a piece of text still asks for, in order, once. */
