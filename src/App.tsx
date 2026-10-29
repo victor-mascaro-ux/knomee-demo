@@ -3156,15 +3156,11 @@ function InviteCompose({
   const noTo = toBad && !to.trim()
   const sender = fieldValue('Advisor Name', fill).trim() || fill.known['Advisor Name']
   const unfilled = fill.flagged ? missing.length : 0
-  const fields = unfilled === 1 ? 'the highlighted field' : `the ${unfilled} highlighted fields`
-  const hint =
-    noTo && unfilled
-      ? `Add an email address and fill in ${fields} to send it.`
-      : noTo
-        ? 'Add an email address to send it.'
-        : unfilled
-          ? `Fill in ${fields} to send it.`
-          : null
+  /* What still stands between the email and Send, one short line each. */
+  const hint = [
+    noTo && 'Add an email address.',
+    unfilled > 0 && (unfilled === 1 ? 'Fill in the highlighted field.' : 'Fill in the highlighted fields.'),
+  ].filter(Boolean)
   return (
     <div className="invite-mail" onMouseDown={editNearest}>
       {/* The toolkit's sample email (activation-playbook .email): a mail
@@ -3255,9 +3251,11 @@ function InviteCompose({
             <PencilGlyph /> Click anywhere to edit
           </span>
         )}
-        {hint && (
+        {hint.length > 0 && (
           <p className="invite-fill-hint" role="status">
-            {hint}
+            {hint.map((line) => (
+              <span key={line as string}>{line}</span>
+            ))}
           </p>
         )}
         <FeedbackButton
