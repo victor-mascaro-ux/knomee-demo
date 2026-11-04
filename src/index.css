@@ -897,9 +897,19 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   color: #333;
   padding: 16px 12px;
   border-bottom: 1px solid var(--line);
-  background: #fff;
+  /* The header row is #EEEEEE on every dashboard, never white. */
+  background: var(--pearl);
   font-size: 14px;
   white-space: nowrap;
+}
+/* Below 1024px the tables drop columns with display: none, but the tier band
+   still spans all of them, so the header row ends in empty column slots that
+   no th paints. A row's background stops at its cells; an inset shadow on the
+   row covers its whole width, header rule included. */
+.prospects-table thead tr {
+  box-shadow:
+    inset 0 -1px 0 var(--line),
+    inset 0 0 0 999px var(--pearl);
 }
 
 .th-sort {
@@ -2191,10 +2201,6 @@ button.name-link-btn:hover .name-text {
 
 .empty-table {
   border-bottom: none;
-}
-.empty-table .prospects-table thead th {
-  background: #f4f4f6;
-  color: #333;
 }
 .empty-table .prospects-table thead th:first-child {
   border-top-left-radius: 14px;
