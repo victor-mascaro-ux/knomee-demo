@@ -796,8 +796,12 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   gap: var(--grid-gutter);
 }
 
-/* Three columns of twelve, so the search box's right edge lands on the same
-   grid line as the first metric tile's. */
+/* The search box runs to the end of the Name column below it: the 44px
+   checkbox column, plus Name's 23.75% of the table, plus the table wrap's 1px
+   border (the table is 2px narrower than the toolbar, hence 44.5px). A table
+   with other column widths sets --search-w on its toolbar. No pixel floor: a
+   280px minimum broke the line below ~1000px, and at 701px, the narrowest it
+   gets before going full width, the box is still ~200px. */
 .search-box {
   display: flex;
   align-items: center;
@@ -805,8 +809,8 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   border: 1px solid var(--stone);
   border-radius: 10px;
   padding: 0 16px;
-  width: 23.75%;
-  min-width: 280px;
+  width: var(--search-w, calc(23.75% + 44.5px));
+  min-width: 0;
   height: var(--control-h);
   color: var(--ash);
 }
@@ -1000,9 +1004,11 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   align-items: center;
   gap: 5px;
 }
+/* Slate, the header grey: the old #b7b0c2 all but vanished on the #EEEEEE
+   header row. */
 .th-caret {
   display: inline-flex;
-  color: #b7b0c2;
+  color: var(--k-slate);
   transition: transform 0.15s ease, color 0.15s ease;
 }
 .th-caret.is-active {
@@ -1111,6 +1117,11 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
 .prospects-cols .top-action-text {
   min-height: calc(2 * 1.45em);
 }
+/* Sign Up sits on Top Action's first line, not on the row's middle where the
+   KQ badge sits: it gets the same two-line box, centred the same way. */
+.prospects-cols .signup-cell {
+  min-height: calc(2 * 1.45em);
+}
 .top-action-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -1183,6 +1194,10 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
 }
 .clients-table .col-name {
   width: 300px;
+}
+/* Its search box ends where Name does: 55 + 300 + the wrap's 1px border. */
+.toolbar-clients {
+  --search-w: 356px;
 }
 .clients-table .col-kr {
   width: 110px;
