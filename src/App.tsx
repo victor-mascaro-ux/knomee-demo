@@ -465,15 +465,17 @@ function ProspectRow({
       <td className="col-num">{p.clarity ?? '–'}</td>
       <td className="col-num">{p.receptivity ?? '–'}</td>
       <td className="col-signup">
-        {p.signUpLabel ? (
-          <span className="signup-invited">
-            {p.signUpLabel}
-            <br />
-            {p.signUp}
-          </span>
-        ) : (
-          p.signUp
-        )}
+        <div className="signup-cell">
+          {p.signUpLabel ? (
+            <span className="signup-invited">
+              {p.signUpLabel}
+              <br />
+              {p.signUp}
+            </span>
+          ) : (
+            p.signUp
+          )}
+        </div>
       </td>
       <td className="col-action">
         <TopActionCell text={p.topAction} />
@@ -661,13 +663,15 @@ function Toolbar({
   downloadActive,
   onDownload,
   onInvite,
+  className,
 }: {
   downloadActive: boolean
   onDownload: () => void
   onInvite: () => void
+  className?: string
 }) {
   return (
-    <div className="toolbar">
+    <div className={className ? `toolbar ${className}` : 'toolbar'}>
       <div className="search-box">
         <SearchIcon />
         <input type="text" placeholder="Search name" />
@@ -1354,7 +1358,12 @@ function ClientsScreen({
         onPickSentiment={pickSentiment}
       />
       <ClientInsights clients={clients} tier={tierFilter} onOpenProfile={onOpenProfile} />
-      <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
+      <Toolbar
+        className="toolbar-clients"
+        downloadActive={selected.size > 0}
+        onDownload={onDownload}
+        onInvite={onInvite}
+      />
       <div className="table-wrap">
         <table className="prospects-table clients-table">
           <thead>
