@@ -365,7 +365,9 @@ function Row({
           <td className="col-num col-receptivity">{c.receptivity ?? '–'}</td>
         </>
       )}
-      <td className="col-completed">{c.completed ?? '–'}</td>
+      <td className="col-completed">
+        <div className="completed-cell">{c.completed ?? '–'}</div>
+      </td>
       <td className="col-action">
         {mark ? (
           <div className="fc-joined-note">
