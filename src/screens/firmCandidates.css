@@ -55,6 +55,11 @@
 .fc-table tbody tr:not(.group-header) td:last-child {
   padding-right: 20px;
 }
+/* Completed sits on Top Action's first line, as Sign Up does on My Prospects,
+   not on the row's middle with the EQ badge. A joined row's one-line note
+   takes the same two-line box, so its date and note still share a line. */
+.fc-table .completed-cell,
+.fc-table .fc-joined-note,
 .fc-table .top-action-text {
   min-height: calc(2 * 1.45em);
 }
