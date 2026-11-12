@@ -14,11 +14,11 @@
  * exactly as Invite, Convert and the goal panel do.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './addGoalModal.css'
 import type { Goal } from '../data/financialId'
 import { CloseIcon } from '../components/icons'
-import { AddButton, ReadinessLevel, TTM_STAGES } from './profileParts'
+import { ReadinessLevel, TTM_STAGES } from './profileParts'
 import ReadinessModal from './ReadinessModal'
 import SelectMenu from '../components/SelectMenu'
 
@@ -69,8 +69,67 @@ const PencilTip = () => (
   </svg>
 )
 
+/* A line of a pro or con list, as tall as its words: it wraps rather than
+   cutting a long point off at the field's edge. */
+function PointText({
+  value,
+  placeholder,
+  label,
+  focus,
+  onChange,
+  onEnter,
+  onEmptyBack,
+}: {
+  value: string
+  placeholder: string
+  label: string
+  /** A new number each time this line should take the cursor; 0 for never. */
+  focus: number
+  onChange: (v: string) => void
+  onEnter: () => void
+  onEmptyBack: () => void
+}) {
+  const box = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [value])
+  useEffect(() => {
+    if (!focus || !box.current) return
+    const el = box.current
+    el.focus()
+    el.setSelectionRange(el.value.length, el.value.length)
+  }, [focus])
+  return (
+    <textarea
+      ref={box}
+      className="ag-point-text"
+      rows={1}
+      value={value}
+      placeholder={placeholder}
+      aria-label={label}
+      onChange={(e) => onChange(e.target.value.replace(/\n/g, ' '))}
+      onKeyDown={(e) => {
+        /* A point is one line of thought: Enter starts the next one, and
+           Backspace in an empty one takes it away. */
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          onEnter()
+        } else if (e.key === 'Backspace' && value === '') {
+          e.preventDefault()
+          onEmptyBack()
+        }
+      }}
+    />
+  )
+}
+
 /* A pro or a con: a line they are typing, or one they have typed. The list is
-   the thing, so an empty last line is simply not saved. */
+   the thing, so an empty last line is simply not saved. Each line wears the
+   mark the goal card reads it back with — a green plus, a coral minus — and
+   wraps to its full length, one list over the other. */
 export function PointList({
   label,
   hint,
@@ -82,52 +141,60 @@ export function PointList({
   items: string[]
   onChange: (next: string[]) => void
 }) {
+  const pro = label === 'Pros'
+  const one = pro ? 'Pro' : 'Con'
+  /* The line to put the cursor in after a change: the one just started, or
+     the one before a line taken away. */
+  const [focusAt, setFocus] = useState<{ i: number; n: number } | null>(null)
+  const setFocusAt = (i: number | null) => setFocus((f) => (i === null ? null : { i, n: (f?.n ?? 0) + 1 }))
+  const insertAfter = (i: number) => {
+    onChange([...items.slice(0, i + 1), '', ...items.slice(i + 1)])
+    setFocusAt(i + 1)
+  }
   return (
-    <div className="ag-points">
-      <div className="ag-points-head">
-        <span className="ag-label">{label}</span>
-        {/* The card's own plus — the one that opened this panel — rather than a
-            second drawing of the same idea. */}
-        <AddButton
-          label={`Add a ${label.slice(0, -1).toLowerCase()}`}
-          onClick={() => onChange([...items, ''])}
-        />
-      </div>
-      {items.length === 0 ? (
-        /* The line that says what goes here is also the way to start one: it
-           is the only thing under the heading, and it reads as the place to
-           write. */
-        <button className="ag-hint" type="button" onClick={() => onChange([...items, ''])}>
-          {hint}
-        </button>
-      ) : (
-        items.map((v, i) => (
-          <div className="ag-point" key={i}>
-            <input
-              className="ag-input"
-              value={v}
-              autoFocus={i === items.length - 1 && v === ''}
-              placeholder={hint}
-              onChange={(e) => onChange(items.map((o, j) => (j === i ? e.target.value : o)))}
-            />
-            <button
-              className="ag-drop"
-              type="button"
-              aria-label={`Remove “${v || hint}”`}
-              onClick={() => onChange(items.filter((_, j) => j !== i))}
-            >
-              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
-                <path
-                  d="M4 4l8 8M12 4l-8 8"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          </div>
-        ))
+    <div className={`ag-points ${pro ? 'is-pros' : 'is-cons'}`}>
+      <span className="ag-label">{label}</span>
+      {items.length > 0 && (
+        <ul className="ag-point-list">
+          {items.map((v, i) => (
+            <li className="ag-point" key={i}>
+              <span className="ag-point-mark" aria-hidden>
+                {pro ? '+' : '−'}
+              </span>
+              <PointText
+                value={v}
+                placeholder={hint}
+                label={`${one} ${i + 1}`}
+                focus={focusAt?.i === i ? focusAt.n : 0}
+                onChange={(t) => onChange(items.map((o, j) => (j === i ? t : o)))}
+                onEnter={() => insertAfter(i)}
+                onEmptyBack={() => {
+                  onChange(items.filter((_, j) => j !== i))
+                  setFocusAt(i > 0 ? i - 1 : null)
+                }}
+              />
+              <button
+                className="ag-drop"
+                type="button"
+                aria-label={`Remove “${v || hint}”`}
+                onClick={() => onChange(items.filter((_, j) => j !== i))}
+              >
+                <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden>
+                  <path
+                    d="M4 4l8 8M12 4l-8 8"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
+      <button className="ag-point-add" type="button" onClick={() => insertAfter(items.length - 1)}>
+        <span aria-hidden>+</span> Add {one}
+      </button>
     </div>
   )
 }
