@@ -12,7 +12,7 @@
  * someone actually answered.
  */
 
-import { rqFromSheet, supportOf } from './rqSheet'
+import { rqFromSheet, supportOf, ttmFromReadiness } from './rqSheet'
 import {
   advisor,
   advisorAdventures,
@@ -510,7 +510,7 @@ const CHOICE_VOTES: Record<string, Partial<Record<string, [ThemeKey, number][]>>
   'mv-q10': {
     'My spouse or family': [['family', 2]],
     'My team': [['team', 1]],
-    'A business partner': [['economics', 1]],
+    'My business partners': [['economics', 1]],
     'My clients': [['clients', 1]],
   },
   'fy-q5': {
@@ -757,14 +757,7 @@ export const STAGES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Act
 export type Stage = (typeof STAGES)[number]
 
 export function stageOf(a: Answers): Stage {
-  const thought = rank('mv-q5', a)
-  const knows = rank('mv-q6', a)
-  const acting = rank('mv-q7', a)
-  if (acting === 3) return 'Maintenance'
-  if (acting >= 1 || thought >= 2) return 'Action'
-  if (knows >= 2) return 'Preparation'
-  if (thought >= 1 || knows >= 1) return 'Contemplation'
-  return 'Pre-Contemplation'
+  return STAGES[ttmFromReadiness(rank('mv-q5', a), rank('mv-q6', a), rank('mv-q7', a)) - 1]
 }
 
 const STAGE_NOTE: Record<Stage, string> = {

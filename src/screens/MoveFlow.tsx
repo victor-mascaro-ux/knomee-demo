@@ -394,12 +394,12 @@ const BRAND_ICONS = [
    a ring, and each one chosen lights up with a line drawn in to you. "Nobody
    but me" is not somebody on the ring — it sits under it, and choosing it
    clears the ring and leaves you glowing on your own. */
-const ALONE = 'Nobody but me'
+const ALONE = 'Nobody but me — it’s my call'
 /* Each of them as a photograph in a round frame: the team together, a
    partner's fist bump, the family on the sofa, a client across the table. */
 const PERSON_PHOTOS: Record<string, string> = {
   'My team': './advisor/future-you/my-current-team.jpg',
-  'A business partner': './future-you/business-partners.png',
+  'My business partners': './future-you/business-partners.png',
   'My spouse or family': './future-you/family.png',
   'My clients': './advisor/future-you/clients-i-chose.jpg',
 }
@@ -473,7 +473,7 @@ function Circle({ options, value, onChange }: { options: string[]; value: string
               <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
             </svg>
           </span>
-          Nobody but me — it’s my call
+          {ALONE}
         </button>
       )}
     </div>
@@ -714,10 +714,8 @@ export const ADVISOR_MOVE: MoveContent = {
     cheer: 'That’s the heart of it ✦',
   },
   support: {
-    /* Asked as a how rather than a yes or no, so it is answered on the scale
-       between the two pictures. Here only: the plain flow keeps its own
-       wording. */
-    title: 'How do you want to make your move?',
+    /* The Typeform's 1–5 scale, answered between the two pictures. */
+    title: title('mv-q4'),
     options: opts('mv-q4'),
     pictures: SUPPORT_PICTURES,
     labels: SUPPORT_LABELS,
