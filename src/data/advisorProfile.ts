@@ -14,7 +14,7 @@
 
 import { advisor, businessId, steps, type BusinessId } from './advisorFlow'
 import { RECOMMENDATIONS_KEY, type ToolkitTab, type ReadinessTab } from './readiness'
-import { rqFromSheet, supportOf } from './rqSheet'
+import { rqFromSheet, supportOf, ttmFromReadiness } from './rqSheet'
 
 /* ── reading the flow back ──────────────────────────────────────────────── */
 
@@ -74,16 +74,7 @@ const rankOf = (id: string) => {
   const st = step(id)
   return st?.options && st.chosen?.[0] ? st.options.indexOf(st.chosen[0]) : -1
 }
-const ttmOf = () => {
-  const thought = rankOf('mv-q5')
-  const knows = rankOf('mv-q6')
-  const acting = rankOf('mv-q7')
-  if (acting === 3) return 5
-  if (acting >= 1 || thought >= 2) return 4
-  if (knows >= 2) return 3
-  if (thought >= 1 || knows >= 1) return 2
-  return 1
-}
+const ttmOf = () => ttmFromReadiness(rankOf('mv-q5'), rankOf('mv-q6'), rankOf('mv-q7'))
 export const rq = rqFromSheet({
   ttm: ttmOf(),
   firm: statement(0)?.value,

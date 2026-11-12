@@ -18,6 +18,19 @@ import type { CalcRow } from './readiness'
 
 export const TTM_NAMES = ['Pre-Contemplation', 'Contemplation', 'Preparation', 'Action', 'Maintenance']
 
+/* The readiness stage off The Move's three progress questions, banded on the
+   sum the way the Typeform branching does. Each answer scores its place in its
+   list, 1–4 (a blank scores nothing), so the three run 3 to 12:
+   4 or less Pre-Contemplation, 5–6 Contemplation, 7–8 Preparation,
+   9–10 Action, 11 and up Maintenance. `thought`, `knows` and `acting` are each
+   0–3, -1 for unanswered. Returns the stage 1–5. */
+const TTM_BANDS = [4, 6, 8, 10]
+export function ttmFromReadiness(thought: number, knows: number, acting: number): number {
+  const score = [thought, knows, acting].reduce((sum, at) => sum + (at >= 0 ? at + 1 : 0), 0)
+  const band = TTM_BANDS.findIndex((max) => score <= max)
+  return band < 0 ? 5 : band + 1
+}
+
 /* The sheet's ramps: raw 1–5 to 0–100. */
 const TTM_RAMP = [20, 40, 60, 80, 90]
 const LIKERT_RAMP = [25, 45, 65, 85, 95]
