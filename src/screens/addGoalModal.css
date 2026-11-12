@@ -148,20 +148,96 @@
   color: var(--text-link);
 }
 
-/* A point and the cross that takes it away. The cross is quiet until the row
-   is hovered: there are up to half a dozen of these and a column of crosses
-   reads as a list of things to delete. */
+/* A point and the cross that takes it away. Each is a line of the list the
+   goal card reads back — its mark, then its words, wrapped to their full
+   length — with a hairline under it; it is written in where it stands, and
+   only shows itself a field when hovered or typed in. The mark and the cross
+   sit on the first line. The cross is quiet until the row is hovered: there
+   are up to half a dozen of these and a column of crosses reads as a list of
+   things to delete. */
+.ag-point-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .ag-point {
   display: flex;
-  align-items: center;
-  gap: var(--space-6);
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-bottom: var(--border-thin) solid var(--border-hairline);
 }
-.ag-point .ag-input {
+.ag-point-mark {
+  flex: none;
+  width: 14px;
+  /* The text's own top: the field's 1px border and 6px padding. */
+  padding-top: 7px;
+  font-size: 15px;
+  font-weight: var(--weight-bold, 700);
+  line-height: 1.45;
+}
+.ag-points.is-pros .ag-point-mark {
+  color: #2e9e6a;
+}
+.ag-points.is-cons .ag-point-mark {
+  color: #d4573b;
+}
+.ag-point-text {
   flex: 1;
   min-width: 0;
+  display: block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--space-6) var(--space-8);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-strong);
+  resize: none;
+  overflow: hidden;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.ag-point-text::placeholder {
+  color: var(--text-placeholder, #a19cad);
+}
+.ag-point-text:hover {
+  background: var(--surface-hover);
+}
+.ag-point-text:focus {
+  outline: none;
+  border-color: var(--k-grape);
+  background: var(--surface-card);
+}
+/* Under each list, the way to start another line. */
+.ag-point-add {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: var(--space-6);
+  margin-top: var(--space-2);
+  padding: var(--space-4) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold, 700);
+  color: var(--text-link);
+  cursor: pointer;
+}
+.ag-point-add:hover {
+  color: var(--text-link-hover);
+}
+.ag-point-add:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+  border-radius: var(--radius-sm);
 }
 .ag-drop {
   flex: none;
+  align-self: flex-start;
+  margin-top: var(--space-8);
   display: inline-flex;
   padding: var(--space-4);
   border: 0;
@@ -229,38 +305,27 @@
   pointer-events: none;
 }
 
-/* What is good about it and what is not, side by side, because that is how
-   they are read back on the card. */
+/* What is good about it, then what is not: one list over the other, each as
+   wide as the panel, so a point is never cut off at a narrow column's edge. */
 .ag-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-8) var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
   margin-top: var(--space-4);
 }
 .ag-points {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
   min-width: 0;
 }
-.ag-points-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-10);
-}
-.ag-points-head .ag-label {
-  margin-top: 0;
+/* The label sits the standard 6px over its first line. */
+.ag-points > .ag-label {
+  margin: 0 0 var(--space-6);
 }
 
 .ag-foot {
   justify-content: flex-end;
   gap: var(--space-10);
-}
-
-@media (max-width: 620px) {
-  .ag-cols {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Readiness, on an edit: the stage it is at, and the way to work it out

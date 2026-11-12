@@ -549,7 +549,10 @@ function Pills({
 /* A question answered on a scale, Confidence's way: one card in the middle
    of the screen, the question on it, and five points between two pictures
    that are its ends — `pictures` the first and last of `options`, and
-   `labels` their short names. The side the chosen point leans to holds its
+   `labels` their short names. A stem runs down from each picture to the
+   point at its end, so the track and the two stems make one bracket: the
+   first point is plainly the left picture's and the last the right's,
+   without a word saying so. The side the chosen point leans to holds its
    picture up and the far one steps back; the point's own words read under
    the scale, and the answer kept is still the option's own words. */
 function ScaleCard({
@@ -584,6 +587,7 @@ function ScaleCard({
                 <Photo src={pictures[side]} fallback="jf-photo-fallback" />
               </span>
               <figcaption>{labels?.[options[i]] ?? options[i]}</figcaption>
+              <span className="mv-scale-stem" aria-hidden />
             </figure>
           ))}
         </div>
