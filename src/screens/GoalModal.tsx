@@ -25,7 +25,7 @@ import { DEMO_TODAY } from '../data/financialId'
 import { ReadinessLevel, StatusTags, TTM_STAGES, withTag } from './profileParts'
 import { CloseIcon } from '../components/icons'
 import SelectMenu from '../components/SelectMenu'
-import { PointList, TIMELINES } from './AddGoalModal'
+import { GrowField, PointList, TIMELINES } from './AddGoalModal'
 import ReadinessModal, { QUESTIONS as READINESS } from './ReadinessModal'
 import { InlineTitle, ReadBackCheck, ReadBackFoot, closesOnEscape } from './ReadBack'
 
@@ -171,15 +171,15 @@ export default function GoalModal({
             <label className="ag-label" htmlFor="goal-note">
               I want to do this because…
             </label>
-            <input
+            <GrowField
               id="goal-note"
-              className="ag-input"
               value={note}
               placeholder="Write your primary motivation."
-              onChange={(e) => setNote(e.target.value)}
+              onChange={setNote}
             />
 
-            {/* The rest of what the adventure asked, each the way it asked. */}
+            {/* The rest of what the adventure asked, each the way it asked —
+                a written answer as tall as it is, like the note above. */}
             {asked.map((f, i) => {
               const value = vals[f.label] ?? ''
               const id = `goal-field-${i}`
@@ -189,12 +189,7 @@ export default function GoalModal({
                     <label className="ag-label" htmlFor={id}>
                       {f.label}
                     </label>
-                    <input
-                      id={id}
-                      className="ag-input"
-                      value={value}
-                      onChange={(e) => setVal(f.label, e.target.value)}
-                    />
+                    <GrowField id={id} value={value} onChange={(v) => setVal(f.label, v)} />
                   </React.Fragment>
                 )
               if (f.kind === 'one')
