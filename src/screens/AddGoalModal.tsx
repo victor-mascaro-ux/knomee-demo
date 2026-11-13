@@ -69,6 +69,54 @@ const PencilTip = () => (
   </svg>
 )
 
+/* Keeps a textarea as tall as its words, so it wraps rather than cutting a
+   long answer off at the field's edge. */
+function useGrow(value: string) {
+  const box = useRef<HTMLTextAreaElement>(null)
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    el.style.height = 'auto'
+    /* scrollHeight leaves out the border; a border-box field needs it back. */
+    const s = getComputedStyle(el)
+    const edge = s.boxSizing === 'border-box' ? parseFloat(s.borderTopWidth) + parseFloat(s.borderBottomWidth) : 0
+    el.style.height = `${el.scrollHeight + edge}px`
+  }, [value])
+  return box
+}
+
+/* A one-answer field in the goal panels — "I want to do this because…" and
+   the adventure's own free-text questions — drawn like the panel's other
+   fields but as tall as what is written in it. An answer is one thought, so
+   Enter does not break it into lines. */
+export function GrowField({
+  id,
+  value,
+  placeholder,
+  onChange,
+}: {
+  id?: string
+  value: string
+  placeholder?: string
+  onChange: (v: string) => void
+}) {
+  const box = useGrow(value)
+  return (
+    <textarea
+      ref={box}
+      id={id}
+      className="ag-input ag-grow"
+      rows={1}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value.replace(/\n/g, ' '))}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.preventDefault()
+      }}
+    />
+  )
+}
+
 /* A line of a pro or con list, as tall as its words: it wraps rather than
    cutting a long point off at the field's edge. */
 function PointText({
@@ -89,13 +137,7 @@ function PointText({
   onEnter: () => void
   onEmptyBack: () => void
 }) {
-  const box = useRef<HTMLTextAreaElement>(null)
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }, [value])
+  const box = useGrow(value)
   useEffect(() => {
     if (!focus || !box.current) return
     const el = box.current
@@ -381,12 +423,7 @@ export default function AddGoalModal({
 
               <span className="ag-label">I want to do this because…</span>
               <div className="ag-field">
-                <input
-                  className="ag-input"
-                  value={note}
-                  placeholder="Write your primary motivation."
-                  onChange={(e) => setNote(e.target.value)}
-                />
+                <GrowField value={note} placeholder="Write your primary motivation." onChange={setNote} />
                 <span className="ag-pencil" aria-hidden>
                   <PencilTip />
                 </span>

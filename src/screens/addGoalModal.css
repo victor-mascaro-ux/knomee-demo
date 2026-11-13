@@ -292,7 +292,10 @@
 .ag-field {
   position: relative;
 }
-.ag-field .ag-input {
+/* Room for the pencil, so words never run under it. Scoped through .modal to
+   outrank the modals' shared field padding (index.css), which reset it. */
+.ag-field .ag-input,
+.modal .ag-field .ag-input {
   padding-right: var(--space-32);
 }
 .ag-pencil {
@@ -303,6 +306,23 @@
   display: inline-flex;
   color: var(--text-secondary);
   pointer-events: none;
+}
+
+/* A written answer as tall as its words: the same field, wrapping instead of
+   running off its right edge. Its pencil stays on the first line rather than
+   drifting to the middle of a tall one. The panel's body is a scrolling flex
+   column, which would otherwise squeeze it back to one line. */
+.ag-input.ag-grow {
+  flex: none;
+  display: block;
+  box-sizing: border-box;
+  line-height: 1.45;
+  resize: none;
+  overflow: hidden;
+}
+.ag-field .ag-grow + .ag-pencil {
+  top: 16px;
+  transform: none;
 }
 
 /* What is good about it, then what is not: one list over the other, each as
