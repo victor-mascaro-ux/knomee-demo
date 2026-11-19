@@ -51,8 +51,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       option: 2,
       subject: 'Most financial conversations start in the wrong place',
       message:
-        'Hi {{First Name}},\n\nMost financial conversations start with your money. Here’s a different place to start: you.\n\nI’m offering a free 8-minute guided experience that helps you clarify what you want your money to make possible, what matters most right now, and the financial questions you want answered.\n\nYou’ll walk away with:\n- A clearer understanding of what’s most important to you\n- Personalized insights about your financial priorities\n- Better questions to ask any financial advisor\n\nNo appointment required.',
-      cta: 'Start Your Personalized Assessment →',
+        'Hi {{First Name}},\n\nMost financial conversations start with your money. Here’s a different place to start: you.\n\nThis free 8-minute check-in helps you get clear on what you want your money to make possible and the questions you want answered.\n\nYou’ll walk away with:\n- A clearer picture of what matters most to you\n- A personal summary to keep\n- Better questions to ask any financial advisor\n\nNo appointment required.',
+      cta: 'Start Your Check-In →',
       signoff: SIGNED,
     },
     {
@@ -61,9 +61,9 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       name: 'Confirmation',
       subject: 'Before we meet',
       message:
-        'Hi {{First Name}},\n\nI’m looking forward to meeting you.\n\nBefore we do, take about 8 minutes for this guided experience. It will help you organize your thoughts, uncover your top three money questions, and see what’s driving your financial decisions, with personalized insights that are yours to keep.\n\nYou’ll come to our meeting with more clarity, and rather than spending it on basic fact-finding, we’ll focus on the questions, goals, and opportunities that matter most to you.',
-      cta: 'Get My Personalized Insights →',
-      signoff: 'I’m looking forward to our conversation.\n\n' + SIGNED,
+        'Hi {{First Name}},\n\nI’m looking forward to meeting you.\n\nBefore we do, take about 8 minutes for this short check-in. It helps you organize your thoughts and uncover your top three money questions, and you’ll get a personal summary to keep.\n\nWe’ll skip the basic fact-finding and spend our time on the questions and goals that matter most to you.',
+      cta: 'Start Your Check-In →',
+      signoff: SIGNED,
     },
   ],
   client: [
@@ -74,8 +74,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       note: '2 weeks before',
       subject: 'A quick check-in before we connect',
       message:
-        'Hi {{First Name}},\n\nAhead of our meeting, I want to make sure our conversation is focused on what matters most to you right now.\n\nKnomee is a brief experience that helps you reflect on your goals, priorities, and what’s top of mind. Take a few minutes with it before we meet — you’ll get a personal summary to keep, and you’ll come to our conversation clearer on what you want from it:',
-      cta: 'Access Your Knomee Experience Here →',
+        'Hi {{First Name}},\n\nBefore we meet, I’d like to know what’s top of mind for you, so we spend our time on what matters most.\n\nThis short check-in takes a few minutes. You’ll come in clearer on what you want from our meeting, and you’ll get a personal summary to keep.',
+      cta: 'Start Your Check-In →',
       signoff: SIGNED,
     },
     {
@@ -85,7 +85,7 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       note: 'Between reviews',
       subject: 'A quick mid-year check-in',
       message:
-        'Hi {{First Name}},\n\nA lot can change between reviews. I wanted to reach out with a quick mid-year check-in.\n\nIf anything has shifted, Knomee is a simple way to take stock of what’s changed for you, so our next meeting starts with what matters now.',
+        'Hi {{First Name}},\n\nA lot can change between reviews. If anything has shifted for you, this quick check-in helps you take stock, and our next meeting starts right there.',
       cta: 'See What’s Changed →',
       signoff: SIGNED,
     },
@@ -96,8 +96,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       note: 'The default re-opener',
       subject: 'A quick check-in to make sure we’re focused on what matters',
       message:
-        'Hi {{First Name}},\n\nIt’s been a while since we connected, and I wanted to reach out with a quick check-in.\n\nRather than assume your priorities are the same, I’d like to give you a simple way to see what’s top of mind for you now. Knomee is a brief experience that helps you reflect on what may have changed, and you’ll get a personal summary to keep.',
-      cta: 'Access Your Knomee Experience Here →',
+        'Hi {{First Name}},\n\nIt’s been a while since we connected, and I don’t want to assume your priorities are the same.\n\nThis short check-in takes a few minutes and helps you see what’s top of mind for you now. You’ll get a personal summary to keep.',
+      cta: 'Start Your Check-In →',
       signoff: SIGNED,
     },
     {
@@ -107,8 +107,8 @@ export const INVITE_EMAILS: Record<InviteAudience, InviteEmail[]> = {
       note: 'When something changed',
       subject: 'A quick check-in on changes in your financial picture',
       message:
-        'Hi {{First Name}},\n\nI wanted to check in on whether anything has changed in your financial picture or planning needs since we last spoke.\n\nIf new responsibilities or questions have come up, Knomee is a helpful starting point. It helps you sort out what’s changed and what you most want answered, and you’ll get a personal summary to keep.',
-      cta: 'Access Your Knomee Experience Here →',
+        'Hi {{First Name}},\n\nHas anything changed in your life or finances since we last spoke?\n\nIf new questions have come up, this short check-in helps you sort out what’s changed and what you most want answered. You’ll get a personal summary to keep.',
+      cta: 'Start Your Check-In →',
       signoff: SIGNED,
     },
   ],
