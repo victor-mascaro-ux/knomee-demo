@@ -38,7 +38,7 @@ import { ComingUp, NudgeCell } from './dashboard'
 import ProspectProfileScreen from '../screens/ProspectProfileScreen'
 import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
-import { useLeave } from './motion'
+import { reducedMotion, useCountUps, useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
 import TeamChat from './TeamChat'
 import {
@@ -240,6 +240,20 @@ export default function AdoptionDemo({
     }
   }, [st.idx, st.visit])
 
+  /* ── Motion ── A new step, or a day once its intro closes, lays the page in
+     from the top; the dashboard's numbers count up to theirs once the page
+     is in view; buttons that do something ripple where they are pressed. */
+  const [entering, setEntering] = useState(false)
+  useLayoutEffect(() => {
+    if (st.intro || reducedMotion()) return
+    setEntering(true)
+    const t = window.setTimeout(() => setEntering(false), 1400)
+    return () => window.clearTimeout(t)
+  }, [st.idx, st.visit, st.intro])
+  useCountUps(device, st.intro)
+  const root = useRef<HTMLDivElement>(null)
+  useRipples(root)
+
   /* ── Inviting ── */
   const openInvite = useCallback(() => {
     setSt((s) => {
@@ -440,6 +454,7 @@ export default function AdoptionDemo({
 
   return (
     <div
+      ref={root}
       className={`adoption-demo${labelsOn ? ' labels-on' : ''}`}
       style={{ '--brand-bar': ACME.primary } as CSSProperties}
       data-beckon={tipOn ? '' : undefined}
@@ -461,7 +476,11 @@ export default function AdoptionDemo({
         onExit={onExit}
       />
       <main className="ad-stage">
-        <section className="ad-device" ref={device} aria-label="ACME advisor dashboard">
+        <section
+          className={`ad-device${entering ? ' ad-entering' : ''}`}
+          ref={device}
+          aria-label="ACME advisor dashboard"
+        >
           <div className="ad-scroll" ref={scroller}>
             <div className="ad-zoom" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
               <div className="page brand-client">

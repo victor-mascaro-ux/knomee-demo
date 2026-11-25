@@ -2,9 +2,9 @@
    a timeline, and under the current step what happens, the emails and alerts
    it sends, and what to click. */
 
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ClockIcon, ExpandIcon, HashIcon, MailIcon, Rich, TapIcon } from './icons'
-import { reducedMotion } from './motion'
+import { reducedMotion, useCountUp } from './motion'
 import { EXTRAS, STEPS, effortTo, emailContent, type ExtraKey, type SentEmail } from './steps'
 
 function MiniEmail({
@@ -84,6 +84,23 @@ export default function NotesPanel({
   const step = STEPS[idx]
   const effort = effortTo(idx)
   const list = useRef<HTMLOListElement>(null)
+  /* The effort counter counts to its new value and bumps once. */
+  const clicks = step.branch ? 0 : effort.clicks
+  const shownClicks = useCountUp(clicks)
+  const [bump, setBump] = useState(false)
+  const lastClicks = useRef(clicks)
+  useEffect(() => {
+    if (lastClicks.current === clicks) return
+    lastClicks.current = clicks
+    if (reducedMotion()) return
+    setBump(false)
+    const on = window.requestAnimationFrame(() => setBump(true))
+    const off = window.setTimeout(() => setBump(false), 600)
+    return () => {
+      window.cancelAnimationFrame(on)
+      window.clearTimeout(off)
+    }
+  }, [clicks])
 
   /* The timeline fills down to the current step, and the current step (or
      the hinted next day) scrolls into view. */
@@ -108,20 +125,20 @@ export default function NotesPanel({
         Step through what a new advisor sees, and what Intercom and the Knomee team do at each moment.
       </p>
       {step.branch ? (
-        <div className="effort">
+        <div className={`effort${bump ? ' bump' : ''}`}>
           <span className="lbl">Alex’s effort on this path</span>
           <span className="vals">
             <span className="big">
-              <span className="n">0</span> clicks
+              <span className="n">{shownClicks}</span> clicks
             </span>
           </span>
         </div>
       ) : (
-        <div className="effort">
+        <div className={`effort${bump ? ' bump' : ''}`}>
           <span className="lbl">Alex’s effort so far</span>
           <span className="vals">
             <span className="big">
-              <span className="n">{effort.clicks}</span> click{effort.clicks === 1 ? '' : 's'}
+              <span className="n">{shownClicks}</span> click{effort.clicks === 1 ? '' : 's'}
             </span>
             <span className="min">
               <ClockIcon />
