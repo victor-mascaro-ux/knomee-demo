@@ -4721,7 +4721,6 @@ export default function App() {
     const onDemo = (e: MessageEvent) => {
       const d = e.data as { type?: string; key?: string; value?: unknown } | null
       if (!d || d.type !== 'cc-demo-set') return
-      if (d.key === 'empty') setEmptyMode(!!d.value)
       if (d.key === 'brand') setBrandId(typeof d.value === 'string' ? d.value : null)
       if (d.key === 'cobrand') setCobrandLayout(d.value === 'centered' ? 'centered' : 'left')
       if (d.key === 'device') setDeviceMode(d.value === 'desktop' ? 'desktop' : 'mobile')
@@ -5281,6 +5280,18 @@ export default function App() {
           setAdminView(false)
           setFirmView(false)
         }}
+        /* Only over the three tables, with nobody's page open: a profile or
+           the family's page covers the table, so emptying it would change
+           nothing you can see. */
+        emptyState={emptyMode}
+        onEmptyState={
+          (currentView === 'prospects' || currentView === 'clients' || currentView === 'analytics') &&
+          !profileProspect &&
+          !profileClient &&
+          !householdOpen
+            ? setEmptyMode
+            : undefined
+        }
       />
 
       {firmView ? (

@@ -25,6 +25,8 @@ export default function TopBar({
   sub = 'ADVISOR',
   onSettings,
   onApiStore,
+  emptyState = false,
+  onEmptyState,
 }: {
   logo?: ReactNode
   cobrand?: 'left' | 'centered'
@@ -32,6 +34,11 @@ export default function TopBar({
   onSettings?: () => void
   /** The API store — the data a firm can pull from knomee. */
   onApiStore?: () => void
+  /** The dashboards with nobody in them yet, as a new advisor first sees
+      them: a presenter's switch, so it shows its state. Left out of the menu
+      where no handler is passed — the pages where emptying changes nothing. */
+  emptyState?: boolean
+  onEmptyState?: (on: boolean) => void
 }) {
   const { open, shown, closing, setOpen } = useDropdown()
   const ref = useRef<HTMLDivElement>(null)
@@ -104,6 +111,22 @@ export default function TopBar({
                 >
                   API Store
                 </button>
+              )}
+              {/* A switch, not an item: the menu stays open so the presenter
+                  sees it flip while the dashboard behind it changes. */}
+              {onEmptyState && (
+                <label className="menu-item menu-toggle">
+                  <span>Empty state</span>
+                  <span className={`switch ${emptyState ? 'on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      checked={emptyState}
+                      onChange={(e) => onEmptyState(e.target.checked)}
+                    />
+                    <span className="switch-knob" />
+                  </span>
+                </label>
               )}
               <button className="menu-item" type="button">
                 Sign Out

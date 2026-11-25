@@ -1791,11 +1791,8 @@
     return null;
   };
   const CONTROLS = [
-    { key: 'empty', kind: 'toggle', label: 'Empty state',
-      views: ['prospects', 'clients', 'analytics'],
-      // A profile is a layer over the table, so emptying the table behind it
-      // changes nothing you can see.
-      when: () => !demoState.profile },
+    // Empty state was here. It lives in the app's own burger menu now, on the
+    // same three tables with no profile open.
     // Mobile is a view of the client page, not a separate screen: the phone
     // frame renders the very same profile the desktop does, at 393px. So it is
     // a switch on the page you are already looking at rather than two entries
