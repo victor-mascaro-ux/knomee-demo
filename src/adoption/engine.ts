@@ -144,7 +144,7 @@ export interface Ui {
   tip: boolean
   /** The dashboard's modal: the invite, Alex's reminder email (Day 2), or
       the one question (Day 4). */
-  modal: 'invite' | 'mail' | 'ask' | null
+  modal: 'invite' | 'mail' | 'ask' | 'nudge' | null
   invite: InviteTarget | null
   /** What arrives on its own, a moment after the step opens. */
   auto: 'mail' | 'ask' | 'notif' | null
@@ -159,6 +159,19 @@ export interface Ui {
   /** Day 4's question: the answer picked (-1: none yet), and the box for
       "Something else". */
   ask: { answer: number; text: string; sent: boolean }
+  /** Day 2: Sarah stopped halfway. Alex can nudge her himself; what he sent
+      replaces Knomee's own reminder in the notes. */
+  nudge: { sent: boolean; draft: { subject: string; body: string } | null } | null
+  /** Day 3: Intercom's tip on Sarah's name, now that she has finished. */
+  rowTip: boolean
+  /** Sarah's page is open, on her Prospect Playbook. */
+  drawer: boolean
+  /** Day 4: Intercom's survey after Alex read her playbook. */
+  survey: { answer: number; details: string; sent: boolean } | null
+  /** Week 3: Intercom's post asking Alex to connect his calendar. */
+  post: boolean
+  /** His calendar, once connected: which meetings have had a check-in sent. */
+  cal: { sent: Record<number, boolean> } | null
   /** The step's story has played out: Next pulses. */
   done: boolean
 }
@@ -175,6 +188,12 @@ export function freshUi(id: StepId): Ui {
     notif: false,
     notifOpen: false,
     ask: { answer: -1, text: '', sent: false },
+    nudge: id === 'sarah-explores' ? { sent: false, draft: null } : null,
+    rowTip: id === 'results-land',
+    drawer: false,
+    survey: id === 'after-meeting' ? { answer: -1, details: '', sent: false } : null,
+    post: id === 'habit',
+    cal: null,
     done: false,
   }
 }

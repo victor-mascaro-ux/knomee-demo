@@ -33,7 +33,9 @@ import ComposeModal, { type Sent } from './ComposeModal'
 import DemoBar from './DemoBar'
 import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
 import IntroScreen from './IntroScreen'
-import { AnchoredTip, Banner, Launcher } from './intercom'
+import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
+import { ComingUp, NudgeCell } from './dashboard'
+import ProspectProfileScreen from '../screens/ProspectProfileScreen'
 import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { useLeave } from './motion'
@@ -42,7 +44,9 @@ import TeamChat from './TeamChat'
 import {
   ALEX,
   ASK,
+  CAL_MEETS,
   NOTE_TEXT,
+  NUDGE,
   STEPS,
   dayOf,
   firstName,
@@ -57,7 +61,7 @@ const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
 
 /** The controls in the app that are part of the story. Everything else in it
     is inert. */
-const LIVE = '.toolbar .btn-primary, [data-ad-live]'
+const LIVE = '.toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]'
 
 /** Alex's first invite, as his draft starts. */
 const FIRST_INVITE: InviteEmail = {
@@ -68,6 +72,14 @@ const FIRST_INVITE: InviteEmail = {
   message: NOTE_TEXT.replace('{first}', '{{First Name}}'),
   cta: 'Start Your Check-In →',
   signoff: 'Best,\n{{Advisor Name}}\n{{Firm Name}}',
+}
+
+/** Alex's nudge to Sarah, as his draft starts. */
+const NUDGE_EMAIL: InviteEmail = {
+  id: 'adoption-nudge',
+  stage: 'Adoption demo',
+  name: 'Nudge',
+  ...NUDGE,
 }
 
 interface StepState {
@@ -222,6 +234,10 @@ export default function AdoptionDemo({
       const tb = sc.querySelector('.toolbar')
       if (tb) sc.scrollTop = Math.max(0, tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 138)
     }
+    if (st.ui.rowTip) {
+      const nm = sc.querySelector('.prospects-table .name-link-btn')
+      if (nm) sc.scrollTop += nm.getBoundingClientRect().top - sc.getBoundingClientRect().top - 260
+    }
   }, [st.idx, st.visit])
 
   /* ── Inviting ── */
@@ -257,7 +273,57 @@ export default function AdoptionDemo({
     setSt((s) => ({
       ...s,
       rows: [...s.rows.map((r) => ({ ...r, fresh: false })), { ...row, fresh: true }],
-      ui: { ...s.ui, modal: null, invite: null, tip: false, done: true },
+      ui: { ...s.ui, modal: null, invite: null, tip: false, survey: null, done: true },
+    }))
+  }
+
+  /* ── Day 2: Sarah stopped halfway ── Alex can nudge her himself; if he
+     does, Knomee's own reminder is off. */
+  const openNudge = () => setSt((s) => ({ ...s, ui: { ...s.ui, modal: 'nudge' } }))
+  const nudgeSent = (out: Sent) =>
+    setSt((s) => ({
+      ...s,
+      ui: {
+        ...s.ui,
+        modal: null,
+        done: true,
+        nudge: { sent: true, draft: { subject: out.subject, body: out.body } },
+      },
+    }))
+
+  /* ── Day 3: Sarah's playbook ── Her name opens her page on its Prospect
+     Playbook tab; its breadcrumb brings Alex back. */
+  const openPlaybook = () =>
+    setSt((s) => ({
+      ...s,
+      rows: s.rows.map((r) => ({ ...r, isNew: false, fresh: false })),
+      ui: { ...s.ui, drawer: true, rowTip: false },
+    }))
+  const closePlaybook = () => setSt((s) => ({ ...s, ui: { ...s.ui, drawer: false, done: true } }))
+  useLayoutEffect(() => {
+    if (scroller.current) scroller.current.scrollTop = 0
+  }, [ui.drawer])
+  const [rowTipLeaving, leaveRowTip] = useLeave()
+
+  /* ── Day 4: how did it go? ── */
+  const [surveyLeaving, leaveSurvey] = useLeave()
+  const setSurvey = (patch: Partial<NonNullable<Ui['survey']>>, done = false) =>
+    setSt((s) =>
+      s.ui.survey ? { ...s, ui: { ...s.ui, survey: { ...s.ui.survey, ...patch }, done: done || s.ui.done } } : s,
+    )
+
+  /* ── Week 3: the calendar ── */
+  const [postLeaving, leavePost] = useLeave()
+  const connectCalendar = () => leavePost(setUiLater({ post: false, cal: { sent: {} } }))
+  const calSend = (i: number) => {
+    const m = CAL_MEETS[i]
+    setSt((s) => ({
+      ...s,
+      rows: [
+        ...s.rows.map((r) => ({ ...r, isNew: false, fresh: false })),
+        { ...invitedRow(`cal${i}`, m.name, m.email, '12/14/2026'), isNew: true, fresh: true },
+      ],
+      ui: { ...s.ui, done: true, cal: { sent: { ...(s.ui.cal?.sent ?? {}), [i]: true } } },
     }))
   }
 
@@ -318,8 +384,8 @@ export default function AdoptionDemo({
 
   /* ── Keys ── Arrows step through; Enter, Space or Esc open a day from its
      intro; Esc closes an open email. Typing is left alone. */
-  const keys = useRef({ st, goTo, closeIntro, closeMail, closeInbox, closeAsk })
-  keys.current = { st, goTo, closeIntro, closeMail, closeInbox, closeAsk }
+  const keys = useRef({ st, goTo, closeIntro, closeMail, closeInbox, closeAsk, closePlaybook })
+  keys.current = { st, goTo, closeIntro, closeMail, closeInbox, closeAsk, closePlaybook }
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null
@@ -342,6 +408,10 @@ export default function AdoptionDemo({
         /* The invite's window closes itself on Esc. */
         if (e.key === 'Escape' && s.ui.modal === 'mail') shutInbox()
         if (e.key === 'Escape' && s.ui.modal === 'ask') shutAsk()
+        return
+      }
+      if (s.ui.drawer && e.key === 'Escape') {
+        keys.current.closePlaybook()
         return
       }
       if (e.key === 'ArrowRight') go(s.idx + 1)
@@ -396,6 +466,17 @@ export default function AdoptionDemo({
             <div className="ad-zoom" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
               <div className="page brand-client">
                 <TopBar logo={ACME.logo} cobrand="left" />
+                {ui.drawer ? (
+                  <main className="content content-profile">
+                    <ProspectProfileScreen
+                      prospect={rows.find((r) => r.id === 'sarah') ?? rows[0]}
+                      initialTab="toolkit"
+                      onBack={closePlaybook}
+                      onConvert={noop}
+                      onToast={noop}
+                    />
+                  </main>
+                ) : (
                 <main className="content">
                   {kit.tabs}
                   {ui.welcome && (
@@ -420,10 +501,17 @@ export default function AdoptionDemo({
                       onConvert={noop}
                       onResend={noop}
                       onDownload={noop}
-                      onOpenProfile={noop}
+                      onOpenProfile={openPlaybook}
+                      renderAction={(p) =>
+                        ui.nudge && p.name === 'Sarah Mitchell' && p.tier === 'incomplete' ? (
+                          <NudgeCell text={p.topAction} sent={ui.nudge.sent} onNudge={openNudge} />
+                        ) : undefined
+                      }
+                      afterMetrics={ui.cal && <ComingUp sent={ui.cal.sent} onSend={calSend} />}
                     />
                   )}
                 </main>
+                )}
               </div>
             </div>
           </div>
@@ -440,6 +528,43 @@ export default function AdoptionDemo({
               >
                 Meeting someone this week? Click <b>Invite</b> to add them.
               </AnchoredTip>
+            )}
+            {ui.rowTip && !ui.drawer && !ui.modal && !st.intro && (
+              <>
+                <Beacon
+                  key={`beacon-${st.idx}-${st.visit}`}
+                  anchor={() => device.current?.querySelector<HTMLElement>('.prospects-table .name-link-btn') ?? null}
+                  device={device}
+                  scroller={scroller}
+                />
+                <AnchoredTip
+                  key={`rowtip-${st.idx}-${st.visit}`}
+                  side="left"
+                  anchor={() => device.current?.querySelector<HTMLElement>('.prospects-table .name-link-btn') ?? null}
+                  device={device}
+                  scroller={scroller}
+                  leaving={rowTipLeaving}
+                  onClose={() => leaveRowTip(setUiLater({ rowTip: false }))}
+                >
+                  <b>Sarah finished.</b> Click her name to see her playbook.
+                </AnchoredTip>
+              </>
+            )}
+            {ui.survey && !ui.modal && !st.intro && (
+              <Survey
+                answer={ui.survey.answer}
+                details={ui.survey.details}
+                sent={ui.survey.sent}
+                leaving={surveyLeaving}
+                onAnswer={(answer) => setSurvey({ answer, details: '', sent: false }, true)}
+                onDetails={(details) => setSurvey({ details })}
+                onSend={() => setSurvey({ sent: true }, true)}
+                onClose={() => leaveSurvey(setUiLater({ survey: null }))}
+                onInvite={openInvite}
+              />
+            )}
+            {ui.post && !st.intro && (
+              <Post leaving={postLeaving} onConnect={connectCalendar} onLater={() => leavePost(setUiLater({ post: false }))} />
             )}
             <Launcher />
           </div>
@@ -458,6 +583,19 @@ export default function AdoptionDemo({
               brand={ACME}
               onSent={inviteSent}
               onClose={closeInvite}
+            />
+          )}
+          {ui.modal === 'nudge' && (
+            <ComposeModal
+              key={`nudge-${st.idx}-${st.visit}`}
+              Compose={kit.InviteCompose}
+              title="Nudge Sarah"
+              sample={NUDGE_EMAIL}
+              to="sara.mitchell@email.com"
+              known={{ 'Advisor Name': ALEX.name, 'Firm Name': ALEX.firm, 'First Name': 'Sarah' }}
+              brand={ACME}
+              onSent={nudgeSent}
+              onClose={() => setSt((s) => ({ ...s, ui: { ...s.ui, modal: null } }))}
             />
           )}
           {ui.view === 'chat' && (
@@ -507,8 +645,8 @@ export default function AdoptionDemo({
         </section>
         <NotesPanel
           idx={idx}
-          nudged={false}
-          nudge={null}
+          nudged={!!ui.nudge?.sent}
+          nudge={ui.nudge?.draft ?? null}
           sent={sent}
           hint={st.hint}
           onGoto={goTo}
@@ -521,7 +659,7 @@ export default function AdoptionDemo({
           <MailWindow
             k={st.mail}
             sent={sent}
-            nudge={null}
+            nudge={ui.nudge?.draft ?? null}
             brand={ACME}
             leaving={mailLeaving}
             onClose={closeMail}

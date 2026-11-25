@@ -49,6 +49,8 @@ export interface ProspectsScreenProps {
   rows?: Prospect[]
   stats?: BookStats
   rowClassName?: (p: Prospect) => string | undefined
+  renderAction?: (p: Prospect) => ReactNode
+  afterMetrics?: ReactNode
 }
 
 export interface DemoKit {

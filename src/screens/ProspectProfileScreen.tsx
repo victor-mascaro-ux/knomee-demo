@@ -68,7 +68,7 @@ const ADVENTURE_ICON: Record<string, string> = {
   Goals: icGoals,
 }
 
-type ProfileTab = 'id' | 'readiness' | 'toolkit'
+export type ProfileTab = 'id' | 'readiness' | 'toolkit'
 
 export type FinIdCard = 'goals' | 'joy' | 'future' | 'outlook' | 'confidence'
 
@@ -91,7 +91,11 @@ export default function ProspectProfileScreen({
   added,
   reveal,
   onReveal,
+  initialTab,
 }: {
+  /** The tab the page opens on: her Financial ID unless told otherwise (the
+      adoption demo opens Sarah's straight on her Prospect Playbook). */
+  initialTab?: ProfileTab
   /** A completed adventure's heading, tapped: its ending screen again. */
   onOpenEnding?: (id: string) => void
   /** The adventure that is next on her journey. Its waiting card starts it. */
@@ -140,7 +144,7 @@ export default function ProspectProfileScreen({
   reveal?: object | null
   onReveal?: (card: HTMLElement) => void
 }) {
-  const [tab, setTab] = useState<ProfileTab>('id')
+  const [tab, setTab] = useState<ProfileTab>(initialTab ?? 'id')
   const { printing, print } = usePrintSheet()
   /* A new client's page is empty, and fills as adventures are completed:
      only Financial Joy can be taken yet, so only what it produces appears —
