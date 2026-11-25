@@ -232,7 +232,7 @@ export default function AdoptionDemo({
     sc.scrollTop = 0
     if (STEPS[st.idx].id === 'first-send') {
       const tb = sc.querySelector('.toolbar')
-      if (tb) sc.scrollTop = Math.max(0, tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 138)
+      if (tb) sc.scrollTop = Math.max(0, tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 160)
     }
     if (st.ui.rowTip) {
       const nm = sc.querySelector('.prospects-table .name-link-btn')
@@ -314,7 +314,12 @@ export default function AdoptionDemo({
       ui: { ...s.ui, drawer: true, rowTip: false },
     }))
   const closePlaybook = () => setSt((s) => ({ ...s, ui: { ...s.ui, drawer: false, done: true } }))
+  /* Her page opens, and closes, at the top: only when it does, so a step's
+     own opening scroll (to Sarah's row) stands. */
+  const drawerWas = useRef(ui.drawer)
   useLayoutEffect(() => {
+    if (drawerWas.current === ui.drawer) return
+    drawerWas.current = ui.drawer
     if (scroller.current) scroller.current.scrollTop = 0
   }, [ui.drawer])
   const [rowTipLeaving, leaveRowTip] = useLeave()
@@ -482,7 +487,7 @@ export default function AdoptionDemo({
           aria-label="ACME advisor dashboard"
         >
           <div className="ad-scroll" ref={scroller}>
-            <div className="ad-zoom" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
+            <div className="ad-app" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
               <div className="page brand-client">
                 <TopBar logo={ACME.logo} cobrand="left" />
                 {ui.drawer ? (
