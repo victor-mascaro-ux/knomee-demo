@@ -371,6 +371,15 @@ export const EXTRAS: Record<ExtraKey, DemoEmail | DemoAlert> = {
   csRoi: { kind: 'slack', body: 'Alex: Knomee helped with Sarah.' },
 }
 
+/** Day 4's one question, and its four answers. */
+export const ASK_QUESTION = 'What would help you send your first invite?'
+export const ASK = [
+  'See the email before it goes out',
+  'Talk it through with someone',
+  'I have no meetings coming up',
+  'Something else',
+]
+
 /** What Alex actually sent, once he has: it replaces the sample in the notes. */
 export interface SentEmail {
   first: string
