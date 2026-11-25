@@ -1,0 +1,1647 @@
+/* The adoption demo (src/adoption). Everything here sits under .adoption-demo,
+   so none of it reaches the product's own pages. Colours come from the
+   design-system tokens (src/tokens); the few the tokens don't have — the demo
+   bar's night, the notes' wash, Intercom's yellow label — are named once,
+   below. Every animation is behind prefers-reduced-motion: no-preference,
+   and its keyframes are prefixed ad- so they never meet the app's own. */
+
+.adoption-demo {
+  /* The demo's own colours, beyond the tokens. */
+  --ad-night: #14022a;
+  --ad-night-line: #4a3666;
+  --ad-night-hover: #2a1247;
+  --ad-night-ink: #d9d0e6;
+  --ad-notes-bg: #f6f4f9;
+  --ad-notes-line: #e6e1ee;
+  --ad-notes-rail: #e2dcea;
+  --ad-tag: #ffd66b;
+  --ad-tag-ink: #4a3300;
+  --ad-tag-edge: #e0a800;
+  --ad-try-bg: #fff7db;
+  --ad-try-edge: #f3dd96;
+  --ad-try-ink: #5b4300;
+  --ad-ic-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ad-notes-bg);
+  color: var(--k-ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+.adoption-demo .ad-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.adoption-demo button {
+  font-family: inherit;
+}
+.adoption-demo :is(.ad-bar, .ad-notes, .intro, .ic-layer, .mail-win) button:focus-visible {
+  outline: 2px solid var(--k-grape);
+  outline-offset: 2px;
+}
+
+/* ── The demo bar ─────────────────────────────────────────────────────── */
+.adoption-demo .ad-bar {
+  position: relative;
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 16px 0 20px;
+  background: var(--ad-night);
+  color: #fff;
+}
+.adoption-demo .ad-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.adoption-demo .ad-bar-brand svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: #fff;
+}
+.adoption-demo .ad-bar-brand b {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.adoption-demo .ad-bar-now {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ad-night-ink);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.adoption-demo .ad-bar-now b {
+  color: #fff;
+  font-weight: 600;
+}
+.adoption-demo .ad-now-in {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.adoption-demo .ad-bar-prog {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, var(--k-grape), var(--k-violet-new));
+}
+.adoption-demo .ad-bar-ctrls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adoption-demo .ad-bar-sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: var(--ad-night-line);
+}
+.adoption-demo .ad-db-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ad-night-line);
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.adoption-demo .ad-db-btn:hover {
+  background: var(--ad-night-hover);
+}
+.adoption-demo .ad-db-btn.primary {
+  background: #fff;
+  border-color: #fff;
+  color: var(--k-plum);
+  font-weight: 600;
+}
+.adoption-demo .ad-db-btn.primary:hover {
+  background: #efe7f8;
+}
+.adoption-demo .ad-db-btn[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+.adoption-demo .ad-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+  font-size: 13px;
+  color: var(--ad-night-ink);
+  cursor: pointer;
+  user-select: none;
+}
+.adoption-demo .ad-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.adoption-demo .ad-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--ad-night-line);
+}
+.adoption-demo .ad-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+}
+.adoption-demo .ad-switch input:checked + .ad-track {
+  background: var(--ad-tag-edge);
+}
+.adoption-demo .ad-switch input:checked + .ad-track::after {
+  transform: translateX(14px);
+}
+.adoption-demo .ad-switch input:focus-visible + .ad-track {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── The stage: the app on the left, the notes on the right ───────────── */
+.adoption-demo .ad-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 370px;
+}
+/* The app's own box. contain makes it the frame for the app's fixed pieces
+   (the modal, the powered-by credit), so they sit inside it, not over the
+   notes and the demo bar. */
+.adoption-demo .ad-device {
+  position: relative;
+  overflow: hidden;
+  contain: layout paint;
+  background: #fff;
+  border-right: 1px solid #ddd8e4;
+}
+.adoption-demo .ad-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+/* The app is drawn at 86%, so the full prospects table fits beside the
+   notes, as it does at 1440 px. */
+.adoption-demo .ad-zoom {
+  zoom: 0.86;
+  min-height: 100%;
+}
+
+/* Not part of the story: the app's controls don't react. The story's own
+   (the Invite button, the demo's marked pieces) still do. */
+.adoption-demo .ad-zoom * {
+  pointer-events: none;
+}
+.adoption-demo .ad-zoom :is(.toolbar .btn-primary, [data-ad-live]),
+.adoption-demo .ad-zoom :is(.toolbar .btn-primary, [data-ad-live]) * {
+  pointer-events: auto;
+}
+/* The Invite button the tip points at. */
+.adoption-demo[data-beckon] .ad-zoom .toolbar .btn-primary {
+  outline: 2px solid var(--ad-tag-edge);
+  outline-offset: 3px;
+}
+
+/* Top Line Metrics before anyone has finished: no average, no tiers yet. */
+.adoption-demo .metric-value.is-empty {
+  color: var(--k-ash);
+}
+.adoption-demo .dist-bar.is-empty {
+  display: grid;
+  place-items: center;
+  background: var(--k-pearl);
+}
+.adoption-demo .dist-none {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--k-slate);
+}
+
+/* The compose window's Send, sending: a spinner where its label was. */
+.adoption-demo .invite-mail-send.ad-busy {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+.adoption-demo .invite-mail-send.ad-busy > * {
+  opacity: 0;
+}
+.adoption-demo .invite-mail-send.ad-busy::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+}
+
+/* ── Intercom ─────────────────────────────────────────────────────────── */
+.adoption-demo .ic-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  font-family: var(--ad-ic-font);
+}
+.adoption-demo .ic-layer > * {
+  pointer-events: auto;
+}
+.adoption-demo .ic {
+  position: absolute;
+}
+.adoption-demo .ic-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
+  color: var(--k-ink);
+}
+.adoption-demo .ic-tag {
+  position: absolute;
+  left: 0;
+  top: -28px;
+  padding: 6px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--ad-tag);
+  color: var(--ad-tag-ink);
+  font: 600 11.5px/1 var(--font-ui);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+.adoption-demo:not(.labels-on) .ic-tag {
+  display: none;
+}
+.adoption-demo.labels-on .ic-outline {
+  outline: 2px dashed var(--ad-tag-edge);
+  outline-offset: 5px;
+}
+.adoption-demo .ic-av {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--k-teal);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.adoption-demo .ic-av.firm {
+  background: var(--brand-bar);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 15px;
+}
+.adoption-demo .ic-btn {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--k-plum);
+  color: #fff;
+  font: 600 14px var(--ad-ic-font);
+  cursor: pointer;
+}
+.adoption-demo .ic-btn:hover {
+  background: var(--k-plum-hover);
+}
+.adoption-demo .ic-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: #737376;
+  cursor: pointer;
+}
+.adoption-demo .ic-close:hover {
+  background: #f2f2f4;
+}
+.adoption-demo .ic-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The banner, across the page under the tabs. */
+.adoption-demo .ic-banner {
+  position: relative;
+  margin-top: 38px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px 14px 18px;
+  border: 1px solid #e2d2f1;
+  border-radius: var(--radius-xl);
+  background: var(--k-adv-open);
+  font-family: var(--ad-ic-font);
+}
+.adoption-demo .ic-banner .ic-av {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+}
+.adoption-demo .ic-banner p {
+  flex: 1;
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--k-plum);
+}
+.adoption-demo .ic-banner p b {
+  font-weight: 700;
+}
+.adoption-demo .ic-banner .ic-close {
+  position: static;
+}
+.adoption-demo .ic-banner + .page-title {
+  margin-top: 24px;
+}
+.adoption-demo .ic-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.7) 50%, transparent 80%) no-repeat;
+  background-size: 40% 100%;
+  background-position: -150% 0;
+}
+
+/* The tip, under what it points at. Hidden until it has been placed. */
+.adoption-demo .ic-tip {
+  width: 260px;
+  padding: 16px 18px;
+  visibility: hidden;
+}
+.adoption-demo .ic-tip::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 46px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.05);
+}
+.adoption-demo .ic-tip.left::after {
+  right: auto;
+  left: 22px;
+}
+.adoption-demo .ic-tip p {
+  margin: 0 28px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #2b2b30;
+}
+
+.adoption-demo .ic-launcher {
+  right: 20px;
+  bottom: 20px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--k-plum);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(36, 4, 70, 0.35);
+}
+.adoption-demo .ic-launcher svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* ── The intro screen, between days ───────────────────────────────────── */
+.adoption-demo .ad-intro-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+}
+.adoption-demo .intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px;
+  background: var(--ad-night);
+  color: #fff;
+}
+.adoption-demo .intro-inner {
+  width: min(820px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.adoption-demo .tl2 {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  margin-bottom: 18px;
+}
+.adoption-demo .tl2 .ln {
+  position: absolute;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.adoption-demo .tl2 .ln.side {
+  height: 0;
+  background: none;
+  border-top: 2px dashed rgba(255, 255, 255, 0.2);
+}
+.adoption-demo .tl2 .vln {
+  position: absolute;
+  width: 0;
+  border-left: 2px dashed rgba(255, 255, 255, 0.2);
+}
+.adoption-demo .tl2.side-on .ln.side,
+.adoption-demo .tl2.side-on .vln {
+  border-color: rgba(199, 125, 255, 0.6);
+}
+.adoption-demo .tl2 .ln.prog {
+  height: 2px;
+  background: var(--k-violet-new);
+}
+.adoption-demo .tl2 .ln.prog.sideprog {
+  height: 0;
+  background: none;
+  border-top: 2px dashed var(--k-violet-new);
+}
+.adoption-demo .tl2 .cap {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-style: italic;
+  color: #8f80a8;
+  white-space: nowrap;
+}
+.adoption-demo .tl2 .nd {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ad-night);
+  border: 2px solid rgba(255, 255, 255, 0.34);
+}
+.adoption-demo .tl2 .nd.side {
+  border-style: dashed;
+}
+.adoption-demo .tl2 .nd.past {
+  background: var(--k-grape);
+  border-color: var(--k-grape);
+}
+.adoption-demo .tl2 .nd.side.past {
+  background: var(--ad-night);
+  border-color: var(--k-grape);
+}
+.adoption-demo .tl2 .nd.on {
+  background: var(--k-violet-new);
+  border: 2px solid var(--k-violet-new);
+  box-shadow: 0 0 0 6px rgba(199, 125, 255, 0.22);
+}
+.adoption-demo .tl2 .lb {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+}
+.adoption-demo .tl2 .lb b {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a99cbd;
+}
+.adoption-demo .tl2 .lb span {
+  font-size: 11.5px;
+  color: #7f7096;
+}
+.adoption-demo .tl2 .lb.on b {
+  color: #fff;
+}
+.adoption-demo .tl2 .lb.on span {
+  color: #cdc1de;
+}
+.adoption-demo .intro-pill {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(233, 217, 244, 0.28);
+  background: rgba(233, 217, 244, 0.1);
+  color: var(--k-grape-light);
+  font-size: 13px;
+  font-weight: 600;
+}
+.adoption-demo .intro.branch .intro-pill {
+  border-style: dashed;
+}
+.adoption-demo .intro h2 {
+  margin: 0 0 6px;
+  font-size: 58px;
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -1.4px;
+  color: #fff;
+  text-wrap: balance;
+}
+.adoption-demo .intro.branch h2 {
+  font-size: 46px;
+}
+.adoption-demo .moments {
+  list-style: none;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.adoption-demo .moments li {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+}
+.adoption-demo .moments span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--k-violet-new);
+}
+.adoption-demo .moments p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.45;
+  color: #e6def0;
+}
+.adoption-demo .intro-go {
+  height: 50px;
+  padding: 0 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--k-plum);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.adoption-demo .intro-go:hover {
+  background: #efe5f8;
+}
+.adoption-demo .intro-go svg {
+  width: 18px;
+  height: 18px;
+}
+.adoption-demo .intro-go:focus-visible {
+  outline: 2px solid var(--k-violet-new);
+  outline-offset: 3px;
+}
+.adoption-demo .intro-mark {
+  position: absolute;
+  left: 40px;
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #8f80a8;
+}
+.adoption-demo .intro-mark svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Emails ───────────────────────────────────────────────────────────── */
+.adoption-demo .ad-mail-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.adoption-demo .mail-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 8, 30, 0.55);
+}
+.adoption-demo .mail-win {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(640px, calc(100% - 40px));
+  max-height: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(10, 2, 24, 0.45);
+}
+.adoption-demo .mail-win.in-device {
+  z-index: 250;
+  width: min(600px, calc(100% - 40px));
+}
+.adoption-demo .mail-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid #dcdce0;
+  background: #eeeef0;
+}
+.adoption-demo .mail-dots {
+  display: flex;
+  gap: 6px;
+}
+.adoption-demo .mail-dots i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.adoption-demo .mail-dots i:nth-child(1) {
+  background: #ff5f57;
+}
+.adoption-demo .mail-dots i:nth-child(2) {
+  background: #febc2e;
+}
+.adoption-demo .mail-dots i:nth-child(3) {
+  background: #28c840;
+}
+.adoption-demo .mail-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid #d8d8de;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 12.5px;
+  color: #8a8a92;
+}
+.adoption-demo .mail-title svg {
+  width: 13px;
+  height: 13px;
+}
+.adoption-demo .mail-x {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #6b6b73;
+  cursor: pointer;
+}
+.adoption-demo .mail-x:hover {
+  background: #e2e2e6;
+}
+.adoption-demo .mail-x svg {
+  width: 15px;
+  height: 15px;
+}
+.adoption-demo .mail-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 22px 14px;
+  border-bottom: 1px solid var(--k-line);
+  background: var(--k-cloud-cool);
+}
+.adoption-demo .mail-from {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+}
+.adoption-demo .mail-from b {
+  font-weight: 600;
+  color: var(--k-plum);
+}
+.adoption-demo .mail-from .org {
+  font-weight: 300;
+  color: var(--k-slate);
+}
+.adoption-demo .mail-from time {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--k-slate);
+  white-space: nowrap;
+}
+.adoption-demo .mail-av {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.adoption-demo .mail-av.person {
+  background: var(--brand-bar);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.adoption-demo .mail-av.knomee {
+  background: var(--k-plum);
+}
+.adoption-demo .mail-av.knomee svg {
+  width: 18px;
+  height: 18px;
+}
+.adoption-demo .mail-to {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--k-line);
+  font-size: 13.5px;
+  color: #221833;
+}
+.adoption-demo .mail-to span {
+  color: var(--k-slate);
+}
+.adoption-demo .mail-subj {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--k-plum);
+}
+.adoption-demo .mail-body {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 24px 26px;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: #463a57;
+}
+.adoption-demo .mail-brand {
+  display: inline-flex;
+  color: var(--brand-bar);
+}
+.adoption-demo .mail-brand .client-logo {
+  height: 22px;
+}
+.adoption-demo .mail-brand.knomee {
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--k-plum);
+}
+.adoption-demo .mail-brand.knomee svg {
+  width: 20px;
+  height: 20px;
+}
+.adoption-demo .mail-msg {
+  align-self: stretch;
+  white-space: pre-wrap;
+}
+/* The email's one button: the firm's colour on the firm's emails, Knomee's
+   plum on Knomee's own. */
+.adoption-demo .mail-cta {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--k-plum);
+  color: #fff;
+  font: 600 13.5px var(--font-ui);
+}
+.adoption-demo .by-firm .mail-cta {
+  background: var(--brand-bar);
+}
+.adoption-demo button.mail-cta {
+  cursor: pointer;
+}
+.adoption-demo button.mail-cta:hover {
+  filter: brightness(0.9);
+}
+.adoption-demo .mail-sign {
+  white-space: pre-line;
+}
+
+/* ── The notes ────────────────────────────────────────────────────────── */
+.adoption-demo .ad-notes {
+  overflow: auto;
+  padding: 20px 18px 40px;
+}
+.adoption-demo .ad-notes h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--k-plum);
+  text-wrap: balance;
+}
+.adoption-demo .ad-notes .sub {
+  margin: -8px 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--k-muted);
+}
+.adoption-demo .effort {
+  position: sticky;
+  top: -20px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--ad-notes-line);
+  border-radius: var(--radius-xl);
+  background: #fff;
+  box-shadow: 0 6px 14px -8px rgba(36, 4, 70, 0.18);
+}
+.adoption-demo .effort .lbl {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--k-ink);
+}
+.adoption-demo .effort .vals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.adoption-demo .effort .big {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--k-plum);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.adoption-demo .effort .min {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--k-muted);
+  white-space: nowrap;
+}
+.adoption-demo .effort .min svg {
+  width: 13px;
+  height: 13px;
+}
+.adoption-demo .tl {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adoption-demo .tl::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: 14px;
+  width: 2px;
+  background: var(--ad-notes-rail);
+}
+/* The rail fills down to the current step. */
+.adoption-demo .tl::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  z-index: 0;
+  width: 2px;
+  height: var(--prog, 0px);
+  border-radius: 2px;
+  background: var(--k-grape);
+}
+.adoption-demo .tl-item {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 34px;
+  scroll-margin-top: 110px;
+}
+.adoption-demo .tl-dot {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #cfc6da;
+  background: #fff;
+}
+.adoption-demo .tl-item.past .tl-dot {
+  background: var(--k-grape);
+  border-color: var(--k-grape);
+}
+.adoption-demo .tl-item.current .tl-dot {
+  background: var(--ad-tag);
+  border-color: var(--ad-tag-edge);
+  box-shadow: 0 0 0 4px rgba(255, 214, 107, 0.35);
+}
+.adoption-demo .tl-item.branch .tl-dot {
+  border-style: dashed;
+}
+.adoption-demo .day-pill {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: #ece6f4;
+  color: var(--k-grape);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+.adoption-demo .tl-item.current .day-pill {
+  background: var(--k-plum);
+  color: #fff;
+}
+.adoption-demo .tl-item.branch .day-pill {
+  padding: 4px 9px;
+  border: 1px dashed #b9a9cf;
+  background: transparent;
+}
+.adoption-demo .tl-item.current.branch .day-pill {
+  border-color: var(--k-plum);
+  background: var(--k-plum);
+}
+.adoption-demo .tl-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.adoption-demo .tl-btn:hover {
+  background: #ece7f3;
+}
+.adoption-demo .tl-btn > span {
+  display: inline-block;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--k-ink);
+}
+.adoption-demo .tl-item.current .tl-btn {
+  padding: 12px 14px 4px;
+  border: 1px solid var(--ad-notes-line);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #fff;
+}
+.adoption-demo .tl-item.hint .tl-btn {
+  background: #fff8e1;
+  box-shadow: 0 0 0 2px var(--ad-tag-edge);
+}
+.adoption-demo .tl-item.hint .day-pill {
+  border-color: var(--ad-tag-edge);
+  background: var(--ad-tag);
+  color: var(--ad-tag-ink);
+}
+.adoption-demo .tl-item.hint .tl-dot {
+  border-color: var(--ad-tag-edge);
+  background: var(--ad-tag);
+}
+.adoption-demo .tl-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 14px 16px;
+  border: 1px solid var(--ad-notes-line);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  background: #fff;
+}
+.adoption-demo .what {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2e2a35;
+}
+.adoption-demo .try {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--ad-try-edge);
+  border-radius: var(--radius-lg);
+  background: var(--ad-try-bg);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ad-try-ink);
+}
+.adoption-demo .try svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: #b07c00;
+}
+.adoption-demo .try b {
+  font-weight: 600;
+}
+.adoption-demo .mini {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--ad-notes-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  font-family: inherit;
+  text-align: left;
+}
+.adoption-demo .mini.mail {
+  cursor: pointer;
+}
+.adoption-demo .mini.mail:hover {
+  border-color: #cfc6da;
+}
+.adoption-demo .mini-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #faf8fc;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--k-muted);
+}
+.adoption-demo .mini-head > svg {
+  width: 13px;
+  height: 13px;
+  color: var(--k-muted);
+}
+.adoption-demo .mini.mail:hover .mini-head > svg {
+  color: var(--k-grape);
+}
+.adoption-demo .mini .mh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.adoption-demo .mini .mh svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.adoption-demo .mini-body,
+.adoption-demo .mini-body > span {
+  display: block;
+}
+.adoption-demo .mini-body {
+  padding: 10px 12px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #2e2a35;
+}
+.adoption-demo .mini-body .from {
+  font-size: 12px;
+  color: var(--k-muted);
+}
+.adoption-demo .mini-body .subj {
+  margin: 2px 0 6px;
+  font-weight: 600;
+  color: var(--k-ink);
+}
+.adoption-demo .mini-body .clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.adoption-demo .mini.slack .mini-head {
+  background: #f3faf8;
+  color: var(--k-forest);
+}
+.adoption-demo .foot-note {
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--k-muted);
+}
+
+/* A narrow window: the app above, the notes under it. */
+@media (max-width: 1100px) {
+  .adoption-demo {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  .adoption-demo .ad-stage {
+    display: block;
+  }
+  .adoption-demo .ad-device {
+    height: 760px;
+    border-right: 0;
+    border-bottom: 1px solid #ddd8e4;
+  }
+  .adoption-demo .ad-bar-now {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .adoption-demo .ad-bar-prog {
+    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .adoption-demo .tl::after {
+    transition: height 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .adoption-demo .ad-track,
+  .adoption-demo .ad-track::after {
+    transition: background 0.2s, transform 0.2s;
+  }
+  .adoption-demo :is(.ad-db-btn, .ic-btn, .ic-close, .intro-go, .mail-x, .mini.mail, button.mail-cta) {
+    transition: transform 0.16s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+  .adoption-demo :is(.intro-go svg, .tl-btn > span, .mini-head > svg) {
+    transition: transform 0.2s ease;
+  }
+  .adoption-demo .tl-btn {
+    transition: background-color 0.2s ease;
+  }
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .adoption-demo .ad-db-btn:hover,
+  .adoption-demo .ic-btn:hover,
+  .adoption-demo .intro-go:hover {
+    transform: translateY(-1px);
+  }
+  .adoption-demo :is(.ad-db-btn, .ic-btn, .intro-go):active {
+    transform: scale(0.97);
+  }
+  .adoption-demo .intro-go:hover svg {
+    transform: translateX(3px);
+  }
+  .adoption-demo :is(.ic-close, .mail-x):hover {
+    transform: rotate(90deg);
+  }
+  .adoption-demo .mini.mail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(36, 4, 70, 0.1);
+  }
+  .adoption-demo .mini.mail:hover .mini-head > svg {
+    transform: scale(1.2);
+  }
+  .adoption-demo .tl-btn:hover > span {
+    transform: translateX(3px);
+  }
+
+  /* The demo bar */
+  .adoption-demo .ad-db-btn.pulse {
+    animation: ad-pulse 1.6s ease-in-out infinite;
+  }
+  .adoption-demo .ad-now-in.go {
+    animation: ad-rise-8 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* The Invite button the tip points at */
+  .adoption-demo[data-beckon] .ad-zoom .toolbar .btn-primary {
+    animation: ad-beckon 1.6s ease-out infinite;
+  }
+
+  /* Intercom */
+  .adoption-demo .ic-banner {
+    animation: ad-drop-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .adoption-demo .ic-banner::after {
+    animation: ad-sweep 1.3s ease 0.45s both;
+  }
+  .adoption-demo .ic-banner.leaving {
+    animation: ad-lift-out 0.19s ease both;
+  }
+  .adoption-demo .ic-tip {
+    animation: ad-tip-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both, ad-float 3.2s ease-in-out 0.6s infinite;
+  }
+  .adoption-demo .ic-tip.leaving {
+    animation: ad-fade-out 0.19s ease both;
+  }
+  .adoption-demo .ic-launcher {
+    animation: ad-pop-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s both;
+  }
+
+  /* The compose window */
+  .adoption-demo .invite-mail-send.ad-busy::after {
+    animation: ad-spin 0.7s linear infinite;
+  }
+  .adoption-demo .modal-backdrop.ad-leaving {
+    animation: ad-fade-out 0.19s ease both;
+  }
+  .adoption-demo .modal.ad-leaving {
+    animation: ad-modal-out 0.19s ease both;
+  }
+
+  /* A row that has just arrived */
+  .adoption-demo .ad-row-enter td {
+    animation: ad-row-in 0.9s ease both;
+  }
+
+  /* The intro screen */
+  .adoption-demo .intro {
+    animation: ad-fade-in 0.45s ease both;
+  }
+  .adoption-demo .intro.leaving {
+    animation: ad-intro-out 0.26s ease both;
+  }
+  .adoption-demo .intro-inner > * {
+    animation: ad-rise-10 0.5s ease both;
+  }
+  .adoption-demo .intro-inner > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  .adoption-demo .intro-inner > :nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  .adoption-demo .intro-inner > :nth-child(4) {
+    animation-delay: 0.18s;
+  }
+  .adoption-demo .intro-inner > :nth-child(5) {
+    animation-delay: 0.24s;
+  }
+  .adoption-demo .tl2 .ln.main,
+  .adoption-demo .tl2 .ln.side {
+    transform-origin: left center;
+    animation: ad-grow-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+  }
+  .adoption-demo .tl2 .vln {
+    transform-origin: top center;
+    animation: ad-grow-y 0.35s ease 0.1s both;
+  }
+  .adoption-demo .tl2 .ln.prog {
+    transform-origin: left center;
+    animation: ad-grow-x 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.55s both;
+  }
+  .adoption-demo .tl2 .nd {
+    animation: ad-nd-in 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+    animation-delay: calc(150ms + var(--i, 0) * 70ms);
+  }
+  .adoption-demo .tl2 .nd.on {
+    animation: ad-nd-in 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both, ad-nd-pulse 2s ease-out 1.4s infinite;
+    animation-delay: calc(150ms + var(--i, 0) * 70ms), 1.4s;
+  }
+  .adoption-demo .tl2 .lb {
+    animation: ad-lb-in 0.4s ease both;
+    animation-delay: calc(200ms + var(--i, 0) * 70ms);
+  }
+  .adoption-demo .moments li {
+    animation: ad-rise-10 0.45s ease both;
+    animation-delay: calc(350ms + var(--i, 0) * 110ms);
+  }
+  .adoption-demo .intro-go svg {
+    animation: ad-nudge-x 1.6s ease-in-out 1.4s infinite;
+  }
+
+  /* Emails */
+  .adoption-demo .mail-scrim {
+    animation: ad-fade-in 0.22s ease both;
+  }
+  .adoption-demo .mail-win {
+    animation: ad-modal-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .adoption-demo .mail-body > * {
+    animation: ad-rise-10 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(120ms + var(--i, 0) * 50ms);
+  }
+  .adoption-demo .mail-scrim.leaving {
+    animation: ad-fade-out 0.19s ease both;
+  }
+  .adoption-demo .mail-win.leaving {
+    animation: ad-win-out 0.19s ease both;
+  }
+
+  /* The notes */
+  .adoption-demo .tl-detail {
+    animation: ad-rise-10 0.3s ease both;
+  }
+  .adoption-demo .tl-item.current .tl-dot {
+    animation: ad-cur-pulse 2.4s ease-out infinite;
+  }
+  .adoption-demo .tl-item.current .day-pill {
+    animation: ad-pop-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+  .adoption-demo .tl-item.hint .tl-btn {
+    animation: ad-hint-glow 1.6s ease-in-out infinite;
+  }
+  .adoption-demo .tl-item.hint .tl-dot {
+    animation: ad-hint-dot 1.6s ease-out infinite;
+  }
+  .adoption-demo .try svg {
+    transform-origin: 50% 90%;
+    animation: ad-tap 2.2s ease-in-out 1s infinite;
+  }
+
+  @keyframes ad-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 214, 107, 0);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(255, 214, 107, 0.55);
+    }
+  }
+  @keyframes ad-beckon {
+    0% {
+      box-shadow: 0 0 0 0 rgba(224, 168, 0, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 12px rgba(224, 168, 0, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(224, 168, 0, 0);
+    }
+  }
+  @keyframes ad-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes ad-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes ad-rise-10 {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ad-rise-8 {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ad-drop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ad-lift-out {
+    to {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes ad-tip-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ad-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes ad-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes ad-sweep {
+    from {
+      background-position: -150% 0;
+    }
+    to {
+      background-position: 250% 0;
+    }
+  }
+  @keyframes ad-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes ad-modal-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -46%) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  @keyframes ad-modal-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+  @keyframes ad-win-out {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.97);
+    }
+  }
+  @keyframes ad-row-in {
+    0% {
+      opacity: 0;
+      background: #efe2fb;
+    }
+    30% {
+      opacity: 1;
+      background: #efe2fb;
+    }
+    100% {
+      background: transparent;
+    }
+  }
+  @keyframes ad-intro-out {
+    to {
+      opacity: 0;
+      transform: scale(1.02);
+    }
+  }
+  @keyframes ad-grow-x {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes ad-grow-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes ad-nd-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.3);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  @keyframes ad-nd-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(199, 125, 255, 0.55);
+    }
+    100% {
+      box-shadow: 0 0 0 16px rgba(199, 125, 255, 0);
+    }
+  }
+  @keyframes ad-lb-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 6px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  @keyframes ad-nudge-x {
+    0%,
+    100% {
+      transform: none;
+    }
+    50% {
+      transform: translateX(4px);
+    }
+  }
+  @keyframes ad-cur-pulse {
+    0% {
+      box-shadow: 0 0 0 4px rgba(255, 214, 107, 0.35), 0 0 0 4px rgba(224, 168, 0, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 0 4px rgba(255, 214, 107, 0.35), 0 0 0 13px rgba(224, 168, 0, 0);
+    }
+  }
+  @keyframes ad-hint-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 2px var(--ad-tag-edge);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(224, 168, 0, 0.25);
+    }
+  }
+  @keyframes ad-hint-dot {
+    0% {
+      box-shadow: 0 0 0 0 rgba(224, 168, 0, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 0 10px rgba(224, 168, 0, 0);
+    }
+  }
+  @keyframes ad-tap {
+    0%,
+    55%,
+    100% {
+      transform: none;
+    }
+    65% {
+      transform: translateY(2px) scale(0.86);
+    }
+    75% {
+      transform: none;
+    }
+  }
+}

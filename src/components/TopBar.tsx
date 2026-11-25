@@ -27,6 +27,7 @@ export default function TopBar({
   onApiStore,
   emptyState = false,
   onEmptyState,
+  onAdoptionDemo,
 }: {
   logo?: ReactNode
   cobrand?: 'left' | 'centered'
@@ -39,6 +40,8 @@ export default function TopBar({
       where no handler is passed — the pages where emptying changes nothing. */
   emptyState?: boolean
   onEmptyState?: (on: boolean) => void
+  /** The Intercom adoption demo: a new advisor's first three weeks. */
+  onAdoptionDemo?: () => void
 }) {
   const { open, shown, closing, setOpen } = useDropdown()
   const ref = useRef<HTMLDivElement>(null)
@@ -110,6 +113,18 @@ export default function TopBar({
                   }}
                 >
                   API Store
+                </button>
+              )}
+              {onAdoptionDemo && (
+                <button
+                  className="menu-item"
+                  type="button"
+                  onClick={() => {
+                    setOpen(false)
+                    onAdoptionDemo()
+                  }}
+                >
+                  Adoption Demo
                 </button>
               )}
               {/* A switch, not an item: the menu stays open so the presenter

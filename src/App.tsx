@@ -149,6 +149,7 @@ import {
 import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
+import AdoptionDemo from './adoption/AdoptionDemo'
 
 /* Under this share, a bar is narrower than the label it would have to hold,
    so the label steps outside it instead of going white on a pale track. */
@@ -250,12 +251,19 @@ function ProspectsMetrics({
   tier,
   onPickTier,
   onClear,
+  stats = prospectStats,
 }: {
   tier: TierKey | null
   onPickTier: (k: TierKey) => void
   onClear: () => void
+  /** Another book's numbers (the adoption demo's few rows); the standing
+      book's when not passed. A book where nobody has finished yet has no
+      average and no tiers, so it says so rather than showing a 0 — which
+      the standing book, always scored, never reaches. */
+  stats?: typeof prospectStats
 }) {
   const tierBar = useRef<HTMLDivElement>(null)
+  const unscored = stats.scored === 0
 
   return (
     <CollapsibleCard
@@ -277,12 +285,14 @@ function ProspectsMetrics({
             />
           </span>
           <div className="metric-num">
-            <span className="metric-value metric-value-kq">{Math.round(prospectStats.avgKQ)}</span>
+            <span className={`metric-value metric-value-kq${unscored ? ' is-empty' : ''}`}>
+              {unscored ? '–' : Math.round(stats.avgKQ)}
+            </span>
           </div>
         </div>
         <div className="metric-tile">
           <span className="metric-label">TOTAL PROSPECTS</span>
-          <div className="metric-num"><span className="metric-value">{prospectStats.total}</span></div>
+          <div className="metric-num"><span className="metric-value">{stats.total}</span></div>
         </div>
         <div className="metric-tile distribution">
           <div className="dist-head">
@@ -300,10 +310,11 @@ function ProspectsMetrics({
               </span>
             )}
           </div>
-          <div className="dist-bar cmd-dist-bar" ref={tierBar}>
+          <div className={`dist-bar cmd-dist-bar${unscored ? ' is-empty' : ''}`} ref={tierBar}>
+            {unscored && <span className="dist-none">No results yet</span>}
             {/* A tier with nobody in it is left off the bar and its legend. */}
-            {TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => {
-              const n = prospectStats.byTier[m.tierId]
+            {TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => {
+              const n = stats.byTier[m.tierId]
               return (
                 <button
                   key={m.key}
@@ -323,17 +334,17 @@ function ProspectsMetrics({
           </div>
           <TierLegend
             bar={tierBar}
-            items={TIER_META.filter((m) => prospectStats.byTier[m.tierId] > 0).map((m) => ({
+            items={TIER_META.filter((m) => stats.byTier[m.tierId] > 0).map((m) => ({
               key: m.key,
               dot: m.dot,
               name: `${m.key} · ${m.name}`,
               range: m.range,
             }))}
           />
-          {prospectStats.byTier.incomplete > 0 && (
+          {stats.byTier.incomplete > 0 && (
             <p className="dist-foot">
-              {prospectStats.byTier.incomplete} incomplete profile
-              {prospectStats.byTier.incomplete === 1 ? '' : 's'} not shown
+              {stats.byTier.incomplete} incomplete profile
+              {stats.byTier.incomplete === 1 ? '' : 's'} not shown
             </p>
           )}
         </div>
@@ -423,6 +434,7 @@ function ProspectRow({
   onOpenProfile,
   checked,
   onToggle,
+  className,
 }: {
   p: Prospect
   onConvert: (p: Prospect) => void
@@ -430,10 +442,14 @@ function ProspectRow({
   onOpenProfile: (p: Prospect) => void
   checked: boolean
   onToggle: () => void
+  /** A class of the caller's on the row (the adoption demo marks a row that
+      has just arrived). */
+  className?: string
 }) {
   const incomplete = p.tier === 'incomplete'
+  const rowClass = [incomplete ? 'row-incomplete' : '', className ?? ''].filter(Boolean).join(' ')
   return (
-    <tr className={incomplete ? 'row-incomplete' : undefined}>
+    <tr className={rowClass || undefined}>
       <td className="col-check">
         <input
           type="checkbox"
@@ -533,6 +549,8 @@ function ProspectsTable({
   onToggle,
   allChecked,
   onToggleAll,
+  rows: book = prospects,
+  rowClassName,
 }: {
   onConvert: (p: Prospect) => void
   onResend: (p: Prospect) => void
@@ -543,6 +561,10 @@ function ProspectsTable({
   onToggle: (name: string) => void
   allChecked: boolean
   onToggleAll: () => void
+  /** Another book to list (the adoption demo's); the standing book's when
+      not passed. */
+  rows?: Prospect[]
+  rowClassName?: (p: Prospect) => string | undefined
 }) {
   // KQ Score sort. null = book order. 'desc' (caret down): normal tier order,
   // strongest prospect first within each tier. 'asc' (caret up): the whole
@@ -609,7 +631,7 @@ function ProspectsTable({
         </thead>
         <tbody>
           {orderedGroups.map((group) => {
-            const rows = prospects.filter((p) => p.tier === group.id && !hidden?.has(p.email))
+            const rows = book.filter((p) => p.tier === group.id && !hidden?.has(p.email))
             if (rows.length === 0) return null
             const isCollapsed = collapsed.has(group.id)
             return (
@@ -648,6 +670,7 @@ function ProspectsTable({
                       onOpenProfile={onOpenProfile}
                       checked={selected.has(p.name)}
                       onToggle={() => onToggle(p.name)}
+                      className={rowClassName?.(p)}
                     />
                   ))}
               </Fragment>
@@ -700,6 +723,9 @@ function ProspectsScreen({
   onInvite,
   onOpenProfile,
   hidden,
+  rows,
+  stats,
+  rowClassName,
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
@@ -707,8 +733,13 @@ function ProspectsScreen({
   onDownload: () => void
   onInvite: () => void
   onOpenProfile: (p: Prospect) => void
+  /** Another book, with its own numbers (the adoption demo's, which changes
+      step by step). The standing book and its stats when not passed. */
+  rows?: Prospect[]
+  stats?: typeof prospectStats
+  rowClassName?: (p: Prospect) => string | undefined
 }) {
-  const allNames = prospects.map((p) => p.name)
+  const allNames = (rows ?? prospects).map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const toggle = (name: string) =>
     setSelected((s) => {
@@ -729,6 +760,7 @@ function ProspectsScreen({
         tier={tier}
         onPickTier={(k) => setTier((prev) => (prev === k ? null : k))}
         onClear={() => setTier(null)}
+        stats={stats}
       />
       <ProspectInsights tier={tier} onOpenProfile={onOpenProfile} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
@@ -741,6 +773,8 @@ function ProspectsScreen({
         onToggle={toggle}
         allChecked={allChecked}
         onToggleAll={toggleAll}
+        rows={rows}
+        rowClassName={rowClassName}
       />
     </>
   )
@@ -2729,7 +2763,17 @@ function EmptyIllustration({ variant }: { variant: EmptyVariant }) {
   )
 }
 
-function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => void }) {
+function EmptyScreen({
+  variant,
+  onCta,
+  onInvite,
+}: {
+  variant: EmptyVariant
+  onCta?: () => void
+  /** The Invite button's action. Without one it does nothing, as it always
+      has here; the adoption demo's first invite starts from it. */
+  onInvite?: () => void
+}) {
   const cfg = emptyConfigs[variant]
   return (
     <>
@@ -2750,7 +2794,7 @@ function EmptyScreen({ variant, onCta }: { variant: EmptyVariant; onCta?: () => 
               <button className="btn btn-outline" type="button" disabled>
                 <DownloadIcon /> Download
               </button>
-              <button className="btn btn-primary" type="button">
+              <button className="btn btn-primary" type="button" onClick={onInvite}>
                 <PlusIcon /> Invite
               </button>
             </div>
@@ -4330,6 +4374,9 @@ const ROUTE_VIEWS = [
   'settings',
   'firm-candidates',
   'firm-analytics',
+  /* The Intercom adoption demo, from the burger menu: a new advisor's first
+     three weeks, step by step. #/adoption-demo/<step id> opens one step. */
+  'adoption-demo',
 ] as const
 type RouteView = (typeof ROUTE_VIEWS)[number]
 
@@ -4481,6 +4528,14 @@ export default function App() {
     initialView === 'firm-analytics' && initialProfile === 'older',
   )
   const [apiStoreOpen, setApiStoreOpen] = useState(initialView === 'api-store')
+  /* The adoption demo, and which of its steps is showing (null: the first).
+     It is its own page — demo bar, the app, the notes — and keeps its own
+     brand and its own empty or populated book, so nothing here changes
+     while it runs and Exit lands back on the dashboard as it was. */
+  const [adoptionOpen, setAdoptionOpen] = useState(initialView === 'adoption-demo')
+  const [adoptionStep, setAdoptionStep] = useState<string | null>(
+    initialView === 'adoption-demo' ? initialProfile : null,
+  )
   const [apiProduct, setApiProduct] = useState<string | null>(
     initialView === 'api-store' ? initialProfile : null,
   )
@@ -4624,7 +4679,9 @@ export default function App() {
 
   // The single view the app is showing right now — the source of truth the
   // URL hash reflects.
-  const currentView: RouteView = firmView
+  const currentView: RouteView = adoptionOpen
+    ? 'adoption-demo'
+    : firmView
     ? firmScreen
     : adminView
     ? 'admin'
@@ -4782,6 +4839,10 @@ export default function App() {
       if (v === 'welcome') setLandingVersion('a')
       if (v === 'welcome-b') setLandingVersion('b')
       if (v === 'prospects' || v === 'clients' || v === 'analytics') setScreen(v)
+      setAdoptionOpen(v === 'adoption-demo')
+      setAdoptionStep(v === 'adoption-demo' ? slug : null)
+      /* The demo shows the Prospects tab; leaving it lands there. */
+      if (v === 'adoption-demo') setScreen('prospects')
     }
     const syncFromHash = () => {
       const { view, profile } = parseHash()
@@ -4808,7 +4869,9 @@ export default function App() {
   // (the URL people actually copy on the live site).
   useEffect(() => {
     const open =
-      currentView === 'prospects' && profileProspect
+      currentView === 'adoption-demo'
+        ? adoptionStep
+        : currentView === 'prospects' && profileProspect
         ? profileSlug(profileProspect.name)
         : currentView === 'clients' && householdOpen && family
           ? HOUSEHOLD_SLUG
@@ -4859,6 +4922,7 @@ export default function App() {
     apiProduct,
     prospectAnalyticsOpen,
     candidateAnalyticsOlder,
+    adoptionStep,
   ])
 
   // Esc closes the convert modal.
@@ -5245,6 +5309,29 @@ export default function App() {
     </nav>
   )
 
+  /* The adoption demo is a page of its own: the demo bar, this app on the
+     left, the notes on the right. It is handed the product's real pieces —
+     the tab bar above, the empty dashboard, the prospects table, the compose
+     window — so what it shows is the product, not a drawing of it. */
+  if (adoptionOpen) {
+    return (
+      <AdoptionDemo
+        step={adoptionStep}
+        onStep={(id) => {
+          /* A step is a place in the demo, not a page: the address follows
+             it without a history entry for each one. */
+          routeFromAddress.current = true
+          setAdoptionStep(id)
+        }}
+        onExit={() => {
+          setAdoptionOpen(false)
+          setAdoptionStep(null)
+        }}
+        kit={{ tabs: dashNav, EmptyScreen, ProspectsScreen, InviteCompose, PoweredBy }}
+      />
+    )
+  }
+
   return (
     <div
       className={`page ${brand ? 'brand-client' : ''}`}
@@ -5283,6 +5370,20 @@ export default function App() {
         /* Only over the three tables, with nobody's page open: a profile or
            the family's page covers the table, so emptying it would change
            nothing you can see. */
+        onAdoptionDemo={() => {
+          setAdoptionStep(null)
+          setAdoptionOpen(true)
+          setScreen('prospects')
+          setProfileProspect(null)
+          setProfileClient(null)
+          setHouseholdOpen(false)
+          setCandidateOpen(false)
+          setSettingsOpen(false)
+          setApiStoreOpen(false)
+          setSegmentationOpen(false)
+          setAdminView(false)
+          setFirmView(false)
+        }}
         emptyState={emptyMode}
         onEmptyState={
           (currentView === 'prospects' || currentView === 'clients' || currentView === 'analytics') &&

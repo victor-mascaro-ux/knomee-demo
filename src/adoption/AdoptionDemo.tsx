@@ -1,0 +1,420 @@
+/* The Intercom adoption demo: a new advisor's first three weeks at Acme, step
+ * by step. The dark demo bar runs it; the advisor's real app is on the left,
+ * wearing Acme's brand, with what Intercom adds over it; the notes on the
+ * right say what is happening and why.
+ *
+ * Its story, copy and timing are the approved prototype's
+ * (docs/adoption-demo/prototype.html). Its app is the product's own: the top
+ * bar, the tab bar, the empty dashboard, the prospects table and the compose
+ * window, handed in by App (kit.ts). Only what the product doesn't have — the
+ * Intercom pieces, the notes, the intro screens — is drawn here.
+ *
+ * Buttons that aren't part of the story do nothing: the app is inert except
+ * for its live controls (the Invite button, and anything of the demo's own
+ * marked data-ad-live).
+ */
+
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+} from 'react'
+import TopBar from '../components/TopBar'
+import { CLIENT_BRANDS, type ClientBrand } from '../components/clientBrands'
+import { useCcNav } from '../ccNav'
+import type { InviteEmail } from '../data/inviteEmails'
+import ComposeModal, { type Sent } from './ComposeModal'
+import DemoBar from './DemoBar'
+import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
+import IntroScreen from './IntroScreen'
+import { AnchoredTip, Banner, Launcher } from './intercom'
+import type { DemoKit } from './kit'
+import MailWindow from './MailWindow'
+import { useLeave } from './motion'
+import NotesPanel from './NotesPanel'
+import {
+  ALEX,
+  NOTE_TEXT,
+  STEPS,
+  dayOf,
+  firstName,
+  nextDayStart,
+  stepIndex,
+  type ExtraKey,
+  type SentEmail,
+} from './steps'
+import './adoption.css'
+
+const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
+
+/** The controls in the app that are part of the story. Everything else in it
+    is inert. */
+const LIVE = '.toolbar .btn-primary, [data-ad-live]'
+
+/** Alex's first invite, as his draft starts. */
+const FIRST_INVITE: InviteEmail = {
+  id: 'adoption-first-invite',
+  stage: 'Adoption demo',
+  name: 'Before we meet',
+  subject: 'Before we meet',
+  message: NOTE_TEXT.replace('{first}', '{{First Name}}'),
+  cta: 'Start Your Check-In →',
+  signoff: 'Best,\n{{Advisor Name}}\n{{Firm Name}}',
+}
+
+interface StepState {
+  idx: number
+  /** Bumped by Restart and by re-entering the current step: either opens it afresh. */
+  visit: number
+  rows: DemoRow[]
+  ui: Ui
+  /** The day's intro screen is up. */
+  intro: boolean
+  /** The email open from the notes, over everything. */
+  mail: ExtraKey | null
+  /** The next day, lit up in the notes after a pause at the end of a day. */
+  hint: number | null
+}
+
+function openStep(idx: number, visit: number, prevDay: number, intros: boolean): StepState {
+  const id = STEPS[idx].id
+  return {
+    idx,
+    visit,
+    rows: rowsFor(id),
+    ui: freshUi(id),
+    intro: intros && dayOf(idx) !== prevDay,
+    mail: null,
+    hint: null,
+  }
+}
+
+export default function AdoptionDemo({
+  step,
+  onStep,
+  onExit,
+  kit,
+}: {
+  /** The step in the address; null or unknown is the first. */
+  step: string | null
+  onStep: (id: string) => void
+  onExit: () => void
+  kit: DemoKit
+}) {
+  const idx = Math.max(0, stepIndex(step))
+  const [introsOn, setIntrosOn] = useState(true)
+  const [labelsOn, setLabelsOn] = useState(true)
+  /* What Alex sent, carried from his first invite to the notes of later steps. */
+  const [sent, setSent] = useState<SentEmail | null>(null)
+  /* Restart and re-entering a step open it afresh; Restart also starts the
+     day's intro again, as on a first visit. */
+  const [visit, setVisit] = useState({ n: 0, fresh: false })
+
+  const [st, setSt] = useState<StepState>(() => openStep(idx, 0, -1, true))
+  if (st.idx !== idx || st.visit !== visit.n) {
+    const prevDay = st.visit !== visit.n && visit.fresh ? -1 : dayOf(st.idx)
+    setSt(openStep(idx, visit.n, prevDay, introsOn))
+  }
+  const { ui, rows } = st
+  /** A change to this step's screen, made later (after an exit has played):
+      dropped if the presenter has moved to another step meanwhile. */
+  const laterOnThisStep = (patch: (s: StepState) => StepState) => {
+    const at = { idx: st.idx, visit: st.visit }
+    return () => setSt((s) => (s.idx === at.idx && s.visit === at.visit ? patch(s) : s))
+  }
+  const setUiLater = (patch: Partial<Ui>) => laterOnThisStep((s) => ({ ...s, ui: { ...s.ui, ...patch } }))
+
+  /* The address names the step it shows. */
+  useEffect(() => {
+    if (step !== STEPS[idx].id) onStep(STEPS[idx].id)
+  }, [step, idx, onStep])
+
+  /* A comment left on the demo lands back on its step. */
+  useCcNav(
+    'adoption-step',
+    STEPS[idx].id,
+    (id: string) => onStep(id),
+    STEPS.map((s) => s.id),
+  )
+
+  const goTo = useCallback(
+    (i: number) => {
+      const k = Math.max(0, Math.min(STEPS.length - 1, i))
+      if (k === idx) setVisit((v) => ({ n: v.n + 1, fresh: false }))
+      else onStep(STEPS[k].id)
+    },
+    [idx, onStep],
+  )
+  const restart = () => {
+    setSent(null)
+    setVisit((v) => ({ n: v.n + 1, fresh: true }))
+    if (idx !== 0) onStep(STEPS[0].id)
+  }
+
+  /* ── The intro screen ── */
+  const [introLeaving, leaveIntro] = useLeave(260)
+  const closeIntro = useCallback(() => {
+    if (!st.intro) return
+    const at = { idx: st.idx, visit: st.visit }
+    leaveIntro(() => setSt((s) => (s.idx === at.idx && s.visit === at.visit ? { ...s, intro: false } : s)))
+  }, [st.intro, st.idx, st.visit, leaveIntro])
+  /* Turning intros off mid-intro opens the day. */
+  useEffect(() => {
+    if (!introsOn) closeIntro()
+  }, [introsOn, closeIntro])
+
+  /* ── Pacing ── At the end of a day, if the presenter hasn't moved on within
+     4 seconds, the next day lights up in the notes. */
+  useEffect(() => {
+    if (st.intro) return
+    const target = nextDayStart(st.idx)
+    if (target === null) return
+    const t = window.setTimeout(() => setSt((s) => (s.idx === st.idx ? { ...s, hint: target } : s)), 4000)
+    return () => window.clearTimeout(t)
+  }, [st.idx, st.visit, st.intro])
+
+  /* ── The app's scroll ── A step opens at the top; the first invite opens
+     with the toolbar in view, where its tip points. */
+  const device = useRef<HTMLElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const sc = scroller.current
+    if (!sc) return
+    sc.scrollTop = 0
+    if (STEPS[st.idx].id === 'first-send') {
+      const tb = sc.querySelector('.toolbar')
+      if (tb) sc.scrollTop = Math.max(0, tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 138)
+    }
+  }, [st.idx, st.visit])
+
+  /* ── Inviting ── */
+  const openInvite = useCallback(() => {
+    setSt((s) => {
+      const next = s.rows.some((r) => r.id === 'sarah')
+      return {
+        ...s,
+        ui: {
+          ...s.ui,
+          tip: false,
+          modal: 'invite',
+          invite: next
+            ? { name: 'Sam Patel', email: 'sam.patel@example.com', next: true }
+            : { name: 'Sarah Mitchell', email: 'sara.mitchell@email.com', next: false },
+        },
+      }
+    })
+  }, [])
+  const closeInvite = () =>
+    setSt((s) => ({
+      ...s,
+      /* Closed without sending on the first invite: the tip comes back. */
+      ui: { ...s.ui, modal: null, invite: null, tip: STEPS[s.idx].id === 'first-send' && !s.ui.done },
+    }))
+  const inviteSent = (out: Sent) => {
+    const who = ui.invite
+    if (!who) return
+    setSent({ first: firstName(who.name), subject: out.subject, body: out.body })
+    const row = who.next
+      ? invitedRow('next', who.name, out.email, '12/04/2026')
+      : sarahInvited(out.email)
+    setSt((s) => ({
+      ...s,
+      rows: [...s.rows.map((r) => ({ ...r, fresh: false })), { ...row, fresh: true }],
+      ui: { ...s.ui, modal: null, invite: null, tip: false, done: true },
+    }))
+  }
+
+  /* ── The welcome banner and the Invite tip ── */
+  const [bannerLeaving, leaveBanner] = useLeave()
+  const [tipLeaving, leaveTip] = useLeave()
+
+  /* ── Emails opened from the notes ── */
+  const [mailLeaving, leaveMail] = useLeave()
+  const mailFrom = useRef<HTMLElement | null>(null)
+  const openMail = (k: ExtraKey, from: HTMLElement) => {
+    mailFrom.current = from
+    setSt((s) => ({ ...s, mail: k }))
+  }
+  const closeMail = useCallback(() => {
+    leaveMail(() => {
+      setSt((s) => (s.mail ? { ...s, mail: null } : s))
+      const back = mailFrom.current
+      if (back && document.body.contains(back)) back.focus()
+    })
+  }, [leaveMail])
+
+  /* ── Keys ── Arrows step through; Enter, Space or Esc open a day from its
+     intro; Esc closes an open email. Typing is left alone. */
+  const keys = useRef({ st, goTo, closeIntro, closeMail })
+  keys.current = { st, goTo, closeIntro, closeMail }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
+      const { st: s, goTo: go, closeIntro: openDay, closeMail: shut } = keys.current
+      if (s.mail) {
+        if (e.key === 'Escape') shut()
+        return
+      }
+      if (s.intro) {
+        if (['Enter', ' ', 'ArrowRight', 'Escape'].includes(e.key)) {
+          e.preventDefault()
+          openDay()
+        }
+        if (e.key === 'ArrowLeft') go(s.idx - 1)
+        return
+      }
+      if (s.ui.modal) return
+      if (e.key === 'ArrowRight') go(s.idx + 1)
+      if (e.key === 'ArrowLeft') go(s.idx - 1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  const next = () => (st.intro ? closeIntro() : goTo(idx + 1))
+
+  /* ── The app ── */
+  const stats = useMemo(() => statsOf(rows), [rows])
+  const freshRows = useMemo(() => new Set(rows.filter((r) => r.fresh).map((r) => r.name)), [rows])
+  const noop = () => undefined
+  const tipOn = ui.tip && !ui.modal && !st.intro
+
+  /* Clicks on anything in the app that isn't part of the story stop here. */
+  const guard = (e: ReactMouseEvent) => {
+    const t = e.target as Element
+    if (!t.closest(LIVE)) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
+  return (
+    <div
+      className={`adoption-demo${labelsOn ? ' labels-on' : ''}`}
+      style={{ '--brand-bar': ACME.primary } as CSSProperties}
+      data-beckon={tipOn ? '' : undefined}
+    >
+      <h1 className="ad-sr-only">
+        Knomee adoption demo: how Intercom guides a new advisor from first login to a habit, inside the ACME
+        advisor dashboard
+      </h1>
+      <DemoBar
+        idx={idx}
+        introsOn={introsOn}
+        onIntros={setIntrosOn}
+        labelsOn={labelsOn}
+        onLabels={setLabelsOn}
+        pulse={ui.done && idx < STEPS.length - 1}
+        onRestart={restart}
+        onBack={() => goTo(idx - 1)}
+        onNext={next}
+        onExit={onExit}
+      />
+      <main className="ad-stage">
+        <section className="ad-device" ref={device} aria-label="ACME advisor dashboard">
+          <div className="ad-scroll" ref={scroller}>
+            <div className="ad-zoom" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
+              <div className="page brand-client">
+                <TopBar logo={ACME.logo} cobrand="left" />
+                <main className="content">
+                  {kit.tabs}
+                  {ui.welcome && (
+                    <Banner
+                      title="Welcome, Alex."
+                      action="Show me"
+                      onAction={() => goTo(1)}
+                      onDismiss={() => leaveBanner(setUiLater({ welcome: false }))}
+                      leaving={bannerLeaving}
+                    >
+                      This is where you see what matters to prospects before you meet them.
+                    </Banner>
+                  )}
+                  {rows.length === 0 ? (
+                    <kit.EmptyScreen variant="prospects" onInvite={openInvite} />
+                  ) : (
+                    <kit.ProspectsScreen
+                      rows={rows}
+                      stats={stats}
+                      rowClassName={(p) => (freshRows.has(p.name) ? 'ad-row-enter' : undefined)}
+                      onInvite={openInvite}
+                      onConvert={noop}
+                      onResend={noop}
+                      onDownload={noop}
+                      onOpenProfile={noop}
+                    />
+                  )}
+                </main>
+              </div>
+            </div>
+          </div>
+          <kit.PoweredBy />
+          <div className="ic-layer">
+            {tipOn && (
+              <AnchoredTip
+                key={`tip-${st.idx}-${st.visit}`}
+                anchor={() => device.current?.querySelector<HTMLElement>('.toolbar .btn-primary') ?? null}
+                device={device}
+                scroller={scroller}
+                leaving={tipLeaving}
+                onClose={() => leaveTip(setUiLater({ tip: false }))}
+              >
+                Meeting someone this week? Click <b>Invite</b> to add them.
+              </AnchoredTip>
+            )}
+            <Launcher />
+          </div>
+          {ui.modal === 'invite' && ui.invite && (
+            <ComposeModal
+              key={`invite-${st.idx}-${st.visit}`}
+              Compose={kit.InviteCompose}
+              title="Invite"
+              sample={FIRST_INVITE}
+              to={ui.invite.email}
+              known={{
+                'Advisor Name': ALEX.name,
+                'Firm Name': ALEX.firm,
+                'First Name': firstName(ui.invite.name),
+              }}
+              brand={ACME}
+              onSent={inviteSent}
+              onClose={closeInvite}
+            />
+          )}
+          {st.intro && (
+            <div className="ad-intro-layer">
+              <IntroScreen day={dayOf(st.idx)} leaving={introLeaving} onContinue={closeIntro} />
+            </div>
+          )}
+        </section>
+        <NotesPanel
+          idx={idx}
+          nudged={false}
+          nudge={null}
+          sent={sent}
+          hint={st.hint}
+          onGoto={goTo}
+          onOpenMail={openMail}
+        />
+      </main>
+      {st.mail && (
+        <div className="ad-mail-layer">
+          <div className={`mail-scrim${mailLeaving ? ' leaving' : ''}`} onClick={closeMail} />
+          <MailWindow
+            k={st.mail}
+            sent={sent}
+            nudge={null}
+            brand={ACME}
+            leaving={mailLeaving}
+            onClose={closeMail}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
