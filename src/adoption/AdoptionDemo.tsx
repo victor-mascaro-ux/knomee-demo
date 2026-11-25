@@ -28,6 +28,7 @@ import TopBar from '../components/TopBar'
 import { CLIENT_BRANDS, type ClientBrand } from '../components/clientBrands'
 import { useCcNav } from '../ccNav'
 import type { InviteEmail } from '../data/inviteEmails'
+import AskModal from './AskModal'
 import ComposeModal, { type Sent } from './ComposeModal'
 import DemoBar from './DemoBar'
 import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
@@ -37,8 +38,10 @@ import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { useLeave } from './motion'
 import NotesPanel from './NotesPanel'
+import TeamChat from './TeamChat'
 import {
   ALEX,
+  ASK,
   NOTE_TEXT,
   STEPS,
   dayOf,
@@ -111,6 +114,8 @@ export default function AdoptionDemo({
   const [labelsOn, setLabelsOn] = useState(true)
   /* What Alex sent, carried from his first invite to the notes of later steps. */
   const [sent, setSent] = useState<SentEmail | null>(null)
+  /* What Alex answered on Day 4: the team's alert quotes it on Day 7. */
+  const [askAnswer, setAskAnswer] = useState<string | null>(null)
   /* Restart and re-entering a step open it afresh; Restart also starts the
      day's intro again, as on a first visit. */
   const [visit, setVisit] = useState({ n: 0, fresh: false })
@@ -152,6 +157,7 @@ export default function AdoptionDemo({
   )
   const restart = () => {
     setSent(null)
+    setAskAnswer(null)
     setVisit((v) => ({ n: v.n + 1, fresh: true }))
     if (idx !== 0) onStep(STEPS[0].id)
   }
@@ -177,6 +183,32 @@ export default function AdoptionDemo({
     const t = window.setTimeout(() => setSt((s) => (s.idx === st.idx ? { ...s, hint: target } : s)), 4000)
     return () => window.clearTimeout(t)
   }, [st.idx, st.visit, st.intro])
+
+  /* ── What arrives on its own ── A moment after the day opens: Alex's
+     reminder email (Day 2), the one question (Day 4), the team's
+     notification (Day 7, or after "Talk it through"). */
+  useEffect(() => {
+    const a = st.ui.auto
+    if (st.intro || !a) return
+    const at = { idx: st.idx, visit: st.visit }
+    const t = window.setTimeout(
+      () =>
+        setSt((s) =>
+          s.idx !== at.idx || s.visit !== at.visit
+            ? s
+            : {
+                ...s,
+                ui: {
+                  ...s.ui,
+                  auto: null,
+                  ...(a === 'mail' ? { modal: 'mail' as const } : a === 'ask' ? { modal: 'ask' as const } : { notif: true }),
+                },
+              },
+        ),
+      900,
+    )
+    return () => window.clearTimeout(t)
+  }, [st.idx, st.visit, st.intro, st.ui.auto])
 
   /* ── The app's scroll ── A step opens at the top; the first invite opens
      with the toolbar in view, where its tip points. */
@@ -229,6 +261,42 @@ export default function AdoptionDemo({
     }))
   }
 
+  /* ── Day 2: Knomee's reminder, open in Alex's inbox ── Its button starts
+     an invite; closing it is the end of the day's story either way. */
+  const [inboxLeaving, leaveInbox] = useLeave()
+  const closeInbox = () =>
+    leaveInbox(laterOnThisStep((s) => ({ ...s, ui: { ...s.ui, modal: null, done: true } })))
+  const inboxCta = () => {
+    setSt((s) => ({ ...s, ui: { ...s.ui, modal: null, done: true } }))
+    openInvite()
+  }
+
+  /* ── Day 4: the one question ── */
+  const [askLeaving, leaveAsk] = useLeave()
+  const closeAsk = () => leaveAsk(setUiLater({ modal: null }))
+  const answerAsk = (i: number) => {
+    setAskAnswer(ASK[i])
+    const ask = { ...ui.ask, answer: i }
+    if (i === 0) {
+      /* See the email: the invite, with its email, opens in its place. */
+      setSt((s) => ({ ...s, ui: { ...s.ui, ask, done: true, modal: null } }))
+      openInvite()
+    } else if (i === 1) {
+      /* Talk it through: the Knomee team hears from him. */
+      setSt((s) => ({
+        ...s,
+        ui: { ...s.ui, ask, done: true, modal: null, view: 'chat', chat: 'help', notif: false, notifOpen: false, auto: 'notif' },
+      }))
+    } else {
+      setSt((s) => ({ ...s, ui: { ...s.ui, ask, done: true } }))
+    }
+  }
+
+  /* ── The team's chat: its notification opens the alert ── */
+  const [notifLeaving, leaveNotif] = useLeave(160)
+  const openNotif = () =>
+    leaveNotif(laterOnThisStep((s) => ({ ...s, ui: { ...s.ui, notif: false, notifOpen: true, done: true } })))
+
   /* ── The welcome banner and the Invite tip ── */
   const [bannerLeaving, leaveBanner] = useLeave()
   const [tipLeaving, leaveTip] = useLeave()
@@ -250,13 +318,14 @@ export default function AdoptionDemo({
 
   /* ── Keys ── Arrows step through; Enter, Space or Esc open a day from its
      intro; Esc closes an open email. Typing is left alone. */
-  const keys = useRef({ st, goTo, closeIntro, closeMail })
-  keys.current = { st, goTo, closeIntro, closeMail }
+  const keys = useRef({ st, goTo, closeIntro, closeMail, closeInbox, closeAsk })
+  keys.current = { st, goTo, closeIntro, closeMail, closeInbox, closeAsk }
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
-      const { st: s, goTo: go, closeIntro: openDay, closeMail: shut } = keys.current
+      const { st: s, goTo: go, closeIntro: openDay, closeMail: shut, closeInbox: shutInbox, closeAsk: shutAsk } =
+        keys.current
       if (s.mail) {
         if (e.key === 'Escape') shut()
         return
@@ -269,7 +338,12 @@ export default function AdoptionDemo({
         if (e.key === 'ArrowLeft') go(s.idx - 1)
         return
       }
-      if (s.ui.modal) return
+      if (s.ui.modal) {
+        /* The invite's window closes itself on Esc. */
+        if (e.key === 'Escape' && s.ui.modal === 'mail') shutInbox()
+        if (e.key === 'Escape' && s.ui.modal === 'ask') shutAsk()
+        return
+      }
       if (e.key === 'ArrowRight') go(s.idx + 1)
       if (e.key === 'ArrowLeft') go(s.idx - 1)
     }
@@ -384,6 +458,45 @@ export default function AdoptionDemo({
               brand={ACME}
               onSent={inviteSent}
               onClose={closeInvite}
+            />
+          )}
+          {ui.view === 'chat' && (
+            <div className="ad-chat-layer">
+              <TeamChat
+                kind={ui.chat}
+                askAnswer={askAnswer}
+                notif={ui.notif}
+                notifLeaving={notifLeaving}
+                notifOpen={ui.notifOpen}
+                onOpenNotif={openNotif}
+              />
+            </div>
+          )}
+          {ui.modal === 'mail' && (
+            <>
+              <div className={`ad-scrim${inboxLeaving ? ' leaving' : ''}`} onClick={closeInbox} />
+              <MailWindow
+                k="alexNudge"
+                sent={sent}
+                nudge={null}
+                brand={ACME}
+                inDevice
+                leaving={inboxLeaving}
+                onClose={closeInbox}
+                onCta={inboxCta}
+              />
+            </>
+          )}
+          {ui.modal === 'ask' && (
+            <AskModal
+              answer={ui.ask.answer}
+              text={ui.ask.text}
+              sent={ui.ask.sent}
+              leaving={askLeaving}
+              onAnswer={answerAsk}
+              onText={(text) => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, text } } }))}
+              onSend={() => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, sent: true } } }))}
+              onClose={closeAsk}
             />
           )}
           {st.intro && (

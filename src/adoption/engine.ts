@@ -142,8 +142,23 @@ export interface Ui {
   welcome: boolean
   /** Intercom's tip beside the Invite button. */
   tip: boolean
-  modal: 'invite' | null
+  /** The dashboard's modal: the invite, Alex's reminder email (Day 2), or
+      the one question (Day 4). */
+  modal: 'invite' | 'mail' | 'ask' | null
   invite: InviteTarget | null
+  /** What arrives on its own, a moment after the step opens. */
+  auto: 'mail' | 'ask' | 'notif' | null
+  /** The advisor's app, or the Knomee team's chat (Day 7, or Day 4's "talk
+      it through"). */
+  view: 'app' | 'chat'
+  chat: 'week' | 'help'
+  /** The chat's desktop notification is up; once clicked, its message is
+      highlighted. */
+  notif: boolean
+  notifOpen: boolean
+  /** Day 4's question: the answer picked (-1: none yet), and the box for
+      "Something else". */
+  ask: { answer: number; text: string; sent: boolean }
   /** The step's story has played out: Next pulses. */
   done: boolean
 }
@@ -154,6 +169,12 @@ export function freshUi(id: StepId): Ui {
     tip: id === 'first-send',
     modal: null,
     invite: null,
+    auto: id === 'if-day2' ? 'mail' : id === 'if-day4' ? 'ask' : id === 'if-day7' ? 'notif' : null,
+    view: id === 'if-day7' ? 'chat' : 'app',
+    chat: 'week',
+    notif: false,
+    notifOpen: false,
+    ask: { answer: -1, text: '', sent: false },
     done: false,
   }
 }
