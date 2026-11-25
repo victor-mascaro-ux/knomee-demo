@@ -94,12 +94,16 @@ function useFollow(
     go()
     const sc = scroller.current
     sc?.addEventListener('scroll', go, { passive: true })
+    /* The page lays in from the top as a step opens: once its pieces have
+       risen into place, look again. */
+    sc?.addEventListener('animationend', go)
     window.addEventListener('resize', go)
     /* The page settles after fonts and pictures load; a few more looks catch it. */
     void document.fonts?.ready.then(go)
-    const t = [120, 400, 900].map((ms) => window.setTimeout(go, ms))
+    const t = [120, 400, 900, 1500].map((ms) => window.setTimeout(go, ms))
     return () => {
       sc?.removeEventListener('scroll', go)
+      sc?.removeEventListener('animationend', go)
       window.removeEventListener('resize', go)
       t.forEach((x) => window.clearTimeout(x))
     }

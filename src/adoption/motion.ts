@@ -167,7 +167,7 @@ export function useCountUps(root: RefObject<HTMLElement | null>, paused: boolean
 /* A press ripple on the buttons that do something: drawn from where the
    pointer went down, inside the button, then gone. */
 const RIPPLED =
-  '.ad-db-btn, .intro-go, .ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn, .ad-zoom .toolbar .btn-primary'
+  '.ad-db-btn, .intro-go, .ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn, .ad-app .toolbar .btn-primary'
 
 export function useRipples(root: RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -178,7 +178,7 @@ export function useRipples(root: RefObject<HTMLElement | null>) {
       const b = (e.target as Element | null)?.closest<HTMLElement>(RIPPLED)
       if (!b || !box.contains(b) || (b as HTMLButtonElement).disabled) return
       const r = b.getBoundingClientRect()
-      /* Inside the app, drawn at 86%: its own pixels are larger. */
+      /* In case the page is zoomed: the button's own pixels, not the screen's. */
       const z = b.offsetWidth ? r.width / b.offsetWidth : 1
       const d = (Math.max(r.width, r.height) * 2.2) / z
       const s = document.createElement('span')
