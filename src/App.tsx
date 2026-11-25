@@ -435,6 +435,7 @@ function ProspectRow({
   checked,
   onToggle,
   className,
+  renderAction,
 }: {
   p: Prospect
   onConvert: (p: Prospect) => void
@@ -445,6 +446,9 @@ function ProspectRow({
   /** A class of the caller's on the row (the adoption demo marks a row that
       has just arrived). */
   className?: string
+  /** The caller's own Top Action for a row (the adoption demo's Nudge); the
+      row's written action wherever it returns nothing. */
+  renderAction?: (p: Prospect) => ReactNode
 }) {
   const incomplete = p.tier === 'incomplete'
   const rowClass = [incomplete ? 'row-incomplete' : '', className ?? ''].filter(Boolean).join(' ')
@@ -494,7 +498,7 @@ function ProspectRow({
         </div>
       </td>
       <td className="col-action">
-        <TopActionCell text={p.topAction} />
+        {renderAction?.(p) ?? <TopActionCell text={p.topAction} />}
       </td>
       <td className="col-bolt">
         <button
@@ -551,6 +555,7 @@ function ProspectsTable({
   onToggleAll,
   rows: book = prospects,
   rowClassName,
+  renderAction,
 }: {
   onConvert: (p: Prospect) => void
   onResend: (p: Prospect) => void
@@ -565,6 +570,7 @@ function ProspectsTable({
       not passed. */
   rows?: Prospect[]
   rowClassName?: (p: Prospect) => string | undefined
+  renderAction?: (p: Prospect) => ReactNode
 }) {
   // KQ Score sort. null = book order. 'desc' (caret down): normal tier order,
   // strongest prospect first within each tier. 'asc' (caret up): the whole
@@ -671,6 +677,7 @@ function ProspectsTable({
                       checked={selected.has(p.name)}
                       onToggle={() => onToggle(p.name)}
                       className={rowClassName?.(p)}
+                      renderAction={renderAction}
                     />
                   ))}
               </Fragment>
@@ -726,6 +733,8 @@ function ProspectsScreen({
   rows,
   stats,
   rowClassName,
+  renderAction,
+  afterMetrics,
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
@@ -738,6 +747,11 @@ function ProspectsScreen({
   rows?: Prospect[]
   stats?: typeof prospectStats
   rowClassName?: (p: Prospect) => string | undefined
+  /** A row's Top Action of the caller's own, where it returns one. */
+  renderAction?: (p: Prospect) => ReactNode
+  /** A card of the caller's under Top Line Metrics (the adoption demo's
+      Coming up). Nothing there when not passed. */
+  afterMetrics?: ReactNode
 }) {
   const allNames = (rows ?? prospects).map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -762,6 +776,7 @@ function ProspectsScreen({
         onClear={() => setTier(null)}
         stats={stats}
       />
+      {afterMetrics}
       <ProspectInsights tier={tier} onOpenProfile={onOpenProfile} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
@@ -775,6 +790,7 @@ function ProspectsScreen({
         onToggleAll={toggleAll}
         rows={rows}
         rowClassName={rowClassName}
+        renderAction={renderAction}
       />
     </>
   )

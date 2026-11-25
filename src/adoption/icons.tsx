@@ -70,6 +70,20 @@ export const ChatIcon = () => (
   </svg>
 )
 
+export const BellIcon = () => (
+  <svg viewBox="0 0 24 24" {...line} strokeWidth="2" aria-hidden>
+    <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+    <path d="M10 20a2 2 0 0 0 4 0" />
+  </svg>
+)
+
+export const CalendarIcon = () => (
+  <svg viewBox="0 0 24 24" {...line} strokeWidth="2" aria-hidden>
+    <rect x="4" y="5.5" width="16" height="14.5" rx="2.5" />
+    <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
+  </svg>
+)
+
 /** A pointing hand tapping: the notes' "try it" hint. */
 export const TapIcon = () => (
   <svg viewBox="0 0 24 24" {...line} strokeWidth="1.9" role="img" aria-label="Try it">

@@ -380,6 +380,25 @@ export const ASK = [
   'Something else',
 ]
 
+/** Day 2: Alex's nudge to Sarah, as his draft starts. */
+export const NUDGE = {
+  subject: 'Your check-in',
+  message:
+    'Hi {{First Name}},\n\nI saw you started the check-in. It takes about 4 more minutes to finish, and I’d love to see your answers before we meet on Friday.',
+  cta: 'Finish My Check-In',
+  signoff: 'Alex',
+}
+
+/** Day 4: Intercom's survey, after Alex read Sarah's playbook. */
+export const SURVEY_QUESTION = 'Did Knomee help with Sarah?'
+export const SURVEY = ['Yes', 'A little', 'No']
+
+/** Week 3: the meetings his calendar shows, once connected. */
+export const CAL_MEETS = [
+  { name: 'Jordan Lee', email: 'j.lee@example.com', when: 'Tue, Dec 15 · 10:00 AM' },
+  { name: 'Nina Alvarez', email: 'nina.alvarez@example.com', when: 'Thu, Dec 17 · 3:30 PM' },
+]
+
 /** What Alex actually sent, once he has: it replaces the sample in the notes. */
 export interface SentEmail {
   first: string
