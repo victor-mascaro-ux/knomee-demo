@@ -7163,6 +7163,19 @@ button.name-link-btn:hover .name-text {
   background: var(--k-plum-wash);
   color: var(--text-strong);
 }
+/* A row that is a switch (Empty state): the row's own size and wash, its
+   label at the start and the switch at the end. Keyboard focus sits on the
+   hidden checkbox, so the row shows it. */
+.menu-item.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 400;
+}
+.menu-item.menu-toggle:has(input:focus-visible) {
+  background: var(--k-plum-wash);
+}
 .menu-hint {
   margin: 4px 0 0;
   padding: 10px 12px 6px;
