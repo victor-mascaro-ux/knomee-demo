@@ -150,6 +150,7 @@ import { segModels, segMethod } from './data/segmentation'
 import { advisor as candidate } from './data/advisorFlow'
 import { useSlideIndicator } from './useSlideIndicator'
 import AdoptionDemo from './adoption/AdoptionDemo'
+import EmptyIntercom from './adoption/EmptyIntercom'
 
 /* Under this share, a bar is narrower than the label it would have to hold,
    so the label steps outside it instead of going white on a pale track. */
@@ -5612,7 +5613,16 @@ export default function App() {
 
         {screen === 'prospects' &&
           (emptyMode ? (
-            <EmptyScreen variant="prospects" onCta={() => setEmptyMode(false)} />
+            <>
+              {/* Intercom, as a new advisor meets it on this page: its
+                  welcome, its tip on Invite, its chat button. */}
+              <EmptyIntercom />
+              <EmptyScreen
+                variant="prospects"
+                onCta={() => setEmptyMode(false)}
+                onInvite={() => setInviteKind('prospect')}
+              />
+            </>
           ) : (
             <ProspectsScreen
               hidden={convertedEmails}
