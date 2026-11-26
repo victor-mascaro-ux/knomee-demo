@@ -65,15 +65,20 @@ export function Banner({
   )
 }
 
+/** The box a piece is placed in: the demo's app, or, on the product's own
+    page (no app box), the whole document. */
+type Frame = Pick<DOMRect, 'top' | 'left' | 'bottom'>
+const documentFrame = (): Frame => ({ top: -window.scrollY, left: -window.scrollX, bottom: Infinity })
+
 /** Keeps a piece of the Intercom layer next to something on the page: placed
     when drawn, and again as the page scrolls, resizes and settles. `place`
-    gets the piece, the thing's box and the app's box. */
+    gets the piece, the thing's box and the frame's. */
 function useFollow(
   ref: RefObject<HTMLElement | null>,
   anchor: () => HTMLElement | null,
-  device: RefObject<HTMLElement | null>,
-  scroller: RefObject<HTMLElement | null>,
-  place: (el: HTMLElement, b: DOMRect, d: DOMRect) => void,
+  device: RefObject<HTMLElement | null> | null,
+  scroller: RefObject<HTMLElement | null> | null,
+  place: (el: HTMLElement, b: DOMRect, d: Frame) => void,
 ) {
   const find = useRef(anchor)
   find.current = anchor
@@ -82,20 +87,19 @@ function useFollow(
   useLayoutEffect(() => {
     const go = () => {
       const el = ref.current
-      const dev = device.current
+      const dev = device ? device.current : null
       const at = find.current()
       if (!el) return
-      if (!dev || !at) {
+      if ((device && !dev) || !at) {
         el.style.visibility = 'hidden'
         return
       }
-      put.current(el, at.getBoundingClientRect(), dev.getBoundingClientRect())
+      put.current(el, at.getBoundingClientRect(), dev ? dev.getBoundingClientRect() : documentFrame())
     }
     go()
-    const sc = scroller.current
+    const sc: HTMLElement | Document | null = scroller ? scroller.current : document
     sc?.addEventListener('scroll', go, { passive: true })
-    /* The page lays in from the top as a step opens: once its pieces have
-       risen into place, look again. */
+    /* The page lays in as it opens: once its pieces have settled, look again. */
     sc?.addEventListener('animationend', go)
     window.addEventListener('resize', go)
     /* The page settles after fonts and pictures load; a few more looks catch it. */
@@ -123,8 +127,9 @@ export function AnchoredTip({
   children,
 }: {
   anchor: () => HTMLElement | null
-  device: RefObject<HTMLElement | null>
-  scroller: RefObject<HTMLElement | null>
+  /** The demo's app box and its scroller; null on the product's own page. */
+  device: RefObject<HTMLElement | null> | null
+  scroller: RefObject<HTMLElement | null> | null
   side?: 'left' | 'right'
   leaving: boolean
   onClose: () => void

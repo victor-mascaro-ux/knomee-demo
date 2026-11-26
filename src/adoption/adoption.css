@@ -48,6 +48,26 @@
   outline-offset: 2px;
 }
 
+/* Intercom's pieces on the product's own empty dashboard (EmptyIntercom):
+   as Alex would see them, with no demo labels. The banner sits in the page
+   where the title would; the tooltip and the chat button float over it. */
+.ad-intercom {
+  --ad-ic-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+.ad-intercom.ad-intercom-flow .ic-banner {
+  margin-top: var(--block-gap);
+}
+.ad-intercom-page {
+  font-family: var(--ad-ic-font);
+  color: var(--k-ink);
+}
+.ad-intercom-page .ic {
+  z-index: 150;
+}
+.ad-intercom-page .ic.ic-launcher {
+  position: fixed;
+}
+
 /* ── The demo bar ─────────────────────────────────────────────────────── */
 .adoption-demo .ad-bar {
   position: relative;
@@ -455,26 +475,26 @@
 }
 
 /* ── Intercom ─────────────────────────────────────────────────────────── */
-.adoption-demo .ic-layer {
+:is(.adoption-demo, .ad-intercom) .ic-layer {
   position: absolute;
   inset: 0;
   z-index: 150;
   pointer-events: none;
   font-family: var(--ad-ic-font);
 }
-.adoption-demo .ic-layer > * {
+:is(.adoption-demo, .ad-intercom) .ic-layer > * {
   pointer-events: auto;
 }
-.adoption-demo .ic {
+:is(.adoption-demo, .ad-intercom) .ic {
   position: absolute;
 }
-.adoption-demo .ic-card {
+:is(.adoption-demo, .ad-intercom) .ic-card {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
   color: var(--k-ink);
 }
-.adoption-demo .ic-tag {
+:is(.adoption-demo, .ad-intercom) .ic-tag {
   position: absolute;
   left: 0;
   top: -28px;
@@ -486,14 +506,14 @@
   letter-spacing: 0.1px;
   white-space: nowrap;
 }
-.adoption-demo:not(.labels-on) .ic-tag {
+:is(.adoption-demo, .ad-intercom):not(.labels-on) .ic-tag {
   display: none;
 }
-.adoption-demo.labels-on .ic-outline {
+:is(.adoption-demo, .ad-intercom).labels-on .ic-outline {
   outline: 2px dashed var(--ad-tag-edge);
   outline-offset: 5px;
 }
-.adoption-demo .ic-av {
+:is(.adoption-demo, .ad-intercom) .ic-av {
   width: 32px;
   height: 32px;
   flex: none;
@@ -505,13 +525,13 @@
   font-size: 14px;
   font-weight: 700;
 }
-.adoption-demo .ic-av.firm {
-  background: var(--brand-bar);
+:is(.adoption-demo, .ad-intercom) .ic-av.firm {
+  background: var(--brand-bar, var(--k-plum));
   font-family: Georgia, 'Times New Roman', serif;
   font-weight: 400;
   font-size: 15px;
 }
-.adoption-demo .ic-btn {
+:is(.adoption-demo, .ad-intercom) .ic-btn {
   height: 40px;
   padding: 0 16px;
   border: 0;
@@ -521,10 +541,10 @@
   font: 600 14px var(--ad-ic-font);
   cursor: pointer;
 }
-.adoption-demo .ic-btn:hover {
+:is(.adoption-demo, .ad-intercom) .ic-btn:hover {
   background: var(--k-plum-hover);
 }
-.adoption-demo .ic-close {
+:is(.adoption-demo, .ad-intercom) .ic-close {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -538,35 +558,35 @@
   color: #737376;
   cursor: pointer;
 }
-.adoption-demo .ic-close:hover {
+:is(.adoption-demo, .ad-intercom) .ic-close:hover {
   background: #f2f2f4;
 }
-.adoption-demo .ic-close svg {
+:is(.adoption-demo, .ad-intercom) .ic-close svg {
   width: 16px;
   height: 16px;
 }
 
 /* Who an Intercom message is from. */
-.adoption-demo .ic-sender {
+:is(.adoption-demo, .ad-intercom) .ic-sender {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.adoption-demo .ic-sender > div > b {
+:is(.adoption-demo, .ad-intercom) .ic-sender > div > b {
   display: block;
   font-size: 14px;
   font-weight: 600;
 }
-.adoption-demo .ic-btn.ghost {
+:is(.adoption-demo, .ad-intercom) .ic-btn.ghost {
   background: #f2f2f4;
   color: var(--k-ink);
 }
-.adoption-demo .ic-btn.ghost:hover {
+:is(.adoption-demo, .ad-intercom) .ic-btn.ghost:hover {
   background: #e7e7ea;
 }
 
 /* The pulsing dot at the end of Sarah's name. */
-.adoption-demo .ic-beacon {
+:is(.adoption-demo, .ad-intercom) .ic-beacon {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -575,27 +595,27 @@
 }
 
 /* The survey, in the corner above the launcher. */
-.adoption-demo .ic-survey {
+:is(.adoption-demo, .ad-intercom) .ic-survey {
   right: 20px;
   bottom: 88px;
   width: 300px;
   padding: 18px;
 }
-.adoption-demo .ic-survey h4 {
+:is(.adoption-demo, .ad-intercom) .ic-survey h4 {
   margin: 14px 0 12px;
   font-size: 16px;
   font-weight: 700;
   line-height: 1.35;
 }
-.adoption-demo .ic-survey h4.ic-next {
+:is(.adoption-demo, .ad-intercom) .ic-survey h4.ic-next {
   margin-top: 30px;
 }
-.adoption-demo .ic-opts {
+:is(.adoption-demo, .ad-intercom) .ic-opts {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.adoption-demo .ic-opt {
+:is(.adoption-demo, .ad-intercom) .ic-opt {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -609,25 +629,25 @@
   text-align: left;
   cursor: pointer;
 }
-.adoption-demo .ic-opt:hover {
+:is(.adoption-demo, .ad-intercom) .ic-opt:hover {
   border-color: #cfc6da;
   background: #fbfafc;
 }
-.adoption-demo .ic-opt.sel {
+:is(.adoption-demo, .ad-intercom) .ic-opt.sel {
   border-color: var(--k-plum);
   background: var(--k-plum-wash);
   color: var(--k-plum);
   font-weight: 600;
 }
-.adoption-demo .ic-opt svg {
+:is(.adoption-demo, .ad-intercom) .ic-opt svg {
   width: 14px;
   height: 14px;
   flex: none;
 }
-.adoption-demo .ic-follow {
+:is(.adoption-demo, .ad-intercom) .ic-follow {
   margin-top: 12px;
 }
-.adoption-demo .ic-reply {
+:is(.adoption-demo, .ad-intercom) .ic-reply {
   margin: 12px 0;
   padding: 12px 14px;
   border-radius: var(--radius-xl);
@@ -636,7 +656,7 @@
   line-height: 1.5;
   color: #2b2b30;
 }
-.adoption-demo .ic-grow {
+:is(.adoption-demo, .ad-intercom) .ic-grow {
   display: block;
   width: 100%;
   min-height: 46px;
@@ -650,45 +670,45 @@
   resize: none;
   overflow: hidden;
 }
-.adoption-demo .ic-grow:focus {
+:is(.adoption-demo, .ad-intercom) .ic-grow:focus {
   outline: 2px solid var(--k-grape-light);
   border-color: var(--k-grape);
 }
 
 /* The post, in the middle of the page over a light scrim. */
-.adoption-demo .ic-post-scrim {
+:is(.adoption-demo, .ad-intercom) .ic-post-scrim {
   position: absolute;
   inset: 0;
   background: rgba(20, 2, 42, 0.28);
 }
-.adoption-demo .ic-post {
+:is(.adoption-demo, .ad-intercom) .ic-post {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: min(380px, calc(100% - 40px));
   padding: 24px;
 }
-.adoption-demo .ic-post h3 {
+:is(.adoption-demo, .ad-intercom) .ic-post h3 {
   margin: 18px 0 8px;
   font-size: 22px;
   font-weight: 700;
   line-height: 1.3;
   text-wrap: balance;
 }
-.adoption-demo .ic-post p {
+:is(.adoption-demo, .ad-intercom) .ic-post p {
   margin: 0 0 10px;
   font-size: 16px;
   line-height: 1.5;
   color: #3c3c40;
 }
-.adoption-demo .ic-post .ic-row {
+:is(.adoption-demo, .ad-intercom) .ic-post .ic-row {
   display: flex;
   gap: 10px;
   margin-top: 18px;
 }
 
 /* The banner, across the page under the tabs. */
-.adoption-demo .ic-banner {
+:is(.adoption-demo, .ad-intercom) .ic-banner {
   position: relative;
   margin-top: 38px;
   display: flex;
@@ -700,25 +720,25 @@
   background: var(--k-adv-open);
   font-family: var(--ad-ic-font);
 }
-.adoption-demo .ic-banner .ic-av {
+:is(.adoption-demo, .ad-intercom) .ic-banner .ic-av {
   width: 28px;
   height: 28px;
   font-size: 13px;
 }
-.adoption-demo .ic-banner p {
+:is(.adoption-demo, .ad-intercom) .ic-banner p {
   flex: 1;
   margin: 0;
   font-size: 14.5px;
   line-height: 1.45;
   color: var(--k-plum);
 }
-.adoption-demo .ic-banner p b {
+:is(.adoption-demo, .ad-intercom) .ic-banner p b {
   font-weight: 700;
 }
-.adoption-demo .ic-banner .ic-close {
+:is(.adoption-demo, .ad-intercom) .ic-banner .ic-close {
   position: static;
 }
-.adoption-demo .ic-banner::after {
+:is(.adoption-demo, .ad-intercom) .ic-banner::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -730,12 +750,12 @@
 }
 
 /* The tip, under what it points at. Hidden until it has been placed. */
-.adoption-demo .ic-tip {
+:is(.adoption-demo, .ad-intercom) .ic-tip {
   width: 260px;
   padding: 16px 18px;
   visibility: hidden;
 }
-.adoption-demo .ic-tip::after {
+:is(.adoption-demo, .ad-intercom) .ic-tip::after {
   content: '';
   position: absolute;
   top: -8px;
@@ -746,18 +766,18 @@
   transform: rotate(45deg);
   box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.05);
 }
-.adoption-demo .ic-tip.left::after {
+:is(.adoption-demo, .ad-intercom) .ic-tip.left::after {
   right: auto;
   left: 22px;
 }
-.adoption-demo .ic-tip p {
+:is(.adoption-demo, .ad-intercom) .ic-tip p {
   margin: 0 28px 0 0;
   font-size: 15px;
   line-height: 1.45;
   color: #2b2b30;
 }
 
-.adoption-demo .ic-launcher {
+:is(.adoption-demo, .ad-intercom) .ic-launcher {
   right: 20px;
   bottom: 20px;
   width: 56px;
@@ -769,7 +789,7 @@
   color: #fff;
   box-shadow: 0 4px 16px rgba(36, 4, 70, 0.35);
 }
-.adoption-demo .ic-launcher svg {
+:is(.adoption-demo, .ad-intercom) .ic-launcher svg {
   width: 26px;
   height: 26px;
 }
@@ -2301,7 +2321,7 @@
 /* ── Motion ───────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .adoption-demo .ad-db-btn:hover,
-  .adoption-demo .ic-btn:hover,
+  :is(.adoption-demo, .ad-intercom) .ic-btn:hover,
   .adoption-demo .intro-go:hover {
     transform: translateY(-1px);
   }
@@ -2339,22 +2359,22 @@
   }
 
   /* Intercom */
-  .adoption-demo .ic-banner {
+  :is(.adoption-demo, .ad-intercom) .ic-banner {
     animation: ad-drop-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .adoption-demo .ic-banner::after {
+  :is(.adoption-demo, .ad-intercom) .ic-banner::after {
     animation: ad-sweep 1.3s ease 0.45s both;
   }
-  .adoption-demo .ic-banner.leaving {
+  :is(.adoption-demo, .ad-intercom) .ic-banner.leaving {
     animation: ad-lift-out 0.19s ease both;
   }
-  .adoption-demo .ic-tip {
+  :is(.adoption-demo, .ad-intercom) .ic-tip {
     animation: ad-tip-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both, ad-float 3.2s ease-in-out 0.6s infinite;
   }
-  .adoption-demo .ic-tip.leaving {
+  :is(.adoption-demo, .ad-intercom) .ic-tip.leaving {
     animation: ad-fade-out 0.19s ease both;
   }
-  .adoption-demo .ic-launcher {
+  :is(.adoption-demo, .ad-intercom) .ic-launcher {
     animation: ad-pop-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s both;
   }
 
@@ -2526,7 +2546,7 @@
     animation: ad-rise-10 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     animation-delay: calc(220ms + var(--i, 0) * 90ms);
   }
-  .adoption-demo .ic-beacon::after {
+  :is(.adoption-demo, .ad-intercom) .ic-beacon::after {
     content: '';
     position: absolute;
     inset: -6px;
@@ -2534,39 +2554,39 @@
     border: 2px solid var(--ad-tag-edge);
     animation: ad-beacon 1.4s ease-out infinite;
   }
-  .adoption-demo .ic-survey {
+  :is(.adoption-demo, .ad-intercom) .ic-survey {
     transform-origin: bottom right;
     animation: ad-rise-10 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .adoption-demo .ic-survey.leaving {
+  :is(.adoption-demo, .ad-intercom) .ic-survey.leaving {
     animation: ad-sink-out 0.19s ease both;
   }
-  .adoption-demo .ic-opts .ic-opt {
+  :is(.adoption-demo, .ad-intercom) .ic-opts .ic-opt {
     animation: ad-rise-10 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     animation-delay: calc(120ms + var(--i, 0) * 60ms);
   }
-  .adoption-demo .ic-opt:hover {
+  :is(.adoption-demo, .ad-intercom) .ic-opt:hover {
     transform: translateX(2px);
   }
-  .adoption-demo .ic-opt.sel svg {
+  :is(.adoption-demo, .ad-intercom) .ic-opt.sel svg {
     animation: ad-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) both;
   }
   .adoption-demo :is(.ic-reply, .ic-follow) {
     animation: ad-rise-10 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .adoption-demo .ic-post-scrim {
+  :is(.adoption-demo, .ad-intercom) .ic-post-scrim {
     animation: ad-fade-in 0.22s ease both;
   }
-  .adoption-demo .ic-post-scrim.leaving {
+  :is(.adoption-demo, .ad-intercom) .ic-post-scrim.leaving {
     animation: ad-fade-out 0.19s ease both;
   }
-  .adoption-demo .ic-post {
+  :is(.adoption-demo, .ad-intercom) .ic-post {
     animation: ad-modal-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-  .adoption-demo .ic-post.leaving {
+  :is(.adoption-demo, .ad-intercom) .ic-post.leaving {
     animation: ad-win-out 0.19s ease both;
   }
-  .adoption-demo .ic-post .ic-row .ic-btn:first-child {
+  :is(.adoption-demo, .ad-intercom) .ic-post .ic-row .ic-btn:first-child {
     animation: ad-pop-in 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 0.25s both;
   }
 
