@@ -1004,6 +1004,10 @@ html.cx-desktop .cx-page.is-bare:has(.cx-tabbar, .jf-foot, .af-foot) ~ .powered-
   align-items: center;
   gap: 5px;
 }
+/* The empty dashboard's header: nothing to sort yet. */
+.th-sort-btn:disabled {
+  cursor: default;
+}
 /* Slate, the header grey: the old #b7b0c2 all but vanished on the #EEEEEE
    header row. */
 .th-caret {
