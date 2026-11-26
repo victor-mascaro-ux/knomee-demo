@@ -544,6 +544,62 @@ function TopActionCell({ text }: { text: string }) {
 }
 
 
+/* The prospects table's header: its columns, at their widths. The empty
+   dashboard draws the very same one over nothing, so the two tables line up
+   column for column; there, with no one to select or sort, its controls are
+   off. */
+function ProspectsHead({
+  sortDir = null,
+  onSort,
+  allChecked = false,
+  onToggleAll,
+}: {
+  sortDir?: 'asc' | 'desc' | null
+  /** Without it (the empty dashboard) the sort and select-all are off. */
+  onSort?: () => void
+  allChecked?: boolean
+  onToggleAll?: () => void
+}) {
+  const off = !onSort
+  return (
+    <thead>
+      <tr>
+        <th className="col-check">
+          <input
+            type="checkbox"
+            checked={allChecked}
+            onChange={() => onToggleAll?.()}
+            disabled={off}
+            aria-label="Select all prospects"
+          />
+        </th>
+        <th className="col-name">Name</th>
+        <th className="col-kq tt" data-tip="Knomee Quotient — how ready this prospect is to convert">
+          <button
+            type="button"
+            className="th-sort th-sort-btn"
+            onClick={onSort}
+            disabled={off}
+            aria-label="Sort by KQ score"
+          >
+            KQ Score
+            <span className={`th-caret ${sortDir ? 'is-active' : ''} ${sortDir === 'asc' ? 'is-asc' : ''}`}>
+              <CaretDown />
+            </span>
+          </button>
+        </th>
+        <th className="col-num">Intent</th>
+        <th className="col-num">Clarity</th>
+        <th className="col-num">Receptivity</th>
+        <th className="col-signup">Sign Up</th>
+        <th className="col-action">Top Action</th>
+        <th className="col-bolt" />
+        <th className="col-dots" />
+      </tr>
+    </thead>
+  )
+}
+
 function ProspectsTable({
   onConvert,
   onResend,
@@ -602,39 +658,12 @@ function ProspectsTable({
   return (
     <div className="table-wrap">
       <table className="prospects-table prospects-cols">
-        <thead>
-          <tr>
-            <th className="col-check">
-              <input
-                type="checkbox"
-                checked={allChecked}
-                onChange={onToggleAll}
-                aria-label="Select all prospects"
-              />
-            </th>
-            <th className="col-name">Name</th>
-            <th className="col-kq tt" data-tip="Knomee Quotient — how ready this prospect is to convert">
-              <button
-                type="button"
-                className="th-sort th-sort-btn"
-                onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
-                aria-label="Sort by KQ score"
-              >
-                KQ Score
-                <span className={`th-caret ${sortDir ? 'is-active' : ''} ${sortDir === 'asc' ? 'is-asc' : ''}`}>
-                  <CaretDown />
-                </span>
-              </button>
-            </th>
-            <th className="col-num">Intent</th>
-            <th className="col-num">Clarity</th>
-            <th className="col-num">Receptivity</th>
-            <th className="col-signup">Sign Up</th>
-            <th className="col-action">Top Action</th>
-            <th className="col-bolt" />
-            <th className="col-dots" />
-          </tr>
-        </thead>
+        <ProspectsHead
+          sortDir={sortDir}
+          onSort={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+          allChecked={allChecked}
+          onToggleAll={onToggleAll}
+        />
         <tbody>
           {orderedGroups.map((group) => {
             const rows = book.filter((p) => p.tier === group.id && !hidden?.has(p.email))
@@ -2730,7 +2759,8 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
     ctaClass: 'empty-cta-prospect',
     subtitle:
       'Experience the prospect journey to preview conversation starters and strategic conversion insights generated for you.',
-    columns: ['Name', 'KQ Score', 'Intent', 'Clarity', 'Receptivity', 'Sign Up', 'Top Action'],
+    /* Its header is the populated table's own (ProspectsHead). */
+    columns: [],
   },
   clients: {
     title: 'My Clients',
@@ -2818,6 +2848,15 @@ function EmptyScreen({
         </>
       )}
 
+      {/* The Prospects table's own header, over no rows, so the empty table
+          has the populated one's columns, widths and height. */}
+      {variant === 'prospects' && (
+        <div className="table-wrap empty-table">
+          <table className="prospects-table prospects-cols">
+            <ProspectsHead />
+          </table>
+        </div>
+      )}
       {cfg.columns.length > 0 && (
         <div className="table-wrap empty-table">
           <table className="prospects-table">
