@@ -17,8 +17,6 @@ import { hasProfile } from './data/memberProfiles'
 import type { HouseholdMember } from './data/clientProfile'
 import { financialId } from './data/financialId'
 import { prospects, prospectStats, tierGroups, type Prospect, type Tier } from './data/prospects'
-import { insights } from './data/insights'
-import { reachSegments, segmentTip, talkTo } from './data/prospectSegments'
 import { clientReadings } from './data/clientSegments'
 import {
   modelClusters,
@@ -124,6 +122,8 @@ import ApiStoreScreen from './screens/ApiStoreScreen'
 import TierLegend from './components/TierLegend'
 import CollapsibleCard from './components/CollapsibleCard'
 import ActionableInsights from './components/ActionableInsights'
+import ProspectGroupInsights from './components/ProspectGroupInsights'
+import { segmentTip } from './data/prospectSegments'
 import RowMenu from './components/RowMenu'
 import TabMenu from './components/TabMenu'
 import FeedbackButton, { useFlash } from './components/FeedbackButton'
@@ -235,13 +235,12 @@ function HelpTip({ text, side }: { text: string; side?: 'left' | 'right' }) {
   )
 }
 
-// Tier metadata shared by the pulse bar and the drill-in filter. `book` is the
-// full-book count shown on the bar; the linked insight surfaces as the "why"
-// when a tier is focused.
+// Tier metadata shared by the pulse bar and the drill-in filter: focusing a
+// tier narrows the "Who you're reaching" half of Actionable Insights to it.
 const TIER_META = [
-  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1', insightN: 1 },
-  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2', insightN: 4 },
-  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3', insightN: 5 },
+  { key: 'Tier 1' as const, tierId: 'tier1' as const, name: 'Ready Now', range: '70–100 KQ', seg: 'seg-1', dot: 'dot-1' },
+  { key: 'Tier 2' as const, tierId: 'tier2' as const, name: 'Considering', range: '40–69 KQ', seg: 'seg-2', dot: 'dot-2' },
+  { key: 'Tier 3' as const, tierId: 'tier3' as const, name: 'Nurture', range: '0–39 KQ', seg: 'seg-3', dot: 'dot-3' },
 ]
 type TierKey = (typeof TIER_META)[number]['key']
 
@@ -354,44 +353,23 @@ function ProspectsMetrics({
   )
 }
 
-// Who the book is made of, who to talk to this week, and the reasoning. Each
-// "Who you're reaching" chip is a segment read off the prospects' own answers
-// (why money matters to them and how they feel about it, crossed with how
-// clearly they see the future and how close they are to acting), never an
-// audience typed in.
+// The prospects as a group: how the invitations are doing, and who they reach.
+// Each person's reading is the table's; nobody is named here.
 function ProspectInsights({
   tier,
-  onOpenProfile,
+  convertedNow,
+  onAnalytics,
 }: {
   tier: TierKey | null
-  onOpenProfile?: (p: Prospect) => void
+  convertedNow?: number
+  onAnalytics?: () => void
 }) {
   const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
-  // Only the one whose profile is built out is a link, the same rule as the
-  // table's.
-  const profileOf = (name: string) =>
-    name === financialId.owner ? prospects.find((p) => p.name === name) : undefined
   return (
-    <ActionableInsights
-      hint="Who you’re reaching, who to talk to this week, and the reasoning behind it."
-      reach={{
-        label: 'Who you’re reaching',
-        tip: 'Purpose × Posture crossed with Vision × Readiness, read from each prospect’s own answers.',
-        chips: reachSegments,
-      }}
-      noun="prospects"
-      scoreLabel="KQ"
-      talk={(tier ? talkTo.filter((t) => t.tier === tier) : talkTo).map((t) => ({ ...t, score: t.kq }))}
-      focus={meta && { label: `${meta.key} · ${meta.name}`, name: meta.name }}
-      insights={insights}
-      tierInsight={meta ? insights.find((i) => i.n === meta.insightN) : undefined}
-      empty="None flagged in this tier this week — keep them on a light-touch nurture track."
-      explain={segmentTip}
-      opens={(name) => !!onOpenProfile && !!profileOf(name)}
-      onOpen={(name) => {
-        const p = profileOf(name)
-        if (p) onOpenProfile?.(p)
-      }}
+    <ProspectGroupInsights
+      focus={meta && { tierId: meta.tierId, label: `${meta.key} · ${meta.name}` }}
+      convertedNow={convertedNow}
+      onAnalytics={onAnalytics}
     />
   )
 }
@@ -765,6 +743,7 @@ function ProspectsScreen({
   rowClassName,
   renderAction,
   afterMetrics,
+  onAnalytics,
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
@@ -782,6 +761,8 @@ function ProspectsScreen({
   /** A card of the caller's under Top Line Metrics (the adoption demo's
       Coming up). Nothing there when not passed. */
   afterMetrics?: ReactNode
+  /** Opens Prospect Analytics; the insights card links there when passed. */
+  onAnalytics?: () => void
 }) {
   const allNames = (rows ?? prospects).map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -807,7 +788,7 @@ function ProspectsScreen({
         stats={stats}
       />
       {afterMetrics}
-      <ProspectInsights tier={tier} onOpenProfile={onOpenProfile} />
+      <ProspectInsights tier={tier} convertedNow={hidden?.size} onAnalytics={onAnalytics} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
@@ -5627,6 +5608,7 @@ export default function App() {
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('prospect')}
               onOpenProfile={setProfileProspect}
+              onAnalytics={() => goDashTab(analyticsTabs[1])}
             />
           ))}
         {screen === 'clients' &&
