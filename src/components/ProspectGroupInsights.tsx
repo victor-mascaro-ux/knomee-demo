@@ -1,8 +1,9 @@
-/* My Prospects' Actionable Insights: the prospects as a group. Two halves —
-   how the advisor's invitations are doing (a funnel, always the whole book),
-   and who they are reaching (read from the prospects' own answers, narrowed
-   by the tier bar above). One person's reading and next step is the table's
-   job, so nobody is named here. Every figure comes from prospectGroup.ts.
+/* My Prospects' Actionable Insights: the prospects as a group. How the
+   advisor's invitations are doing (a funnel, always the whole book), who they
+   are reaching (read from the prospects' own answers, narrowed by the tier bar
+   above), and how that compares with everyone on Knomee (the whole book
+   again). One person's reading and next step is the table's job, so nobody is
+   named here. Every figure comes from prospectGroup.ts.
 
    My Clients and My Candidates keep the shared ActionableInsights card. */
 
@@ -10,7 +11,14 @@ import { useMemo } from 'react'
 import CollapsibleCard from './CollapsibleCard'
 import { BoltIcon } from './icons'
 import { prospects } from '../data/prospects'
-import { groupProfile, invitationFunnel, type Line, type SplitPart } from '../data/prospectGroup'
+import {
+  groupProfile,
+  invitationFunnel,
+  knomeeComparison,
+  type CompareRow,
+  type Line,
+  type SplitPart,
+} from '../data/prospectGroup'
 import './groupInsights.css'
 
 function HelpTip({ text }: { text: string }) {
@@ -46,6 +54,28 @@ function Split({ parts }: { parts: SplitPart[] }) {
   )
 }
 
+/* One answer, side by side: the advisor's prospects over everyone on Knomee. */
+function Compared({ kicker, rows }: { kicker: string; rows: CompareRow[] }) {
+  return (
+    <div className="gi-cmp-group">
+      <span className="gi-kicker">{kicker}</span>
+      {rows.map((r) => (
+        <div className="gi-cmp-row" key={r.label}>
+          <span className="gi-cmp-label">{r.label}</span>
+          <span className="gi-cmp-bar is-you">
+            <i style={{ width: `${Math.max(r.you * 100, 1)}%` }} />
+            <b>{r.youText}</b>
+          </span>
+          <span className="gi-cmp-bar is-all">
+            <i style={{ width: `${Math.max(r.all * 100, 1)}%` }} />
+            <span>{r.allText}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ProspectGroupInsights({
   focus,
   convertedNow = 0,
@@ -67,6 +97,7 @@ export default function ProspectGroupInsights({
       ),
     [focus],
   )
+  const cmp = useMemo(() => knomeeComparison(), [])
 
   return (
     <CollapsibleCard
@@ -74,7 +105,7 @@ export default function ProspectGroupInsights({
       icon={<BoltIcon color="#7639a1" />}
       title="Actionable Insights"
       hint={
-        <HelpTip text="Your prospects as a group: how your invitations are doing, and who they reach. Each person’s next step is in the table below." />
+        <HelpTip text="Your prospects as a group: how your invitations are doing, who they reach, and how that compares with everyone on Knomee. Each person’s next step is in the table below." />
       }
       bodyClassName="cmd-body gi-body"
       defaultOpen={false}
@@ -157,6 +188,33 @@ export default function ProspectGroupInsights({
           ))}
         </div>
       </section>
+
+      {/* 3 · Am I reaching the people I meant to? There is no stated target
+          to score against, so the book is set beside everyone who takes the
+          same Adventures. Whole book only: the respondents have no tiers. */}
+      {cmp && (
+        <section className={`gi-sec${focus ? ' is-lensed' : ''}`}>
+          <div className="gi-head">
+            <h3 className="gi-title">
+              Compared with everyone on Knomee <HelpTip text={cmp.basis} />
+            </h3>
+            <span className="gi-legend" aria-hidden>
+              <i className="is-you" /> Your prospects <i className="is-all" /> Everyone on Knomee
+            </span>
+          </div>
+          <div className="gi-compare">
+            {cmp.joy.length > 0 && <Compared kicker="Financial Joy · share of people" rows={cmp.joy} />}
+            {cmp.confidence.length > 0 && <Compared kicker="Confidence · average, of 5" rows={cmp.confidence} />}
+          </div>
+          <div className="gi-callout">
+            <p>
+              <Said line={cmp.verdict} />
+            </p>
+            {cmp.action && <p className="gi-do">{cmp.action}</p>}
+          </div>
+          {focus && <p className="gi-note">This compares your whole book: Knomee’s respondents have no tiers.</p>}
+        </section>
+      )}
 
       <p className="gi-foot">Each person’s reading and next step is in the table below.</p>
     </CollapsibleCard>
