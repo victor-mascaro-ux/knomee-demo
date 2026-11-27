@@ -230,3 +230,21 @@
   transform: none;
   box-shadow: none;
 }
+
+/* The microphone's corner: a round button with the mic alone, in the box's
+   bottom-right corner (Dictation's MicButton draws itself here). The words
+   keep clear of it — the box runs on under the button rather than writing
+   beneath it. */
+.mem-mic {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+}
+.mem-mic:empty {
+  display: none;
+}
+.mem-card:has(.mem-mic:not(:empty)) .mem-field {
+  padding-bottom: 60px;
+}

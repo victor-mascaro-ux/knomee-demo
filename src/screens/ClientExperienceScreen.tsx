@@ -155,18 +155,6 @@ export const TabFinId = () => (
   </svg>
 )
 
-/* My Team, on the bar once every adventure is done: two people, the one in
-   front whole and the one behind showing round its shoulder. Drawn to sit
-   beside TabFinId — same box, same stroke weight. */
-export const TabTeam = () => (
-  <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-    <circle cx="12.5" cy="8.6" r="4.2" />
-    <path d="M4.4 23.6c.9-4.8 4-7.4 8.1-7.4s7.2 2.6 8.1 7.4" />
-    <path d="M20.6 4.7a4.2 4.2 0 0 1 0 7.8" />
-    <path d="M23.4 16.6c2.4.8 4 3.1 4.6 7" />
-  </svg>
-)
-
 /* The third tab on the advisor's flow: the three questions the eight minutes
    hand back. Drawn to sit beside TabFinId — same box, same stroke weight. */
 /* The knomee mark as paths rather than an <img>, so a tab bar can colour it.
@@ -1839,6 +1827,9 @@ function ClientExperienceRun({
   const pickTab = (id: TabId) => {
     setSheet(false)
     setVoiceOpen(false)
+    /* Adventures from the end of the journey is the list itself: the end
+       stands on the Adventures tab, so picking it again is leaving it. */
+    setEnded(false)
     setTab(id)
   }
   const pickKnomee = () => {
@@ -1857,12 +1848,8 @@ function ClientExperienceRun({
 
   const active: TabId = tab
   const tabInd = useTabInd(active, brand?.primary)
-  /* On the end of the journey; the bar there has My Team where Adventures
-     was, every adventure being done. */
+  /* On the end of the journey, under the same bar as everywhere else. */
   const atEnd = ended && !intro && !adventure && tab === 'adventures'
-  const barTabs: { id: TabId; label: string }[] = atEnd
-    ? [mobileTabs.find((t) => t.id === 'finid')!, { id: 'team', label: 'My Team' }]
-    : mobileTabs
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -2122,7 +2109,7 @@ function ClientExperienceRun({
                 hints={{
                   id: 'Your answers, on one page.',
                   knomee: 'Quick actions, or hold to talk.',
-                  team: 'Who sees what you share.',
+                  adventures: 'Life Events, and more to come.',
                 }}
                 share={{
                   who: 'a friend or family member',
@@ -2133,7 +2120,7 @@ function ClientExperienceRun({
                   if (b === 'knomee') {
                     setVoiceOpen(false)
                     setSheet(true)
-                  } else pickTab(b === 'id' ? 'finid' : 'team')
+                  } else pickTab(b === 'id' ? 'finid' : 'adventures')
                 }}
               />
             ) : tab === 'adventures' ? (
@@ -2284,9 +2271,8 @@ function ClientExperienceRun({
             onPointerLeave={pressEnd}
           >
             {tabInd.ind}
-            {/* Financial ID · the mark in its raised circle · Adventures —
-                or, at the end of the journey, My Team. */}
-            {barTabs.map((t, i) => [
+            {/* Financial ID · the mark in its raised circle · Adventures. */}
+            {mobileTabs.map((t, i) => [
               i === 1 && <KnomeeFab key="fab" on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />,
               <button
                 key={t.id}
@@ -2294,7 +2280,7 @@ function ClientExperienceRun({
                 className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
                 onClick={() => pickTab(t.id)}
               >
-                {t.id === 'adventures' ? <TabAdventures /> : t.id === 'team' ? <TabTeam /> : <TabFinId />}
+                {t.id === 'adventures' ? <TabAdventures /> : <TabFinId />}
                 <span className="cx-tab-lbl">{t.label}</span>
               </button>,
             ])}

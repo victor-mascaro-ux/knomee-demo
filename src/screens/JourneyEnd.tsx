@@ -6,12 +6,12 @@
  *   - the five adventures' marks, each with its check, and what they add up to;
  *   - in the middle, Share: a link for somebody else to start their own;
  *   - at the foot, a card over each of the bottom bar's three buttons saying
- *     what it is for from here on — the ID, the Knomee button, My Team. The
- *     cards point down at the buttons, and a tap on one does what its button
- *     does.
+ *     what it is for from here on — the ID, the Knomee button, Adventures.
+ *     The cards point down at the buttons, and a tap on one does what its
+ *     button does.
  *
- * The bar itself is the phone's own (the host draws it, with My Team in the
- * place Adventures has while there are adventures to take).
+ * The bar itself is the phone's own, the same as on every other screen (the
+ * host draws it).
  */
 
 import { useEffect, useState } from 'react'
@@ -20,7 +20,7 @@ import { CloseIcon } from '../components/icons'
 import './journeyEnd.css'
 
 /** One of the bottom bar's three buttons. */
-export type EndButton = 'id' | 'knomee' | 'team'
+export type EndButton = 'id' | 'knomee' | 'adventures'
 
 /** Where a link to start Knomee points: the app's own address with the given
     route. Inside the review overlay the app runs at app/app.html, and the link
@@ -59,7 +59,7 @@ export default function JourneyEnd({
   const tips: { id: EndButton; title: string }[] = [
     { id: 'id', title: idName },
     { id: 'knomee', title: 'Knomee' },
-    { id: 'team', title: 'My Team' },
+    { id: 'adventures', title: 'Adventures' },
   ]
   return (
     <div className="je">
@@ -82,30 +82,27 @@ export default function JourneyEnd({
       </div>
 
       <section className="je-share" aria-labelledby="je-share-h">
-        <h3 id="je-share-h">Share the Knomee experience</h3>
-        <p>Know {share.who} who’d enjoy this? Send them a link to start their own adventures.</p>
+        <h3 id="je-share-h">Know {share.who} who’d enjoy this?</h3>
+        <p>Send them a link to start their own adventures.</p>
         <button className="je-share-btn" type="button" onClick={() => setSharing(true)}>
           <ShareGlyph />
-          Share
+          Share Knomee
         </button>
       </section>
 
-      <div className="je-next">
-        <p className="je-next-k">Where to next?</p>
-        <div className="je-tips">
-          {tips.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`je-tip is-${t.id}`}
-              onClick={() => onPick(t.id)}
-            >
-              <b>{t.title}</b>
-              <span>{hints[t.id]}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <nav className="je-tips" aria-label="Where to next">
+        {tips.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`je-tip is-${t.id}`}
+            onClick={() => onPick(t.id)}
+          >
+            <b>{t.title}</b>
+            <span>{hints[t.id]}</span>
+          </button>
+        ))}
+      </nav>
 
       {sharing && <ShareModal {...share} onClose={() => setSharing(false)} />}
     </div>

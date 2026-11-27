@@ -115,3 +115,53 @@ html.cx-desktop .af-mic.af-mic-big {
   margin-inline: auto;
   padding-inline: 28px;
 }
+
+/* On an answer box (MemoryAsk): a circle with the mic alone, in the box's
+   bottom-right corner. Listening, it goes red and a ring breathes round it. */
+.af-mic.af-mic-round {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(36, 4, 70, 0.1);
+  transition:
+    border-color 0.25s var(--ease-out, ease),
+    box-shadow 0.25s var(--ease-out, ease),
+    transform 0.2s var(--ease-out, ease);
+}
+.af-mic.af-mic-round svg {
+  /* The disc's full 40, over its border: the drawing is laid out on it. */
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin: -1.5px;
+}
+.af-mic.af-mic-round:hover {
+  border-color: var(--k-grape, #7639a1);
+  transform: translateY(-1px);
+}
+.af-mic.af-mic-round:active {
+  transform: scale(0.94);
+}
+.af-mic.af-mic-round.is-on {
+  border-color: #d64545;
+  color: #b83232;
+  background: #fff5f5;
+  animation: afMicRing 1.3s ease-out infinite;
+}
+@keyframes afMicRing {
+  from {
+    box-shadow: 0 0 0 0 rgba(214, 69, 69, 0.4);
+  }
+  to {
+    box-shadow: 0 0 0 10px rgba(214, 69, 69, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .af-mic.af-mic-round.is-on {
+    animation: none;
+  }
+}

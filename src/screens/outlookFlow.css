@@ -410,34 +410,10 @@
   text-shadow: none;
 }
 
-/* With a microphone, the row carries both: the mic at the start, Add at the
-   end, on one line and one height. */
-.ol-add-row.has-mic {
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-10);
-}
-.ol-add-row.has-mic .af-mic {
-  margin: 0;
-}
-/* Add keeps the end of the row whether or not the browser can listen. */
-.ol-add-row.has-mic {
-  justify-content: flex-start;
-}
-.ol-add-row.has-mic .ol-add {
-  margin-left: auto;
-}
-
-/* Add, drawn as the microphone's twin: the same pill, height, border and
-   type. Waiting (nothing in the box) it is an outline like the mic; with
-   something to add it fills with the brand's purple. The mic keeps the end
-   of the row, as it does everywhere else. */
-.ol-add-row.has-mic .ol-add {
-  margin-left: 0;
-}
-.ol-add-row.has-mic .af-mic {
-  margin-left: auto;
-}
+/* Add (Add Con, Add Hope…) on the right under the box, on its own: the
+   microphone is a circle in the box's corner now (MemoryAsk, Dictation).
+   Waiting (nothing in the box) it is an outline; with something to add it
+   fills with the brand's purple. */
 .ol-add.ol-add-pill {
   display: inline-flex;
   align-items: center;
@@ -632,16 +608,6 @@ html.cx-desktop .jf.ol .ol-sky .ol-haze {
 html.cx-desktop .jf.ol .ol-sky .ol-full {
   left: 16px;
   right: 16px;
-}
-
-/* Add Concern / Add Hope beside the microphone, not at the far ends of the
-   row. The Move's pros and cons use the same row. */
-html.cx-desktop .ol-add-row {
-  justify-content: flex-start;
-  gap: 12px;
-}
-html.cx-desktop .ol-add-row.has-mic .af-mic {
-  margin-left: 0;
 }
 
 /* The ending (the 720 results column): the tall sky is the same radius-24

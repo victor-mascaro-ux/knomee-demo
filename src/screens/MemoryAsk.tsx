@@ -6,14 +6,22 @@
  * ending pays off something they watched happen. While it is empty, a few
  * real-sounding openings type themselves in and away as a ghost, showing the
  * kind of answer wanted without putting words in anyone's mouth. A row of
- * starters drops a beginning into the box with one tap, the microphone sits
- * big under it, and once there is a real answer a quiet line says so.
+ * starters drops a beginning into the box with one tap, the microphone is a
+ * round button in the box's bottom-right corner, whatever action the box has
+ * (Add Con, Add Hope) sits under it on the right, and once there is a real
+ * answer a quiet line says so. Tapping into the box scrolls it into view
+ * together with the buttons under it.
  *
- * Shared by the client's Financial Joy and the advisor's Practice Joy.
+ * Every adventure's written answers use it: Financial Joy and Practice Joy,
+ * Outlook, The Move and Goals.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import './memoryAsk.css'
+
+/** The box's bottom-right corner, where a microphone handed to the box (in
+    `below`, as every flow does) draws itself — see MicButton. */
+export const MicCorner = createContext<HTMLElement | null>(null)
 
 /* The ghost's rhythm: letters in, a pause to read, letters out. */
 const TYPE_MS = 45
@@ -60,6 +68,39 @@ function useGhost(lines: string[], active: boolean) {
 
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length
 
+/* Scroll the box and the buttons under it into the part of the screen that
+   is really free: the scroller's height less whatever is pinned over it — an
+   adventure's bar at the top and its Back / OK at the foot, The Move's
+   balloon. The foot of the buttons comes up clear of what is pinned below;
+   if the whole does not fit, the box's top stays in view instead. The phone
+   frame is scaled, and its scroll is not, so distances are measured back
+   out of the scale. */
+function showField(el: HTMLElement | null, smooth: boolean) {
+  if (!el) return
+  let scroller = el.parentElement
+  while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
+  if (!scroller) return el.scrollIntoView({ block: 'nearest' })
+  const s = scroller.getBoundingClientRect()
+  const k = s.height / scroller.offsetHeight || 1
+  let top = s.top
+  let bottom = s.bottom
+  for (const p of scroller.querySelectorAll<HTMLElement>('*')) {
+    if (p.contains(el) || getComputedStyle(p).position !== 'sticky') continue
+    const r = p.getBoundingClientRect()
+    if (!r.height) continue
+    if (r.top + r.height / 2 > s.top + s.height / 2) bottom = Math.min(bottom, r.top)
+    else top = Math.max(top, r.bottom)
+  }
+  const gap = 12 * k
+  const r = el.getBoundingClientRect()
+  let by = 0
+  if (r.height > bottom - top - 2 * gap || r.top < top + gap) by = r.top - (top + gap)
+  else if (r.bottom > bottom - gap) by = r.bottom - (bottom - gap)
+  if (Math.abs(by) < 1) return
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  scroller.scrollBy({ top: by / k, behavior: smooth && !reduce ? 'smooth' : 'auto' })
+}
+
 export default function MemoryAsk({
   value,
   onChange,
@@ -92,7 +133,23 @@ export default function MemoryAsk({
 }) {
   const box = useRef<HTMLTextAreaElement>(null)
   const card = useRef<HTMLDivElement>(null)
+  /* The box and what is under it, brought into view together. */
+  const field = useRef<HTMLDivElement>(null)
+  const [corner, setCorner] = useState<HTMLSpanElement | null>(null)
   const [focused, setFocused] = useState(false)
+  /* Tapped into, the box and its buttons scroll up into view — now, and
+     again once a phone's keyboard has come up and taken half the screen. */
+  const reveal = () => {
+    window.setTimeout(() => showField(field.current, true), 60)
+    window.setTimeout(() => showField(field.current, true), 420)
+  }
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!focused || !vv) return
+    const shown = () => showField(field.current, false)
+    vv.addEventListener('resize', shown)
+    return () => vv.removeEventListener('resize', shown)
+  }, [focused])
   const empty = !value.trim()
   const ghost = useGhost(ghosts, empty && !focused && !disabled)
   /* How warm the sky is: nothing yet is dusk, a few lines is full light. */
@@ -114,17 +171,15 @@ export default function MemoryAsk({
     const el = box.current
     if (el) {
       /* Straight to the box with the words in it: the page glides down to
-         it (the focus itself does not scroll, which would jump), and the
-         cursor waits at the end. */
+         it and its buttons (the focus itself does not scroll, which would
+         jump — its reveal does), and the cursor waits at the end. */
       el.focus({ preventScroll: true })
-      requestAnimationFrame(() => {
-        el.setSelectionRange(next.length, next.length)
-        card.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      })
+      requestAnimationFrame(() => el.setSelectionRange(next.length, next.length))
     }
   }
 
   return (
+    <MicCorner.Provider value={corner}>
     <div className="mem">
       {starters.length > 0 && (
         <div className="mem-starters" role="group" aria-label="Start with">
@@ -143,6 +198,7 @@ export default function MemoryAsk({
         </div>
       )}
 
+      <div className="mem-field-wrap" ref={field}>
       <div
         ref={card}
         className={`mem-card${focused ? ' is-focused' : ''}${disabled ? ' is-disabled' : ''}`}
@@ -166,7 +222,10 @@ export default function MemoryAsk({
           disabled={!!disabled}
           aria-label={disabled ?? placeholder}
           placeholder={disabled ?? (empty && !focused && ghost ? '' : placeholder)}
-          onFocus={() => setFocused(true)}
+          onFocus={() => {
+            setFocused(true)
+            reveal()
+          }}
           onBlur={() => setFocused(false)}
           onChange={(e) => onChange(e.target.value)}
           onDoubleClick={(e) => {
@@ -179,13 +238,17 @@ export default function MemoryAsk({
             }
           }}
         />
+        {/* The microphone's corner (MicButton draws itself here). */}
+        <span className="mem-mic" ref={setCorner} />
       </div>
 
       {below}
+      </div>
 
       <p className={`mem-cheer${words(value) >= 10 ? ' is-on' : ''}`} aria-live="polite">
         {words(value) >= 10 ? cheer : ''}
       </p>
     </div>
+    </MicCorner.Provider>
   )
 }
