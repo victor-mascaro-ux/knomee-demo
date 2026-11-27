@@ -1,16 +1,11 @@
-/* What Intercom puts on Alex's dashboard. The floating pieces carry a yellow
-   "Intercom · …" tag so the room can tell them from the product; the banner
-   sits in the page as it would for real, unmarked. The sender is the firm,
+/* What Intercom puts on Alex's dashboard, as Alex would see it: no demo
+   tags or outlines. The sender is the firm,
    Acme Advisors, as Intercom is set up for the pilot. */
 
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react'
 import BusyButton from './BusyButton'
 import { ChatIcon, CheckIcon, XIcon } from './icons'
 import { SURVEY, SURVEY_QUESTION } from './steps'
-
-export function Tag({ label }: { label: string }) {
-  return <span className="ic-tag">Intercom · {label}</span>
-}
 
 /** The firm's letter, in its colour: who an Intercom message is from. */
 export function FirmAvatar() {
@@ -150,9 +145,8 @@ export function AnchoredTip({
   return (
     <div
       ref={ref}
-      className={`ic ic-card ic-tip ic-outline${side === 'left' ? ' left' : ''}${leaving ? ' leaving' : ''}`}
+      className={`ic ic-card ic-tip${side === 'left' ? ' left' : ''}${leaving ? ' leaving' : ''}`}
     >
-      <Tag label="Tooltip" />
       <button className="ic-close" type="button" aria-label="Close" onClick={onClose}>
         <XIcon />
       </button>
@@ -216,8 +210,7 @@ export function Survey({
   }, [answer, sent])
   const answered = answer >= 0
   return (
-    <div className={`ic ic-card ic-survey ic-outline${leaving ? ' leaving' : ''}`}>
-      <Tag label="Survey" />
+    <div className={`ic ic-card ic-survey${leaving ? ' leaving' : ''}`}>
       <button className="ic-close" type="button" aria-label="Close" onClick={onClose}>
         <XIcon />
       </button>
@@ -285,11 +278,10 @@ export function Post({
     <>
       <div className={`ic-post-scrim${leaving ? ' leaving' : ''}`} />
       <div
-        className={`ic ic-card ic-post ic-outline${leaving ? ' leaving' : ''}`}
+        className={`ic ic-card ic-post${leaving ? ' leaving' : ''}`}
         role="dialog"
         aria-labelledby="ad-post-h"
       >
-        <Tag label="Post" />
         <button className="ic-close" type="button" aria-label="Close" onClick={onLater}>
           <XIcon />
         </button>

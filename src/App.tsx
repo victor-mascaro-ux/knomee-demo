@@ -2760,9 +2760,11 @@ const emptyConfigs: Record<EmptyVariant, EmptyConfig> = {
   },
 }
 
-function LockedBar({ icon, title }: { icon: ReactNode; title: string }) {
+/** A card the dashboard will have, shown locked. `full` draws its icon at
+    full strength, as the dashboard's own card does (My Prospects). */
+function LockedBar({ icon, title, full }: { icon: ReactNode; title: string; full?: boolean }) {
   return (
-    <div className="locked-bar">
+    <div className={`locked-bar${full ? ' is-full-icon' : ''}`}>
       <div className="card-title">
         {icon}
         <span>{title}</span>
@@ -2810,8 +2812,18 @@ function EmptyScreen({
       {/* Analytics has no metrics/insights bars, search, or buttons. */}
       {variant !== 'analytics' && (
         <>
-          <LockedBar icon={<ChartIcon />} title="Top Line Metrics" />
-          <LockedBar icon={<BoltIcon />} title="Actionable Insights" />
+          {/* The icons are the ones the dashboard's own cards wear: My
+              Prospects' in plum, Clients' in teal. */}
+          <LockedBar
+            icon={<ChartIcon color={variant === 'prospects' ? '#7639a1' : undefined} />}
+            title="Top Line Metrics"
+            full={variant === 'prospects'}
+          />
+          <LockedBar
+            icon={<BoltIcon color={variant === 'prospects' ? '#7639a1' : undefined} />}
+            title="Actionable Insights"
+            full={variant === 'prospects'}
+          />
 
           <div className="toolbar">
             <div className="search-box is-disabled">

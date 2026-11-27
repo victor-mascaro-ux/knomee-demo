@@ -2179,8 +2179,8 @@ button.name-link-btn:hover .name-text {
 .locked-bar .card-title {
   color: var(--grey-text);
 }
-.locked-bar .card-title svg path,
-.locked-bar .card-title svg rect {
+.locked-bar:not(.is-full-icon) .card-title svg path,
+.locked-bar:not(.is-full-icon) .card-title svg rect {
   opacity: 0.7;
 }
 .locked-icon {

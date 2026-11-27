@@ -75,7 +75,7 @@ export default function NotesPanel({ idx, onGoto }: { idx: number; onGoto: (i: n
             )
           })}
         </ol>
-        <p className="foot-note">Yellow tags on screen mark Intercom messages. Names and numbers are examples.</p>
+        <p className="foot-note">Names and numbers are examples.</p>
       </div>
     </aside>
   )

@@ -40,101 +40,11 @@ export function useLeave(ms = 190): [boolean, (fn: () => void) => void] {
 export const BUSY_MS = 560
 export const OK_MS = 340
 
-const easeOut = (k: number) => 1 - Math.pow(1 - k, 3)
-
-/* The app's own numbers that count up: the dashboard's Top Line Metrics, and
-   the Knomee Quotient on Sarah's page. They are the product's elements, so
-   the count runs on the text the product drew, ending on the very value it
-   drew, and marks them with data attributes of its own (which React leaves
-   alone) for the colour while counting and the bump at the end. */
-const COUNTED: { key: string; sel: string; fromZero?: boolean }[] = [
-  { key: 'avg', sel: '.metric-value-kq' },
-  { key: 'total', sel: '.metric-tile:nth-child(2) .metric-value' },
-  /* Her score counts up from 0 each time her page opens. */
-  { key: 'ppkq', sel: '.ap-side-stat-v', fromZero: true },
-]
-
-/** Counts the app's numbers up to their new values after each render: from
-    the value last shown, so a step that adds someone counts on from the
-    last. Held while `paused` (an intro screen covers the page). */
-export function useCountUps(root: RefObject<HTMLElement | null>, paused: boolean) {
-  /* Per number: the element and value last counted to, and, while a count
-     runs, the text it last wrote (so its own writes are never mistaken for
-     the product's new value) and how to stop it. */
-  const last = useRef(new Map<string, { node: Element; value: number }>())
-  const running = useRef(new Map<string, { node: Element; wrote: string; stop: () => void }>())
-  useEffect(() => () => running.current.forEach((r) => r.stop()), [])
-  useEffect(() => {
-    if (paused) return
-    const box = root.current
-    if (!box) return
-    for (const c of COUNTED) {
-      const node = box.querySelector(c.sel)
-      const text = node?.firstChild
-      if (!node || !text || text.nodeType !== Node.TEXT_NODE) continue
-      const run = running.current.get(c.key)
-      if (run && run.node === node && text.nodeValue === run.wrote) continue
-      const to = Number(text.nodeValue)
-      if (!Number.isFinite(to)) continue
-      const prev = last.current.get(c.key)
-      if (!run && prev && prev.node === node && prev.value === to) continue
-      const from = c.fromZero && prev?.node !== node ? 0 : (prev?.value ?? 0)
-      last.current.set(c.key, { node, value: to })
-      run?.stop()
-      running.current.delete(c.key)
-      if (from === to || reducedMotion()) {
-        text.nodeValue = String(to)
-        continue
-      }
-      const el = node as HTMLElement
-      let raf = 0
-      let bump = 0
-      let t0: number | null = null
-      const me = { node, wrote: String(from), stop: () => undefined as void }
-      const write = (n: number) => {
-        me.wrote = String(n)
-        text.nodeValue = me.wrote
-      }
-      el.dataset.adCounting = ''
-      write(from)
-      const finish = () => {
-        cancelAnimationFrame(raf)
-        window.clearTimeout(land)
-        if (running.current.get(c.key) !== me) return
-        running.current.delete(c.key)
-        if (!el.isConnected) return
-        write(to)
-        delete el.dataset.adCounting
-        el.dataset.adBump = ''
-        bump = window.setTimeout(() => delete el.dataset.adBump, 450)
-      }
-      const tick = (t: number) => {
-        if (running.current.get(c.key) !== me || !el.isConnected) return
-        if (t0 === null) t0 = t
-        const k = Math.min(1, (t - t0) / 650)
-        write(Math.round(from + (to - from) * easeOut(k)))
-        if (k < 1) raf = requestAnimationFrame(tick)
-        else finish()
-      }
-      raf = requestAnimationFrame(tick)
-      /* A hidden tab holds animation frames back: the number lands anyway. */
-      const land = window.setTimeout(finish, 730)
-      me.stop = () => {
-        cancelAnimationFrame(raf)
-        window.clearTimeout(land)
-        window.clearTimeout(bump)
-        delete el.dataset.adCounting
-        delete el.dataset.adBump
-      }
-      running.current.set(c.key, me)
-    }
-  })
-}
 
 /* A press ripple on the buttons that do something: drawn from where the
    pointer went down, inside the button, then gone. */
 const RIPPLED =
-  '.ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn, .ad-app .toolbar .btn-primary'
+  '.ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn'
 
 export function useRipples(root: RefObject<HTMLElement | null>) {
   useEffect(() => {
