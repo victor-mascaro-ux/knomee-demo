@@ -547,36 +547,98 @@
   margin-top: 18px;
 }
 
-/* The banner, across the page under the tabs, a block's gap below them. */
+/* The banner, across the page under the tabs, a block's gap below them, in
+   knomee's design system: a dashboard card's edge and radius on the tray's
+   plum wash, the page's own type, the card head's white icon disc for the
+   firm's initial (top-aligned with the words, and never in the firm's
+   colour: a brand colours the bars only), the DS primary button and the
+   table's quiet close. */
 :is(.adoption-demo, .ad-intercom) .ic-banner {
   position: relative;
   margin-top: var(--block-gap);
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px 14px 18px;
-  border: 1px solid #e2d2f1;
-  border-radius: var(--radius-xl);
-  background: var(--k-adv-open);
-  font-family: var(--ad-ic-font);
+  gap: var(--space-16);
+  padding: var(--space-16) 22px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  background: var(--surface-tray);
+  font-family: inherit;
 }
-:is(.adoption-demo, .ad-intercom) .ic-banner .ic-av {
-  width: 28px;
-  height: 28px;
-  font-size: 13px;
+:is(.adoption-demo, .ad-intercom) .ic-banner-msg {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+:is(.adoption-demo, .ad-intercom) .ic-banner .ic-av.firm {
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-default);
+  background: var(--surface-card);
+  box-shadow: var(--disc-lift);
+  color: var(--text-strong);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner p {
-  flex: 1;
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.45;
-  color: var(--k-plum);
+  /* One line sits level with the disc; more lines run down from its top. */
+  padding-top: 7px;
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner p b {
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner .ic-close {
   position: static;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--k-ash);
+}
+:is(.adoption-demo, .ad-intercom) .ic-banner .ic-close:hover {
+  background: #f0eef4;
+  color: #555;
+}
+/* Show me: the DS primary button, as Invite is, with the DS shine that the
+   advisor flow's Get Started and the results' Claim wear: a band of light
+   that crosses it. */
+:is(.adoption-demo, .ad-intercom) .ic-banner .btn {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+}
+:is(.adoption-demo, .ad-intercom) .ic-banner .btn > span {
+  position: relative;
+}
+:is(.adoption-demo, .ad-intercom) .ic-banner .btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  pointer-events: none;
+}
+/* The banner's own shine: one sweep of light across it once it has landed. */
+:is(.adoption-demo, .ad-intercom) .ic-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.7) 50%, transparent 80%) no-repeat;
+  background-size: 40% 100%;
+  background-position: -150% 0;
 }
 
 /* The tip, under what it points at. Hidden until it has been placed. */
@@ -1862,6 +1924,14 @@
   :is(.adoption-demo, .ad-intercom) .ic-banner {
     animation: ad-drop-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
+  /* It sweeps once as it lands; the button's shine starts as that ends, so
+     the two never cross the button together, then repeats on the DS beat. */
+  :is(.adoption-demo, .ad-intercom) .ic-banner::after {
+    animation: ad-sweep 1.3s ease 0.45s both;
+  }
+  :is(.adoption-demo, .ad-intercom) .ic-banner .btn::after {
+    animation: ad-btn-shine 2.8s ease-in-out 1.8s infinite;
+  }
   :is(.adoption-demo, .ad-intercom) .ic-banner.leaving {
     animation: ad-lift-out 0.19s ease both;
   }
@@ -2130,6 +2200,23 @@
     to {
       opacity: 1;
       transform: scale(1);
+    }
+  }
+  @keyframes ad-sweep {
+    from {
+      background-position: -150% 0;
+    }
+    to {
+      background-position: 250% 0;
+    }
+  }
+  @keyframes ad-btn-shine {
+    0% {
+      left: -60%;
+    }
+    45%,
+    100% {
+      left: 130%;
     }
   }
   @keyframes ad-spin {

@@ -48,13 +48,25 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+/* Three purples that deepen as people go further, then the client side's
+   teal for those who became clients. */
 .gi-step {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px 12px 18px;
-  background: var(--k-plum-wash);
+  gap: 4px;
+  min-height: 112px;
+  padding: 14px 16px 14px 18px;
+  background: var(--k-adv-open);
+}
+.gi-step-2 {
+  background: var(--k-grape-light);
+}
+.gi-step-3 {
+  background: #dcc6ee;
+}
+.gi-step.is-won {
+  background: var(--k-teal-light);
 }
 .gi-step + .gi-step {
   padding-left: 30px;
@@ -89,63 +101,80 @@
   z-index: 2;
 }
 .gi-step-label {
-  font-size: 12.5px;
+  padding-right: 52px;
+  font-size: 13px;
   color: var(--k-body);
 }
 .gi-step-num {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
   color: var(--plum);
+  font-variant-numeric: tabular-nums;
 }
-.gi-step-rate {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--k-grape);
-}
-.gi-step:first-child .gi-step-rate {
-  color: var(--k-muted);
-  font-weight: 400;
-}
-.gi-step.is-won {
-  background: var(--k-teal-light);
-}
-.gi-step.is-won .gi-step-num,
-.gi-step.is-won .gi-step-rate {
+.gi-step.is-won .gi-step-num {
   color: var(--k-ocean);
 }
-.gi-step.is-leak {
-  box-shadow: inset 0 -3px 0 var(--k-bolt);
-}
-.gi-leak-tag {
-  padding: 1px 8px;
+/* The step's share of the one before it, top right; the biggest drop's own
+   pill sits bottom right. */
+.gi-step .gi-step-pill,
+.gi-step .gi-leak-tag {
+  position: absolute;
+  right: 14px;
+  padding: 2px 9px;
   border-radius: 999px;
-  background: var(--k-grape-light);
+  white-space: nowrap;
+}
+.gi-step .gi-step-pill {
+  top: 12px;
+  background: #fff;
   color: var(--k-grape);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.18s ease;
+}
+.gi-step.is-won .gi-step-pill {
+  color: var(--k-ocean);
+}
+.gi-step:hover .gi-step-pill {
+  transform: scale(1.08);
+}
+.gi-step .gi-leak-tag {
+  bottom: 12px;
+  background: var(--k-plum);
+  color: #fff;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
-/* A section's one finding, bold, and what to do about it. */
+/* A section's one finding, in the reading the analytics pages end their
+   sections on (.act-reading): a plum tray with a grape edge, led by the
+   knomee mark, since the reading is knomee's. */
 .gi-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin: 12px 0 0;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: inset 3px 0 0 var(--k-bolt);
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--k-body);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--k-plum-050);
+  border-left: 3px solid var(--k-grape);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--k-plum-ink);
+}
+.gi-callout svg {
+  flex: none;
+  /* Meets the first line's cap height. */
+  margin-top: 1px;
 }
 .gi-callout b {
   color: var(--plum);
+  font-weight: 600;
 }
 .gi-thread-do {
   font-size: 13px;
@@ -155,21 +184,13 @@
 .gi-thread-do::before {
   content: '→ ';
 }
-.gi-link {
-  border: 0;
-  background: none;
-  padding: 0;
-  font: inherit;
-  font-weight: 600;
-  color: var(--purple-bolt);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.gi-link:hover {
-  text-decoration: underline;
-}
 /* A tier is focused: the funnel and the Knomee comparison cannot narrow with
    it, so they step back. */
+.gi-funnel,
+.gi-compare,
+.gi-callout {
+  transition: opacity 0.3s ease;
+}
 .gi-sec.is-lensed .gi-funnel,
 .gi-sec.is-lensed .gi-compare,
 .gi-sec.is-lensed .gi-callout {
@@ -194,6 +215,12 @@
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.gi-thread:hover {
+  transform: translateY(-2px);
+  border-color: #ddd0ec;
+  box-shadow: 0 8px 22px rgba(36, 4, 70, 0.08);
 }
 .gi-thread-head {
   font-size: 15px;
@@ -211,6 +238,12 @@
 .gi-split i {
   display: block;
   min-width: 4px;
+  transition: filter 0.16s ease;
+}
+/* A segment pointed at brightens and lifts its bubble over its neighbours. */
+.gi-split i:hover {
+  filter: brightness(1.12);
+  z-index: 2;
 }
 .gi-split i:first-child {
   border-radius: 999px 0 0 999px;
@@ -301,6 +334,10 @@
 .gi-cmp-label {
   font-size: 13px;
   color: var(--k-body);
+  transition: color 0.16s ease;
+}
+.gi-cmp-row:hover .gi-cmp-label {
+  color: var(--plum);
 }
 .gi-cmp-bar {
   display: grid;
@@ -314,6 +351,7 @@
   display: block;
   height: 8px;
   border-radius: 999px;
+  transform-origin: left center;
 }
 .gi-cmp-bar b,
 .gi-cmp-bar span {
@@ -328,6 +366,92 @@
 }
 .gi-cmp-bar span {
   color: var(--k-muted);
+}
+
+/* ── Motion ──
+   The card starts folded, so nothing plays on page load: each entrance runs
+   when .collapse.open arrives, and again on every reopen. Steps keep their
+   boxes still (a moving box would hide the arrow of the step before it); what
+   is inside them rises. "backwards", not "both": once played, hover and the
+   tooltips get their own transform and clip back. Reduced motion is handled
+   by index.css's global rule. */
+@keyframes giRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes giPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+@keyframes giGrow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes giReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.gi-card .collapse.open .gi-step > :not(.gi-step-pill):not(.gi-leak-tag) {
+  animation: giRise 0.45s cubic-bezier(0.22, 0.81, 0.28, 1.02) backwards;
+}
+.gi-card .collapse.open .gi-step .gi-step-pill,
+.gi-card .collapse.open .gi-step .gi-leak-tag {
+  animation: giPop 0.42s cubic-bezier(0.22, 0.81, 0.28, 1.02) backwards;
+}
+.gi-card .collapse.open .gi-step-2 > * {
+  animation-delay: 0.07s;
+}
+.gi-card .collapse.open .gi-step-3 > * {
+  animation-delay: 0.14s;
+}
+.gi-card .collapse.open .gi-step-4 > * {
+  animation-delay: 0.21s;
+}
+.gi-card .collapse.open .gi-step .gi-step-pill {
+  animation-delay: 0.35s;
+}
+.gi-card .collapse.open .gi-step .gi-leak-tag {
+  animation-delay: 0.55s;
+}
+.gi-card .collapse.open .gi-callout {
+  animation: giRise 0.45s ease 0.3s backwards;
+}
+.gi-card .collapse.open .gi-thread {
+  animation: giRise 0.45s cubic-bezier(0.22, 0.81, 0.28, 1.02) 0.12s backwards;
+}
+.gi-card .collapse.open .gi-thread:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.gi-card .collapse.open .gi-thread:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.gi-card .collapse.open .gi-thread:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.gi-card .collapse.open .gi-split {
+  animation: giReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s backwards;
+}
+.gi-card .collapse.open .gi-cmp-group {
+  animation: giRise 0.45s ease 0.3s backwards;
+}
+.gi-card .collapse.open .gi-cmp-bar i {
+  animation: giGrow 0.65s cubic-bezier(0.22, 0.81, 0.28, 1.02) 0.45s backwards;
+}
+.gi-card .collapse.open .gi-cmp-bar.is-all i {
+  animation-delay: 0.55s;
 }
 
 @media (max-width: 1100px) {
