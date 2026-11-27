@@ -1,8 +1,10 @@
-/* What Intercom puts on Alex's dashboard, as Alex would see it: no demo
-   tags or outlines. The sender is the firm,
+/* What Intercom puts on Alex's dashboard, as Alex would see it, in knomee's
+   design system: Poppins, the DS's buttons, option chips, field and modal.
+   Only the chat button in the corner keeps Intercom's own look. The sender is the firm,
    Acme Advisors, as Intercom is set up for the pilot. */
 
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react'
+import { CloseIcon } from '../components/icons'
 import BusyButton from './BusyButton'
 import { ChatIcon, CheckIcon, XIcon } from './icons'
 import { SURVEY, SURVEY_QUESTION } from './steps'
@@ -219,11 +221,11 @@ export function Survey({
       </button>
       <Sender />
       <h4>{SURVEY_QUESTION}</h4>
-      <div className="ic-opts">
+      <div className="ask-opts">
         {SURVEY.map((o, i) => (
           <button
             key={o}
-            className={`ic-opt${i === answer ? ' sel' : ''}`}
+            className={`ask-opt${i === answer ? ' sel' : ''}`}
             type="button"
             aria-pressed={i === answer}
             style={{ '--i': i } as CSSProperties}
@@ -238,7 +240,7 @@ export function Survey({
         <>
           <textarea
             ref={box}
-            className="ic-grow ic-follow"
+            className="ad-grow ic-follow"
             placeholder="Tell us more"
             aria-label="Tell us more"
             rows={1}
@@ -248,7 +250,7 @@ export function Survey({
               fit()
             }}
           />
-          <BusyButton key={answer} className="ic-btn" onDone={onSend}>
+          <BusyButton key={answer} className="btn btn-primary ic-wide" onDone={onSend}>
             Send
           </BusyButton>
         </>
@@ -257,8 +259,8 @@ export function Survey({
         <>
           {answer === 2 && <div className="ic-reply">We’ll check in with you.</div>}
           <h4 className="ic-follow ic-next">Who’s next?</h4>
-          <button className="ic-btn" type="button" onClick={onInvite}>
-            Invite another prospect
+          <button className="btn btn-primary ic-wide" type="button" onClick={onInvite}>
+            Invite Another Prospect
           </button>
         </>
       )}
@@ -267,7 +269,9 @@ export function Survey({
 }
 
 /** Week 3: a post in the middle of the page, asking Alex to connect his
-    calendar so a check-in is ready for every new meeting. */
+    calendar so a check-in is ready for every new meeting. It is the DS
+    modal: the plum bar with its title and close, the body, and a foot of
+    pill buttons with the main one filled. */
 export function Post({
   leaving,
   onConnect,
@@ -278,29 +282,36 @@ export function Post({
   onLater: () => void
 }) {
   return (
-    <>
-      <div className={`ic-post-scrim${leaving ? ' leaving' : ''}`} />
-      <div
-        className={`ic ic-card ic-post${leaving ? ' leaving' : ''}`}
-        role="dialog"
-        aria-labelledby="ad-post-h"
-      >
-        <button className="ic-close" type="button" aria-label="Close" onClick={onLater}>
-          <XIcon />
-        </button>
-        <Sender />
-        <h3 id="ad-post-h">Never forget a check-in</h3>
-        <p>Connect your calendar. When you book a meeting with someone new, their check-in is ready to send.</p>
-        <div className="ic-row">
-          <BusyButton className="ic-btn" done="Connected" onDone={onConnect}>
-            Connect calendar
-          </BusyButton>
-          <button className="ic-btn ghost" type="button" onClick={onLater}>
-            Later
+    <div
+      className={`modal-backdrop${leaving ? ' ad-leaving' : ''}`}
+      onClick={onLater}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ad-post-h"
+    >
+      <div className={`modal ad-post${leaving ? ' ad-leaving' : ''}`} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title" id="ad-post-h">
+            Never forget a check-in
+          </h2>
+          <button className="modal-close" type="button" aria-label="Close" onClick={onLater}>
+            <CloseIcon />
           </button>
         </div>
+        <div className="modal-body ad-post-body">
+          <Sender />
+          <p>Connect your calendar. When you book a meeting with someone new, their check-in is ready to send.</p>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-outline" type="button" onClick={onLater}>
+            Later
+          </button>
+          <BusyButton className="btn btn-primary" done="Connected" onDone={onConnect}>
+            Connect Calendar
+          </BusyButton>
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 
