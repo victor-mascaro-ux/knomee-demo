@@ -1,17 +1,19 @@
 /* The Intercom adoption demo: a new advisor's first three weeks at Acme, step
- * by step. The dark demo bar runs it; the advisor's real app is on the left,
- * wearing Acme's brand, with what Intercom adds over it; the notes on the
- * right say what is happening and why.
+ * by step. It is the burger menu's Empty State, switched on: the advisor's
+ * real app on the left, wearing Acme's brand, with what Intercom adds over
+ * it; on the right, the steps, the current one saying what happens and what
+ * to click. Picking a step goes to it; the arrow keys step through. The same
+ * switch, in this app's own burger menu, turns it off.
  *
  * Its story, copy and timing are the approved prototype's
  * (docs/adoption-demo/prototype.html). Its app is the product's own: the top
  * bar, the tab bar, the empty dashboard, the prospects table and the compose
  * window, handed in by App (kit.ts). Only what the product doesn't have — the
- * Intercom pieces, the notes, the intro screens — is drawn here.
+ * Intercom pieces and the steps — is drawn here.
  *
  * Buttons that aren't part of the story do nothing: the app is inert except
- * for its live controls (the Invite button, and anything of the demo's own
- * marked data-ad-live).
+ * for its live controls (the burger's switch, the Invite button, and anything
+ * of the demo's own marked data-ad-live).
  */
 
 import {
@@ -28,40 +30,26 @@ import TopBar from '../components/TopBar'
 import { CLIENT_BRANDS, type ClientBrand } from '../components/clientBrands'
 import { useCcNav } from '../ccNav'
 import type { InviteEmail } from '../data/inviteEmails'
+import ProspectProfileScreen from '../screens/ProspectProfileScreen'
 import AskModal from './AskModal'
 import ComposeModal, { type Sent } from './ComposeModal'
-import DemoBar from './DemoBar'
-import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
-import IntroScreen from './IntroScreen'
-import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
 import { ComingUp, NudgeCell } from './dashboard'
-import ProspectProfileScreen from '../screens/ProspectProfileScreen'
+import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
+import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
 import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { reducedMotion, useCountUps, useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
+import { ALEX, ASK, CAL_MEETS, NOTE_TEXT, NUDGE, REMINDER, STEPS, firstName, stepIndex } from './steps'
 import TeamChat from './TeamChat'
-import {
-  ALEX,
-  ASK,
-  CAL_MEETS,
-  NOTE_TEXT,
-  NUDGE,
-  STEPS,
-  dayOf,
-  firstName,
-  nextDayStart,
-  stepIndex,
-  type ExtraKey,
-  type SentEmail,
-} from './steps'
 import './adoption.css'
 
 const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
 
 /** The controls in the app that are part of the story. Everything else in it
     is inert. */
-const LIVE = '.toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]'
+const LIVE =
+  '.menu-btn, .menu-toggle, .toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]'
 
 /** Alex's first invite, as his draft starts. */
 const FIRST_INVITE: InviteEmail = {
@@ -84,29 +72,15 @@ const NUDGE_EMAIL: InviteEmail = {
 
 interface StepState {
   idx: number
-  /** Bumped by Restart and by re-entering the current step: either opens it afresh. */
+  /** Bumped by picking the current step again: it opens afresh. */
   visit: number
   rows: DemoRow[]
   ui: Ui
-  /** The day's intro screen is up. */
-  intro: boolean
-  /** The email open from the notes, over everything. */
-  mail: ExtraKey | null
-  /** The next day, lit up in the notes after a pause at the end of a day. */
-  hint: number | null
 }
 
-function openStep(idx: number, visit: number, prevDay: number, intros: boolean): StepState {
+function openStep(idx: number, visit: number): StepState {
   const id = STEPS[idx].id
-  return {
-    idx,
-    visit,
-    rows: rowsFor(id),
-    ui: freshUi(id),
-    intro: intros && dayOf(idx) !== prevDay,
-    mail: null,
-    hint: null,
-  }
+  return { idx, visit, rows: rowsFor(id), ui: freshUi(id) }
 }
 
 export default function AdoptionDemo({
@@ -118,25 +92,17 @@ export default function AdoptionDemo({
   /** The step in the address; null or unknown is the first. */
   step: string | null
   onStep: (id: string) => void
+  /** The burger's Empty State, switched off. */
   onExit: () => void
   kit: DemoKit
 }) {
   const idx = Math.max(0, stepIndex(step))
-  const [introsOn, setIntrosOn] = useState(true)
-  const [labelsOn, setLabelsOn] = useState(true)
-  /* What Alex sent, carried from his first invite to the notes of later steps. */
-  const [sent, setSent] = useState<SentEmail | null>(null)
   /* What Alex answered on Day 4: the team's alert quotes it on Day 7. */
   const [askAnswer, setAskAnswer] = useState<string | null>(null)
-  /* Restart and re-entering a step open it afresh; Restart also starts the
-     day's intro again, as on a first visit. */
-  const [visit, setVisit] = useState({ n: 0, fresh: false })
+  const [visit, setVisit] = useState(0)
 
-  const [st, setSt] = useState<StepState>(() => openStep(idx, 0, -1, true))
-  if (st.idx !== idx || st.visit !== visit.n) {
-    const prevDay = st.visit !== visit.n && visit.fresh ? -1 : dayOf(st.idx)
-    setSt(openStep(idx, visit.n, prevDay, introsOn))
-  }
+  const [st, setSt] = useState<StepState>(() => openStep(idx, 0))
+  if (st.idx !== idx || st.visit !== visit) setSt(openStep(idx, visit))
   const { ui, rows } = st
   /** A change to this step's screen, made later (after an exit has played):
       dropped if the presenter has moved to another step meanwhile. */
@@ -162,46 +128,18 @@ export default function AdoptionDemo({
   const goTo = useCallback(
     (i: number) => {
       const k = Math.max(0, Math.min(STEPS.length - 1, i))
-      if (k === idx) setVisit((v) => ({ n: v.n + 1, fresh: false }))
+      if (k === idx) setVisit((v) => v + 1)
       else onStep(STEPS[k].id)
     },
     [idx, onStep],
   )
-  const restart = () => {
-    setSent(null)
-    setAskAnswer(null)
-    setVisit((v) => ({ n: v.n + 1, fresh: true }))
-    if (idx !== 0) onStep(STEPS[0].id)
-  }
 
-  /* ── The intro screen ── */
-  const [introLeaving, leaveIntro] = useLeave(260)
-  const closeIntro = useCallback(() => {
-    if (!st.intro) return
-    const at = { idx: st.idx, visit: st.visit }
-    leaveIntro(() => setSt((s) => (s.idx === at.idx && s.visit === at.visit ? { ...s, intro: false } : s)))
-  }, [st.intro, st.idx, st.visit, leaveIntro])
-  /* Turning intros off mid-intro opens the day. */
-  useEffect(() => {
-    if (!introsOn) closeIntro()
-  }, [introsOn, closeIntro])
-
-  /* ── Pacing ── At the end of a day, if the presenter hasn't moved on within
-     4 seconds, the next day lights up in the notes. */
-  useEffect(() => {
-    if (st.intro) return
-    const target = nextDayStart(st.idx)
-    if (target === null) return
-    const t = window.setTimeout(() => setSt((s) => (s.idx === st.idx ? { ...s, hint: target } : s)), 4000)
-    return () => window.clearTimeout(t)
-  }, [st.idx, st.visit, st.intro])
-
-  /* ── What arrives on its own ── A moment after the day opens: Alex's
+  /* ── What arrives on its own ── A moment after the step opens: Alex's
      reminder email (Day 2), the one question (Day 4), the team's
      notification (Day 7, or after "Talk it through"). */
   useEffect(() => {
     const a = st.ui.auto
-    if (st.intro || !a) return
+    if (!a) return
     const at = { idx: st.idx, visit: st.visit }
     const t = window.setTimeout(
       () =>
@@ -220,10 +158,11 @@ export default function AdoptionDemo({
       900,
     )
     return () => window.clearTimeout(t)
-  }, [st.idx, st.visit, st.intro, st.ui.auto])
+  }, [st.idx, st.visit, st.ui.auto])
 
   /* ── The app's scroll ── A step opens at the top; the first invite opens
-     with the toolbar in view, where its tip points. */
+     with the toolbar in view, where its tip points; Sarah finishing, with her
+     row in view. */
   const device = useRef<HTMLElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
@@ -240,17 +179,17 @@ export default function AdoptionDemo({
     }
   }, [st.idx, st.visit])
 
-  /* ── Motion ── A new step, or a day once its intro closes, lays the page in
-     from the top; the dashboard's numbers count up to theirs once the page
-     is in view; buttons that do something ripple where they are pressed. */
+  /* ── Motion ── A new step lays the page in from the top; the dashboard's
+     numbers count up to theirs; buttons that do something ripple where they
+     are pressed. */
   const [entering, setEntering] = useState(false)
   useLayoutEffect(() => {
-    if (st.intro || reducedMotion()) return
+    if (reducedMotion()) return
     setEntering(true)
     const t = window.setTimeout(() => setEntering(false), 1400)
     return () => window.clearTimeout(t)
-  }, [st.idx, st.visit, st.intro])
-  useCountUps(device, st.intro)
+  }, [st.idx, st.visit])
+  useCountUps(device, false)
   const root = useRef<HTMLDivElement>(null)
   useRipples(root)
 
@@ -275,19 +214,16 @@ export default function AdoptionDemo({
     setSt((s) => ({
       ...s,
       /* Closed without sending on the first invite: the tip comes back. */
-      ui: { ...s.ui, modal: null, invite: null, tip: STEPS[s.idx].id === 'first-send' && !s.ui.done },
+      ui: { ...s.ui, modal: null, invite: null, tip: STEPS[s.idx].id === 'first-send' && s.rows.length === 0 },
     }))
   const inviteSent = (out: Sent) => {
     const who = ui.invite
     if (!who) return
-    setSent({ first: firstName(who.name), subject: out.subject, body: out.body })
-    const row = who.next
-      ? invitedRow('next', who.name, out.email, '12/04/2026')
-      : sarahInvited(out.email)
+    const row = who.next ? invitedRow('next', who.name, out.email, '12/04/2026') : sarahInvited(out.email)
     setSt((s) => ({
       ...s,
       rows: [...s.rows.map((r) => ({ ...r, fresh: false })), { ...row, fresh: true }],
-      ui: { ...s.ui, modal: null, invite: null, tip: false, survey: null, done: true },
+      ui: { ...s.ui, modal: null, invite: null, tip: false, survey: null },
     }))
   }
 
@@ -297,12 +233,7 @@ export default function AdoptionDemo({
   const nudgeSent = (out: Sent) =>
     setSt((s) => ({
       ...s,
-      ui: {
-        ...s.ui,
-        modal: null,
-        done: true,
-        nudge: { sent: true, draft: { subject: out.subject, body: out.body } },
-      },
+      ui: { ...s.ui, modal: null, nudge: { sent: true, draft: { subject: out.subject, body: out.body } } },
     }))
 
   /* ── Day 3: Sarah's playbook ── Her name opens her page on its Prospect
@@ -313,7 +244,7 @@ export default function AdoptionDemo({
       rows: s.rows.map((r) => ({ ...r, isNew: false, fresh: false })),
       ui: { ...s.ui, drawer: true, rowTip: false },
     }))
-  const closePlaybook = () => setSt((s) => ({ ...s, ui: { ...s.ui, drawer: false, done: true } }))
+  const closePlaybook = () => setSt((s) => ({ ...s, ui: { ...s.ui, drawer: false } }))
   /* Her page opens, and closes, at the top: only when it does, so a step's
      own opening scroll (to Sarah's row) stands. */
   const drawerWas = useRef(ui.drawer)
@@ -326,10 +257,8 @@ export default function AdoptionDemo({
 
   /* ── Day 4: how did it go? ── */
   const [surveyLeaving, leaveSurvey] = useLeave()
-  const setSurvey = (patch: Partial<NonNullable<Ui['survey']>>, done = false) =>
-    setSt((s) =>
-      s.ui.survey ? { ...s, ui: { ...s.ui, survey: { ...s.ui.survey, ...patch }, done: done || s.ui.done } } : s,
-    )
+  const setSurvey = (patch: Partial<NonNullable<Ui['survey']>>) =>
+    setSt((s) => (s.ui.survey ? { ...s, ui: { ...s.ui, survey: { ...s.ui.survey, ...patch } } } : s))
 
   /* ── Week 3: the calendar ── */
   const [postLeaving, leavePost] = useLeave()
@@ -342,21 +271,20 @@ export default function AdoptionDemo({
         ...s.rows.map((r) => ({ ...r, isNew: false, fresh: false })),
         { ...invitedRow(`cal${i}`, m.name, m.email, '12/14/2026'), isNew: true, fresh: true },
       ],
-      ui: { ...s.ui, done: true, cal: { sent: { ...(s.ui.cal?.sent ?? {}), [i]: true } } },
+      ui: { ...s.ui, cal: { sent: { ...(s.ui.cal?.sent ?? {}), [i]: true } } },
     }))
   }
 
-  /* ── Day 2: Knomee's reminder, open in Alex's inbox ── Its button starts
-     an invite; closing it is the end of the day's story either way. */
+  /* ── Day 2 if no invite: Knomee's reminder, open in Alex's inbox ── Its
+     button starts an invite. */
   const [inboxLeaving, leaveInbox] = useLeave()
-  const closeInbox = () =>
-    leaveInbox(laterOnThisStep((s) => ({ ...s, ui: { ...s.ui, modal: null, done: true } })))
+  const closeInbox = () => leaveInbox(setUiLater({ modal: null }))
   const inboxCta = () => {
-    setSt((s) => ({ ...s, ui: { ...s.ui, modal: null, done: true } }))
+    setSt((s) => ({ ...s, ui: { ...s.ui, modal: null } }))
     openInvite()
   }
 
-  /* ── Day 4: the one question ── */
+  /* ── Day 4 if no invite: the one question ── */
   const [askLeaving, leaveAsk] = useLeave()
   const closeAsk = () => leaveAsk(setUiLater({ modal: null }))
   const answerAsk = (i: number) => {
@@ -364,69 +292,40 @@ export default function AdoptionDemo({
     const ask = { ...ui.ask, answer: i }
     if (i === 0) {
       /* See the email: the invite, with its email, opens in its place. */
-      setSt((s) => ({ ...s, ui: { ...s.ui, ask, done: true, modal: null } }))
+      setSt((s) => ({ ...s, ui: { ...s.ui, ask, modal: null } }))
       openInvite()
     } else if (i === 1) {
       /* Talk it through: the Knomee team hears from him. */
       setSt((s) => ({
         ...s,
-        ui: { ...s.ui, ask, done: true, modal: null, view: 'chat', chat: 'help', notif: false, notifOpen: false, auto: 'notif' },
+        ui: { ...s.ui, ask, modal: null, view: 'chat', chat: 'help', notif: false, notifOpen: false, auto: 'notif' },
       }))
     } else {
-      setSt((s) => ({ ...s, ui: { ...s.ui, ask, done: true } }))
+      setSt((s) => ({ ...s, ui: { ...s.ui, ask } }))
     }
   }
 
   /* ── The team's chat: its notification opens the alert ── */
   const [notifLeaving, leaveNotif] = useLeave(160)
-  const openNotif = () =>
-    leaveNotif(laterOnThisStep((s) => ({ ...s, ui: { ...s.ui, notif: false, notifOpen: true, done: true } })))
+  const openNotif = () => leaveNotif(setUiLater({ notif: false, notifOpen: true }))
 
   /* ── The welcome banner and the Invite tip ── */
   const [bannerLeaving, leaveBanner] = useLeave()
   const [tipLeaving, leaveTip] = useLeave()
 
-  /* ── Emails opened from the notes ── */
-  const [mailLeaving, leaveMail] = useLeave()
-  const mailFrom = useRef<HTMLElement | null>(null)
-  const openMail = (k: ExtraKey, from: HTMLElement) => {
-    mailFrom.current = from
-    setSt((s) => ({ ...s, mail: k }))
-  }
-  const closeMail = useCallback(() => {
-    leaveMail(() => {
-      setSt((s) => (s.mail ? { ...s, mail: null } : s))
-      const back = mailFrom.current
-      if (back && document.body.contains(back)) back.focus()
-    })
-  }, [leaveMail])
-
-  /* ── Keys ── Arrows step through; Enter, Space or Esc open a day from its
-     intro; Esc closes an open email. Typing is left alone. */
-  const keys = useRef({ st, goTo, closeIntro, closeMail, closeInbox, closeAsk, closePlaybook })
-  keys.current = { st, goTo, closeIntro, closeMail, closeInbox, closeAsk, closePlaybook }
+  /* ── Keys ── Arrows step through; Esc closes what is open. Typing is left
+     alone. */
+  const keys = useRef({ st, goTo, closeInbox, closeAsk, closePlaybook })
+  keys.current = { st, goTo, closeInbox, closeAsk, closePlaybook }
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
-      const { st: s, goTo: go, closeIntro: openDay, closeMail: shut, closeInbox: shutInbox, closeAsk: shutAsk } =
-        keys.current
-      if (s.mail) {
-        if (e.key === 'Escape') shut()
-        return
-      }
-      if (s.intro) {
-        if (['Enter', ' ', 'ArrowRight', 'Escape'].includes(e.key)) {
-          e.preventDefault()
-          openDay()
-        }
-        if (e.key === 'ArrowLeft') go(s.idx - 1)
-        return
-      }
+      const { st: s, goTo: go } = keys.current
       if (s.ui.modal) {
         /* The invite's window closes itself on Esc. */
-        if (e.key === 'Escape' && s.ui.modal === 'mail') shutInbox()
-        if (e.key === 'Escape' && s.ui.modal === 'ask') shutAsk()
+        if (e.key === 'Escape' && s.ui.modal === 'mail') keys.current.closeInbox()
+        if (e.key === 'Escape' && s.ui.modal === 'ask') keys.current.closeAsk()
         return
       }
       if (s.ui.drawer && e.key === 'Escape') {
@@ -440,13 +339,11 @@ export default function AdoptionDemo({
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  const next = () => (st.intro ? closeIntro() : goTo(idx + 1))
-
   /* ── The app ── */
   const stats = useMemo(() => statsOf(rows), [rows])
   const freshRows = useMemo(() => new Set(rows.filter((r) => r.fresh).map((r) => r.name)), [rows])
   const noop = () => undefined
-  const tipOn = ui.tip && !ui.modal && !st.intro
+  const tipOn = ui.tip && !ui.modal
 
   /* Clicks on anything in the app that isn't part of the story stop here. */
   const guard = (e: ReactMouseEvent) => {
@@ -460,7 +357,7 @@ export default function AdoptionDemo({
   return (
     <div
       ref={root}
-      className={`adoption-demo${labelsOn ? ' labels-on' : ''}`}
+      className="adoption-demo labels-on"
       style={{ '--brand-bar': ACME.primary } as CSSProperties}
       data-beckon={tipOn ? '' : undefined}
     >
@@ -468,18 +365,6 @@ export default function AdoptionDemo({
         Knomee adoption demo: how Intercom guides a new advisor from first login to a habit, inside the ACME
         advisor dashboard
       </h1>
-      <DemoBar
-        idx={idx}
-        introsOn={introsOn}
-        onIntros={setIntrosOn}
-        labelsOn={labelsOn}
-        onLabels={setLabelsOn}
-        pulse={ui.done && idx < STEPS.length - 1}
-        onRestart={restart}
-        onBack={() => goTo(idx - 1)}
-        onNext={next}
-        onExit={onExit}
-      />
       <main className="ad-stage">
         <section
           className={`ad-device${entering ? ' ad-entering' : ''}`}
@@ -489,7 +374,14 @@ export default function AdoptionDemo({
           <div className="ad-scroll" ref={scroller}>
             <div className="ad-app" onClickCapture={guard} key={`${st.idx}-${st.visit}`}>
               <div className="page brand-client">
-                <TopBar logo={ACME.logo} cobrand="left" />
+                <TopBar
+                  logo={ACME.logo}
+                  cobrand="left"
+                  emptyState
+                  onEmptyState={(on) => {
+                    if (!on) onExit()
+                  }}
+                />
                 {ui.drawer ? (
                   <main className="content content-profile">
                     <ProspectProfileScreen
@@ -501,40 +393,40 @@ export default function AdoptionDemo({
                     />
                   </main>
                 ) : (
-                <main className="content">
-                  {kit.tabs}
-                  {ui.welcome && (
-                    <Banner
-                      title="Welcome, Alex."
-                      action="Show me"
-                      onAction={() => goTo(1)}
-                      onDismiss={() => leaveBanner(setUiLater({ welcome: false }))}
-                      leaving={bannerLeaving}
-                    >
-                      This is where you see what matters to prospects before you meet them.
-                    </Banner>
-                  )}
-                  {rows.length === 0 ? (
-                    <kit.EmptyScreen variant="prospects" onInvite={openInvite} />
-                  ) : (
-                    <kit.ProspectsScreen
-                      rows={rows}
-                      stats={stats}
-                      rowClassName={(p) => (freshRows.has(p.name) ? 'ad-row-enter' : undefined)}
-                      onInvite={openInvite}
-                      onConvert={noop}
-                      onResend={noop}
-                      onDownload={noop}
-                      onOpenProfile={openPlaybook}
-                      renderAction={(p) =>
-                        ui.nudge && p.name === 'Sarah Mitchell' && p.tier === 'incomplete' ? (
-                          <NudgeCell text={p.topAction} sent={ui.nudge.sent} onNudge={openNudge} />
-                        ) : undefined
-                      }
-                      afterMetrics={ui.cal && <ComingUp sent={ui.cal.sent} onSend={calSend} />}
-                    />
-                  )}
-                </main>
+                  <main className="content">
+                    {kit.tabs}
+                    {ui.welcome && (
+                      <Banner
+                        title="Welcome, Alex."
+                        action="Show me"
+                        onAction={() => goTo(1)}
+                        onDismiss={() => leaveBanner(setUiLater({ welcome: false }))}
+                        leaving={bannerLeaving}
+                      >
+                        This is where you see what matters to prospects before you meet them.
+                      </Banner>
+                    )}
+                    {rows.length === 0 ? (
+                      <kit.EmptyScreen variant="prospects" onInvite={openInvite} />
+                    ) : (
+                      <kit.ProspectsScreen
+                        rows={rows}
+                        stats={stats}
+                        rowClassName={(p) => (freshRows.has(p.name) ? 'ad-row-enter' : undefined)}
+                        onInvite={openInvite}
+                        onConvert={noop}
+                        onResend={noop}
+                        onDownload={noop}
+                        onOpenProfile={openPlaybook}
+                        renderAction={(p) =>
+                          ui.nudge && p.name === 'Sarah Mitchell' && p.tier === 'incomplete' ? (
+                            <NudgeCell text={p.topAction} sent={ui.nudge.sent} onNudge={openNudge} />
+                          ) : undefined
+                        }
+                        afterMetrics={ui.cal && <ComingUp sent={ui.cal.sent} onSend={calSend} />}
+                      />
+                    )}
+                  </main>
                 )}
               </div>
             </div>
@@ -553,7 +445,7 @@ export default function AdoptionDemo({
                 Meeting someone this week? Click <b>Invite</b> to add them.
               </AnchoredTip>
             )}
-            {ui.rowTip && !ui.drawer && !ui.modal && !st.intro && (
+            {ui.rowTip && !ui.drawer && !ui.modal && (
               <>
                 <Beacon
                   key={`beacon-${st.idx}-${st.visit}`}
@@ -574,21 +466,25 @@ export default function AdoptionDemo({
                 </AnchoredTip>
               </>
             )}
-            {ui.survey && !ui.modal && !st.intro && (
+            {ui.survey && !ui.modal && (
               <Survey
                 answer={ui.survey.answer}
                 details={ui.survey.details}
                 sent={ui.survey.sent}
                 leaving={surveyLeaving}
-                onAnswer={(answer) => setSurvey({ answer, details: '', sent: false }, true)}
+                onAnswer={(answer) => setSurvey({ answer, details: '', sent: false })}
                 onDetails={(details) => setSurvey({ details })}
-                onSend={() => setSurvey({ sent: true }, true)}
+                onSend={() => setSurvey({ sent: true })}
                 onClose={() => leaveSurvey(setUiLater({ survey: null }))}
                 onInvite={openInvite}
               />
             )}
-            {ui.post && !st.intro && (
-              <Post leaving={postLeaving} onConnect={connectCalendar} onLater={() => leavePost(setUiLater({ post: false }))} />
+            {ui.post && (
+              <Post
+                leaving={postLeaving}
+                onConnect={connectCalendar}
+                onLater={() => leavePost(setUiLater({ post: false }))}
+              />
             )}
             <Launcher />
           </div>
@@ -638,9 +534,7 @@ export default function AdoptionDemo({
             <>
               <div className={`ad-scrim${inboxLeaving ? ' leaving' : ''}`} onClick={closeInbox} />
               <MailWindow
-                k="alexNudge"
-                sent={sent}
-                nudge={null}
+                email={REMINDER}
                 brand={ACME}
                 inDevice
                 leaving={inboxLeaving}
@@ -661,35 +555,9 @@ export default function AdoptionDemo({
               onClose={closeAsk}
             />
           )}
-          {st.intro && (
-            <div className="ad-intro-layer">
-              <IntroScreen day={dayOf(st.idx)} leaving={introLeaving} onContinue={closeIntro} />
-            </div>
-          )}
         </section>
-        <NotesPanel
-          idx={idx}
-          nudged={!!ui.nudge?.sent}
-          nudge={ui.nudge?.draft ?? null}
-          sent={sent}
-          hint={st.hint}
-          onGoto={goTo}
-          onOpenMail={openMail}
-        />
+        <NotesPanel idx={idx} onGoto={goTo} />
       </main>
-      {st.mail && (
-        <div className="ad-mail-layer">
-          <div className={`mail-scrim${mailLeaving ? ' leaving' : ''}`} onClick={closeMail} />
-          <MailWindow
-            k={st.mail}
-            sent={sent}
-            nudge={ui.nudge?.draft ?? null}
-            brand={ACME}
-            leaving={mailLeaving}
-            onClose={closeMail}
-          />
-        </div>
-      )}
     </div>
   )
 }

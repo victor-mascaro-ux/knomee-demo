@@ -1,5 +1,5 @@
-/* The demo's own small glyphs (its bar, notes, intro screens and Intercom
-   pieces). The knomee mark is the product's own five paths. */
+/* The demo's own small glyphs (its notes, emails and Intercom pieces).
+   The knomee mark is the product's own five paths. */
 
 import { MARK_PARTS } from '../screens/ClientExperienceScreen'
 
@@ -36,31 +36,6 @@ export const MailIcon = () => (
   <svg viewBox="0 0 24 24" {...line} strokeWidth="2" aria-hidden>
     <rect x="3" y="5" width="18" height="14" rx="2" />
     <path d="M3.5 6.5l8.5 6.5 8.5-6.5" />
-  </svg>
-)
-
-export const HashIcon = () => (
-  <svg viewBox="0 0 24 24" {...line} strokeWidth="2.2" aria-hidden>
-    <path d="M9 4L7 20M17 4l-2 16M4.5 9h16M3.5 15h16" />
-  </svg>
-)
-
-export const ExpandIcon = () => (
-  <svg viewBox="0 0 24 24" {...line} strokeWidth="2" aria-hidden>
-    <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
-  </svg>
-)
-
-export const ClockIcon = () => (
-  <svg viewBox="0 0 24 24" {...line} strokeWidth="2" aria-hidden>
-    <circle cx="12" cy="12" r="8.5" />
-    <path d="M12 7.5V12l3 2" />
-  </svg>
-)
-
-export const ArrowIcon = () => (
-  <svg viewBox="0 0 24 24" {...line} strokeWidth="2.4" aria-hidden>
-    <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 )
 

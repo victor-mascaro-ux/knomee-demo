@@ -27,7 +27,6 @@ export default function TopBar({
   onApiStore,
   emptyState = false,
   onEmptyState,
-  onAdoptionDemo,
 }: {
   logo?: ReactNode
   cobrand?: 'left' | 'centered'
@@ -35,13 +34,11 @@ export default function TopBar({
   onSettings?: () => void
   /** The API store — the data a firm can pull from knomee. */
   onApiStore?: () => void
-  /** The dashboards with nobody in them yet, as a new advisor first sees
-      them: a presenter's switch, so it shows its state. Left out of the menu
-      where no handler is passed — the pages where emptying changes nothing. */
+  /** Empty State: the dashboard as a new advisor first meets it, with
+      Intercom over it (the adoption demo). A presenter's switch, so it shows
+      its state; left out of the menu where no handler is passed. */
   emptyState?: boolean
   onEmptyState?: (on: boolean) => void
-  /** The Intercom adoption demo: a new advisor's first three weeks. */
-  onAdoptionDemo?: () => void
 }) {
   const { open, shown, closing, setOpen } = useDropdown()
   const ref = useRef<HTMLDivElement>(null)
@@ -115,23 +112,10 @@ export default function TopBar({
                   API Store
                 </button>
               )}
-              {onAdoptionDemo && (
-                <button
-                  className="menu-item"
-                  type="button"
-                  onClick={() => {
-                    setOpen(false)
-                    onAdoptionDemo()
-                  }}
-                >
-                  Adoption Demo
-                </button>
-              )}
-              {/* A switch, not an item: the menu stays open so the presenter
-                  sees it flip while the dashboard behind it changes. */}
+              {/* A switch, not an item: it shows whether the empty state is on. */}
               {onEmptyState && (
                 <label className="menu-item menu-toggle">
-                  <span>Empty state</span>
+                  <span>Empty State</span>
                   <span className={`switch ${emptyState ? 'on' : ''}`}>
                     <input
                       type="checkbox"

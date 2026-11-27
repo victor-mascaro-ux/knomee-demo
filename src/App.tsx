@@ -5426,7 +5426,12 @@ export default function App() {
         /* Only over the three tables, with nobody's page open: a profile or
            the family's page covers the table, so emptying it would change
            nothing you can see. */
-        onAdoptionDemo={() => {
+        /* Empty State: the empty dashboard a new advisor meets, with
+           Intercom over it, step by step (the adoption demo). The demo's own
+           burger has the same switch, on, to leave it. */
+        emptyState={false}
+        onEmptyState={(on) => {
+          if (!on) return
           setAdoptionStep(null)
           setAdoptionOpen(true)
           setScreen('prospects')
@@ -5440,15 +5445,6 @@ export default function App() {
           setAdminView(false)
           setFirmView(false)
         }}
-        emptyState={emptyMode}
-        onEmptyState={
-          (currentView === 'prospects' || currentView === 'clients' || currentView === 'analytics') &&
-          !profileProspect &&
-          !profileClient &&
-          !householdOpen
-            ? setEmptyMode
-            : undefined
-        }
       />
 
       {firmView ? (

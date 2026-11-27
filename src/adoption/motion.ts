@@ -42,39 +42,6 @@ export const OK_MS = 340
 
 const easeOut = (k: number) => 1 - Math.pow(1 - k, 3)
 
-/** A number of the demo's own that counts up (or down) to its new value. */
-export function useCountUp(value: number, ms = 600): number {
-  const [shown, setShown] = useState(value)
-  const from = useRef(value)
-  useEffect(() => {
-    const start = from.current
-    from.current = value
-    if (start === value || reducedMotion()) {
-      setShown(value)
-      return
-    }
-    let raf = 0
-    let t0: number | null = null
-    const tick = (t: number) => {
-      if (t0 === null) t0 = t
-      const k = Math.min(1, (t - t0) / ms)
-      setShown(Math.round(start + (value - start) * easeOut(k)))
-      if (k < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    /* A hidden tab holds animation frames back: the value lands anyway. */
-    const land = window.setTimeout(() => {
-      cancelAnimationFrame(raf)
-      setShown(value)
-    }, ms + 80)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.clearTimeout(land)
-    }
-  }, [value, ms])
-  return shown
-}
-
 /* The app's own numbers that count up: the dashboard's Top Line Metrics, and
    the Knomee Quotient on Sarah's page. They are the product's elements, so
    the count runs on the text the product drew, ending on the very value it
@@ -167,7 +134,7 @@ export function useCountUps(root: RefObject<HTMLElement | null>, paused: boolean
 /* A press ripple on the buttons that do something: drawn from where the
    pointer went down, inside the button, then gone. */
 const RIPPLED =
-  '.ad-db-btn, .intro-go, .ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn, .ad-app .toolbar .btn-primary'
+  '.ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .notif, .ad-cal-btn, .ad-ask .btn, .ad-app .toolbar .btn-primary'
 
 export function useRipples(root: RefObject<HTMLElement | null>) {
   useEffect(() => {

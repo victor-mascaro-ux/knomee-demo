@@ -172,8 +172,6 @@ export interface Ui {
   post: boolean
   /** His calendar, once connected: which meetings have had a check-in sent. */
   cal: { sent: Record<number, boolean> } | null
-  /** The step's story has played out: Next pulses. */
-  done: boolean
 }
 
 export function freshUi(id: StepId): Ui {
@@ -194,6 +192,5 @@ export function freshUi(id: StepId): Ui {
     survey: id === 'after-meeting' ? { answer: -1, details: '', sent: false } : null,
     post: id === 'habit',
     cal: null,
-    done: false,
   }
 }
