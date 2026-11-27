@@ -70,6 +70,7 @@ import { AdventureMarkContext } from './AdventureMark'
 import SheetExits from './SheetExits'
 import { useCcNav, useCcNavRoots } from '../ccNav'
 import { DesktopIcon, GearIcon, PeopleIcon, RestartIcon, ShieldIcon, SignOutIcon } from '../components/profileIcons'
+import JourneyEnd, { startLink } from './JourneyEnd'
 
 const art: Record<ArtKey, string> = {
   'financial-joy': icFinancialJoy,
@@ -151,6 +152,18 @@ export const TabFinId = () => (
     <circle cx="11" cy="10.6" r="3.2" />
     <path d="M6.2 18.6c.8-2.3 2.7-3.5 4.8-3.5s4 1.2 4.8 3.5" strokeLinecap="round" />
     <path d="M20 9.4h5.6M20 14h4.2M20 18.4h5.6" strokeLinecap="round" />
+  </svg>
+)
+
+/* My Team, on the bar once every adventure is done: two people, the one in
+   front whole and the one behind showing round its shoulder. Drawn to sit
+   beside TabFinId — same box, same stroke weight. */
+export const TabTeam = () => (
+  <svg viewBox="0 0 32 26" width="34" height="27" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <circle cx="12.5" cy="8.6" r="4.2" />
+    <path d="M4.4 23.6c.9-4.8 4-7.4 8.1-7.4s7.2 2.6 8.1 7.4" />
+    <path d="M20.6 4.7a4.2 4.2 0 0 1 0 7.8" />
+    <path d="M23.4 16.6c2.4.8 4 3.1 4.6 7" />
   </svg>
 )
 
@@ -676,47 +689,6 @@ function MeterSeg({ i, on, last, order }: { i: number; on: boolean; last: boolea
     >
       <i />
     </span>
-  )
-}
-
-/* All five core adventures done: confetti falls over the list, and a banner
-   says so, for a few seconds. It takes no taps — the list stays usable under
-   it. */
-const FALL = Array.from({ length: 44 }, (_, i) => ({
-  i,
-  x: (i * 37) % 100,
-  d: ((i * 53) % 90) / 100,
-  t: 2.2 + ((i * 29) % 12) / 10,
-  r: (i * 67) % 360,
-  s: ((i * 41) % 60) - 30,
-  c: ['#240446', '#7639a1', '#b98ddc', '#e9d9f4', '#affc41', '#3dbdaa'][i % 6],
-  w: 6 + (i % 3) * 2,
-}))
-function Celebration() {
-  return (
-    <div className="cx-celebrate" aria-live="polite">
-      <div className="cx-celebrate-fall" aria-hidden>
-        {FALL.map((b) => (
-          <i
-            key={b.i}
-            style={{
-              left: `${b.x}%`,
-              width: b.w,
-              height: b.w * 1.6,
-              background: b.c,
-              animationDelay: `${b.d}s`,
-              animationDuration: `${b.t}s`,
-              ['--r' as string]: `${b.r}deg`,
-              ['--sway' as string]: `${b.s}px`,
-            }}
-          />
-        ))}
-      </div>
-      <div className="cx-celebrate-banner" role="status">
-        <b>All five adventures complete!</b>
-        <span>Your Financial ID is complete.</span>
-      </div>
-    </div>
   )
 }
 
@@ -1634,12 +1606,18 @@ function ClientExperienceRun({
      carries its name and a way out, and its own footer replaces the tab bar. */
   const [adventure, setAdventure] = useState<string | null>(null)
   useCcNav('cx.adventure', adventure, setAdventure)
+  /* The end of the journey, once Goals is left: every adventure done, Share,
+     and what the bar's buttons are for from here. Leaving it for anything
+     else — a tab, an adventure — is leaving it. */
+  const [ended, setEnded] = useState(false)
+  useCcNav('cx.end', ended, setEnded)
   useCcNavRoots('cx', () => [
     { 'cx.intro': 'welcome' },
     { 'cx.intro': 'you', 'cx.idField': 0 },
-    { 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': null },
+    { 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': null, 'cx.end': false },
     ...journey.map((j) => ({ 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': j.id })),
     { 'cx.intro': null, 'cx.tab': 'finid', 'cx.adventure': null },
+    { 'cx.intro': null, 'cx.tab': 'adventures', 'cx.adventure': null, 'cx.end': true },
   ])
   /* Reopened from her Financial ID: the adventure's ending again, with her
      answers, and back to the page after — nothing on the journey changes. */
@@ -1649,14 +1627,9 @@ function ClientExperienceRun({
   useEffect(() => {
     if (!adventure) setReviewing(false)
   }, [adventure])
-  /* The fifth adventure done: a moment on the list she comes back to, then
-     it clears itself. Keyed by when, so finishing again celebrates again. */
-  const [celebrate, setCelebrate] = useState(0)
   useEffect(() => {
-    if (!celebrate) return
-    const t = window.setTimeout(() => setCelebrate(0), 4200)
-    return () => window.clearTimeout(t)
-  }, [celebrate])
+    if (intro || adventure || tab !== 'adventures') setEnded(false)
+  }, [intro, adventure, tab])
   const leaveReview = () => {
     setReviewing(false)
     setAdventure(null)
@@ -1884,6 +1857,12 @@ function ClientExperienceRun({
 
   const active: TabId = tab
   const tabInd = useTabInd(active, brand?.primary)
+  /* On the end of the journey; the bar there has My Team where Adventures
+     was, every adventure being done. */
+  const atEnd = ended && !intro && !adventure && tab === 'adventures'
+  const barTabs: { id: TabId; label: string }[] = atEnd
+    ? [mobileTabs.find((t) => t.id === 'finid')!, { id: 'team', label: 'My Team' }]
+    : mobileTabs
 
   return (
     // The page is exactly as tall as the window it has to fit in. `100vh` would
@@ -1963,7 +1942,7 @@ function ClientExperienceRun({
           <div
             className={`cx-viewport${tab !== 'adventures' ? ' cx-viewport-id' : ''}${
               tab !== 'adventures' && railOpen ? ' is-menu-open' : ''
-            }`}
+            }${atEnd ? ' is-end' : ''}`}
             ref={viewport}
           >
             {intro === 'welcome' ? (
@@ -2008,9 +1987,11 @@ function ClientExperienceRun({
                   if (reviewing) return leaveReview()
                   setGoalsDone(answers)
                   completeAt('goals')
+                  /* The last adventure: its celebration's Continue opens the
+                     end of the journey. */
                   setAdventure(null)
                   setTab('adventures')
-                  setCelebrate(Date.now())
+                  setEnded(true)
                 }}
               />
             ) : adventure === 'future-you' ? (
@@ -2131,6 +2112,28 @@ function ClientExperienceRun({
                   setJoy(answers)
                   completeAt('financial-joy')
                   goNext('confidence')
+                }}
+              />
+            ) : atEnd ? (
+              <JourneyEnd
+                marks={journey.filter((j) => j.core && j.art).map((j) => artOf(j.art!))}
+                idName="Financial ID"
+                sub="Your Financial ID puts it in your own words, ready for your next talk with your advisor."
+                hints={{
+                  id: 'Your answers, on one page.',
+                  knomee: 'Quick actions, or hold to talk.',
+                  team: 'Who sees what you share.',
+                }}
+                share={{
+                  who: 'a friend or family member',
+                  text: 'I got clear on what I want with Knomee. Start your own adventures:',
+                  link: startLink('client-experience'),
+                }}
+                onPick={(b) => {
+                  if (b === 'knomee') {
+                    setVoiceOpen(false)
+                    setSheet(true)
+                  } else pickTab(b === 'id' ? 'finid' : 'team')
                 }}
               />
             ) : tab === 'adventures' ? (
@@ -2281,8 +2284,9 @@ function ClientExperienceRun({
             onPointerLeave={pressEnd}
           >
             {tabInd.ind}
-            {/* Financial ID · the mark in its raised circle · Adventures. */}
-            {mobileTabs.map((t, i) => [
+            {/* Financial ID · the mark in its raised circle · Adventures —
+                or, at the end of the journey, My Team. */}
+            {barTabs.map((t, i) => [
               i === 1 && <KnomeeFab key="fab" on={sheet || voiceOpen} label="Knomee" onClick={pickKnomee} />,
               <button
                 key={t.id}
@@ -2290,14 +2294,12 @@ function ClientExperienceRun({
                 className={`cx-tab ${active === t.id ? 'is-on' : ''}`}
                 onClick={() => pickTab(t.id)}
               >
-                {t.id === 'adventures' ? <TabAdventures /> : <TabFinId />}
+                {t.id === 'adventures' ? <TabAdventures /> : t.id === 'team' ? <TabTeam /> : <TabFinId />}
                 <span className="cx-tab-lbl">{t.label}</span>
               </button>,
             ])}
           </nav>
           )}
-
-          {celebrate > 0 && !adventure && tab === 'adventures' && <Celebration key={celebrate} />}
 
           <div className="cx-home-bar" />
 

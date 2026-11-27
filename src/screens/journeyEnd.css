@@ -1,0 +1,328 @@
+/* ── the end of the journey (JourneyEnd) ──
+   The brand's plum, the page's height: the marks and the title at the top,
+   Share in the middle, and at the foot a card over each of the bottom bar's
+   buttons, pointing down at it. The viewport's own plum and its foot are set
+   in client-experience.css, next to the bar's room for the Knomee button. */
+/* Not positioned: the Share modal inside it covers the whole screen, bars
+   and all, as every phone modal does. */
+.je {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  text-align: center;
+}
+
+/* ── the marks and the title ── */
+.je-hero {
+  position: relative;
+  padding-top: 26px;
+}
+/* A soft light behind the marks, breathing slowly — the ground the five sit
+   on, not a thing of its own. */
+.je-glow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  width: 360px;
+  height: 220px;
+  margin-left: -180px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(110, 160, 220, 0.34), rgba(118, 57, 161, 0.14) 60%, transparent);
+  pointer-events: none;
+  animation: jeBreathe 6s ease-in-out infinite alternate;
+}
+@keyframes jeBreathe {
+  to {
+    opacity: 0.65;
+    transform: scale(1.06);
+  }
+}
+.je-marks {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.je-mark {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  animation: jePop 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) backwards;
+  animation-delay: calc(0.1s + var(--i, 0) * 0.08s);
+}
+.je-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Each one's check: lime, ringed in the page's plum so it cuts into the
+   mark's edge rather than sitting on it. */
+.je-check {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 3px solid var(--k-plum);
+  border-radius: 50%;
+  background: var(--k-lime);
+  color: var(--k-plum);
+  animation: jePop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) backwards;
+  animation-delay: calc(0.5s + var(--i, 0) * 0.08s);
+}
+@keyframes jePop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+.je-title {
+  position: relative;
+  margin: 22px auto 8px;
+  max-width: 300px;
+  font-size: 30px;
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  letter-spacing: -0.3px;
+  color: #fff;
+  animation: jeUp 0.5s var(--ease-out) 0.35s backwards;
+}
+.je-sub {
+  position: relative;
+  margin: 0 auto;
+  max-width: 330px;
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.76);
+  animation: jeUp 0.5s var(--ease-out) 0.45s backwards;
+}
+@keyframes jeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ── Share, in the middle: the room above and below it is shared out evenly ── */
+.je-share {
+  margin: auto 0;
+  padding: 18px 18px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.07);
+  text-align: left;
+  animation: jeUp 0.5s var(--ease-out) 0.6s backwards;
+}
+.je-share h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+  color: #fff;
+}
+.je-share p {
+  margin: 0 0 14px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.74);
+}
+.je-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 50px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--k-lime);
+  font: inherit;
+  font-size: 17px;
+  font-weight: var(--weight-bold);
+  color: var(--k-plum);
+  cursor: pointer;
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+}
+.je-share-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px rgba(175, 252, 65, 0.6);
+}
+.je-share-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── where to next: a card over each of the bar's three buttons ──
+   Three across, the width the screen leaves, each pointing down at its button.
+   The bar puts its two tabs' centres 7.5px further out than these cards'
+   centres, so the side cards' pointers lean out by that much; the middle card
+   rides higher, clear of the Knomee button's rise above the bar. */
+.je-next {
+  padding-top: 20px;
+}
+.je-next-k {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.je-tips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+}
+.je-tip {
+  --nudge: 0px;
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 9px 8px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+  animation: jeUp 0.5s var(--ease-out) backwards;
+  transition: transform 0.18s var(--ease-out);
+}
+.je-tip.is-id {
+  --nudge: 7.5px;
+  animation-delay: 0.8s;
+}
+.je-tip.is-knomee {
+  margin-bottom: 30px;
+  animation-delay: 0.9s;
+}
+.je-tip.is-team {
+  --nudge: -7.5px;
+  animation-delay: 1s;
+}
+.je-tip:hover {
+  transform: translateY(-2px);
+}
+.je-tip:active {
+  transform: scale(0.97);
+}
+.je-tip b {
+  font-size: 13.5px;
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+  color: var(--k-plum);
+}
+.je-tip span {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text-secondary, #6b6478);
+}
+/* The pointer, down at the button. */
+.je-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: calc(50% + var(--nudge) - 8px);
+  border: 8px solid transparent;
+  border-top-color: #fff;
+  border-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .je-glow,
+  .je-mark,
+  .je-check,
+  .je-title,
+  .je-sub,
+  .je-share,
+  .je-tip {
+    animation: none;
+  }
+}
+
+/* On the desktop the bar's tabs spread across the window, so the cards can
+   no longer point at them: they sit in the column, without pointers. */
+html.cx-desktop .je-tip::after {
+  display: none;
+}
+html.cx-desktop .je-tip.is-knomee {
+  margin-bottom: 0;
+}
+
+/* ── Share Knomee (the modal) ── */
+.je-share-lead {
+  margin: 2px 0 18px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-body);
+}
+.je-channels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 18px;
+}
+/* Each way to send it: its mark on a wash of one of the brand's colours,
+   the name under it. A link (WhatsApp, Email, Messages) or a button
+   (Instagram) — one look. */
+.je-ch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-strong);
+  text-decoration: none;
+  cursor: pointer;
+}
+/* Instagram's confirmation swaps the whole column — mark and name — in the
+   one grid cell FeedbackButton keeps them in. */
+.je-ch .fb-stack > span {
+  flex-direction: column;
+  gap: 7px;
+}
+.je-ch-ic {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  color: var(--k-plum);
+  transition: transform 0.18s var(--ease-out);
+}
+.je-ch:hover .je-ch-ic {
+  transform: translateY(-2px);
+}
+.je-ch:active .je-ch-ic {
+  transform: scale(0.95);
+}
+.je-ch.is-whatsapp .je-ch-ic {
+  background: var(--k-teal-light);
+}
+.je-ch.is-instagram .je-ch-ic {
+  background: var(--k-grape-light);
+}
+.je-ch.is-email .je-ch-ic {
+  background: var(--k-lime-soft);
+}
+.je-ch.is-messages .je-ch-ic {
+  background: color-mix(in srgb, var(--k-ocean) 14%, #fff);
+}
+.je-ch-lbl {
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+.je-link {
+  margin-bottom: 4px;
+}

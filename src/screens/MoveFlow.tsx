@@ -699,8 +699,8 @@ export interface MoveContent {
   reading: (m: MoveAnswers) => { level: number; name: string; line: string }
   results: { title: string; kicker: string }
   badge: { art: string; name: string; arcTitle?: string }
-  /** The last adventure: its celebration ends on the Business ID and the
-      questions rather than on a next adventure. */
+  /** The last adventure: its celebration ends on Continue, to the end of the
+      journey, rather than on a next adventure. */
   last?: boolean
 }
 
@@ -762,8 +762,8 @@ export const ADVISOR_MOVE: MoveContent = {
   last: true,
 }
 
-/* Where the last adventure's celebration can send you. */
-export type MoveEnd = 'id' | 'questions'
+/* Where the last adventure's celebration sends you: the end of the journey. */
+export type MoveEnd = 'end'
 
 export default function MoveFlow({
   onComplete,
@@ -778,12 +778,12 @@ export default function MoveFlow({
   fillSkipped?: boolean
   /** The words it asks in: the advisor's move, or the client's goal. */
   content?: MoveContent
-  /** The Move taken to its end; `to` is the card chosen on the celebration,
-      when there is one. */
+  /** The Move taken to its end; `to` is 'end' when the last adventure's
+      celebration sends them on to the end of the journey. */
   onComplete: (m: MoveAnswers, to?: MoveEnd) => void
-  /** The celebration, as the other adventures end on it. The Move is the
-      last of them, so it ends not on a next adventure but on two cards: the
-      Business ID it has completed, and the questions it has written. */
+  /** The celebration, as the other adventures end on it. The last of them
+      (The Move, the client's Goals) ends not on a next adventure but on
+      Continue, to the end of the journey. */
   reward?: MoveReward | ((m: MoveAnswers) => MoveReward)
   /** The advisor's privacy switch, for a private question's screen. */
   privateNote?: (stepId: string) => ReactNode
@@ -1220,32 +1220,12 @@ export default function MoveFlow({
           next={rewardNow.next ?? ''}
           onNext={() => onComplete(m)}
           ending={c.last ? (
+            /* The last adventure names no next one: Continue goes on to the
+               end of the journey, which says where to from here. */
             <div className="mv-end">
               <h2 className="mv-end-title">Every adventure, done!</h2>
-              <p className="mv-end-sub">Your Business ID is complete. Where to next?</p>
-              <button className="mv-end-card" type="button" style={{ ['--i' as string]: 0 }} onClick={() => onComplete(m, 'id')}>
-                <span className="mv-end-ic" aria-hidden>
-                  {icon('M4 5.5h16v13H4z', 'M8 10a1.8 1.8 0 1 0 0-3.6A1.8 1.8 0 0 0 8 10Z', 'M5.6 14.4c.5-1.8 1.3-2.8 2.4-2.8s1.9 1 2.4 2.8', 'M13 9h4.5', 'M13 12.5h4.5')}
-                </span>
-                <span className="mv-end-text">
-                  <b>My Business ID</b>
-                  <span>Everything you told us, on one page.</span>
-                </span>
-                <span className="mv-end-go" aria-hidden>
-                  <ArrowGo />
-                </span>
-              </button>
-              <button className="mv-end-card" type="button" style={{ ['--i' as string]: 1 }} onClick={() => onComplete(m, 'questions')}>
-                <span className="mv-end-ic" aria-hidden>
-                  {icon('M5 5.5h14v10H10l-4 3.5v-3.5H5z', 'M10.2 9.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1', 'M12 14h.01')}
-                </span>
-                <span className="mv-end-text">
-                  <b>My Questions</b>
-                  <span>The three to ask, on your Business ID.</span>
-                </span>
-                <span className="mv-end-go" aria-hidden>
-                  <ArrowGo />
-                </span>
+              <button className="jw-next-btn mv-end-btn" type="button" onClick={() => onComplete(m, 'end')}>
+                Continue
               </button>
             </div>
           ) : undefined}

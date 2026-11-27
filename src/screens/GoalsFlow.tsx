@@ -166,6 +166,9 @@ export const CLIENT_GOALS: MoveContent = {
   },
   results: { title: 'Goal Readiness', kicker: 'My readiness stage for my goal is' },
   badge: { art: bgGoals, name: 'Goals' },
+  /* Her last core adventure: its celebration goes on to the end of the
+     journey. */
+  last: true,
 }
 
 /* Her answers as the goal the Financial ID keeps: dated today, at the stage
