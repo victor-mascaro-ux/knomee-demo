@@ -3,6 +3,8 @@
    its own copy of this. */
 
 import { useEffect, useRef, useState } from 'react'
+import { toast } from '../toast'
+import { toastWords } from './FeedbackButton'
 import { DotsIcon } from './icons'
 import { useDropdown } from './useDropdown'
 import './feedbackButton.css'
@@ -15,8 +17,11 @@ export interface MenuItem {
       menu of four actions does not hide the one that cannot be undone. */
   danger?: boolean
   /** In-button feedback ("Copied ✓"): the item says it for a moment and the
-      menu stays open while it does, then folds away on its own. */
+      menu stays open while it does, then folds away on its own; the app's
+      toast names it too. */
   done?: string
+  /** The toast's words ("Link copied"); `done` without its check otherwise. */
+  toast?: string
 }
 
 /* Long enough to read two words, short enough not to feel stuck open. */
@@ -76,6 +81,7 @@ export default function RowMenu({ items }: { items: MenuItem[] }) {
                 e.stopPropagation()
                 it.onClick?.()
                 if (it.done) {
+                  toast(it.toast ?? toastWords(it.done))
                   setDoneLabel(it.label)
                   window.clearTimeout(doneTimer.current)
                   doneTimer.current = window.setTimeout(() => setOpen(false), DONE_MS)

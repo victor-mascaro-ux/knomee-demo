@@ -106,9 +106,15 @@ small and diffable.
   pills, modal feet, link-style actions and menu rows read "Skip This
   Question", "Copy Link", "Back to Dashboard". Option chips and photo choices
   are things a person says, so they stay sentence case ("Nobody but me — it's
-  my call"). A fold toggle reads Show More / Show Less, never See More. Copy,
-  create and send confirm inside the button itself ("Copied ✓", "Link
-  Created ✓"), not with a toast.
+  my call"). A fold toggle reads Show More / Show Less, never See More.
+
+- **Copy, create and send confirm twice: in the button and with a toast.**
+  The button itself says it worked for a moment ("Copied ✓", "Link
+  Created ✓", "Sent ✓"), and at the same moment the app's toast names what
+  happened ("Link copied", "Prospect email sent"). `FeedbackButton`
+  and `RowMenu`'s `done` items do both (their `toast` prop sets the words);
+  anything else calls `toast()` from `src/toast.ts`. There is one toast host,
+  `<Toaster />` in `main.tsx`, so every screen has it.
 
 - **A card's header is one control, with its ? beside the title.** A card
   that folds (Show More / Show Less) opens and shuts from a click anywhere on

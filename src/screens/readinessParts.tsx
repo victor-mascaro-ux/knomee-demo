@@ -370,6 +370,7 @@ function CopyLine({ text, label }: { text: string; label: string }) {
       onClick={() => navigator.clipboard?.writeText(text).catch(() => {})}
       aria-label={`Copy ${label}`}
       announce="Copied"
+      toast="Copied to clipboard"
       done={
         <>
           <CheckIcon /> Copied

@@ -127,6 +127,7 @@ import { segmentTip } from './data/prospectSegments'
 import RowMenu from './components/RowMenu'
 import TabMenu from './components/TabMenu'
 import FeedbackButton, { useFlash } from './components/FeedbackButton'
+import { toast } from './toast'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
 import HouseholdScreen from './screens/HouseholdScreen'
@@ -2877,7 +2878,7 @@ function EmptyScreen({
    either dashboard, defaulting to that dashboard's kind. A prospect's invite
    is sent again as an email from their row (Resend Invite Link). Copying the
    link or the QR, and sending, each confirm in their own button (a check, for
-   a moment) rather than in a toast. All data is demo-fake: the link is a
+   a moment) and with the app's toast, which names what happened. All data is demo-fake: the link is a
    placeholder and the QR is decorative. */
 
 // Modal positioning across embeddings.
@@ -3919,55 +3920,6 @@ const Confetti = forwardRef<ConfettiHandle>(function Confetti(_props, ref) {
   return <canvas ref={canvasRef} className="confetti-canvas" aria-hidden />
 })
 
-function Toast({ show, message }: { show: boolean; message: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  // The prototype is embedded in a full-height iframe whose parent document
-  // scrolls, so `position: fixed` would pin the toast to the bottom of the tall
-  // iframe (off-screen). Anchor it to the parent's visible viewport instead.
-  useLayoutEffect(() => {
-    if (!show) return
-    let parentWin: Window | null = null
-    try {
-      if (window.parent !== window && typeof window.parent.scrollY === 'number') {
-        parentWin = window.parent
-      }
-    } catch {
-      parentWin = null
-    }
-    const place = () => {
-      const el = ref.current
-      if (!el) return
-      const h = el.offsetHeight || 60
-      // When the iframe is sized to its full content, the parent document is the
-      // scroller; otherwise this window scrolls internally. Anchor to whichever
-      // one actually scrolls so the toast lands in the visible viewport.
-      const selfScrolls = document.documentElement.scrollHeight > window.innerHeight + 2
-      const w = selfScrolls || !parentWin ? window : parentWin
-      el.style.top = `${w.scrollY + w.innerHeight - h - 32}px`
-    }
-    place()
-    const targets = new Set<Window>([window])
-    if (parentWin) targets.add(parentWin)
-    targets.forEach((t) => {
-      t.addEventListener('scroll', place, { passive: true })
-      t.addEventListener('resize', place)
-    })
-    return () =>
-      targets.forEach((t) => {
-        t.removeEventListener('scroll', place)
-        t.removeEventListener('resize', place)
-      })
-  }, [show, message])
-  return (
-    <div ref={ref} className={`app-toast ${show ? 'show' : ''}`} role="status" aria-live="polite">
-      <span className="app-toast-check">
-        <CheckIcon />
-      </span>
-      {message}
-    </div>
-  )
-}
-
 /* ── Account settings (Profile · Security · Billing · Marketing) ── */
 
 type SettingsSection = 'profile' | 'security' | 'billing' | 'marketing'
@@ -4491,11 +4443,8 @@ export default function App() {
   const [householdOpen, setHouseholdOpen] = useState(
     initialView === 'clients' && initialProfile === HOUSEHOLD_SLUG,
   )
-  const [toast, setToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' })
-  const showToast = (msg: string) => {
-    setToast({ show: true, msg })
-    window.setTimeout(() => setToast((t) => ({ ...t, show: false })), 3200)
-  }
+  /* The app's one toast (src/components/Toaster.tsx), raised from here. */
+  const showToast = (msg: string) => toast(msg)
   const confettiRef = useRef<ConfettiHandle>(null)
   // Internal-only: show the empty dashboards. Off by default so the prototype
   // reads as the populated demo; toggled from the top-right menu.
@@ -5707,7 +5656,6 @@ export default function App() {
       )}
       {inviteKind && <InviteModal initialKind={inviteKind} onClose={() => setInviteKind(null)} />}
       {resendTo && <ResendModal prospect={resendTo} brand={brand} onClose={() => setResendTo(null)} />}
-      <Toast show={toast.show} message={toast.msg} />
       <Confetti ref={confettiRef} />
       {/* Under a client's brand the product is still knomee's, and the credit
           says so from every screen rather than only from the tab row of the

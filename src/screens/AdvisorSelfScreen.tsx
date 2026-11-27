@@ -679,6 +679,7 @@ export function JourneyQuestions({
               aria-label={`Copy question ${i + 1}`}
               onClick={() => copy(q)}
               announce="Copied"
+              toast="Question copied"
               done={
                 <svg viewBox="0 0 16 16" aria-hidden>
                   <path d="M3.5 8.5 6.6 11.5 12.5 4.8" />
@@ -698,6 +699,7 @@ export function JourneyQuestions({
         tint={false}
         onClick={() => copy(qs.map((q, i) => `${i + 1}. ${q}`).join('\n'))}
         done="Copied All Three ✓"
+        toast="All three questions copied"
       >
         Copy All Three
       </FeedbackButton>

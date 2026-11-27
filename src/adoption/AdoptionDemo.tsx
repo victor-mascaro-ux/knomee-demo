@@ -42,6 +42,7 @@ import { useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
 import { ALEX, ASK, CAL_MEETS, NOTE_TEXT, NUDGE, REMINDER, STEPS, firstName, stepIndex } from './steps'
 import TeamChat from './TeamChat'
+import { toast } from '../toast'
 import './adoption.css'
 
 const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
@@ -248,11 +249,12 @@ export default function AdoptionDemo({
   /* ── Day 2: Sarah stopped halfway ── Alex can nudge her himself; if he
      does, Knomee's own reminder is off. */
   const openNudge = () => setSt((s) => ({ ...s, ui: { ...s.ui, modal: 'nudge' } }))
-  const nudgeSent = (out: Sent) =>
+  const nudgeSent = (out: Sent) => {
     setSt((s) => ({
       ...s,
       ui: { ...s.ui, modal: null, nudge: { sent: true, draft: { subject: out.subject, body: out.body } } },
     }))
+  }
 
   /* ── Day 3: Sarah's playbook ── Her name opens her page on its Prospect
      Playbook tab; its breadcrumb brings Alex back. */
@@ -283,6 +285,7 @@ export default function AdoptionDemo({
   const connectCalendar = () => leavePost(setUiLater({ post: false, cal: { sent: {} } }))
   const calSend = (i: number) => {
     const m = CAL_MEETS[i]
+    toast(`Check-in sent to ${m.name}`)
     setSt((s) => ({
       ...s,
       rows: [
@@ -568,7 +571,10 @@ export default function AdoptionDemo({
               leaving={askLeaving}
               onAnswer={answerAsk}
               onText={(text) => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, text } } }))}
-              onSend={() => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, sent: true } } }))}
+              onSend={() => {
+                toast('Answer sent to the Knomee team')
+                setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, sent: true } } }))
+              }}
               onClose={closeAsk}
             />
           )}

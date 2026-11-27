@@ -1,10 +1,11 @@
 /* In-button feedback: the standard confirmation for copy, create and send.
    The button itself says it worked ("Copied ✓", "Sent ✓") for a moment, then
-   goes back to its label — no toast, nothing to look for elsewhere on the
-   page. Both labels sit stacked in one grid cell, so the button is always as
+   goes back to its label, and the app's toast names what happened ("Link
+   copied") at the same moment: both, by the design system's rule. Both labels sit stacked in one grid cell, so the button is always as
    wide as the longer of the two and the layout never jumps when it swaps. */
 
 import { useCallback, useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { toast as raiseToast } from '../toast'
 import './feedbackButton.css'
 
 export const FLASH_MS = 1800
@@ -39,7 +40,14 @@ type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
   tint?: boolean
   /** What a screen reader hears while confirming, when `done` is not text. */
   announce?: string
+  /** The toast's words ("Link copied"). Without it, `announce`, or `done`
+      when it is text. false: the owner raises its own. */
+  toast?: string | false
 }
+
+/** The toast's words for a confirmation: what it names, or what the button
+    says without its check. */
+export const toastWords = (said: string) => said.replace(/\s*✓\s*$/, '').trim()
 
 export default function FeedbackButton({
   done,
@@ -47,6 +55,7 @@ export default function FeedbackButton({
   flashing,
   tint = true,
   announce,
+  toast,
   className,
   children,
   type = 'button',
@@ -54,6 +63,14 @@ export default function FeedbackButton({
 }: Props) {
   const own = useFlash()
   const on = flashing ?? own.is()
+  /* The toast rises with the button's own confirmation, once per press. */
+  const was = useRef(false)
+  useEffect(() => {
+    if (on && !was.current && toast !== false) {
+      raiseToast(toastWords(toast ?? announce ?? (typeof done === 'string' ? done : '')))
+    }
+    was.current = on
+  }, [on]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <button
       {...rest}
@@ -72,7 +89,7 @@ export default function FeedbackButton({
           {done}
         </span>
       </span>
-      {/* Said for screen readers too, without a toast. */}
+      {/* Said for screen readers too. */}
       <span className="fb-sr" role="status" aria-live="polite">
         {on ? (announce ?? (typeof done === 'string' ? done : '')) : ''}
       </span>

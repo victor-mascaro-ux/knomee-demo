@@ -12,12 +12,13 @@ import {
   apiProducts,
   curlFor,
 } from '../data/apiStore'
+import { toast } from '../toast'
 import './apiStore.css'
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 
-/* Copy confirms inside the button rather than in a toast. */
-function CopyButton({ text }: { text: string }) {
+/* Copy confirms inside the button and with the app's toast. */
+function CopyButton({ text, what }: { text: string; what: string }) {
   const [done, setDone] = useState(false)
   const t = useRef<number>()
   useEffect(() => () => window.clearTimeout(t.current), [])
@@ -28,6 +29,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={() => {
         navigator.clipboard?.writeText(text).catch(() => {})
         setDone(true)
+        toast(`${what} copied`)
         window.clearTimeout(t.current)
         t.current = window.setTimeout(() => setDone(false), 1800)
       }}
@@ -204,14 +206,14 @@ export default function ApiStoreScreen({
                           <div>
                             <div className="api-sample-head">
                               <span>Request</span>
-                              <CopyButton text={request} />
+                              <CopyButton text={request} what="Request" />
                             </div>
                             <pre className="api-code is-wrap">{request}</pre>
                           </div>
                           <div>
                             <div className="api-sample-head">
                               <span>Response · 200</span>
-                              <CopyButton text={response} />
+                              <CopyButton text={response} what="Response" />
                             </div>
                             <pre className="api-code">{response}</pre>
                           </div>

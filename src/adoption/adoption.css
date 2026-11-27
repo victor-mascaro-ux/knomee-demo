@@ -106,6 +106,12 @@
   display: block;
 }
 
+/* The app's toast, while the demo is open: left of Intercom's chat button
+   in the corner, not over it. */
+body:has(.adoption-demo) .app-toast {
+  right: 96px;
+}
+
 /* Top Line Metrics before anyone has finished: no average, no tiers yet. */
 .adoption-demo .metric-value.is-empty {
   color: var(--k-ash);
