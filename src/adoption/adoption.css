@@ -1,7 +1,8 @@
 /* The adoption demo (src/adoption). Everything here sits under .adoption-demo,
    so none of it reaches the product's own pages. Colours come from the
    design-system tokens (src/tokens); the few the tokens don't have — the
-   notes' wash, Intercom's yellow label — are named once, below. Every animation is behind prefers-reduced-motion: no-preference,
+   notes' wash, the yellow of the current step and Intercom's beacon — are
+   named once, below. Every animation is behind prefers-reduced-motion: no-preference,
    and its keyframes are prefixed ad- so they never meet the app's own. */
 
 .adoption-demo {
@@ -10,7 +11,6 @@
   --ad-notes-line: #e6e1ee;
   --ad-notes-rail: #e2dcea;
   --ad-tag: #ffd66b;
-  --ad-tag-ink: #4a3300;
   --ad-tag-edge: #e0a800;
   --ad-try-bg: #fff7db;
   --ad-try-edge: #f3dd96;
@@ -98,10 +98,16 @@
 .adoption-demo .ad-app :is(.menu-btn, .menu-toggle, .toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]) * {
   pointer-events: auto;
 }
-/* The Invite button the tip points at. */
-.adoption-demo[data-beckon] .ad-app .toolbar .btn-primary {
-  outline: 2px solid var(--ad-tag-edge);
-  outline-offset: 3px;
+
+/* The tab bar's underline. The app measures it against the tab bar it drew
+   first; the demo draws the page afresh for each step, which leaves that
+   measure pointing at a bar that is gone, and the underline shrinks away.
+   So here it sits under the active tab as the product shows it at rest. */
+.adoption-demo .ad-app .tabs.slide-nav .slide-ind {
+  display: none;
+}
+.adoption-demo .ad-app .tabs.slide-nav .tab-active::after {
+  display: block;
 }
 
 /* Top Line Metrics before anyone has finished: no average, no tiers yet. */
@@ -347,25 +353,6 @@
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
   color: var(--k-ink);
 }
-:is(.adoption-demo, .ad-intercom) .ic-tag {
-  position: absolute;
-  left: 0;
-  top: -28px;
-  padding: 6px 9px;
-  border-radius: var(--radius-sm);
-  background: var(--ad-tag);
-  color: var(--ad-tag-ink);
-  font: 600 11.5px/1 var(--font-ui);
-  letter-spacing: 0.1px;
-  white-space: nowrap;
-}
-:is(.adoption-demo, .ad-intercom):not(.labels-on) .ic-tag {
-  display: none;
-}
-:is(.adoption-demo, .ad-intercom).labels-on .ic-outline {
-  outline: 2px dashed var(--ad-tag-edge);
-  outline-offset: 5px;
-}
 :is(.adoption-demo, .ad-intercom) .ic-av {
   width: 32px;
   height: 32px;
@@ -590,16 +577,6 @@
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner .ic-close {
   position: static;
-}
-:is(.adoption-demo, .ad-intercom) .ic-banner::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.7) 50%, transparent 80%) no-repeat;
-  background-size: 40% 100%;
-  background-position: -150% 0;
 }
 
 /* The tip, under what it points at. Hidden until it has been placed. */
@@ -1881,23 +1858,15 @@
     transform: translateX(3px);
   }
 
-  /* The Invite button the tip points at */
-  .adoption-demo[data-beckon] .ad-app .toolbar .btn-primary {
-    animation: ad-beckon 1.6s ease-out infinite;
-  }
-
   /* Intercom */
   :is(.adoption-demo, .ad-intercom) .ic-banner {
     animation: ad-drop-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  :is(.adoption-demo, .ad-intercom) .ic-banner::after {
-    animation: ad-sweep 1.3s ease 0.45s both;
   }
   :is(.adoption-demo, .ad-intercom) .ic-banner.leaving {
     animation: ad-lift-out 0.19s ease both;
   }
   :is(.adoption-demo, .ad-intercom) .ic-tip {
-    animation: ad-tip-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both, ad-float 3.2s ease-in-out 0.6s infinite;
+    animation: ad-tip-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   :is(.adoption-demo, .ad-intercom) .ic-tip.leaving {
     animation: ad-fade-out 0.19s ease both;
@@ -1906,123 +1875,9 @@
     animation: ad-pop-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.3s both;
   }
 
-  /* A new step: the page lays in from the
-     top, one block after another; the tiles, the table's rows and its
-     scores follow. */
-  .adoption-demo .ad-entering .ad-app .content > :not(.tabs) {
-    animation: ad-rise-10 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(3) {
-    animation-delay: 70ms;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(4) {
-    animation-delay: 140ms;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(5) {
-    animation-delay: 210ms;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(6) {
-    animation-delay: 280ms;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(7) {
-    animation-delay: 350ms;
-  }
-  .adoption-demo .ad-entering .ad-app .content > :nth-child(n + 8) {
-    animation-delay: 420ms;
-  }
-  .adoption-demo .ad-entering .ad-app .metric-tile {
-    animation: ad-rise-10 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: 140ms;
-  }
-  .adoption-demo .ad-entering .ad-app .metric-tile:nth-child(2) {
-    animation-delay: 200ms;
-  }
-  .adoption-demo .ad-entering .ad-app .metric-tile:nth-child(3) {
-    animation-delay: 260ms;
-  }
-  .adoption-demo .ad-entering .ad-app .dist-bar {
-    transform-origin: left center;
-    animation: ad-grow-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr td {
-    animation: ad-rise-10 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: 300ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr:nth-child(2) td {
-    animation-delay: 345ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr:nth-child(3) td {
-    animation-delay: 390ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr:nth-child(4) td {
-    animation-delay: 435ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr:nth-child(5) td {
-    animation-delay: 480ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table tbody tr:nth-child(n + 6) td {
-    animation-delay: 525ms;
-  }
-  .adoption-demo .ad-entering .ad-app .prospects-table .score-badge {
-    animation: ad-pop-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-    animation-delay: 420ms;
-  }
-  .adoption-demo .ad-entering .ad-app .empty-state > * {
-    animation: ad-rise-10 0.4s ease both;
-    animation-delay: 300ms;
-  }
-  .adoption-demo .ad-entering .ad-app .empty-state > :nth-child(2) {
-    animation-delay: 350ms;
-  }
-  .adoption-demo .ad-entering .ad-app .empty-state > :nth-child(3) {
-    animation-delay: 400ms;
-  }
-  .adoption-demo .ad-entering .ad-app .empty-state > :nth-child(4) {
-    animation-delay: 450ms;
-  }
-
-  /* Sarah's page, as it opens: it slides in, her rail rises item by item,
-     and her playbook's sections follow. */
-  .adoption-demo .ad-app .content-profile :is(.pp-crumb, .pp-layout) {
-    animation: ad-page-in 0.35s ease both;
-  }
-  .adoption-demo .ad-app .content-profile .pp-side-inner > * {
-    animation: ad-rise-10 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .adoption-demo .ad-app .content-profile .pp-side-inner > :nth-child(2) {
-    animation-delay: 0.05s;
-  }
-  .adoption-demo .ad-app .content-profile .pp-side-inner > :nth-child(3) {
-    animation-delay: 0.1s;
-  }
-  .adoption-demo .ad-app .content-profile .pp-side-inner > :nth-child(4) {
-    animation-delay: 0.15s;
-  }
-  .adoption-demo .ad-app .content-profile .pp-side-inner > :nth-child(n + 5) {
-    animation-delay: 0.2s;
-  }
-  .adoption-demo .ad-app .content-profile :is(.rd-kit-main, .rd-kit-rail) > * {
-    animation: ad-rise-10 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: 0.2s;
-  }
-  .adoption-demo .ad-app .content-profile :is(.rd-kit-main, .rd-kit-rail) > :nth-child(2) {
-    animation-delay: 0.27s;
-  }
-  .adoption-demo .ad-app .content-profile :is(.rd-kit-main, .rd-kit-rail) > :nth-child(n + 3) {
-    animation-delay: 0.34s;
-  }
-
-  /* Numbers counting up: in orchid while they count, then a bump. */
-  .adoption-demo [data-ad-counting] {
-    color: var(--k-orchid);
-  }
-  .adoption-demo [data-ad-bump] {
-    animation: ad-bump 0.45s cubic-bezier(0.2, 1.6, 0.4, 1);
-  }
-
   /* The press ripple: the button holds it, under its label. */
   .adoption-demo
-    :is(.ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .ad-cal-btn, .ad-ask .btn, .ad-app .toolbar .btn-primary) {
+    :is(.ic-btn, .ad-nudge-btn, button.mail-cta, .ask-opt, .ic-opt, .ad-cal-btn, .ad-ask .btn) {
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -2215,17 +2070,6 @@
     animation: ad-tap 2.2s ease-in-out 1s infinite;
   }
 
-  @keyframes ad-beckon {
-    0% {
-      box-shadow: 0 0 0 0 rgba(224, 168, 0, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 12px rgba(224, 168, 0, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(224, 168, 0, 0);
-    }
-  }
   @keyframes ad-fade-in {
     from {
       opacity: 0;
@@ -2278,15 +2122,6 @@
       transform: none;
     }
   }
-  @keyframes ad-float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-4px);
-    }
-  }
   @keyframes ad-pop-in {
     from {
       opacity: 0;
@@ -2295,14 +2130,6 @@
     to {
       opacity: 1;
       transform: scale(1);
-    }
-  }
-  @keyframes ad-sweep {
-    from {
-      background-position: -150% 0;
-    }
-    to {
-      background-position: 250% 0;
     }
   }
   @keyframes ad-spin {
@@ -2428,27 +2255,6 @@
       transform: translateY(10px) scale(0.98);
     }
   }
-  @keyframes ad-page-in {
-    from {
-      opacity: 0;
-      transform: translateX(14px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes ad-bump {
-    0% {
-      transform: scale(1);
-    }
-    40% {
-      transform: scale(1.14);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
   @keyframes ad-ripple {
     to {
       transform: scale(1);
@@ -2466,14 +2272,6 @@
     }
     100% {
       background: transparent;
-    }
-  }
-  @keyframes ad-grow-x {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
     }
   }
   @keyframes ad-cur-pulse {

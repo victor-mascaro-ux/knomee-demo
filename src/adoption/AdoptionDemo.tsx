@@ -38,7 +38,7 @@ import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type
 import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
 import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
-import { reducedMotion, useCountUps, useLeave, useRipples } from './motion'
+import { useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
 import { ALEX, ASK, CAL_MEETS, NOTE_TEXT, NUDGE, REMINDER, STEPS, firstName, stepIndex } from './steps'
 import TeamChat from './TeamChat'
@@ -179,17 +179,10 @@ export default function AdoptionDemo({
     }
   }, [st.idx, st.visit])
 
-  /* ── Motion ── A new step lays the page in from the top; the dashboard's
-     numbers count up to theirs; buttons that do something ripple where they
-     are pressed. */
-  const [entering, setEntering] = useState(false)
-  useLayoutEffect(() => {
-    if (reducedMotion()) return
-    setEntering(true)
-    const t = window.setTimeout(() => setEntering(false), 1400)
-    return () => window.clearTimeout(t)
-  }, [st.idx, st.visit])
-  useCountUps(device, false)
+  /* ── Motion ── The product moves as it does for real: a step mounts the
+     page afresh, so its own entrance plays, once. The demo adds nothing to
+     the product's elements; buttons that do something ripple where they are
+     pressed. */
   const root = useRef<HTMLDivElement>(null)
   useRipples(root)
 
@@ -357,9 +350,8 @@ export default function AdoptionDemo({
   return (
     <div
       ref={root}
-      className="adoption-demo labels-on"
+      className="adoption-demo"
       style={{ '--brand-bar': ACME.primary } as CSSProperties}
-      data-beckon={tipOn ? '' : undefined}
     >
       <h1 className="ad-sr-only">
         Knomee adoption demo: how Intercom guides a new advisor from first login to a habit, inside the ACME
@@ -367,7 +359,7 @@ export default function AdoptionDemo({
       </h1>
       <main className="ad-stage">
         <section
-          className={`ad-device${entering ? ' ad-entering' : ''}`}
+          className="ad-device"
           ref={device}
           aria-label="ACME advisor dashboard"
         >
