@@ -28,6 +28,7 @@ import {
 import { advisor } from '../data/advisorFlow'
 import { CLIENT_BRANDS } from '../components/clientBrands'
 import FeedbackButton, { useFlash } from '../components/FeedbackButton'
+import { toast } from '../toast'
 import './advisorDirectory.css'
 
 /* One line per person, whichever kind they are. An entry and an invite are
@@ -140,8 +141,9 @@ export function InvitePanel({
   const [test, setTest] = useState(false)
   const [made, setMade] = useState<Invite | null>(null)
   const [busy, setBusy] = useState(false)
-  /* Feedback lives in the buttons: the link view opens with Copy Link saying
-     "Link Created ✓", and Copy Link then says "Copied ✓" for a moment. */
+  /* Feedback lives in the buttons and the toast: the link view opens with
+     Copy Link saying "Link Created ✓", and Copy Link then says "Copied ✓"
+     for a moment; the toast says each as it happens. */
   const created = useFlash()
   const copied = useFlash()
 
@@ -155,6 +157,7 @@ export function InvitePanel({
     if (!trouble) {
       setMade(invite)
       created.flash()
+      toast('Link created')
       onDone()
     }
   }
@@ -164,6 +167,7 @@ export function InvitePanel({
     try {
       await navigator.clipboard.writeText(inviteLink(made.token))
       copied.flash()
+      toast('Link copied')
     } catch {
       // Clipboard blocked: the field beside the button holds the link and is
       // selectable, so there is always a way to get it out.
@@ -205,6 +209,7 @@ export function InvitePanel({
             onClick={copy}
             flashing={created.is() || copied.is()}
             announce={copied.is() ? 'Copied' : 'Link created'}
+            toast={false}
             done={
               /* Both confirmations stacked, so the button keeps one width. */
               <span className="fb-stack">
@@ -456,6 +461,7 @@ export default function AdvisorDirectoryScreen({
                       <FeedbackButton
                         className="adir-copy"
                         done="Copied ✓"
+                        toast="Link copied"
                         onClick={() => void navigator.clipboard?.writeText(r.link as string)}
                       >
                         Copy

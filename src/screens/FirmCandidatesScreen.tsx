@@ -427,6 +427,7 @@ function Row({
                   {
                     label: 'Copy Link',
                     done: 'Copied ✓',
+                    toast: 'Link copied',
                     onClick: () => {
                       void navigator.clipboard?.writeText(inviteLink((c as LiveCandidate).token as string))
                     },

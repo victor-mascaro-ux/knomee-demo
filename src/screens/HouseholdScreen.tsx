@@ -220,6 +220,7 @@ export default function HouseholdScreen({
                             {
                               label: 'Resend Invitation',
                               done: 'Resent ✓',
+                              toast: 'Invitation resent',
                               disabled: !pending,
                             },
                             {
