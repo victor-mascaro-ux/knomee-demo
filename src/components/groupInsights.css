@@ -48,22 +48,21 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-/* Three purples that deepen as people go further, then the client side's
+/* Three purples that lighten as the group narrows, then the client side's
    teal for those who became clients. */
 .gi-step {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-height: 112px;
   padding: 14px 16px 14px 18px;
-  background: var(--k-adv-open);
+  background: #dcc6ee;
 }
 .gi-step-2 {
   background: var(--k-grape-light);
 }
 .gi-step-3 {
-  background: #dcc6ee;
+  background: var(--k-adv-open);
 }
 .gi-step.is-won {
   background: var(--k-teal-light);
@@ -105,10 +104,18 @@
   font-size: 13px;
   color: var(--k-body);
 }
+.gi-step-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+/* Line-height 1 leaves 0.15em of Poppins' descent under the digits; the
+   pill's margin lifts its foot by the same, onto their baseline. */
 .gi-step-num {
   font-size: 40px;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1;
   letter-spacing: -0.5px;
   color: var(--plum);
   font-variant-numeric: tabular-nums;
@@ -117,17 +124,17 @@
   color: var(--k-ocean);
 }
 /* The step's share of the one before it, top right; the biggest drop's own
-   pill sits bottom right. */
+   pill sits at the right of the number's row. */
 .gi-step .gi-step-pill,
 .gi-step .gi-leak-tag {
-  position: absolute;
-  right: 14px;
   padding: 2px 9px;
   border-radius: 999px;
   white-space: nowrap;
 }
 .gi-step .gi-step-pill {
+  position: absolute;
   top: 12px;
+  right: 14px;
   background: #fff;
   color: var(--k-grape);
   font-size: 12px;
@@ -142,7 +149,7 @@
   transform: scale(1.08);
 }
 .gi-step .gi-leak-tag {
-  bottom: 12px;
+  margin-bottom: 6px;
   background: var(--k-plum);
   color: #fff;
   font-size: 10px;

@@ -150,15 +150,19 @@ export default function ProspectGroupInsights({
               }`}
             >
               <span className="gi-step-label">{s.label}</span>
-              <span className="gi-step-num">
-                <CountUp to={s.count} />
+              {/* The number and the biggest drop's pill share a row, the pill's
+                  foot on the digits' baseline. */}
+              <span className="gi-step-row">
+                <span className="gi-step-num">
+                  <CountUp to={s.count} />
+                </span>
+                {leak?.at === s.key && <span className="gi-leak-tag">Biggest drop</span>}
               </span>
               {s.rate != null && (
                 <span className="gi-step-pill tt" data-tip={`${s.rate}% ${s.of}`}>
                   {s.rate}%
                 </span>
               )}
-              {leak?.at === s.key && <span className="gi-leak-tag">Biggest drop</span>}
             </li>
           ))}
         </ol>
