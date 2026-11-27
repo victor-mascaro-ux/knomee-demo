@@ -967,7 +967,12 @@ export default function AdvisorSelfScreen({
   sandbox = false,
   onRestartDemo,
   onBackToProfile,
+  end = false,
 }: {
+  /** Open on the end of the journey — every adventure done, Share, the bar
+      explained — rather than wherever the sheet stands. For a sandboxed
+      sheet with every adventure finished (#/advisor-journey/end). */
+  end?: boolean
   /** A persona's or candidate's phone opened from their profile: the menu's
       way back to it (the advisor's view). */
   onBackToProfile?: () => void
@@ -1146,6 +1151,7 @@ export default function AdvisorSelfScreen({
       askSignUp={askSignUp}
       onRestartDemo={onRestartDemo}
       onBackToProfile={onBackToProfile}
+      end={end}
       onExit={onExit}
       onReport={() => setView('report')}
       onRecord={() => setView('record')}
@@ -1179,11 +1185,14 @@ function FlowPhone({
   askSignUp = false,
   onRestartDemo,
   onBackToProfile,
+  end = false,
 }: {
   rich?: boolean
   askSignUp?: boolean
   onRestartDemo?: () => void
   onBackToProfile?: () => void
+  /** Open on the end of the journey (#/advisor-journey/end). */
+  end?: boolean
   answers: Answers
   edit: Edit
   d: Derived
@@ -1314,7 +1323,7 @@ function FlowPhone({
   /* The end of the journey, once The Move's celebration is left: every
      adventure done, Share, and what the bar's buttons are for from here.
      It stands on the list's place in the flow; going anywhere else leaves it. */
-  const [ended, setEnded] = useState(false)
+  const [ended, setEnded] = useState(end)
   useCcNav('self.end', ended, setEnded)
   const HOME = steps.findIndex((s) => s.kind === 'home')
   useEffect(() => {

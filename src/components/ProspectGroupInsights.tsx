@@ -13,7 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import CollapsibleCard from './CollapsibleCard'
-import { BoltIcon, KnomeeMark } from './icons'
+import { BoltIcon, KnomeeMark, PeopleIcon } from './icons'
 import { prospects } from '../data/prospects'
 import {
   groupProfile,
@@ -72,19 +72,75 @@ function CountUp({ to }: { to: number }) {
   return <span ref={ref}>{n}</span>
 }
 
-/* A thread's split, one segment per answer group, each naming itself on
-   hover. */
-function Split({ parts }: { parts: SplitPart[] }) {
+/* The tones as fills: the pie is SVG, which the .gi-tone-* backgrounds
+   cannot paint. */
+const TONE_FILL: Record<SplitPart['tone'], string> = {
+  plum: 'var(--k-plum)',
+  grape: 'var(--k-grape)',
+  bolt: 'var(--k-bolt)',
+  ocean: 'var(--k-ocean)',
+  teal: 'var(--k-teal)',
+  mist: 'var(--k-pearl)',
+}
+
+/* A slice from angle a0 to a1 (radians, clockwise from twelve o'clock) of a
+   16-radius pie centred in a 32 box. */
+function slice(a0: number, a1: number) {
+  const x = (a: number) => (16 + 16 * Math.sin(a)).toFixed(3)
+  const y = (a: number) => (16 - 16 * Math.cos(a)).toFixed(3)
+  const large = a1 - a0 > Math.PI ? 1 : 0
+  return `M16 16 L${x(a0)} ${y(a0)} A16 16 0 ${large} 1 ${x(a1)} ${y(a1)} Z`
+}
+
+/* A thread's split as a pie with its legend beside it. Pointing at a slice
+   or its legend row lights both and names it, with its share, in a tooltip
+   above the pie. */
+function SplitPie({ parts }: { parts: SplitPart[] }) {
+  const [on, setOn] = useState<number | null>(null)
+  const total = parts.reduce((a, p) => a + p.count, 0) || 1
+  const pct = (k: number) => Math.round((k / total) * 100)
+  let a = 0
+  const slices = parts.map((p) => {
+    const a0 = a
+    a += (p.count / total) * Math.PI * 2
+    return { ...p, a0, a1: a }
+  })
+  const hover = (k: number | null) => ({
+    onMouseEnter: () => setOn(k),
+    onMouseLeave: () => setOn(null),
+  })
+  const label = parts.map((p) => `${p.count} ${p.label}, ${pct(p.count)}%`).join('; ')
   return (
-    <div className="gi-split" aria-hidden>
-      {parts.map((p) => (
-        <i
-          key={p.label}
-          className={`gi-tone-${p.tone} tt`}
-          style={{ flex: p.count }}
-          data-tip={`${p.count} ${p.label}`}
-        />
-      ))}
+    <div className="gi-thread-body">
+      <div className="gi-pie-wrap">
+        <svg
+          className={`gi-pie${on === null ? '' : ' is-hovering'}`}
+          viewBox="0 0 32 32"
+          role="img"
+          aria-label={label}
+        >
+          {slices.map((p, k) =>
+            p.count === total ? (
+              <circle key={p.label} className={`gi-slice${on === k ? ' is-on' : ''}`} cx="16" cy="16" r="16" style={{ fill: TONE_FILL[p.tone] }} {...hover(k)} />
+            ) : (
+              <path key={p.label} className={`gi-slice${on === k ? ' is-on' : ''}`} d={slice(p.a0, p.a1)} style={{ fill: TONE_FILL[p.tone] }} {...hover(k)} />
+            ),
+          )}
+        </svg>
+        {on !== null && parts[on] && (
+          <span className="gi-pie-tip" role="tooltip">
+            {parts[on].count} {parts[on].label} · {pct(parts[on].count)}%
+          </span>
+        )}
+      </div>
+      <ul className="gi-pie-legend">
+        {parts.map((p, k) => (
+          <li key={p.label} className={on === k ? 'is-on' : undefined} {...hover(k)}>
+            <span className={`gi-dot gi-tone-${p.tone}`} aria-hidden />
+            <b>{p.count}</b> {p.label}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -181,13 +237,16 @@ export default function ProspectGroupInsights({
           cards arrive again when the tier bar changes them. */}
       <section className="gi-sec">
         <div className="gi-head">
-          <h3 className="gi-title">
-            Who you’re reaching
-            {focus && (
-              <>
-                {' '}in <span className="gi-title-tier">{focus.label}</span>
-              </>
-            )}
+          <h3 className="gi-title has-icon">
+            <PeopleIcon color="var(--k-grape)" />
+            <span>
+              Who you’re reaching
+              {focus && (
+                <>
+                  {' '}in <span className="gi-title-tier">{focus.label}</span>
+                </>
+              )}
+            </span>
           </h3>
           <span className="gi-sub">
             {group.size} {group.size === 1 ? 'prospect' : 'prospects'}
@@ -197,8 +256,7 @@ export default function ProspectGroupInsights({
           {group.threads.map((t) => (
             <div className="gi-thread" key={t.key}>
               <span className="gi-thread-head">{t.headline}</span>
-              <Split parts={t.split} />
-              <span className="gi-thread-detail">{t.detail}</span>
+              <SplitPie parts={t.split} />
               <span className="gi-thread-do">{t.action}</span>
             </div>
           ))}
