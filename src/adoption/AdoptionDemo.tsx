@@ -179,10 +179,35 @@ export default function AdoptionDemo({
     }
   }, [st.idx, st.visit])
 
-  /* ── Motion ── The product moves as it does for real: a step mounts the
-     page afresh, so its own entrance plays, once. The demo adds nothing to
-     the product's elements; buttons that do something ripple where they are
-     pressed. */
+  /* ── Motion ── The page's own entrance (the product's fade-ups and drawn
+     bars) plays when the page loads, and only then. A step change mounts
+     the page afresh (Show me, a step picked, an arrow key), which would play
+     it again: from then on it is finished before it is painted, so the page
+     holds still. The story's own pieces (Intercom's, a row that has just
+     arrived) still move as they arrive; the demo adds nothing to the
+     product's elements; buttons that do something ripple where pressed. */
+  const loaded = useRef(false)
+  useLayoutEffect(() => {
+    if (!loaded.current) {
+      loaded.current = true
+      return
+    }
+    const app = device.current?.querySelector('.ad-app')
+    if (!app) return
+    const hold = () => {
+      for (const a of document.getAnimations()) {
+        const name = (a as CSSAnimation).animationName
+        const target = (a.effect as KeyframeEffect | null)?.target
+        if (!name || name.startsWith('ad-') || !target || !app.contains(target)) continue
+        if (a.effect?.getComputedTiming().iterations === Infinity) continue
+        a.finish()
+      }
+    }
+    hold()
+    /* What mounts a beat later (a measured chart, a lazy cell) too. */
+    const raf = requestAnimationFrame(hold)
+    return () => cancelAnimationFrame(raf)
+  }, [st.idx, st.visit])
   const root = useRef<HTMLDivElement>(null)
   useRipples(root)
 
