@@ -1867,10 +1867,17 @@
      somebody the longer-named of the two. The flow you answer yourself is the
      Advisor · Business ID now. The walkthrough is still at #/advisor-flow and
      still works; it is simply not listed, so this panel is no longer a way in. */
+  /* The end of the journey on either phone (#/…/end): every adventure done,
+     Share, the bar explained — without taking the five to get there. */
+  const endRoute = () => /\/end(\?|$)/i.test(currentRoute || '');
   const DEMOS = [
     ['advisor', 'Advisor Dashboards (Desktop)', '#/firm-candidates', DASHBOARDS[0][3]],
     ['client-exp', 'Client Experience (Mobile)', '#/client-experience',
-      v => v === 'client-experience'],
+      v => v === 'client-experience' && !endRoute()],
+    ['client-end', 'Client Journey End (Mobile)', '#/client-experience/end',
+      v => v === 'client-experience' && endRoute()],
+    ['advisor-end', 'Advisor Journey End (Mobile)', '#/advisor-journey/end',
+      v => v === 'advisor-journey' && endRoute()],
   ];
   const personaOf = (view) => {
     if (view === 'admin') return 'admin';

@@ -1517,6 +1517,7 @@ export default function ClientExperienceScreen(props: ComponentProps<typeof Clie
       key={run}
       {...props}
       complete={run ? false : props.complete}
+      end={run ? false : props.end}
       onRestart={() => setRun((n) => n + 1)}
     />
   )
@@ -1525,6 +1526,7 @@ export default function ClientExperienceScreen(props: ComponentProps<typeof Clie
 function ClientExperienceRun({
   brand,
   complete,
+  end,
   onRestart,
   onBackToProfile,
 }: {
@@ -1535,6 +1537,9 @@ function ClientExperienceRun({
   /** Open with all five adventures done and Life Events next — her page as the
       advisor sees it, on her phone. */
   complete?: boolean
+  /** With `complete`: open on the end of the journey rather than the list
+      (#/client-experience/end). */
+  end?: boolean
   /** The way back to the advisor demo. Her menu no longer offers it — the demo
       menu does — so it is accepted and not used. */
   onExit?: () => void
@@ -1597,7 +1602,7 @@ function ClientExperienceRun({
   /* The end of the journey, once Goals is left: every adventure done, Share,
      and what the bar's buttons are for from here. Leaving it for anything
      else — a tab, an adventure — is leaving it. */
-  const [ended, setEnded] = useState(false)
+  const [ended, setEnded] = useState(!!end)
   useCcNav('cx.end', ended, setEnded)
   useCcNavRoots('cx', () => [
     { 'cx.intro': 'welcome' },
