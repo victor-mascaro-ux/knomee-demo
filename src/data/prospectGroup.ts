@@ -89,10 +89,16 @@ export function invitationFunnel(convertedNow = 0): { steps: FunnelStep[]; leak:
   return { steps, leak }
 }
 
-/* ── Who you're reaching ─────────────────────────────────────────────────────
-   Only what Knomee asks: why money matters to them (Financial Joy) and how
-   they feel about it (the Confidence adventure). Intent and Clarity are table
-   columns, and KQ is built from them, so they are left out here. */
+/* ── Who you're reaching: the insight rules ──────────────────────────────────
+   Only what Knomee asks: why money matters to them (Financial Joy), how they
+   feel about it (the Confidence adventure's six sliders), and how clearly
+   they see the future and how close they are to acting (Future You's Clarity,
+   the Goals adventure's Intent).
+
+   Every insight is a RULE in INSIGHT_RULES below: what it reads, when it
+   fires, how strongly, and the card it makes. Many can fire; four are shown.
+   Which four is the selection rule, pickInsights(). The full catalogue, in
+   words, is docs/prospect-insight-rules.md: change both together. */
 
 export type Tone = 'plum' | 'grape' | 'bolt' | 'ocean' | 'teal' | 'mist'
 
@@ -102,18 +108,40 @@ export interface SplitPart {
   label: string
 }
 
+/** One card's subject. At most one card per topic is shown. */
+export type Topic =
+  | 'purpose'
+  | 'giving'
+  | 'status'
+  | 'posture'
+  | 'advisor'
+  | 'resilience'
+  | 'goals'
+  | 'gap'
+  | 'permission'
+  | 'joy'
+  | 'regret'
+  | 'vision'
+
 export interface Thread {
-  key: 'joy' | 'posture' | 'advisor' | 'resilience'
+  /** The rule that made it. */
+  key: string
+  topic: Topic
   headline: string
   split: SplitPart[]
   /** The split in numbers. */
   detail: string
   action: string
+  /** Share of the group the card is about, times the rule's weight. */
+  score: number
 }
 
 export interface GroupProfile {
   size: number
+  /** The cards shown, in order: at most four. */
   threads: Thread[]
+  /** Every rule that fired, best first, shown or not. */
+  fired: Thread[]
 }
 
 /* What each Model B family wants money for, in the words a person would use. */
@@ -132,12 +160,20 @@ const FAMILY_TONE: Record<Exclude<PurposeFamily, 'Unstated'>, Tone> = {
   Contributor: 'teal',
 }
 
-/* The Confidence adventure's sliders, in its order (prospects.ts). */
-const GOALS = 2
+/* The Confidence adventure's sliders, 0–100, in its order (prospects.ts). */
+const CONDITION = 0
 const RESILIENCE = 1
+const GOALS = 2
+const JOY_SPEND = 3
+const NO_REGRET = 4
 const ADVISOR = 5
+/* Under halfway reads as a no; 70 and up as a clear yes. The tension rules
+   use the engine's own cuts on its 1–5 scale: 4 and up is 75+, 3 and under
+   is 50 and under (segmentation.ts, Model D). */
 const LOW = 50
 const HIGH = 70
+const ENGINE_HIGH = 75
+const ENGINE_LOW = 50
 
 /** "1 in 3", "Half", "2 in 3", "All", or a percent, whichever is true to
     within a few points; in a group under ten, the count itself ("4 of 5").
@@ -147,10 +183,15 @@ function share(k: number, n: number): { text: string; one: boolean } {
   if (n < 10) return { text: `${k} of ${n}`, one: false }
   const r = k / n
   if (Math.abs(r - 0.5) <= 0.04) return { text: 'Half', one: false }
-  for (const m of [3, 4, 5]) if (Math.abs(r - 1 / m) <= 0.03) return { text: `1 in ${m}`, one: true }
+  for (const m of [3, 4, 5, 6, 8]) if (Math.abs(r - 1 / m) <= 0.03) return { text: `1 in ${m}`, one: true }
   if (Math.abs(r - 2 / 3) <= 0.03) return { text: '2 in 3', one: false }
   if (Math.abs(r - 3 / 4) <= 0.03) return { text: '3 in 4', one: false }
   return { text: `${Math.round(r * 100)}%`, one: false }
+}
+/* "1 in 3 doubts", "Half doubt". */
+const says = (k: number, n: number, one: string, many: string) => {
+  const s = share(k, n)
+  return `${s.text} ${s.one ? one : many}`
 }
 
 /* A part of a small group is said as a count, of a larger one as a percent. */
@@ -165,153 +206,467 @@ const count = <T,>(xs: T[], f: (x: T) => boolean) => xs.filter(f).length
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0)
 /* "14 uneasy · 20 still building", leaving out the empty parts. */
 const counts = (parts: SplitPart[]) => parts.map((p) => `${p.count} ${p.label}`).join(' · ')
+const splitOf = (parts: SplitPart[]) => parts.filter((p) => p.count > 0)
 
-function joyThread(rows: Prospect[], scope: Scope): Thread | null {
-  const fams = rows
-    .map((p) => purposeFamily(p.joy))
-    .filter((f): f is Exclude<PurposeFamily, 'Unstated'> => f !== 'Unstated')
-  const n = fams.length
-  if (!n) return null
-  const ranked = (Object.keys(WANTS) as Exclude<PurposeFamily, 'Unstated'>[])
-    .map((f) => ({ f, k: count(fams, (x) => x === f) }))
-    .filter((x) => x.k > 0)
-    .sort((a, b) => b.k - a.k)
-  const [a, b] = ranked
-  const twoCamps = !!b && a.k + b.k >= 0.6 * n && b.k >= 0.7 * a.k && a.k < 0.5 * n
-  return {
-    key: 'joy',
-    headline:
-      a.k === n
-        ? `All want money for ${WANTS[a.f]}`
-        : twoCamps
-          ? `Two camps: ${WANTS[a.f]} vs. ${WANTS[b.f]}`
-          : a.k >= 0.45 * n
-            ? `${share(a.k, n).text} want money for ${WANTS[a.f]}`
-            : `Led by ${WANTS[a.f]}, then ${WANTS[b.f]}`,
-    split: ranked.map(({ f, k }) => ({ count: k, tone: FAMILY_TONE[f], label: WANTS[f] })),
-    detail: ranked
-      .slice(0, 3)
-      .map(({ f, k }) => `${part(k, n)} ${WANTS[f]}`)
-      .join(' · '),
-    action:
-      scope === 'book'
-        ? twoCamps
-          ? 'Write one invite per camp.'
-          : `Lead your invite with ${WANTS[a.f]}.`
-        : twoCamps
-          ? 'Have an opener for each camp.'
-          : `Talk about ${WANTS[a.f]} first.`,
-  }
+/* The rows that answered every slider a rule reads: an unanswered slider is
+   never read as a low one. */
+const answered = (rows: Prospect[], ...idx: number[]) =>
+  rows.filter((p) => idx.every((i) => typeof p.confidence?.[i] === 'number'))
+const at = (p: Prospect, i: number) => p.confidence?.[i] as number
+
+/* A positive finding (nobody doubts, all could) is worth less than a problem
+   of the same size: there is less to do about it. */
+const POSITIVE = 0.8
+
+/** What a rule hands back when it fires. */
+type Fired = Omit<Thread, 'key' | 'topic' | 'score'> & {
+  /** Share of the group the card is about, 0–1. */
+  share: number
+  /** 1 for a problem; POSITIVE for good news. */
+  tone?: number
+  /** The families the card names, so another card does not name them again. */
+  names?: Exclude<PurposeFamily, 'Unstated'>[]
 }
 
-function postureThread(rows: Prospect[]): Thread | null {
-  const ps = rows.map((p) => posture(p.confidence)).filter((x): x is Exclude<Posture, 'Unrated'> => x !== 'Unrated')
-  const n = ps.length
-  if (!n) return null
-  const uneasy = count(ps, (x) => x === 'Uneasy')
-  const building = count(ps, (x) => x === 'Working on it')
-  const sure = count(ps, (x) => x === 'Assured')
-  const notYet = uneasy + building
-  const split = [
-    { count: uneasy, tone: 'plum' as Tone, label: 'uneasy' },
-    { count: building, tone: 'grape' as Tone, label: 'building' },
-    { count: sure, tone: 'teal' as Tone, label: 'confident' },
-  ].filter((s) => s.count > 0)
-  return {
-    key: 'posture',
-    headline:
-      uneasy === n
-        ? `All ${n} are uneasy about money`
-        : notYet === n
-          ? 'None feel confident with money yet'
-          : sure === n
-            ? 'All feel confident with money'
-            : uneasy === 0
-              ? 'Nobody is uneasy about money'
-              : `${share(notYet, n).text} aren’t confident with money yet`,
-    split,
-    detail: counts(split),
-    action:
-      uneasy * 2 >= n
-        ? 'Educate before you pitch.'
-        : notYet * 2 >= n && uneasy > 0
-          ? 'Lead with stability, not growth.'
-          : 'Skip reassurance; talk next steps.',
-  }
+export interface InsightRule {
+  id: string
+  topic: Topic
+  /** How much this kind of finding moves the advisor's next step, 0–1. */
+  weight: number
+  /** The least share of the group it needs, and at least two people. */
+  min: number
+  evaluate: (rows: Prospect[], scope: Scope, named: Set<string>) => Fired | null
 }
 
-function advisorThread(rows: Prospect[]): Thread | null {
-  const xs = rows.map((p) => p.confidence?.[ADVISOR]).filter((v): v is number => typeof v === 'number')
-  const n = xs.length
-  if (!n) return null
-  const doubt = count(xs, (v) => v < LOW)
-  const sure = count(xs, (v) => v >= HIGH)
-  const s = share(doubt, n)
-  const split = [
-    { count: doubt, tone: 'plum' as Tone, label: 'doubt it' },
-    { count: n - doubt - sure, tone: 'mist' as Tone, label: 'unsure' },
-    { count: sure, tone: 'teal' as Tone, label: 'sure' },
-  ].filter((p) => p.count > 0)
-  return {
-    key: 'advisor',
-    headline:
-      doubt === 0
-        ? sure === n
-          ? 'All believe an advisor would help'
-          : 'Nobody doubts an advisor would help'
-        : doubt === n
-          ? 'None believe an advisor would help'
-          : `${s.text} ${s.one ? 'doubts' : 'doubt'} an advisor would help`,
-    split,
-    detail: counts(split),
-    action:
-      doubt * 2 >= n
-        ? 'Build trust before asking to meet.'
-        : doubt > 0
-          ? 'Share an insight before asking to meet.'
-          : 'Ask for the meeting.',
-  }
-}
+/* A rule about some of the group fires only on two people or more, and on at
+   least its share: one person on their own is the table's business. */
+const enough = (k: number, n: number, min: number) => k >= 2 && k / n >= min
 
-function resilienceThread(rows: Prospect[]): Thread | null {
-  const xs = rows.map((p) => p.confidence?.[RESILIENCE]).filter((v): v is number => typeof v === 'number')
-  const n = xs.length
-  if (!n) return null
-  const shaky = count(xs, (v) => v < LOW)
-  const s = share(shaky, n)
-  const split = [
-    { count: shaky, tone: 'plum' as Tone, label: 'couldn’t' },
-    { count: n - shaky, tone: 'mist' as Tone, label: 'could' },
-  ].filter((p) => p.count > 0)
-  return {
-    key: 'resilience',
-    headline:
-      shaky === 0
-        ? 'All could weather a setback'
-        : shaky === n
-          ? `All ${n} doubt they’d weather a setback`
-          : `${s.text} couldn’t weather a setback`,
-    split,
-    detail: counts(split),
-    action:
-      shaky * 2 >= n
-        ? 'Start with an emergency fund.'
-        : shaky > 0
-          ? 'Offer a protection check.'
-          : 'Talk growth, not protection.',
+export const INSIGHT_RULES: InsightRule[] = [
+  /* ── Financial Joy ── */
+  {
+    id: 'purpose',
+    topic: 'purpose',
+    weight: 1,
+    min: 0,
+    evaluate: (rows, scope) => {
+      const fams = rows
+        .map((p) => purposeFamily(p.joy))
+        .filter((f): f is Exclude<PurposeFamily, 'Unstated'> => f !== 'Unstated')
+      const n = fams.length
+      if (n < 2) return null
+      const ranked = (Object.keys(WANTS) as Exclude<PurposeFamily, 'Unstated'>[])
+        .map((f) => ({ f, k: count(fams, (x) => x === f) }))
+        .filter((x) => x.k > 0)
+        .sort((a, b) => b.k - a.k)
+      const [a, b] = ranked
+      const twoCamps = !!b && a.k + b.k >= 0.6 * n && b.k >= 0.7 * a.k && a.k < 0.5 * n
+      return {
+        share: twoCamps ? (a.k + b.k) / n : a.k / n,
+        names: twoCamps ? [a.f, b.f] : [a.f],
+        headline:
+          a.k === n
+            ? `All want money for ${WANTS[a.f]}`
+            : twoCamps
+              ? `Two camps: ${WANTS[a.f]} vs. ${WANTS[b.f]}`
+              : a.k >= 0.45 * n
+                ? `${share(a.k, n).text} want money for ${WANTS[a.f]}`
+                : `Led by ${WANTS[a.f]}, then ${WANTS[b.f]}`,
+        split: ranked.map(({ f, k }) => ({ count: k, tone: FAMILY_TONE[f], label: WANTS[f] })),
+        detail: ranked
+          .slice(0, 3)
+          .map(({ f, k }) => `${part(k, n)} ${WANTS[f]}`)
+          .join(' · '),
+        action:
+          scope === 'book'
+            ? twoCamps
+              ? 'Write one invite per camp.'
+              : `Lead your invite with ${WANTS[a.f]}.`
+            : twoCamps
+              ? 'Have an opener for each camp.'
+              : `Talk about ${WANTS[a.f]} first.`,
+      }
+    },
+  },
+  {
+    id: 'giving',
+    topic: 'giving',
+    weight: 0.7,
+    min: 0.15,
+    evaluate: (rows, scope, named) => {
+      if (named.has('Contributor')) return null
+      const n = rows.length
+      const k = count(rows, (p) => !!p.joy?.includes('Philanthropy and giving'))
+      if (!enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: `${says(k, n, 'wants', 'want')} money to give back`,
+        split: splitOf([
+          { count: k, tone: 'teal', label: 'picked giving' },
+          { count: n - k, tone: 'mist', label: 'didn’t' },
+        ]),
+        detail: `${k} picked giving`,
+        action: scope === 'book' ? 'Mention giving in your invite.' : 'Ask what they’d like to give to.',
+      }
+    },
+  },
+  {
+    id: 'status',
+    topic: 'status',
+    weight: 0.7,
+    min: 0.1,
+    evaluate: (rows, _scope, named) => {
+      if (named.has('Achiever')) return null
+      const n = rows.length
+      const k = count(rows, (p) => !!p.joy?.includes('Status'))
+      if (!enough(k, n, 0.1)) return null
+      return {
+        share: k / n,
+        headline: `${says(k, n, 'wants', 'want')} money for status`,
+        split: splitOf([
+          { count: k, tone: 'bolt', label: 'picked status' },
+          { count: n - k, tone: 'mist', label: 'didn’t' },
+        ]),
+        detail: `${k} picked status`,
+        action: 'Show progress they can measure.',
+      }
+    },
+  },
+
+  /* ── Confidence ── */
+  {
+    id: 'posture',
+    topic: 'posture',
+    weight: 0.9,
+    min: 0,
+    evaluate: (rows) => {
+      const ps = rows.map((p) => posture(p.confidence)).filter((x): x is Exclude<Posture, 'Unrated'> => x !== 'Unrated')
+      const n = ps.length
+      if (n < 2) return null
+      const uneasy = count(ps, (x) => x === 'Uneasy')
+      const building = count(ps, (x) => x === 'Working on it')
+      const sure = count(ps, (x) => x === 'Assured')
+      const notYet = uneasy + building
+      const split = splitOf([
+        { count: uneasy, tone: 'plum', label: 'uneasy' },
+        { count: building, tone: 'grape', label: 'building' },
+        { count: sure, tone: 'teal', label: 'confident' },
+      ])
+      const good = uneasy === 0 || sure * 2 >= n
+      return {
+        share: uneasy === n ? 1 : good ? (uneasy === 0 ? 1 : sure / n) : notYet / n,
+        tone: good ? POSITIVE : 1,
+        headline:
+          uneasy === n
+            ? `All ${n} are uneasy about money`
+            : notYet === n
+              ? 'None feel confident with money yet'
+              : sure === n
+                ? 'All feel confident with money'
+                : uneasy === 0
+                  ? 'Nobody is uneasy about money'
+                  : `${share(notYet, n).text} aren’t confident with money yet`,
+        split,
+        detail: counts(split),
+        action:
+          uneasy * 2 >= n
+            ? 'Educate before you pitch.'
+            : notYet * 2 >= n && uneasy > 0
+              ? 'Lead with stability, not growth.'
+              : 'Skip reassurance; talk next steps.',
+      }
+    },
+  },
+  {
+    id: 'advisor',
+    topic: 'advisor',
+    weight: 1,
+    min: 0.2,
+    evaluate: (rows) => {
+      const xs = answered(rows, ADVISOR).map((p) => at(p, ADVISOR))
+      const n = xs.length
+      if (n < 2) return null
+      const doubt = count(xs, (v) => v < LOW)
+      const sure = count(xs, (v) => v >= HIGH)
+      const split = splitOf([
+        { count: doubt, tone: 'plum', label: 'doubt it' },
+        { count: n - doubt - sure, tone: 'mist', label: 'unsure' },
+        { count: sure, tone: 'teal', label: 'sure' },
+      ])
+      if (doubt === n || enough(doubt, n, 0.2))
+        return {
+          share: doubt / n,
+          headline: doubt === n ? 'None believe an advisor would help' : `${says(doubt, n, 'doubts', 'doubt')} an advisor would help`,
+          split,
+          detail: counts(split),
+          action: doubt * 2 >= n ? 'Build trust before asking to meet.' : 'Share an insight before asking to meet.',
+        }
+      if (sure / n >= 0.6)
+        return {
+          share: sure / n,
+          tone: POSITIVE,
+          headline: doubt === 0 ? (sure === n ? 'All believe an advisor would help' : 'Nobody doubts an advisor would help') : `${share(sure, n).text} are sure an advisor would help`,
+          split,
+          detail: counts(split),
+          action: 'Ask for the meeting.',
+        }
+      return null
+    },
+  },
+  {
+    id: 'resilience',
+    topic: 'resilience',
+    weight: 0.8,
+    min: 0.2,
+    evaluate: (rows) => {
+      const xs = answered(rows, RESILIENCE).map((p) => at(p, RESILIENCE))
+      const n = xs.length
+      if (n < 2) return null
+      const shaky = count(xs, (v) => v < LOW)
+      const split = splitOf([
+        { count: shaky, tone: 'plum', label: 'couldn’t' },
+        { count: n - shaky, tone: 'mist', label: 'could' },
+      ])
+      if (shaky === 0)
+        return { share: 1, tone: POSITIVE, headline: 'All could weather a setback', split, detail: counts(split), action: 'Talk growth, not protection.' }
+      if (!enough(shaky, n, 0.2)) return null
+      return {
+        share: shaky / n,
+        headline: shaky === n ? `All ${n} doubt they’d weather a setback` : `${share(shaky, n).text} couldn’t weather a setback`,
+        split,
+        detail: counts(split),
+        action: shaky * 2 >= n ? 'Start with an emergency fund.' : 'Offer a protection check.',
+      }
+    },
+  },
+  {
+    id: 'goals',
+    topic: 'goals',
+    weight: 0.8,
+    min: 0.2,
+    evaluate: (rows) => {
+      const xs = answered(rows, GOALS).map((p) => at(p, GOALS))
+      const n = xs.length
+      const low = count(xs, (v) => v < LOW)
+      if (!(low === n && n >= 2) && !enough(low, n, 0.2)) return null
+      const split = splitOf([
+        { count: low, tone: 'plum', label: 'doubt it' },
+        { count: n - low, tone: 'mist', label: 'believe it' },
+      ])
+      return {
+        share: low / n,
+        headline: low === n ? `All ${n} doubt they’ll reach their goals` : `${says(low, n, 'doubts', 'doubt')} they’ll reach their goals`,
+        split,
+        detail: counts(split),
+        action: 'Start with one goal they can hit soon.',
+      }
+    },
+  },
+  {
+    /* Model D's Confidence Gap: sure of the goal, shaky about today. */
+    id: 'gap',
+    topic: 'gap',
+    weight: 0.85,
+    min: 0.15,
+    evaluate: (rows) => {
+      const asked = answered(rows, GOALS, CONDITION, RESILIENCE)
+      const n = asked.length
+      const k = count(asked, (p) => at(p, GOALS) >= ENGINE_HIGH && Math.min(at(p, CONDITION), at(p, RESILIENCE)) <= ENGINE_LOW)
+      if (!enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: share(k, n).one
+          ? `${share(k, n).text} believes in their goals but feels shaky today`
+          : `${share(k, n).text} believe in their goals but feel shaky today`,
+        split: splitOf([
+          { count: k, tone: 'plum', label: 'shaky today' },
+          { count: n - k, tone: 'mist', label: 'others' },
+        ]),
+        detail: `${k} of ${n}`,
+        action: 'Show the path from today to the goal.',
+      }
+    },
+  },
+  {
+    /* Model D's Permission Gap: secure, and still not spending on joy. */
+    id: 'permission',
+    topic: 'permission',
+    weight: 0.8,
+    min: 0.15,
+    evaluate: (rows) => {
+      const asked = answered(rows, CONDITION, RESILIENCE, JOY_SPEND)
+      const n = asked.length
+      const k = count(asked, (p) => Math.min(at(p, CONDITION), at(p, RESILIENCE)) >= ENGINE_HIGH && at(p, JOY_SPEND) <= ENGINE_LOW)
+      if (!enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: `${says(k, n, 'could', 'could')} enjoy their money but hold back`,
+        split: splitOf([
+          { count: k, tone: 'grape', label: 'holding back' },
+          { count: n - k, tone: 'mist', label: 'others' },
+        ]),
+        detail: `${k} of ${n}`,
+        action: 'Give them permission to spend on joy.',
+      }
+    },
+  },
+  {
+    id: 'joy',
+    topic: 'joy',
+    weight: 0.7,
+    min: 0.25,
+    evaluate: (rows) => {
+      const xs = answered(rows, JOY_SPEND).map((p) => at(p, JOY_SPEND))
+      const n = xs.length
+      const low = count(xs, (v) => v < LOW)
+      if (!enough(low, n, 0.25)) return null
+      const split = splitOf([
+        { count: low, tone: 'grape', label: 'rarely' },
+        { count: n - low, tone: 'mist', label: 'do' },
+      ])
+      return {
+        share: low / n,
+        headline: `${says(low, n, 'rarely spends', 'rarely spend')} on what brings joy`,
+        split,
+        detail: counts(split),
+        action: 'Talk about joy, not just security.',
+      }
+    },
+  },
+  {
+    /* Model D's Decision Fatigue, read at halfway rather than at the floor. */
+    id: 'regret',
+    topic: 'regret',
+    weight: 0.75,
+    min: 0.2,
+    evaluate: (rows) => {
+      const xs = answered(rows, NO_REGRET).map((p) => at(p, NO_REGRET))
+      const n = xs.length
+      const low = count(xs, (v) => v < LOW)
+      if (!(low === n && n >= 2) && !enough(low, n, 0.2)) return null
+      const split = splitOf([
+        { count: low, tone: 'plum', label: 'second-guess' },
+        { count: n - low, tone: 'mist', label: 'settled' },
+      ])
+      return {
+        share: low / n,
+        headline: `${says(low, n, 'second-guesses', 'second-guess')} their money moves`,
+        split,
+        detail: counts(split),
+        action: 'Hand them a simple plan to follow.',
+      }
+    },
+  },
+
+  /* ── Future You (Clarity) × Goals (Intent) ──
+     Fixed cuts, not the book's medians: half of any book sits under its own
+     median, which would make every one of these fire. */
+  {
+    id: 'stuck',
+    topic: 'vision',
+    weight: 0.9,
+    min: 0.15,
+    evaluate: (rows) => {
+      const n = rows.length
+      const k = count(rows, (p) => (p.clarity ?? 0) >= 70 && (p.intent ?? 100) < 50)
+      if (!enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: share(k, n).one
+          ? `${share(k, n).text} sees the future but hasn’t started`
+          : `${share(k, n).text} see the future but haven’t started`,
+        split: splitOf([
+          { count: k, tone: 'grape', label: 'stuck' },
+          { count: n - k, tone: 'mist', label: 'others' },
+        ]),
+        detail: `${k} of ${n}`,
+        action: 'Offer one concrete first step.',
+      }
+    },
+  },
+  {
+    id: 'fog',
+    topic: 'vision',
+    weight: 0.75,
+    min: 0.15,
+    evaluate: (rows) => {
+      const n = rows.length
+      const k = count(rows, (p) => (p.clarity ?? 100) < 40)
+      if (!(k === n && n >= 2) && !enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: k === n ? 'None can picture their future yet' : `${share(k, n).text} can’t picture their future yet`,
+        split: splitOf([
+          { count: k, tone: 'plum', label: 'foggy' },
+          { count: n - k, tone: 'mist', label: 'clear' },
+        ]),
+        detail: `${k} of ${n}`,
+        action: 'Start with a Future You session.',
+      }
+    },
+  },
+  {
+    id: 'mapless',
+    topic: 'vision',
+    weight: 0.75,
+    min: 0.15,
+    evaluate: (rows) => {
+      const n = rows.length
+      const k = count(rows, (p) => (p.intent ?? 0) >= 70 && (p.clarity ?? 100) < 50)
+      if (!enough(k, n, 0.15)) return null
+      return {
+        share: k / n,
+        headline: `${says(k, n, 'is', 'are')} moving without a clear goal`,
+        split: splitOf([
+          { count: k, tone: 'ocean', label: 'no clear goal' },
+          { count: n - k, tone: 'mist', label: 'others' },
+        ]),
+        detail: `${k} of ${n}`,
+        action: 'Help them name the goal first.',
+      }
+    },
+  },
+]
+
+/** How many cards the row has room for. */
+export const SHOWN = 4
+
+/** The selection rule. Every rule runs on the rows in view; each that fires
+    scores its share of the group times its weight (times POSITIVE for good
+    news). Then:
+    1. The purpose card always leads: it answers "who are they?".
+    2. One card per topic: the higher score wins its topic.
+    3. The rest of the slots go to the highest scores; a tie goes to the
+       higher weight, then to the rule listed first.
+    4. Fewer than four fire, fewer show. */
+export function pickInsights(rows: Prospect[], scope: Scope): { threads: Thread[]; fired: Thread[] } {
+  const named = new Set<string>()
+  const fired: (Thread & { weight: number; order: number })[] = []
+  INSIGHT_RULES.forEach((rule, order) => {
+    const f = rule.evaluate(rows, scope, named)
+    if (!f) return
+    f.names?.forEach((x) => named.add(x))
+    const { share: s, tone = 1, names: _names, ...card } = f
+    fired.push({ ...card, key: rule.id, topic: rule.topic, score: s * rule.weight * tone, weight: rule.weight, order })
+  })
+  const ranked = [...fired].sort((a, b) => b.score - a.score || b.weight - a.weight || a.order - b.order)
+  const lead = ranked.find((t) => t.topic === 'purpose')
+  const picked: Thread[] = lead ? [lead] : []
+  for (const t of ranked) {
+    if (picked.length >= SHOWN) break
+    if (picked.some((p) => p.topic === t.topic)) continue
+    picked.push(t)
   }
+  const strip = ({ weight: _w, order: _o, ...t }: Thread & { weight: number; order: number }) => t
+  return { threads: picked.map((t) => strip(t as Thread & { weight: number; order: number })), fired: ranked.map(strip) }
 }
 
 /** The "Who you're reaching" cards, read off the given rows: the whole scored
     book, or one tier of it. */
 export function groupProfile(rows: Prospect[], scope: Scope = 'book'): GroupProfile {
   const scored = rows.filter((p) => p.kq !== null)
-  return {
-    size: scored.length,
-    threads: [joyThread(scored, scope), postureThread(scored), advisorThread(scored), resilienceThread(scored)].filter(
-      (t): t is Thread => !!t,
-    ),
-  }
+  const { threads, fired } = pickInsights(scored, scope)
+  return { size: scored.length, threads, fired }
 }
 
 /* ── Compared with everyone on Knomee ────────────────────────────────────────
