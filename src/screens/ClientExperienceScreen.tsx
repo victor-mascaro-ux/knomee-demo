@@ -2117,7 +2117,7 @@ function ClientExperienceRun({
                   adventures: 'Life Events, and more to come.',
                 }}
                 share={{
-                  who: 'a friend or family member',
+                  who: 'a friend',
                   text: 'I got clear on what I want with Knomee. Start your own adventures:',
                   link: startLink('client-experience'),
                 }}

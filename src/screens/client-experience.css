@@ -806,7 +806,7 @@ svg.cx-tab-mark {
   background: var(--k-plum);
 }
 .cx-viewport.is-end:has(~ .cx-tabbar .cx-fab) {
-  padding-bottom: 14px;
+  padding-bottom: 12px;
 }
 
 .cx-home-bar {
