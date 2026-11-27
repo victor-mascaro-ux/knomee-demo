@@ -4657,6 +4657,16 @@ export default function App() {
   const [clientExpComplete, setClientExpComplete] = useState(
     () => typeof window !== 'undefined' && /^#\/?client-experience\/complete/i.test(window.location.hash),
   )
+  /* #/client-experience/end and #/advisor-journey/end: the phone opened on the
+     end of the journey — every adventure done, Share, the bar explained —
+     without taking the five to get there. The advisor's is a sandboxed
+     sheet: nothing on it is saved or sent to the directory. */
+  const [clientExpEnd, setClientExpEnd] = useState(
+    () => typeof window !== 'undefined' && /^#\/?client-experience\/end/i.test(window.location.hash),
+  )
+  const [advisorJourneyEnd, setAdvisorJourneyEnd] = useState(
+    () => typeof window !== 'undefined' && /^#\/?advisor-journey\/end/i.test(window.location.hash),
+  )
   const [viewEntry, setViewEntry] = useState<Entry | null>(null)
   const [inviteToken, setInviteToken] = useState<string | null>(
     initialView === 'flow' ? initialProfile : null,
@@ -4878,6 +4888,7 @@ export default function App() {
       setAdvisorFlowOpen(v === 'advisor-flow')
       setAdvisorSelfOpen(v === 'advisor-self')
       setAdvisorJourneyOpen(v === 'advisor-journey')
+      setAdvisorJourneyEnd(v === 'advisor-journey' && /^#\/?advisor-journey\/end/i.test(window.location.hash))
       setDirectoryOpen(false)
       setViewEntryId(v === 'advisors' ? slug : null)
       setViewEntryPhone(v === 'advisors' && /^#\/?advisors\/[^/]+\/phone/i.test(window.location.hash))
@@ -4885,6 +4896,7 @@ export default function App() {
       setLandingOpen(v === 'welcome' || v === 'welcome-b')
       setClientExpOpen(v === 'client-experience')
       setClientExpComplete(v === 'client-experience' && /^#\/?client-experience\/complete/i.test(window.location.hash))
+      setClientExpEnd(v === 'client-experience' && /^#\/?client-experience\/end/i.test(window.location.hash))
       setClientMobileOpen(v === 'client-mobile')
       setClientMobileSlug(v === 'client-mobile' ? slug : null)
       setAdvisorMobileOpen(v === 'advisor-mobile')
@@ -4937,6 +4949,9 @@ export default function App() {
                 ? inviteToken
                 : currentView === 'client-experience' && clientExpComplete
                   ? 'complete'
+                  : (currentView === 'client-experience' && clientExpEnd) ||
+                      (currentView === 'advisor-journey' && advisorJourneyEnd)
+                    ? 'end'
                   : currentView === 'client-mobile' && clientMobileSlug
                     ? clientMobileSlug
                     : currentView === 'api-store' && apiProduct
@@ -4970,6 +4985,8 @@ export default function App() {
     viewEntryPhone,
     inviteToken,
     clientExpComplete,
+    clientExpEnd,
+    advisorJourneyEnd,
     clientMobileSlug,
     apiProduct,
     prospectAnalyticsOpen,
@@ -5150,9 +5167,10 @@ export default function App() {
     return (
       <>
         <ClientExperienceScreen
-          key={clientExpComplete ? 'complete' : 'fresh'}
+          key={clientExpEnd ? 'end' : clientExpComplete ? 'complete' : 'fresh'}
           brand={brand}
-          complete={clientExpComplete}
+          complete={clientExpComplete || clientExpEnd}
+          end={clientExpEnd}
           onExit={() => setClientExpOpen(false)}
           onBackToProfile={() => backToProfile('#/prospects/sarah-mitchell')}
         />
@@ -5181,6 +5199,27 @@ export default function App() {
   }
 
   if (advisorJourneyOpen) {
+    if (advisorJourneyEnd) {
+      /* Every adventure finished on the demo's sample sheet, opened on the
+         end of the journey. Sandboxed, so it never reaches the directory. */
+      const done = sampleAnswers()
+      done.finished = Object.fromEntries(advisorAdventures.map((r) => [r.id, done.completed]))
+      return (
+        <>
+          <AdvisorSelfScreen
+            key="self-journey-end"
+            rich
+            mode="demo"
+            sandbox
+            end
+            entry={entryOf(done, null, done.identity.name || 'Marcus Hale')}
+            onExit={() => setAdvisorJourneyOpen(false)}
+            brand={brand}
+          />
+          {brand && <PoweredBy />}
+        </>
+      )
+    }
     return (
       <>
         <AdvisorSelfScreen key="self-journey" rich onExit={() => setAdvisorJourneyOpen(false)} brand={brand} />
