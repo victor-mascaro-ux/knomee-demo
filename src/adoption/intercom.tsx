@@ -1,5 +1,6 @@
-/* What Intercom puts on Alex's dashboard, each with a yellow "Intercom · …"
-   tag so the room can tell them from the product. The sender is the firm,
+/* What Intercom puts on Alex's dashboard. The floating pieces carry a yellow
+   "Intercom · …" tag so the room can tell them from the product; the banner
+   sits in the page as it would for real, unmarked. The sender is the firm,
    Acme Advisors, as Intercom is set up for the pilot. */
 
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react'
@@ -49,8 +50,7 @@ export function Banner({
   leaving: boolean
 }) {
   return (
-    <div className={`ic-banner ic-outline${leaving ? ' leaving' : ''}`} data-ad-live>
-      <Tag label="Banner" />
+    <div className={`ic-banner${leaving ? ' leaving' : ''}`} data-ad-live>
       <FirmAvatar />
       <p>
         <b>{title}</b> {children}

@@ -49,9 +49,6 @@
 .ad-intercom {
   --ad-ic-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
-.ad-intercom.ad-intercom-flow .ic-banner {
-  margin-top: var(--block-gap);
-}
 .ad-intercom-page {
   font-family: var(--ad-ic-font);
   color: var(--k-ink);
@@ -563,10 +560,10 @@
   margin-top: 18px;
 }
 
-/* The banner, across the page under the tabs. */
+/* The banner, across the page under the tabs, a block's gap below them. */
 :is(.adoption-demo, .ad-intercom) .ic-banner {
   position: relative;
-  margin-top: 38px;
+  margin-top: var(--block-gap);
   display: flex;
   align-items: center;
   gap: 14px;
