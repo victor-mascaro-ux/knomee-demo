@@ -133,16 +133,13 @@
   white-space: nowrap;
 }
 
-/* The one reading of the biggest drop, and what to do about it. */
+/* A section's one finding, bold, and what to do about it. */
 .gi-callout {
-  margin-top: 12px;
+  margin: 12px 0 0;
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: inset 3px 0 0 var(--k-bolt);
-}
-.gi-callout p {
-  margin: 0;
   font-size: 13.5px;
   line-height: 1.5;
   color: var(--k-body);
@@ -150,16 +147,11 @@
 .gi-callout b {
   color: var(--plum);
 }
-.gi-callout .gi-do {
-  margin-top: 4px;
-}
-.gi-do,
 .gi-thread-do {
   font-size: 13px;
   font-weight: 500;
   color: var(--k-grape);
 }
-.gi-do::before,
 .gi-thread-do::before {
   content: '→ ';
 }
@@ -190,27 +182,10 @@
 }
 
 /* ── Who you're reaching ── */
-.gi-summary {
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: var(--k-plum-050);
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--k-body);
-}
-.gi-summary b {
-  font-weight: 600;
-  color: var(--plum);
-}
-.gi-summary .gi-kicker {
-  margin-bottom: 2px;
-}
 .gi-threads {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 12px;
 }
 .gi-thread {
   display: flex;
@@ -352,12 +327,6 @@
   color: var(--k-grape);
 }
 .gi-cmp-bar span {
-  color: var(--k-muted);
-}
-
-.gi-foot {
-  margin: 16px 0 0;
-  font-size: 12px;
   color: var(--k-muted);
 }
 

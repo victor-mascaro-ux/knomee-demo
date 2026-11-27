@@ -1,14 +1,17 @@
 // My Prospects' Actionable Insights: the prospects as a GROUP. Each person's
 // reading and next step is the table's job; this answers what only the whole
-// book can: how the advisor's invitations are doing, and who they are reaching.
+// book can: how the advisor's invitations are doing, who they are reaching,
+// and how that compares with everyone on Knomee.
 //
 // Nothing here repeats Top Line Metrics (KQ, the count, the tier split) or a
 // table column (KQ, Intent, Clarity, Receptivity, Top Action). Every number is
 // computed from the prospect rows and their own answers, never typed, so the
 // sentences stay true when the rows change. The only typed figures are the two
 // link counts below, which Knomee cannot read off a row; the Knomee-wide
-// figures the book is compared with are read from evidence.ts and
-// analytics.ts, never retyped.
+// figures are read from evidence.ts and analytics.ts, never retyped.
+//
+// Copy is kept short on purpose: a bold finding and a few words of action.
+// Anything a bar or a number already shows is not said again in a sentence.
 
 import { prospects, type Prospect } from './prospects'
 import { modelClusters, outcomes } from './analytics'
@@ -43,7 +46,6 @@ export interface Leak {
   at: StepKey
   lost: number
   headline: string
-  reading: string
   action: string
   /** The action points at Prospect Analytics, not at the table. */
   toAnalytics: boolean
@@ -70,27 +72,21 @@ export function invitationFunnel(convertedNow = 0): { steps: FunnelStep[]; leak:
      not a drop: those people are still in the table, still prospects. */
   const beforeStart = clicked - started
   const midway = started - completed
-  const finishRate = pct(completed, started)
   let leak: Leak | null = null
   if (beforeStart > 0 && beforeStart / clicked >= midway / started) {
     leak = {
       at: 'started',
       lost: beforeStart,
-      headline: `${beforeStart} opened your link and never started.`,
-      reading:
-        finishRate >= 80
-          ? `Once people start, ${finishRate}% finish, so the Adventures aren’t what loses them: the invite reaches people who don’t yet see why it’s for them.`
-          : 'More are lost before they begin than part-way through, so look at who the invite reaches before the Adventures themselves.',
-      action: 'See which invite templates bring people who start, and try a warmer message.',
+      headline: `${beforeStart} opened your link but never started.`,
+      action: 'Try a warmer invite.',
       toAnalytics: true,
     }
   } else if (midway > 0) {
     leak = {
       at: 'completed',
       lost: midway,
-      headline: `${midway} started an Adventure and stopped part-way.`,
-      reading: 'Your invite gets people to start; something in the Adventures loses them before the end.',
-      action: 'Nudge the ones who stopped: they are the Incomplete Profiles in the table below.',
+      headline: `${midway} stopped part-way through.`,
+      action: 'Nudge the Incomplete Profiles below.',
       toAnalytics: false,
     }
   }
@@ -112,20 +108,15 @@ export interface SplitPart {
 
 export interface Thread {
   key: 'joy' | 'posture' | 'advisor' | 'resilience'
-  /** Which adventure it comes from. */
-  source: string
   headline: string
   split: SplitPart[]
+  /** The split in numbers. */
   detail: string
   action: string
 }
 
-/** Running text with the parts worth bolding marked. */
-export type Line = (string | { b: string })[]
-
 export interface GroupProfile {
   size: number
-  summary: Line
   threads: Thread[]
 }
 
@@ -146,6 +137,7 @@ const FAMILY_TONE: Record<Exclude<PurposeFamily, 'Unstated'>, Tone> = {
 }
 
 /* The Confidence adventure's sliders, in its order (prospects.ts). */
+const GOALS = 2
 const RESILIENCE = 1
 const ADVISOR = 5
 const LOW = 50
@@ -175,9 +167,13 @@ type Scope = 'book' | 'tier'
 
 const count = <T,>(xs: T[], f: (x: T) => boolean) => xs.filter(f).length
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0)
+/* "14 uneasy · 20 still building", leaving out the empty parts. */
+const counts = (parts: SplitPart[]) => parts.map((p) => `${p.count} ${p.label}`).join(' · ')
 
-function joyThread(rows: Prospect[], scope: Scope): { thread: Thread; lead: string[] } | null {
-  const fams = rows.map((p) => purposeFamily(p.joy)).filter((f): f is Exclude<PurposeFamily, 'Unstated'> => f !== 'Unstated')
+function joyThread(rows: Prospect[], scope: Scope): Thread | null {
+  const fams = rows
+    .map((p) => purposeFamily(p.joy))
+    .filter((f): f is Exclude<PurposeFamily, 'Unstated'> => f !== 'Unstated')
   const n = fams.length
   if (!n) return null
   const ranked = (Object.keys(WANTS) as Exclude<PurposeFamily, 'Unstated'>[])
@@ -186,39 +182,33 @@ function joyThread(rows: Prospect[], scope: Scope): { thread: Thread; lead: stri
     .sort((a, b) => b.k - a.k)
   const [a, b] = ranked
   const twoCamps = !!b && a.k + b.k >= 0.6 * n && b.k >= 0.7 * a.k && a.k < 0.5 * n
-  const lead = twoCamps ? [WANTS[a.f], WANTS[b.f]] : [WANTS[a.f]]
-  const headline =
-    a.k === n
-      ? `All want money for ${WANTS[a.f]}`
-      : twoCamps
-        ? `Two camps: ${WANTS[a.f]} vs. ${WANTS[b.f]}`
-        : a.k >= 0.45 * n
-          ? `${share(a.k, n).text} want money for ${WANTS[a.f]}`
-          : `Led by ${WANTS[a.f]}, then ${WANTS[b.f]}`
   return {
-    lead,
-    thread: {
-      key: 'joy',
-      source: 'Financial Joy',
-      headline,
-      split: ranked.map(({ f, k }) => ({ count: k, tone: FAMILY_TONE[f], label: WANTS[f] })),
-      detail: ranked
-        .slice(0, 3)
-        .map(({ f, k }) => `${part(k, n)} ${WANTS[f]}`)
-        .join(' · '),
-      action:
-        scope === 'book'
-          ? twoCamps
-            ? 'Write two invite messages, one for each camp, rather than one for both.'
-            : `Lead your invite message with ${WANTS[a.f]}.`
-          : twoCamps
-            ? `Have two openers ready: ${WANTS[a.f]}, and ${WANTS[b.f]}.`
-            : `Talk about ${WANTS[a.f]} first.`,
-    },
+    key: 'joy',
+    headline:
+      a.k === n
+        ? `All want money for ${WANTS[a.f]}`
+        : twoCamps
+          ? `Two camps: ${WANTS[a.f]} vs. ${WANTS[b.f]}`
+          : a.k >= 0.45 * n
+            ? `${share(a.k, n).text} want money for ${WANTS[a.f]}`
+            : `Led by ${WANTS[a.f]}, then ${WANTS[b.f]}`,
+    split: ranked.map(({ f, k }) => ({ count: k, tone: FAMILY_TONE[f], label: WANTS[f] })),
+    detail: ranked
+      .slice(0, 3)
+      .map(({ f, k }) => `${part(k, n)} ${WANTS[f]}`)
+      .join(' · '),
+    action:
+      scope === 'book'
+        ? twoCamps
+          ? 'Write one invite per camp.'
+          : `Lead your invite with ${WANTS[a.f]}.`
+        : twoCamps
+          ? 'Have an opener for each camp.'
+          : `Talk about ${WANTS[a.f]} first.`,
   }
 }
 
-function postureThread(rows: Prospect[]): { thread: Thread; phrase: Line } | null {
+function postureThread(rows: Prospect[]): Thread | null {
   const ps = rows.map((p) => posture(p.confidence)).filter((x): x is Exclude<Posture, 'Unrated'> => x !== 'Unrated')
   const n = ps.length
   if (!n) return null
@@ -226,157 +216,105 @@ function postureThread(rows: Prospect[]): { thread: Thread; phrase: Line } | nul
   const building = count(ps, (x) => x === 'Working on it')
   const sure = count(ps, (x) => x === 'Assured')
   const notYet = uneasy + building
-  const headline =
-    uneasy === n
-      ? `All ${n} are uneasy about money`
-      : notYet === n
-        ? 'None feel confident with money yet'
-        : sure === n
-          ? 'All feel confident with money'
-          : uneasy === 0
-            ? 'Nobody here is uneasy about money'
-            : `${share(notYet, n).text} aren’t confident with money yet`
-  const phrase: Line =
-    uneasy * 2 >= n
-      ? ['who are ', { b: 'uneasy about money' }]
-      : sure * 2 >= n
-        ? ['who feel ', { b: 'confident with money' }]
-        : uneasy === 0
-          ? ['who are ', { b: 'confident with money or getting there' }]
-          : ['who ', { b: 'aren’t confident with money yet' }]
+  const split = [
+    { count: uneasy, tone: 'plum' as Tone, label: 'uneasy' },
+    { count: building, tone: 'grape' as Tone, label: 'building' },
+    { count: sure, tone: 'teal' as Tone, label: 'confident' },
+  ].filter((s) => s.count > 0)
   return {
-    phrase,
-    thread: {
-      key: 'posture',
-      source: 'Confidence',
-      headline,
-      split: [
-        { count: uneasy, tone: 'plum' as Tone, label: 'uneasy' },
-        { count: building, tone: 'grape' as Tone, label: 'still building' },
-        { count: sure, tone: 'teal' as Tone, label: 'confident' },
-      ].filter((s) => s.count > 0),
-      detail: [
-        uneasy && `${uneasy} uneasy`,
-        building && `${building} still building`,
-        sure && `${sure} confident`,
-      ]
-        .filter(Boolean)
-        .join(' · '),
-      action:
-        uneasy * 2 >= n
-          ? 'Education before a sales call: start with the basics.'
-          : notYet * 2 >= n && uneasy > 0
-            ? 'Open with where they stand today: stability before growth.'
-            : 'Skip the reassurance: talk plans and next steps.',
-    },
+    key: 'posture',
+    headline:
+      uneasy === n
+        ? `All ${n} are uneasy about money`
+        : notYet === n
+          ? 'None feel confident with money yet'
+          : sure === n
+            ? 'All feel confident with money'
+            : uneasy === 0
+              ? 'Nobody is uneasy about money'
+              : `${share(notYet, n).text} aren’t confident with money yet`,
+    split,
+    detail: counts(split),
+    action:
+      uneasy * 2 >= n
+        ? 'Educate before you pitch.'
+        : notYet * 2 >= n && uneasy > 0
+          ? 'Lead with stability, not growth.'
+          : 'Skip reassurance; talk next steps.',
   }
 }
 
-function advisorThread(rows: Prospect[]): { thread: Thread; phrase: Line | null } | null {
+function advisorThread(rows: Prospect[]): Thread | null {
   const xs = rows.map((p) => p.confidence?.[ADVISOR]).filter((v): v is number => typeof v === 'number')
   const n = xs.length
   if (!n) return null
   const doubt = count(xs, (v) => v < LOW)
   const sure = count(xs, (v) => v >= HIGH)
   const s = share(doubt, n)
-  const headline =
-    doubt === 0
-      ? sure === n
-        ? 'All believe an advisor would help'
-        : 'Nobody doubts an advisor would help'
-      : doubt === n
-        ? 'None believe an advisor would help'
-        : `${s.text} ${s.one ? 'doubts' : 'doubt'} an advisor would help`
+  const split = [
+    { count: doubt, tone: 'plum' as Tone, label: 'doubt it' },
+    { count: n - doubt - sure, tone: 'mist' as Tone, label: 'unsure' },
+    { count: sure, tone: 'teal' as Tone, label: 'sure' },
+  ].filter((p) => p.count > 0)
   return {
-    phrase:
+    key: 'advisor',
+    headline:
+      doubt === 0
+        ? sure === n
+          ? 'All believe an advisor would help'
+          : 'Nobody doubts an advisor would help'
+        : doubt === n
+          ? 'None believe an advisor would help'
+          : `${s.text} ${s.one ? 'doubts' : 'doubt'} an advisor would help`,
+    split,
+    detail: counts(split),
+    action:
       doubt * 2 >= n
-        ? ['and ', { b: 'doubt an advisor would help' }]
-        : doubt === 0
-          ? ['and are ', { b: 'open to an advisor' }]
-          : null,
-    thread: {
-      key: 'advisor',
-      source: 'Confidence',
-      headline,
-      split: [
-        { count: doubt, tone: 'plum' as Tone, label: 'doubt it' },
-        { count: n - doubt - sure, tone: 'mist' as Tone, label: 'unsure' },
-        { count: sure, tone: 'teal' as Tone, label: 'sure it would' },
-      ].filter((p) => p.count > 0),
-      detail:
-        doubt === 0
-          ? `${sure} of ${n} are sure working with an advisor would raise their confidence`
-          : doubt === n
-            ? `None of the ${n} think working with an advisor would raise their confidence`
-            : `${doubt} of ${n} don’t think working with an advisor would raise their confidence`,
-      action:
-        doubt * 2 >= n
-          ? 'Don’t push for a meeting yet: let useful content build trust first.'
-          : doubt > 0
-            ? 'Share an insight from their Financial ID before asking for a meeting.'
-            : 'Ask for the meeting directly.',
-    },
+        ? 'Build trust before asking to meet.'
+        : doubt > 0
+          ? 'Share an insight before asking to meet.'
+          : 'Ask for the meeting.',
   }
 }
 
 function resilienceThread(rows: Prospect[]): Thread | null {
-  const answered = rows.filter((p) => typeof p.confidence?.[RESILIENCE] === 'number')
-  const n = answered.length
+  const xs = rows.map((p) => p.confidence?.[RESILIENCE]).filter((v): v is number => typeof v === 'number')
+  const n = xs.length
   if (!n) return null
-  const xs = answered.map((p) => p.confidence![RESILIENCE])
   const shaky = count(xs, (v) => v < LOW)
-  /* Is it their weakest answer? Only said when it is. */
-  const means = [0, 1, 2, 3, 4, 5].map((i) => mean(answered.map((p) => p.confidence?.[i] ?? 0)))
-  const weakest = means.every((m, i) => i === RESILIENCE || m >= means[RESILIENCE])
   const s = share(shaky, n)
+  const split = [
+    { count: shaky, tone: 'plum' as Tone, label: 'couldn’t' },
+    { count: n - shaky, tone: 'mist' as Tone, label: 'could' },
+  ].filter((p) => p.count > 0)
   return {
     key: 'resilience',
-    source: 'Confidence',
     headline:
       shaky === 0
-        ? 'All feel they could weather a setback'
+        ? 'All could weather a setback'
         : shaky === n
           ? `All ${n} doubt they’d weather a setback`
           : `${s.text} couldn’t weather a setback`,
-    split: [
-      { count: shaky, tone: 'plum' as Tone, label: 'couldn’t' },
-      { count: n - shaky, tone: 'mist' as Tone, label: 'could' },
-    ].filter((p) => p.count > 0),
-    detail:
-      shaky === 0
-        ? `None of the ${n} rate themselves below halfway`
-        : `${shaky} of ${n} rate themselves below halfway${weakest ? ', their weakest confidence answer' : ''}`,
+    split,
+    detail: counts(split),
     action:
       shaky * 2 >= n
-        ? 'Start with the basics: an emergency fund and a budget.'
+        ? 'Start with an emergency fund.'
         : shaky > 0
-          ? 'A protection check is an easy first conversation.'
-          : 'Protection isn’t the way in here: talk about what comes next.',
+          ? 'Offer a protection check.'
+          : 'Talk growth, not protection.',
   }
 }
 
-/** Everything the "Who you're reaching" half says, read off the given rows:
-    the whole scored book, or one tier of it. */
+/** The "Who you're reaching" cards, read off the given rows: the whole scored
+    book, or one tier of it. */
 export function groupProfile(rows: Prospect[], scope: Scope = 'book'): GroupProfile {
   const scored = rows.filter((p) => p.kq !== null)
-  const joy = joyThread(scored, scope)
-  const pos = postureThread(scored)
-  const adv = advisorThread(scored)
-  const res = resilienceThread(scored)
-
-  const summary: Line = []
-  if (joy) {
-    summary.push('Mostly people who want money for ', { b: joy.lead[0] })
-    if (joy.lead[1]) summary.push(' or ', { b: joy.lead[1] })
-  }
-  if (pos) summary.push(summary.length ? ', ' : 'Mostly people ', ...pos.phrase)
-  if (adv?.phrase) summary.push(summary.length ? ', ' : 'Mostly people who ', ...adv.phrase)
-  if (summary.length) summary.push('.')
-
   return {
     size: scored.length,
-    summary,
-    threads: [joy?.thread, pos?.thread, adv?.thread, res].filter((t): t is Thread => !!t),
+    threads: [joyThread(scored, scope), postureThread(scored), advisorThread(scored), resilienceThread(scored)].filter(
+      (t): t is Thread => !!t,
+    ),
   }
 }
 
@@ -402,7 +340,7 @@ export interface CompareRow {
 export interface Comparison {
   joy: CompareRow[]
   confidence: CompareRow[]
-  verdict: Line
+  finding: string
   action: string | null
   /** Who "everyone" is, for the help tip. */
   basis: string
@@ -413,29 +351,16 @@ const FAMILY_GAP = 5
 /* And a 1–5 average at least this far off. */
 const SCORE_GAP = 0.2
 
-/* The Confidence adventure's questions as the respondents were asked them
-   (evidence.ts), each with its slider in the app's order and how it reads. */
+/* The Confidence questions as the respondents were asked them (evidence.ts),
+   each with its slider in the app's order. */
 const CONFIDENCE_ITEMS = [
-  { asked: 'I can achieve my goals', slider: 2, label: 'Believe they’ll reach their goals', less: 'less confident about reaching their goals', more: 'more confident about reaching their goals' },
-  { asked: 'I can weather a shock', slider: RESILIENCE, label: 'Could weather a setback', less: 'less sure they’d weather a setback', more: 'surer they’d weather a setback' },
-  { asked: 'An advisor improves my confidence', slider: ADVISOR, label: 'Think an advisor would help', less: 'less sure an advisor would help', more: 'surer an advisor would help' },
+  { asked: 'I can achieve my goals', slider: GOALS, label: 'Reaching their goals' },
+  { asked: 'I can weather a shock', slider: RESILIENCE, label: 'Weathering a setback' },
+  { asked: 'An advisor improves my confidence', slider: ADVISOR, label: 'An advisor would help' },
 ]
 
 const pctText = (x: number) => (x > 0 && x < 0.01 ? '<1%' : `${Math.round(x * 100)}%`)
-
-/* "A", "A or B", "A, B or C", each bolded. */
-function either(xs: string[]): Line {
-  return xs.flatMap((x, i) => [
-    ...(i === 0 ? [] : [i === xs.length - 1 ? ' or ' : ', ']),
-    { b: x },
-  ])
-}
-function both(xs: string[]): Line {
-  return xs.flatMap((x, i) => [
-    ...(i === 0 ? [] : [i === xs.length - 1 ? ' and ' : ', ']),
-    { b: x },
-  ])
-}
+const capFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 export function knomeeComparison(rows: Prospect[] = prospects): Comparison | null {
   const scored = rows.filter((p) => p.kq !== null)
@@ -458,7 +383,7 @@ export function knomeeComparison(rows: Prospect[] = prospects): Comparison | nul
     .slice(0, 3)
   const top = Math.max(...families.flatMap((x) => [x.you, x.all]), 0.01)
   const joy: CompareRow[] = families.map(({ f, you, all }) => ({
-    label: `Want money for ${WANTS[f]}`,
+    label: capFirst(WANTS[f]),
     you: you / top,
     all: all / top,
     youText: pctText(you),
@@ -485,32 +410,29 @@ export function knomeeComparison(rows: Prospect[] = prospects): Comparison | nul
 
   if (!joy.length && !confidence.length) return null
 
-  /* The verdict says what the rows above show, and only that. */
-  const over = families.filter((x) => x.gap > 0).sort((a, b) => b.gap - a.gap).map((x) => WANTS[x.f])
-  const under = families.filter((x) => x.gap < 0).map((x) => WANTS[x.f])
-  const less = items.filter((x) => x.gap <= -SCORE_GAP && x.slider !== RESILIENCE).map((x) => x.less)
-  const more = items.filter((x) => x.gap >= SCORE_GAP && x.slider !== RESILIENCE).map((x) => x.more)
-  const verdict: Line = []
-  if (over.length || under.length) {
-    verdict.push('Your link reaches ')
-    if (over.length) verdict.push('more people who want money for ', ...either(over))
-    if (under.length) verdict.push(over.length ? ', and fewer who want ' : 'fewer people who want money for ', ...either(under))
-    verdict.push('. ')
-  }
-  const moods = [...less, ...more]
-  if (moods.length) verdict.push(verdict.length ? 'They’re also ' : 'Your prospects are ', ...both(moods), '.')
-  if (!verdict.length) verdict.push('Your prospects look much like everyone who takes Knomee.')
+  /* One sentence, from the rows above: the biggest shortfall, the biggest
+     excess, and confidence only where every question leans the same way. */
+  const under = families.find((x) => x.gap < 0)
+  const over = families.filter((x) => x.gap > 0).sort((a, b) => b.gap - a.gap)[0]
+  const lower = items.length > 0 && items.every((x) => x.gap <= -SCORE_GAP)
+  const higher = items.length > 0 && items.every((x) => x.gap >= SCORE_GAP)
+  const mix = [under && `fewer want ${WANTS[under.f]}`, over && `more want ${WANTS[over.f]}`].filter(
+    (c): c is string => !!c,
+  )
+  const finding =
+    [
+      mix.length ? `${capFirst(mix.join(', '))}.` : '',
+      lower ? 'Less confident overall.' : higher ? 'More confident overall.' : '',
+    ]
+      .filter(Boolean)
+      .join(' ') || 'Much like everyone on Knomee.'
 
   const confidenceN = card?.n
   return {
     joy,
     confidence,
-    verdict,
-    action: under.length
-      ? `To reach more people who want ${under[0]}, lead your invite with it.`
-      : over.length
-        ? `Your invite already draws people who want ${over[0]}; keep leading with it.`
-        : null,
+    finding,
+    action: under ? `Want more of them? Lead your invite with ${WANTS[under.f]}.` : null,
     basis: `Everyone on Knomee: ${model.n} Financial Joy${confidenceN ? ` and ${confidenceN} Confidence` : ''} respondents, anonymized, ${evidenceMeta.period}.`,
   }
 }
