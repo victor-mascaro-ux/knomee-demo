@@ -176,8 +176,10 @@
 .gi-link:hover {
   text-decoration: underline;
 }
-/* A tier is focused: the funnel cannot narrow with it, so it steps back. */
+/* A tier is focused: the funnel and the Knomee comparison cannot narrow with
+   it, so they step back. */
 .gi-sec.is-lensed .gi-funnel,
+.gi-sec.is-lensed .gi-compare,
 .gi-sec.is-lensed .gi-callout {
   opacity: 0.5;
 }
@@ -275,6 +277,84 @@
   background: var(--k-pearl);
 }
 
+/* ── Compared with everyone on Knomee ── */
+.gi-title .help-tip {
+  margin-left: 4px;
+  vertical-align: 1px;
+}
+.gi-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--k-muted);
+}
+.gi-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.gi-legend i + * {
+  margin-right: 6px;
+}
+.gi-legend i.is-you,
+.gi-cmp-bar.is-you i {
+  background: var(--k-grape);
+}
+.gi-legend i.is-all,
+.gi-cmp-bar.is-all i {
+  background: var(--k-stone);
+}
+.gi-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px var(--grid-gutter);
+}
+.gi-cmp-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.gi-cmp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gi-cmp-label {
+  font-size: 13px;
+  color: var(--k-body);
+}
+.gi-cmp-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 8px;
+}
+/* The bar sits in the first column only; its length is set inline. */
+.gi-cmp-bar i {
+  grid-column: 1;
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+}
+.gi-cmp-bar b,
+.gi-cmp-bar span {
+  grid-column: 2;
+  font-size: 12.5px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.gi-cmp-bar b {
+  font-weight: 600;
+  color: var(--k-grape);
+}
+.gi-cmp-bar span {
+  color: var(--k-muted);
+}
+
 .gi-foot {
   margin: 16px 0 0;
   font-size: 12px;
@@ -282,6 +362,9 @@
 }
 
 @media (max-width: 1100px) {
+  .gi-compare {
+    grid-template-columns: 1fr;
+  }
   .gi-threads {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
