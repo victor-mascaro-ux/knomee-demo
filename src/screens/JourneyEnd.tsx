@@ -82,11 +82,13 @@ export default function JourneyEnd({
       </div>
 
       <section className="je-share" aria-labelledby="je-share-h">
-        <h3 id="je-share-h">Know {share.who} who’d enjoy this?</h3>
-        <p>Send them a link to start their own adventures.</p>
+        <div className="je-share-text">
+          <h3 id="je-share-h">Know {share.who} who’d enjoy this?</h3>
+          <p>Send them a link to start their own adventures.</p>
+        </div>
         <button className="je-share-btn" type="button" onClick={() => setSharing(true)}>
           <ShareGlyph />
-          Share Knomee
+          Share
         </button>
       </section>
 
