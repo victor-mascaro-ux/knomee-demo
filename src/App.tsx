@@ -355,21 +355,12 @@ function ProspectsMetrics({
 
 // The prospects as a group: how the invitations are doing, and who they reach.
 // Each person's reading is the table's; nobody is named here.
-function ProspectInsights({
-  tier,
-  convertedNow,
-  onAnalytics,
-}: {
-  tier: TierKey | null
-  convertedNow?: number
-  onAnalytics?: () => void
-}) {
+function ProspectInsights({ tier, convertedNow }: { tier: TierKey | null; convertedNow?: number }) {
   const meta = tier ? TIER_META.find((m) => m.key === tier)! : null
   return (
     <ProspectGroupInsights
       focus={meta && { tierId: meta.tierId, label: `${meta.key} · ${meta.name}` }}
       convertedNow={convertedNow}
-      onAnalytics={onAnalytics}
     />
   )
 }
@@ -743,7 +734,6 @@ function ProspectsScreen({
   rowClassName,
   renderAction,
   afterMetrics,
-  onAnalytics,
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
@@ -761,8 +751,6 @@ function ProspectsScreen({
   /** A card of the caller's under Top Line Metrics (the adoption demo's
       Coming up). Nothing there when not passed. */
   afterMetrics?: ReactNode
-  /** Opens Prospect Analytics; the insights card links there when passed. */
-  onAnalytics?: () => void
 }) {
   const allNames = (rows ?? prospects).map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -788,7 +776,7 @@ function ProspectsScreen({
         stats={stats}
       />
       {afterMetrics}
-      <ProspectInsights tier={tier} convertedNow={hidden?.size} onAnalytics={onAnalytics} />
+      <ProspectInsights tier={tier} convertedNow={hidden?.size} />
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}
@@ -4317,8 +4305,12 @@ function SecurityPanel() {
   )
 }
 
-function SettingsScreen({ onClose }: { onClose: () => void }) {
+/* Account Settings. No back link: while it is open, the burger menu's
+   Account Settings item reads Dashboard and leads back (TopBar). */
+function SettingsScreen() {
   const [section, setSection] = useState<SettingsSection>('billing')
+  /* The active section's highlight slides to the one picked. */
+  const ind = useSlideIndicator<HTMLElement>(section)
   const nav: { id: SettingsSection; label: string }[] = [
     { id: 'profile', label: 'Profile' },
     { id: 'security', label: 'Security' },
@@ -4327,9 +4319,6 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
   ]
   return (
     <main className="content settings-screen">
-      <button className="settings-back" type="button" onClick={onClose}>
-        ‹ Back to Dashboard
-      </button>
       <div className="settings-grid">
         <aside className="settings-side">
           {/* The aside stays stretched so its divider runs the full height of
@@ -4340,12 +4329,23 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
               <h1>Account</h1>
               <p>Manage your account info.</p>
             </div>
-            <nav className="settings-nav">
+            <nav className="settings-nav slide-nav" ref={ind.ref}>
+              {ind.box && (
+                <span
+                  className="slide-ind settings-nav-ind"
+                  style={{
+                    transform: `translate(${ind.box.left}px, ${ind.box.top}px)`,
+                    width: ind.box.width,
+                    height: ind.box.height,
+                  }}
+                />
+              )}
               {nav.map((n) => (
                 <button
                   key={n.id}
                   type="button"
                   className={`settings-nav-item ${section === n.id ? 'active' : ''}`}
+                  data-active={section === n.id}
                   onClick={() => setSection(n.id)}
                 >
                   {n.label}
@@ -4355,10 +4355,13 @@ function SettingsScreen({ onClose }: { onClose: () => void }) {
           </div>
         </aside>
         <section className="settings-main">
-          {section === 'profile' && <ProfilePanel />}
-          {section === 'security' && <SecurityPanel />}
-          {section === 'billing' && <BillingPanel />}
-          {section === 'marketing' && <MarketingPanel />}
+          {/* Keyed, so each section arrives with its own entrance. */}
+          <div className="settings-panel-in" key={section}>
+            {section === 'profile' && <ProfilePanel />}
+            {section === 'security' && <SecurityPanel />}
+            {section === 'billing' && <BillingPanel />}
+            {section === 'marketing' && <MarketingPanel />}
+          </div>
         </section>
       </div>
     </main>
@@ -5395,6 +5398,11 @@ export default function App() {
         logo={brand ? brand.logo : undefined}
         cobrand={cobrandLayout}
         sub={adminView ? 'ADMIN' : apiStoreOpen ? 'API STORE' : 'ADVISOR'}
+        inSettings={settingsOpen}
+        onDashboard={() => {
+          setSettingsOpen(false)
+          scrollPageToTop()
+        }}
         onSettings={() => {
           setSettingsOpen(true)
           setApiStoreOpen(false)
@@ -5576,7 +5584,7 @@ export default function App() {
           <AdminScreen />
         </main>
       ) : settingsOpen ? (
-        <SettingsScreen onClose={() => setSettingsOpen(false)} />
+        <SettingsScreen />
       ) : segmentationOpen ? (
         <main className="content">
           <button
@@ -5620,7 +5628,6 @@ export default function App() {
               onDownload={() => showToast('CSV downloaded')}
               onInvite={() => setInviteKind('prospect')}
               onOpenProfile={setProfileProspect}
-              onAnalytics={() => goDashTab(analyticsTabs[1])}
             />
           ))}
         {screen === 'clients' &&

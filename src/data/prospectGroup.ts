@@ -47,8 +47,6 @@ export interface Leak {
   lost: number
   headline: string
   action: string
-  /** The action points at Prospect Analytics, not at the table. */
-  toAnalytics: boolean
 }
 
 const pct = (k: number, n: number) => (n ? Math.round((k / n) * 100) : 0)
@@ -63,9 +61,9 @@ export function invitationFunnel(convertedNow = 0): { steps: FunnelStep[]; leak:
 
   const steps: FunnelStep[] = [
     { key: 'clicked', label: 'Clicked your link', count: clicked },
-    { key: 'started', label: 'Started an Adventure', count: started, rate: pct(started, clicked), of: 'of clicks' },
-    { key: 'completed', label: 'Completed', count: completed, rate: pct(completed, started), of: 'of starters' },
-    { key: 'converted', label: 'Converted', count: converted, rate: pct(converted, completed), of: 'of completers' },
+    { key: 'started', label: 'Started Adventures', count: started, rate: pct(started, clicked), of: 'of clicks' },
+    { key: 'completed', label: 'Completed Adventures', count: completed, rate: pct(completed, started), of: 'of starters' },
+    { key: 'converted', label: 'Converted to Client', count: converted, rate: pct(converted, completed), of: 'of completers' },
   ]
 
   /* Only the two steps where people walk away can leak. Not converting yet is
@@ -79,7 +77,6 @@ export function invitationFunnel(convertedNow = 0): { steps: FunnelStep[]; leak:
       lost: beforeStart,
       headline: `${beforeStart} opened your link but never started.`,
       action: 'Try a warmer invite.',
-      toAnalytics: true,
     }
   } else if (midway > 0) {
     leak = {
@@ -87,7 +84,6 @@ export function invitationFunnel(convertedNow = 0): { steps: FunnelStep[]; leak:
       lost: midway,
       headline: `${midway} stopped part-way through.`,
       action: 'Nudge the Incomplete Profiles below.',
-      toAnalytics: false,
     }
   }
   return { steps, leak }
