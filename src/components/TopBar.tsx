@@ -24,6 +24,8 @@ export default function TopBar({
   /** The word under the knomee mark — which product this is. */
   sub = 'ADVISOR',
   onSettings,
+  inSettings = false,
+  onDashboard,
   onApiStore,
   emptyState = false,
   onEmptyState,
@@ -32,6 +34,10 @@ export default function TopBar({
   cobrand?: 'left' | 'centered'
   sub?: string
   onSettings?: () => void
+  /** Account Settings is open: its item becomes the way back, Dashboard, so
+      the page needs no back link of its own. */
+  inSettings?: boolean
+  onDashboard?: () => void
   /** The API store — the data a firm can pull from knomee. */
   onApiStore?: () => void
   /** Empty State: the dashboard as a new advisor first meets it, with
@@ -88,17 +94,30 @@ export default function TopBar({
                 <span className="menu-avatar">A</span>
                 <span className="menu-name">Alex Advisor</span>
               </div>
-              {onSettings && (
+              {inSettings && onDashboard ? (
                 <button
                   className="menu-item"
                   type="button"
                   onClick={() => {
                     setOpen(false)
-                    onSettings()
+                    onDashboard()
                   }}
                 >
-                  Account Settings
+                  Dashboard
                 </button>
+              ) : (
+                onSettings && (
+                  <button
+                    className="menu-item"
+                    type="button"
+                    onClick={() => {
+                      setOpen(false)
+                      onSettings()
+                    }}
+                  >
+                    Account Settings
+                  </button>
+                )
               )}
               {onApiStore && (
                 <button
