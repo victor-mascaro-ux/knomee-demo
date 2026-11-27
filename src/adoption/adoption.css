@@ -49,9 +49,6 @@
 .ad-intercom {
   --ad-ic-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
-.ad-intercom.ad-intercom-flow .ic-banner {
-  margin-top: var(--block-gap);
-}
 .ad-intercom-page {
   font-family: var(--ad-ic-font);
   color: var(--k-ink);
@@ -63,22 +60,22 @@
   position: fixed;
 }
 
-/* ── The stage: the app on the left, the notes on the right ───────────── */
+/* ── The stage: the app, full width, and the steps in a drawer over it ── */
 .adoption-demo .ad-stage {
+  position: relative;
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 370px;
+  overflow: hidden;
 }
-/* The app's own box. contain makes it the frame for the app's fixed pieces
-   (the modal, the powered-by credit), so they sit inside it, not over the
-   notes. */
+/* The app's own box, the whole stage. contain makes it the frame for the
+   app's fixed pieces (the modal, the powered-by credit), so they sit inside
+   it. */
 .adoption-demo .ad-device {
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   contain: layout paint;
   background: #fff;
-  border-right: 1px solid #ddd8e4;
 }
 .adoption-demo .ad-scroll {
   position: absolute;
@@ -563,10 +560,10 @@
   margin-top: 18px;
 }
 
-/* The banner, across the page under the tabs. */
+/* The banner, across the page under the tabs, a block's gap below them. */
 :is(.adoption-demo, .ad-intercom) .ic-banner {
   position: relative;
-  margin-top: 38px;
+  margin-top: var(--block-gap);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -1613,10 +1610,69 @@
   white-space: pre-line;
 }
 
-/* ── The notes ────────────────────────────────────────────────────────── */
+/* ── The notes: a drawer on the right edge, over the app ──────────────── */
+/* It opens under the top bar, so the menu (and its Empty State switch)
+   stays in reach. */
 .adoption-demo .ad-notes {
+  position: absolute;
+  top: var(--topbar-h);
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  width: min(370px, calc(100% - 44px));
+  border-left: 1px solid #ddd8e4;
+  background: var(--ad-notes-bg);
+  transform: translateX(100%);
+}
+.adoption-demo .ad-notes.open {
+  transform: none;
+  box-shadow: -14px 0 32px -14px rgba(36, 4, 70, 0.24);
+}
+.adoption-demo .ad-notes-body {
+  height: 100%;
   overflow: auto;
   padding: 20px 18px 40px;
+  visibility: hidden;
+}
+.adoption-demo .ad-notes.open .ad-notes-body {
+  visibility: visible;
+}
+/* Its tab, on the drawer's edge: the one control that opens and closes it.
+   Closed, it is all that shows, at the window's right edge. */
+.adoption-demo .ad-notes-tab {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 32px;
+  padding: 14px 0;
+  border: 1px solid #ddd8e4;
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  background: var(--ad-notes-bg);
+  box-shadow: -4px 2px 12px -4px rgba(36, 4, 70, 0.18);
+  color: var(--k-plum);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.adoption-demo .ad-notes-tab:hover {
+  background: #ece7f3;
+}
+.adoption-demo .ad-notes-tab span {
+  writing-mode: vertical-rl;
+}
+.adoption-demo .ad-notes-tab svg {
+  flex: none;
+  transform: rotate(180deg);
+}
+.adoption-demo .ad-notes.open .ad-notes-tab svg {
+  transform: none;
 }
 .adoption-demo .ad-notes h2 {
   margin: 0 0 14px;
@@ -1781,24 +1837,21 @@
   color: var(--k-muted);
 }
 
-/* A narrow window: the app above, the notes under it. */
-@media (max-width: 1100px) {
-  .adoption-demo {
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
-  }
-  .adoption-demo .ad-stage {
-    display: block;
-  }
-  .adoption-demo .ad-device {
-    height: 760px;
-    border-right: 0;
-    border-bottom: 1px solid #ddd8e4;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
+  /* The drawer slides; its list stays shown until it has slid away. */
+  .adoption-demo .ad-notes {
+    transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.32s ease;
+  }
+  .adoption-demo .ad-notes-body {
+    transition: visibility 0s linear 0.32s;
+  }
+  .adoption-demo .ad-notes.open .ad-notes-body {
+    transition-delay: 0s;
+  }
+  .adoption-demo .ad-notes-tab,
+  .adoption-demo .ad-notes-tab svg {
+    transition: background-color 0.2s ease, transform 0.25s ease;
+  }
   .adoption-demo .tl::after {
     transition: height 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
