@@ -28,7 +28,8 @@ function Sender() {
   )
 }
 
-/** A banner across the top of the page, under the tabs. */
+/** A banner across the top of the page, under the tabs, in knomee's own
+    design system: its button is the DS primary button, with the DS shine. */
 export function Banner({
   title,
   children,
@@ -46,12 +47,14 @@ export function Banner({
 }) {
   return (
     <div className={`ic-banner${leaving ? ' leaving' : ''}`} data-ad-live>
-      <FirmAvatar />
-      <p>
-        <b>{title}</b> {children}
-      </p>
-      <button className="ic-btn" type="button" onClick={onAction}>
-        {action}
+      <div className="ic-banner-msg">
+        <FirmAvatar />
+        <p>
+          <b>{title}</b> {children}
+        </p>
+      </div>
+      <button className="btn btn-primary" type="button" onClick={onAction}>
+        <span>{action}</span>
       </button>
       <button className="ic-close" type="button" aria-label="Dismiss" onClick={onDismiss}>
         <XIcon />
