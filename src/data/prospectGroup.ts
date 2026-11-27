@@ -6,10 +6,13 @@
 // table column (KQ, Intent, Clarity, Receptivity, Top Action). Every number is
 // computed from the prospect rows and their own answers, never typed, so the
 // sentences stay true when the rows change. The only typed figures are the two
-// link counts below, which Knomee cannot read off a row.
+// link counts below, which Knomee cannot read off a row; the Knomee-wide
+// figures the book is compared with are read from evidence.ts and
+// analytics.ts, never retyped.
 
 import { prospects, type Prospect } from './prospects'
-import { outcomes } from './analytics'
+import { modelClusters, outcomes } from './analytics'
+import { evidence, evidenceMeta } from './evidence'
 import { posture, purposeFamily, type Posture, type PurposeFamily } from './prospectSegments'
 
 /* ── How your invitations are doing ──────────────────────────────────────────
@@ -374,5 +377,140 @@ export function groupProfile(rows: Prospect[], scope: Scope = 'book'): GroupProf
     size: scored.length,
     summary,
     threads: [joy?.thread, pos?.thread, adv?.thread, res].filter((t): t is Thread => !!t),
+  }
+}
+
+/* ── Compared with everyone on Knomee ────────────────────────────────────────
+   "Am I reaching the people I meant to?" has no target to score against: what
+   an advisor says they enjoy working with (business owners, retirees…) is
+   never asked of a prospect. What Knomee can say is how this book differs
+   from everyone who takes the same Adventures: the anonymized respondents in
+   evidence.ts and analytics.ts. Like for like only: each family's share of the
+   book against its share of the 404 Financial Joy respondents, and the
+   average of the same three Confidence questions against the 607 who answered
+   them. Only the whole book is compared: the respondents have no tiers. */
+
+export interface CompareRow {
+  label: string
+  /** Bar lengths, 0–1. */
+  you: number
+  all: number
+  youText: string
+  allText: string
+}
+
+export interface Comparison {
+  joy: CompareRow[]
+  confidence: CompareRow[]
+  verdict: Line
+  action: string | null
+  /** Who "everyone" is, for the help tip. */
+  basis: string
+}
+
+/* A family must sit at least this many points off Knomee's share to be named. */
+const FAMILY_GAP = 5
+/* And a 1–5 average at least this far off. */
+const SCORE_GAP = 0.2
+
+/* The Confidence adventure's questions as the respondents were asked them
+   (evidence.ts), each with its slider in the app's order and how it reads. */
+const CONFIDENCE_ITEMS = [
+  { asked: 'I can achieve my goals', slider: 2, label: 'Believe they’ll reach their goals', less: 'less confident about reaching their goals', more: 'more confident about reaching their goals' },
+  { asked: 'I can weather a shock', slider: RESILIENCE, label: 'Could weather a setback', less: 'less sure they’d weather a setback', more: 'surer they’d weather a setback' },
+  { asked: 'An advisor improves my confidence', slider: ADVISOR, label: 'Think an advisor would help', less: 'less sure an advisor would help', more: 'surer an advisor would help' },
+]
+
+const pctText = (x: number) => (x > 0 && x < 0.01 ? '<1%' : `${Math.round(x * 100)}%`)
+
+/* "A", "A or B", "A, B or C", each bolded. */
+function either(xs: string[]): Line {
+  return xs.flatMap((x, i) => [
+    ...(i === 0 ? [] : [i === xs.length - 1 ? ' or ' : ', ']),
+    { b: x },
+  ])
+}
+function both(xs: string[]): Line {
+  return xs.flatMap((x, i) => [
+    ...(i === 0 ? [] : [i === xs.length - 1 ? ' and ' : ', ']),
+    { b: x },
+  ])
+}
+
+export function knomeeComparison(rows: Prospect[] = prospects): Comparison | null {
+  const scored = rows.filter((p) => p.kq !== null)
+
+  /* What they want money for: each family's share, here and across Knomee. */
+  const model = modelClusters.B
+  const fams = scored
+    .map((p) => purposeFamily(p.joy))
+    .filter((f): f is Exclude<PurposeFamily, 'Unstated'> => f !== 'Unstated')
+  const families = (Object.keys(WANTS) as Exclude<PurposeFamily, 'Unstated'>[])
+    .map((f) => {
+      const knomee = model.segs.find((s) => s.name === f)?.scored
+      if (knomee == null || !fams.length) return null
+      const you = count(fams, (x) => x === f) / fams.length
+      const all = knomee / model.n
+      return { f, you, all, gap: (you - all) * 100 }
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x && Math.abs(x.gap) >= FAMILY_GAP)
+    .sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap))
+    .slice(0, 3)
+  const top = Math.max(...families.flatMap((x) => [x.you, x.all]), 0.01)
+  const joy: CompareRow[] = families.map(({ f, you, all }) => ({
+    label: `Want money for ${WANTS[f]}`,
+    you: you / top,
+    all: all / top,
+    youText: pctText(you),
+    allText: pctText(all),
+  }))
+
+  /* How confident they are: the same questions' averages, on Knomee's 1–5. */
+  const card = evidence.find((e) => e.key === 'confidence')
+  const items = CONFIDENCE_ITEMS.flatMap((it) => {
+    const row = card?.secondary?.rows.find((r) => r.label === it.asked)
+    const xs = scored.map((p) => p.confidence?.[it.slider]).filter((v): v is number => typeof v === 'number')
+    if (!row || !xs.length) return []
+    const all = Number(row.display)
+    const you = 1 + mean(xs) / 25
+    return [{ ...it, you, all, gap: you - all }]
+  })
+  const confidence: CompareRow[] = items.map((it) => ({
+    label: it.label,
+    you: it.you / 5,
+    all: it.all / 5,
+    youText: it.you.toFixed(1),
+    allText: it.all.toFixed(1),
+  }))
+
+  if (!joy.length && !confidence.length) return null
+
+  /* The verdict says what the rows above show, and only that. */
+  const over = families.filter((x) => x.gap > 0).sort((a, b) => b.gap - a.gap).map((x) => WANTS[x.f])
+  const under = families.filter((x) => x.gap < 0).map((x) => WANTS[x.f])
+  const less = items.filter((x) => x.gap <= -SCORE_GAP && x.slider !== RESILIENCE).map((x) => x.less)
+  const more = items.filter((x) => x.gap >= SCORE_GAP && x.slider !== RESILIENCE).map((x) => x.more)
+  const verdict: Line = []
+  if (over.length || under.length) {
+    verdict.push('Your link reaches ')
+    if (over.length) verdict.push('more people who want money for ', ...either(over))
+    if (under.length) verdict.push(over.length ? ', and fewer who want ' : 'fewer people who want money for ', ...either(under))
+    verdict.push('. ')
+  }
+  const moods = [...less, ...more]
+  if (moods.length) verdict.push(verdict.length ? 'They’re also ' : 'Your prospects are ', ...both(moods), '.')
+  if (!verdict.length) verdict.push('Your prospects look much like everyone who takes Knomee.')
+
+  const confidenceN = card?.n
+  return {
+    joy,
+    confidence,
+    verdict,
+    action: under.length
+      ? `To reach more people who want ${under[0]}, lead your invite with it.`
+      : over.length
+        ? `Your invite already draws people who want ${over[0]}; keep leading with it.`
+        : null,
+    basis: `Everyone on Knomee: ${model.n} Financial Joy${confidenceN ? ` and ${confidenceN} Confidence` : ''} respondents, anonymized, ${evidenceMeta.period}.`,
   }
 }
