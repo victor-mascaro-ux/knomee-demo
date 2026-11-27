@@ -195,44 +195,9 @@ export function topSegments(rows: { seg: ProspectSegment }[]): SegmentCount[] {
   return [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 }
 
-/** The "Who you're reaching" strip: the five biggest crossed segments. One
-    person on their own is not an audience, so a segment needs two. */
-export const reachSegments: { name: string; count: number }[] = topSegments(segmented)
-  .filter((s) => s.count >= 2)
-  .slice(0, 5)
-  .map(({ name, count }) => ({ name, count }))
-
-/* ── Who to talk to this week ─────────────────────────────────────────────────
-   The six the advisor is flagged to call, strongest first. Who is on the list
-   is a judgement; everything said about them is read off their row. Every
-   chip but the last is something the prospect answered, and the last is the
-   row's own next action — tracked behaviour (adventures completed, logins,
-   scheduling state) is deliberately left out, because the point of the card
-   is that the score shows its reasoning. */
-
-export interface TalkTo {
-  name: string
-  tier: string
-  kq: number
-  /** Their crossed segment, where the firm side shows its cluster. */
-  segment: string
-  said: string[]
-}
-
-const FLAGGED = [
-  'Emma Rossi',
-  'Sarah Mitchell',
-  'Jorday Ray',
-  'Barbara Dean',
-  'Sophie Dean',
-  'Sebastian Watson',
-]
-
-const TIER_LABEL: Record<string, string> = {
-  tier1: 'Tier 1',
-  tier2: 'Tier 2',
-  tier3: 'Tier 3',
-}
+/* ── What they said, in a few words ──────────────────────────────────────────
+   The Clients page's talk cards open with what the person answered: what they
+   want money for, and how they feel about it. */
 
 const POSTURE_CHIP: Record<Posture, string> = {
   Assured: 'Confident in where they stand',
@@ -265,27 +230,6 @@ export function answeredChips(joy: string[] | undefined, pos: Posture): string[]
   const wants = [...new Set((joy ?? []).slice(0, 2).map((w) => WANTS_PHRASE[w] ?? w.toLowerCase()))]
   return [wants.length ? `Wants money for ${wants.join(' and ')}` : '', POSTURE_CHIP[pos]].filter(Boolean)
 }
-
-/* No quadrant chip: the segment pill beside the name already says it, and a
-   second wording of the same reading could only disagree with the action. */
-function said(p: Prospect, seg: ProspectSegment): string[] {
-  return [...answeredChips(p.joy, seg.posture), p.topAction].filter(Boolean)
-}
-
-export const talkTo: TalkTo[] = FLAGGED.flatMap((name) => {
-  const row = segmented.find(({ p }) => p.name === name)
-  if (!row) return []
-  const { p, seg } = row
-  return [
-    {
-      name: p.name,
-      tier: TIER_LABEL[p.tier] ?? 'Tier 2',
-      kq: p.kq as number,
-      segment: seg.name,
-      said: said(p, seg),
-    },
-  ]
-})
 
 /* ── What a segment's name means ──────────────────────────────────────────────
    The hover on a segment pill: one line for each half of its name. How they

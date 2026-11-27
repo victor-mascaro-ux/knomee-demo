@@ -1,0 +1,308 @@
+/* My Prospects' Actionable Insights, the group view (ProspectGroupInsights).
+   Plum side colours only; the funnel's last step is the client side's teal,
+   because that is where a prospect goes. */
+
+.gi-body {
+  gap: 0;
+}
+.gi-sec + .gi-sec {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.gi-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+.gi-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--plum);
+}
+.gi-title-tier {
+  color: var(--k-grape);
+}
+.gi-sub {
+  font-size: 12px;
+  color: var(--k-muted);
+}
+.gi-kicker {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--k-slate);
+}
+
+/* ── The funnel: four steps, each an arrow into the next ── */
+.gi-funnel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.gi-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px 12px 18px;
+  background: var(--k-plum-wash);
+}
+.gi-step + .gi-step {
+  padding-left: 30px;
+}
+.gi-step:first-child {
+  border-radius: 10px 0 0 10px;
+}
+.gi-step:last-child {
+  border-radius: 0 10px 10px 0;
+}
+/* Each step points into the next: its own colour as a 12px tip, over a white
+   seam 3px wider, so the arrow reads even where both steps share a colour. */
+.gi-step:not(:last-child)::before,
+.gi-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.gi-step:not(:last-child)::before {
+  right: -15px;
+  width: 15px;
+  background: #fff;
+  clip-path: polygon(0 0, 3px 0, 100% 50%, 3px 100%, 0 100%);
+  z-index: 1;
+}
+.gi-step:not(:last-child)::after {
+  right: -12px;
+  width: 12px;
+  background: inherit;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  z-index: 2;
+}
+.gi-step-label {
+  font-size: 12.5px;
+  color: var(--k-body);
+}
+.gi-step-num {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--plum);
+}
+.gi-step-rate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--k-grape);
+}
+.gi-step:first-child .gi-step-rate {
+  color: var(--k-muted);
+  font-weight: 400;
+}
+.gi-step.is-won {
+  background: var(--k-teal-light);
+}
+.gi-step.is-won .gi-step-num,
+.gi-step.is-won .gi-step-rate {
+  color: var(--k-ocean);
+}
+.gi-step.is-leak {
+  box-shadow: inset 0 -3px 0 var(--k-bolt);
+}
+.gi-leak-tag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--k-grape-light);
+  color: var(--k-grape);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The one reading of the biggest drop, and what to do about it. */
+.gi-callout {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: inset 3px 0 0 var(--k-bolt);
+}
+.gi-callout p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--k-body);
+}
+.gi-callout b {
+  color: var(--plum);
+}
+.gi-callout .gi-do {
+  margin-top: 4px;
+}
+.gi-do,
+.gi-thread-do {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--k-grape);
+}
+.gi-do::before,
+.gi-thread-do::before {
+  content: '→ ';
+}
+.gi-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--purple-bolt);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.gi-link:hover {
+  text-decoration: underline;
+}
+/* A tier is focused: the funnel cannot narrow with it, so it steps back. */
+.gi-sec.is-lensed .gi-funnel,
+.gi-sec.is-lensed .gi-callout {
+  opacity: 0.5;
+}
+.gi-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--k-muted);
+}
+
+/* ── Who you're reaching ── */
+.gi-summary {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--k-plum-050);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--k-body);
+}
+.gi-summary b {
+  font-weight: 600;
+  color: var(--plum);
+}
+.gi-summary .gi-kicker {
+  margin-bottom: 2px;
+}
+.gi-threads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.gi-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.gi-thread-head {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--plum);
+}
+.gi-split {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  margin: 2px 0;
+  border-radius: 999px;
+}
+.gi-split i {
+  display: block;
+  min-width: 4px;
+}
+.gi-split i:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.gi-split i:last-child {
+  border-radius: 0 999px 999px 0;
+}
+.gi-split i:only-child {
+  border-radius: 999px;
+}
+.gi-thread-detail {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--k-muted);
+}
+.gi-thread-do {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.gi-tone-plum {
+  background: var(--k-plum);
+}
+.gi-tone-grape {
+  background: var(--k-grape);
+}
+.gi-tone-bolt {
+  background: var(--k-bolt);
+}
+.gi-tone-ocean {
+  background: var(--k-ocean);
+}
+.gi-tone-teal {
+  background: var(--k-teal);
+}
+.gi-tone-mist {
+  background: var(--k-pearl);
+}
+
+.gi-foot {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: var(--k-muted);
+}
+
+@media (max-width: 1100px) {
+  .gi-threads {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .gi-funnel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .gi-step,
+  .gi-step + .gi-step {
+    padding-left: 14px;
+    border-radius: 10px;
+  }
+  .gi-step:not(:last-child)::before,
+  .gi-step:not(:last-child)::after {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .gi-threads {
+    grid-template-columns: 1fr;
+  }
+}
