@@ -5,21 +5,17 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
 import type { ClientBrand } from '../components/clientBrands'
 import { Mark, MailIcon, XIcon } from './icons'
-import { emailContent, type ExtraKey, type SentEmail } from './steps'
+import type { DemoEmail } from './steps'
 
 export default function MailWindow({
-  k,
-  sent,
-  nudge,
+  email: e,
   brand,
   inDevice,
   leaving,
   onClose,
   onCta,
 }: {
-  k: ExtraKey
-  sent: SentEmail | null
-  nudge: { subject: string; body: string } | null
+  email: DemoEmail
   brand: ClientBrand
   /** Shown inside the app (Alex reading it) rather than over the whole demo. */
   inDevice?: boolean
@@ -28,7 +24,6 @@ export default function MailWindow({
   /** Its button does something here (Alex's own inbox); elsewhere it is shown. */
   onCta?: () => void
 }) {
-  const { e, subj, full } = emailContent(k, sent, nudge)
   const close = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     close.current?.focus({ preventScroll: true })
@@ -76,7 +71,7 @@ export default function MailWindow({
           {e.to} &lt;{e.toEmail}&gt;
         </div>
         <h2 className="mail-subj" id="ad-mail-subj">
-          {subj}
+          {e.subj}
         </h2>
       </div>
       <div className={`mail-body${e.by === 'alex' ? ' by-firm' : ' by-knomee'}`}>
@@ -91,7 +86,7 @@ export default function MailWindow({
           </span>
         )}
         <div className="mail-msg" style={i(1)}>
-          {full}
+          {e.full}
         </div>
         {onCta ? (
           <button className="mail-cta" type="button" style={i(2)} onClick={onCta}>
