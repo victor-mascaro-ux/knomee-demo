@@ -1,9 +1,15 @@
-/* The microphone under a free-text box, shared by every flow that has one —
+/* The microphone on a free-text box, shared by every flow that has one —
  * the advisor's questions and the client's adventures — so it is the same
  * button, with the same behaviour, wherever somebody is asked to write.
+ *
+ * On an adventure's answer box (MemoryAsk) it is a round button with the mic
+ * alone, in the box's bottom-right corner: the box hands it that corner, and
+ * it draws itself there from wherever the flow put it.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { MicCorner } from './MemoryAsk'
 import './dictation.css'
 
 /* Speaking a long answer is easier than typing it on a phone. The browser's own
@@ -137,6 +143,19 @@ function MicIcon() {
   )
 }
 
+/* The mic for the round button, drawn on the disc's own 40 grid about its
+   centre: its farthest point (the top of the capsule and the foot of the
+   stem, stroke included) is 16 from the centre — 0.8 of the radius, as every
+   icon in a circle sits. */
+function RoundMicIcon() {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+      <rect x="15.4" y="5.1" width="9.2" height="18" rx="4.6" />
+      <path d="M10.8 18.8a9.2 9.2 0 0 0 18.4 0M20 28v6.9" />
+    </svg>
+  )
+}
+
 /** The microphone under a free-text box: what is said is added to what is
     there, word by word as it is said. Nothing at all where the browser cannot
     listen. */
@@ -169,6 +188,8 @@ export function MicButton({
     if (wrote.current.size) mic.cancel()
     else before.current = value
   }, [value, mic.on])
+  /* On an answer box: its corner, where the mic goes as a circle. */
+  const corner = useContext(MicCorner)
   if (!mic.supported) return null
   const toggle = () => {
     if (!mic.on) {
@@ -177,6 +198,20 @@ export function MicButton({
     }
     mic.toggle()
   }
+  if (corner)
+    return createPortal(
+      <button
+        type="button"
+        className={`af-mic af-mic-round${mic.on ? ' is-on' : ''}`}
+        aria-pressed={mic.on}
+        aria-label={mic.on ? 'Listening… Tap to Stop' : 'Say Your Answer'}
+        title={mic.on ? 'Listening… Tap to Stop' : 'Say Your Answer'}
+        onClick={toggle}
+      >
+        <RoundMicIcon />
+      </button>,
+      corner,
+    )
   if (big)
     return (
       <button

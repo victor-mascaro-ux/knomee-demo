@@ -31,7 +31,6 @@ import {
   SheetItem,
   TabFinId,
   TabAdventures,
-  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -1592,15 +1591,15 @@ function FlowPhone({
                 sub="Your Business ID puts it in your own words, with 3 questions to ask about your move."
                 hints={{
                   id: 'Answers and 3 questions.',
-                  knomee: 'Back to your adventures.',
-                  team: 'Who sees what you share.',
+                  knomee: 'Your next step, any time.',
+                  adventures: 'Take any one again.',
                 }}
                 share={{
                   who: 'another advisor',
                   text: 'I got clear on what I want from my practice with Knomee. Start your own adventures:',
                   link: startLink('advisor-journey'),
                 }}
-                onPick={(b) => (b === 'knomee' ? openNext() : setTab(b === 'id' ? 'finid' : 'team'))}
+                onPick={(b) => (b === 'knomee' ? openNext() : b === 'id' ? setTab('finid') : closeToList())}
               />
             ) : tab === 'team' ? (
               /* My Team: who on their team sees which part of the Business ID.
@@ -1771,23 +1770,14 @@ function FlowPhone({
             {/* The mark picks up where they left off: the next adventure
                 still open, or the list once there is none. */}
             <KnomeeFab label="Next adventure" onClick={openNext} />
-            {/* At the end of the journey every adventure is done, and My
-                Team takes Adventures' place. */}
-            {atEnd ? (
-              <button type="button" className="cx-tab" onClick={() => setTab('team')}>
-                <TabTeam />
-                <span className="cx-tab-lbl">My Team</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
-                onClick={closeToList}
-              >
-                <TabAdventures />
-                <span className="cx-tab-lbl">Adventures</span>
-              </button>
-            )}
+            <button
+              type="button"
+              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+              onClick={closeToList}
+            >
+              <TabAdventures />
+              <span className="cx-tab-lbl">Adventures</span>
+            </button>
           </nav>
           )}
 

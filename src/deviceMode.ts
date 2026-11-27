@@ -63,17 +63,54 @@ export function useDeviceMode(): DeviceMode {
    when it was reached some other way. */
 const BACK_KEY = 'knomee.experienceFrom'
 
-export function openExperience(hash: string) {
+/* An experience opens in a tab of its own, named so its Close Experience
+   knows to close that tab rather than turn it into the profile. */
+const TAB_NAME = 'knomee-experience'
+
+/** The window the address bar belongs to: inside the review overlay the app
+    is a frame, and a tab opened or closed is the overlay's. */
+function topWindow(): Window {
   try {
-    sessionStorage.setItem(BACK_KEY, window.location.hash)
+    if (window.top && window.top !== window) {
+      void window.top.location.href // throws if it is not ours to read
+      return window.top
+    }
+  } catch {
+    /* a foreign embed — this frame is all there is */
+  }
+  return window
+}
+
+export function openExperience(hash: string) {
+  const top = topWindow()
+  try {
+    sessionStorage.setItem(BACK_KEY, top.location.hash)
   } catch {
     /* fine — the fallback still knows the way */
   }
   setDeviceMode('mobile')
-  window.location.hash = hash
+  /* The profile stays where it is; the experience opens next to it. */
+  const page = top.location.href.split('#')[0]
+  const tab = window.open(`${page}${hash}`, `${TAB_NAME}-${Date.now()}`)
+  /* A blocked pop-up: open it here, as it always used to. */
+  if (!tab) window.location.hash = hash
 }
 
 export function backToProfile(fallback: string) {
+  /* Opened in its own tab: closing it is going back, to the profile still
+     open in the tab it came from. */
+  const top = topWindow()
+  if (top.name.startsWith(TAB_NAME)) {
+    top.close()
+    /* A tab the browser will not let a page close stays open; it goes to
+       the profile instead. */
+    window.setTimeout(() => backHere(fallback), 300)
+    return
+  }
+  backHere(fallback)
+}
+
+function backHere(fallback: string) {
   let from: string | null = null
   try {
     from = sessionStorage.getItem(BACK_KEY)

@@ -1105,7 +1105,7 @@ export default function MoveFlow({
               setDraft('')
             }}
             below={
-              <div className={`ol-add-row${mic ? ' has-mic' : ''}`}>
+              <div className="ol-add-row">
                 <button
                   className="ol-add ol-add-pill"
                   type="button"

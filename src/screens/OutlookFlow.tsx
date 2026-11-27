@@ -434,7 +434,7 @@ function Ask({
         below={
           /* Add and the microphone as one matched pair of pills: Add at the
              start, the mic at the end — where it sits on every other screen. */
-          <div className={`ol-add-row${slot?.below ? ' has-mic' : ''}`}>
+          <div className="ol-add-row">
             <button className="ol-add ol-add-pill" type="button" disabled={!text.trim()} onClick={add}>
               <span aria-hidden>+</span>
               {concern ? 'Add Concern' : 'Add Hope'}
