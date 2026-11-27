@@ -798,6 +798,16 @@ svg.cx-tab-mark {
 .cx-viewport:has(~ .cx-tabbar .cx-fab):not(:has(> .pp)) {
   padding-bottom: calc(22px + 30px);
 }
+/* The end of the journey (JourneyEnd): the screen goes plum, and its foot
+   runs down nearly to the bar — the cards there point at the bar's buttons,
+   so they sit just over them (the middle one clears the Knomee button's rise
+   by its own margin) rather than a scroll's room away. */
+.cx-viewport.is-end {
+  background: var(--k-plum);
+}
+.cx-viewport.is-end:has(~ .cx-tabbar .cx-fab) {
+  padding-bottom: 14px;
+}
 
 .cx-home-bar {
   flex: none;

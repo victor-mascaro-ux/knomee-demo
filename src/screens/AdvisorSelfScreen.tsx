@@ -31,6 +31,7 @@ import {
   SheetItem,
   TabFinId,
   TabAdventures,
+  TabTeam,
   ZOOM_CONTROLS_TITLE,
   AppbarBrand,
   artOf,
@@ -115,6 +116,7 @@ import './advisor-flow.css'
 import FeedbackButton from '../components/FeedbackButton'
 import { AdventureClose, AdventureMark, AdventureMarkContext } from './AdventureMark'
 import { useCcNav, useCcNavRoots } from '../ccNav'
+import JourneyEnd, { startLink } from './JourneyEnd'
 
 const ZOOM_STEP = 0.1
 const OTHER = 'Other'
@@ -1308,13 +1310,26 @@ function FlowPhone({
      journey); an advisor on their invite link skips for real. */
   const personaFill = mode !== 'invited'
   useCcNav('self.rich', richOpen, setRichOpen)
+  /* The end of the journey, once The Move's celebration is left: every
+     adventure done, Share, and what the bar's buttons are for from here.
+     It stands on the list's place in the flow; going anywhere else leaves it. */
+  const [ended, setEnded] = useState(false)
+  useCcNav('self.end', ended, setEnded)
+  const HOME = steps.findIndex((s) => s.kind === 'home')
+  useEffect(() => {
+    if (tab !== 'flow' || richOpen || i !== HOME) setEnded(false)
+  }, [tab, richOpen, i, HOME])
+  const atEnd = ended && tab === 'flow' && !richOpen && i === HOME
   /* The screens this phone can start from, for finding a comment's step by
      its heading: each step outside an adventure, each adventure, each tab. */
   useCcNavRoots('self', () => [
-    ...steps.flatMap((st, n) => (st.adventure ? [] : [{ 'self.tab': 'flow', 'self.rich': null, 'self.trail': [n] }])),
+    ...steps.flatMap((st, n) =>
+      st.adventure ? [] : [{ 'self.tab': 'flow', 'self.rich': null, 'self.trail': [n], 'self.end': false }],
+    ),
     ...advisorAdventures.map((r) => ({ 'self.tab': 'flow', 'self.rich': r.id })),
     { 'self.tab': 'finid', 'self.rich': null },
     { 'self.tab': 'team', 'self.rich': null },
+    ...(rich ? [{ 'self.tab': 'flow', 'self.rich': null, 'self.trail': [HOME], 'self.end': true }] : []),
   ])
   const RICH: AdventureId[] = rich ? ['practice-joy', 'confidence', 'outlook', 'future-you', 'the-move'] : []
 
@@ -1385,6 +1400,7 @@ function FlowPhone({
   const HOME_AT = steps.findIndex((s) => s.kind === 'home')
   const tabInd = useTabInd(tab, brand?.primary)
   const closeToList = () => {
+    setEnded(false)
     setTab('flow')
     reset(HOME_AT)
   }
@@ -1393,6 +1409,7 @@ function FlowPhone({
   // flow last stood, which would count a closing card left open as passed.
   const openNext = () => {
     const next = (rich ? journeyStates(answers) : adventureStates(answers)).find((r) => r.state === 'open')
+    setEnded(false)
     setTab('flow')
     if (next && RICH.includes(next.id)) {
       setTrail([HOME_AT])
@@ -1502,7 +1519,7 @@ function FlowPhone({
             </div>
           )}
           <div
-            className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}`}
+            className={`cx-viewport${tab === 'finid' && railOpen ? ' is-menu-open' : ''}${atEnd ? ' is-end' : ''}`}
             ref={viewport}
           >
             {richOpen === 'the-move' ? (
@@ -1517,23 +1534,12 @@ function FlowPhone({
                 onComplete={(m, to) => {
                   edit.apply((a) => withFinished(sheetWithMove(a, m), 'the-move'))
                   setRichOpen(null)
-                  /* The last adventure ends on its celebration, and the card
-                     chosen there says where to: the Business ID it completed,
-                     or the three questions it wrote. */
-                  if (to === 'id') {
+                  /* The last adventure ends on its celebration, and its
+                     Continue goes on to the end of the journey. */
+                  if (to === 'end') {
                     reset(HOME_AT)
-                    setTab('finid')
-                    toTop()
-                    return
-                  }
-                  if (to === 'questions') {
-                    /* The questions live on the Business ID now: open it on
-                       its Questions card. */
-                    reset(HOME_AT)
-                    setTab('finid')
-                    window.setTimeout(() => {
-                      document.getElementById('ap-questions')?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-                    }, 120)
+                    setTab('flow')
+                    setEnded(true)
                     return
                   }
                   setTab('flow')
@@ -1578,6 +1584,23 @@ function FlowPhone({
                   }
                 }}
                 onComplete={(j) => finish('practice-joy', (a) => sheetWithJoy(a, j), 'confidence')}
+              />
+            ) : atEnd ? (
+              <JourneyEnd
+                marks={advisorAdventures.map((a) => artOf(a.art))}
+                idName="Business ID"
+                sub="Your Business ID puts it in your own words, with 3 questions to ask about your move."
+                hints={{
+                  id: 'Answers and 3 questions.',
+                  knomee: 'Back to your adventures.',
+                  team: 'Who sees what you share.',
+                }}
+                share={{
+                  who: 'another advisor',
+                  text: 'I got clear on what I want from my practice with Knomee. Start your own adventures:',
+                  link: startLink('advisor-journey'),
+                }}
+                onPick={(b) => (b === 'knomee' ? openNext() : setTab(b === 'id' ? 'finid' : 'team'))}
               />
             ) : tab === 'team' ? (
               /* My Team: who on their team sees which part of the Business ID.
@@ -1748,14 +1771,23 @@ function FlowPhone({
             {/* The mark picks up where they left off: the next adventure
                 still open, or the list once there is none. */}
             <KnomeeFab label="Next adventure" onClick={openNext} />
-            <button
-              type="button"
-              className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
-              onClick={closeToList}
-            >
-              <TabAdventures />
-              <span className="cx-tab-lbl">Adventures</span>
-            </button>
+            {/* At the end of the journey every adventure is done, and My
+                Team takes Adventures' place. */}
+            {atEnd ? (
+              <button type="button" className="cx-tab" onClick={() => setTab('team')}>
+                <TabTeam />
+                <span className="cx-tab-lbl">My Team</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`cx-tab ${tab === 'flow' ? 'is-on' : ''}`}
+                onClick={closeToList}
+              >
+                <TabAdventures />
+                <span className="cx-tab-lbl">Adventures</span>
+              </button>
+            )}
           </nav>
           )}
 

@@ -1020,15 +1020,20 @@
 }
 
 /* ── the last celebration ──
-   The Move ends every adventure, so its celebration names no next one. Under
-   the badge: the news, then two white cards on the plum — the Business ID it
-   completed, and the questions it wrote — arriving after the badge lands. */
+   The Move (and the client's Goals) ends every adventure, so its celebration
+   names no next one. Under the badge: the news, then Continue — on to the end
+   of the journey (JourneyEnd) — arriving after the badge lands. */
 .mv-end {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-10, 10px);
   width: 100%;
   animation: jwUp 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) 1.1s both;
+}
+/* The next-adventure pill, with no adventure's mark to lead it. */
+.mv-end-btn {
+  padding: 11px 40px;
 }
 .mv-end-title {
   margin: 0;
