@@ -122,9 +122,11 @@
 .je-share {
   display: flex;
   align-items: center;
-  gap: 14px;
+  /* Clear air between the words and the button, so the button reads as
+     its own thing rather than the end of the sentence. */
+  gap: 24px;
   margin: auto 0;
-  padding: 16px 16px 16px 18px;
+  padding: 18px 18px 18px 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.07);
