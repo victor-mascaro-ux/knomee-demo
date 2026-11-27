@@ -16,7 +16,6 @@ import {
   invitationFunnel,
   knomeeComparison,
   type CompareRow,
-  type Line,
   type SplitPart,
 } from '../data/prospectGroup'
 import './groupInsights.css'
@@ -26,14 +25,6 @@ function HelpTip({ text }: { text: string }) {
     <span className="help-tip tt help-tip-right" data-tip={text} tabIndex={0} role="img" aria-label={text}>
       ?
     </span>
-  )
-}
-
-function Said({ line }: { line: Line }) {
-  return (
-    <>
-      {line.map((x, i) => (typeof x === 'string' ? <span key={i}>{x}</span> : <b key={i}>{x.b}</b>))}
-    </>
   )
 }
 
@@ -105,7 +96,7 @@ export default function ProspectGroupInsights({
       icon={<BoltIcon color="#7639a1" />}
       title="Actionable Insights"
       hint={
-        <HelpTip text="Your prospects as a group: how your invitations are doing, who they reach, and how that compares with everyone on Knomee. Each person’s next step is in the table below." />
+        <HelpTip text="Your prospects as a group. Each person is in the table below." />
       }
       bodyClassName="cmd-body gi-body"
       defaultOpen={false}
@@ -114,8 +105,7 @@ export default function ProspectGroupInsights({
           someone completes, so the bar above cannot narrow it. */}
       <section className={`gi-sec${focus ? ' is-lensed' : ''}`}>
         <div className="gi-head">
-          <h3 className="gi-title">How your invitations are doing</h3>
-          <span className="gi-sub">All time · everyone who opened your link</span>
+          <h3 className="gi-title">Your invitations</h3>
         </div>
         <ol className="gi-funnel">
           {steps.map((s) => (
@@ -126,33 +116,26 @@ export default function ProspectGroupInsights({
               <span className="gi-step-label">{s.label}</span>
               <span className="gi-step-num">{s.count}</span>
               <span className="gi-step-rate">
-                {s.rate == null ? 'Your link, all time' : `${s.rate}% ${s.of}`}
+                {s.rate == null ? 'All time' : `${s.rate}% ${s.of}`}
                 {leak?.at === s.key && <span className="gi-leak-tag">Biggest drop</span>}
               </span>
             </li>
           ))}
         </ol>
         {leak && (
-          <div className="gi-callout">
-            <p>
-              <b>{leak.headline}</b> {leak.reading}
-            </p>
-            <p className="gi-do">
-              {leak.action}
-              {leak.toAnalytics && onAnalytics && (
-                <>
-                  {' '}
-                  <button type="button" className="gi-link" onClick={onAnalytics}>
-                    Open Prospect Analytics →
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
+          <p className="gi-callout">
+            <b>{leak.headline}</b> {leak.action}
+            {leak.toAnalytics && onAnalytics && (
+              <>
+                {' '}
+                <button type="button" className="gi-link" onClick={onAnalytics}>
+                  Compare Templates →
+                </button>
+              </>
+            )}
+          </p>
         )}
-        {focus && (
-          <p className="gi-note">The funnel always counts everyone: tiers are only given once someone completes.</p>
-        )}
+        {focus && <p className="gi-note">Not filtered by tier.</p>}
       </section>
 
       {/* 2 · Who they are, from their own answers. */}
@@ -167,19 +150,12 @@ export default function ProspectGroupInsights({
             )}
           </h3>
           <span className="gi-sub">
-            {group.size} completed {group.size === 1 ? 'prospect' : 'prospects'} · from their own answers
+            {group.size} {group.size === 1 ? 'prospect' : 'prospects'}
           </span>
         </div>
-        {group.summary.length > 0 && (
-          <p className="gi-summary">
-            <span className="gi-kicker">In one line</span>
-            <Said line={group.summary} />
-          </p>
-        )}
         <div className="gi-threads">
           {group.threads.map((t) => (
             <div className="gi-thread" key={t.key}>
-              <span className="gi-kicker">{t.source}</span>
               <span className="gi-thread-head">{t.headline}</span>
               <Split parts={t.split} />
               <span className="gi-thread-detail">{t.detail}</span>
@@ -196,27 +172,23 @@ export default function ProspectGroupInsights({
         <section className={`gi-sec${focus ? ' is-lensed' : ''}`}>
           <div className="gi-head">
             <h3 className="gi-title">
-              Compared with everyone on Knomee <HelpTip text={cmp.basis} />
+              You vs. everyone on Knomee <HelpTip text={cmp.basis} />
             </h3>
             <span className="gi-legend" aria-hidden>
-              <i className="is-you" /> Your prospects <i className="is-all" /> Everyone on Knomee
+              <i className="is-you" /> You <i className="is-all" /> Knomee
             </span>
           </div>
           <div className="gi-compare">
-            {cmp.joy.length > 0 && <Compared kicker="Financial Joy · share of people" rows={cmp.joy} />}
-            {cmp.confidence.length > 0 && <Compared kicker="Confidence · average, of 5" rows={cmp.confidence} />}
+            {cmp.joy.length > 0 && <Compared kicker="Want money for" rows={cmp.joy} />}
+            {cmp.confidence.length > 0 && <Compared kicker="Confidence, of 5" rows={cmp.confidence} />}
           </div>
-          <div className="gi-callout">
-            <p>
-              <Said line={cmp.verdict} />
-            </p>
-            {cmp.action && <p className="gi-do">{cmp.action}</p>}
-          </div>
-          {focus && <p className="gi-note">This compares your whole book: Knomee’s respondents have no tiers.</p>}
+          <p className="gi-callout">
+            <b>{cmp.finding}</b> {cmp.action}
+          </p>
+          {focus && <p className="gi-note">Not filtered by tier.</p>}
         </section>
       )}
 
-      <p className="gi-foot">Each person’s reading and next step is in the table below.</p>
     </CollapsibleCard>
   )
 }
