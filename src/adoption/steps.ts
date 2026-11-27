@@ -86,14 +86,14 @@ export const STEPS: Step[] = [
     day: 'Day 4',
     title: 'How did it go?',
     what: 'Alex is back. He read Sarah’s playbook yesterday.',
-    tryIt: 'Tap an answer, add a detail, then <b>Invite another prospect</b>.',
+    tryIt: 'Tap an answer, add a detail, then <b>Invite Another Prospect</b>.',
   },
   {
     id: 'habit',
     day: 'Week 3',
     title: 'Making it a habit',
     what: 'Three weeks in. Alex has invited 4 people, each time because he remembered. Now his calendar does the remembering.',
-    tryIt: 'Click <b>Connect calendar</b>, then <b>Send Check-In</b>.',
+    tryIt: 'Click <b>Connect Calendar</b>, then <b>Send Check-In</b>.',
   },
 ]
 
