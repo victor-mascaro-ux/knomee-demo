@@ -7357,8 +7357,13 @@ body .modal-backdrop {
   backdrop-filter: none;
 }
 body .modal-backdrop .modal {
+  --modal-bar: var(--surface-brand, var(--plum, #240446));
   border-radius: 20px;
   box-shadow: 0 24px 60px -12px rgba(20, 10, 40, 0.32);
+  /* The panel is the bar's colour under the bar's rounded corners: white
+     there showed through the corners' soft edge as a pale line round the
+     bar. The bar covers this band; the rest of the panel is white. */
+  background: linear-gradient(var(--modal-bar), var(--modal-bar)) top / 100% 24px no-repeat, #fff;
 }
 body .modal-backdrop .modal .modal-header {
   /* The brand's bar across the top, the title in white on it. */
@@ -7366,12 +7371,12 @@ body .modal-backdrop .modal .modal-header {
   min-height: 0;
   padding: 9px 24px;
   border-radius: 0;
-  background: var(--surface-brand, var(--plum, #240446));
+  background: var(--modal-bar);
 }
 /* Opened from a client's or household's page — inline or portalled to the
    body — the bar is the client side's ink, as the page's own headings are. */
-body:has(.pp.cp) .modal-backdrop .modal .modal-header {
-  background: var(--client-ink);
+body:has(.pp.cp) .modal-backdrop .modal {
+  --modal-bar: var(--client-ink);
 }
 body .modal-backdrop .modal .modal-title {
   margin: 0;

@@ -80,6 +80,9 @@ small and diffable.
   margin clear of the screen's edges. The base styles are in `index.css` (the modal block, prefixed
   `body` so no modal's own header colour wins) and the phone's in
   `client-experience.css`; My Team's "Add someone" form is the reference.
+  When what it holds changes (a tab, a box an answer opens), the modal
+  eases to its new height in 0.2s rather than jumping (`src/modalSizeTween.ts`
+  watches every `.modal`; nothing to opt into).
 
 - **A form field is label, helper, field — in that order, one look.** The
   label is 13px semibold in the page's ink; an optional helper under it is
