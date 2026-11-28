@@ -46,6 +46,8 @@ export interface InviteModalProps {
   initialKind: 'prospect' | 'client'
   onClose: () => void
   onShared?: (how: 'link' | 'qr') => void
+  /** The Email tab's contents for a kind, or null for none. */
+  emailPanel?: (kind: 'prospect' | 'client') => ReactNode
 }
 
 export interface ProspectsScreenProps {

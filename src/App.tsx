@@ -2919,6 +2919,16 @@ function LinkGlyph() {
   )
 }
 
+// An envelope, in the channel glyphs' line.
+function MailGlyph() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="2.75" y="4.25" width="14.5" height="11.5" rx="1.8" />
+      <path d="M3.4 5.4 10 10.6l6.6-5.2" />
+    </svg>
+  )
+}
+
 // A QR code in small: three finder squares, each with its dot, and a scatter
 // of modules in the fourth corner.
 function QrGlyph() {
@@ -3333,16 +3343,27 @@ function InviteModal({
   initialKind,
   onClose,
   onShared,
+  emailPanel,
 }: {
   initialKind: InviteKind
   onClose: () => void
   /** Told when the link or the QR is copied. Optional: the adoption demo
       moves its story on with it; nothing else passes it. */
   onShared?: (how: InviteChannel) => void
+  /** An Email tab after Link and QR Code, holding what this returns for the
+      kind showing (null: no tab for it). Optional: only the adoption demo
+      passes one, its custom email; the product's own invites go out by link
+      or QR, and Resend Invite Link sends the email. */
+  emailPanel?: (kind: InviteKind) => ReactNode
 }) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
   const tabInd = useSlideIndicator(kind)
-  const [channel, setChannel] = useState<InviteChannel>('link')
+  const [picked, setChannel] = useState<InviteChannel | 'email'>('link')
+  const emailBody = emailPanel?.(kind) ?? null
+  /* A kind with no Email tab shows its link instead. */
+  const channel = picked === 'email' && emailBody === null ? 'link' : picked
+  const channels: { id: InviteChannel | 'email'; label: string; icon: ReactNode }[] =
+    emailBody === null ? INVITE_CHANNELS : [...INVITE_CHANNELS, { id: 'email', label: 'Email', icon: <MailGlyph /> }]
   const chanInd = useSlideIndicator(channel)
   const label = kind === 'prospect' ? 'Prospect' : 'Client'
   const link = `knomee.com/${kind === 'prospect' ? 'kIIKLERH034847' : 'cLNT82H7A19023'}`
@@ -3447,7 +3468,7 @@ function InviteModal({
                 }}
               />
             )}
-            {INVITE_CHANNELS.map((c) => (
+            {channels.map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -3519,6 +3540,7 @@ function InviteModal({
                 <p className="invite-channel-hint">For print and in person: a flyer, a slide, an event table.</p>
               </>
             )}
+            {channel === 'email' && emailBody}
           </div>
         </div>
       </div>

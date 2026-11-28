@@ -1,8 +1,10 @@
 /* The product's compose window (InviteCompose, the one Resend Invite Link
-   opens) in the design system's modal, addressed to the person Alex is
-   writing to. Its From line is Alex. Send spins, checks, then sends. */
+   opens), addressed to the person Alex is writing to. Its From line is
+   Alex. Send spins, checks, then sends. ComposePanel is the window and its
+   sending; it sits in the Invite window's Email tab (the first invite), or
+   in a design-system modal of its own (ComposeModal, the nudge). */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type MutableRefObject } from 'react'
 import { CloseIcon } from '../components/icons'
 import type { ClientBrand } from '../components/clientBrands'
 import { placeholdersIn, type InviteEmail } from '../data/inviteEmails'
@@ -16,18 +18,16 @@ export interface Sent {
   body: string
 }
 
-export default function ComposeModal({
+export function ComposePanel({
   Compose,
-  title,
   sample,
   to: initialTo,
   known,
   brand,
   onSent,
-  onClose,
+  busy: busyRef,
 }: {
   Compose: ComponentType<ComposeProps>
-  title: string
   /** The email as Alex's draft starts. */
   sample: InviteEmail
   to: string
@@ -35,7 +35,8 @@ export default function ComposeModal({
   known: Record<string, string>
   brand: ClientBrand
   onSent: (sent: Sent) => void
-  onClose: () => void
+  /** Set while a send is under way (the owner holds Esc meanwhile). */
+  busy?: MutableRefObject<boolean>
 }) {
   const [edits, setEdits] = useState<InviteDraft | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
@@ -43,9 +44,9 @@ export default function ComposeModal({
   const [to, setTo] = useState(initialTo)
   const [toBad, setToBad] = useState(false)
   const [sending, setSending] = useState(false)
-  const [leaving, leave] = useLeave()
   const panel = useRef<HTMLDivElement>(null)
-  const busy = useRef(false)
+  const ownBusy = useRef(false)
+  const busy = busyRef ?? ownBusy
   const timers = useRef<number[]>([])
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), [])
 
@@ -61,16 +62,6 @@ export default function ComposeModal({
   )
   /** The words as they go out, every field filled in. */
   const filled = (t: string) => t.replace(/\{\{([^}]+)\}\}/g, (_, k: string) => valueOf(k.trim()))
-
-  const close = () => leave(onClose)
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !busy.current) close()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  })
 
   useEffect(() => {
     panel.current?.querySelector<HTMLInputElement>('#invite-email')?.focus({ preventScroll: true })
@@ -111,6 +102,64 @@ export default function ComposeModal({
   }
 
   return (
+    <div className="ad-compose" ref={panel}>
+      <Compose
+        sample={sample}
+        draft={draft}
+        edited={edited}
+        onDraft={setEdits}
+        onReset={() => setEdits(null)}
+        missing={missing}
+        brand={brand}
+        link="knomee.com/kIIKLERH034847"
+        kind="prospect"
+        label="Prospect"
+        to={to}
+        onTo={setTo}
+        toBad={toBad}
+        onSend={send}
+        sending={sending}
+        known={known}
+        fields={fields}
+        onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
+        flagged={flagged}
+      />
+    </div>
+  )
+}
+
+export default function ComposeModal({
+  Compose,
+  title,
+  sample,
+  to,
+  known,
+  brand,
+  onSent,
+  onClose,
+}: {
+  Compose: ComponentType<ComposeProps>
+  title: string
+  sample: InviteEmail
+  to: string
+  known: Record<string, string>
+  brand: ClientBrand
+  onSent: (sent: Sent) => void
+  onClose: () => void
+}) {
+  const [leaving, leave] = useLeave()
+  const busy = useRef(false)
+  const close = () => leave(onClose)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !busy.current) close()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  return (
     <div
       className={`modal-backdrop${leaving ? ' ad-leaving' : ''}`}
       onClick={close}
@@ -128,27 +177,15 @@ export default function ComposeModal({
           </button>
         </div>
         <div className="modal-body invite-body">
-          <div className="invite-panel" ref={panel}>
-            <Compose
+          <div className="invite-panel">
+            <ComposePanel
+              Compose={Compose}
               sample={sample}
-              draft={draft}
-              edited={edited}
-              onDraft={setEdits}
-              onReset={() => setEdits(null)}
-              missing={missing}
-              brand={brand}
-              link="knomee.com/kIIKLERH034847"
-              kind="prospect"
-              label="Prospect"
               to={to}
-              onTo={setTo}
-              toBad={toBad}
-              onSend={send}
-              sending={sending}
               known={known}
-              fields={fields}
-              onField={(k, v) => setFields((f) => ({ ...f, [k]: v }))}
-              flagged={flagged}
+              brand={brand}
+              onSent={onSent}
+              busy={busy}
             />
           </div>
         </div>

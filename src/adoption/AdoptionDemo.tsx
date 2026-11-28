@@ -32,7 +32,7 @@ import { useCcNav } from '../ccNav'
 import type { InviteEmail } from '../data/inviteEmails'
 import ProspectProfileScreen from '../screens/ProspectProfileScreen'
 import AskModal from './AskModal'
-import ComposeModal, { type Sent } from './ComposeModal'
+import ComposeModal, { ComposePanel, type Sent } from './ComposeModal'
 import { ComingUp, NudgeCell } from './dashboard'
 import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
 import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
@@ -40,7 +40,7 @@ import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
-import { ALEX, ASK, CAL_MEETS, NUDGE, REMINDER, STEPS, stepIndex } from './steps'
+import { ALEX, ASK, CAL_MEETS, NOTE_TEXT, NUDGE, REMINDER, STEPS, firstName, stepIndex } from './steps'
 import TeamChat from './TeamChat'
 import { toast } from '../toast'
 import './adoption.css'
@@ -51,6 +51,17 @@ const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
     is inert. */
 const LIVE =
   '.menu-btn, .menu-toggle, .toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]'
+
+/** Alex's first invite, as his draft starts: the Invite window's Email tab. */
+const FIRST_INVITE: InviteEmail = {
+  id: 'adoption-first-invite',
+  stage: 'Adoption demo',
+  name: 'Before we meet',
+  subject: 'Before we meet',
+  message: NOTE_TEXT.replace('{first}', '{{First Name}}'),
+  cta: 'Start Your Check-In →',
+  signoff: 'Best,\n{{Advisor Name}}\n{{Firm Name}}',
+}
 
 /** Alex's nudge to Sarah, as his draft starts. */
 const NUDGE_EMAIL: InviteEmail = {
@@ -202,10 +213,12 @@ export default function AdoptionDemo({
   useRipples(root)
 
   /* ── Inviting ── */
-  /* ── Inviting ── The product's own Invite window: Alex copies his link
-     (or its QR code) to send it himself. Once he has, closing the window is
-     the invite gone out, and the person lands in his table; closed without
-     a copy, nothing went, and on the first invite the tip comes back. */
+  /* ── Inviting ── The product's own Invite window, with a third tab only
+     the demo has: Email, the custom invite. Alex copies his link (or its QR
+     code) to send it himself, and once he has, closing the window is the
+     invite gone out; or he sends the email, which closes it. Either way the
+     person lands in his table. Closed with neither, nothing went, and on
+     the first invite the tip comes back. */
   const shared = useRef(false)
   const openInvite = useCallback(() => {
     shared.current = false
@@ -513,6 +526,25 @@ export default function AdoptionDemo({
               onShared={() => {
                 shared.current = true
               }}
+              emailPanel={(kind) =>
+                kind === 'prospect' && ui.invite ? (
+                  <ComposePanel
+                    Compose={kit.InviteCompose}
+                    sample={FIRST_INVITE}
+                    to={ui.invite.email}
+                    known={{
+                      'Advisor Name': ALEX.name,
+                      'Firm Name': ALEX.firm,
+                      'First Name': firstName(ui.invite.name),
+                    }}
+                    brand={ACME}
+                    onSent={() => {
+                      shared.current = true
+                      closeInvite()
+                    }}
+                  />
+                ) : null
+              }
               onClose={closeInvite}
             />
           )}
