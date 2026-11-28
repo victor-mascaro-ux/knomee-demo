@@ -74,13 +74,15 @@ function CountUp({ to }: { to: number }) {
   return <span ref={ref}>{n}</span>
 }
 
-/* The tones as the pie’s fills: knomee’s main colours, mist for the rest. */
+/* The tones as the pie’s fills: the light steps of knomee’s main colours
+   (README, "Pie charts are one style"). Plum, grape and ocean themselves
+   are too dark to fill a 168px pie. */
 const TONE_FILL: Record<SplitPart['tone'], string> = {
-  plum: 'var(--k-plum)',
-  grape: 'var(--k-grape)',
-  bolt: 'var(--k-bolt)',
-  ocean: 'var(--k-ocean)',
-  teal: 'var(--k-teal)',
+  plum: 'var(--k-lilac)',
+  grape: '#dcc6ee',
+  bolt: 'var(--k-violet-new)',
+  ocean: 'var(--k-steel)',
+  teal: 'var(--k-aqua)',
   mist: 'var(--k-pearl)',
 }
 

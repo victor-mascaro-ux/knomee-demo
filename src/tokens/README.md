@@ -125,8 +125,14 @@ small and diffable.
   neighbours, and lights the row; a slice picked as a filter stays out and
   the rest dim. A pie’s title names what it measures (“Confidence with
   money”), never the finding (“87% aren’t confident”): the split and
-  the line under it say what was found. The Clients dashboard’s confidence
-  pie and My Prospects’ Actionable Insights are this; so is any new pie.
+  the line under it say what was found. Slices are filled in light colours:
+  the light steps of knomee’s main colours (lilac `--k-lilac`, pale lilac
+  `#dcc6ee`, violet `--k-violet-new`, steel `--k-steel`, aqua `--k-aqua`, and
+  pearl `--k-pearl` for “the rest”), or the moods’ own colours; never plum,
+  grape or ocean themselves, which are too dark to fill a pie. When the
+  pointer leaves, the slice snaps back in place: no fade, no flash. The
+  Clients dashboard’s confidence pie and My Prospects’ Actionable Insights
+  are this; so is any new pie.
 
 - **The avatar is one.** The tinted disc (`--k-grape-light`, the initial in
   `--k-grape`, 600), a 2px white rim and a 1.5px `--k-line` ring: the menu's,
