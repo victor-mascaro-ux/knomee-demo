@@ -2534,9 +2534,12 @@ button.name-link-btn:hover .name-text {
   cursor: pointer;
 }
 /* The slice that is out is drawn again on top (.pie-slice-out); its place
-   under it is left empty, as the slice has left it. */
+   under it is left empty, as the slice has left it. Hidden, not faded: an
+   opacity of 0 faded back in over 0.15s once the pointer left, after the
+   copy on top was already gone, so the slice flashed white. Visibility
+   comes back at once. */
 .pie-slice.is-under {
-  opacity: 0;
+  visibility: hidden;
 }
 .pie-slice.dim {
   opacity: 0.4;
