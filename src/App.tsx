@@ -1824,7 +1824,7 @@ function ProspectClusters() {
       </div>
 
       <div className="niche-callout">
-        <BoltIcon />
+        <BoltIcon color="var(--k-grape)" />
         <div>{model.lead}</div>
       </div>
 

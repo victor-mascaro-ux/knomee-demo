@@ -108,6 +108,20 @@ small and diffable.
   are things a person says, so they stay sentence case ("Nobody but me — it's
   my call"). A fold toggle reads Show More / Show Less, never See More.
 
+- **Banners are one style.** A banner or callout is the plum wash
+  (`--k-plum-050`) with a 3px grape bar on its left edge, 8px round, padded
+  10px 12px; its words are 13px, `--k-plum-ink`, line height 1.55, the lead
+  in plum semibold. Its icon comes first and top-aligns with the words: the
+  knomee mark in grape, or, when someone sends it, their avatar. A button on
+  it is a DS button. Actionable Insights' callout (`.gi-callout`) is the
+  reference; the analytics' `.niche-callout` and the Intercom banner in the
+  adoption demo follow it. No other banner style.
+
+- **The avatar is one.** The tinted disc (`--k-grape-light`, the initial in
+  `--k-grape`, 600), a 2px white rim and a 1.5px `--k-line` ring: the menu's,
+  a profile's, an Intercom sender's. Only its size changes. A firm's colour
+  never fills it.
+
 - **Copy, create and send confirm twice: in the button and with a toast.**
   The button itself says it worked for a moment ("Copied ✓", "Link
   Created ✓", "Sent ✓"), and at the same moment the app's toast names what
