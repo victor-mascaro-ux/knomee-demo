@@ -127,6 +127,7 @@ import { segmentTip } from './data/prospectSegments'
 import RowMenu from './components/RowMenu'
 import TabMenu from './components/TabMenu'
 import FeedbackButton, { useFlash } from './components/FeedbackButton'
+import PieChart from './components/PieChart'
 import { toast } from './toast'
 import { scrollPageToTop } from './reviewBridge'
 import ClientProfileScreen from './screens/ClientProfileScreen'
@@ -958,60 +959,22 @@ function ConfidencePie({
   activeSentiment: number | null
   onPick: (level: number) => void
 }) {
-  const [hover, setHover] = useState<number | null>(null)
-  // The picked slice stays highlighted; hover previews another.
-  const sel = activeSentiment != null ? activeSentiment - 1 : null
-  const focus = hover ?? sel
-  const cx = 50
-  const cy = 50
-  const r = 46
-  let acc = 0
-  const slices = confidenceSegments.map((s) => {
-    const start = (acc / 100) * 2 * Math.PI - Math.PI / 2
-    acc += s.pct
-    const end = (acc / 100) * 2 * Math.PI - Math.PI / 2
-    const large = s.pct > 50 ? 1 : 0
-    const x1 = cx + r * Math.cos(start)
-    const y1 = cy + r * Math.sin(start)
-    const x2 = cx + r * Math.cos(end)
-    const y2 = cy + r * Math.sin(end)
-    return `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`
-  })
+  // The design system's pie; the picked mood stays out while it filters.
   return (
-    <div className="confidence">
-      <svg className="pie" viewBox="0 0 100 100" role="img" aria-label="Client confidence breakdown">
-        {slices.map((d, i) => (
-          <path
-            key={confidenceSegments[i].label}
-            d={d}
-            fill={confidenceSegments[i].color}
-            className={`pie-slice ${focus === i ? 'on' : ''} ${
-              focus !== null && focus !== i ? 'dim' : ''
-            }`}
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-            onClick={() => onPick(i + 1)}
-          />
-        ))}
-      </svg>
-      <ul className="pie-legend">
-        {confidenceSegments.map((s, i) => (
-          <li
-            key={s.label}
-            className={`${focus === i ? 'on' : ''} ${sel === i ? 'is-sel' : ''}`}
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-            onClick={() => onPick(i + 1)}
-          >
-            {/* The face itself rather than a chip of its colour: the legend
-                names the five moods the table draws, so it draws them too. */}
-            <img className="pie-face" src={SENTIMENT_FACES[i].art} alt="" />
-            <span className="pie-label">{s.label}</span>
-            <span className="pie-pct">{s.pct}%</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <PieChart
+      className="confidence"
+      label="Client confidence breakdown"
+      picked={activeSentiment != null ? activeSentiment - 1 : null}
+      onPick={(i) => onPick(i + 1)}
+      slices={confidenceSegments.map((s, i) => ({
+        label: s.label,
+        value: s.pct,
+        color: s.color,
+        /* The face itself rather than a chip of its colour: the legend names
+           the five moods the table draws, so it draws them too. */
+        icon: <img className="pie-face" src={SENTIMENT_FACES[i].art} alt="" />,
+      }))}
+    />
   )
 }
 
