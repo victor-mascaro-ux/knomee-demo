@@ -41,7 +41,7 @@ export const STEPS: Step[] = [
     day: 'Day 0',
     title: 'First invite',
     what: 'Alex invites one person he’s meeting this week.',
-    tryIt: 'Click <b>Invite</b>, then <b>Send</b>.',
+    tryIt: 'Click <b>Invite</b>, <b>Copy</b> the link, then close the window.',
   },
   {
     id: 'if-day2',
@@ -106,10 +106,6 @@ export const stepIndex = (id: string | null | undefined) => STEPS.findIndex((s) 
 export const ALEX = { name: 'Alex Advisor', address: 'alex@acmeadvisors.com', firm: 'Acme Advisors' }
 export const KNOMEE = { name: 'Knomee', address: 'notifications@knomee.com' }
 
-/** The note Alex sends with his first invite. {first} is the person's first name. */
-export const NOTE_TEXT =
-  'Hi {first},\n\nI’m looking forward to meeting you.\n\nBefore we do, take about 8 minutes for this short check-in. It helps you organize your thoughts and uncover your top three money questions, and you’ll get a personal summary to keep.\n\nWe’ll skip the basic fact-finding and spend our time on the questions and goals that matter most to you.'
-
 export interface DemoEmail {
   /** The window's title: whose inbox it lands in. */
   head: string
@@ -168,5 +164,3 @@ export const CAL_MEETS = [
   { name: 'Jordan Lee', email: 'j.lee@example.com', when: 'Tue, Dec 15 · 10:00 AM' },
   { name: 'Nina Alvarez', email: 'nina.alvarez@example.com', when: 'Thu, Dec 17 · 3:30 PM' },
 ]
-
-export const firstName = (n: string) => String(n || '').trim().split(/\s+/)[0] || 'there'

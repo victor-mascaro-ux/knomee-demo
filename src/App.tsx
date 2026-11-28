@@ -3366,7 +3366,17 @@ function DoneGlyph() {
   )
 }
 
-function InviteModal({ initialKind, onClose }: { initialKind: InviteKind; onClose: () => void }) {
+function InviteModal({
+  initialKind,
+  onClose,
+  onShared,
+}: {
+  initialKind: InviteKind
+  onClose: () => void
+  /** Told when the link or the QR is copied. Optional: the adoption demo
+      moves its story on with it; nothing else passes it. */
+  onShared?: (how: InviteChannel) => void
+}) {
   const [kind, setKind] = useState<InviteKind>(initialKind)
   const tabInd = useSlideIndicator(kind)
   const [channel, setChannel] = useState<InviteChannel>('link')
@@ -3503,7 +3513,10 @@ function InviteModal({ initialKind, onClose }: { initialKind: InviteKind; onClos
                   <FeedbackButton
                     className="invite-pill"
                     aria-label={`Copy ${kind} link`}
-                    onClick={() => copy(link)}
+                    onClick={() => {
+                      copy(link)
+                      onShared?.('link')
+                    }}
                     done={
                       <>
                         <DoneGlyph /> Copied
@@ -3526,7 +3539,10 @@ function InviteModal({ initialKind, onClose }: { initialKind: InviteKind; onClos
                   <FeedbackButton
                     className="invite-pill invite-qr-copy"
                     aria-label={`Copy ${kind} QR code`}
-                    onClick={copyQr}
+                    onClick={() => {
+                      copyQr()
+                      onShared?.('qr')
+                    }}
                     done={
                       <>
                         <DoneGlyph /> Copied
@@ -5367,7 +5383,7 @@ export default function App() {
           setAdoptionOpen(false)
           setAdoptionStep(null)
         }}
-        kit={{ tabs: dashNav, EmptyScreen, ProspectsScreen, InviteCompose, PoweredBy }}
+        kit={{ tabs: dashNav, EmptyScreen, ProspectsScreen, InviteCompose, InviteModal, PoweredBy }}
       />
     )
   }

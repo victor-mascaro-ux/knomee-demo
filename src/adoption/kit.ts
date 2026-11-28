@@ -40,6 +40,14 @@ export interface ComposeProps {
   flagged: boolean
 }
 
+/** The product's Invite window (App's InviteModal): Prospect or Client, a
+    link or a QR code, each with its Copy. */
+export interface InviteModalProps {
+  initialKind: 'prospect' | 'client'
+  onClose: () => void
+  onShared?: (how: 'link' | 'qr') => void
+}
+
 export interface ProspectsScreenProps {
   onConvert: (p: Prospect) => void
   onResend: (p: Prospect) => void
@@ -59,5 +67,6 @@ export interface DemoKit {
   EmptyScreen: ComponentType<{ variant: 'prospects'; onCta?: () => void; onInvite?: () => void }>
   ProspectsScreen: ComponentType<ProspectsScreenProps>
   InviteCompose: ComponentType<ComposeProps>
+  InviteModal: ComponentType<InviteModalProps>
   PoweredBy: ComponentType
 }

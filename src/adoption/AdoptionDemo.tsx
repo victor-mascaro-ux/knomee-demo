@@ -40,7 +40,7 @@ import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { useLeave, useRipples } from './motion'
 import NotesPanel from './NotesPanel'
-import { ALEX, ASK, CAL_MEETS, NOTE_TEXT, NUDGE, REMINDER, STEPS, firstName, stepIndex } from './steps'
+import { ALEX, ASK, CAL_MEETS, NUDGE, REMINDER, STEPS, stepIndex } from './steps'
 import TeamChat from './TeamChat'
 import { toast } from '../toast'
 import './adoption.css'
@@ -51,17 +51,6 @@ const ACME = CLIENT_BRANDS.find((b) => b.id === 'acme') as ClientBrand
     is inert. */
 const LIVE =
   '.menu-btn, .menu-toggle, .toolbar .btn-primary, .prospects-table .name-link-btn, .pp-crumb-link, [data-ad-live]'
-
-/** Alex's first invite, as his draft starts. */
-const FIRST_INVITE: InviteEmail = {
-  id: 'adoption-first-invite',
-  stage: 'Adoption demo',
-  name: 'Before we meet',
-  subject: 'Before we meet',
-  message: NOTE_TEXT.replace('{first}', '{{First Name}}'),
-  cta: 'Start Your Check-In →',
-  signoff: 'Best,\n{{Advisor Name}}\n{{Firm Name}}',
-}
 
 /** Alex's nudge to Sarah, as his draft starts. */
 const NUDGE_EMAIL: InviteEmail = {
@@ -213,7 +202,13 @@ export default function AdoptionDemo({
   useRipples(root)
 
   /* ── Inviting ── */
+  /* ── Inviting ── The product's own Invite window: Alex copies his link
+     (or its QR code) to send it himself. Once he has, closing the window is
+     the invite gone out, and the person lands in his table; closed without
+     a copy, nothing went, and on the first invite the tip comes back. */
+  const shared = useRef(false)
   const openInvite = useCallback(() => {
+    shared.current = false
     setSt((s) => {
       const next = s.rows.some((r) => r.id === 'sarah')
       return {
@@ -229,21 +224,24 @@ export default function AdoptionDemo({
       }
     })
   }, [])
-  const closeInvite = () =>
-    setSt((s) => ({
-      ...s,
-      /* Closed without sending on the first invite: the tip comes back. */
-      ui: { ...s.ui, modal: null, invite: null, tip: STEPS[s.idx].id === 'first-send' && s.rows.length === 0 },
-    }))
-  const inviteSent = (out: Sent) => {
-    const who = ui.invite
-    if (!who) return
-    const row = who.next ? invitedRow('next', who.name, out.email, '12/04/2026') : sarahInvited(out.email)
-    setSt((s) => ({
-      ...s,
-      rows: [...s.rows.map((r) => ({ ...r, fresh: false })), { ...row, fresh: true }],
-      ui: { ...s.ui, modal: null, invite: null, tip: false, survey: null },
-    }))
+  const closeInvite = () => {
+    const out = shared.current
+    shared.current = false
+    setSt((s) => {
+      const who = s.ui.invite
+      if (!out || !who) {
+        return {
+          ...s,
+          ui: { ...s.ui, modal: null, invite: null, tip: STEPS[s.idx].id === 'first-send' && s.rows.length === 0 },
+        }
+      }
+      const row = who.next ? invitedRow('next', who.name, who.email, '12/04/2026') : sarahInvited(who.email)
+      return {
+        ...s,
+        rows: [...s.rows.map((r) => ({ ...r, fresh: false })), { ...row, fresh: true }],
+        ui: { ...s.ui, modal: null, invite: null, tip: false, survey: null },
+      }
+    })
   }
 
   /* ── Day 2: Sarah stopped halfway ── Alex can nudge her himself; if he
@@ -509,19 +507,12 @@ export default function AdoptionDemo({
             <Launcher />
           </div>
           {ui.modal === 'invite' && ui.invite && (
-            <ComposeModal
+            <kit.InviteModal
               key={`invite-${st.idx}-${st.visit}`}
-              Compose={kit.InviteCompose}
-              title="Invite"
-              sample={FIRST_INVITE}
-              to={ui.invite.email}
-              known={{
-                'Advisor Name': ALEX.name,
-                'Firm Name': ALEX.firm,
-                'First Name': firstName(ui.invite.name),
+              initialKind="prospect"
+              onShared={() => {
+                shared.current = true
               }}
-              brand={ACME}
-              onSent={inviteSent}
               onClose={closeInvite}
             />
           )}
