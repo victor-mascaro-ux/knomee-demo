@@ -1,4 +1,4 @@
-/* The steps beside the demo: Alex's three weeks, one line each (the day, then
+/* The steps beside the demo: the advisor's three weeks, one line each (the day, then
    what happens), and under the current one what is going on. Picking a step goes to it. The list is a drawer on the right edge,
    over the app, so the dashboard keeps the product's full width; its tab on
    that edge opens and closes it. It starts closed. */
@@ -40,7 +40,7 @@ export default function NotesPanel({ idx, onGoto }: { idx: number; onGoto: (i: n
         <span>Steps</span>
       </button>
       <div className="ad-notes-body" id="ad-steps" ref={body}>
-        <h2>Alex’s first 3 weeks</h2>
+        <h2>The advisor’s first 3 weeks</h2>
         <ol className="tl" ref={list}>
           {STEPS.map((s, i) => {
             const cls = ['tl-item', i === idx ? 'current' : i < idx && !s.branch ? 'past' : '', s.branch ? 'branch' : '']
