@@ -31,11 +31,10 @@ import { CLIENT_BRANDS, type ClientBrand } from '../components/clientBrands'
 import { useCcNav } from '../ccNav'
 import type { InviteEmail } from '../data/inviteEmails'
 import ProspectProfileScreen from '../screens/ProspectProfileScreen'
-import AskModal from './AskModal'
 import ComposeModal, { ComposePanel, type Sent } from './ComposeModal'
-import { ComingUp, NudgeCell } from './dashboard'
+import { ComingUp, NudgeCell, NudgeInsights } from './dashboard'
 import { freshUi, invitedRow, rowsFor, sarahInvited, statsOf, type DemoRow, type Ui } from './engine'
-import { AnchoredTip, Banner, Beacon, Launcher, Post, Survey } from './intercom'
+import { AnchoredTip, Ask, Banner, Beacon, Launcher, Post, Survey } from './intercom'
 import type { DemoKit } from './kit'
 import MailWindow from './MailWindow'
 import { useLeave, useRipples } from './motion'
@@ -455,6 +454,7 @@ export default function AdoptionDemo({
                           ) : undefined
                         }
                         afterMetrics={ui.cal && <ComingUp sent={ui.cal.sent} onSend={calSend} />}
+                        insights={ui.nudge ? <NudgeInsights sent={ui.nudge.sent} onNudge={openNudge} /> : undefined}
                       />
                     )}
                   </main>
@@ -508,6 +508,18 @@ export default function AdoptionDemo({
                 onSend={() => setSurvey({ sent: true })}
                 onClose={() => leaveSurvey(setUiLater({ survey: null }))}
                 onInvite={openInvite}
+              />
+            )}
+            {ui.modal === 'ask' && (
+              <Ask
+                answer={ui.ask.answer}
+                text={ui.ask.text}
+                sent={ui.ask.sent}
+                leaving={askLeaving}
+                onAnswer={answerAsk}
+                onText={(text) => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, text } } }))}
+                onSend={() => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, sent: true } } }))}
+                onClose={closeAsk}
               />
             )}
             {ui.post && (
@@ -585,21 +597,6 @@ export default function AdoptionDemo({
                 onCta={inboxCta}
               />
             </>
-          )}
-          {ui.modal === 'ask' && (
-            <AskModal
-              answer={ui.ask.answer}
-              text={ui.ask.text}
-              sent={ui.ask.sent}
-              leaving={askLeaving}
-              onAnswer={answerAsk}
-              onText={(text) => setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, text } } }))}
-              onSend={() => {
-                toast('Answer sent to the Knomee team')
-                setSt((s) => ({ ...s, ui: { ...s.ui, ask: { ...s.ui.ask, sent: true } } }))
-              }}
-              onClose={closeAsk}
-            />
           )}
         </section>
         <NotesPanel idx={idx} onGoto={goTo} />

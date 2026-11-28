@@ -44,7 +44,7 @@ export const OK_MS = 340
 /* A press ripple on the buttons that do something: drawn from where the
    pointer went down, inside the button, then gone. */
 const RIPPLED =
-  '.ad-nudge-btn, button.mail-cta, .ask-opt, .notif, .ad-cal-btn, .ad-ask .btn'
+  '.ad-nudge-btn, button.mail-cta, .ask-opt, .notif, .ad-cal-btn'
 
 export function useRipples(root: RefObject<HTMLElement | null>) {
   useEffect(() => {

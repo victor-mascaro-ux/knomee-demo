@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode,
 import { CloseIcon } from '../components/icons'
 import BusyButton from './BusyButton'
 import { ChatIcon, CheckIcon, XIcon } from './icons'
-import { SURVEY, SURVEY_QUESTION } from './steps'
+import { ASK, ASK_QUESTION, SURVEY, SURVEY_QUESTION } from './steps'
 
 /** The firm's letter, in its colour: who an Intercom message is from. */
 export function FirmAvatar() {
@@ -177,6 +177,91 @@ export function Beacon({
     dot.style.visibility = b.bottom > d.top + 64 && b.bottom < d.bottom ? 'visible' : 'hidden'
   })
   return <span ref={ref} className="ic ic-beacon" aria-hidden />
+}
+
+/** Day 4, if Alex has invited no one: one question, in the corner, as
+    Intercom's survey (the meeting's "How did it go?" is the other). Seeing
+    the email opens the invite; talking it through reaches the team; the
+    other two answer in the card. */
+export function Ask({
+  answer,
+  text,
+  sent,
+  leaving,
+  onAnswer,
+  onText,
+  onSend,
+  onClose,
+}: {
+  answer: number
+  text: string
+  sent: boolean
+  leaving: boolean
+  onAnswer: (i: number) => void
+  onText: (t: string) => void
+  onSend: () => void
+  onClose: () => void
+}) {
+  const box = useRef<HTMLTextAreaElement>(null)
+  /* The box grows with what is typed, and takes the cursor when it opens. */
+  const fit = () => {
+    const el = box.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+  useEffect(() => {
+    if (answer !== 3 || sent) return
+    fit()
+    box.current?.focus({ preventScroll: true })
+  }, [answer, sent])
+  return (
+    <div className={`ic ic-card ic-survey${leaving ? ' leaving' : ''}`} role="dialog" aria-labelledby="ad-ask-q">
+      <button className="ic-close" type="button" aria-label="Close" onClick={onClose}>
+        <XIcon />
+      </button>
+      <Sender />
+      <h4 id="ad-ask-q">{ASK_QUESTION}</h4>
+      <div className="ask-opts">
+        {ASK.map((o, i) => (
+          <button
+            key={o}
+            className={`ask-opt${i === answer ? ' sel' : ''}`}
+            type="button"
+            aria-pressed={i === answer}
+            style={{ '--i': i } as CSSProperties}
+            onClick={() => onAnswer(i)}
+          >
+            <span>{o}</span>
+            {i === answer && <CheckIcon />}
+          </button>
+        ))}
+      </div>
+      {answer === 2 && <div className="ic-reply">Got it. We’ll check in next week.</div>}
+      {answer === 3 &&
+        (sent ? (
+          <div className="ic-reply">Thanks. Someone from Knomee will reach out.</div>
+        ) : (
+          <>
+            <textarea
+              ref={box}
+              className="ad-grow ic-follow"
+              placeholder="Tell us more"
+              aria-label="Tell us more"
+              rows={1}
+              value={text}
+              onChange={(e) => {
+                onText(e.target.value)
+                fit()
+              }}
+            />
+            <BusyButton className="btn btn-primary ic-wide" onDone={onSend}>
+              Send
+            </BusyButton>
+          </>
+        ))}
+    </div>
+  )
 }
 
 /** Day 4: one question about how the meeting went, then who's next. */
