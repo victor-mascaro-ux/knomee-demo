@@ -1,12 +1,10 @@
 /* The steps beside the demo: Alex's three weeks, one line each (the day, then
-   what happens), and under the current one what is going on and what to
-   click. Picking a step goes to it. The list is a drawer on the right edge,
+   what happens), and under the current one what is going on. Picking a step goes to it. The list is a drawer on the right edge,
    over the app, so the dashboard keeps the product's full width; its tab on
    that edge opens and closes it. It starts closed. */
 
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ChevronRight } from '../components/icons'
-import { Rich, TapIcon } from './icons'
 import { STEPS } from './steps'
 
 export default function NotesPanel({ idx, onGoto }: { idx: number; onGoto: (i: number) => void }) {
@@ -63,12 +61,6 @@ export default function NotesPanel({ idx, onGoto }: { idx: number; onGoto: (i: n
                 {i === idx && (
                   <div className="tl-detail">
                     <p className="what">{s.what}</p>
-                    <div className="try">
-                      <TapIcon />
-                      <span>
-                        <Rich text={s.tryIt} />
-                      </span>
-                    </div>
                   </div>
                 )}
               </li>

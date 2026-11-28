@@ -12,9 +12,6 @@
   --ad-notes-rail: #e2dcea;
   --ad-tag: #ffd66b;
   --ad-tag-edge: #e0a800;
-  --ad-try-bg: #fff7db;
-  --ad-try-edge: #f3dd96;
-  --ad-try-ink: #5b4300;
 
   height: 100vh;
   display: flex;
@@ -377,16 +374,18 @@ body:has(.adoption-demo) .app-toast {
   font-size: 14px;
   font-weight: 700;
 }
-/* The firm's initial: the card head's white icon disc, the letter in plum.
-   Never the firm's colour: a brand colours the bars only. */
+/* The firm's initial: the design system's avatar, the one the product has
+   (the menu's, a profile's): the grape-light disc, the letter in grape, a
+   white rim and the thin line ring. Never the firm's colour: a brand
+   colours the bars only. */
 :is(.adoption-demo, .ad-intercom) .ic-av.firm {
   width: 34px;
   height: 34px;
   box-sizing: border-box;
-  border: 1px solid var(--border-default);
-  background: var(--surface-card);
-  box-shadow: var(--disc-lift);
-  color: var(--text-strong);
+  border: 2px solid #fff;
+  background: var(--k-grape-light);
+  box-shadow: 0 0 0 1.5px var(--k-line);
+  color: var(--k-grape);
   font-family: inherit;
   font-size: 15px;
   font-weight: var(--weight-semibold);
@@ -491,21 +490,21 @@ body:has(.adoption-demo) .app-toast {
 }
 
 /* The banner, across the page under the tabs, a block's gap below them, in
-   knomee's design system: a dashboard card's edge and radius on the tray's
-   plum wash, the page's own type, the card head's white icon disc for the
-   firm's initial (top-aligned with the words, and never in the firm's
-   colour: a brand colours the bars only), the DS primary button and the
-   table's quiet close. */
+   the design system's one banner style (Actionable Insights' callout is the
+   reference): the plum wash, a 3px grape bar on the left, 8px round, 13px
+   plum-ink words with the lead in plum semibold, and its icon first, here
+   the firm's avatar, top-aligned with the words. Its button is the DS
+   primary button; its close is the table's quiet one. */
 :is(.adoption-demo, .ad-intercom) .ic-banner {
   position: relative;
   margin-top: var(--block-gap);
   display: flex;
   align-items: center;
-  gap: var(--space-16);
-  padding: var(--space-16) 22px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-2xl);
-  background: var(--surface-tray);
+  gap: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--k-grape);
+  border-radius: var(--radius-md);
+  background: var(--k-plum-050);
   font-family: inherit;
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner-msg {
@@ -513,19 +512,19 @@ body:has(.adoption-demo) .app-toast {
   min-width: 0;
   display: flex;
   align-items: flex-start;
-  gap: 11px;
+  gap: 10px;
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner p {
   margin: 0;
-  /* One line sits level with the disc; more lines run down from its top. */
+  /* One line sits level with the avatar; more lines run down from its top. */
   padding-top: 7px;
-  font-size: var(--text-md);
-  line-height: var(--leading-normal);
-  color: var(--text-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--k-plum-ink);
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner p b {
-  font-weight: var(--weight-semibold);
-  color: var(--text-strong);
+  font-weight: 600;
+  color: var(--plum);
 }
 :is(.adoption-demo, .ad-intercom) .ic-banner .ic-close {
   position: static;
@@ -1776,27 +1775,6 @@ body:has(.adoption-demo) .app-toast {
   line-height: 1.5;
   color: #2e2a35;
 }
-.adoption-demo .try {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 9px 12px;
-  border: 1px solid var(--ad-try-edge);
-  border-radius: var(--radius-lg);
-  background: var(--ad-try-bg);
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--ad-try-ink);
-}
-.adoption-demo .try svg {
-  width: 18px;
-  height: 18px;
-  flex: none;
-  color: #b07c00;
-}
-.adoption-demo .try b {
-  font-weight: 600;
-}
 .adoption-demo .foot-note {
   margin-top: 16px;
   font-size: 12px;
@@ -2032,10 +2010,6 @@ body:has(.adoption-demo) .app-toast {
   .adoption-demo .tl-item.current .day-pill {
     animation: ad-pop-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
   }
-  .adoption-demo .try svg {
-    transform-origin: 50% 90%;
-    animation: ad-tap 2.2s ease-in-out 1s infinite;
-  }
 
   @keyframes ad-fade-in {
     from {
@@ -2264,19 +2238,6 @@ body:has(.adoption-demo) .app-toast {
     }
     100% {
       box-shadow: 0 0 0 4px rgba(255, 214, 107, 0.35), 0 0 0 13px rgba(224, 168, 0, 0);
-    }
-  }
-  @keyframes ad-tap {
-    0%,
-    55%,
-    100% {
-      transform: none;
-    }
-    65% {
-      transform: translateY(2px) scale(0.86);
-    }
-    75% {
-      transform: none;
     }
   }
 }

@@ -60,21 +60,3 @@ export const CalendarIcon = () => (
 )
 
 /** A pointing hand tapping: the notes' "try it" hint. */
-export const TapIcon = () => (
-  <svg viewBox="0 0 24 24" {...line} strokeWidth="1.9" role="img" aria-label="Try it">
-    <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10" />
-    <path d="M12 9.5a1.5 1.5 0 0 1 3 0V11" />
-    <path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.2a5 5 0 0 1-4.1-2.1L4 15.3a1.5 1.5 0 0 1 2.3-1.9L9 16" />
-    <path d="M4.5 4.5L6 6M3 8.5h2M8.5 3v2" />
-  </svg>
-)
-
-/** Text with <b>…</b> in it, drawn with the bold kept. */
-export function Rich({ text }: { text: string }) {
-  const parts = text.split(/<b>(.*?)<\/b>/)
-  return (
-    <>
-      {parts.map((p, i) => (i % 2 ? <b key={i}>{p}</b> : p))}
-    </>
-  )
-}

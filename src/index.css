@@ -3343,23 +3343,29 @@ button.name-link-btn:hover .name-text {
   text-align: right;
 }
 
+/* The design system's one banner style (README, "Banners are one style";
+   Actionable Insights' callout is the reference). */
 .niche-callout {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
   margin-top: 20px;
-  padding: 14px 16px;
-  border: 1px solid #e6d9f2;
-  border-left: 3px solid var(--purple-bolt);
-  border-radius: 10px;
-  background: #faf7fd;
+  padding: 10px 12px;
+  border-left: 3px solid var(--k-grape);
+  border-radius: var(--radius-md);
+  background: var(--k-plum-050);
   font-size: 13px;
   line-height: 1.55;
-  color: #3a3350;
+  color: var(--k-plum-ink);
 }
 .niche-callout svg {
   flex: none;
-  margin-top: 2px;
+  /* Meets the first line's cap height. */
+  margin-top: 1px;
+}
+.niche-callout b {
+  color: var(--plum);
+  font-weight: 600;
 }
 
 /* 3 ── Does the score work? */

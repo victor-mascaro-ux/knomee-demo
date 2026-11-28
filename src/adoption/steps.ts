@@ -24,8 +24,6 @@ export interface Step {
   /** The side path: what happens only if Alex invites no one. */
   branch?: boolean
   what: string
-  /** The hint under the step; <b> marks the control to click. */
-  tryIt: string
 }
 
 export const STEPS: Step[] = [
@@ -33,23 +31,20 @@ export const STEPS: Step[] = [
     id: 'first-login',
     day: 'Day 0',
     title: 'First login',
-    what: 'Alex, a new advisor at Acme, logs in for the first time. His dashboard is empty.',
-    tryIt: 'Click <b>Show me</b> on the banner.',
+    what: 'The advisor logs in for the first time. Their dashboard is empty. They get an Intercom banner.',
   },
   {
     id: 'first-send',
     day: 'Day 0',
     title: 'First invite',
-    what: 'Alex invites one person he’s meeting this week.',
-    tryIt: 'Click <b>Invite</b>, <b>Copy</b> the link, then close the window.',
+    what: 'The advisor invites one person they’re meeting this week.',
   },
   {
     id: 'if-day2',
     day: 'Day 2',
-    title: 'No invite yet: a reminder',
+    title: 'No invite yet: email reminder',
     branch: true,
-    what: 'Alex hasn’t invited anyone since Monday.',
-    tryIt: 'Wait for the email, then click <b>Invite a Prospect</b> or close it.',
+    what: 'The advisor hasn’t invited anyone since Day 0. They get an email reminder.',
   },
   {
     id: 'if-day4',
@@ -57,7 +52,6 @@ export const STEPS: Step[] = [
     title: 'Still no invite: one question',
     branch: true,
     what: 'Still no invites. Alex logs in.',
-    tryIt: 'Pick an answer.',
   },
   {
     id: 'if-day7',
@@ -65,35 +59,30 @@ export const STEPS: Step[] = [
     title: 'A week, no invite: Gayathri calls',
     branch: true,
     what: 'A week since Alex logged in, and still no invites.',
-    tryIt: 'Click the notification.',
   },
   {
     id: 'sarah-explores',
     day: 'Day 2',
     title: 'Sarah stops halfway',
     what: 'Sarah started the check-in, then got busy.',
-    tryIt: 'Click <b>Nudge</b> on Sarah’s row, or do nothing.',
   },
   {
     id: 'results-land',
     day: 'Day 3',
     title: 'Sarah finishes',
     what: 'Sarah finished. Alex needs to know before they meet.',
-    tryIt: 'Click <b>Sarah Mitchell</b> in the table.',
   },
   {
     id: 'after-meeting',
     day: 'Day 4',
     title: 'How did it go?',
     what: 'Alex is back. He read Sarah’s playbook yesterday.',
-    tryIt: 'Tap an answer, add a detail, then <b>Invite Another Prospect</b>.',
   },
   {
     id: 'habit',
     day: 'Week 3',
     title: 'Making it a habit',
     what: 'Three weeks in. Alex has invited 4 people, each time because he remembered. Now his calendar does the remembering.',
-    tryIt: 'Click <b>Connect Calendar</b>, then <b>Send Check-In</b>.',
   },
 ]
 
