@@ -1,10 +1,13 @@
-/* The demo's two additions to the product's own prospects screen, set into it
+/* The demo's additions to the product's own prospects screen, set into it
    through its optional slots: the Nudge on Sarah's row when she stops halfway
-   (Top Action) and, once Alex connects his calendar, the meetings it brings
-   (a card under Top Line Metrics). Both are marked data-ad-live: they are
-   part of the story in an app that is otherwise inert. */
+   (Top Action), Actionable Insights open on it that day, and, once Alex
+   connects his calendar, the meetings it brings (a card under Top Line
+   Metrics). Their controls are marked data-ad-live: they are part of the
+   story in an app that is otherwise inert. */
 
 import type { CSSProperties } from 'react'
+import CollapsibleCard from '../components/CollapsibleCard'
+import { BoltIcon, KnomeeMark } from '../components/icons'
 import BusyButton from './BusyButton'
 import { BellIcon, CalendarIcon, CheckIcon } from './icons'
 import { CAL_MEETS } from './steps'
@@ -26,6 +29,40 @@ export function NudgeCell({ text, sent, onNudge }: { text: string; sent: boolean
         Nudge
       </button>
     </span>
+  )
+}
+
+/** Day 2: Actionable Insights, open, with the one thing that needs Alex:
+    Sarah stopped halfway. The card is the product's own; its banner is the
+    design system's one banner style, its button the row's Nudge. */
+export function NudgeInsights({ sent, onNudge }: { sent: boolean; onNudge: () => void }) {
+  return (
+    <CollapsibleCard
+      className="insights-card gi-card"
+      icon={<BoltIcon color="#7639a1" />}
+      title="Actionable Insights"
+      bodyClassName="cmd-body gi-body"
+      defaultOpen
+    >
+      <p className="gi-callout ad-nudge-banner" data-ad-live>
+        <KnomeeMark size={18} color="var(--k-grape)" />
+        {sent ? (
+          <span>
+            <b>Sarah nudged today.</b> You’ll see when she finishes.
+          </span>
+        ) : (
+          <>
+            <span>
+              <b>Sarah stopped halfway.</b> Nudge her to finish before Friday.
+            </span>
+            <button className="ad-nudge-btn" type="button" onClick={onNudge}>
+              <BellIcon />
+              Nudge
+            </button>
+          </>
+        )}
+      </p>
+    </CollapsibleCard>
   )
 }
 

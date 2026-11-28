@@ -736,6 +736,7 @@ function ProspectsScreen({
   rowClassName,
   renderAction,
   afterMetrics,
+  insights,
 }: {
   hidden?: Set<string>
   onConvert: (p: Prospect) => void
@@ -753,6 +754,10 @@ function ProspectsScreen({
   /** A card of the caller's under Top Line Metrics (the adoption demo's
       Coming up). Nothing there when not passed. */
   afterMetrics?: ReactNode
+  /** The Actionable Insights card of the caller's own, in place of the
+      standing book's (the adoption demo's book is not that one). The
+      standing book's when not passed. */
+  insights?: ReactNode
 }) {
   const allNames = (rows ?? prospects).map((p) => p.name)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -778,7 +783,7 @@ function ProspectsScreen({
         stats={stats}
       />
       {afterMetrics}
-      <ProspectInsights tier={tier} convertedNow={hidden?.size} />
+      {insights ?? <ProspectInsights tier={tier} convertedNow={hidden?.size} />}
       <Toolbar downloadActive={selected.size > 0} onDownload={onDownload} onInvite={onInvite} />
       <ProspectsTable
         onConvert={onConvert}

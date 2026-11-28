@@ -158,26 +158,12 @@ body:has(.adoption-demo) .app-toast {
   height: 15px;
 }
 
-/* ── The dashboard's own overlays: Alex's inbox, the one question ───── */
+/* ── The dashboard's own overlays: Alex's inbox ───────────────────── */
 .adoption-demo .ad-scrim {
   position: absolute;
   inset: 0;
   z-index: 240;
   background: rgba(17, 8, 30, 0.42);
-}
-.adoption-demo .ad-ask {
-  width: 520px;
-}
-.adoption-demo .ad-ask-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.adoption-demo .ask-q {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--k-plum);
 }
 .adoption-demo .ask-opts {
   display: flex;
@@ -215,11 +201,20 @@ body:has(.adoption-demo) .app-toast {
   height: 14px;
   flex: none;
 }
-.adoption-demo .ask-reply {
+/* Day 2's Actionable Insights: the banner, its icon top-aligned with the
+   words (the DS rule), and its Nudge at the end. */
+.adoption-demo .ad-nudge-banner {
   margin: 0;
-  font-size: 14px;
-  color: var(--k-slate);
 }
+.adoption-demo .ad-nudge-banner > span {
+  flex: 1;
+  align-self: center;
+}
+.adoption-demo .ad-nudge-banner .ad-nudge-btn {
+  flex: none;
+  align-self: center;
+}
+
 /* A box to type in: the DS form field (white, 12px round, a 1.5px light
    edge that turns grape on focus, 15px text, a plain grey placeholder). */
 .adoption-demo .ad-grow {
@@ -1847,7 +1842,7 @@ body:has(.adoption-demo) .app-toast {
 
   /* The press ripple: the button holds it, under its label. */
   .adoption-demo
-    :is(.ad-nudge-btn, button.mail-cta, .ask-opt, .ad-cal-btn, .ad-ask .btn) {
+    :is(.ad-nudge-btn, button.mail-cta, .ask-opt, .ad-cal-btn) {
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -1942,7 +1937,7 @@ body:has(.adoption-demo) .app-toast {
   .adoption-demo .ask-opt.sel svg {
     animation: ad-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) both;
   }
-  .adoption-demo :is(.ask-reply, .ad-grow, .ad-ask-foot) {
+  .adoption-demo .ad-grow {
     animation: ad-rise-10 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 

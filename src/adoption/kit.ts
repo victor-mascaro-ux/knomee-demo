@@ -61,6 +61,7 @@ export interface ProspectsScreenProps {
   rowClassName?: (p: Prospect) => string | undefined
   renderAction?: (p: Prospect) => ReactNode
   afterMetrics?: ReactNode
+  insights?: ReactNode
 }
 
 export interface DemoKit {
