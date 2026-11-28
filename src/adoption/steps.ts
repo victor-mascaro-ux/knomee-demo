@@ -51,14 +51,14 @@ export const STEPS: Step[] = [
     day: 'Day 4',
     title: 'Still no invite: one question',
     branch: true,
-    what: 'Still no invites. Alex logs in.',
+    what: 'Still no invites. The advisor logs in. They get one question.',
   },
   {
     id: 'if-day7',
     day: 'Day 7',
     title: 'A week, no invite: Gayathri calls',
     branch: true,
-    what: 'A week since Alex logged in, and still no invites.',
+    what: 'A week since the advisor logged in, and still no invites. Gayathri from Knomee calls them.',
   },
   {
     id: 'sarah-explores',
@@ -70,19 +70,19 @@ export const STEPS: Step[] = [
     id: 'results-land',
     day: 'Day 3',
     title: 'Sarah finishes',
-    what: 'Sarah finished. Alex needs to know before they meet.',
+    what: 'Sarah finished. The advisor needs to know before they meet.',
   },
   {
     id: 'after-meeting',
     day: 'Day 4',
     title: 'How did it go?',
-    what: 'Alex is back. He read Sarah’s playbook yesterday.',
+    what: 'The advisor is back. They read Sarah’s playbook yesterday. They get a one-question survey.',
   },
   {
     id: 'habit',
     day: 'Week 3',
     title: 'Making it a habit',
-    what: 'Three weeks in. Alex has invited 4 people, each time because he remembered. Now his calendar does the remembering.',
+    what: 'Three weeks in. The advisor has invited 4 people, each time because they remembered. Now their calendar does the remembering.',
   },
 ]
 
