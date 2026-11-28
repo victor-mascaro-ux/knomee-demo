@@ -2513,20 +2513,48 @@ button.name-link-btn:hover .name-text {
   gap: 30px;
   padding: 6px 0;
 }
+/* ── Pie (design system: README, "Pie charts are one style";
+   src/components/PieChart.tsx) ── */
+.pie-chart {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
 .pie {
   width: 168px;
   height: 168px;
   flex: none;
+  overflow: visible;
 }
 .pie-slice {
-  cursor: pointer;
-  transition: opacity 0.15s ease, filter 0.15s ease;
+  transition: opacity 0.15s ease;
 }
-.pie-slice.on {
-  filter: brightness(1.09);
+.pie-chart.is-pickable .pie-slice,
+.pie-chart.is-pickable .pie-legend li {
+  cursor: pointer;
+}
+/* The slice that is out is drawn again on top (.pie-slice-out); its place
+   under it is left empty, as the slice has left it. */
+.pie-slice.is-under {
+  opacity: 0;
 }
 .pie-slice.dim {
   opacity: 0.4;
+}
+.pie-slice-out {
+  pointer-events: none;
+  filter: drop-shadow(0 3px 5px rgba(36, 4, 70, 0.3));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pie-slice-out {
+    animation: pieOut 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+@keyframes pieOut {
+  from {
+    transform: translate(0, 0);
+    filter: drop-shadow(0 0 0 rgba(36, 4, 70, 0));
+  }
 }
 /* The legend takes the rest of the row, so its percentages end on the card's
    right edge, under the score in the head, instead of floating mid-card. */
@@ -2545,7 +2573,6 @@ button.name-link-btn:hover .name-text {
   font-size: 14px;
   color: #444;
   font-weight: 500;
-  cursor: pointer;
   transition: color 0.15s ease;
 }
 .pie-legend li.on {

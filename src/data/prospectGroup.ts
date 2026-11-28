@@ -123,6 +123,23 @@ export type Topic =
   | 'regret'
   | 'vision'
 
+/** What each card measures: its title. A card's title names the measure;
+    its finding is in the split and the action, not in the title. */
+export const TOPIC_TITLE: Record<Topic, string> = {
+  purpose: 'What their money is for',
+  giving: 'Wanting to give back',
+  status: 'Wanting status',
+  posture: 'Confidence with money',
+  advisor: 'Belief an advisor would help',
+  resilience: 'Ability to weather a setback',
+  goals: 'Confidence in reaching their goals',
+  gap: 'Goal confidence vs. today’s',
+  permission: 'Permission to enjoy their money',
+  joy: 'Spending on what brings joy',
+  regret: 'Confidence in their money decisions',
+  vision: 'Clarity about their future',
+}
+
 export interface Thread {
   /** The rule that made it. */
   key: string

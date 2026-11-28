@@ -117,6 +117,17 @@ small and diffable.
   reference; the analytics' `.niche-callout` and the Intercom banner in the
   adoption demo follow it. No other banner style.
 
+- **Pie charts are one style.** `src/components/PieChart.tsx`: the pie at
+  168px with its legend beside it, 30px apart; each legend row its 12px
+  swatch (or the thing’s own picture, like a mood’s face), its label, and
+  its share in percent at the row’s right edge. Pointing at a slice or its
+  row pops that slice out from the centre with a drop shadow, over its
+  neighbours, and lights the row; a slice picked as a filter stays out and
+  the rest dim. A pie’s title names what it measures (“Confidence with
+  money”), never the finding (“87% aren’t confident”): the split and
+  the line under it say what was found. The Clients dashboard’s confidence
+  pie and My Prospects’ Actionable Insights are this; so is any new pie.
+
 - **The avatar is one.** The tinted disc (`--k-grape-light`, the initial in
   `--k-grape`, 600), a 2px white rim and a 1.5px `--k-line` ring: the menu's,
   a profile's, an Intercom sender's. Only its size changes. A firm's colour

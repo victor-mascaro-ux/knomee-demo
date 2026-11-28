@@ -13,12 +13,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import CollapsibleCard from './CollapsibleCard'
+import PieChart from './PieChart'
 import { BoltIcon, KnomeeMark, PeopleIcon } from './icons'
 import { prospects } from '../data/prospects'
 import {
   groupProfile,
   invitationFunnel,
   knomeeComparison,
+  TOPIC_TITLE,
   type CompareRow,
   type SplitPart,
 } from '../data/prospectGroup'
@@ -72,8 +74,7 @@ function CountUp({ to }: { to: number }) {
   return <span ref={ref}>{n}</span>
 }
 
-/* The tones as fills: the pie is SVG, which the .gi-tone-* backgrounds
-   cannot paint. */
+/* The tones as the pie’s fills: knomee’s main colours, mist for the rest. */
 const TONE_FILL: Record<SplitPart['tone'], string> = {
   plum: 'var(--k-plum)',
   grape: 'var(--k-grape)',
@@ -81,68 +82,6 @@ const TONE_FILL: Record<SplitPart['tone'], string> = {
   ocean: 'var(--k-ocean)',
   teal: 'var(--k-teal)',
   mist: 'var(--k-pearl)',
-}
-
-/* A slice from angle a0 to a1 (radians, clockwise from twelve o'clock) of a
-   16-radius pie centred in a 32 box. */
-function slice(a0: number, a1: number) {
-  const x = (a: number) => (16 + 16 * Math.sin(a)).toFixed(3)
-  const y = (a: number) => (16 - 16 * Math.cos(a)).toFixed(3)
-  const large = a1 - a0 > Math.PI ? 1 : 0
-  return `M16 16 L${x(a0)} ${y(a0)} A16 16 0 ${large} 1 ${x(a1)} ${y(a1)} Z`
-}
-
-/* A thread's split as a pie with its legend beside it. Pointing at a slice
-   or its legend row lights both and names it, with its share, in a tooltip
-   above the pie. */
-function SplitPie({ parts }: { parts: SplitPart[] }) {
-  const [on, setOn] = useState<number | null>(null)
-  const total = parts.reduce((a, p) => a + p.count, 0) || 1
-  const pct = (k: number) => Math.round((k / total) * 100)
-  let a = 0
-  const slices = parts.map((p) => {
-    const a0 = a
-    a += (p.count / total) * Math.PI * 2
-    return { ...p, a0, a1: a }
-  })
-  const hover = (k: number | null) => ({
-    onMouseEnter: () => setOn(k),
-    onMouseLeave: () => setOn(null),
-  })
-  const label = parts.map((p) => `${p.count} ${p.label}, ${pct(p.count)}%`).join('; ')
-  return (
-    <div className="gi-thread-body">
-      <div className="gi-pie-wrap">
-        <svg
-          className={`gi-pie${on === null ? '' : ' is-hovering'}`}
-          viewBox="0 0 32 32"
-          role="img"
-          aria-label={label}
-        >
-          {slices.map((p, k) =>
-            p.count === total ? (
-              <circle key={p.label} className={`gi-slice${on === k ? ' is-on' : ''}`} cx="16" cy="16" r="16" style={{ fill: TONE_FILL[p.tone] }} {...hover(k)} />
-            ) : (
-              <path key={p.label} className={`gi-slice${on === k ? ' is-on' : ''}`} d={slice(p.a0, p.a1)} style={{ fill: TONE_FILL[p.tone] }} {...hover(k)} />
-            ),
-          )}
-        </svg>
-        {on !== null && parts[on] && (
-          <span className="gi-pie-tip" role="tooltip">
-            {parts[on].count} {parts[on].label} · {pct(parts[on].count)}%
-          </span>
-        )}
-      </div>
-      <ul className="gi-pie-legend">
-        {parts.map((p, k) => (
-          <li key={p.label} className={on === k ? 'is-on' : undefined} {...hover(k)}>
-            <span className={`gi-dot gi-tone-${p.tone}`} aria-hidden />
-            <b>{p.count}</b> {p.label}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
 }
 
 /* One answer, side by side: the advisor's prospects over everyone on Knomee. */
@@ -255,8 +194,13 @@ export default function ProspectGroupInsights({
         <div className="gi-threads" key={tierId ?? 'all'}>
           {group.threads.map((t) => (
             <div className="gi-thread" key={t.key}>
-              <span className="gi-thread-head">{t.headline}</span>
-              <SplitPie parts={t.split} />
+              {/* Named for what it measures; the split and the action say
+                  what was found. */}
+              <span className="gi-thread-head">{TOPIC_TITLE[t.topic]}</span>
+              <PieChart
+                label={`${TOPIC_TITLE[t.topic]}: ${t.split.map((p) => `${p.count} ${p.label}`).join(', ')}`}
+                slices={t.split.map((p) => ({ label: p.label, value: p.count, color: TONE_FILL[p.tone] }))}
+              />
               <span className="gi-thread-do">{t.action}</span>
             </div>
           ))}

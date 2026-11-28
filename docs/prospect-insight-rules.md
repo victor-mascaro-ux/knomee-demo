@@ -87,3 +87,26 @@ shapes the conversation but not whether to have one.
   - *Retirement fear*: "running out of money" in top concerns.
   - *Solo future*: Model D *Solo Future*.
   - *Travel dream*: travel among top hopes.
+
+## Card titles
+
+A card is titled by what it measures, not by what it found: the split (a pie)
+and the action under it say what was found. One title per topic
+(`TOPIC_TITLE` in `src/data/prospectGroup.ts`):
+
+| Topic | Title |
+|---|---|
+| purpose | What their money is for |
+| giving | Wanting to give back |
+| status | Wanting status |
+| posture | Confidence with money |
+| advisor | Belief an advisor would help |
+| resilience | Ability to weather a setback |
+| goals | Confidence in reaching their goals |
+| gap | Goal confidence vs. today's |
+| permission | Permission to enjoy their money |
+| joy | Spending on what brings joy |
+| regret | Confidence in their money decisions |
+| vision | Clarity about their future |
+
+Each rule's `headline` still says its finding; the card doesn't show it.
